@@ -1,0 +1,251 @@
+.permission-tree {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background);
+  overflow: hidden;
+}
+
+.empty-state {
+  padding: 32px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.permission-list {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.permission-item {
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.has-children {
+    .permission-header {
+      cursor: pointer;
+
+      &:hover {
+        background: var(--color-surface-hover);
+      }
+    }
+  }
+}
+
+.permission-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  transition: background 0.2s ease;
+}
+
+.expand-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease;
+
+  svg {
+    transition: transform 0.2s ease;
+
+    &.expanded {
+      transform: rotate(90deg);
+    }
+  }
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
+}
+
+.expand-placeholder {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.checkbox-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+
+  input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+
+    &:checked ~ .checkmark {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+
+      &::after {
+        display: block;
+      }
+    }
+
+    &:indeterminate ~ .checkmark {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+
+      &::after {
+        width: 10px;
+        height: 2px;
+        top: 7px;
+        left: 3px;
+        border: none;
+        background: white;
+        transform: none;
+      }
+    }
+  }
+
+  .checkmark {
+    position: relative;
+    height: 20px;
+    width: 20px;
+    border: 2px solid var(--color-border);
+    border-radius: 4px;
+    background: white;
+    transition: all 0.2s ease;
+
+    &::after {
+      content: "";
+      position: absolute;
+      display: none;
+      left: 5px;
+      top: 2px;
+      width: 5px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+  }
+
+  &:hover .checkmark {
+    border-color: var(--color-accent);
+  }
+}
+
+.permission-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.permission-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+
+  .permission-icon {
+    font-size: 16px;
+  }
+
+  .name-text {
+    flex: 1;
+  }
+}
+
+.permission-description {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.permission-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.action-badge {
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+
+  &.action-read {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+  }
+
+  &.action-create {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+  }
+
+  &.action-update {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+  }
+
+  &.action-delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+
+  &.action-manage,
+  &.action-approve,
+  &.action-export,
+  &.action-import {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+  }
+}
+
+.permission-children {
+  background: rgba(0, 0, 0, 0.02);
+  border-top: 1px solid var(--color-border);
+}
+
+.child-permission {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px 12px 52px;
+  border-bottom: 1px dashed var(--color-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--color-surface-hover);
+  }
+}
+
+// Dark mode adjustments
+[data-theme="dark"] {
+  .checkbox-container {
+    .checkmark {
+      background: var(--color-surface);
+    }
+  }
+
+  .permission-children {
+    background: rgba(255, 255, 255, 0.02);
+  }
+}

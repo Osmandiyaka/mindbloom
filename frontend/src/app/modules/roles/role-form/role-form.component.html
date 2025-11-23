@@ -1,0 +1,101 @@
+<div class="role-form-container">
+    <!-- Header -->
+    <div class="page-header">
+        <button class="back-btn" (click)="cancel()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back to Roles
+        </button>
+        <h1>{{ isEditMode() ? 'Edit Role' : 'Create New Role' }}</h1>
+    </div>
+
+    <!-- Loading State -->
+    @if (loading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading role...</p>
+    </div>
+    }
+
+    <!-- Form -->
+    @if (!loading()) {
+    <form [formGroup]="roleForm" (ngSubmit)="onSubmit()">
+        <!-- Error Message -->
+        @if (error()) {
+        <div class="alert alert-error">
+            {{ error() }}
+        </div>
+        }
+
+        <div class="form-section">
+            <h2>Basic Information</h2>
+
+            <!-- Role Name -->
+            <div class="form-group">
+                <label for="name">Role Name <span class="required">*</span></label>
+                <input type="text" id="name" formControlName="name" class="form-control"
+                    [class.error]="nameControl?.invalid && nameControl?.touched"
+                    placeholder="e.g., Librarian, Accountant" />
+                @if (nameControl?.invalid && nameControl?.touched) {
+                <span class="error-message">
+                    @if (nameControl?.errors?.['required']) {
+                    Role name is required
+                    }
+                    @if (nameControl?.errors?.['minlength']) {
+                    Role name must be at least 3 characters
+                    }
+                </span>
+                }
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label for="description">Description <span class="required">*</span></label>
+                <textarea id="description" formControlName="description" class="form-control"
+                    [class.error]="descriptionControl?.invalid && descriptionControl?.touched" rows="3"
+                    placeholder="Describe what this role is for and what permissions it should have"></textarea>
+                @if (descriptionControl?.invalid && descriptionControl?.touched) {
+                <span class="error-message">
+                    @if (descriptionControl?.errors?.['required']) {
+                    Description is required
+                    }
+                    @if (descriptionControl?.errors?.['minlength']) {
+                    Description must be at least 10 characters
+                    }
+                </span>
+                }
+            </div>
+        </div>
+
+        <!-- Permissions Section -->
+        <div class="form-section">
+            <h2>Permissions</h2>
+            <p class="section-description">
+                Select the permissions this role should have. Permissions control what actions users with this role can
+                perform.
+            </p>
+
+            <app-permission-tree [permissionTree]="permissionTree()" [selectedPermissions]="selectedPermissions()"
+                (permissionsChange)="onPermissionsChange($event)" />
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="submitting()">
+                Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+                @if (submitting()) {
+                <div class="btn-spinner"></div>
+                Saving...
+                } @else {
+                {{ isEditMode() ? 'Update Role' : 'Create Role' }}
+                }
+            </button>
+        </div>
+    </form>
+    }
+</div>
