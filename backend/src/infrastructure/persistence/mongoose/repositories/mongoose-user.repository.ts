@@ -93,7 +93,7 @@ export class MongooseUserRepository implements IUserRepository {
 
         return new User(
             doc.id,
-            doc.tenantId.toString(),
+            doc.tenantId ? doc.tenantId.toString() : '',
             doc.email,
             doc.name,
             doc.role,
