@@ -3,9 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { TenantService, Tenant } from './tenant.service';
 
 interface User {
     id: string;
+    tenantId: string;
     email: string;
     name: string;
     role: string;
@@ -13,8 +15,7 @@ interface User {
 
 interface AuthResponse {
     user: User;
-    accessToken: string;
-    refreshToken: string;
+    access_token: string;
 }
 
 @Injectable({
@@ -33,7 +34,8 @@ export class AuthService {
 
     constructor(
         private http: HttpClient,
-        private router: Router
+        private router: Router,
+        private tenantService: TenantService
     ) { }
 
     login(email: string, password: string): Observable<AuthResponse> {
@@ -48,7 +50,8 @@ export class AuthService {
         localStorage.removeItem(this.REFRESH_TOKEN_KEY);
         localStorage.removeItem('user');
         this.currentUserSubject.next(null);
-        this.showLoginOverlay.set(true); // Show login overlay on logout
+        this.tenantService.clearTenant(); // Clear tenant on logout
+        this.showLoginOverlay.set(true);
         this.router.navigate(['/login']);
     }
 
@@ -65,11 +68,22 @@ export class AuthService {
     }
 
     private handleAuthSuccess(response: AuthResponse): void {
-        localStorage.setItem(this.TOKEN_KEY, response.accessToken);
-        localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
+        localStorage.setItem(this.TOKEN_KEY, response.access_token);
         localStorage.setItem('user', JSON.stringify(response.user));
         this.currentUserSubject.next(response.user);
-        this.showLoginOverlay.set(false); // Hide overlay on successful login
+        this.showLoginOverlay.set(false);
+
+        // Fetch and set tenant information
+        if (response.user.tenantId) {
+            this.tenantService.getTenantById(response.user.tenantId).subscribe({
+                next: (tenant) => {
+                    this.tenantService.setTenant(tenant);
+                },
+                error: (error) => {
+                    console.error('Failed to load tenant information', error);
+                }
+            });
+        }
     }
 
     private getUserFromStorage(): User | null {

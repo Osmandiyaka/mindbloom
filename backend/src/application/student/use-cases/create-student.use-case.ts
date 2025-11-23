@@ -23,7 +23,7 @@ export class CreateStudentUseCase {
 
     async execute(command: CreateStudentCommand): Promise<Student> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const student = Student.create({
             tenantId,
             name: command.name,

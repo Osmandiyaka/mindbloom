@@ -45,11 +45,11 @@ export class LoginUseCase {
         }
 
         // Generate JWT token with tenant information
-        const payload = { 
-            sub: user.id, 
+        const payload = {
+            sub: user.id,
             tenantId: user.tenantId,
-            email: user.email, 
-            role: user.role 
+            email: user.email,
+            role: user.role
         };
         const access_token = this.jwtService.sign(payload);
 
