@@ -8,13 +8,13 @@ export class DeleteStudentUseCase {
         private readonly studentRepository: IStudentRepository,
     ) { }
 
-    async execute(id: string): Promise<void> {
-        const student = await this.studentRepository.findById(id);
+    async execute(id: string, tenantId: string): Promise<void> {
+        const student = await this.studentRepository.findById(id, tenantId);
 
         if (!student) {
             throw new NotFoundException(`Student with ID ${id} not found`);
         }
 
-        await this.studentRepository.delete(id);
+        await this.studentRepository.delete(id, tenantId);
     }
 }

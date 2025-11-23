@@ -10,6 +10,8 @@ import {
     UpdateStudentUseCase,
     DeleteStudentUseCase,
 } from '../../application/student/use-cases';
+import { AddGuardianToStudentUseCase } from '../../application/student/use-cases/add-guardian-to-student.use-case';
+import { UpdateStudentEnrollmentUseCase } from '../../application/student/use-cases/update-student-enrollment.use-case';
 import { StudentsController } from '../../adapters/http/students/students.controller';
 
 @Module({
@@ -29,6 +31,8 @@ import { StudentsController } from '../../adapters/http/students/students.contro
         GetStudentByIdUseCase,
         UpdateStudentUseCase,
         DeleteStudentUseCase,
+        AddGuardianToStudentUseCase,
+        UpdateStudentEnrollmentUseCase,
     ],
     exports: [STUDENT_REPOSITORY],
 })

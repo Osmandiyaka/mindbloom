@@ -9,8 +9,8 @@ export class GetStudentByIdUseCase {
         private readonly studentRepository: IStudentRepository,
     ) { }
 
-    async execute(id: string): Promise<Student> {
-        const student = await this.studentRepository.findById(id);
+    async execute(id: string, tenantId: string): Promise<Student> {
+        const student = await this.studentRepository.findById(id, tenantId);
 
         if (!student) {
             throw new NotFoundException(`Student with ID ${id} not found`);

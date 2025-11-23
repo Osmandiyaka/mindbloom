@@ -1,98 +1,246 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Student } from '../../../../domain/student/entities/student.entity';
-import { IStudentRepository } from '../../../../domain/student/ports/student.repository.interface';
-import { StudentDocument } from '../schemas/student.schema';
-import { TenantContext } from '../../../../common/tenant/tenant.context';
+import { Model, Types } from 'mongoose';
+import {
+    Student,
+    Gender,
+    BloodGroup,
+    StudentStatus,
+    RelationshipType,
+    Address,
+    Guardian,
+    MedicalInfo,
+    Document as StudentDocument,
+    EnrollmentInfo,
+    StudentProps
+} from '../../../../domain/student/entities/student.entity';
+import { IStudentRepository, StudentFilters } from '../../../../domain/student/ports/student.repository.interface';
+import { StudentDocument as StudentDoc } from '../schemas/student.schema';
 
 @Injectable()
 export class MongooseStudentRepository implements IStudentRepository {
     constructor(
         @InjectModel('Student')
-        private readonly studentModel: Model<StudentDocument>,
-        private readonly tenantContext: TenantContext,
+        private readonly studentModel: Model<StudentDoc>,
     ) { }
 
-    async findAll(): Promise<Student[]> {
-        const tenantId = this.tenantContext.tenantId;
-        const students = await this.studentModel.find({ tenantId }).populate('classId').exec();
-        return students.map(this.toDomain);
-    }
-
-    async findById(id: string): Promise<Student | null> {
-        const tenantId = this.tenantContext.tenantId;
-        const student = await this.studentModel.findOne({ _id: id, tenantId }).populate('classId').exec();
-        return student ? this.toDomain(student) : null;
-    }
-
-    async findByEmail(email: string): Promise<Student | null> {
-        const tenantId = this.tenantContext.tenantId;
-        const student = await this.studentModel.findOne({ email, tenantId }).populate('classId').exec();
-        return student ? this.toDomain(student) : null;
-    }
-
     async create(student: Student): Promise<Student> {
-        const tenantId = this.tenantContext.tenantId;
-        const created = await this.studentModel.create({
-            tenantId,
-            name: student.name,
+        const studentDoc = new this.studentModel({
+            _id: student.id,
+            tenantId: new Types.ObjectId(student.tenantId),
+            firstName: student.firstName,
+            lastName: student.lastName,
+            middleName: student['props'].middleName,
+            dateOfBirth: student.dateOfBirth,
+            gender: student.gender,
+            nationality: student['props'].nationality,
+            religion: student['props'].religion,
+            caste: student['props'].caste,
+            motherTongue: student['props'].motherTongue,
             email: student.email,
             phone: student.phone,
-            dob: student.dob,
-            classId: student.classId,
-            rollNo: student.rollNo,
+            address: student.address,
+            guardians: student.guardians,
+            medicalInfo: student.medicalInfo,
+            enrollment: student.enrollment,
             status: student.status,
+            documents: student.documents,
+            photo: student.photo,
+            notes: student.notes,
         });
 
-        const populated = await created.populate('classId');
-        return this.toDomain(populated);
+        const saved = await studentDoc.save();
+        return this.toDomain(saved);
     }
 
-    async update(id: string, data: Partial<Student>): Promise<Student> {
-        const tenantId = this.tenantContext.tenantId;
-        const updated = await this.studentModel
-            .findOneAndUpdate(
-                { _id: id, tenantId },
-                {
-                    name: data.name,
-                    email: data.email,
-                    phone: data.phone,
-                    dob: data.dob,
-                    classId: data.classId,
-                    rollNo: data.rollNo,
-                    status: data.status,
-                },
-                { new: true }
-            )
-            .populate('classId')
-            .exec();
+    async findById(id: string, tenantId: string): Promise<Student | null> {
+        const doc = await this.studentModel.findOne({
+            _id: id,
+            tenantId: new Types.ObjectId(tenantId),
+        });
 
-        if (!updated) {
-            throw new Error(`Student with id ${id} not found`);
+        return doc ? this.toDomain(doc) : null;
+    }
+
+    async findByAdmissionNumber(admissionNumber: string, tenantId: string): Promise<Student | null> {
+        const doc = await this.studentModel.findOne({
+            'enrollment.admissionNumber': admissionNumber,
+            tenantId: new Types.ObjectId(tenantId),
+        });
+
+        return doc ? this.toDomain(doc) : null;
+    }
+
+    async findAll(tenantId: string, filters?: StudentFilters): Promise<Student[]> {
+        const query: any = { tenantId: new Types.ObjectId(tenantId) };
+
+        if (filters) {
+            if (filters.search) {
+                query.$or = [
+                    { firstName: { $regex: filters.search, $options: 'i' } },
+                    { lastName: { $regex: filters.search, $options: 'i' } },
+                    { 'enrollment.admissionNumber': { $regex: filters.search, $options: 'i' } },
+                    { email: { $regex: filters.search, $options: 'i' } },
+                ];
+            }
+            if (filters.class) {
+                query['enrollment.class'] = filters.class;
+            }
+            if (filters.section) {
+                query['enrollment.section'] = filters.section;
+            }
+            if (filters.status) {
+                query.status = filters.status;
+            }
+            if (filters.academicYear) {
+                query['enrollment.academicYear'] = filters.academicYear;
+            }
+            if (filters.gender) {
+                query.gender = filters.gender;
+            }
         }
 
-        return this.toDomain(updated);
+        const docs = await this.studentModel.find(query).sort({ firstName: 1, lastName: 1 });
+        return docs.map(doc => this.toDomain(doc));
     }
 
-    async delete(id: string): Promise<void> {
-        const tenantId = this.tenantContext.tenantId;
-        await this.studentModel.findOneAndDelete({ _id: id, tenantId }).exec();
-    }
-
-    private toDomain(doc: StudentDocument): Student {
-        return new Student(
-            doc._id.toString(),
-            doc.tenantId.toString(),
-            doc.name,
-            doc.email,
-            doc.phone,
-            doc.dob,
-            doc.classId?.toString(),
-            doc.rollNo,
-            doc.status,
-            doc.createdAt,
-            doc.updatedAt,
+    async update(student: Student): Promise<Student> {
+        const doc = await this.studentModel.findOneAndUpdate(
+            { _id: student.id, tenantId: new Types.ObjectId(student.tenantId) },
+            {
+                $set: {
+                    firstName: student.firstName,
+                    lastName: student.lastName,
+                    middleName: student['props'].middleName,
+                    dateOfBirth: student.dateOfBirth,
+                    gender: student.gender,
+                    nationality: student['props'].nationality,
+                    religion: student['props'].religion,
+                    caste: student['props'].caste,
+                    motherTongue: student['props'].motherTongue,
+                    email: student.email,
+                    phone: student.phone,
+                    address: student.address,
+                    guardians: student.guardians,
+                    medicalInfo: student.medicalInfo,
+                    enrollment: student.enrollment,
+                    status: student.status,
+                    documents: student.documents,
+                    photo: student.photo,
+                    notes: student.notes,
+                    updatedAt: new Date(),
+                },
+            },
+            { new: true },
         );
+
+        if (!doc) {
+            throw new Error('Student not found');
+        }
+
+        return this.toDomain(doc);
+    }
+
+    async delete(id: string, tenantId: string): Promise<void> {
+        await this.studentModel.deleteOne({
+            _id: id,
+            tenantId: new Types.ObjectId(tenantId),
+        });
+    }
+
+    async count(tenantId: string, filters?: StudentFilters): Promise<number> {
+        const query: any = { tenantId: new Types.ObjectId(tenantId) };
+
+        if (filters) {
+            if (filters.search) {
+                query.$or = [
+                    { firstName: { $regex: filters.search, $options: 'i' } },
+                    { lastName: { $regex: filters.search, $options: 'i' } },
+                    { 'enrollment.admissionNumber': { $regex: filters.search, $options: 'i' } },
+                    { email: { $regex: filters.search, $options: 'i' } },
+                ];
+            }
+            if (filters.class) {
+                query['enrollment.class'] = filters.class;
+            }
+            if (filters.section) {
+                query['enrollment.section'] = filters.section;
+            }
+            if (filters.status) {
+                query.status = filters.status;
+            }
+            if (filters.academicYear) {
+                query['enrollment.academicYear'] = filters.academicYear;
+            }
+            if (filters.gender) {
+                query.gender = filters.gender;
+            }
+        }
+
+        return this.studentModel.countDocuments(query);
+    }
+
+    private toDomain(doc: StudentDoc): Student {
+        const props: StudentProps = {
+            id: doc._id.toString(),
+            tenantId: doc.tenantId ? doc.tenantId.toString() : '',
+            firstName: doc.firstName,
+            lastName: doc.lastName,
+            middleName: doc.middleName,
+            dateOfBirth: doc.dateOfBirth,
+            gender: doc.gender as Gender,
+            nationality: doc.nationality,
+            religion: doc.religion,
+            caste: doc.caste,
+            motherTongue: doc.motherTongue,
+            email: doc.email,
+            phone: doc.phone,
+            address: doc.address as Address,
+            guardians: doc.guardians.map(g => ({
+                id: g.id,
+                name: g.name,
+                relationship: g.relationship as RelationshipType,
+                phone: g.phone,
+                email: g.email,
+                occupation: g.occupation,
+                address: g.address as Address,
+                isPrimary: g.isPrimary,
+                isEmergencyContact: g.isEmergencyContact,
+            })),
+            medicalInfo: doc.medicalInfo ? {
+                bloodGroup: doc.medicalInfo.bloodGroup as BloodGroup,
+                allergies: doc.medicalInfo.allergies,
+                medicalConditions: doc.medicalInfo.medicalConditions,
+                medications: doc.medicalInfo.medications,
+                doctorName: doc.medicalInfo.doctorName,
+                doctorPhone: doc.medicalInfo.doctorPhone,
+                insuranceProvider: doc.medicalInfo.insuranceProvider,
+                insuranceNumber: doc.medicalInfo.insuranceNumber,
+            } : undefined,
+            enrollment: {
+                admissionNumber: doc.enrollment.admissionNumber,
+                admissionDate: doc.enrollment.admissionDate,
+                academicYear: doc.enrollment.academicYear,
+                class: doc.enrollment.class,
+                section: doc.enrollment.section,
+                rollNumber: doc.enrollment.rollNumber,
+                previousSchool: doc.enrollment.previousSchool,
+                previousClass: doc.enrollment.previousClass,
+            },
+            status: doc.status as StudentStatus,
+            documents: doc.documents?.map(d => ({
+                id: d.id,
+                name: d.name,
+                type: d.type,
+                url: d.url,
+                uploadedAt: d.uploadedAt,
+            })),
+            photo: doc.photo,
+            notes: doc.notes,
+            createdAt: doc.createdAt,
+            updatedAt: doc.updatedAt,
+        };
+
+        return new Student(props);
     }
 }
