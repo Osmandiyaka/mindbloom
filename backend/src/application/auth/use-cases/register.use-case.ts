@@ -30,7 +30,8 @@ export class RegisterUseCase {
             tenantId: command.tenantId,
             email: command.email,
             name: command.name,
-            role: command.role || 'user',
+            roleId: null, // Will be assigned later by admin
+            role: null,
         });
 
         return await this.userRepository.create(user, command.password);

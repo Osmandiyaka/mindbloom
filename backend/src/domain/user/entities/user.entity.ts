@@ -1,4 +1,5 @@
 import { Permission } from '../../rbac/entities/permission.entity';
+import { Role } from '../../rbac/entities/role.entity';
 
 export class User {
     constructor(
@@ -6,14 +7,25 @@ export class User {
         public readonly tenantId: string,
         public readonly email: string,
         public readonly name: string,
-        public readonly role: string = 'user',
+        public readonly roleId: string | null = null,
+        public readonly role: Role | null = null,
         public readonly permissions: Permission[] = [],
         public readonly createdAt: Date = new Date(),
         public readonly updatedAt: Date = new Date(),
     ) { }
 
     isAdmin(): boolean {
-        return this.role === 'admin';
+        return this.role?.name === 'TenantAdmin' || this.role?.name === 'SuperAdmin';
+    }
+
+    /**
+     * Check if user has a specific permission through their role
+     */
+    hasRolePermission(resource: string, action: string): boolean {
+        if (!this.role) {
+            return false;
+        }
+        return this.role.hasPermission(resource, action);
     }
 
     /**
@@ -33,6 +45,7 @@ export class User {
                 this.tenantId,
                 this.email,
                 this.name,
+                this.roleId,
                 this.role,
                 [...this.permissions, permission],
                 this.createdAt,
@@ -51,6 +64,7 @@ export class User {
             this.tenantId,
             this.email,
             this.name,
+            this.roleId,
             this.role,
             this.permissions.filter(p => p.id !== permissionId),
             this.createdAt,
@@ -63,7 +77,8 @@ export class User {
         tenantId: string;
         email: string;
         name: string;
-        role?: string;
+        roleId?: string | null;
+        role?: Role | null;
         permissions?: Permission[];
     }): User {
         return new User(
@@ -71,7 +86,8 @@ export class User {
             data.tenantId,
             data.email,
             data.name,
-            data.role || 'user',
+            data.roleId || null,
+            data.role || null,
             data.permissions || [],
         );
     }

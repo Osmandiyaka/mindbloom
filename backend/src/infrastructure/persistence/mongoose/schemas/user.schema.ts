@@ -15,8 +15,8 @@ export class UserDocument extends Document {
     @Prop({ required: true })
     name: string;
 
-    @Prop({ default: 'user' })
-    role: string;
+    @Prop({ type: Types.ObjectId, ref: 'Role', default: null })
+    roleId: Types.ObjectId | null;
 
     @Prop({ type: [String], default: [] })
     permissions: string[];

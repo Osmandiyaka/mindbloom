@@ -1,0 +1,92 @@
+<div class="permission-tree">
+    @if (permissionTreeValue.length === 0) {
+    <div class="empty-state">
+        <p>No permissions available</p>
+    </div>
+    } @else {
+    <div class="permission-list">
+        @for (permission of permissionTreeValue; track permission.id) {
+        <div class="permission-item" [class.has-children]="hasChildren(permission)">
+            <!-- Permission Header -->
+            <div class="permission-header" (click)="hasChildren(permission) && toggleNode(permission.id)">
+                <!-- Expand/Collapse Icon -->
+                @if (hasChildren(permission)) {
+                <button class="expand-btn" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" [class.expanded]="isExpanded(permission.id)">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+                } @else {
+                <span class="expand-placeholder"></span>
+                }
+
+                <!-- Checkbox -->
+                <label class="checkbox-container" (click)="$event.stopPropagation()">
+                    <input type="checkbox" [checked]="isSelected(permission.id)"
+                        [indeterminate]="isIndeterminate(permission)" (change)="togglePermission(permission, $event)" />
+                    <span class="checkmark"></span>
+                </label>
+
+                <!-- Permission Info -->
+                <div class="permission-info">
+                    <div class="permission-name">
+                        @if (permission.icon) {
+                        <span class="permission-icon">{{ permission.icon }}</span>
+                        }
+                        <span class="name-text">{{ permission.displayName }}</span>
+                    </div>
+                    @if (permission.description) {
+                    <div class="permission-description">{{ permission.description }}</div>
+                    }
+                </div>
+
+                <!-- Action Badges -->
+                <div class="permission-actions">
+                    @for (action of permission.actions; track action) {
+                    <span class="action-badge" [class]="'action-' + action">
+                        {{ action }}
+                    </span>
+                    }
+                </div>
+            </div>
+
+            <!-- Children -->
+            @if (hasChildren(permission) && isExpanded(permission.id)) {
+            <div class="permission-children">
+                @for (child of permission.children; track child.id) {
+                <div class="child-permission">
+                    <label class="checkbox-container">
+                        <input type="checkbox" [checked]="isSelected(child.id)"
+                            (change)="togglePermission(child, $event)" />
+                        <span class="checkmark"></span>
+                    </label>
+
+                    <div class="permission-info">
+                        <div class="permission-name">
+                            @if (child.icon) {
+                            <span class="permission-icon">{{ child.icon }}</span>
+                            }
+                            <span class="name-text">{{ child.displayName }}</span>
+                        </div>
+                        @if (child.description) {
+                        <div class="permission-description">{{ child.description }}</div>
+                        }
+                    </div>
+
+                    <div class="permission-actions">
+                        @for (action of child.actions; track action) {
+                        <span class="action-badge" [class]="'action-' + action">
+                            {{ action }}
+                        </span>
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+            }
+        </div>
+        }
+    </div>
+    }
+</div>

@@ -5,9 +5,11 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../../../../domain/user/entities/user.entity';
 import { IUserRepository } from '../../../../domain/user/ports/user.repository.interface';
 import { UserDocument } from '../schemas/user.schema';
+import { RoleDocument } from '../schemas/role.schema';
 import { TenantContext } from '../../../../common/tenant/tenant.context';
 import { GetPermissionTreeUseCase } from '../../../../application/rbac/use-cases/get-permission-tree.use-case';
 import { Permission } from '../../../../domain/rbac/entities/permission.entity';
+import { Role } from '../../../../domain/rbac/entities/role.entity';
 
 @Injectable()
 export class MongooseUserRepository implements IUserRepository {
@@ -21,12 +23,12 @@ export class MongooseUserRepository implements IUserRepository {
     async findByEmail(email: string): Promise<User | null> {
         // For login, we might not have tenant context yet
         // Allow finding by email across tenants for authentication
-        const user = await this.userModel.findOne({ email }).exec();
+        const user = await this.userModel.findOne({ email }).populate('roleId').exec();
         return user ? this.toDomain(user) : null;
     }
 
     async findById(id: string): Promise<User | null> {
-        const user = await this.userModel.findById(id).exec();
+        const user = await this.userModel.findById(id).populate('roleId').exec();
         return user ? this.toDomain(user) : null;
     }
 
@@ -39,14 +41,14 @@ export class MongooseUserRepository implements IUserRepository {
             email: user.email,
             name: user.name,
             password: hashedPassword,
-            role: user.role,
+            roleId: user.roleId || null,
         });
 
         return this.toDomain(created);
     }
 
     async findAll(tenantId: string): Promise<User[]> {
-        const users = await this.userModel.find({ tenantId }).exec();
+        const users = await this.userModel.find({ tenantId }).populate('roleId').exec();
         return users.map(user => this.toDomain(user));
     }
 
@@ -56,11 +58,12 @@ export class MongooseUserRepository implements IUserRepository {
         const updated = await this.userModel.findByIdAndUpdate(
             user.id,
             {
+                roleId: user.roleId,
                 permissions: permissionIds,
                 updatedAt: new Date(),
             },
             { new: true }
-        ).exec();
+        ).populate('roleId').exec();
 
         if (!updated) {
             throw new Error(`User with ID ${user.id} not found`);
@@ -80,6 +83,36 @@ export class MongooseUserRepository implements IUserRepository {
     }
 
     private toDomain(doc: UserDocument): User {
+        // Convert populated role document to Role entity
+        let role: Role | null = null;
+        if (doc.roleId && typeof doc.roleId === 'object' && 'name' in doc.roleId) {
+            const roleDoc = doc.roleId as any as RoleDocument;
+            const rolePermissions = roleDoc.permissions?.map(p => new Permission({
+                id: '', // Permission ID not stored in embedded schema
+                resource: p.resource,
+                displayName: p.resource, // Use resource as display name
+                description: undefined,
+                actions: p.actions as any[],
+                scope: p.scope as any,
+                parentId: undefined,
+                children: undefined,
+                icon: undefined,
+                order: undefined
+            })) || [];
+
+            role = new Role({
+                id: roleDoc._id?.toString() || '',
+                tenantId: roleDoc.tenantId?.toString() || '',
+                name: roleDoc.name,
+                description: roleDoc.description,
+                isSystemRole: roleDoc.isSystemRole,
+                permissions: rolePermissions,
+                parentRoleId: roleDoc.parentRoleId?.toString(),
+                createdAt: roleDoc.createdAt,
+                updatedAt: roleDoc.updatedAt
+            });
+        }
+
         // Convert permission IDs to Permission objects
         const permissions: Permission[] = [];
         if (this.getPermissionTree && doc.permissions && doc.permissions.length > 0) {
@@ -91,12 +124,19 @@ export class MongooseUserRepository implements IUserRepository {
             }
         }
 
+        const roleId = doc.roleId
+            ? (typeof doc.roleId === 'object' && '_id' in doc.roleId
+                ? (doc.roleId as any)._id?.toString()
+                : String(doc.roleId))
+            : null;
+
         return new User(
             doc.id,
             doc.tenantId ? doc.tenantId.toString() : '',
             doc.email,
             doc.name,
-            doc.role,
+            roleId,
+            role,
             permissions,
             doc.createdAt,
             doc.updatedAt,

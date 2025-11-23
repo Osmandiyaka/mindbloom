@@ -1,6 +1,7 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PermissionAction } from '../../domain/rbac/entities/permission.entity';
+import { IUserRepository, USER_REPOSITORY } from '../../domain/user/ports/user.repository.interface';
 
 export const PERMISSIONS_KEY = 'permissions';
 
@@ -14,9 +15,12 @@ export const PERMISSIONS_KEY = 'permissions';
  */
 @Injectable()
 export class PermissionGuard implements CanActivate {
-    constructor(private reflector: Reflector) { }
+    constructor(
+        private reflector: Reflector,
+        @Inject(USER_REPOSITORY) private userRepository: IUserRepository
+    ) { }
 
-    canActivate(context: ExecutionContext): boolean {
+    async canActivate(context: ExecutionContext): Promise<boolean> {
         const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
             PERMISSIONS_KEY,
             [context.getHandler(), context.getClass()],
@@ -27,7 +31,19 @@ export class PermissionGuard implements CanActivate {
         }
 
         const request = context.switchToHttp().getRequest();
-        const user = request.user;
+        const jwtUser = request.user; // From JWT payload
+
+        if (!jwtUser || !jwtUser.userId) {
+            return false; // No user
+        }
+
+        // SuperAdmin has all permissions
+        if (jwtUser.roleName === 'SuperAdmin') {
+            return true;
+        }
+
+        // Fetch full user with populated role
+        const user = await this.userRepository.findById(jwtUser.userId);
 
         if (!user || !user.role) {
             return false; // No user or role
