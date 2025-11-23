@@ -88,16 +88,16 @@ export class MongooseUserRepository implements IUserRepository {
         if (doc.roleId && typeof doc.roleId === 'object' && 'name' in doc.roleId) {
             const roleDoc = doc.roleId as any as RoleDocument;
             const rolePermissions = roleDoc.permissions?.map(p => new Permission({
-                id: p.id || p._id?.toString() || '',
+                id: '', // Permission ID not stored in embedded schema
                 resource: p.resource,
-                displayName: p.displayName,
-                description: p.description,
-                actions: p.actions,
-                scope: p.scope,
-                parentId: p.parentId,
-                children: p.children,
-                icon: p.icon,
-                order: p.order
+                displayName: p.resource, // Use resource as display name
+                description: undefined,
+                actions: p.actions as any[],
+                scope: p.scope as any,
+                parentId: undefined,
+                children: undefined,
+                icon: undefined,
+                order: undefined
             })) || [];
 
             role = new Role({
@@ -124,12 +124,18 @@ export class MongooseUserRepository implements IUserRepository {
             }
         }
 
+        const roleId = doc.roleId 
+            ? (typeof doc.roleId === 'object' && '_id' in doc.roleId 
+                ? (doc.roleId as any)._id?.toString() 
+                : doc.roleId.toString()) 
+            : null;
+
         return new User(
             doc.id,
             doc.tenantId ? doc.tenantId.toString() : '',
             doc.email,
             doc.name,
-            doc.roleId ? (typeof doc.roleId === 'object' ? doc.roleId._id?.toString() : doc.roleId.toString()) : null,
+            roleId,
             role,
             permissions,
             doc.createdAt,

@@ -44,7 +44,7 @@ export class PermissionGuard implements CanActivate {
 
         // Fetch full user with populated role
         const user = await this.userRepository.findById(jwtUser.userId);
-        
+
         if (!user || !user.role) {
             return false; // No user or role
         }
