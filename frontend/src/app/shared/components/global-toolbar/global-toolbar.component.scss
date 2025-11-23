@@ -1,7 +1,7 @@
 .global-toolbar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     background: #ffffff;
     border-bottom: 1px solid #e8edf2;
     padding: 0 16px;
@@ -54,11 +54,11 @@
     }
 
     .toolbar-center {
-        flex: 1;
+        flex: 0;
         display: flex;
-        justify-content: center;
-        max-width: 600px;
-        margin: 0 auto;
+        justify-content: flex-start;
+        max-width: 500px;
+        margin-left: 16px;
     }
 
     .search-container {
