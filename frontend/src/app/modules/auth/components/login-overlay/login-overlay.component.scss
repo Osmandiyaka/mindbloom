@@ -150,6 +150,18 @@
     line-height: 1.4;
 }
 
+.register-link {
+    color: #1EA7FF;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+
+    &:hover {
+        color: #0078C8;
+        text-decoration: underline;
+    }
+}
+
 .tenant-error {
     font-size: 12px;
     color: #DC2626;

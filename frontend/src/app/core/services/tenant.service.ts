@@ -55,6 +55,16 @@ export class TenantService {
         );
     }
 
+    createTenant(data: { name: string; subdomain: string; plan: string }): Observable<Tenant> {
+        return this.http.post<Tenant>(`${this.API_URL}/tenants`, data).pipe(
+            tap(tenant => {
+                if (tenant) {
+                    this.setTenant(tenant);
+                }
+            })
+        );
+    }
+
     setTenant(tenant: Tenant): void {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(tenant));
         this.currentTenantSubject.next(tenant);

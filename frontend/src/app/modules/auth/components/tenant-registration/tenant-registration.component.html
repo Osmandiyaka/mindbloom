@@ -1,0 +1,139 @@
+<div class="registration-card">
+    <!-- Left Brand Panel -->
+    <div class="brand-panel">
+        <div class="brand-content">
+            <h1 class="brand-title">MindBloom</h1>
+            <p class="brand-subtitle">
+                Register your school<br>
+                and start managing today.
+            </p>
+
+            <div class="brand-illustration">
+                <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+                    <!-- School building illustration -->
+                    <g>
+                        <!-- Main building -->
+                        <rect x="40" y="60" width="120" height="80" fill="#10B981" rx="4" />
+
+                        <!-- Roof -->
+                        <path d="M 30 60 L 100 30 L 170 60 Z" fill="#059669" />
+
+                        <!-- Windows row 1 -->
+                        <rect x="55" y="75" width="18" height="18" fill="#6EE7B7" rx="2" />
+                        <rect x="91" y="75" width="18" height="18" fill="#6EE7B7" rx="2" />
+                        <rect x="127" y="75" width="18" height="18" fill="#6EE7B7" rx="2" />
+
+                        <!-- Windows row 2 -->
+                        <rect x="55" y="105" width="18" height="18" fill="#6EE7B7" rx="2" />
+                        <rect x="91" y="105" width="18" height="18" fill="#6EE7B7" rx="2" />
+                        <rect x="127" y="105" width="18" height="18" fill="#6EE7B7" rx="2" />
+
+                        <!-- Door -->
+                        <rect x="85" y="110" width="30" height="30" fill="#065F46" rx="2" />
+                        <circle cx="108" cy="125" r="2" fill="#6EE7B7" />
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Registration Panel -->
+    <div class="registration-panel">
+        <div class="header">
+            <h2 class="title">Register Your School</h2>
+            <button type="button" class="close-btn" (click)="onCancel()" title="Cancel">
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+                    <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </button>
+        </div>
+
+        <form (ngSubmit)="onSubmit()" class="registration-form">
+            <!-- School Name -->
+            <div class="form-group">
+                <label class="form-label">School Name *</label>
+                <input type="text" class="form-input" placeholder="e.g., Greenfield High School"
+                    [value]="schoolName()" (input)="schoolName.set($any($event.target).value)" required />
+            </div>
+
+            <!-- School Code -->
+            <div class="form-group">
+                <label class="form-label">School Code *</label>
+                <input type="text" class="form-input" placeholder="e.g., greenfield (lowercase, no spaces)"
+                    [value]="schoolCode()" (input)="schoolCode.set($any($event.target).value.toLowerCase())"
+                    required />
+                <p class="form-help">This will be your unique identifier. Use lowercase letters, numbers, and hyphens
+                    only.</p>
+            </div>
+
+            <!-- Contact Person -->
+            <div class="form-group">
+                <label class="form-label">Contact Person</label>
+                <input type="text" class="form-input" placeholder="e.g., John Doe" [value]="contactPerson()"
+                    (input)="contactPerson.set($any($event.target).value)" />
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label class="form-label">Email Address *</label>
+                <input type="email" class="form-input" placeholder="admin@yourschool.edu" [value]="email()"
+                    (input)="email.set($any($event.target).value)" required />
+            </div>
+
+            <!-- Phone -->
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-input" placeholder="+1 (555) 123-4567" [value]="phone()"
+                    (input)="phone.set($any($event.target).value)" />
+            </div>
+
+            <!-- Plan Selection -->
+            <div class="form-group">
+                <label class="form-label">Select Plan</label>
+                <div class="plan-cards">
+                    <div class="plan-card" [class.selected]="selectedPlan() === 'free'"
+                        (click)="selectPlan('free')">
+                        <div class="plan-name">Free</div>
+                        <div class="plan-price">$0/month</div>
+                        <div class="plan-features">Basic features</div>
+                    </div>
+                    <div class="plan-card" [class.selected]="selectedPlan() === 'basic'"
+                        (click)="selectPlan('basic')">
+                        <div class="plan-name">Basic</div>
+                        <div class="plan-price">$49/month</div>
+                        <div class="plan-features">Student & Attendance</div>
+                    </div>
+                    <div class="plan-card" [class.selected]="selectedPlan() === 'premium'"
+                        (click)="selectPlan('premium')">
+                        <div class="plan-name">Premium</div>
+                        <div class="plan-price">$99/month</div>
+                        <div class="plan-features">Finance & Library</div>
+                    </div>
+                    <div class="plan-card" [class.selected]="selectedPlan() === 'enterprise'"
+                        (click)="selectPlan('enterprise')">
+                        <div class="plan-name">Enterprise</div>
+                        <div class="plan-price">Custom</div>
+                        <div class="plan-features">All features</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            @if (errorMessage()) {
+            <div class="error-message">{{ errorMessage() }}</div>
+            }
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button type="button" class="cancel-action-btn" (click)="onCancel()"
+                    [disabled]="isRegistering()">
+                    Cancel
+                </button>
+                <button type="submit" class="register-btn" [disabled]="isRegistering()">
+                    {{ isRegistering() ? 'Registering...' : 'Register School' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
