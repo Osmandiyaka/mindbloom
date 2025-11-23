@@ -7,6 +7,7 @@ import {
     UseGuards,
     Request,
 } from '@nestjs/common';
+import { IsArray, IsString } from 'class-validator';
 import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard';
 import { TenantGuard } from '../../../common/tenant/tenant.guard';
 import { AddPermissionsToUserUseCase } from '../../../application/rbac/use-cases/add-permissions-to-user.use-case';
@@ -14,6 +15,8 @@ import { IUserRepository, USER_REPOSITORY } from '../../../domain/user/ports/use
 import { Inject } from '@nestjs/common';
 
 class AddPermissionsDto {
+    @IsArray()
+    @IsString({ each: true })
     permissionIds: string[];
 }
 
