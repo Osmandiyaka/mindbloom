@@ -7,10 +7,10 @@ import { Permission } from '../../../../core/models/role.model';
 import { PermissionTreeSelectorComponent } from '../../../../shared/components/permission-tree-selector/permission-tree-selector.component';
 
 @Component({
-    selector: 'app-role-form',
-    standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, PermissionTreeSelectorComponent],
-    template: `
+  selector: 'app-role-form',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, PermissionTreeSelectorComponent],
+  template: `
     <div class="role-form-container">
       <!-- Header -->
       <div class="page-header">
@@ -143,7 +143,7 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
       }
     </div>
   `,
-    styles: [`
+  styles: [`
     .role-form-container {
       max-width: 900px;
       margin: 0 auto;
@@ -466,157 +466,160 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
   `]
 })
 export class RoleFormComponent implements OnInit {
-    private fb = inject(FormBuilder);
-    private router = inject(Router);
-    private route = inject(ActivatedRoute);
-    private roleService = inject(RoleService);
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private roleService = inject(RoleService);
 
-    // State
-    roleForm!: FormGroup;
-    isEditMode = signal(false);
-    saving = signal(false);
-    roleId = signal<string | null>(null);
-    
-    // Permission tree state
-    permissionTree = signal<Permission[]>([]);
-    selectedPermissionIds = signal<string[]>([]);
-    selectedPermissions = signal<Permission[]>([]);
-    showPermissionDialog = signal(false);
-    tempSelectedIds = signal<string[]>([]);
+  // State
+  roleForm!: FormGroup;
+  isEditMode = signal(false);
+  saving = signal(false);
+  roleId = signal<string | null>(null);
 
-    ngOnInit() {
-        this.initForm();
-        this.loadPermissionTree();
-        this.checkEditMode();
+  // Permission tree state
+  permissionTree = signal<Permission[]>([]);
+  selectedPermissionIds = signal<string[]>([]);
+  selectedPermissions = signal<Permission[]>([]);
+  showPermissionDialog = signal(false);
+  tempSelectedIds = signal<string[]>([]);
+
+  ngOnInit() {
+    this.initForm();
+    this.loadPermissionTree();
+    this.checkEditMode();
+  }
+
+  private initForm() {
+    this.roleForm = this.fb.group({
+      name: ['', Validators.required],
+      description: ['', Validators.required],
+    });
+  }
+
+  private loadPermissionTree() {
+    this.roleService.getPermissionTree().subscribe({
+      next: (tree) => {
+        this.permissionTree.set(tree);
+      },
+      error: (err) => {
+        console.error('Failed to load permission tree:', err);
+      }
+    });
+  }
+
+  private checkEditMode() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEditMode.set(true);
+      this.roleId.set(id);
+      this.loadRole(id);
     }
+  }
 
-    private initForm() {
-        this.roleForm = this.fb.group({
-            name: ['', Validators.required],
-            description: ['', Validators.required],
+  private loadRole(id: string) {
+    this.roleService.getRoleById(id).subscribe({
+      next: (role) => {
+        this.roleForm.patchValue({
+          name: role.name,
+          description: role.description,
         });
+
+        // Extract permission IDs (use id if available, fallback to resource)
+        const permissionIds = role.permissions
+          .map(p => p.id || p.resource)
+          .filter(id => !!id);
+
+        this.selectedPermissionIds.set(permissionIds);
+        this.updateSelectedPermissions(permissionIds);
+      },
+      error: (err) => {
+        console.error('Failed to load role:', err);
+      }
+    });
+  }
+
+  private updateSelectedPermissions(permissionIds: string[]) {
+    const flatPermissions = this.flattenPermissionTree(this.permissionTree());
+    const selected = flatPermissions.filter(p => permissionIds.includes(p.id));
+    this.selectedPermissions.set(selected);
+  }
+
+  private flattenPermissionTree(tree: Permission[]): Permission[] {
+    const flat: Permission[] = [];
+    for (const permission of tree) {
+      flat.push(permission);
+      if (permission.children) {
+        flat.push(...this.flattenPermissionTree(permission.children));
+      }
+    }
+    return flat;
+  }
+
+  showPermissionSelector() {
+    this.tempSelectedIds.set([...this.selectedPermissionIds()]);
+    this.showPermissionDialog.set(true);
+  }
+
+  closePermissionSelector() {
+    this.showPermissionDialog.set(false);
+    this.tempSelectedIds.set([]);
+  }
+
+  onPermissionSelectionChange(selectedIds: string[]) {
+    this.tempSelectedIds.set(selectedIds);
+  }
+
+  applyPermissionSelection() {
+    this.selectedPermissionIds.set([...this.tempSelectedIds()]);
+    this.updateSelectedPermissions(this.tempSelectedIds());
+    this.closePermissionSelector();
+  }
+
+  removePermission(permissionId: string) {
+    const newIds = this.selectedPermissionIds().filter(id => id !== permissionId);
+    this.selectedPermissionIds.set(newIds);
+    this.updateSelectedPermissions(newIds);
+  }
+
+  onSubmit() {
+    if (this.roleForm.invalid) {
+      Object.keys(this.roleForm.controls).forEach(key => {
+        this.roleForm.get(key)?.markAsTouched();
+      });
+      return;
     }
 
-    private loadPermissionTree() {
-        this.roleService.getPermissionTree().subscribe({
-            next: (tree) => {
-                this.permissionTree.set(tree);
-            },
-            error: (err) => {
-                console.error('Failed to load permission tree:', err);
-            }
-        });
-    }
+    this.saving.set(true);
 
-    private checkEditMode() {
-        const id = this.route.snapshot.paramMap.get('id');
-        if (id) {
-            this.isEditMode.set(true);
-            this.roleId.set(id);
-            this.loadRole(id);
-        }
-    }
+    const flatPermissions = this.flattenPermissionTree(this.permissionTree());
+    const selectedPerms = flatPermissions.filter(p =>
+      this.selectedPermissionIds().includes(p.id)
+    );
 
-    private loadRole(id: string) {
-        this.roleService.getRoleById(id).subscribe({
-            next: (role) => {
-                this.roleForm.patchValue({
-                    name: role.name,
-                    description: role.description,
-                });
-                
-                // Extract permission IDs and find full permission objects
-                const permissionIds = role.permissions.map(p => p.id);
-                this.selectedPermissionIds.set(permissionIds);
-                this.updateSelectedPermissions(permissionIds);
-            },
-            error: (err) => {
-                console.error('Failed to load role:', err);
-            }
-        });
-    }
+    const dto = {
+      name: this.roleForm.value.name,
+      description: this.roleForm.value.description,
+      permissions: selectedPerms,
+    };
 
-    private updateSelectedPermissions(permissionIds: string[]) {
-        const flatPermissions = this.flattenPermissionTree(this.permissionTree());
-        const selected = flatPermissions.filter(p => permissionIds.includes(p.id));
-        this.selectedPermissions.set(selected);
-    }
+    const action = this.isEditMode()
+      ? this.roleService.updateRole(this.roleId()!, dto)
+      : this.roleService.createRole(dto);
 
-    private flattenPermissionTree(tree: Permission[]): Permission[] {
-        const flat: Permission[] = [];
-        for (const permission of tree) {
-            flat.push(permission);
-            if (permission.children) {
-                flat.push(...this.flattenPermissionTree(permission.children));
-            }
-        }
-        return flat;
-    }
-
-    showPermissionSelector() {
-        this.tempSelectedIds.set([...this.selectedPermissionIds()]);
-        this.showPermissionDialog.set(true);
-    }
-
-    closePermissionSelector() {
-        this.showPermissionDialog.set(false);
-        this.tempSelectedIds.set([]);
-    }
-
-    onPermissionSelectionChange(selectedIds: string[]) {
-        this.tempSelectedIds.set(selectedIds);
-    }
-
-    applyPermissionSelection() {
-        this.selectedPermissionIds.set([...this.tempSelectedIds()]);
-        this.updateSelectedPermissions(this.tempSelectedIds());
-        this.closePermissionSelector();
-    }
-
-    removePermission(permissionId: string) {
-        const newIds = this.selectedPermissionIds().filter(id => id !== permissionId);
-        this.selectedPermissionIds.set(newIds);
-        this.updateSelectedPermissions(newIds);
-    }
-
-    onSubmit() {
-        if (this.roleForm.invalid) {
-            Object.keys(this.roleForm.controls).forEach(key => {
-                this.roleForm.get(key)?.markAsTouched();
-            });
-            return;
-        }
-
-        this.saving.set(true);
-
-        const flatPermissions = this.flattenPermissionTree(this.permissionTree());
-        const selectedPerms = flatPermissions.filter(p => 
-            this.selectedPermissionIds().includes(p.id)
-        );
-
-        const dto = {
-            name: this.roleForm.value.name,
-            description: this.roleForm.value.description,
-            permissions: selectedPerms,
-        };
-
-        const action = this.isEditMode()
-            ? this.roleService.updateRole(this.roleId()!, dto)
-            : this.roleService.createRole(dto);
-
-        action.subscribe({
-            next: () => {
-                this.saving.set(false);
-                this.router.navigate(['/setup/roles']);
-            },
-            error: (err) => {
-                console.error('Failed to save role:', err);
-                this.saving.set(false);
-            }
-        });
-    }
-
-    goBack() {
+    action.subscribe({
+      next: () => {
+        this.saving.set(false);
         this.router.navigate(['/setup/roles']);
-    }
+      },
+      error: (err) => {
+        console.error('Failed to save role:', err);
+        this.saving.set(false);
+      }
+    });
+  }
+
+  goBack() {
+    this.router.navigate(['/setup/roles']);
+  }
 }
