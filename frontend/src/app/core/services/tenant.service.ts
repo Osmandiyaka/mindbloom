@@ -45,6 +45,16 @@ export class TenantService {
         return this.http.get<Tenant>(`${this.API_URL}/tenants/subdomain/${subdomain}`);
     }
 
+    getTenantByCode(code: string): Observable<Tenant> {
+        return this.http.get<Tenant>(`${this.API_URL}/tenants/code/${code}`).pipe(
+            tap(tenant => {
+                if (tenant) {
+                    this.setTenant(tenant);
+                }
+            })
+        );
+    }
+
     setTenant(tenant: Tenant): void {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(tenant));
         this.currentTenantSubject.next(tenant);

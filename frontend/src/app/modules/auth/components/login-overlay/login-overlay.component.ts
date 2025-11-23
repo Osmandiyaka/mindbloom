@@ -18,10 +18,12 @@ export class LoginOverlayComponent {
     rememberMe = signal(false);
     isLoading = signal(false);
     errorMessage = signal('');
-    
+
     // Tenant editing state
     isEditingTenant = signal(false);
     tenantEditValue = signal('');
+    isValidatingTenant = signal(false);
+    tenantErrorMessage = signal('');
 
     constructor(
         private authService: AuthService,
@@ -35,38 +37,49 @@ export class LoginOverlayComponent {
     }
 
     onChangeTenant(): void {
-        // Enter edit mode
-        this.tenantEditValue.set(this.currentTenant);
+        // Clear any previous tenant error
+        this.tenantErrorMessage.set('');
+
+        // Enter edit mode - clear the field for new input
+        this.tenantEditValue.set('');
         this.isEditingTenant.set(true);
-        
+
         // Focus the input after a short delay to allow the DOM to update
         setTimeout(() => {
             const input = document.querySelector('.tenant-edit-input') as HTMLInputElement;
             if (input) {
                 input.focus();
-                input.select();
             }
         }, 50);
     }
 
     onSaveTenant(): void {
-        const newTenantName = this.tenantEditValue().trim();
-        if (newTenantName) {
-            // In a real app, you'd fetch a new tenant by subdomain or ID
-            // For now, we'll just log the change
-            console.log('Tenant change requested:', newTenantName);
-            
-            // Update the tenant service (simplified version)
-            const currentTenant = this.tenantService.getCurrentTenantValue();
-            if (currentTenant) {
-                // Keep the existing tenant but update the name (simplified)
-                this.tenantService.setTenant({
-                    ...currentTenant,
-                    name: newTenantName
-                });
-            }
+        const tenantCode = this.tenantEditValue().trim();
+        if (!tenantCode) {
+            this.tenantErrorMessage.set('Please enter a school code');
+            return;
         }
-        this.isEditingTenant.set(false);
+
+        // Validate tenant from backend
+        this.isValidatingTenant.set(true);
+        this.tenantErrorMessage.set('');
+
+        this.tenantService.getTenantByCode(tenantCode).subscribe({
+            next: (tenant) => {
+                this.isValidatingTenant.set(false);
+                if (tenant) {
+                    // Tenant found and automatically set by the service
+                    this.isEditingTenant.set(false);
+                    this.tenantEditValue.set('');
+                } else {
+                    this.tenantErrorMessage.set('School code not found');
+                }
+            },
+            error: (error) => {
+                this.isValidatingTenant.set(false);
+                this.tenantErrorMessage.set('School code not found. Please check and try again.');
+            }
+        });
     }
 
     onCancelTenantEdit(): void {

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
+import { TenantModule } from './modules/tenant/tenant.module';
 import { StudentsModule } from './modules/students/students.module';
 import { AcademicsModule } from './modules/academics/academics.module';
 import { AttendanceModule } from './modules/attendance/attendance.module';
@@ -21,6 +22,7 @@ import { DatabaseModule } from './common/database/database.module';
         }),
         DatabaseModule,
         AuthModule,
+        TenantModule,
         StudentsModule,
         AcademicsModule,
         AttendanceModule,
