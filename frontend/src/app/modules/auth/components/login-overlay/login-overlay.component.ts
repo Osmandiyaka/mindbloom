@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TenantService } from '../../../../core/services/tenant.service';
+import { TenantRegistrationComponent } from '../tenant-registration/tenant-registration.component';
 
 @Component({
     selector: 'app-login-overlay',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, TenantRegistrationComponent],
     templateUrl: './login-overlay.component.html',
     styleUrls: ['./login-overlay.component.scss']
 })
@@ -24,6 +25,9 @@ export class LoginOverlayComponent {
     tenantEditValue = signal('');
     isValidatingTenant = signal(false);
     tenantErrorMessage = signal('');
+    
+    // Registration state
+    showRegistration = signal(false);
 
     constructor(
         private authService: AuthService,
@@ -95,6 +99,22 @@ export class LoginOverlayComponent {
             event.preventDefault();
             this.onCancelTenantEdit();
         }
+    }
+
+    onRegisterTenant(event: Event): void {
+        event.preventDefault();
+        this.showRegistration.set(true);
+    }
+
+    onRegistrationCancelled(): void {
+        this.showRegistration.set(false);
+    }
+
+    onRegistrationCompleted(data: { tenantId: string; subdomain: string }): void {
+        this.showRegistration.set(false);
+        // Tenant is already set by the service, just show success message
+        this.isEditingTenant.set(false);
+        this.tenantEditValue.set('');
     }
 
     onSubmit(): void {
