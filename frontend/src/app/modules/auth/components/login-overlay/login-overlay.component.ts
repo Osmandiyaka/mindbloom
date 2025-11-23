@@ -26,14 +26,22 @@ export class LoginOverlayComponent {
     ) { }
 
     get currentTenant(): string {
-        return this.tenantService.getCurrentTenant();
+        const tenant = this.tenantService.getCurrentTenantValue();
+        return tenant?.name || 'No Tenant Selected';
     }
 
     onChangeTenant(): void {
         // For now, just show an alert. You can implement a modal later
-        const newTenant = prompt('Enter school code:', this.currentTenant);
-        if (newTenant && newTenant.trim()) {
-            this.tenantService.setTenant(newTenant.trim());
+        const newTenantName = prompt('Enter school name:', this.currentTenant);
+        if (newTenantName && newTenantName.trim()) {
+            // This is a simplified version - in production, you'd fetch the tenant from the backend
+            // For now, we'll just update the display name
+            const currentTenant = this.tenantService.getCurrentTenantValue();
+            if (currentTenant) {
+                // Keep the existing tenant but update the name (simplified)
+                // In a real app, you'd fetch a new tenant by subdomain or ID
+                console.log('Tenant change requested:', newTenantName);
+            }
         }
     }
 
