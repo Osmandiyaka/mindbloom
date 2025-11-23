@@ -26,7 +26,7 @@ export class MongooseStudentRepository implements IStudentRepository {
 
     async create(student: Student): Promise<Student> {
         const studentDoc = new this.studentModel({
-            _id: student.id,
+            _id: new Types.ObjectId(student.id), // Use the ObjectId from domain
             tenantId: new Types.ObjectId(student.tenantId),
             firstName: student.firstName,
             lastName: student.lastName,

@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import { Types } from 'mongoose';
 import { Student, StudentProps, StudentStatus } from '../../../domain/student/entities/student.entity';
 import { IStudentRepository, STUDENT_REPOSITORY } from '../../../domain/student/ports/student.repository.interface';
 
@@ -98,8 +99,11 @@ export class CreateStudentUseCase {
             id: g.id || randomUUID(),
         }));
 
+        // Generate a new MongoDB ObjectId for the student
+        const studentId = new Types.ObjectId().toString();
+
         const studentProps: StudentProps = {
-            id: randomUUID(),
+            id: studentId,
             tenantId,
             firstName: command.firstName,
             lastName: command.lastName,

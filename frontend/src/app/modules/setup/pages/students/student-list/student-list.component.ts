@@ -2,8 +2,8 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { StudentService } from '../../../../core/services/student.service';
-import { Student, StudentFilters, StudentStatus } from '../../../../core/models/student.model';
+import { StudentService } from '../../../../../core/services/student.service';
+import { Student, StudentFilters, StudentStatus } from '../../../../../core/models/student.model';
 
 @Component({
     selector: 'app-student-list',
@@ -44,6 +44,7 @@ export class StudentListComponent implements OnInit {
     }
 
     loadStudents(): void {
+        console.log('Loading students...');
         this.loading.set(true);
         this.error.set(null);
 
@@ -55,15 +56,17 @@ export class StudentListComponent implements OnInit {
             gender: this.selectedGender(),
         };
 
+        console.log('Calling API with filters:', filters);
         this.studentService.getStudents(filters).subscribe({
-            next: (students) => {
+            next: (students: Student[]) => {
+                console.log('Received students from API:', students.length, students);
                 this.students.set(students);
                 this.loading.set(false);
             },
-            error: (err) => {
+            error: (err: any) => {
+                console.error('Error loading students:', err);
                 this.error.set('Failed to load students');
                 this.loading.set(false);
-                console.error('Error loading students:', err);
             }
         });
     }
@@ -91,15 +94,15 @@ export class StudentListComponent implements OnInit {
     }
 
     createStudent(): void {
-        this.router.navigate(['/setup/students/new']);
+        this.router.navigate(['/students/new']);
     }
 
     viewStudent(id: string): void {
-        this.router.navigate(['/setup/students', id]);
+        this.router.navigate(['/students', id]);
     }
 
     editStudent(id: string): void {
-        this.router.navigate(['/setup/students', id, 'edit']);
+        this.router.navigate(['/students', id, 'edit']);
     }
 
     deleteStudent(student: Student): void {
@@ -108,7 +111,7 @@ export class StudentListComponent implements OnInit {
                 next: () => {
                     this.loadStudents();
                 },
-                error: (err) => {
+                error: (err: any) => {
                     alert('Failed to delete student');
                     console.error('Error deleting student:', err);
                 }
