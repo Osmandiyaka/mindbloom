@@ -50,7 +50,7 @@ export class AuthService {
         localStorage.removeItem(this.REFRESH_TOKEN_KEY);
         localStorage.removeItem('user');
         this.currentUserSubject.next(null);
-        this.tenantService.clearTenant(); // Clear tenant on logout
+        // Don't clear tenant - keep it persisted for next login
         this.showLoginOverlay.set(true);
         this.router.navigate(['/login']);
     }
