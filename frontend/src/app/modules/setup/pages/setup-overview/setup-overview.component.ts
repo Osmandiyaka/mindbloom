@@ -4,10 +4,10 @@ import { RouterModule } from '@angular/router';
 import { HeroComponent } from '../../../../shared/components/hero/hero.component';
 
 @Component({
-    selector: 'app-setup-overview',
-    standalone: true,
-    imports: [CommonModule, RouterModule, HeroComponent],
-    template: `
+  selector: 'app-setup-overview',
+  standalone: true,
+  imports: [CommonModule, RouterModule, HeroComponent],
+  template: `
     <div>
       <app-hero
         title="System Setup & Configuration"

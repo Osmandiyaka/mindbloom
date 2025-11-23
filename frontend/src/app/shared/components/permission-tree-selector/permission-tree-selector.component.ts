@@ -438,7 +438,7 @@ export class PermissionTreeSelectorComponent {
         for (const node of nodes) {
             if (node.children && node.children.length > 0) {
                 const childState = this.updateParentStateRecursive(node.children);
-                
+
                 if (childState.allSelected) {
                     node.selected = true;
                     node.indeterminate = false;
@@ -505,7 +505,7 @@ export class PermissionTreeSelectorComponent {
         const filtered: PermissionNode[] = [];
 
         for (const node of nodes) {
-            const matches = 
+            const matches =
                 node.displayName.toLowerCase().includes(query) ||
                 node.description?.toLowerCase().includes(query) ||
                 node.resource.toLowerCase().includes(query);
@@ -526,7 +526,7 @@ export class PermissionTreeSelectorComponent {
 
     getNodeDepth(node: PermissionNode): number {
         if (!node.parentId) return 0;
-        
+
         // Count dots in resource path as depth indicator
         const parts = node.resource.split('.');
         return parts.length - 1;

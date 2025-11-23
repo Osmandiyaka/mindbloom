@@ -494,7 +494,7 @@ export class RoleListComponent implements OnInit {
 
     systemRoles = signal<Role[]>([]);
     customRoles = signal<Role[]>([]);
-    
+
     // Permission management state
     showPermissionDialog = signal(false);
     selectedRole = signal<Role | null>(null);

@@ -83,14 +83,14 @@ export class Permission {
      */
     getAllChildIds(): string[] {
         const childIds: string[] = [];
-        
+
         if (this.children && this.children.length > 0) {
             for (const child of this.children) {
                 childIds.push(child.id);
                 childIds.push(...child.getAllChildIds());
             }
         }
-        
+
         return childIds;
     }
 
@@ -106,14 +106,14 @@ export class Permission {
      */
     findChildById(id: string): Permission | undefined {
         if (this.id === id) return this;
-        
+
         if (this.children) {
             for (const child of this.children) {
                 const found = child.findChildById(id);
                 if (found) return found;
             }
         }
-        
+
         return undefined;
     }
 

@@ -11,4 +11,4 @@ import { PERMISSIONS_KEY } from '../guards/permission.guard';
  * async updateStudent() { ... }
  */
 export const Permissions = (...permissions: string[]) =>
-  SetMetadata(PERMISSIONS_KEY, permissions);
+    SetMetadata(PERMISSIONS_KEY, permissions);
