@@ -20,5 +20,9 @@ export const SETUP_ROUTES: Routes = [
     {
         path: 'users',
         loadComponent: () => import('./pages/users/user-list.component').then(m => m.UserListComponent)
+    },
+    {
+        path: 'students',
+        loadComponent: () => import('./pages/students/student-list/student-list.component').then(m => m.StudentListComponent)
     }
 ];

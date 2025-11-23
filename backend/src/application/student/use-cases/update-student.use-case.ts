@@ -1,15 +1,32 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { Student } from '../../../domain/student/entities/student.entity';
+import { Student, StudentStatus } from '../../../domain/student/entities/student.entity';
 import { IStudentRepository, STUDENT_REPOSITORY } from '../../../domain/student/ports/student.repository.interface';
 
 export interface UpdateStudentCommand {
-    name?: string;
+    // Personal Information
+    firstName?: string;
+    lastName?: string;
+    middleName?: string;
     email?: string;
     phone?: string;
-    dob?: Date;
-    classId?: string;
-    rollNo?: string;
-    status?: string;
+    address?: {
+        street: string;
+        city: string;
+        state: string;
+        postalCode: string;
+        country: string;
+    };
+    nationality?: string;
+    religion?: string;
+    caste?: string;
+    motherTongue?: string;
+
+    // Status
+    status?: StudentStatus;
+
+    // Additional
+    photo?: string;
+    notes?: string;
 }
 
 @Injectable()
@@ -19,13 +36,19 @@ export class UpdateStudentUseCase {
         private readonly studentRepository: IStudentRepository,
     ) { }
 
-    async execute(id: string, command: UpdateStudentCommand): Promise<Student> {
-        const existingStudent = await this.studentRepository.findById(id);
+    async execute(id: string, tenantId: string, command: UpdateStudentCommand): Promise<Student> {
+        const existingStudent = await this.studentRepository.findById(id, tenantId);
 
         if (!existingStudent) {
             throw new NotFoundException(`Student with ID ${id} not found`);
         }
 
-        return await this.studentRepository.update(id, command);
+        // Apply updates to the domain entity
+        existingStudent.updateProfile(command);
+        if (command.status) {
+            existingStudent.changeStatus(command.status);
+        }
+
+        return await this.studentRepository.update(existingStudent);
     }
 }

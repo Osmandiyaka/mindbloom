@@ -1,0 +1,745 @@
+<div class="wizard-container">
+    <!-- Left Sidebar - Progress Steps -->
+    <div class="progress-steps">
+        <div class="wizard-header">
+            <h1 class="wizard-title">{{ isEditMode() ? 'Edit Student' : 'Student Registration' }}</h1>
+            <p class="wizard-subtitle">{{ totalSteps }} Step Process</p>
+        </div>
+
+        <div class="step" [class.completed]="currentStep() > 1" [class.active]="currentStep() === 1">
+            <div class="step-circle">1</div>
+            <div class="step-info">
+                <div class="step-title">Personal Info</div>
+                <div class="step-status">{{ currentStep() > 1 ? 'Completed' : currentStep() === 1 ? 'In Progress' :
+                    'Pending' }}</div>
+            </div>
+        </div>
+
+        <div class="step" [class.completed]="currentStep() > 2" [class.active]="currentStep() === 2">
+            <div class="step-circle">2</div>
+            <div class="step-info">
+                <div class="step-title">Enrollment</div>
+                <div class="step-status">{{ currentStep() > 2 ? 'Completed' : currentStep() === 2 ? 'In Progress' :
+                    'Pending' }}</div>
+            </div>
+        </div>
+
+        <div class="step" [class.completed]="currentStep() > 3" [class.active]="currentStep() === 3">
+            <div class="step-circle">3</div>
+            <div class="step-info">
+                <div class="step-title">Guardians</div>
+                <div class="step-status">{{ currentStep() > 3 ? 'Completed' : currentStep() === 3 ? 'In Progress' :
+                    'Pending' }}</div>
+            </div>
+        </div>
+
+        <div class="step" [class.completed]="currentStep() > 4" [class.active]="currentStep() === 4">
+            <div class="step-circle">4</div>
+            <div class="step-info">
+                <div class="step-title">Medical Info</div>
+                <div class="step-status">{{ currentStep() > 4 ? 'Completed' : currentStep() === 4 ? 'In Progress' :
+                    'Pending' }}</div>
+            </div>
+        </div>
+
+        <div class="step" [class.completed]="currentStep() > 5" [class.active]="currentStep() === 5">
+            <div class="step-circle">5</div>
+            <div class="step-info">
+                <div class="step-title">Review</div>
+                <div class="step-status">{{ currentStep() > 5 ? 'Completed' : currentStep() === 5 ? 'In Progress' :
+                    'Pending' }}</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="(currentStep() / totalSteps) * 100"></div>
+        </div>
+        <div class="progress-text">{{ currentStep() }} of {{ totalSteps }} steps completed</div>
+    </div>
+
+    <!-- Right Content Area -->
+    <div class="wizard-content">
+        @if (error()) {
+        <div class="error-alert">
+            <span>{{ error() }}</span>
+        </div>
+        }
+
+        <div class="form-content">
+            <div class="content-with-sidebar">
+                <div class="main-form-area">
+                    <!-- Step 1: Personal Information -->
+                    @if (currentStep() === 1) {
+                    <form [formGroup]="personalInfoForm" class="wizard-form">
+                        <h2 class="form-heading">Personal Information</h2>
+                        <p class="form-description">Enter the student's personal details as they should appear in
+                            official
+                            records</p>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>First Name <span class="required">*</span></label>
+                                <input type="text" formControlName="firstName" placeholder="Legal first name" />
+                                @if (personalInfoForm.get('firstName')?.invalid &&
+                                personalInfoForm.get('firstName')?.touched) {
+                                <span class="field-error">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
+                                    </svg>
+                                    First name is required
+                                </span>
+                                }
+                            </div>
+
+                            <div class="form-field">
+                                <label>Middle Name</label>
+                                <input type="text" formControlName="middleName"
+                                    placeholder="Optional middle name or initial" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field full-width">
+                                <label>Last Name <span class="required">*</span></label>
+                                <input type="text" formControlName="lastName" placeholder="Legal last name" />
+                                @if (personalInfoForm.get('lastName')?.invalid &&
+                                personalInfoForm.get('lastName')?.touched) {
+                                <span class="field-error">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
+                                    </svg>
+                                    Last name is required
+                                </span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Email Address <span class="required">*</span></label>
+                                <input type="email" formControlName="email"
+                                    placeholder="Primary email for notifications and password reset" />
+                                @if (personalInfoForm.get('email')?.invalid && personalInfoForm.get('email')?.touched) {
+                                <span class="field-error">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
+                                    </svg>
+                                    Valid email is required
+                                </span>
+                                }
+                            </div>
+
+                            <div class="form-field">
+                                <label>Phone Number</label>
+                                <input type="tel" formControlName="phone"
+                                    placeholder="Contact phone number (optional)" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Date of Birth <span class="required">*</span></label>
+                                <input type="date" formControlName="dateOfBirth" />
+                                @if (personalInfoForm.get('dateOfBirth')?.invalid &&
+                                personalInfoForm.get('dateOfBirth')?.touched) {
+                                <span class="field-error">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
+                                    </svg>
+                                    Date of birth is required
+                                </span>
+                                }
+                            </div>
+
+                            <div class="form-field">
+                                <label>Gender <span class="required">*</span></label>
+                                <select formControlName="gender">
+                                    <option value="">Select gender</option>
+                                    <option [value]="Gender.MALE">Male</option>
+                                    <option [value]="Gender.FEMALE">Female</option>
+                                    <option [value]="Gender.OTHER">Other</option>
+                                </select>
+                                @if (personalInfoForm.get('gender')?.invalid && personalInfoForm.get('gender')?.touched)
+                                {
+                                <span class="field-error">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
+                                    </svg>
+                                    Gender is required
+                                </span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Nationality</label>
+                                <input type="text" formControlName="nationality" placeholder="Enter nationality" />
+                            </div>
+
+                            <div class="form-field">
+                                <label>Religion</label>
+                                <input type="text" formControlName="religion" placeholder="Enter religion (optional)" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Caste/Category</label>
+                                <input type="text" formControlName="caste"
+                                    placeholder="Enter caste or category (optional)" />
+                            </div>
+
+                            <div class="form-field">
+                                <label>Mother Tongue</label>
+                                <input type="text" formControlName="motherTongue" placeholder="Primary language" />
+                            </div>
+                        </div>
+
+                        <div formGroupName="address" class="address-section">
+                            <h3 class="subsection-title">Address</h3>
+                            <div class="form-row">
+                                <div class="form-field full-width">
+                                    <label>Street Address</label>
+                                    <input type="text" formControlName="street" placeholder="Street address" />
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>City</label>
+                                    <input type="text" formControlName="city" placeholder="City" />
+                                </div>
+                                <div class="form-field">
+                                    <label>State/Province</label>
+                                    <input type="text" formControlName="state" placeholder="State or province" />
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Postal Code</label>
+                                    <input type="text" formControlName="postalCode" placeholder="Postal/ZIP code" />
+                                </div>
+                                <div class="form-field">
+                                    <label>Country</label>
+                                    <input type="text" formControlName="country" placeholder="Country" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-field full-width">
+                            <label>Notes</label>
+                            <textarea formControlName="notes" rows="3"
+                                placeholder="Any additional notes about the student (optional)"></textarea>
+                        </div>
+                    </form>
+                    }
+
+                    <!-- Step 2: Enrollment Information -->
+                    @if (currentStep() === 2) {
+                    <form [formGroup]="enrollmentForm" class="wizard-form">
+                        <h2 class="form-heading">Enrollment Information</h2>
+                        <p class="form-description">Enter academic enrollment details</p>
+
+                        <div formGroupName="enrollment" class="enrollment-section">
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Admission Number <span class="required">*</span></label>
+                                    <input type="text" formControlName="admissionNumber"
+                                        placeholder="Enter admission number" />
+                                    @if (enrollmentForm.get('enrollment.admissionNumber')?.invalid &&
+                                    enrollmentForm.get('enrollment.admissionNumber')?.touched) {
+                                    <span class="field-error">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
+                                        </svg>
+                                        Admission number is required
+                                    </span>
+                                    }
+                                </div>
+
+                                <div class="form-field">
+                                    <label>Admission Date <span class="required">*</span></label>
+                                    <input type="date" formControlName="admissionDate" />
+                                    @if (enrollmentForm.get('enrollment.admissionDate')?.invalid &&
+                                    enrollmentForm.get('enrollment.admissionDate')?.touched) {
+                                    <span class="field-error">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
+                                        </svg>
+                                        Admission date is required
+                                    </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Academic Year <span class="required">*</span></label>
+                                    <input type="text" formControlName="academicYear" placeholder="e.g., 2024-2025" />
+                                    @if (enrollmentForm.get('enrollment.academicYear')?.invalid &&
+                                    enrollmentForm.get('enrollment.academicYear')?.touched) {
+                                    <span class="field-error">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
+                                        </svg>
+                                        Academic year is required
+                                    </span>
+                                    }
+                                </div>
+
+                                <div class="form-field">
+                                    <label>Class <span class="required">*</span></label>
+                                    <input type="text" formControlName="class" placeholder="e.g., Grade 10" />
+                                    @if (enrollmentForm.get('enrollment.class')?.invalid &&
+                                    enrollmentForm.get('enrollment.class')?.touched) {
+                                    <span class="field-error">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
+                                        </svg>
+                                        Class is required
+                                    </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Section</label>
+                                    <input type="text" formControlName="section" placeholder="e.g., A, B, C" />
+                                </div>
+
+                                <div class="form-field">
+                                    <label>Roll Number</label>
+                                    <input type="text" formControlName="rollNumber" placeholder="Class roll number" />
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Previous School</label>
+                                    <input type="text" formControlName="previousSchool"
+                                        placeholder="Name of previous school (optional)" />
+                                </div>
+
+                                <div class="form-field">
+                                    <label>Previous Class</label>
+                                    <input type="text" formControlName="previousClass"
+                                        placeholder="Last class attended (optional)" />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    }
+
+                    <!-- Step 3: Guardians -->
+                    @if (currentStep() === 3) {
+                    <form [formGroup]="guardiansForm" class="wizard-form">
+                        <h2 class="form-heading">Guardian Information</h2>
+                        <p class="form-description">Add at least one guardian or parent</p>
+
+                        <div formArrayName="guardians">
+                            @for (guardian of guardians.controls; let i = $index; track i) {
+                            <div [formGroupName]="i" class="guardian-card">
+                                <div class="card-header">
+                                    <h3>Guardian {{ i + 1 }}</h3>
+                                    <div class="card-actions">
+                                        @if (!guardian.get('isPrimary')?.value && guardians.length > 1) {
+                                        <button type="button" class="btn-text" (click)="setPrimaryGuardian(i)">
+                                            Set as Primary
+                                        </button>
+                                        }
+                                        @if (guardian.get('isPrimary')?.value) {
+                                        <span class="primary-badge">Primary</span>
+                                        }
+                                        @if (guardians.length > 1) {
+                                        <button type="button" class="btn-icon-danger" (click)="removeGuardian(i)">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <path d="M18 6L6 18M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-field full-width">
+                                        <label>Full Name <span class="required">*</span></label>
+                                        <input type="text" formControlName="name" placeholder="Guardian's full name" />
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-field">
+                                        <label>Relationship <span class="required">*</span></label>
+                                        <select formControlName="relationship">
+                                            <option value="">Select relationship</option>
+                                            <option [value]="RelationshipType.FATHER">Father</option>
+                                            <option [value]="RelationshipType.MOTHER">Mother</option>
+                                            <option [value]="RelationshipType.GUARDIAN">Guardian</option>
+                                            <option [value]="RelationshipType.SIBLING">Sibling</option>
+                                            <option [value]="RelationshipType.GRANDPARENT">Grandparent</option>
+                                            <option [value]="RelationshipType.OTHER">Other</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label>Phone <span class="required">*</span></label>
+                                        <input type="tel" formControlName="phone" placeholder="Contact number" />
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-field">
+                                        <label>Email</label>
+                                        <input type="email" formControlName="email"
+                                            placeholder="Email address (optional)" />
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label>Occupation</label>
+                                        <input type="text" formControlName="occupation"
+                                            placeholder="Occupation (optional)" />
+                                    </div>
+                                </div>
+
+                                <div class="form-field">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" formControlName="isEmergencyContact" />
+                                        <span>Emergency Contact</span>
+                                    </label>
+                                </div>
+                            </div>
+                            }
+                        </div>
+
+                        <button type="button" class="btn-add-guardian" (click)="addGuardian()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M12 5v14m-7-7h14"></path>
+                            </svg>
+                            Add Another Guardian
+                        </button>
+                    </form>
+                    }
+
+                    <!-- Step 4: Medical Information & Review -->
+                    @if (currentStep() === 4) {
+                    <form [formGroup]="medicalForm" class="wizard-form">
+                        <h2 class="form-heading">Medical Information</h2>
+                        <p class="form-description">Health and medical details (optional)</p>
+
+                        <div formGroupName="medicalInfo">
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Blood Group</label>
+                                    <select formControlName="bloodGroup">
+                                        <option value="">Select blood group</option>
+                                        <option [value]="BloodGroup.A_POSITIVE">A+</option>
+                                        <option [value]="BloodGroup.A_NEGATIVE">A-</option>
+                                        <option [value]="BloodGroup.B_POSITIVE">B+</option>
+                                        <option [value]="BloodGroup.B_NEGATIVE">B-</option>
+                                        <option [value]="BloodGroup.AB_POSITIVE">AB+</option>
+                                        <option [value]="BloodGroup.AB_NEGATIVE">AB-</option>
+                                        <option [value]="BloodGroup.O_POSITIVE">O+</option>
+                                        <option [value]="BloodGroup.O_NEGATIVE">O-</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Doctor Name</label>
+                                    <input type="text" formControlName="doctorName" placeholder="Family doctor name" />
+                                </div>
+
+                                <div class="form-field">
+                                    <label>Doctor Phone</label>
+                                    <input type="tel" formControlName="doctorPhone"
+                                        placeholder="Doctor's contact number" />
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>Insurance Provider</label>
+                                    <input type="text" formControlName="insuranceProvider"
+                                        placeholder="Health insurance provider" />
+                                </div>
+
+                                <div class="form-field">
+                                    <label>Insurance Number</label>
+                                    <input type="text" formControlName="insuranceNumber"
+                                        placeholder="Policy/member number" />
+                                </div>
+                            </div>
+
+                            <div class="medical-lists">
+                                <div class="medical-list-section">
+                                    <label>Allergies</label>
+                                    <div class="list-items">
+                                        @for (item of getArrayItems('allergies').controls; let i = $index; track i) {
+                                        <div class="list-item">
+                                            <input type="text" [formControl]="$any(item)" placeholder="Enter allergy" />
+                                            <button type="button" class="btn-remove-item"
+                                                (click)="removeArrayItem('allergies', i)">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2">
+                                                    <path d="M18 6L6 18M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        }
+                                    </div>
+                                    <button type="button" class="btn-add-item" (click)="addArrayItem('allergies')">+ Add
+                                        Allergy</button>
+                                </div>
+
+                                <div class="medical-list-section">
+                                    <label>Medical Conditions</label>
+                                    <div class="list-items">
+                                        @for (item of getArrayItems('medicalConditions').controls; let i = $index; track
+                                        i) {
+                                        <div class="list-item">
+                                            <input type="text" [formControl]="$any(item)"
+                                                placeholder="Enter condition" />
+                                            <button type="button" class="btn-remove-item"
+                                                (click)="removeArrayItem('medicalConditions', i)">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2">
+                                                    <path d="M18 6L6 18M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        }
+                                    </div>
+                                    <button type="button" class="btn-add-item"
+                                        (click)="addArrayItem('medicalConditions')">+ Add
+                                        Condition</button>
+                                </div>
+
+                                <div class="medical-list-section">
+                                    <label>Current Medications</label>
+                                    <div class="list-items">
+                                        @for (item of getArrayItems('medications').controls; let i = $index; track i) {
+                                        <div class="list-item">
+                                            <input type="text" [formControl]="$any(item)"
+                                                placeholder="Enter medication" />
+                                            <button type="button" class="btn-remove-item"
+                                                (click)="removeArrayItem('medications', i)">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2">
+                                                    <path d="M18 6L6 18M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        }
+                                    </div>
+                                    <button type="button" class="btn-add-item" (click)="addArrayItem('medications')">+
+                                        Add
+                                        Medication</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    }
+
+                    <!-- Step 5: Review -->
+                    @if (currentStep() === 5) {
+                    <div class="wizard-form">
+                        <h2 class="form-heading">Review & Submit</h2>
+                        <p class="form-description">Please review all information before submitting</p>
+
+                        <div class="review-section">
+                            <div class="review-group">
+                                <h3 class="review-group-title">Personal Information</h3>
+                                <div class="review-grid">
+                                    <div class="review-item">
+                                        <span class="review-label">Name:</span>
+                                        <span class="review-value">{{ personalInfoForm.value.firstName }} {{
+                                            personalInfoForm.value.middleName }} {{ personalInfoForm.value.lastName
+                                            }}</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="review-label">Date of Birth:</span>
+                                        <span class="review-value">{{ personalInfoForm.value.dateOfBirth }}</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="review-label">Gender:</span>
+                                        <span class="review-value">{{ personalInfoForm.value.gender }}</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="review-label">Email:</span>
+                                        <span class="review-value">{{ personalInfoForm.value.email }}</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="review-label">Phone:</span>
+                                        <span class="review-value">{{ personalInfoForm.value.phone }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="review-group">
+                                <h3 class="review-group-title">Enrollment Information</h3>
+                                <div class="review-grid">
+                                    <div class="review-item">
+                                        <span class="review-label">Admission Number:</span>
+                                        <span class="review-value">{{ enrollmentForm.value.enrollment?.admissionNumber
+                                            }}</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="review-label">Admission Date:</span>
+                                        <span class="review-value">{{ enrollmentForm.value.enrollment?.admissionDate
+                                            }}</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="review-label">Academic Year:</span>
+                                        <span class="review-value">{{ enrollmentForm.value.enrollment?.academicYear
+                                            }}</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="review-label">Class:</span>
+                                        <span class="review-value">{{ enrollmentForm.value.enrollment?.class }}</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="review-label">Section:</span>
+                                        <span class="review-value">{{ enrollmentForm.value.enrollment?.section || 'N/A'
+                                            }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="review-group">
+                                <h3 class="review-group-title">Guardians</h3>
+                                @for (guardian of guardians.controls; let i = $index; track i) {
+                                <div class="review-guardian">
+                                    <strong>Guardian {{ i + 1 }}{{ guardian.value.isPrimary ? ' (Primary)' : ''
+                                        }}</strong>
+                                    <div class="review-grid">
+                                        <div class="review-item">
+                                            <span class="review-label">Name:</span>
+                                            <span class="review-value">{{ guardian.value.firstName }} {{
+                                                guardian.value.lastName }}</span>
+                                        </div>
+                                        <div class="review-item">
+                                            <span class="review-label">Relationship:</span>
+                                            <span class="review-value">{{ guardian.value.relationship }}</span>
+                                        </div>
+                                        <div class="review-item">
+                                            <span class="review-label">Phone:</span>
+                                            <span class="review-value">{{ guardian.value.phone }}</span>
+                                        </div>
+                                        <div class="review-item">
+                                            <span class="review-label">Email:</span>
+                                            <span class="review-value">{{ guardian.value.email || 'N/A' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+
+                <!-- Photo Sidebar -->
+                <div class="photo-sidebar">
+                    <h3 class="photo-title">Student Photo</h3>
+                    <div class="photo-preview-box">
+                        @if (photoPreview()) {
+                        <img [src]="photoPreview()" alt="Student photo preview" />
+                        } @else {
+                        <div class="photo-placeholder">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5">
+                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <span>No photo uploaded</span>
+                        </div>
+                        }
+                    </div>
+                    <div class="photo-button-group">
+                        <button type="button" class="btn-photo-upload" (click)="fileInput.click()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4m14-7l-5-5-5 5m5-5v12"></path>
+                            </svg>
+                            Upload Photo
+                        </button>
+                        <button type="button" class="btn-photo-take">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z">
+                                </path>
+                                <circle cx="12" cy="13" r="4"></circle>
+                            </svg>
+                            Take Photo
+                        </button>
+                    </div>
+                    <p class="photo-guideline">
+                        Recommended: 300x300px, JPG or PNG, max 2MB
+                    </p>
+                    <input type="file" #fileInput accept="image/*" (change)="onPhotoSelected($event)"
+                        style="display: none" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="form-actions">
+            <div class="left-actions">
+                <button type="button" class="btn-cancel" (click)="cancel()">Cancel</button>
+            </div>
+            <div class="right-actions">
+                @if (currentStep() < totalSteps) { @if (currentStep()> 1) {
+                    <button type="button" class="btn-back" (click)="previousStep()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M19 12H5m7 7l-7-7 7-7"></path>
+                        </svg>
+                        Back
+                    </button>
+                    }
+                    <button type="button" class="btn-next" (click)="nextStep()">
+                        Next
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M5 12h14m-7-7l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                    } @else {
+                    <button type="button" class="btn-back" (click)="previousStep()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M19 12H5m7 7l-7-7 7-7"></path>
+                        </svg>
+                        Back
+                    </button>
+                    <button type="button" class="btn-save-new" (click)="submit(true)" [disabled]="submitting()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 5v14m-7-7h14"></path>
+                        </svg>
+                        Save & New
+                    </button>
+                    <button type="button" class="btn-save" (click)="submit(false)" [disabled]="submitting()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path>
+                            <path d="M7 3v5h8M17 21v-8H7v8"></path>
+                        </svg>
+                        {{ submitting() ? 'Saving...' : 'Save' }}
+                    </button>
+                    }
+            </div>
+        </div>

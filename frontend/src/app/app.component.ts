@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { LoginOverlayComponent } from './modules/auth/components/login-overlay/login-overlay.component';
 import { AuthService } from './core/services/auth.service';
+import { TenantService } from './core/services/tenant.service';
 import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
+import { environment } from '../environments/environment';
 
 @Component({
     selector: 'app-root',
@@ -38,8 +40,26 @@ import { SidebarComponent } from './shared/components/sidebar/sidebar.component'
         }
     `]
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
     title = 'MindBloom';
 
-    constructor(public authService: AuthService) { }
+    constructor(
+        public authService: AuthService,
+        private tenantService: TenantService
+    ) { }
+
+    ngOnInit(): void {
+        // For development: Set a default tenant if none exists
+        if (!environment.production && !this.tenantService.getTenantId()) {
+            const devTenant = {
+                id: '674189e9f57b370bbc3efae9',
+                name: 'Development School',
+                subdomain: 'dev',
+                status: 'active' as const,
+                plan: 'enterprise' as const
+            };
+            this.tenantService.setTenant(devTenant);
+            console.log('Development tenant initialized:', devTenant);
+        }
+    }
 }

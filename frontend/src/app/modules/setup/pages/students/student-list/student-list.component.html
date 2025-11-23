@@ -1,0 +1,242 @@
+<div class="student-list-container">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">Students</h1>
+            <p class="page-subtitle">Manage student records and enrollment</p>
+        </div>
+        <button class="btn btn-primary" (click)="createStudent()">
+            <i class="icon-plus"></i>
+            Add Student
+        </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+        <div class="search-box">
+            <i class="icon-search"></i>
+            <input type="text" placeholder="Search by name, admission number, email..." [value]="searchTerm()"
+                (input)="onSearchChange($any($event.target).value)" />
+        </div>
+
+        <div class="filter-controls">
+            <select [value]="selectedClass() || ''"
+                (change)="selectedClass.set($any($event.target).value || undefined); onFilterChange()">
+                <option value="">All Classes</option>
+                <option value="1">Class 1</option>
+                <option value="2">Class 2</option>
+                <option value="3">Class 3</option>
+                <option value="4">Class 4</option>
+                <option value="5">Class 5</option>
+            </select>
+
+            <select [value]="selectedStatus() || ''"
+                (change)="selectedStatus.set($any($event.target).value || undefined); onFilterChange()">
+                <option value="">All Status</option>
+                <option [value]="StudentStatus.ACTIVE">Active</option>
+                <option [value]="StudentStatus.INACTIVE">Inactive</option>
+                <option [value]="StudentStatus.GRADUATED">Graduated</option>
+                <option [value]="StudentStatus.TRANSFERRED">Transferred</option>
+                <option [value]="StudentStatus.WITHDRAWN">Withdrawn</option>
+                <option [value]="StudentStatus.SUSPENDED">Suspended</option>
+            </select>
+
+            <select [value]="selectedGender() || ''"
+                (change)="selectedGender.set($any($event.target).value || undefined); onFilterChange()">
+                <option value="">All Genders</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+            </select>
+
+            <button class="btn btn-secondary" (click)="clearFilters()">
+                Clear Filters
+            </button>
+
+            <button class="btn btn-icon" (click)="toggleViewMode()"
+                [title]="viewMode() === 'table' ? 'Switch to Cards' : 'Switch to Table'">
+                <i [class]="viewMode() === 'table' ? 'icon-grid' : 'icon-list'"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (loading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading students...</p>
+    </div>
+    }
+
+    <!-- Error State -->
+    @if (error()) {
+    <div class="error-state">
+        <i class="icon-alert-circle"></i>
+        <p>{{ error() }}</p>
+        <button class="btn btn-primary" (click)="loadStudents()">Retry</button>
+    </div>
+    }
+
+    <!-- Empty State -->
+    @if (!loading() && !error() && students().length === 0) {
+    <div class="empty-state">
+        <i class="icon-users"></i>
+        <h3>No students found</h3>
+        <p>Get started by adding your first student</p>
+        <button class="btn btn-primary" (click)="createStudent()">
+            <i class="icon-plus"></i>
+            Add Student
+        </button>
+    </div>
+    }
+
+    <!-- Table View -->
+    @if (!loading() && !error() && students().length > 0 && viewMode() === 'table') {
+    <div class="table-container">
+        <table class="students-table">
+            <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Admission No.</th>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Guardian</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (student of students(); track student.id) {
+                <tr>
+                    <td>
+                        <div class="student-avatar">
+                            @if (student.photo) {
+                            <img [src]="student.photo" [alt]="student.fullName" />
+                            } @else {
+                            <div class="avatar-placeholder">
+                                {{ student.firstName.charAt(0) }}{{ student.lastName.charAt(0) }}
+                            </div>
+                            }
+                        </div>
+                    </td>
+                    <td class="admission-number">{{ student.enrollment.admissionNumber }}</td>
+                    <td>
+                        <div class="student-name">
+                            <strong>{{ student.fullName }}</strong>
+                            @if (student.email) {
+                            <small>{{ student.email }}</small>
+                            }
+                        </div>
+                    </td>
+                    <td>{{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section :
+                        '' }}</td>
+                    <td>{{ student.age }}</td>
+                    <td>{{ student.gender }}</td>
+                    <td>
+                        @if (student.primaryGuardian) {
+                        <div class="guardian-info">
+                            <strong>{{ student.primaryGuardian.name }}</strong>
+                            <small>{{ student.primaryGuardian.phone }}</small>
+                        </div>
+                        }
+                    </td>
+                    <td>
+                        <span class="badge" [class]="getStatusBadgeClass(student.status)">
+                            {{ student.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-icon" (click)="viewStudent(student.id)" title="View">
+                                <i class="icon-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-icon" (click)="editStudent(student.id)" title="Edit">
+                                <i class="icon-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-icon btn-danger" (click)="deleteStudent(student)"
+                                title="Delete">
+                                <i class="icon-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+
+    <!-- Cards View -->
+    @if (!loading() && !error() && students().length > 0 && viewMode() === 'cards') {
+    <div class="cards-container">
+        @for (student of students(); track student.id) {
+        <div class="student-card">
+            <div class="card-header">
+                <div class="student-avatar">
+                    @if (student.photo) {
+                    <img [src]="student.photo" [alt]="student.fullName" />
+                    } @else {
+                    <div class="avatar-placeholder">
+                        {{ student.firstName.charAt(0) }}{{ student.lastName.charAt(0) }}
+                    </div>
+                    }
+                </div>
+                <span class="badge" [class]="getStatusBadgeClass(student.status)">
+                    {{ student.status }}
+                </span>
+            </div>
+
+            <div class="card-body">
+                <h3>{{ student.fullName }}</h3>
+                <div class="student-details">
+                    <div class="detail-row">
+                        <i class="icon-hash"></i>
+                        <span>{{ student.enrollment.admissionNumber }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <i class="icon-book"></i>
+                        <span>Class {{ student.enrollment.class }}{{ student.enrollment.section ? '-' +
+                            student.enrollment.section : '' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <i class="icon-calendar"></i>
+                        <span>{{ student.age }} years old</span>
+                    </div>
+                    @if (student.primaryGuardian) {
+                    <div class="detail-row">
+                        <i class="icon-user"></i>
+                        <span>{{ student.primaryGuardian.name }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <i class="icon-phone"></i>
+                        <span>{{ student.primaryGuardian.phone }}</span>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <button class="btn btn-sm btn-secondary" (click)="viewStudent(student.id)">
+                    <i class="icon-eye"></i> View
+                </button>
+                <button class="btn btn-sm btn-primary" (click)="editStudent(student.id)">
+                    <i class="icon-edit"></i> Edit
+                </button>
+                <button class="btn btn-sm btn-danger" (click)="deleteStudent(student)">
+                    <i class="icon-trash"></i>
+                </button>
+            </div>
+        </div>
+        }
+    </div>
+    }
+
+    <!-- Summary -->
+    @if (!loading() && students().length > 0) {
+    <div class="summary-section">
+        <p>Showing {{ students().length }} student(s)</p>
+    </div>
+    }
+</div>

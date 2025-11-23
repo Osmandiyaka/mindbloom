@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Student } from '../../../domain/student/entities/student.entity';
-import { IStudentRepository, STUDENT_REPOSITORY } from '../../../domain/student/ports/student.repository.interface';
+import { IStudentRepository, STUDENT_REPOSITORY, StudentFilters } from '../../../domain/student/ports/student.repository.interface';
 
 @Injectable()
 export class GetAllStudentsUseCase {
@@ -9,7 +9,7 @@ export class GetAllStudentsUseCase {
         private readonly studentRepository: IStudentRepository,
     ) { }
 
-    async execute(): Promise<Student[]> {
-        return await this.studentRepository.findAll();
+    async execute(tenantId: string, filters?: StudentFilters): Promise<Student[]> {
+        return await this.studentRepository.findAll(tenantId, filters);
     }
 }
