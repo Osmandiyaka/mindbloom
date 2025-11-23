@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { TenantService } from '../../../core/services/tenant.service';
 
 @Component({
     selector: 'app-global-toolbar',
@@ -12,8 +13,12 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class GlobalToolbarComponent {
     searchQuery: string = '';
+    tenantName = computed(() => this.tenantService.currentTenant()?.name || 'School');
 
-    constructor(private authService: AuthService) { }
+    constructor(
+        private authService: AuthService,
+        private tenantService: TenantService
+    ) { }
 
     onSearch() {
         console.log('Search:', this.searchQuery);
