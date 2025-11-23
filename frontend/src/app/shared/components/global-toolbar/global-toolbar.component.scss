@@ -55,9 +55,37 @@
     .toolbar-center {
         flex: 1;
         display: flex;
+        align-items: center;
+        gap: 24px;
         justify-content: center;
-        max-width: 600px;
+        max-width: 800px;
         margin: 0 auto;
+    }
+
+    .school-name {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        font-size: 15px;
+        white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+
+        svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2.5;
+        }
+
+        .school-name-text {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     }
 
     .search-container {
@@ -163,17 +191,33 @@
 
         .toolbar-center {
             max-width: 300px;
+            gap: 12px;
+        }
+
+        .school-name {
+            padding: 6px 12px;
+            font-size: 13px;
+
+            svg {
+                width: 16px;
+                height: 16px;
+            }
+
+            .school-name-text {
+                max-width: 120px;
+            }
         }
 
         .search-container {
-            .search-input {
-                font-size: 13px;
-                height: 36px;
-            }
+            display: none; // Hide search on mobile
         }
 
         .toolbar-divider {
             margin: 0 4px;
+        }
+
+        .logout-btn span {
+            display: none; // Show only icon on mobile
         }
     }
 }
