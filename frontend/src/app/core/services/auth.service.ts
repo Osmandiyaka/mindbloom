@@ -4,16 +4,18 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { TenantService, Tenant } from './tenant.service';
+import { Role, Permission } from '../models/role.model';
 
-interface User {
+export interface User {
     id: string;
     tenantId: string;
     email: string;
     name: string;
-    role: string;
+    roleId: string | null;
+    role: Role | null;
 }
 
-interface AuthResponse {
+export interface AuthResponse {
     user: User;
     access_token: string;
 }

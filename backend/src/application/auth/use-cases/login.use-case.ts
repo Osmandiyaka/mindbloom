@@ -44,12 +44,13 @@ export class LoginUseCase {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        // Generate JWT token with tenant information
+        // Generate JWT token with tenant and role information
         const payload = {
             sub: user.id,
             tenantId: user.tenantId,
             email: user.email,
-            role: user.role
+            roleId: user.roleId,
+            roleName: user.role?.name || null
         };
         const access_token = this.jwtService.sign(payload);
 
@@ -60,7 +61,21 @@ export class LoginUseCase {
                 tenantId: user.tenantId,
                 email: user.email,
                 name: user.name,
-                role: user.role,
+                roleId: user.roleId,
+                role: user.role ? {
+                    id: user.role.id,
+                    name: user.role.name,
+                    description: user.role.description,
+                    isSystemRole: user.role.isSystemRole,
+                    permissions: user.role.permissions.map(p => ({
+                        id: p.id,
+                        resource: p.resource,
+                        displayName: p.displayName,
+                        description: p.description,
+                        actions: p.actions,
+                        scope: p.scope
+                    }))
+                } : null,
             },
         };
     }

@@ -10,22 +10,22 @@ import { Permission, PermissionAction } from '../../../../core/models/role.model
     styleUrls: ['./permission-tree.component.scss']
 })
 export class PermissionTreeComponent {
-  @Input() set permissionTree(value: Permission[]) {
-    this._permissionTree.set(value);
-  }
-  @Input() set selectedPermissions(value: string[]) {
-    this._selectedPermissions.set(new Set(value));
-  }
-  @Output() permissionsChange = new EventEmitter<string[]>();
+    @Input() set permissionTree(value: Permission[]) {
+        this._permissionTree.set(value);
+    }
+    @Input() set selectedPermissions(value: string[]) {
+        this._selectedPermissions.set(new Set(value));
+    }
+    @Output() permissionsChange = new EventEmitter<string[]>();
 
-  private _permissionTree = signal<Permission[]>([]);
-  private _selectedPermissions = signal<Set<string>>(new Set());
+    private _permissionTree = signal<Permission[]>([]);
+    private _selectedPermissions = signal<Set<string>>(new Set());
 
-  get permissionTreeValue() {
-    return this._permissionTree();
-  }
+    get permissionTreeValue() {
+        return this._permissionTree();
+    }
 
-  expandedNodes = signal<Set<string>>(new Set());    toggleNode(permissionId: string) {
+    expandedNodes = signal<Set<string>>(new Set()); toggleNode(permissionId: string) {
         const expanded = this.expandedNodes();
         if (expanded.has(permissionId)) {
             expanded.delete(permissionId);
@@ -81,11 +81,11 @@ export class PermissionTreeComponent {
         return childrenSelected > 0 && childrenSelected < permission.children.length;
     }
 
-  hasChildren(permission: Permission): boolean {
-    return !!(permission.children && permission.children.length > 0);
-  }
+    hasChildren(permission: Permission): boolean {
+        return !!(permission.children && permission.children.length > 0);
+    }
 
-  getActionBadges(actions: PermissionAction[]): string {
-    return actions.map(a => a.toUpperCase()).join(', ');
-  }
+    getActionBadges(actions: PermissionAction[]): string {
+        return actions.map(a => a.toUpperCase()).join(', ');
+    }
 }
