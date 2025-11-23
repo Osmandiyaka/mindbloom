@@ -94,8 +94,23 @@ import { Role } from '../../../../core/models/role.model';
             <div class="profile-picture-preview">
               <div class="avatar-circle" [style.background-image]="profilePictureUrl() ? 'url(' + profilePictureUrl() + ')' : 'none'">
                 <span *ngIf="!profilePictureUrl()" class="avatar-placeholder">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64">
+                    <!-- Background circle -->
+                    <circle cx="50" cy="50" r="50" fill="url(#avatarGradient)"/>
+                    <!-- Person icon -->
+                    <g fill="white" opacity="0.95">
+                      <!-- Head -->
+                      <circle cx="50" cy="35" r="16"/>
+                      <!-- Body -->
+                      <path d="M50 54c-15 0-27 8-27 18v8c0 3 2 5 5 5h44c3 0 5-2 5-5v-8c0-10-12-18-27-18z"/>
+                    </g>
+                    <!-- Gradient definition -->
+                    <defs>
+                      <linearGradient id="avatarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                      </linearGradient>
+                    </defs>
                   </svg>
                 </span>
               </div>
@@ -322,11 +337,15 @@ import { Role } from '../../../../core/models/role.model';
     }
 
     .avatar-placeholder {
-      color: rgba(255, 255, 255, 0.7);
-      z-index: 1;
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .avatar-placeholder svg {
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
     }
 
     .profile-picture-controls {
