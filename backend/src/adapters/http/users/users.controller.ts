@@ -56,6 +56,7 @@ export class UsersController {
                 displayName: p.displayName,
                 actions: p.actions,
             })),
+            profilePicture: user.profilePicture,
             createdAt: user.createdAt,
         }));
     }
@@ -68,6 +69,7 @@ export class UsersController {
             name: dto.name,
             password: dto.password,
             roleId: dto.roleId,
+            profilePicture: dto.profilePicture,
         });
 
         return UserResponseDto.fromDomain(user);
@@ -96,6 +98,7 @@ export class UsersController {
                 displayName: p.displayName,
                 actions: p.actions,
             })),
+            profilePicture: user.profilePicture,
             createdAt: user.createdAt,
         };
     }
@@ -107,6 +110,7 @@ export class UsersController {
             email: dto.email,
             name: dto.name,
             roleId: dto.roleId,
+            profilePicture: dto.profilePicture,
         });
 
         return UserResponseDto.fromDomain(user);

@@ -7,10 +7,10 @@ import { Permission } from '../../../../core/models/role.model';
 import { PermissionTreeSelectorComponent } from '../../../../shared/components/permission-tree-selector/permission-tree-selector.component';
 
 @Component({
-    selector: 'app-user-list',
-    standalone: true,
-    imports: [CommonModule, PermissionTreeSelectorComponent],
-    template: `
+  selector: 'app-user-list',
+  standalone: true,
+  imports: [CommonModule, PermissionTreeSelectorComponent],
+  template: `
     <div class="user-list-container">
       <!-- Header -->
       <div class="page-header">
@@ -52,7 +52,12 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
             <tr *ngFor="let user of users()">
               <td>
                 <div class="user-info">
-                  <div class="user-avatar">{{ getInitials(user.name) }}</div>
+                  <div 
+                    class="user-avatar" 
+                    [style.background-image]="user.profilePicture ? 'url(' + user.profilePicture + ')' : 'none'"
+                  >
+                    <span *ngIf="!user.profilePicture">{{ getInitials(user.name) }}</span>
+                  </div>
                   <span class="user-name">{{ user.name }}</span>
                 </div>
               </td>
@@ -80,7 +85,6 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
                     🔐 Permissions
                   </button>
                 </div>
-                </button>
               </td>
             </tr>
           </tbody>
@@ -131,7 +135,7 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
       }
     </div>
   `,
-    styles: [`
+  styles: [`
     .user-list-container {
       padding: 2rem;
       max-width: 1400px;
@@ -256,12 +260,15 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
       height: 2.5rem;
       border-radius: 50%;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-size: cover;
+      background-position: center;
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 600;
       font-size: 0.875rem;
+      flex-shrink: 0;
     }
 
     .user-name {
@@ -479,118 +486,118 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
   `]
 })
 export class UserListComponent implements OnInit {
-    private readonly userService = inject(UserService);
-    private readonly roleService = inject(RoleService);
-    private readonly router = inject(Router);
+  private readonly userService = inject(UserService);
+  private readonly roleService = inject(RoleService);
+  private readonly router = inject(Router);
 
-    users = signal<User[]>([]);
-    loading = signal(false);
-    error = signal<string | null>(null);
-    saving = signal(false);
+  users = signal<User[]>([]);
+  loading = signal(false);
+  error = signal<string | null>(null);
+  saving = signal(false);
 
-    // Permission management
-    showPermissionDialog = signal(false);
-    selectedUser = signal<User | null>(null);
-    permissionTree = signal<Permission[]>([]);
-    currentPermissionIds = signal<string[]>([]);
-    tempSelectedIds = signal<string[]>([]);
+  // Permission management
+  showPermissionDialog = signal(false);
+  selectedUser = signal<User | null>(null);
+  permissionTree = signal<Permission[]>([]);
+  currentPermissionIds = signal<string[]>([]);
+  tempSelectedIds = signal<string[]>([]);
 
-    ngOnInit() {
-        this.loadUsers();
-        this.loadPermissionTree();
-    }
+  ngOnInit() {
+    this.loadUsers();
+    this.loadPermissionTree();
+  }
 
-    loadUsers() {
-        this.loading.set(true);
-        this.error.set(null);
+  loadUsers() {
+    this.loading.set(true);
+    this.error.set(null);
 
-        this.userService.getUsers().subscribe({
-            next: (users) => {
-                this.users.set(users);
-                this.loading.set(false);
-            },
-            error: (err) => {
-                this.error.set('Failed to load users. Please try again.');
-                this.loading.set(false);
-                console.error('Error loading users:', err);
-            }
-        });
-    }
+    this.userService.getUsers().subscribe({
+      next: (users) => {
+        this.users.set(users);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set('Failed to load users. Please try again.');
+        this.loading.set(false);
+        console.error('Error loading users:', err);
+      }
+    });
+  }
 
-    loadPermissionTree() {
-        this.roleService.getPermissionTree().subscribe({
-            next: (tree) => {
-                this.permissionTree.set(tree);
-            },
-            error: (err) => {
-                console.error('Error loading permission tree:', err);
-            }
-        });
-    }
+  loadPermissionTree() {
+    this.roleService.getPermissionTree().subscribe({
+      next: (tree) => {
+        this.permissionTree.set(tree);
+      },
+      error: (err) => {
+        console.error('Error loading permission tree:', err);
+      }
+    });
+  }
 
-    createUser() {
-        this.router.navigate(['/setup/users/create']);
-    }
+  createUser() {
+    this.router.navigate(['/setup/users/create']);
+  }
 
-    editUser(user: User) {
-        this.router.navigate(['/setup/users/edit', user.id]);
-    }
+  editUser(user: User) {
+    this.router.navigate(['/setup/users/edit', user.id]);
+  }
 
-    managePermissions(user: User) {
-        this.selectedUser.set(user);
-        const permissionIds = user.permissions.map(p => p.id || p.resource).filter(id => !!id);
-        this.currentPermissionIds.set(permissionIds);
-        this.tempSelectedIds.set([...permissionIds]);
-        this.showPermissionDialog.set(true);
-    }
+  managePermissions(user: User) {
+    this.selectedUser.set(user);
+    const permissionIds = user.permissions.map(p => p.id || p.resource).filter(id => !!id);
+    this.currentPermissionIds.set(permissionIds);
+    this.tempSelectedIds.set([...permissionIds]);
+    this.showPermissionDialog.set(true);
+  }
 
-    onPermissionSelectionChange(selectedIds: string[]) {
-        this.tempSelectedIds.set(selectedIds);
-    }
+  onPermissionSelectionChange(selectedIds: string[]) {
+    this.tempSelectedIds.set(selectedIds);
+  }
 
-    savePermissions() {
-        const user = this.selectedUser();
-        if (!user) return;
+  savePermissions() {
+    const user = this.selectedUser();
+    if (!user) return;
 
-        this.saving.set(true);
+    this.saving.set(true);
 
-        this.userService.addPermissionsToUser(user.id, this.tempSelectedIds()).subscribe({
-            next: (updatedUser) => {
-                // Update the user in the list
-                this.users.update(users =>
-                    users.map(u => u.id === updatedUser.id ? updatedUser : u)
-                );
-                this.closePermissionDialog();
-                this.saving.set(false);
-            },
-            error: (err) => {
-                this.error.set('Failed to update user permissions. Please try again.');
-                this.saving.set(false);
-                console.error('Error updating permissions:', err);
-            }
-        });
-    }
+    this.userService.addPermissionsToUser(user.id, this.tempSelectedIds()).subscribe({
+      next: (updatedUser) => {
+        // Update the user in the list
+        this.users.update(users =>
+          users.map(u => u.id === updatedUser.id ? updatedUser : u)
+        );
+        this.closePermissionDialog();
+        this.saving.set(false);
+      },
+      error: (err) => {
+        this.error.set('Failed to update user permissions. Please try again.');
+        this.saving.set(false);
+        console.error('Error updating permissions:', err);
+      }
+    });
+  }
 
-    closePermissionDialog() {
-        this.showPermissionDialog.set(false);
-        this.selectedUser.set(null);
-        this.tempSelectedIds.set([]);
-    }
+  closePermissionDialog() {
+    this.showPermissionDialog.set(false);
+    this.selectedUser.set(null);
+    this.tempSelectedIds.set([]);
+  }
 
-    getInitials(name: string): string {
-        return name
-            .split(' ')
-            .map(n => n[0])
-            .join('')
-            .toUpperCase()
-            .substring(0, 2);
-    }
+  getInitials(name: string): string {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  }
 
-    formatDate(date: Date): string {
-        return new Date(date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    }
+  formatDate(date: Date): string {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
 }

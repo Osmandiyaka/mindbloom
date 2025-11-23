@@ -11,6 +11,7 @@ export interface User {
     roleId: string | null;
     role: { id: string; name: string } | null;
     permissions: Permission[];
+    profilePicture: string | null;
     createdAt: Date;
 }
 
@@ -19,12 +20,14 @@ export interface CreateUserDto {
     name: string;
     password: string;
     roleId?: string;
+    profilePicture?: string;
 }
 
 export interface UpdateUserDto {
     email?: string;
     name?: string;
     roleId?: string;
+    profilePicture?: string;
 }
 
 @Injectable({

@@ -21,6 +21,9 @@ export class UserDocument extends Document {
     @Prop({ type: [String], default: [] })
     permissions: string[];
 
+    @Prop({ type: String, default: null })
+    profilePicture: string | null;
+
     createdAt: Date;
     updatedAt: Date;
 }

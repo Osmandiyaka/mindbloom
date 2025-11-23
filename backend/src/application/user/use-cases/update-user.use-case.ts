@@ -7,6 +7,7 @@ export interface UpdateUserCommand {
     email?: string;
     name?: string;
     roleId?: string;
+    profilePicture?: string;
 }
 
 @Injectable()
@@ -33,6 +34,7 @@ export class UpdateUserUseCase {
             roleId: command.roleId !== undefined ? command.roleId : user.roleId,
             role: user.role,
             permissions: user.permissions,
+            profilePicture: command.profilePicture !== undefined ? command.profilePicture : user.profilePicture,
         });
 
         // Save user

@@ -16,4 +16,9 @@ export class UpdateUserDto {
     @IsOptional()
     @IsString()
     roleId?: string;
+
+    @ApiProperty({ example: 'https://example.com/avatar.jpg', required: false })
+    @IsOptional()
+    @IsString()
+    profilePicture?: string;
 }

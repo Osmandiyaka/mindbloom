@@ -18,6 +18,9 @@ export class UserResponseDto {
     role: any;
 
     @ApiProperty()
+    profilePicture: string | null;
+
+    @ApiProperty()
     createdAt: Date;
 
     static fromDomain(user: User): UserResponseDto {
@@ -33,6 +36,7 @@ export class UserResponseDto {
             isSystemRole: user.role.isSystemRole,
             permissions: user.role.permissions
         } : null;
+        dto.profilePicture = user.profilePicture;
         dto.createdAt = user.createdAt;
         return dto;
     }

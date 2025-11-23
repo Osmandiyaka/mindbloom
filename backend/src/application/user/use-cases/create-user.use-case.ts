@@ -8,6 +8,7 @@ export interface CreateUserCommand {
     name: string;
     password: string;
     roleId?: string;
+    profilePicture?: string;
 }
 
 @Injectable()
@@ -32,6 +33,7 @@ export class CreateUserUseCase {
             name: command.name,
             roleId: command.roleId || null,
             role: null, // Will be populated by repository
+            profilePicture: command.profilePicture || null,
         });
 
         // Save user with password
