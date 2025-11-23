@@ -2,13 +2,14 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RoleService } from '../../../../core/services/role.service';
-import { Role } from '../../../../core/models/role.model';
+import { Role, Permission } from '../../../../core/models/role.model';
+import { PermissionTreeSelectorComponent } from '../../../../shared/components/permission-tree-selector/permission-tree-selector.component';
 
 @Component({
-  selector: 'app-role-list',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-role-list',
+    standalone: true,
+    imports: [CommonModule, PermissionTreeSelectorComponent],
+    template: `
     <div class="role-list-container">
       <!-- Header -->
       <div class="page-header">
@@ -107,6 +108,9 @@ import { Role } from '../../../../core/models/role.model';
                 <button class="btn-text" (click)="editRole(role.id)">
                   ✏️ Edit
                 </button>
+                <button class="btn-text" (click)="managePermissions(role)">
+                  🔐 Manage Permissions
+                </button>
                 <button class="btn-text danger" (click)="deleteRole(role)">
                   🗑️ Delete
                 </button>
@@ -115,9 +119,41 @@ import { Role } from '../../../../core/models/role.model';
           </div>
         </div>
       </div>
+
+      <!-- Permission Management Modal -->
+      @if (showPermissionDialog()) {
+        <div class="modal-overlay" (click)="closePermissionDialog()">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <div>
+                <h2>Manage Permissions</h2>
+                <p class="modal-subtitle">{{ selectedRole()?.name }}</p>
+              </div>
+              <button type="button" class="btn-close" (click)="closePermissionDialog()">×</button>
+            </div>
+            
+            <div class="modal-body">
+              <app-permission-tree-selector
+                [permissions]="permissionTree()"
+                [selectedPermissionIds]="currentPermissionIds()"
+                (selectionChange)="onPermissionSelectionChange($event)"
+              />
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" (click)="closePermissionDialog()">
+                Cancel
+              </button>
+              <button type="button" class="btn btn-primary" (click)="savePermissions()">
+                Save Permissions
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   `,
-  styles: [`
+    styles: [`
     .role-list-container {
       padding: 2rem;
       max-width: 1400px;
@@ -360,55 +396,196 @@ import { Role } from '../../../../core/models/role.model';
     .icon {
       font-size: 1.25rem;
     }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 1.5rem;
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .modal-header h2 {
+      margin: 0 0 0.25rem 0;
+      font-size: 1.5rem;
+    }
+
+    .modal-subtitle {
+      color: #6B7280;
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #9CA3AF;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-close:hover {
+      background: #F3F4F6;
+      color: #111827;
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      padding: 1.5rem;
+      border-top: 1px solid #E5E7EB;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #374151;
+      border: 1px solid #D1D5DB;
+    }
+
+    .btn-secondary:hover {
+      background: #F9FAFB;
+    }
   `]
 })
 export class RoleListComponent implements OnInit {
-  roleService = inject(RoleService);
-  private router = inject(Router);
+    roleService = inject(RoleService);
+    private router = inject(Router);
 
-  systemRoles = signal<Role[]>([]);
-  customRoles = signal<Role[]>([]);
+    systemRoles = signal<Role[]>([]);
+    customRoles = signal<Role[]>([]);
+    
+    // Permission management state
+    showPermissionDialog = signal(false);
+    selectedRole = signal<Role | null>(null);
+    permissionTree = signal<Permission[]>([]);
+    currentPermissionIds = signal<string[]>([]);
+    tempSelectedIds = signal<string[]>([]);
 
-  ngOnInit() {
-    this.loadRoles();
-  }
-
-  loadRoles() {
-    this.roleService.getRoles().subscribe({
-      next: (roles) => {
-        this.systemRoles.set(roles.filter(r => r.isSystemRole));
-        this.customRoles.set(roles.filter(r => !r.isSystemRole));
-      }
-    });
-  }
-
-  getUniqueResources(role: Role): string[] {
-    const resources = new Set(role.permissions.map(p => p.resource));
-    return Array.from(resources);
-  }
-
-  createRole() {
-    this.router.navigate(['/setup/roles/create']);
-  }
-
-  viewRole(id: string) {
-    this.router.navigate(['/setup/roles', id]);
-  }
-
-  editRole(id: string) {
-    this.router.navigate(['/setup/roles', id, 'edit']);
-  }
-
-  deleteRole(role: Role) {
-    if (confirm(`Are you sure you want to delete the role "${role.name}"?\n\nThis action cannot be undone.`)) {
-      this.roleService.deleteRole(role.id).subscribe({
-        next: () => {
-          // Role already removed from signal by service
-        },
-        error: (err) => {
-          alert(`Failed to delete role: ${err.message}`);
-        }
-      });
+    ngOnInit() {
+        this.loadRoles();
+        this.loadPermissionTree();
     }
-  }
+
+    loadRoles() {
+        this.roleService.getRoles().subscribe({
+            next: (roles) => {
+                this.systemRoles.set(roles.filter(r => r.isSystemRole));
+                this.customRoles.set(roles.filter(r => !r.isSystemRole));
+            }
+        });
+    }
+
+    loadPermissionTree() {
+        this.roleService.getPermissionTree().subscribe({
+            next: (tree) => {
+                this.permissionTree.set(tree);
+            },
+            error: (err) => {
+                console.error('Failed to load permission tree:', err);
+            }
+        });
+    }
+
+    getUniqueResources(role: Role): string[] {
+        const resources = new Set(role.permissions.map(p => p.resource));
+        return Array.from(resources);
+    }
+
+    createRole() {
+        this.router.navigate(['/setup/roles/create']);
+    }
+
+    viewRole(id: string) {
+        this.router.navigate(['/setup/roles', id]);
+    }
+
+    editRole(id: string) {
+        this.router.navigate(['/setup/roles', id, 'edit']);
+    }
+
+    deleteRole(role: Role) {
+        if (confirm(`Are you sure you want to delete the role "${role.name}"?\n\nThis action cannot be undone.`)) {
+            this.roleService.deleteRole(role.id).subscribe({
+                next: () => {
+                    // Role already removed from signal by service
+                },
+                error: (err) => {
+                    alert(`Failed to delete role: ${err.message}`);
+                }
+            });
+        }
+    }
+
+    managePermissions(role: Role) {
+        this.selectedRole.set(role);
+        this.currentPermissionIds.set(role.permissions.map(p => p.id));
+        this.tempSelectedIds.set(role.permissions.map(p => p.id));
+        this.showPermissionDialog.set(true);
+    }
+
+    closePermissionDialog() {
+        this.showPermissionDialog.set(false);
+        this.selectedRole.set(null);
+        this.tempSelectedIds.set([]);
+    }
+
+    onPermissionSelectionChange(selectedIds: string[]) {
+        this.tempSelectedIds.set(selectedIds);
+    }
+
+    savePermissions() {
+        const role = this.selectedRole();
+        if (!role) return;
+
+        this.roleService.addPermissionsToRole(role.id, this.tempSelectedIds()).subscribe({
+            next: () => {
+                this.closePermissionDialog();
+                this.loadRoles(); // Reload to get updated permissions
+            },
+            error: (err) => {
+                alert(`Failed to update permissions: ${err.message}`);
+            }
+        });
+    }
 }

@@ -1,25 +1,16 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { RoleService } from '../../../../core/services/role.service';
-import { Permission, PermissionAction, PermissionScope } from '../../../../core/models/role.model';
-
-interface ResourcePermission {
-  resource: string;
-  label: string;
-  description: string;
-  actions: {
-    [key in PermissionAction]?: boolean;
-  };
-  scope: PermissionScope;
-}
+import { Permission } from '../../../../core/models/role.model';
+import { PermissionTreeSelectorComponent } from '../../../../shared/components/permission-tree-selector/permission-tree-selector.component';
 
 @Component({
-  selector: 'app-role-form',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  template: `
+    selector: 'app-role-form',
+    standalone: true,
+    imports: [CommonModule, ReactiveFormsModule, PermissionTreeSelectorComponent],
+    template: `
     <div class="role-form-container">
       <!-- Header -->
       <div class="page-header">
@@ -44,9 +35,9 @@ interface ResourcePermission {
               placeholder="e.g., Exam Coordinator"
               class="form-input"
             />
-            <div *ngIf="roleForm.get('name')?.invalid && roleForm.get('name')?.touched" class="error-text">
-              Role name is required
-            </div>
+            @if (roleForm.get('name')?.invalid && roleForm.get('name')?.touched) {
+              <div class="error-text">Role name is required</div>
+            }
           </div>
 
           <div class="form-group">
@@ -58,86 +49,53 @@ interface ResourcePermission {
               rows="3"
               class="form-input"
             ></textarea>
-            <div *ngIf="roleForm.get('description')?.invalid && roleForm.get('description')?.touched" class="error-text">
-              Description is required
-            </div>
+            @if (roleForm.get('description')?.invalid && roleForm.get('description')?.touched) {
+              <div class="error-text">Description is required</div>
+            }
           </div>
         </div>
 
-        <!-- Permissions Matrix -->
+        <!-- Permissions Tree -->
         <div class="form-section">
-          <h2>Permissions</h2>
-          <p class="section-subtitle">Select which resources this role can access and what actions they can perform</p>
-
-          <div class="permissions-matrix">
-            <!-- Table Header -->
-            <div class="matrix-header">
-              <div class="resource-col">Resource</div>
-              <div class="action-col">Create</div>
-              <div class="action-col">Read</div>
-              <div class="action-col">Update</div>
-              <div class="action-col">Delete</div>
-              <div class="scope-col">Scope</div>
+          <div class="section-header">
+            <div>
+              <h2>Permissions</h2>
+              <p class="section-subtitle">Select which permissions this role should have</p>
             </div>
-
-            <!-- Permission Rows -->
-            <div *ngFor="let resource of availableResources()" class="matrix-row">
-              <div class="resource-col">
-                <div class="resource-info">
-                  <strong>{{ resource.label }}</strong>
-                  <span class="resource-desc">{{ resource.description }}</span>
-                </div>
-              </div>
-              
-              <div class="action-col">
-                <input 
-                  type="checkbox" 
-                  [checked]="resource.actions[PermissionAction.CREATE]"
-                  (change)="toggleAction(resource, PermissionAction.CREATE)"
-                  class="checkbox"
-                />
-              </div>
-              
-              <div class="action-col">
-                <input 
-                  type="checkbox" 
-                  [checked]="resource.actions[PermissionAction.READ]"
-                  (change)="toggleAction(resource, PermissionAction.READ)"
-                  class="checkbox"
-                />
-              </div>
-              
-              <div class="action-col">
-                <input 
-                  type="checkbox" 
-                  [checked]="resource.actions[PermissionAction.UPDATE]"
-                  (change)="toggleAction(resource, PermissionAction.UPDATE)"
-                  class="checkbox"
-                />
-              </div>
-              
-              <div class="action-col">
-                <input 
-                  type="checkbox" 
-                  [checked]="resource.actions[PermissionAction.DELETE]"
-                  (change)="toggleAction(resource, PermissionAction.DELETE)"
-                  class="checkbox"
-                />
-              </div>
-              
-              <div class="scope-col">
-                <select 
-                  [value]="resource.scope"
-                  (change)="changeScope(resource, $event)"
-                  class="scope-select"
-                >
-                  <option [value]="PermissionScope.OWN">Own Only</option>
-                  <option [value]="PermissionScope.DEPARTMENT">Department</option>
-                  <option [value]="PermissionScope.ALL">All</option>
-                </select>
-              </div>
-            </div>
+            <button type="button" class="btn btn-secondary" (click)="showPermissionSelector()">
+              <span class="btn-icon">+</span>
+              Add Permissions
+            </button>
           </div>
+
+          @if (selectedPermissions().length === 0) {
+            <div class="empty-state">
+              <span class="empty-icon">🔐</span>
+              <p>No permissions selected</p>
+              <p class="empty-hint">Click "Add Permissions" to grant access</p>
+            </div>
+          } @else {
+            <div class="selected-permissions-list">
+              @for (permission of selectedPermissions(); track permission.id) {
+                <div class="permission-chip">
+                  <span class="chip-icon">{{ permission.icon || '📄' }}</span>
+                  <div class="chip-content">
+                    <span class="chip-name">{{ permission.displayName }}</span>
+                    <span class="chip-meta">
+                      {{ permission.actions.join(', ') }} • {{ permission.scope }}
+                    </span>
+                  </div>
+                  <button 
+                    type="button" 
+                    class="chip-remove" 
+                    (click)="removePermission(permission.id)"
+                  >
+                    ×
+                  </button>
+                </div>
+              }
+            </div>
+          }
         </div>
 
         <!-- Actions -->
@@ -146,18 +104,50 @@ interface ResourcePermission {
             Cancel
           </button>
           <button type="submit" class="btn btn-primary" [disabled]="roleForm.invalid || saving()">
-            <span *ngIf="!saving()">{{ isEditMode() ? 'Update Role' : 'Create Role' }}</span>
-            <span *ngIf="saving()">Saving...</span>
+            @if (!saving()) {
+              <span>{{ isEditMode() ? 'Update Role' : 'Create Role' }}</span>
+            } @else {
+              <span>Saving...</span>
+            }
           </button>
         </div>
       </form>
+
+      <!-- Permission Selector Modal -->
+      @if (showPermissionDialog()) {
+        <div class="modal-overlay" (click)="closePermissionSelector()">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h2>Select Permissions</h2>
+              <button type="button" class="btn-close" (click)="closePermissionSelector()">×</button>
+            </div>
+            
+            <div class="modal-body">
+              <app-permission-tree-selector
+                [permissions]="permissionTree()"
+                [selectedPermissionIds]="selectedPermissionIds()"
+                (selectionChange)="onPermissionSelectionChange($event)"
+              />
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" (click)="closePermissionSelector()">
+                Cancel
+              </button>
+              <button type="button" class="btn btn-primary" (click)="applyPermissionSelection()">
+                Apply Selection
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   `,
-  styles: [`
+    styles: [`
     .role-form-container {
-      padding: 2rem;
-      max-width: 1200px;
+      max-width: 900px;
       margin: 0 auto;
+      padding: 2rem;
     }
 
     .page-header {
@@ -167,22 +157,22 @@ interface ResourcePermission {
     .btn-back {
       background: none;
       border: none;
-      color: #6B7280;
-      font-weight: 500;
+      color: #3B82F6;
       cursor: pointer;
-      margin-bottom: 1rem;
+      font-size: 0.875rem;
       padding: 0.5rem 0;
-      display: inline-block;
+      margin-bottom: 1rem;
+      display: block;
     }
 
     .btn-back:hover {
-      color: #3B82F6;
+      text-decoration: underline;
     }
 
     h1 {
-      font-size: 2rem;
-      font-weight: 600;
-      color: var(--text-primary);
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #111827;
       margin: 0;
     }
 
@@ -201,16 +191,24 @@ interface ResourcePermission {
       border-bottom: none;
     }
 
-    .form-section h2 {
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
       font-size: 1.25rem;
       font-weight: 600;
-      color: var(--text-primary);
+      color: #111827;
       margin: 0 0 0.5rem 0;
     }
 
     .section-subtitle {
-      color: var(--text-secondary);
-      margin: 0 0 1.5rem 0;
+      color: #6B7280;
+      font-size: 0.875rem;
+      margin: 0;
     }
 
     .form-group {
@@ -224,17 +222,18 @@ interface ResourcePermission {
     label {
       display: block;
       font-weight: 500;
-      color: var(--text-primary);
+      color: #374151;
       margin-bottom: 0.5rem;
+      font-size: 0.875rem;
     }
 
     .form-input {
       width: 100%;
       padding: 0.75rem;
       border: 1px solid #D1D5DB;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: all 0.2s;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      transition: border-color 0.2s;
     }
 
     .form-input:focus {
@@ -243,309 +242,381 @@ interface ResourcePermission {
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
+    textarea.form-input {
+      resize: vertical;
+      font-family: inherit;
+    }
+
     .error-text {
-      color: #EF4444;
-      font-size: 0.875rem;
-      margin-top: 0.5rem;
+      color: #DC2626;
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
     }
 
-    .permissions-matrix {
-      background: #F9FAFB;
-      border: 1px solid #E5E7EB;
-      border-radius: 8px;
-      overflow: hidden;
+    .btn-icon {
+      margin-right: 0.5rem;
+      font-size: 1.125rem;
     }
 
-    .matrix-header, .matrix-row {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1.5fr;
+    .empty-state {
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 1rem;
-      padding: 1rem;
-    }
-
-    .matrix-header {
-      background: #F3F4F6;
-      border-bottom: 2px solid #E5E7EB;
-      font-weight: 600;
-      font-size: 0.875rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #6B7280;
-    }
-
-    .matrix-row {
-      background: white;
-      border-bottom: 1px solid #E5E7EB;
-    }
-
-    .matrix-row:last-child {
-      border-bottom: none;
-    }
-
-    .matrix-row:hover {
+      justify-content: center;
+      padding: 3rem;
       background: #F9FAFB;
-    }
-
-    .resource-info strong {
-      display: block;
-      color: var(--text-primary);
-      margin-bottom: 0.25rem;
-    }
-
-    .resource-desc {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-    }
-
-    .action-col {
+      border-radius: 8px;
       text-align: center;
     }
 
-    .checkbox {
-      width: 20px;
-      height: 20px;
-      cursor: pointer;
-      accent-color: #3B82F6;
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
     }
 
-    .scope-select {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #D1D5DB;
-      border-radius: 6px;
+    .empty-state p {
+      margin: 0.25rem 0;
+      color: #6B7280;
+    }
+
+    .empty-hint {
       font-size: 0.875rem;
-      cursor: pointer;
     }
 
-    .scope-select:focus {
-      outline: none;
-      border-color: #3B82F6;
+    .selected-permissions-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .permission-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #F3F4F6;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 0.75rem;
+      transition: all 0.2s;
+    }
+
+    .permission-chip:hover {
+      background: #E5E7EB;
+    }
+
+    .chip-icon {
+      font-size: 1.25rem;
+    }
+
+    .chip-content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+      flex: 1;
+    }
+
+    .chip-name {
+      font-weight: 500;
+      color: #111827;
+      font-size: 0.875rem;
+    }
+
+    .chip-meta {
+      font-size: 0.75rem;
+      color: #6B7280;
+    }
+
+    .chip-remove {
+      background: none;
+      border: none;
+      color: #9CA3AF;
+      cursor: pointer;
+      font-size: 1.5rem;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .chip-remove:hover {
+      background: #DC2626;
+      color: white;
     }
 
     .form-actions {
-      padding: 2rem;
       display: flex;
       justify-content: flex-end;
       gap: 1rem;
+      padding: 1.5rem 2rem;
       background: #F9FAFB;
       border-top: 1px solid #E5E7EB;
+      border-radius: 0 0 12px 12px;
     }
 
     .btn {
       padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       font-weight: 500;
+      font-size: 0.875rem;
       cursor: pointer;
       transition: all 0.2s;
+      border: none;
     }
 
-    .btn:disabled {
+    .btn-primary {
+      background: #3B82F6;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #2563EB;
+    }
+
+    .btn-primary:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
 
     .btn-secondary {
       background: white;
+      color: #374151;
       border: 1px solid #D1D5DB;
-      color: var(--text-primary);
     }
 
-    .btn-secondary:hover:not(:disabled) {
+    .btn-secondary:hover {
       background: #F9FAFB;
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-      color: white;
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
     }
 
-    .btn-primary:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #9CA3AF;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-close:hover {
+      background: #F3F4F6;
+      color: #111827;
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      padding: 1.5rem;
+      border-top: 1px solid #E5E7EB;
     }
   `]
 })
 export class RoleFormComponent implements OnInit {
-  private fb = inject(FormBuilder);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
-  roleService = inject(RoleService);
+    private fb = inject(FormBuilder);
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private roleService = inject(RoleService);
 
-  roleForm: FormGroup;
-  isEditMode = signal(false);
-  saving = signal(false);
-  roleId: string | null = null;
+    // State
+    roleForm!: FormGroup;
+    isEditMode = signal(false);
+    saving = signal(false);
+    roleId = signal<string | null>(null);
+    
+    // Permission tree state
+    permissionTree = signal<Permission[]>([]);
+    selectedPermissionIds = signal<string[]>([]);
+    selectedPermissions = signal<Permission[]>([]);
+    showPermissionDialog = signal(false);
+    tempSelectedIds = signal<string[]>([]);
 
-  // Expose enums to template
-  PermissionAction = PermissionAction;
-  PermissionScope = PermissionScope;
-
-  availableResources = signal<ResourcePermission[]>([
-    {
-      resource: 'students',
-      label: 'Students',
-      description: 'Student information and records',
-      actions: {},
-      scope: PermissionScope.ALL
-    },
-    {
-      resource: 'staff',
-      label: 'Staff',
-      description: 'Staff and teacher management',
-      actions: {},
-      scope: PermissionScope.ALL
-    },
-    {
-      resource: 'academics',
-      label: 'Academics',
-      description: 'Classes, subjects, and curriculum',
-      actions: {},
-      scope: PermissionScope.ALL
-    },
-    {
-      resource: 'attendance',
-      label: 'Attendance',
-      description: 'Attendance tracking and reports',
-      actions: {},
-      scope: PermissionScope.ALL
-    },
-    {
-      resource: 'exams',
-      label: 'Exams',
-      description: 'Exams and assessments',
-      actions: {},
-      scope: PermissionScope.ALL
-    },
-    {
-      resource: 'grades',
-      label: 'Grades',
-      description: 'Grade entry and gradebook',
-      actions: {},
-      scope: PermissionScope.ALL
-    },
-    {
-      resource: 'fees',
-      label: 'Fees',
-      description: 'Fee management and billing',
-      actions: {},
-      scope: PermissionScope.ALL
-    },
-    {
-      resource: 'payments',
-      label: 'Payments',
-      description: 'Payment collection and processing',
-      actions: {},
-      scope: PermissionScope.ALL
-    },
-    {
-      resource: 'library',
-      label: 'Library',
-      description: 'Library and book management',
-      actions: {},
-      scope: PermissionScope.ALL
-    },
-    {
-      resource: 'reports',
-      label: 'Reports',
-      description: 'Reports and analytics',
-      actions: {},
-      scope: PermissionScope.ALL
+    ngOnInit() {
+        this.initForm();
+        this.loadPermissionTree();
+        this.checkEditMode();
     }
-  ]);
 
-  constructor() {
-    this.roleForm = this.fb.group({
-      name: ['', Validators.required],
-      description: ['', Validators.required]
-    });
-  }
-
-  ngOnInit() {
-    this.roleId = this.route.snapshot.paramMap.get('id');
-    if (this.roleId) {
-      this.isEditMode.set(true);
-      this.loadRole(this.roleId);
-    }
-  }
-
-  loadRole(id: string) {
-    this.roleService.getRoleById(id).subscribe({
-      next: (role) => {
-        this.roleForm.patchValue({
-          name: role.name,
-          description: role.description
+    private initForm() {
+        this.roleForm = this.fb.group({
+            name: ['', Validators.required],
+            description: ['', Validators.required],
         });
+    }
 
-        // Map permissions to resource matrix
-        role.permissions.forEach(perm => {
-          const resource = this.availableResources().find(r => r.resource === perm.resource);
-          if (resource) {
-            perm.actions.forEach(action => {
-              resource.actions[action] = true;
+    private loadPermissionTree() {
+        this.roleService.getPermissionTree().subscribe({
+            next: (tree) => {
+                this.permissionTree.set(tree);
+            },
+            error: (err) => {
+                console.error('Failed to load permission tree:', err);
+            }
+        });
+    }
+
+    private checkEditMode() {
+        const id = this.route.snapshot.paramMap.get('id');
+        if (id) {
+            this.isEditMode.set(true);
+            this.roleId.set(id);
+            this.loadRole(id);
+        }
+    }
+
+    private loadRole(id: string) {
+        this.roleService.getRoleById(id).subscribe({
+            next: (role) => {
+                this.roleForm.patchValue({
+                    name: role.name,
+                    description: role.description,
+                });
+                
+                // Extract permission IDs and find full permission objects
+                const permissionIds = role.permissions.map(p => p.id);
+                this.selectedPermissionIds.set(permissionIds);
+                this.updateSelectedPermissions(permissionIds);
+            },
+            error: (err) => {
+                console.error('Failed to load role:', err);
+            }
+        });
+    }
+
+    private updateSelectedPermissions(permissionIds: string[]) {
+        const flatPermissions = this.flattenPermissionTree(this.permissionTree());
+        const selected = flatPermissions.filter(p => permissionIds.includes(p.id));
+        this.selectedPermissions.set(selected);
+    }
+
+    private flattenPermissionTree(tree: Permission[]): Permission[] {
+        const flat: Permission[] = [];
+        for (const permission of tree) {
+            flat.push(permission);
+            if (permission.children) {
+                flat.push(...this.flattenPermissionTree(permission.children));
+            }
+        }
+        return flat;
+    }
+
+    showPermissionSelector() {
+        this.tempSelectedIds.set([...this.selectedPermissionIds()]);
+        this.showPermissionDialog.set(true);
+    }
+
+    closePermissionSelector() {
+        this.showPermissionDialog.set(false);
+        this.tempSelectedIds.set([]);
+    }
+
+    onPermissionSelectionChange(selectedIds: string[]) {
+        this.tempSelectedIds.set(selectedIds);
+    }
+
+    applyPermissionSelection() {
+        this.selectedPermissionIds.set([...this.tempSelectedIds()]);
+        this.updateSelectedPermissions(this.tempSelectedIds());
+        this.closePermissionSelector();
+    }
+
+    removePermission(permissionId: string) {
+        const newIds = this.selectedPermissionIds().filter(id => id !== permissionId);
+        this.selectedPermissionIds.set(newIds);
+        this.updateSelectedPermissions(newIds);
+    }
+
+    onSubmit() {
+        if (this.roleForm.invalid) {
+            Object.keys(this.roleForm.controls).forEach(key => {
+                this.roleForm.get(key)?.markAsTouched();
             });
-            resource.scope = perm.scope;
-          }
+            return;
+        }
+
+        this.saving.set(true);
+
+        const flatPermissions = this.flattenPermissionTree(this.permissionTree());
+        const selectedPerms = flatPermissions.filter(p => 
+            this.selectedPermissionIds().includes(p.id)
+        );
+
+        const dto = {
+            name: this.roleForm.value.name,
+            description: this.roleForm.value.description,
+            permissions: selectedPerms,
+        };
+
+        const action = this.isEditMode()
+            ? this.roleService.updateRole(this.roleId()!, dto)
+            : this.roleService.createRole(dto);
+
+        action.subscribe({
+            next: () => {
+                this.saving.set(false);
+                this.router.navigate(['/setup/roles']);
+            },
+            error: (err) => {
+                console.error('Failed to save role:', err);
+                this.saving.set(false);
+            }
         });
-      }
-    });
-  }
-
-  toggleAction(resource: ResourcePermission, action: PermissionAction) {
-    resource.actions[action] = !resource.actions[action];
-  }
-
-  changeScope(resource: ResourcePermission, event: any) {
-    resource.scope = event.target.value as PermissionScope;
-  }
-
-  getPermissions(): Permission[] {
-    return this.availableResources()
-      .filter(r => Object.values(r.actions).some(v => v))
-      .map(r => ({
-        resource: r.resource,
-        actions: Object.entries(r.actions)
-          .filter(([_, enabled]) => enabled)
-          .map(([action]) => action as PermissionAction),
-        scope: r.scope
-      }));
-  }
-
-  onSubmit() {
-    if (this.roleForm.invalid) return;
-
-    const permissions = this.getPermissions();
-    if (permissions.length === 0) {
-      alert('Please select at least one permission');
-      return;
     }
 
-    const dto = {
-      name: this.roleForm.value.name,
-      description: this.roleForm.value.description,
-      permissions
-    };
-
-    this.saving.set(true);
-
-    const request = this.isEditMode() && this.roleId
-      ? this.roleService.updateRole(this.roleId, dto)
-      : this.roleService.createRole(dto);
-
-    request.subscribe({
-      next: () => {
-        this.saving.set(false);
+    goBack() {
         this.router.navigate(['/setup/roles']);
-      },
-      error: (err) => {
-        this.saving.set(false);
-        alert(`Failed to save role: ${err.message}`);
-      }
-    });
-  }
-
-  goBack() {
-    this.router.navigate(['/setup/roles']);
-  }
+    }
 }
