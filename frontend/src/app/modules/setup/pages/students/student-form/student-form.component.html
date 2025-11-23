@@ -1,0 +1,445 @@
+<div class="student-form-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">{{ isEditMode() ? 'Edit Student' : 'Add New Student' }}</h1>
+      <p class="page-subtitle">{{ isEditMode() ? 'Update student information' : 'Fill in the student details' }}</p>
+    </div>
+  </div>
+
+  <!-- Progress Steps -->
+  <div class="steps-container">
+    <div class="step" [class.completed]="getStepStatus(1) === 'completed'" [class.active]="getStepStatus(1) === 'current'" (click)="goToStep(1)">
+      <div class="step-number">1</div>
+      <div class="step-label">Personal Info</div>
+    </div>
+    <div class="step-line" [class.completed]="currentStep() > 1"></div>
+    <div class="step" [class.completed]="getStepStatus(2) === 'completed'" [class.active]="getStepStatus(2) === 'current'" (click)="goToStep(2)">
+      <div class="step-number">2</div>
+      <div class="step-label">Enrollment</div>
+    </div>
+    <div class="step-line" [class.completed]="currentStep() > 2"></div>
+    <div class="step" [class.completed]="getStepStatus(3) === 'completed'" [class.active]="getStepStatus(3) === 'current'" (click)="goToStep(3)">
+      <div class="step-number">3</div>
+      <div class="step-label">Guardians</div>
+    </div>
+    <div class="step-line" [class.completed]="currentStep() > 3"></div>
+    <div class="step" [class.completed]="getStepStatus(4) === 'completed'" [class.active]="getStepStatus(4) === 'current'" (click)="goToStep(4)">
+      <div class="step-number">4</div>
+      <div class="step-label">Medical Info</div>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="error-banner">
+      <i class="icon-alert-circle"></i>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <!-- Form Content -->
+  <div class="form-content">
+    <!-- Step 1: Personal Information -->
+    @if (currentStep() === 1) {
+      <form [formGroup]="personalInfoForm" class="form-section">
+        <h2 class="section-title">Personal Information</h2>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label>First Name <span class="required">*</span></label>
+            <input type="text" formControlName="firstName" placeholder="Enter first name" />
+            @if (personalInfoForm.get('firstName')?.touched && personalInfoForm.get('firstName')?.errors) {
+              <span class="error-message">First name is required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Middle Name</label>
+            <input type="text" formControlName="middleName" placeholder="Enter middle name" />
+          </div>
+
+          <div class="form-group">
+            <label>Last Name <span class="required">*</span></label>
+            <input type="text" formControlName="lastName" placeholder="Enter last name" />
+            @if (personalInfoForm.get('lastName')?.touched && personalInfoForm.get('lastName')?.errors) {
+              <span class="error-message">Last name is required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Date of Birth <span class="required">*</span></label>
+            <input type="date" formControlName="dateOfBirth" />
+            @if (personalInfoForm.get('dateOfBirth')?.touched && personalInfoForm.get('dateOfBirth')?.errors) {
+              <span class="error-message">Date of birth is required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Gender <span class="required">*</span></label>
+            <select formControlName="gender">
+              <option value="">Select gender</option>
+              <option [value]="Gender.MALE">Male</option>
+              <option [value]="Gender.FEMALE">Female</option>
+              <option [value]="Gender.OTHER">Other</option>
+            </select>
+            @if (personalInfoForm.get('gender')?.touched && personalInfoForm.get('gender')?.errors) {
+              <span class="error-message">Gender is required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Nationality</label>
+            <input type="text" formControlName="nationality" placeholder="Enter nationality" />
+          </div>
+
+          <div class="form-group">
+            <label>Religion</label>
+            <input type="text" formControlName="religion" placeholder="Enter religion" />
+          </div>
+
+          <div class="form-group">
+            <label>Caste</label>
+            <input type="text" formControlName="caste" placeholder="Enter caste" />
+          </div>
+
+          <div class="form-group">
+            <label>Mother Tongue</label>
+            <input type="text" formControlName="motherTongue" placeholder="Enter mother tongue" />
+          </div>
+
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" formControlName="email" placeholder="Enter email address" />
+            @if (personalInfoForm.get('email')?.touched && personalInfoForm.get('email')?.errors?.['email']) {
+              <span class="error-message">Invalid email format</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" formControlName="phone" placeholder="Enter phone number" />
+          </div>
+
+          <div class="form-group">
+            <label>Photo URL</label>
+            <input type="text" formControlName="photo" placeholder="Enter photo URL" />
+          </div>
+        </div>
+
+        <div class="form-group full-width" formGroupName="address">
+          <h3 class="subsection-title">Address</h3>
+          <div class="form-grid">
+            <div class="form-group span-2">
+              <label>Street</label>
+              <input type="text" formControlName="street" placeholder="Enter street address" />
+            </div>
+
+            <div class="form-group">
+              <label>City</label>
+              <input type="text" formControlName="city" placeholder="Enter city" />
+            </div>
+
+            <div class="form-group">
+              <label>State</label>
+              <input type="text" formControlName="state" placeholder="Enter state" />
+            </div>
+
+            <div class="form-group">
+              <label>Postal Code</label>
+              <input type="text" formControlName="postalCode" placeholder="Enter postal code" />
+            </div>
+
+            <div class="form-group">
+              <label>Country</label>
+              <input type="text" formControlName="country" placeholder="Enter country" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Notes</label>
+          <textarea formControlName="notes" rows="4" placeholder="Additional notes..."></textarea>
+        </div>
+      </form>
+    }
+
+    <!-- Step 2: Enrollment Information -->
+    @if (currentStep() === 2) {
+      <form [formGroup]="enrollmentForm" class="form-section">
+        <h2 class="section-title">Enrollment Information</h2>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Admission Number <span class="required">*</span></label>
+            <input type="text" formControlName="admissionNumber" placeholder="Enter admission number" />
+            @if (enrollmentForm.get('admissionNumber')?.touched && enrollmentForm.get('admissionNumber')?.errors) {
+              <span class="error-message">Admission number is required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Admission Date <span class="required">*</span></label>
+            <input type="date" formControlName="admissionDate" />
+            @if (enrollmentForm.get('admissionDate')?.touched && enrollmentForm.get('admissionDate')?.errors) {
+              <span class="error-message">Admission date is required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Academic Year <span class="required">*</span></label>
+            <input type="text" formControlName="academicYear" placeholder="e.g., 2024-2025" />
+            @if (enrollmentForm.get('academicYear')?.touched && enrollmentForm.get('academicYear')?.errors) {
+              <span class="error-message">Academic year is required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Class <span class="required">*</span></label>
+            <select formControlName="class">
+              <option value="">Select class</option>
+              @for (i of [1,2,3,4,5,6,7,8,9,10,11,12]; track i) {
+                <option [value]="i">Class {{ i }}</option>
+              }
+            </select>
+            @if (enrollmentForm.get('class')?.touched && enrollmentForm.get('class')?.errors) {
+              <span class="error-message">Class is required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Section</label>
+            <input type="text" formControlName="section" placeholder="e.g., A, B, C" maxlength="1" />
+          </div>
+
+          <div class="form-group">
+            <label>Roll Number</label>
+            <input type="text" formControlName="rollNumber" placeholder="Enter roll number" />
+          </div>
+
+          <div class="form-group">
+            <label>Previous School</label>
+            <input type="text" formControlName="previousSchool" placeholder="Name of previous school" />
+          </div>
+
+          <div class="form-group">
+            <label>Previous Class</label>
+            <input type="text" formControlName="previousClass" placeholder="Class at previous school" />
+          </div>
+        </div>
+      </form>
+    }
+
+    <!-- Step 3: Guardians -->
+    @if (currentStep() === 3) {
+      <form [formGroup]="guardiansForm" class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">Guardian Information</h2>
+          <button type="button" class="btn btn-secondary" (click)="addGuardian()">
+            <i class="icon-plus"></i> Add Guardian
+          </button>
+        </div>
+
+        <div formArrayName="guardians">
+          @for (guardian of guardians.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" class="guardian-card">
+              <div class="card-header">
+                <h3>Guardian {{ i + 1 }}</h3>
+                <div class="card-actions">
+                  @if (!guardian.get('isPrimary')?.value) {
+                    <button type="button" class="btn btn-sm btn-secondary" (click)="setPrimaryGuardian(i)">
+                      Set as Primary
+                    </button>
+                  }
+                  @if (guardian.get('isPrimary')?.value) {
+                    <span class="badge badge-primary">Primary</span>
+                  }
+                  @if (guardians.length > 1) {
+                    <button type="button" class="btn btn-sm btn-danger" (click)="removeGuardian(i)">
+                      <i class="icon-trash"></i>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Name <span class="required">*</span></label>
+                  <input type="text" formControlName="name" placeholder="Guardian name" />
+                </div>
+
+                <div class="form-group">
+                  <label>Relationship <span class="required">*</span></label>
+                  <select formControlName="relationship">
+                    <option value="">Select relationship</option>
+                    <option [value]="RelationshipType.FATHER">Father</option>
+                    <option [value]="RelationshipType.MOTHER">Mother</option>
+                    <option [value]="RelationshipType.GUARDIAN">Guardian</option>
+                    <option [value]="RelationshipType.GRANDPARENT">Grandparent</option>
+                    <option [value]="RelationshipType.SIBLING">Sibling</option>
+                    <option [value]="RelationshipType.OTHER">Other</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Phone <span class="required">*</span></label>
+                  <input type="tel" formControlName="phone" placeholder="Phone number" />
+                </div>
+
+                <div class="form-group">
+                  <label>Email</label>
+                  <input type="email" formControlName="email" placeholder="Email address" />
+                </div>
+
+                <div class="form-group">
+                  <label>Occupation</label>
+                  <input type="text" formControlName="occupation" placeholder="Occupation" />
+                </div>
+
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" formControlName="isEmergencyContact" />
+                    <span>Emergency Contact</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (guardians.length === 0) {
+          <div class="empty-state">
+            <p>No guardians added yet. Please add at least one guardian.</p>
+            <button type="button" class="btn btn-primary" (click)="addGuardian()">
+              <i class="icon-plus"></i> Add Guardian
+            </button>
+          </div>
+        }
+      </form>
+    }
+
+    <!-- Step 4: Medical Information -->
+    @if (currentStep() === 4) {
+      <form [formGroup]="medicalForm" class="form-section">
+        <h2 class="section-title">Medical Information (Optional)</h2>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Blood Group</label>
+            <select formControlName="bloodGroup">
+              <option value="">Select blood group</option>
+              <option [value]="BloodGroup.A_POSITIVE">A+</option>
+              <option [value]="BloodGroup.A_NEGATIVE">A-</option>
+              <option [value]="BloodGroup.B_POSITIVE">B+</option>
+              <option [value]="BloodGroup.B_NEGATIVE">B-</option>
+              <option [value]="BloodGroup.AB_POSITIVE">AB+</option>
+              <option [value]="BloodGroup.AB_NEGATIVE">AB-</option>
+              <option [value]="BloodGroup.O_POSITIVE">O+</option>
+              <option [value]="BloodGroup.O_NEGATIVE">O-</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Doctor Name</label>
+            <input type="text" formControlName="doctorName" placeholder="Doctor's name" />
+          </div>
+
+          <div class="form-group">
+            <label>Doctor Phone</label>
+            <input type="tel" formControlName="doctorPhone" placeholder="Doctor's phone" />
+          </div>
+
+          <div class="form-group">
+            <label>Insurance Provider</label>
+            <input type="text" formControlName="insuranceProvider" placeholder="Insurance company" />
+          </div>
+
+          <div class="form-group">
+            <label>Insurance Number</label>
+            <input type="text" formControlName="insuranceNumber" placeholder="Policy number" />
+          </div>
+        </div>
+
+        <div class="array-section">
+          <div class="array-header">
+            <label>Allergies</label>
+            <button type="button" class="btn btn-sm btn-secondary" (click)="addArrayItem('allergies')">
+              <i class="icon-plus"></i> Add
+            </button>
+          </div>
+          @for (item of getArrayItems('allergies').controls; track $index; let i = $index) {
+            <div class="array-item">
+              <input type="text" [formControl]="$any(item)" placeholder="Enter allergy" />
+              <button type="button" class="btn btn-sm btn-danger" (click)="removeArrayItem('allergies', i)">
+                <i class="icon-x"></i>
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="array-section">
+          <div class="array-header">
+            <label>Medical Conditions</label>
+            <button type="button" class="btn btn-sm btn-secondary" (click)="addArrayItem('medicalConditions')">
+              <i class="icon-plus"></i> Add
+            </button>
+          </div>
+          @for (item of getArrayItems('medicalConditions').controls; track $index; let i = $index) {
+            <div class="array-item">
+              <input type="text" [formControl]="$any(item)" placeholder="Enter medical condition" />
+              <button type="button" class="btn btn-sm btn-danger" (click)="removeArrayItem('medicalConditions', i)">
+                <i class="icon-x"></i>
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="array-section">
+          <div class="array-header">
+            <label>Medications</label>
+            <button type="button" class="btn btn-sm btn-secondary" (click)="addArrayItem('medications')">
+              <i class="icon-plus"></i> Add
+            </button>
+          </div>
+          @for (item of getArrayItems('medications').controls; track $index; let i = $index) {
+            <div class="array-item">
+              <input type="text" [formControl]="$any(item)" placeholder="Enter medication" />
+              <button type="button" class="btn btn-sm btn-danger" (click)="removeArrayItem('medications', i)">
+                <i class="icon-x"></i>
+              </button>
+            </div>
+          }
+        </div>
+      </form>
+    }
+  </div>
+
+  <!-- Navigation Buttons -->
+  <div class="form-actions">
+    <button type="button" class="btn btn-secondary" (click)="cancel()">
+      Cancel
+    </button>
+    
+    <div class="nav-buttons">
+      @if (currentStep() > 1) {
+        <button type="button" class="btn btn-secondary" (click)="previousStep()">
+          <i class="icon-chevron-left"></i> Previous
+        </button>
+      }
+      
+      @if (currentStep() < totalSteps) {
+        <button type="button" class="btn btn-primary" (click)="nextStep()">
+          Next <i class="icon-chevron-right"></i>
+        </button>
+      }
+      
+      @if (currentStep() === totalSteps) {
+        <button type="button" class="btn btn-primary" (click)="submit()" [disabled]="submitting()">
+          @if (submitting()) {
+            <span class="spinner-sm"></span>
+          }
+          {{ isEditMode() ? 'Update Student' : 'Create Student' }}
+        </button>
+      }
+    </div>
+  </div>
+</div>
