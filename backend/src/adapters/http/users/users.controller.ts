@@ -1,9 +1,9 @@
-import { 
-    Controller, 
-    Get, 
-    Post, 
-    Param, 
-    Body, 
+import {
+    Controller,
+    Get,
+    Post,
+    Param,
+    Body,
     UseGuards,
     Request,
 } from '@nestjs/common';
@@ -30,7 +30,7 @@ export class UsersController {
     async getUsers(@Request() req) {
         const tenantId = req.user.tenantId;
         const users = await this.userRepository.findAll(tenantId);
-        
+
         return users.map(user => ({
             id: user.id,
             email: user.email,
@@ -49,7 +49,7 @@ export class UsersController {
     @Get(':id')
     async getUser(@Param('id') id: string) {
         const user = await this.userRepository.findById(id);
-        
+
         if (!user) {
             throw new Error(`User with ID ${id} not found`);
         }

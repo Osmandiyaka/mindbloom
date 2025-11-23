@@ -508,7 +508,7 @@ export class UserListComponent implements OnInit {
         this.userService.addPermissionsToUser(user.id, this.tempSelectedIds()).subscribe({
             next: (updatedUser) => {
                 // Update the user in the list
-                this.users.update(users => 
+                this.users.update(users =>
                     users.map(u => u.id === updatedUser.id ? updatedUser : u)
                 );
                 this.closePermissionDialog();

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -6,6 +6,8 @@ import { User } from '../../../../domain/user/entities/user.entity';
 import { IUserRepository } from '../../../../domain/user/ports/user.repository.interface';
 import { UserDocument } from '../schemas/user.schema';
 import { TenantContext } from '../../../../common/tenant/tenant.context';
+import { GetPermissionTreeUseCase } from '../../../../application/rbac/use-cases/get-permission-tree.use-case';
+import { Permission } from '../../../../domain/rbac/entities/permission.entity';
 
 @Injectable()
 export class MongooseUserRepository implements IUserRepository {
@@ -13,6 +15,7 @@ export class MongooseUserRepository implements IUserRepository {
         @InjectModel('User')
         private readonly userModel: Model<UserDocument>,
         private readonly tenantContext: TenantContext,
+        @Optional() private readonly getPermissionTree?: GetPermissionTreeUseCase,
     ) { }
 
     async findByEmail(email: string): Promise<User | null> {
@@ -49,7 +52,7 @@ export class MongooseUserRepository implements IUserRepository {
 
     async update(user: User): Promise<User> {
         const permissionIds = user.permissions.map(p => p.id);
-        
+
         const updated = await this.userModel.findByIdAndUpdate(
             user.id,
             {
@@ -77,13 +80,24 @@ export class MongooseUserRepository implements IUserRepository {
     }
 
     private toDomain(doc: UserDocument): User {
+        // Convert permission IDs to Permission objects
+        const permissions: Permission[] = [];
+        if (this.getPermissionTree && doc.permissions && doc.permissions.length > 0) {
+            for (const permId of doc.permissions) {
+                const perm = this.getPermissionTree.findPermissionById(permId);
+                if (perm) {
+                    permissions.push(perm);
+                }
+            }
+        }
+
         return new User(
             doc.id,
             doc.tenantId.toString(),
             doc.email,
             doc.name,
             doc.role,
-            [], // permissions - will be populated separately
+            permissions,
             doc.createdAt,
             doc.updatedAt,
         );
