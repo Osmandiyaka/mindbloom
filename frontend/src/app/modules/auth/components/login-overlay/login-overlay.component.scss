@@ -1,27 +1,22 @@
 @import '../../../../../styles/theme/variables';
 
-.login-overlay {
+:host {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 9999;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    z-index: 9999;
     animation: fadeIn 0.2s ease-out;
 }
 
-.overlay-backdrop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-}
-
+.login-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 280px auto;
+    width: 820px;
 .login-card {
     position: relative;
     display: grid;
@@ -33,7 +28,7 @@
     border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
-    animation: slideUp 0.3s ease-out;
+    animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 // LEFT BRAND PANEL
@@ -275,9 +270,8 @@
 @keyframes slideUp {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(40px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
