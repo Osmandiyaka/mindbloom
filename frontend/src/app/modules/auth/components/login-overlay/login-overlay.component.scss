@@ -161,9 +161,23 @@
     }
 }
 
+.tenant-edit-wrapper {
+    animation: pulseIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tenant-edit-input {
+    border-color: #1EA7FF !important;
+    box-shadow: 0 0 0 3px rgba(30, 167, 255, 0.12) !important;
+    background: white !important;
+
+    &:focus {
+        box-shadow: 0 0 0 3px rgba(30, 167, 255, 0.12) !important;
+    }
+}
+
 .change-btn {
     height: 34px;
-    padding: 0 16px;
+    padding: 0 14px;
     background: #F3F4F6;
     border: 1.5px solid #E5E7EB;
     border-radius: 6px;
@@ -173,14 +187,79 @@
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    svg {
+        width: 14px;
+        height: 14px;
+    }
 
     &:hover {
         background: #E5E7EB;
         color: #374151;
+        border-color: #D1D5DB;
     }
 
     &:active {
-        transform: translateY(1px);
+        transform: scale(0.98);
+    }
+}
+
+.action-btn {
+    width: 34px;
+    height: 34px;
+    border: 1.5px solid;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+    svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    &:active:not(:disabled) {
+        transform: scale(0.95);
+    }
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+}
+
+.save-btn {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    border-color: #059669;
+    color: white;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+
+    &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0);
+    }
+}
+
+.cancel-btn {
+    background: #F9FAFB;
+    border-color: #E5E7EB;
+    color: #6B7280;
+
+    &:hover {
+        background: #F3F4F6;
+        border-color: #D1D5DB;
+        color: #374151;
     }
 }
 
@@ -271,6 +350,34 @@
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes pulseIn {
+    0% {
+        transform: scale(0.98);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1.01);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
     }
 }
 
