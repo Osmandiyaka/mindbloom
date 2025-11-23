@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
     {
@@ -8,26 +7,17 @@ export const routes: Routes = [
         pathMatch: 'full'
     },
     {
-        path: 'login',
-        loadComponent: () => import('./modules/auth/pages/login/login.component').then(m => m.LoginComponent)
+        path: 'dashboard',
+        loadComponent: () => import('./modules/dashboard/pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
     },
     {
-        path: '',
-        canActivate: [authGuard],
-        loadComponent: () => import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
-        children: [
-            {
-                path: 'dashboard',
-                loadComponent: () => import('./modules/dashboard/pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
-            },
-            {
-                path: 'students',
-                loadChildren: () => import('./modules/students/students.routes').then(m => m.STUDENTS_ROUTES)
-            },
-            {
-                path: 'academics',
-                loadChildren: () => import('./modules/academics/academics.routes').then(m => m.ACADEMICS_ROUTES)
-            },
+        path: 'students',
+        loadChildren: () => import('./modules/students/students.routes').then(m => m.STUDENTS_ROUTES)
+    },
+    {
+        path: 'academics',
+        loadChildren: () => import('./modules/academics/academics.routes').then(m => m.ACADEMICS_ROUTES)
+    },
             {
                 path: 'attendance',
                 loadChildren: () => import('./modules/attendance/attendance.routes').then(m => m.ATTENDANCE_ROUTES)
