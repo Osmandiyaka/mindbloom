@@ -1,0 +1,104 @@
+// ========================================
+// COLOR SYSTEM - Matching WPF Theme
+// ========================================
+
+// Primary Accent Colors
+$accent-blue: #3B82F6; // Primary brand blue
+$accent-blue-dark: #2563EB; // Darker blue for hover states
+$accent-blue-light: #60A5FA; // Lighter blue for backgrounds
+$accent-blue-ultralight: #DBEAFE; // Very light blue for subtle backgrounds
+
+// Dark Accent
+$accent-dark: #1E293B; // Dark slate for headers/sidebar
+$accent-dark-hover: #334155; // Hover state for dark elements
+
+// Slate Palette (Neutral Grays)
+$slate-0: #F8FAFC; // Lightest - page background
+$slate-1: #F1F5F9; // Light - card backgrounds
+$slate-2: #E2E8F0; // Border light
+$slate-3: #CBD5E1; // Border medium
+$slate-4: #94A3B8; // Text muted
+$slate-5: #64748B; // Text secondary
+$slate-6: #475569; // Text primary
+$slate-7: #334155; // Dark elements
+$slate-8: #1E293B; // Darkest
+$slate-9: #0F172A; // Black alternative
+
+// Semantic Colors
+$success: #10B981; // Green for success
+$success-light: #D1FAE5;
+$warning: #F59E0B; // Orange for warnings
+$warning-light: #FEF3C7;
+$error: #EF4444; // Red for errors
+$error-light: #FEE2E2;
+$info: #3B82F6; // Blue for info
+$info-light: #DBEAFE;
+
+// Text Colors
+$text-primary: $slate-8;
+$text-secondary: $slate-5;
+$text-muted: $slate-4;
+$text-inverse: #FFFFFF;
+
+// Background Colors
+$bg-primary: $slate-0;
+$bg-secondary: #FFFFFF;
+$bg-tertiary: $slate-1;
+$bg-dark: $accent-dark;
+
+// Border Colors
+$border-light: $slate-2;
+$border-medium: $slate-3;
+$border-dark: $slate-4;
+
+// Button Gradients
+$gradient-blue: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+$gradient-blue-hover: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+$gradient-dark: linear-gradient(135deg, #334155 0%, #1E293B 100%);
+
+// Overlay
+$overlay: rgba(15, 23, 42, 0.5);
+$overlay-light: rgba(15, 23, 42, 0.2);
+
+// Sidebar
+$sidebar-bg: $accent-dark;
+$sidebar-hover: $accent-dark-hover;
+$sidebar-selected: $accent-blue;
+$sidebar-text: #94A3B8;
+$sidebar-text-active: #FFFFFF;
+
+// Card
+$card-bg: #FFFFFF;
+$card-border: $border-light;
+$card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+
+// Export as CSS variables for runtime usage
+:root {
+    --accent-blue: #{$accent-blue};
+    --accent-blue-dark: #{$accent-blue-dark};
+    --accent-blue-light: #{$accent-blue-light};
+    --accent-dark: #{$accent-dark};
+
+    --slate-0: #{$slate-0};
+    --slate-1: #{$slate-1};
+    --slate-2: #{$slate-2};
+    --slate-3: #{$slate-3};
+    --slate-4: #{$slate-4};
+    --slate-5: #{$slate-5};
+    --slate-6: #{$slate-6};
+    --slate-7: #{$slate-7};
+    --slate-8: #{$slate-8};
+
+    --success: #{$success};
+    --warning: #{$warning};
+    --error: #{$error};
+    --info: #{$info};
+
+    --text-primary: #{$text-primary};
+    --text-secondary: #{$text-secondary};
+    --text-muted: #{$text-muted};
+
+    --bg-primary: #{$bg-primary};
+    --bg-secondary: #{$bg-secondary};
+    --border-light: #{$border-light};
+}

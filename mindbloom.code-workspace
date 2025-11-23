@@ -1,0 +1,142 @@
+{
+    "folders": [
+        {
+            "name": "🏠 Root",
+            "path": "."
+        },
+        {
+            "name": "🎨 Frontend (Angular)",
+            "path": "frontend"
+        },
+        {
+            "name": "⚙️ Backend (NestJS)",
+            "path": "backend"
+        },
+        {
+            "name": "📦 Shared",
+            "path": "shared"
+        }
+    ],
+    "settings": {
+        "typescript.tsdk": "frontend/node_modules/typescript/lib",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+        },
+        "[typescript]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[scss]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "files.exclude": {
+            "**/node_modules": true,
+            "**/dist": true,
+            "**/.angular": true
+        },
+        "search.exclude": {
+            "**/node_modules": true,
+            "**/dist": true,
+            "**/.angular": true
+        }
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "🎨 Launch Frontend",
+                "type": "chrome",
+                "request": "launch",
+                "preLaunchTask": "frontend:serve",
+                "url": "http://localhost:4200",
+                "webRoot": "${workspaceFolder:🎨 Frontend (Angular)}"
+            },
+            {
+                "name": "⚙️ Launch Backend",
+                "type": "node",
+                "request": "launch",
+                "name": "Debug NestJS",
+                "runtimeExecutable": "npm",
+                "runtimeArgs": [
+                    "run",
+                    "start:debug"
+                ],
+                "cwd": "${workspaceFolder:⚙️ Backend (NestJS)}",
+                "console": "integratedTerminal",
+                "restart": true,
+                "protocol": "inspector"
+            },
+            {
+                "name": "🚀 Launch Full Stack",
+                "type": "node",
+                "request": "launch",
+                "runtimeExecutable": "npm",
+                "runtimeArgs": [
+                    "run",
+                    "dev"
+                ],
+                "cwd": "${workspaceFolder:🏠 Root}",
+                "console": "integratedTerminal"
+            }
+        ],
+        "compounds": [
+            {
+                "name": "🎯 Frontend + Backend",
+                "configurations": [
+                    "🎨 Launch Frontend",
+                    "⚙️ Launch Backend"
+                ],
+                "stopAll": true
+            }
+        ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "frontend:serve",
+                "type": "npm",
+                "script": "start",
+                "path": "frontend/",
+                "isBackground": true,
+                "problemMatcher": {
+                    "owner": "typescript",
+                    "pattern": "$tsc",
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": ".*",
+                        "endsPattern": ".*Compiled successfully.*"
+                    }
+                }
+            },
+            {
+                "label": "backend:serve",
+                "type": "npm",
+                "script": "start:dev",
+                "path": "backend/",
+                "isBackground": true,
+                "problemMatcher": {
+                    "owner": "typescript",
+                    "pattern": "$tsc-watch",
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": ".*",
+                        "endsPattern": ".*Nest application successfully started.*"
+                    }
+                }
+            }
+        ]
+    },
+    "extensions": {
+        "recommendations": [
+            "angular.ng-template",
+            "esbenp.prettier-vscode",
+            "dbaeumer.vscode-eslint",
+            "firsttris.vscode-jest-runner",
+            "ms-vscode.vscode-typescript-next",
+            "nrwl.angular-console",
+            "pflannery.vscode-versionlens"
+        ]
+    }
+}

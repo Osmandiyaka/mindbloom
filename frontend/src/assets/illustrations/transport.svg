@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <rect width="200" height="200" fill="#FEF3C7"/>
+  <rect x="40" y="70" width="120" height="60" rx="12" fill="#F59E0B"/>
+  <rect x="50" y="85" width="30" height="30" rx="4" fill="#DBEAFE"/>
+  <rect x="120" y="85" width="30" height="30" rx="4" fill="#DBEAFE"/>
+  <circle cx="40" cy="115" r="15" fill="#1E293B"/>
+  <circle cx="160" cy="115" r="15" fill="#1E293B"/>
+  <text x="100" y="180" font-family="Inter, sans-serif" font-size="14" fill="#F59E0B" text-anchor="middle" font-weight="600">Transport</text>
+</svg>

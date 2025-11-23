@@ -1,0 +1,180 @@
+// ========================================
+// CARD COMPONENT STYLES
+// ========================================
+
+.card {
+    @include card;
+    @include transition(all, 0.2s, ease);
+
+    &.card-hover {
+        @include hover-lift;
+    }
+
+    &.card-clickable {
+        cursor: pointer;
+        @include hover-lift;
+
+        &:active {
+            transform: translateY(0);
+        }
+    }
+
+    // Card header
+    .card-header {
+        padding-bottom: $spacing-4;
+        border-bottom: $border-default;
+        margin-bottom: $spacing-4;
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin: 0;
+        }
+
+        &.no-border {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+    }
+
+    // Card title
+    .card-title {
+        font-size: $font-size-lg;
+        font-weight: $font-weight-semibold;
+        color: $text-primary;
+        margin: 0;
+    }
+
+    .card-subtitle {
+        font-size: $font-size-sm;
+        color: $text-secondary;
+        margin-top: $spacing-1;
+    }
+
+    // Card body
+    .card-body {
+        p:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    // Card footer
+    .card-footer {
+        padding-top: $spacing-4;
+        border-top: $border-default;
+        margin-top: $spacing-4;
+        display: flex;
+        align-items: center;
+        gap: $spacing-3;
+
+        &.no-border {
+            border-top: none;
+            padding-top: 0;
+        }
+    }
+
+    // Card variants
+    &.card-flat {
+        box-shadow: none;
+        border: $border-default;
+    }
+
+    &.card-elevated {
+        box-shadow: $shadow-lg;
+    }
+
+    &.card-borderless {
+        border: none;
+    }
+
+    // Compact card
+    &.card-compact {
+        padding: $spacing-4;
+    }
+
+    // Large card
+    &.card-lg {
+        padding: $spacing-8;
+    }
+}
+
+// Stats card
+.stats-card {
+    @include card;
+    display: flex;
+    align-items: center;
+    gap: $spacing-4;
+
+    .stats-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: $radius-lg;
+        @include flex-center;
+        font-size: $font-size-xl;
+        flex-shrink: 0;
+
+        &.stats-icon-blue {
+            background: $accent-blue-ultralight;
+            color: $accent-blue;
+        }
+
+        &.stats-icon-success {
+            background: $success-light;
+            color: $success;
+        }
+
+        &.stats-icon-warning {
+            background: $warning-light;
+            color: $warning;
+        }
+
+        &.stats-icon-error {
+            background: $error-light;
+            color: $error;
+        }
+    }
+
+    .stats-content {
+        flex: 1;
+
+        .stats-label {
+            font-size: $font-size-sm;
+            color: $text-secondary;
+            margin-bottom: $spacing-1;
+        }
+
+        .stats-value {
+            font-size: $font-size-2xl;
+            font-weight: $font-weight-bold;
+            color: $text-primary;
+            line-height: 1;
+        }
+
+        .stats-change {
+            font-size: $font-size-xs;
+            margin-top: $spacing-1;
+
+            &.positive {
+                color: $success;
+            }
+
+            &.negative {
+                color: $error;
+            }
+        }
+    }
+}
+
+// Card grid
+.card-grid {
+    display: grid;
+    gap: $spacing-6;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+
+    @include responsive(md) {
+        gap: $spacing-6;
+    }
+}

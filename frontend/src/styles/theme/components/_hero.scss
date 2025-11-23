@@ -1,0 +1,146 @@
+// ========================================
+// HERO COMPONENT STYLES
+// ========================================
+
+.hero-card {
+    @include card;
+    background: linear-gradient(135deg, $accent-blue-ultralight 0%, lighten($accent-blue-ultralight, 5%) 100%);
+    border: 1px solid $accent-blue-light;
+    overflow: hidden;
+    position: relative;
+
+    .hero-content {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: $spacing-8;
+        align-items: center;
+
+        @media (max-width: $breakpoint-md) {
+            grid-template-columns: 1fr;
+            gap: $spacing-6;
+        }
+    }
+
+    .hero-text {
+        .hero-title {
+            font-size: $font-size-3xl;
+            font-weight: $font-weight-bold;
+            color: $accent-dark;
+            margin-bottom: $spacing-2;
+            line-height: $line-height-tight;
+        }
+
+        .hero-subtitle {
+            font-size: $font-size-lg;
+            color: $slate-6;
+            margin-bottom: $spacing-5;
+            line-height: $line-height-normal;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: $spacing-3;
+            flex-wrap: wrap;
+        }
+    }
+
+    .hero-illustration {
+        width: 200px;
+        height: 200px;
+        flex-shrink: 0;
+
+        img,
+        svg {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        @media (max-width: $breakpoint-md) {
+            width: 160px;
+            height: 160px;
+            margin: 0 auto;
+        }
+    }
+
+    // Compact hero variant
+    &.hero-compact {
+        .hero-content {
+            gap: $spacing-4;
+        }
+
+        .hero-text .hero-title {
+            font-size: $font-size-2xl;
+        }
+
+        .hero-text .hero-subtitle {
+            font-size: $font-size-base;
+        }
+
+        .hero-illustration {
+            width: 120px;
+            height: 120px;
+        }
+    }
+}
+
+// Page hero (without card)
+.page-hero {
+    padding: $spacing-8 0;
+    margin-bottom: $spacing-8;
+
+    .page-hero-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: $spacing-6;
+        margin-bottom: $spacing-6;
+
+        @media (max-width: $breakpoint-md) {
+            flex-direction: column;
+        }
+    }
+
+    .page-hero-content {
+        flex: 1;
+
+        .breadcrumb {
+            display: flex;
+            gap: $spacing-2;
+            font-size: $font-size-sm;
+            color: $text-muted;
+            margin-bottom: $spacing-3;
+
+            a {
+                color: $accent-blue;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+
+            .separator {
+                color: $text-muted;
+            }
+        }
+
+        h1 {
+            font-size: $font-size-4xl;
+            font-weight: $font-weight-bold;
+            color: $text-primary;
+            margin-bottom: $spacing-2;
+        }
+
+        p {
+            font-size: $font-size-lg;
+            color: $text-secondary;
+            margin: 0;
+        }
+    }
+
+    .page-hero-actions {
+        display: flex;
+        gap: $spacing-3;
+        align-items: center;
+    }
+}

@@ -1,0 +1,137 @@
+// ========================================
+// BUTTON COMPONENT STYLES
+// ========================================
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-2;
+    padding: $button-padding-y $button-padding-x;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    line-height: 1.5;
+    border-radius: $button-radius;
+    border: $border-width-1 solid transparent;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    @include transition(all, 0.15s, ease);
+    min-height: 36px;
+
+    &:focus-visible {
+        @include focus-ring;
+    }
+
+    &:disabled {
+        @include disabled;
+    }
+
+    // Primary button - gradient blue
+    &.btn-primary {
+        background: $gradient-blue;
+        color: $text-inverse;
+        box-shadow: $button-shadow;
+
+        &:hover:not(:disabled) {
+            background: $gradient-blue-hover;
+            box-shadow: $shadow-md;
+            transform: translateY(-1px);
+        }
+
+        &:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: $shadow-sm;
+        }
+    }
+
+    // Secondary button
+    &.btn-secondary {
+        background: $bg-secondary;
+        color: $text-primary;
+        border-color: $border-medium;
+
+        &:hover:not(:disabled) {
+            background: $slate-1;
+            border-color: $border-dark;
+        }
+
+        &:active:not(:disabled) {
+            background: $slate-2;
+        }
+    }
+
+    // Success button
+    &.btn-success {
+        background: $success;
+        color: $text-inverse;
+
+        &:hover:not(:disabled) {
+            background: darken($success, 5%);
+            box-shadow: $shadow-md;
+        }
+    }
+
+    // Danger button
+    &.btn-danger {
+        background: $error;
+        color: $text-inverse;
+
+        &:hover:not(:disabled) {
+            background: darken($error, 5%);
+            box-shadow: $shadow-md;
+        }
+    }
+
+    // Ghost button
+    &.btn-ghost {
+        background: transparent;
+        color: $accent-blue;
+        border-color: transparent;
+
+        &:hover:not(:disabled) {
+            background: $accent-blue-ultralight;
+        }
+
+        &:active:not(:disabled) {
+            background: lighten($accent-blue-light, 20%);
+        }
+    }
+
+    // Icon button
+    &.btn-icon {
+        padding: $spacing-2;
+        min-height: 32px;
+        min-width: 32px;
+
+        &.btn-sm {
+            padding: $spacing-1;
+            min-height: 28px;
+            min-width: 28px;
+        }
+
+        &.btn-lg {
+            padding: $spacing-3;
+            min-height: 40px;
+            min-width: 40px;
+        }
+    }
+
+    // Size variants
+    &.btn-sm {
+        padding: 0.375rem 0.75rem;
+        font-size: $font-size-xs;
+        min-height: 32px;
+    }
+
+    &.btn-lg {
+        padding: 0.625rem 1.25rem;
+        font-size: $font-size-base;
+        min-height: 42px;
+    }
+
+    // Full width
+    &.btn-block {
+        width: 100%;
+    }
+}

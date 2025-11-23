@@ -1,0 +1,121 @@
+// ========================================
+// MODAL COMPONENT STYLES
+// ========================================
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: $overlay;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-4;
+    animation: fadeIn 0.2s ease;
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+}
+
+.modal {
+    background: $bg-secondary;
+    border-radius: $modal-radius;
+    box-shadow: $modal-shadow;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease;
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    &.modal-sm {
+        max-width: 400px;
+    }
+
+    &.modal-lg {
+        max-width: 700px;
+    }
+
+    &.modal-xl {
+        max-width: 1000px;
+    }
+
+    // Modal header
+    .modal-header {
+        padding: $spacing-6;
+        border-bottom: $border-default;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $spacing-4;
+
+        .modal-title {
+            font-size: $font-size-xl;
+            font-weight: $font-weight-semibold;
+            color: $text-primary;
+            margin: 0;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            @include flex-center;
+            border-radius: $radius-md;
+            color: $text-muted;
+            @include transition(all, 0.15s, ease);
+
+            &:hover {
+                background: $slate-1;
+                color: $text-primary;
+            }
+        }
+    }
+
+    // Modal body
+    .modal-body {
+        padding: $spacing-6;
+        overflow-y: auto;
+        flex: 1;
+        @include custom-scrollbar;
+
+        &.modal-body-compact {
+            padding: $spacing-4;
+        }
+    }
+
+    // Modal footer
+    .modal-footer {
+        padding: $spacing-6;
+        border-top: $border-default;
+        display: flex;
+        justify-content: flex-end;
+        gap: $spacing-3;
+
+        @media (max-width: $breakpoint-sm) {
+            flex-direction: column-reverse;
+
+            button {
+                width: 100%;
+            }
+        }
+    }
+}

@@ -1,0 +1,205 @@
+// ========================================
+// SIDEBAR COMPONENT STYLES
+// ========================================
+
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background: $sidebar-bg;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    @include transition(all, 0.3s, ease);
+    box-shadow: $shadow-lg;
+
+    // Sidebar header (logo/brand)
+    .sidebar-header {
+        padding: $spacing-6 $spacing-4;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: $spacing-3;
+            color: $sidebar-text-active;
+            font-size: $font-size-lg;
+            font-weight: $font-weight-bold;
+
+            img {
+                width: 32px;
+                height: 32px;
+            }
+        }
+    }
+
+    // Navigation
+    .sidebar-nav {
+        flex: 1;
+        overflow-y: auto;
+        padding: $spacing-4 0;
+        @include custom-scrollbar;
+    }
+
+    // Nav section
+    .nav-section {
+        margin-bottom: $spacing-6;
+
+        .nav-section-title {
+            padding: 0 $spacing-4;
+            font-size: $font-size-xs;
+            font-weight: $font-weight-semibold;
+            color: $sidebar-text;
+            text-transform: uppercase;
+            letter-spacing: $letter-spacing-wide;
+            margin-bottom: $spacing-2;
+        }
+    }
+
+    // Nav items
+    .nav-item {
+        margin-bottom: $spacing-1;
+
+        a {
+            display: flex;
+            align-items: center;
+            gap: $spacing-3;
+            padding: $spacing-3 $spacing-4;
+            color: $sidebar-text;
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+            @include transition(all, 0.2s, ease);
+            position: relative;
+
+            .nav-icon {
+                width: 20px;
+                height: 20px;
+                flex-shrink: 0;
+            }
+
+            .nav-badge {
+                margin-left: auto;
+                padding: 0.125rem 0.5rem;
+                font-size: $font-size-xs;
+                font-weight: $font-weight-semibold;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: $badge-radius;
+            }
+
+            &:hover {
+                background: $sidebar-hover;
+                color: $sidebar-text-active;
+            }
+
+            &.active {
+                color: $sidebar-text-active;
+                background: rgba(59, 130, 246, 0.15);
+
+                &::before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    bottom: 0;
+                    width: 3px;
+                    background: $sidebar-selected;
+                }
+            }
+        }
+    }
+
+    // Sidebar footer (user profile)
+    .sidebar-footer {
+        padding: $spacing-4;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: $spacing-3;
+            padding: $spacing-3;
+            border-radius: $radius-lg;
+            @include transition(all, 0.2s, ease);
+            cursor: pointer;
+
+            &:hover {
+                background: $sidebar-hover;
+            }
+
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: $radius-full;
+                background: $accent-blue;
+                @include flex-center;
+                color: white;
+                font-weight: $font-weight-semibold;
+                flex-shrink: 0;
+            }
+
+            .user-info {
+                flex: 1;
+                min-width: 0;
+
+                .user-name {
+                    font-size: $font-size-sm;
+                    font-weight: $font-weight-medium;
+                    color: $sidebar-text-active;
+                    @include truncate;
+                }
+
+                .user-role {
+                    font-size: $font-size-xs;
+                    color: $sidebar-text;
+                }
+            }
+        }
+    }
+
+    // Collapsed state
+    &.sidebar-collapsed {
+        width: 72px;
+
+        .sidebar-header .sidebar-logo span,
+        .nav-section-title,
+        .nav-item .nav-text,
+        .nav-item .nav-badge,
+        .user-info {
+            display: none;
+        }
+
+        .nav-item a {
+            justify-content: center;
+        }
+
+        .user-profile {
+            justify-content: center;
+        }
+    }
+}
+
+// Mobile sidebar overlay
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: $overlay;
+    z-index: 99;
+
+    &.active {
+        display: block;
+    }
+}
+
+// Responsive
+@media (max-width: $breakpoint-md) {
+    .sidebar {
+        transform: translateX(-100%);
+
+        &.sidebar-open {
+            transform: translateX(0);
+        }
+    }
+}

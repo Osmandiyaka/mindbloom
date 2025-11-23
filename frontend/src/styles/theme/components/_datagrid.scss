@@ -1,0 +1,274 @@
+// ========================================
+// DATAGRID/TABLE COMPONENT STYLES
+// ========================================
+
+.data-table {
+    width: 100%;
+    background: $bg-secondary;
+    border: $border-default;
+    border-radius: $card-radius;
+    overflow: hidden;
+
+    // Table wrapper with scroll
+    .table-wrapper {
+        overflow-x: auto;
+        @include custom-scrollbar;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: $font-size-sm;
+
+        thead {
+            background: $slate-1;
+            border-bottom: $border-medium;
+
+            tr th {
+                padding: $spacing-3 $spacing-4;
+                text-align: left;
+                font-weight: $font-weight-semibold;
+                color: $text-primary;
+                font-size: $font-size-xs;
+                text-transform: uppercase;
+                letter-spacing: $letter-spacing-wide;
+                white-space: nowrap;
+
+                &.sortable {
+                    cursor: pointer;
+                    user-select: none;
+                    @include transition(all, 0.2s, ease);
+
+                    &:hover {
+                        background: $slate-2;
+                    }
+
+                    .sort-icon {
+                        margin-left: $spacing-1;
+                        opacity: 0.5;
+                    }
+
+                    &.sorted-asc,
+                    &.sorted-desc {
+                        .sort-icon {
+                            opacity: 1;
+                            color: $accent-blue;
+                        }
+                    }
+                }
+            }
+        }
+
+        tbody {
+            tr {
+                border-bottom: $border-default;
+                @include transition(all, 0.15s, ease);
+
+                &:last-child {
+                    border-bottom: none;
+                }
+
+                &:hover {
+                    background: $accent-blue-ultralight;
+                }
+
+                &.row-selected {
+                    background: lighten($accent-blue-ultralight, 2%);
+                }
+
+                &.row-clickable {
+                    cursor: pointer;
+                }
+
+                td {
+                    padding: $spacing-4;
+                    color: $text-secondary;
+                    vertical-align: middle;
+
+                    &.col-primary {
+                        color: $text-primary;
+                        font-weight: $font-weight-medium;
+                    }
+
+                    .cell-badge {
+                        display: inline-block;
+                        padding: 0.25rem 0.625rem;
+                        font-size: $font-size-xs;
+                        font-weight: $font-weight-medium;
+                        border-radius: $badge-radius;
+                        white-space: nowrap;
+
+                        &.badge-success {
+                            background: $success-light;
+                            color: darken($success, 10%);
+                        }
+
+                        &.badge-warning {
+                            background: $warning-light;
+                            color: darken($warning, 10%);
+                        }
+
+                        &.badge-error {
+                            background: $error-light;
+                            color: darken($error, 10%);
+                        }
+
+                        &.badge-info {
+                            background: $info-light;
+                            color: darken($info, 10%);
+                        }
+
+                        &.badge-neutral {
+                            background: $slate-2;
+                            color: $slate-7;
+                        }
+                    }
+
+                    .cell-actions {
+                        display: flex;
+                        gap: $spacing-2;
+                        align-items: center;
+
+                        button {
+                            padding: $spacing-1;
+                            color: $text-muted;
+                            @include transition(color, 0.15s, ease);
+
+                            &:hover {
+                                color: $accent-blue;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Table footer (pagination)
+    .table-footer {
+        padding: $spacing-4;
+        border-top: $border-default;
+        background: $slate-0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: $spacing-4;
+
+        @media (max-width: $breakpoint-md) {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .table-info {
+            font-size: $font-size-sm;
+            color: $text-secondary;
+        }
+
+        .table-pagination {
+            display: flex;
+            gap: $spacing-2;
+            align-items: center;
+
+            button {
+                padding: $spacing-2 $spacing-3;
+                border: $border-default;
+                border-radius: $radius-md;
+                background: $bg-secondary;
+                color: $text-secondary;
+                font-size: $font-size-sm;
+                @include transition(all, 0.15s, ease);
+
+                &:hover:not(:disabled) {
+                    border-color: $accent-blue;
+                    color: $accent-blue;
+                }
+
+                &.active {
+                    background: $accent-blue;
+                    color: white;
+                    border-color: $accent-blue;
+                }
+
+                &:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+            }
+        }
+    }
+
+    // Empty state
+    .table-empty {
+        padding: $spacing-12 $spacing-6;
+        text-align: center;
+
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto $spacing-4;
+            opacity: 0.3;
+        }
+
+        h3 {
+            font-size: $font-size-lg;
+            color: $text-primary;
+            margin-bottom: $spacing-2;
+        }
+
+        p {
+            color: $text-muted;
+            margin-bottom: $spacing-4;
+        }
+    }
+
+    // Striped variant
+    &.table-striped {
+        tbody tr:nth-child(even) {
+            background: $slate-0;
+        }
+    }
+
+    // Compact variant
+    &.table-compact {
+        table {
+            thead tr th {
+                padding: $spacing-2 $spacing-3;
+            }
+
+            tbody tr td {
+                padding: $spacing-3;
+            }
+        }
+    }
+}
+
+// Table toolbar
+.table-toolbar {
+    padding: $spacing-4;
+    background: $bg-secondary;
+    border: $border-default;
+    border-bottom: none;
+    border-top-left-radius: $card-radius;
+    border-top-right-radius: $card-radius;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: $spacing-4;
+
+    @media (max-width: $breakpoint-md) {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-left {
+        display: flex;
+        gap: $spacing-3;
+        align-items: center;
+    }
+
+    .toolbar-right {
+        display: flex;
+        gap: $spacing-2;
+        align-items: center;
+    }
+}

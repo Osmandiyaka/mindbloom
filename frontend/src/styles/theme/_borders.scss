@@ -1,0 +1,31 @@
+// ========================================
+// BORDER SYSTEM
+// ========================================
+
+// Border widths
+$border-width-0: 0;
+$border-width-1: 1px;
+$border-width-2: 2px;
+$border-width-4: 4px;
+
+// Border radius
+$radius-none: 0;
+$radius-sm: 0.25rem; // 4px
+$radius-md: 0.375rem; // 6px
+$radius-lg: 0.5rem; // 8px
+$radius-xl: 0.75rem; // 12px
+$radius-2xl: 1rem; // 16px
+$radius-full: 9999px; // Pill shape
+
+// Default component radius
+$input-radius: $radius-md;
+$button-radius: $radius-md;
+$card-radius: $radius-lg;
+$modal-radius: $radius-xl;
+$badge-radius: $radius-full;
+
+// Border styles
+$border-style: solid;
+$border-default: $border-width-1 $border-style $border-light;
+$border-medium: $border-width-1 $border-style $border-medium;
+$border-dark: $border-width-1 $border-style $border-dark;

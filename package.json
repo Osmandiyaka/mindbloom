@@ -1,0 +1,35 @@
+{
+    "name": "mindbloom-monorepo",
+    "version": "1.0.0",
+    "description": "School Management System - Angular + NestJS Monorepo",
+    "private": true,
+    "workspaces": [
+        "frontend",
+        "backend",
+        "shared"
+    ],
+    "scripts": {
+        "dev": "concurrently \"npm run dev:web\" \"npm run dev:api\"",
+        "dev:web": "cd frontend && npm run start",
+        "dev:api": "cd backend && npm run start:dev",
+        "build": "npm run build:shared && npm run build:web && npm run build:api",
+        "build:web": "cd frontend && npm run build",
+        "build:api": "cd backend && npm run build",
+        "build:shared": "cd shared && npm run build",
+        "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install && cd ../shared && npm install",
+        "lint": "npm run lint:web && npm run lint:api",
+        "lint:web": "cd frontend && npm run lint",
+        "lint:api": "cd backend && npm run lint",
+        "test": "npm run test:web && npm run test:api",
+        "test:web": "cd frontend && npm run test",
+        "test:api": "cd backend && npm run test"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2",
+        "rxjs": "^7.8.1"
+    },
+    "engines": {
+        "node": ">=18.0.0",
+        "npm": ">=9.0.0"
+    }
+}
