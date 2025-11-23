@@ -4,6 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserSchema } from '../../infrastructure/persistence/mongoose/schemas/user.schema';
 import { StudentSchema } from '../../infrastructure/persistence/mongoose/schemas/student.schema';
 import { ClassSchema } from '../../infrastructure/persistence/mongoose/schemas/class.schema';
+import { TenantSchema } from '../../infrastructure/persistence/mongoose/schemas/tenant.schema';
+import { TenantContext } from '../tenant/tenant.context';
 
 @Global()
 @Module({
@@ -19,8 +21,10 @@ import { ClassSchema } from '../../infrastructure/persistence/mongoose/schemas/c
             { name: 'User', schema: UserSchema },
             { name: 'Student', schema: StudentSchema },
             { name: 'Class', schema: ClassSchema },
+            { name: 'Tenant', schema: TenantSchema },
         ]),
     ],
-    exports: [MongooseModule],
+    providers: [TenantContext],
+    exports: [MongooseModule, TenantContext],
 })
 export class DatabaseModule { }

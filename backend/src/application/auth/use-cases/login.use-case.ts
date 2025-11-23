@@ -12,6 +12,7 @@ export interface LoginResult {
     access_token: string;
     user: {
         id: string;
+        tenantId: string;
         email: string;
         name: string;
         role: string;
@@ -43,14 +44,20 @@ export class LoginUseCase {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        // Generate JWT token
-        const payload = { sub: user.id, email: user.email, role: user.role };
+        // Generate JWT token with tenant information
+        const payload = { 
+            sub: user.id, 
+            tenantId: user.tenantId,
+            email: user.email, 
+            role: user.role 
+        };
         const access_token = this.jwtService.sign(payload);
 
         return {
             access_token,
             user: {
                 id: user.id,
+                tenantId: user.tenantId,
                 email: user.email,
                 name: user.name,
                 role: user.role,

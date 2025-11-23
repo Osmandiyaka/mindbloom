@@ -3,6 +3,7 @@ import { User } from '../../../domain/user/entities/user.entity';
 import { IUserRepository, USER_REPOSITORY } from '../../../domain/user/ports/user.repository.interface';
 
 export interface RegisterCommand {
+    tenantId: string;
     email: string;
     password: string;
     name: string;
@@ -26,6 +27,7 @@ export class RegisterUseCase {
 
         // Create new user
         const user = User.create({
+            tenantId: command.tenantId,
             email: command.email,
             name: command.name,
             role: command.role || 'user',
