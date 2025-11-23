@@ -3,56 +3,41 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-global-toolbar',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './global-toolbar.component.html',
-  styleUrl: './global-toolbar.component.scss'
+    selector: 'app-global-toolbar',
+    standalone: true,
+    imports: [CommonModule, FormsModule],
+    templateUrl: './global-toolbar.component.html',
+    styleUrl: './global-toolbar.component.scss'
 })
 export class GlobalToolbarComponent {
-  searchQuery: string = '';
+    searchQuery: string = '';
 
-  onSearch() {
-    console.log('Search:', this.searchQuery);
-  }
+    onSearch() {
+        console.log('Search:', this.searchQuery);
+        // Implement global search functionality
+    }
 
-  onBackClick() {
-    window.history.back();
-  }
+    onDashboardClick() {
+        // Navigate to dashboard
+    }
 
-  onHomeClick() {
-    // Navigate to home
-  }
+    onStudentsClick() {
+        // Navigate to students
+    }
 
-  onUsersClick() {
-    // Navigate to users
-  }
+    onCalendarClick() {
+        // Navigate to calendar
+    }
 
-  onListClick() {
-    // Show list view
-  }
+    onReportsClick() {
+        // Navigate to reports
+    }
 
-  onMenuClick() {
-    // Show menu
-  }
+    onNotificationsClick() {
+        // Show notifications
+    }
 
-  onCardClick() {
-    // Show card view
-  }
-
-  onChartClick() {
-    // Show charts
-  }
-
-  onCalendarClick() {
-    // Show calendar
-  }
-
-  onPeopleClick() {
-    // Show people
-  }
-
-  onArchiveClick() {
-    // Show archive
-  }
+    onMessagesClick() {
+        // Navigate to messages
+    }
 }

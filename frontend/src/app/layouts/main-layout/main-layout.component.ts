@@ -5,10 +5,10 @@ import { SidebarComponent } from '../../shared/components/sidebar/sidebar.compon
 import { GlobalToolbarComponent } from '../../shared/components/global-toolbar/global-toolbar.component';
 
 @Component({
-    selector: 'app-main-layout',
-    standalone: true,
-    imports: [CommonModule, RouterModule, SidebarComponent, GlobalToolbarComponent],
-    template: `
+  selector: 'app-main-layout',
+  standalone: true,
+  imports: [CommonModule, RouterModule, SidebarComponent, GlobalToolbarComponent],
+  template: `
     <div class="app-layout">
       <app-sidebar />
       <div class="content-wrapper">
@@ -19,7 +19,7 @@ import { GlobalToolbarComponent } from '../../shared/components/global-toolbar/g
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .app-layout {
       display: flex;
       min-height: 100vh;
