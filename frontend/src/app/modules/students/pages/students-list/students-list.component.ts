@@ -40,11 +40,11 @@ import { Student, StudentStatus } from '../../../../core/models/student.model';
           </div>
         </div>
         <div class="toolbar-right">
-          <app-button variant="secondary" size="sm">
+          <app-button variant="secondary" size="sm" (click)="exportStudents()">
             Export
           </app-button>
-          <app-button variant="secondary" size="sm">
-            Filter
+          <app-button variant="primary" size="sm" (click)="importStudents()">
+            Import
           </app-button>
         </div>
       </div>
@@ -194,5 +194,28 @@ export class StudentsListComponent implements OnInit {
         }
       });
     }
+  }
+
+  importStudents(): void {
+    this.router.navigate(['/students/import']);
+  }
+
+  exportStudents(): void {
+    const filters = this.searchTerm ? { search: this.searchTerm } : {};
+    
+    this.studentService.exportStudents(filters).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `students_export_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err: any) => {
+        alert('Failed to export students');
+        console.error('Error exporting students:', err);
+      }
+    });
   }
 }

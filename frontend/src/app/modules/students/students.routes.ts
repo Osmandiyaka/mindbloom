@@ -6,6 +6,10 @@ export const STUDENTS_ROUTES: Routes = [
         loadComponent: () => import('./pages/students-list/students-list.component').then(m => m.StudentsListComponent)
     },
     {
+        path: 'import',
+        loadComponent: () => import('./pages/student-import/student-import.component').then(m => m.StudentImportComponent)
+    },
+    {
         path: 'new',
         loadComponent: () => import('../setup/pages/students/student-form/student-form.component').then(m => m.StudentFormComponent)
     },
@@ -18,3 +22,4 @@ export const STUDENTS_ROUTES: Routes = [
         loadComponent: () => import('./pages/student-detail/student-detail.component').then(m => m.StudentDetailComponent)
     }
 ];
+

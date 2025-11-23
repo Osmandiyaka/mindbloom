@@ -1,0 +1,250 @@
+<div class="import-container">
+  <div class="import-header">
+    <div class="header-content">
+      <button class="back-button" (click)="backToList()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M19 12H5M12 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back to Students
+      </button>
+      <h1 class="page-title">Import Students</h1>
+      <p class="page-subtitle">Bulk upload student records from CSV or Excel file</p>
+    </div>
+  </div>
+
+  <div class="import-content">
+    <!-- Progress Steps -->
+    <div class="steps-indicator">
+      <div class="step-item" [class.active]="step() === 'upload'" [class.completed]="step() !== 'upload'">
+        <div class="step-number">1</div>
+        <div class="step-label">Upload File</div>
+      </div>
+      <div class="step-line" [class.completed]="step() === 'review' || step() === 'complete'"></div>
+      <div class="step-item" [class.active]="step() === 'validate'" [class.completed]="step() === 'review' || step() === 'complete'">
+        <div class="step-number">2</div>
+        <div class="step-label">Validate</div>
+      </div>
+      <div class="step-line" [class.completed]="step() === 'complete'"></div>
+      <div class="step-item" [class.active]="step() === 'review'" [class.completed]="step() === 'complete'">
+        <div class="step-number">3</div>
+        <div class="step-label">Review & Import</div>
+      </div>
+    </div>
+
+    <!-- Upload Step -->
+    @if (step() === 'upload') {
+      <div class="upload-section">
+        <div class="upload-card">
+          <div class="upload-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" 
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          
+          @if (!fileName()) {
+            <h3>Upload Student Data File</h3>
+            <p class="upload-description">
+              Drag and drop your CSV or Excel file here, or click to browse
+            </p>
+            <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" 
+                   (change)="onFileSelected($event)" hidden>
+            <label for="fileInput" class="upload-button">
+              Choose File
+            </label>
+          } @else {
+            <div class="file-selected">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" stroke-width="2"/>
+                <path d="M13 2v7h7" stroke-width="2"/>
+              </svg>
+              <div class="file-info">
+                <h4>{{ fileName() }}</h4>
+                <button class="change-file-button" (click)="reset()">Change File</button>
+              </div>
+            </div>
+            
+            <button class="validate-button" (click)="validateFile()" [disabled]="validating()">
+              @if (validating()) {
+                <span class="spinner"></span>
+                Validating...
+              } @else {
+                Validate & Continue
+              }
+            </button>
+          }
+
+          <div class="upload-info">
+            <h4>File Requirements:</h4>
+            <ul>
+              <li>Supported formats: CSV, Excel (.xlsx, .xls)</li>
+              <li>Maximum file size: 5MB</li>
+              <li>Required columns: firstName, lastName, dateOfBirth, gender, admissionNumber</li>
+            </ul>
+          </div>
+
+          <button class="template-button" (click)="downloadTemplate()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" 
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Download Template
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Validation Errors Step -->
+    @if (step() === 'validate') {
+      <div class="validation-section">
+        <div class="validation-card error">
+          <div class="validation-header">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" stroke-width="2"/>
+              <path d="M12 8v4m0 4h.01" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <h3>Validation Failed</h3>
+            <p>{{ validationErrors().length }} error(s) found in your file</p>
+          </div>
+
+          <div class="errors-list">
+            @for (error of validationErrors(); track error) {
+              <div class="error-item">
+                <div class="error-location">Row {{ error.row }}, Column: {{ error.field }}</div>
+                <div class="error-message">{{ error.message }}</div>
+              </div>
+            }
+          </div>
+
+          <div class="validation-actions">
+            <button class="secondary-button" (click)="reset()">
+              Upload Different File
+            </button>
+            <button class="template-button" (click)="downloadTemplate()">
+              Download Template
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Review Step -->
+    @if (step() === 'review') {
+      <div class="review-section">
+        <div class="review-card">
+          <div class="review-header">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-width="2" stroke-linecap="round"/>
+              <path d="M22 4L12 14.01l-3-3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h3>Data Validation Successful</h3>
+            <p>Review the preview below and click import to proceed</p>
+          </div>
+
+          <div class="preview-table-container">
+            <h4>Preview (First 5 Records)</h4>
+            <div class="table-scroll">
+              <table class="preview-table">
+                <thead>
+                  <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Date of Birth</th>
+                    <th>Gender</th>
+                    <th>Admission Number</th>
+                    <th>Class</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of previewData(); track $index) {
+                    <tr>
+                      @for (cell of row.slice(0, 6); track $index) {
+                        <td>{{ cell }}</td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="review-actions">
+            <button class="secondary-button" (click)="reset()">
+              Cancel
+            </button>
+            <button class="import-button" (click)="importStudents()" [disabled]="importing()">
+              @if (importing()) {
+                <span class="spinner"></span>
+                Importing...
+              } @else {
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" 
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Import Students
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Complete Step -->
+    @if (step() === 'complete') {
+      <div class="complete-section">
+        <div class="complete-card">
+          <div class="success-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-width="2" stroke-linecap="round"/>
+              <path d="M22 4L12 14.01l-3-3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          
+          <h3>Import Complete!</h3>
+          
+          @if (importResult()) {
+            <div class="import-summary">
+              <div class="summary-item success">
+                <div class="summary-label">Successfully Imported</div>
+                <div class="summary-value">{{ importResult()!.successful }}</div>
+              </div>
+              
+              @if (importResult()!.failed > 0) {
+                <div class="summary-item error">
+                  <div class="summary-label">Failed</div>
+                  <div class="summary-value">{{ importResult()!.failed }}</div>
+                </div>
+              }
+              
+              <div class="summary-item">
+                <div class="summary-label">Total Processed</div>
+                <div class="summary-value">{{ importResult()!.total }}</div>
+              </div>
+            </div>
+
+            @if (importResult()!.errors && importResult()!.errors.length > 0) {
+              <div class="import-errors">
+                <h4>Import Errors:</h4>
+                @for (error of importResult()!.errors; track error) {
+                  <div class="error-item">
+                    <div class="error-location">Row {{ error.row }}</div>
+                    <div class="error-message">{{ error.message }}</div>
+                  </div>
+                }
+              </div>
+            }
+          }
+
+          <div class="complete-actions">
+            <button class="secondary-button" (click)="reset()">
+              Import More Students
+            </button>
+            <button class="primary-button" (click)="backToList()">
+              View Student List
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

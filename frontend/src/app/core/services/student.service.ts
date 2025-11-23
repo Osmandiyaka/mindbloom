@@ -55,4 +55,26 @@ export class StudentService {
     updateEnrollment(studentId: string, enrollment: Partial<Student['enrollment']>): Observable<Student> {
         return this.http.patch<Student>(`${this.apiUrl}/${studentId}/enrollment`, enrollment);
     }
+
+    importStudents(formData: FormData): Observable<any> {
+        return this.http.post<any>(`${this.apiUrl}/import`, formData);
+    }
+
+    exportStudents(filters?: StudentFilters): Observable<Blob> {
+        let params = new HttpParams();
+
+        if (filters) {
+            if (filters.search) params = params.set('search', filters.search);
+            if (filters.class) params = params.set('class', filters.class);
+            if (filters.section) params = params.set('section', filters.section);
+            if (filters.status) params = params.set('status', filters.status);
+            if (filters.academicYear) params = params.set('academicYear', filters.academicYear);
+            if (filters.gender) params = params.set('gender', filters.gender);
+        }
+
+        return this.http.get(`${this.apiUrl}/export`, {
+            params,
+            responseType: 'blob'
+        });
+    }
 }
