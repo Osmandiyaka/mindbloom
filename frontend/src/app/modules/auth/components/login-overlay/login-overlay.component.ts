@@ -18,6 +18,10 @@ export class LoginOverlayComponent {
     rememberMe = signal(false);
     isLoading = signal(false);
     errorMessage = signal('');
+    
+    // Tenant editing state
+    isEditingTenant = signal(false);
+    tenantEditValue = signal('');
 
     constructor(
         private authService: AuthService,
@@ -31,17 +35,52 @@ export class LoginOverlayComponent {
     }
 
     onChangeTenant(): void {
-        // For now, just show an alert. You can implement a modal later
-        const newTenantName = prompt('Enter school name:', this.currentTenant);
-        if (newTenantName && newTenantName.trim()) {
-            // This is a simplified version - in production, you'd fetch the tenant from the backend
-            // For now, we'll just update the display name
+        // Enter edit mode
+        this.tenantEditValue.set(this.currentTenant);
+        this.isEditingTenant.set(true);
+        
+        // Focus the input after a short delay to allow the DOM to update
+        setTimeout(() => {
+            const input = document.querySelector('.tenant-edit-input') as HTMLInputElement;
+            if (input) {
+                input.focus();
+                input.select();
+            }
+        }, 50);
+    }
+
+    onSaveTenant(): void {
+        const newTenantName = this.tenantEditValue().trim();
+        if (newTenantName) {
+            // In a real app, you'd fetch a new tenant by subdomain or ID
+            // For now, we'll just log the change
+            console.log('Tenant change requested:', newTenantName);
+            
+            // Update the tenant service (simplified version)
             const currentTenant = this.tenantService.getCurrentTenantValue();
             if (currentTenant) {
                 // Keep the existing tenant but update the name (simplified)
-                // In a real app, you'd fetch a new tenant by subdomain or ID
-                console.log('Tenant change requested:', newTenantName);
+                this.tenantService.setTenant({
+                    ...currentTenant,
+                    name: newTenantName
+                });
             }
+        }
+        this.isEditingTenant.set(false);
+    }
+
+    onCancelTenantEdit(): void {
+        this.isEditingTenant.set(false);
+        this.tenantEditValue.set('');
+    }
+
+    onTenantKeyDown(event: KeyboardEvent): void {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            this.onSaveTenant();
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            this.onCancelTenantEdit();
         }
     }
 
