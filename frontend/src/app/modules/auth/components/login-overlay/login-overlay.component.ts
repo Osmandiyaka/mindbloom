@@ -25,7 +25,7 @@ export class LoginOverlayComponent {
     tenantEditValue = signal('');
     isValidatingTenant = signal(false);
     tenantErrorMessage = signal('');
-    
+
     // Registration state
     showRegistration = signal(false);
 
