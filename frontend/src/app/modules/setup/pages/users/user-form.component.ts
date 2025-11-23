@@ -93,7 +93,11 @@ import { Role } from '../../../../core/models/role.model';
           <div class="profile-picture-section">
             <div class="profile-picture-preview">
               <div class="avatar-circle" [style.background-image]="profilePictureUrl() ? 'url(' + profilePictureUrl() + ')' : 'none'">
-                <span *ngIf="!profilePictureUrl()" class="avatar-initials">{{ getInitials() }}</span>
+                <span *ngIf="!profilePictureUrl()" class="avatar-placeholder">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  </svg>
+                </span>
               </div>
             </div>
             <div class="profile-picture-controls">
@@ -227,7 +231,7 @@ import { Role } from '../../../../core/models/role.model';
     .user-form {
       background: white;
       border-radius: 20px;
-      padding: 3rem;
+      padding: 2.5rem;
       box-shadow: 
         0 10px 40px rgba(0, 0, 0, 0.08),
         0 2px 8px rgba(0, 0, 0, 0.06);
@@ -248,8 +252,8 @@ import { Role } from '../../../../core/models/role.model';
 
     .form-with-avatar {
       display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 3rem;
+      grid-template-columns: 1fr 200px;
+      gap: 2rem;
       align-items: start;
     }
 
@@ -257,8 +261,8 @@ import { Role } from '../../../../core/models/role.model';
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1.25rem;
-      padding: 1.5rem;
+      gap: 0.875rem;
+      padding: 1rem;
       background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
       border-radius: 16px;
       border: 2px dashed #e5e7eb;
@@ -317,6 +321,14 @@ import { Role } from '../../../../core/models/role.model';
       z-index: 1;
     }
 
+    .avatar-placeholder {
+      color: rgba(255, 255, 255, 0.7);
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .profile-picture-controls {
       display: flex;
       flex-direction: column;
@@ -370,7 +382,7 @@ import { Role } from '../../../../core/models/role.model';
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 0.625rem;
+      gap: 0.5rem;
       position: relative;
     }
 
@@ -459,7 +471,7 @@ import { Role } from '../../../../core/models/role.model';
       display: flex;
       justify-content: flex-end;
       gap: 1rem;
-      padding-top: 2rem;
+      padding-top: 1.5rem;
       margin-top: 1rem;
       border-top: 2px solid #f3f4f6;
     }
