@@ -82,9 +82,7 @@
         }
 
         .school-name-text {
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            // Allow text to take natural width
         }
     }
 
