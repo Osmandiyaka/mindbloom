@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { LoginOverlayComponent } from './modules/auth/components/login-overlay/login-overlay.component';
 import { AuthService } from './core/services/auth.service';
 import { TenantService } from './core/services/tenant.service';
+import { ThemeService } from './core/services/theme.service';
 import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
 import { environment } from '../environments/environment';
 
@@ -35,7 +36,7 @@ import { environment } from '../environments/environment';
         }
 
         .app-content {
-            background: #f7f9fc;
+            background: var(--color-background, #f7f9fc);
             overflow: auto;
         }
     `]
@@ -45,7 +46,8 @@ export class AppComponent implements OnInit {
 
     constructor(
         public authService: AuthService,
-        private tenantService: TenantService
+        private tenantService: TenantService,
+        private themeService: ThemeService // Initialize theme service
     ) { }
 
     ngOnInit(): void {

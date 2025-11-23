@@ -1,0 +1,58 @@
+<div class="theme-selector" (clickOutside)="closeDropdown()">
+    <button class="theme-toggle" (click)="toggleDropdown()" [attr.aria-label]="'Current theme: ' + currentTheme().name"
+        [class.active]="isOpen()">
+        <span class="icon">{{ getCurrentIcon() }}</span>
+        <span class="theme-name">{{ isAutoMode() ? 'Auto' : currentTheme().name }}</span>
+        <span class="chevron" [class.open]="isOpen()">▼</span>
+    </button>
+
+    @if (isOpen()) {
+    <div class="theme-dropdown">
+        <!-- Auto Mode -->
+        <div class="theme-section">
+            <button class="theme-option auto-option" [class.active]="isAutoMode()" (click)="setAutoMode()">
+                <span class="icon">🖥️</span>
+                <span class="label">
+                    <span class="name">Auto (System)</span>
+                    <span class="description">Follow system theme</span>
+                </span>
+                @if (isAutoMode()) {
+                <span class="check">✓</span>
+                }
+            </button>
+        </div>
+
+        <!-- Light Themes -->
+        <div class="theme-section">
+            <div class="section-header">☀️ Light Themes</div>
+            @for (theme of lightThemes; track theme.id) {
+            <button class="theme-option" [class.active]="isActiveTheme(theme)" (click)="selectTheme(theme)">
+                <span class="color-preview" [style.background]="theme.colors.primary"></span>
+                <span class="label">
+                    <span class="name">{{ theme.name }}</span>
+                </span>
+                @if (isActiveTheme(theme)) {
+                <span class="check">✓</span>
+                }
+            </button>
+            }
+        </div>
+
+        <!-- Dark Themes -->
+        <div class="theme-section">
+            <div class="section-header">🌙 Dark Themes</div>
+            @for (theme of darkThemes; track theme.id) {
+            <button class="theme-option" [class.active]="isActiveTheme(theme)" (click)="selectTheme(theme)">
+                <span class="color-preview" [style.background]="theme.colors.primary"></span>
+                <span class="label">
+                    <span class="name">{{ theme.name }}</span>
+                </span>
+                @if (isActiveTheme(theme)) {
+                <span class="check">✓</span>
+                }
+            </button>
+            }
+        </div>
+    </div>
+    }
+</div>
