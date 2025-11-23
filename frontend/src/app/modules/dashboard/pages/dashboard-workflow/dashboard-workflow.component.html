@@ -2,7 +2,6 @@
     <!-- Header -->
     <div class="workflow-header">
         <h2>Workflow Overview</h2>
-        <p class="header-subtitle">Click any task to navigate</p>
 
         <div class="workflow-actions">
             <button class="btn-secondary">
@@ -65,8 +64,8 @@
                 <app-workflow-block title="Receive Payments" subtitle="Process payments" icon="credit-card"
                     (select)="navigateTo('/fees')">
                 </app-workflow-block>
-                
-                <div style="width: 100%; display: flex; justify-content: flex-start; padding-left: 24px;">
+
+                <div style="width: 100%; display: flex; justify-content: flex-start; margin-top: 4px; padding-left: 20px;">
                     <app-workflow-block title="Deposits" subtitle="Bank deposits" icon="bank"
                         (select)="navigateTo('/finance')">
                     </app-workflow-block>
@@ -86,8 +85,8 @@
                 <app-workflow-block title="Sections & Timetable" subtitle="Schedule classes" icon="calendar"
                     (select)="navigateTo('/academics')">
                 </app-workflow-block>
-                
-                <div style="width: 100%; display: flex; gap: 8px; align-items: center; padding-left: 24px;">
+
+                <div style="width: 100%; display: flex; gap: 6px; align-items: center; margin-top: 4px; padding-left: 20px;">
                     <app-workflow-block title="Attendance" subtitle="Take attendance" icon="clipboard"
                         (select)="navigateTo('/attendance')">
                     </app-workflow-block>
