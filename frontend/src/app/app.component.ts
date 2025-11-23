@@ -28,8 +28,7 @@ import { SidebarComponent } from './shared/components/sidebar/sidebar.component'
         }
 
         .app-shell.dimmed {
-            filter: blur(4px);
-            opacity: 0.45;
+            opacity: 0.95;
             pointer-events: none;
         }
 
