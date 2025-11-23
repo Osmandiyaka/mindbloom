@@ -42,6 +42,30 @@ export class MongooseUserRepository implements IUserRepository {
         return this.toDomain(created);
     }
 
+    async findAll(tenantId: string): Promise<User[]> {
+        const users = await this.userModel.find({ tenantId }).exec();
+        return users.map(user => this.toDomain(user));
+    }
+
+    async update(user: User): Promise<User> {
+        const permissionIds = user.permissions.map(p => p.id);
+        
+        const updated = await this.userModel.findByIdAndUpdate(
+            user.id,
+            {
+                permissions: permissionIds,
+                updatedAt: new Date(),
+            },
+            { new: true }
+        ).exec();
+
+        if (!updated) {
+            throw new Error(`User with ID ${user.id} not found`);
+        }
+
+        return this.toDomain(updated);
+    }
+
     async validatePassword(email: string, password: string): Promise<boolean> {
         const user = await this.userModel.findOne({ email }).exec();
 

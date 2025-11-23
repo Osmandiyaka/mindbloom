@@ -15,6 +15,7 @@ import { TransportModule } from './modules/transport/transport.module';
 import { SetupModule } from './modules/setup/setup.module';
 import { DatabaseModule } from './common/database/database.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
     imports: [
@@ -25,6 +26,7 @@ import { RolesModule } from './modules/roles/roles.module';
         AuthModule,
         TenantModule,
         RolesModule,
+        UsersModule,
         StudentsModule,
         AcademicsModule,
         AttendanceModule,

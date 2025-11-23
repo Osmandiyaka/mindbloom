@@ -23,17 +23,17 @@ import { HeroComponent } from '../../../../shared/components/hero/hero.component
           <span class="card-link">Manage Roles →</span>
         </a>
 
+        <a routerLink="/setup/users" class="setup-card">
+          <div class="card-icon">👥</div>
+          <h3>User Management</h3>
+          <p>Manage users and assign direct permissions to individual users.</p>
+          <span class="card-link">Manage Users →</span>
+        </a>
+
         <div class="setup-card disabled">
           <div class="card-icon">⚙️</div>
           <h3>School Settings</h3>
           <p>Configure school information, academic year, and general settings.</p>
-          <span class="card-link">Coming Soon</span>
-        </div>
-
-        <div class="setup-card disabled">
-          <div class="card-icon">👥</div>
-          <h3>User Management</h3>
-          <p>Manage users, assign roles, and control access to the system.</p>
           <span class="card-link">Coming Soon</span>
         </div>
 

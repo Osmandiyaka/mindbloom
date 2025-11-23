@@ -16,5 +16,9 @@ export const SETUP_ROUTES: Routes = [
     {
         path: 'roles/:id/edit',
         loadComponent: () => import('./pages/roles/role-form.component').then(m => m.RoleFormComponent)
+    },
+    {
+        path: 'users',
+        loadComponent: () => import('./pages/users/user-list.component').then(m => m.UserListComponent)
     }
 ];

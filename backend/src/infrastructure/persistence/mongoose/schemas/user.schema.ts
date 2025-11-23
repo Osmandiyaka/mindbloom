@@ -18,6 +18,9 @@ export class UserDocument extends Document {
     @Prop({ default: 'user' })
     role: string;
 
+    @Prop({ type: [String], default: [] })
+    permissions: string[];
+
     createdAt: Date;
     updatedAt: Date;
 }
