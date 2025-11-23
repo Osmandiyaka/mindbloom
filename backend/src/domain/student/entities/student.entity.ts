@@ -179,6 +179,18 @@ export class Student {
         return this.props.lastName;
     }
 
+    get middleName(): string | undefined {
+        return this.props.middleName;
+    }
+
+    get nationality(): string | undefined {
+        return this.props.nationality;
+    }
+
+    get religion(): string | undefined {
+        return this.props.religion;
+    }
+
     get fullName(): string {
         const parts = [this.props.firstName];
         if (this.props.middleName) parts.push(this.props.middleName);
