@@ -6,6 +6,7 @@ import { MongooseUserRepository } from '../../infrastructure/persistence/mongoos
 import { UserSchema } from '../../infrastructure/persistence/mongoose/schemas/user.schema';
 import { AddPermissionsToUserUseCase } from '../../application/rbac/use-cases/add-permissions-to-user.use-case';
 import { GetPermissionTreeUseCase } from '../../application/rbac/use-cases/get-permission-tree.use-case';
+import { CreateUserUseCase, UpdateUserUseCase } from '../../application/user/use-cases';
 
 @Module({
     imports: [
@@ -19,6 +20,8 @@ import { GetPermissionTreeUseCase } from '../../application/rbac/use-cases/get-p
         },
         AddPermissionsToUserUseCase,
         GetPermissionTreeUseCase,
+        CreateUserUseCase,
+        UpdateUserUseCase,
     ],
     exports: [USER_REPOSITORY],
 })

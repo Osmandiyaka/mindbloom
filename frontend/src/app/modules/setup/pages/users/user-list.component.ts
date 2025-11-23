@@ -18,6 +18,9 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
           <h1>Users</h1>
           <p class="subtitle">Manage users and their permissions</p>
         </div>
+        <button class="btn btn-primary" (click)="createUser()">
+          + Create User
+        </button>
       </div>
 
       <!-- Loading State -->
@@ -55,8 +58,11 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
               </td>
               <td>{{ user.email }}</td>
               <td>
-                <span class="role-badge" [class.admin]="user.role === 'admin'">
-                  {{ user.role }}
+                <span *ngIf="user.role" class="role-badge" [class.admin]="user.role.name?.includes('Admin')">
+                  {{ user.role.name }}
+                </span>
+                <span *ngIf="!user.role" class="role-badge no-role">
+                  No role
                 </span>
               </td>
               <td>
@@ -66,8 +72,14 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
               </td>
               <td>{{ formatDate(user.createdAt) }}</td>
               <td>
-                <button class="btn-text" (click)="managePermissions(user)">
-                  🔐 Manage Permissions
+                <div class="action-buttons">
+                  <button class="btn-text" (click)="editUser(user)">
+                    ✏️ Edit
+                  </button>
+                  <button class="btn-text" (click)="managePermissions(user)">
+                    🔐 Permissions
+                  </button>
+                </div>
                 </button>
               </td>
             </tr>
@@ -143,6 +155,25 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
     .subtitle {
       color: #666;
       margin: 0;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
 
     .loading-state {
@@ -254,9 +285,19 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
       color: #155724;
     }
 
+    .role-badge.no-role {
+      background: #fff3cd;
+      color: #856404;
+    }
+
     .permission-count {
       color: #666;
       font-size: 0.875rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
     }
 
     .btn-text {
@@ -485,6 +526,14 @@ export class UserListComponent implements OnInit {
                 console.error('Error loading permission tree:', err);
             }
         });
+    }
+
+    createUser() {
+        this.router.navigate(['/setup/users/create']);
+    }
+
+    editUser(user: User) {
+        this.router.navigate(['/setup/users/edit', user.id]);
     }
 
     managePermissions(user: User) {
