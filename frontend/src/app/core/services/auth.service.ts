@@ -48,6 +48,7 @@ export class AuthService {
         localStorage.removeItem(this.REFRESH_TOKEN_KEY);
         localStorage.removeItem('user');
         this.currentUserSubject.next(null);
+        this.showLoginOverlay.set(true); // Show login overlay on logout
         this.router.navigate(['/login']);
     }
 
