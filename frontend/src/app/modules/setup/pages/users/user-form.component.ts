@@ -23,165 +23,251 @@ import { Role } from '../../../../core/models/role.model';
       </div>
 
       <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="user-form">
-        <!-- Profile Picture -->
-        <div class="profile-picture-section">
-          <div class="profile-picture-preview">
-            <div class="avatar-circle" [style.background-image]="profilePictureUrl() ? 'url(' + profilePictureUrl() + ')' : 'none'">
-              <span *ngIf="!profilePictureUrl()" class="avatar-initials">{{ getInitials() }}</span>
+        <div class="form-with-avatar">
+          <div class="form-grid">
+            <!-- Name -->
+            <div class="form-group">
+              <label for="name">👤 Full Name *</label>
+              <input
+                id="name"
+                type="text"
+                formControlName="name"
+                placeholder="Enter full name"
+                [class.error]="isFieldInvalid('name')"
+              />
+              <span *ngIf="isFieldInvalid('name')" class="error-message">
+                Name is required
+              </span>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+              <label for="email">📧 Email Address *</label>
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                placeholder="user@example.com"
+                [class.error]="isFieldInvalid('email')"
+              />
+              <span *ngIf="isFieldInvalid('email')" class="error-message">
+                Valid email is required
+              </span>
+            </div>
+
+            <!-- Password (only for create) -->
+            <div *ngIf="!isEditMode()" class="form-group">
+              <label for="password">🔒 Password *</label>
+              <input
+                id="password"
+                type="password"
+                formControlName="password"
+                placeholder="Minimum 8 characters"
+                [class.error]="isFieldInvalid('password')"
+              />
+              <span *ngIf="isFieldInvalid('password')" class="error-message">
+                Password must be at least 8 characters
+              </span>
+            </div>
+
+            <!-- Role -->
+            <div class="form-group">
+              <label for="roleId">🎭 Role</label>
+              <select
+                id="roleId"
+                formControlName="roleId"
+                [disabled]="loadingRoles()"
+              >
+                <option [value]="null">No role assigned</option>
+                <option *ngFor="let role of roles()" [value]="role.id">
+                  {{ role.name }}
+                </option>
+              </select>
+              <span class="field-hint">
+                Users inherit permissions from their assigned role
+              </span>
             </div>
           </div>
-          <div class="profile-picture-controls">
-            <input
-              #fileInput
-              type="file"
-              accept="image/*"
-              (change)="onFileSelected($event)"
-              style="display: none"
-            />
-            <button type="button" class="btn btn-secondary" (click)="fileInput.click()">
-              📷 {{ profilePictureUrl() ? 'Change Photo' : 'Upload Photo' }}
-            </button>
-            <button
-              *ngIf="profilePictureUrl()"
-              type="button"
-              class="btn btn-text-danger"
-              (click)="removeProfilePicture()"
-            >
-              Remove
-            </button>
-            <p class="upload-hint">JPG, PNG or GIF (max 2MB)</p>
-          </div>
-        </div>
 
-        <div class="form-grid">
-          <!-- Name -->
-          <div class="form-group">
-            <label for="name">Full Name *</label>
-            <input
-              id="name"
-              type="text"
-              formControlName="name"
-              placeholder="Enter full name"
-              [class.error]="isFieldInvalid('name')"
-            />
-            <span *ngIf="isFieldInvalid('name')" class="error-message">
-              Name is required
-            </span>
-          </div>
-
-          <!-- Email -->
-          <div class="form-group">
-            <label for="email">Email Address *</label>
-            <input
-              id="email"
-              type="email"
-              formControlName="email"
-              placeholder="user@example.com"
-              [class.error]="isFieldInvalid('email')"
-            />
-            <span *ngIf="isFieldInvalid('email')" class="error-message">
-              Valid email is required
-            </span>
-          </div>
-
-          <!-- Password (only for create) -->
-          <div *ngIf="!isEditMode()" class="form-group">
-            <label for="password">Password *</label>
-            <input
-              id="password"
-              type="password"
-              formControlName="password"
-              placeholder="Minimum 8 characters"
-              [class.error]="isFieldInvalid('password')"
-            />
-            <span *ngIf="isFieldInvalid('password')" class="error-message">
-              Password must be at least 8 characters
-            </span>
-          </div>
-
-          <!-- Role -->
-          <div class="form-group">
-            <label for="roleId">Role</label>
-            <select
-              id="roleId"
-              formControlName="roleId"
-              [disabled]="loadingRoles()"
-            >
-              <option [value]="null">No role assigned</option>
-              <option *ngFor="let role of roles()" [value]="role.id">
-                {{ role.name }}
-              </option>
-            </select>
-            <span class="field-hint">
-              Users inherit permissions from their assigned role
-            </span>
+          <!-- Profile Picture -->
+          <div class="profile-picture-section">
+            <div class="profile-picture-preview">
+              <div class="avatar-circle" [style.background-image]="profilePictureUrl() ? 'url(' + profilePictureUrl() + ')' : 'none'">
+                <span *ngIf="!profilePictureUrl()" class="avatar-initials">{{ getInitials() }}</span>
+              </div>
+            </div>
+            <div class="profile-picture-controls">
+              <input
+                #fileInput
+                type="file"
+                accept="image/*"
+                (change)="onFileSelected($event)"
+                style="display: none"
+              />
+              <button type="button" class="btn btn-secondary btn-sm" (click)="fileInput.click()">
+                📷 {{ profilePictureUrl() ? 'Change' : 'Upload' }}
+              </button>
+              <button
+                *ngIf="profilePictureUrl()"
+                type="button"
+                class="btn btn-text-danger btn-sm"
+                (click)="removeProfilePicture()"
+              >
+                🗑️ Remove
+              </button>
+              <p class="upload-hint">JPG, PNG or GIF (max 2MB)</p>
+            </div>
           </div>
         </div>
 
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" (click)="onCancel()">
-            Cancel
+            ✕ Cancel
           </button>
           <button
             type="submit"
             class="btn btn-primary"
             [disabled]="userForm.invalid || saving()"
           >
-            {{ saving() ? 'Saving...' : (isEditMode() ? 'Update User' : 'Create User') }}
+            {{ saving() ? '⏳ Saving...' : (isEditMode() ? '💾 Update User' : '✨ Create User') }}
           </button>
         </div>
       </form>
     </div>
   `,
     styles: [`
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -1000px 0;
+      }
+      100% {
+        background-position: 1000px 0;
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
     .user-form-container {
       padding: 2rem;
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
+      animation: fadeIn 0.5s ease-out;
+      position: relative;
+    }
+
+    .user-form-container::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: float 6s ease-in-out infinite;
     }
 
     .page-header {
-      margin-bottom: 2rem;
+      margin-bottom: 3rem;
+      text-align: center;
+      position: relative;
     }
 
     .page-header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #1a1a1a;
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0 0 0.75rem 0;
+      letter-spacing: -0.5px;
       margin: 0 0 0.5rem 0;
     }
 
     .subtitle {
       color: #666;
       margin: 0;
+      font-size: 1.1rem;
     }
 
     .error-banner {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      padding: 1rem;
-      background: linear-gradient(135deg, #fee 0%, #fdd 100%);
-      border: 1px solid #fcc;
-      border-radius: 8px;
-      margin-bottom: 1.5rem;
-      color: #c33;
+      padding: 1.25rem;
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      border: 2px solid #fca5a5;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      color: #dc2626;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+      animation: fadeIn 0.3s ease-out;
     }
 
     .user-form {
       background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      padding: 3rem;
+      box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.08),
+        0 2px 8px rgba(0, 0, 0, 0.06);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .user-form::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .form-with-avatar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 3rem;
+      align-items: start;
     }
 
     .profile-picture-section {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 2rem;
-      padding-bottom: 2rem;
-      margin-bottom: 2rem;
-      border-bottom: 1px solid #e0e0e0;
+      gap: 1.25rem;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+      border-radius: 16px;
+      border: 2px dashed #e5e7eb;
+      transition: all 0.3s ease;
+    }
+
+    .profile-picture-section:hover {
+      border-color: #667eea;
+      background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
     }
 
     .profile-picture-preview {
@@ -189,8 +275,8 @@ import { Role } from '../../../../core/models/role.model';
     }
 
     .avatar-circle {
-      width: 120px;
-      height: 120px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
@@ -198,26 +284,66 @@ import { Role } from '../../../../core/models/role.model';
       justify-content: center;
       background-size: cover;
       background-position: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 
+        0 8px 24px rgba(102, 126, 234, 0.3),
+        0 4px 12px rgba(118, 75, 162, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 4px solid white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .avatar-circle::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+      background-size: 200% 200%;
+      animation: shimmer 3s infinite;
+    }
+
+    .avatar-circle:hover {
+      transform: scale(1.05);
+      box-shadow: 
+        0 12px 32px rgba(102, 126, 234, 0.4),
+        0 6px 16px rgba(118, 75, 162, 0.3);
     }
 
     .avatar-initials {
-      font-size: 2.5rem;
+      font-size: 2rem;
       font-weight: 700;
       color: white;
       text-transform: uppercase;
+      z-index: 1;
     }
 
     .profile-picture-controls {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
+      align-items: center;
+      width: 100%;
     }
 
     .upload-hint {
       font-size: 0.75rem;
-      color: #666;
+      color: #9ca3af;
       margin: 0;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    .upload-hint::before {
+      content: 'ℹ️';
+      font-size: 0.75rem;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      width: 100%;
     }
 
     .btn-text-danger {
@@ -228,100 +354,196 @@ import { Role } from '../../../../core/models/role.model';
       padding: 0.5rem;
       font-size: 0.875rem;
       font-weight: 600;
+      transition: all 0.2s ease;
     }
 
     .btn-text-danger:hover {
       color: #dc2626;
+      transform: translateX(2px);
     }
 
     .form-grid {
       display: grid;
       gap: 1.5rem;
-      margin-bottom: 2rem;
     }
 
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.625rem;
+      position: relative;
     }
 
     .form-group label {
       font-weight: 600;
-      color: #333;
+      color: #1f2937;
       font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.2s ease;
+    }
+
+    .form-group:focus-within label {
+      color: #667eea;
     }
 
     .form-group input,
     .form-group select {
-      padding: 0.75rem;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
+      padding: 0.875rem 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
       font-size: 1rem;
-      transition: all 0.2s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: #fafafa;
+    }
+
+    .form-group input:hover,
+    .form-group select:hover {
+      border-color: #d1d5db;
+      background: white;
     }
 
     .form-group input:focus,
     .form-group select:focus {
       outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      border-color: #667eea;
+      background: white;
+      box-shadow: 
+        0 0 0 4px rgba(102, 126, 234, 0.1),
+        0 4px 12px rgba(102, 126, 234, 0.15);
+      transform: translateY(-1px);
     }
 
     .form-group input.error,
     .form-group select.error {
       border-color: #ef4444;
+      background: #fef2f2;
+    }
+
+    .form-group input.error:focus,
+    .form-group select.error:focus {
+      box-shadow: 
+        0 0 0 4px rgba(239, 68, 68, 0.1),
+        0 4px 12px rgba(239, 68, 68, 0.15);
     }
 
     .error-message {
       color: #ef4444;
-      font-size: 0.875rem;
+      font-size: 0.813rem;
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .error-message::before {
+      content: '⚠️';
+      font-size: 0.75rem;
     }
 
     .field-hint {
-      color: #666;
-      font-size: 0.875rem;
+      color: #6b7280;
+      font-size: 0.813rem;
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    .field-hint::before {
+      content: '💡';
+      font-size: 0.75rem;
     }
 
     .form-actions {
       display: flex;
       justify-content: flex-end;
       gap: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid #e0e0e0;
+      padding-top: 2rem;
+      margin-top: 1rem;
+      border-top: 2px solid #f3f4f6;
     }
 
     .btn {
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
+      padding: 0.875rem 2rem;
+      border-radius: 12px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       border: none;
+      font-size: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:active::before {
+      width: 300px;
+      height: 300px;
     }
 
     .btn-secondary {
-      background: #f5f5f5;
-      color: #666;
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+      color: #4b5563;
+      border: 2px solid #e5e7eb;
     }
 
     .btn-secondary:hover {
-      background: #e0e0e0;
+      background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .btn-primary {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
+      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      bottom: -50%;
+      left: -50%;
+      background: linear-gradient(to bottom, 
+        rgba(255, 255, 255, 0.3) 0%, 
+        transparent 50%, 
+        rgba(0, 0, 0, 0.1) 100%);
+      transform: rotateZ(45deg) translateY(100%);
+      transition: transform 0.6s;
+    }
+
+    .btn-primary:hover::after {
+      transform: rotateZ(45deg) translateY(-100%);
     }
 
     .btn-primary:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 
+        0 8px 24px rgba(102, 126, 234, 0.5),
+        0 4px 12px rgba(118, 75, 162, 0.3);
     }
 
     .btn:disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
+      transform: none !important;
     }
   `]
 })
