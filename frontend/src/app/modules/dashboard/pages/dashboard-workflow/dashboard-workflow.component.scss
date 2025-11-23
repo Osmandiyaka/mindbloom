@@ -108,39 +108,24 @@
 
     .workflow-blocks {
         display: flex;
-        gap: 12px;
+        gap: 8px;
         flex-wrap: wrap;
         position: relative;
-        align-items: center;
+        align-items: flex-start;
 
         app-workflow-block {
             position: relative;
-            z-index: 2;
         }
 
-        svg.connector {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 80px;
-            transform: translateY(-50%);
-            pointer-events: none;
-            z-index: 0;
-
-            &.short {
-                width: 60%;
-            }
-
-            &.wide {
-                height: 100px;
-            }
-
-            path {
-                stroke: #D0D7E5;
-                stroke-width: 2;
-                fill: none;
-            }
+        // Simple arrow connector styling
+        .arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #D0D7E5;
+            font-size: 16px;
+            margin: 0 -2px;
+            align-self: center;
         }
     }
 }

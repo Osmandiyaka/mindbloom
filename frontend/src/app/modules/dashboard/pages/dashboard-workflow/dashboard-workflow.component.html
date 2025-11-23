@@ -39,28 +39,14 @@
                 <app-workflow-block title="Inquiries" subtitle="Manage inquiries" icon="mail"
                     (select)="navigateTo('/students')">
                 </app-workflow-block>
-
+                <span class="arrow">→</span>
                 <app-workflow-block title="Applications" subtitle="Review applications" icon="document"
                     (select)="navigateTo('/students')">
                 </app-workflow-block>
-
+                <span class="arrow">→</span>
                 <app-workflow-block title="Review & Decision" subtitle="Make admission decision" icon="checkmark"
                     (select)="navigateTo('/students')">
                 </app-workflow-block>
-
-                <!-- Arrow connectors -->
-                <svg class="connector" width="600" height="50"
-                    style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 0;">
-                    <defs>
-                        <marker id="arrow1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                            <polygon points="0 0, 6 3, 0 6" fill="#D0D7E5" />
-                        </marker>
-                    </defs>
-                    <path d="M 152 25 L 162 25" stroke="#D0D7E5" stroke-width="1.5" fill="none"
-                        marker-end="url(#arrow1)" />
-                    <path d="M 327 25 L 337 25" stroke="#D0D7E5" stroke-width="1.5" fill="none"
-                        marker-end="url(#arrow1)" />
-                </svg>
             </div>
         </section>
 
@@ -71,35 +57,20 @@
             <div class="workflow-blocks">
                 <app-workflow-block title="Fee Plans" subtitle="Setup fees" icon="tag" (select)="navigateTo('/fees')">
                 </app-workflow-block>
-
+                <span class="arrow">→</span>
                 <app-workflow-block title="Invoices" subtitle="Create invoices" icon="invoice"
                     (select)="navigateTo('/fees')">
                 </app-workflow-block>
-
+                <span class="arrow">→</span>
                 <app-workflow-block title="Receive Payments" subtitle="Process payments" icon="credit-card"
                     (select)="navigateTo('/fees')">
                 </app-workflow-block>
-
-                <app-workflow-block title="Deposits" subtitle="Bank deposits" icon="bank"
-                    (select)="navigateTo('/finance')">
-                </app-workflow-block>
-
-                <!-- Arrow connectors -->
-                <svg class="connector" width="900" height="100"
-                    style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 0;">
-                    <defs>
-                        <marker id="arrow2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                            <polygon points="0 0, 6 3, 0 6" fill="#D0D7E5" />
-                        </marker>
-                    </defs>
-                    <path d="M 152 50 L 162 50" stroke="#D0D7E5" stroke-width="1.5" fill="none"
-                        marker-end="url(#arrow2)" />
-                    <path d="M 327 50 L 337 50" stroke="#D0D7E5" stroke-width="1.5" fill="none"
-                        marker-end="url(#arrow2)" />
-                    <!-- Arrow going down from Receive Payments to Deposits -->
-                    <path d="M 417 50 L 417 65 L 350 65" stroke="#D0D7E5" stroke-width="1.5" fill="none"
-                        marker-end="url(#arrow2)" />
-                </svg>
+                
+                <div style="width: 100%; display: flex; justify-content: flex-start; padding-left: 24px;">
+                    <app-workflow-block title="Deposits" subtitle="Bank deposits" icon="bank"
+                        (select)="navigateTo('/finance')">
+                    </app-workflow-block>
+                </div>
             </div>
         </section>
 
@@ -111,41 +82,24 @@
                 <app-workflow-block title="Course Catalog" subtitle="Manage courses" icon="book"
                     (select)="navigateTo('/academics')">
                 </app-workflow-block>
-
+                <span class="arrow">→</span>
                 <app-workflow-block title="Sections & Timetable" subtitle="Schedule classes" icon="calendar"
                     (select)="navigateTo('/academics')">
                 </app-workflow-block>
-
-                <app-workflow-block title="Attendance" subtitle="Take attendance" icon="clipboard"
-                    (select)="navigateTo('/attendance')">
-                </app-workflow-block>
-
-                <app-workflow-block title="Enter Grades" subtitle="Grade students" icon="edit"
-                    (select)="navigateTo('/academics')">
-                </app-workflow-block>
-
-                <app-workflow-block title="Report Cards" subtitle="Generate reports" icon="chart"
-                    (select)="navigateTo('/academics')">
-                </app-workflow-block>
-
-                <!-- Arrow connectors -->
-                <svg class="connector" width="900" height="80"
-                    style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 0;">
-                    <defs>
-                        <marker id="arrow3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                            <polygon points="0 0, 6 3, 0 6" fill="#D0D7E5" />
-                        </marker>
-                    </defs>
-                    <path d="M 152 40 L 162 40" stroke="#D0D7E5" stroke-width="1.5" fill="none"
-                        marker-end="url(#arrow3)" />
-                    <!-- Curved path from Sections & Timetable down to Attendance -->
-                    <path d="M 327 40 L 327 55 L 337 55 L 337 40" stroke="#D0D7E5" stroke-width="1.5" fill="none"
-                        marker-end="url(#arrow3)" />
-                    <path d="M 502 40 L 512 40" stroke="#D0D7E5" stroke-width="1.5" fill="none"
-                        marker-end="url(#arrow3)" />
-                    <path d="M 677 40 L 687 40" stroke="#D0D7E5" stroke-width="1.5" fill="none"
-                        marker-end="url(#arrow3)" />
-                </svg>
+                
+                <div style="width: 100%; display: flex; gap: 8px; align-items: center; padding-left: 24px;">
+                    <app-workflow-block title="Attendance" subtitle="Take attendance" icon="clipboard"
+                        (select)="navigateTo('/attendance')">
+                    </app-workflow-block>
+                    <span class="arrow">→</span>
+                    <app-workflow-block title="Enter Grades" subtitle="Grade students" icon="edit"
+                        (select)="navigateTo('/academics')">
+                    </app-workflow-block>
+                    <span class="arrow">→</span>
+                    <app-workflow-block title="Report Cards" subtitle="Generate reports" icon="chart"
+                        (select)="navigateTo('/academics')">
+                    </app-workflow-block>
+                </div>
             </div>
         </section>
 
@@ -157,22 +111,10 @@
                 <app-workflow-block title="School Setup" subtitle="Configure school" icon="settings"
                     (select)="navigateTo('/setup')">
                 </app-workflow-block>
-
+                <span class="arrow">→</span>
                 <app-workflow-block title="Users & Roles" subtitle="Manage users and roles" icon="user"
                     (select)="navigateTo('/setup')">
                 </app-workflow-block>
-
-                <!-- Arrow connector -->
-                <svg class="connector" width="400" height="50"
-                    style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 0;">
-                    <defs>
-                        <marker id="arrow4" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                            <polygon points="0 0, 6 3, 0 6" fill="#D0D7E5" />
-                        </marker>
-                    </defs>
-                    <path d="M 152 25 L 162 25" stroke="#D0D7E5" stroke-width="1.5" fill="none"
-                        marker-end="url(#arrow4)" />
-                </svg>
             </div>
         </section>
 
@@ -184,22 +126,10 @@
                 <app-workflow-block title="Catalog" subtitle="Library catalog" icon="library"
                     (select)="navigateTo('/library')">
                 </app-workflow-block>
-
+                <span class="arrow">→</span>
                 <app-workflow-block title="Issue/Return" subtitle="Circulation" icon="return"
                     (select)="navigateTo('/library')">
                 </app-workflow-block>
-
-                <!-- Arrow connector -->
-                <svg class="connector" width="400" height="50"
-                    style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 0;">
-                    <defs>
-                        <marker id="arrow5" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                            <polygon points="0 0, 6 3, 0 6" fill="#D0D7E5" />
-                        </marker>
-                    </defs>
-                    <path d="M 152 25 L 162 25" stroke="#D0D7E5" stroke-width="1.5" fill="none"
-                        marker-end="url(#arrow5)" />
-                </svg>
             </div>
         </section>
 
@@ -211,28 +141,14 @@
                 <app-workflow-block title="Employees" subtitle="Manage employees" icon="people"
                     (select)="navigateTo('/hr')">
                 </app-workflow-block>
-
+                <span class="arrow">→</span>
                 <app-workflow-block title="Enter Time" subtitle="Staff timesheets" icon="clock"
                     (select)="navigateTo('/hr')">
                 </app-workflow-block>
-
+                <span class="arrow">→</span>
                 <app-workflow-block title="Pay Staff" subtitle="Process payroll" icon="credit-card"
                     (select)="navigateTo('/payroll')">
                 </app-workflow-block>
-
-                <!-- Arrow connectors -->
-                <svg class="connector" width="600" height="50"
-                    style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 0;">
-                    <defs>
-                        <marker id="arrow6" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                            <polygon points="0 0, 6 3, 0 6" fill="#D0D7E5" />
-                        </marker>
-                    </defs>
-                    <path d="M 152 25 L 162 25" stroke="#D0D7E5" stroke-width="1.5" fill="none"
-                        marker-end="url(#arrow6)" />
-                    <path d="M 327 25 L 337 25" stroke="#D0D7E5" stroke-width="1.5" fill="none"
-                        marker-end="url(#arrow6)" />
-                </svg>
             </div>
         </section>
 
@@ -244,22 +160,10 @@
                 <app-workflow-block title="Messages" subtitle="Message center" icon="message"
                     (select)="navigateTo('/dashboard')">
                 </app-workflow-block>
-
+                <span class="arrow">→</span>
                 <app-workflow-block title="Reports & Dashboards" subtitle="Analytics" icon="chart"
                     (select)="navigateTo('/dashboard')">
                 </app-workflow-block>
-
-                <!-- Arrow connector -->
-                <svg class="connector" width="400" height="50"
-                    style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 0;">
-                    <defs>
-                        <marker id="arrow7" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                            <polygon points="0 0, 6 3, 0 6" fill="#D0D7E5" />
-                        </marker>
-                    </defs>
-                    <path d="M 152 25 L 162 25" stroke="#D0D7E5" stroke-width="1.5" fill="none"
-                        marker-end="url(#arrow7)" />
-                </svg>
             </div>
         </section>
 
