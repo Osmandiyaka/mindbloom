@@ -28,19 +28,20 @@ import { GlobalToolbarComponent } from '../../shared/components/global-toolbar/g
 
     .content-wrapper {
       flex: 1;
-      margin-left: 260px;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      width: calc(100% - 260px);
 
       @media (max-width: 768px) {
-        margin-left: 0;
+        width: 100%;
       }
     }
 
     .main-content {
       flex: 1;
       padding: 2rem;
+      overflow-y: auto;
 
       @media (max-width: 768px) {
         padding: 1rem;
