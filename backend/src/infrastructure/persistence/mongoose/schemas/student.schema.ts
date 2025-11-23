@@ -3,10 +3,13 @@ import { Document, Types } from 'mongoose';
 
 @Schema({ collection: 'students', timestamps: true })
 export class StudentDocument extends Document {
+    @Prop({ type: Types.ObjectId, ref: 'Tenant', required: true, index: true })
+    tenantId: Types.ObjectId;
+
     @Prop({ required: true })
     name: string;
 
-    @Prop({ required: true, unique: true })
+    @Prop({ required: true })
     email: string;
 
     @Prop()
@@ -29,3 +32,7 @@ export class StudentDocument extends Document {
 }
 
 export const StudentSchema = SchemaFactory.createForClass(StudentDocument);
+
+// Add compound indexes for tenant-based queries
+StudentSchema.index({ tenantId: 1, email: 1 }, { unique: true });
+StudentSchema.index({ tenantId: 1, status: 1 });

@@ -1,0 +1,12 @@
+import { Tenant } from '../entities/tenant.entity';
+
+export const TENANT_REPOSITORY = 'TENANT_REPOSITORY';
+
+export interface ITenantRepository {
+    findAll(): Promise<Tenant[]>;
+    findById(id: string): Promise<Tenant | null>;
+    findBySubdomain(subdomain: string): Promise<Tenant | null>;
+    create(tenant: Tenant): Promise<Tenant>;
+    update(id: string, data: Partial<Tenant>): Promise<Tenant>;
+    delete(id: string): Promise<void>;
+}

@@ -1,6 +1,7 @@
 export class User {
     constructor(
         public readonly id: string,
+        public readonly tenantId: string,
         public readonly email: string,
         public readonly name: string,
         public readonly role: string = 'user',
@@ -14,12 +15,14 @@ export class User {
 
     static create(data: {
         id?: string;
+        tenantId: string;
         email: string;
         name: string;
         role?: string;
     }): User {
         return new User(
             data.id || crypto.randomUUID(),
+            data.tenantId,
             data.email,
             data.name,
             data.role || 'user',

@@ -1,9 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 @Schema({ collection: 'users', timestamps: true })
 export class UserDocument extends Document {
-    @Prop({ required: true, unique: true })
+    @Prop({ type: Types.ObjectId, ref: 'Tenant', required: true, index: true })
+    tenantId: Types.ObjectId;
+
+    @Prop({ required: true })
     email: string;
 
     @Prop({ required: true })
@@ -20,3 +23,6 @@ export class UserDocument extends Document {
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserDocument);
+
+// Add compound index for tenant-based queries
+UserSchema.index({ tenantId: 1, email: 1 }, { unique: true });

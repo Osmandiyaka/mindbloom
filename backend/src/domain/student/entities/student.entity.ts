@@ -1,6 +1,7 @@
 export class Student {
     constructor(
         public readonly id: string,
+        public readonly tenantId: string,
         public readonly name: string,
         public readonly email: string,
         public readonly phone?: string,
@@ -18,6 +19,7 @@ export class Student {
 
     static create(data: {
         id?: string;
+        tenantId: string;
         name: string;
         email: string;
         phone?: string;
@@ -28,6 +30,7 @@ export class Student {
     }): Student {
         return new Student(
             data.id || crypto.randomUUID(),
+            data.tenantId,
             data.name,
             data.email,
             data.phone,
@@ -38,9 +41,10 @@ export class Student {
         );
     }
 
-    update(data: Partial<Omit<Student, 'id' | 'createdAt'>>): Student {
+    update(data: Partial<Omit<Student, 'id' | 'tenantId' | 'createdAt'>>): Student {
         return new Student(
             this.id,
+            this.tenantId,
             data.name ?? this.name,
             data.email ?? this.email,
             data.phone ?? this.phone,
