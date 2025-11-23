@@ -15,7 +15,21 @@ export interface LoginResult {
         tenantId: string;
         email: string;
         name: string;
-        role: string;
+        roleId: string | null;
+        role: {
+            id: string;
+            name: string;
+            description: string;
+            isSystemRole: boolean;
+            permissions: Array<{
+                id: string;
+                resource: string;
+                displayName: string;
+                description: string;
+                actions: string[];
+                scope: string;
+            }>
+        } | null;
     };
 }
 

@@ -7,8 +7,10 @@ export class LoginResponseDto {
     @ApiProperty()
     user: {
         id: string;
+        tenantId: string;
         email: string;
         name: string;
-        role: string;
+        roleId: string | null;
+        role: any;
     };
 }

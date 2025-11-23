@@ -12,7 +12,10 @@ export class UserResponseDto {
     name: string;
 
     @ApiProperty()
-    role: string;
+    roleId: string | null;
+
+    @ApiProperty()
+    role: any;
 
     @ApiProperty()
     createdAt: Date;
@@ -22,7 +25,14 @@ export class UserResponseDto {
         dto.id = user.id;
         dto.email = user.email;
         dto.name = user.name;
-        dto.role = user.role;
+        dto.roleId = user.roleId;
+        dto.role = user.role ? {
+            id: user.role.id,
+            name: user.role.name,
+            description: user.role.description,
+            isSystemRole: user.role.isSystemRole,
+            permissions: user.role.permissions
+        } : null;
         dto.createdAt = user.createdAt;
         return dto;
     }

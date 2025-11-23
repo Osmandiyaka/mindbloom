@@ -124,10 +124,10 @@ export class MongooseUserRepository implements IUserRepository {
             }
         }
 
-        const roleId = doc.roleId 
-            ? (typeof doc.roleId === 'object' && '_id' in doc.roleId 
-                ? (doc.roleId as any)._id?.toString() 
-                : doc.roleId.toString()) 
+        const roleId = doc.roleId
+            ? (typeof doc.roleId === 'object' && '_id' in doc.roleId
+                ? (doc.roleId as any)._id?.toString()
+                : String(doc.roleId))
             : null;
 
         return new User(
