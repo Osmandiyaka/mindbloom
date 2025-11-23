@@ -202,7 +202,7 @@ export class StudentsListComponent implements OnInit {
 
   exportStudents(): void {
     const filters = this.searchTerm ? { search: this.searchTerm } : {};
-    
+
     this.studentService.exportStudents(filters).subscribe({
       next: (blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
