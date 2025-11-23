@@ -115,16 +115,7 @@
 
         app-workflow-block {
             position: relative;
-        }
-
-        // Simple arrow connector styling
-        .arrow {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: #C5CFD9;
-            font-size: 14px;
-            margin: 0;
+            z-index: 1;
         }
     }
 }
