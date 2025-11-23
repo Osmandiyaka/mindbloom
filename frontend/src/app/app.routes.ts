@@ -8,7 +8,7 @@ export const routes: Routes = [
     },
     {
         path: 'dashboard',
-        loadComponent: () => import('./modules/dashboard/pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+        loadComponent: () => import('./modules/dashboard/pages/dashboard-workflow/dashboard-workflow.component').then(m => m.DashboardWorkflowComponent)
     },
     {
         path: 'students',

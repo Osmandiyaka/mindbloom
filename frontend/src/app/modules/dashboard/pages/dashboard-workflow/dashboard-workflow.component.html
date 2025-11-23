@@ -1,0 +1,272 @@
+<div class="workflow-container">
+  <!-- Header -->
+  <div class="workflow-header">
+    <h2>Workflow Overview</h2>
+    <p class="header-subtitle">Click any task to navigate</p>
+
+    <div class="workflow-actions">
+      <button class="btn-secondary">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8 5V8L10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Show Info
+      </button>
+      <button class="btn-secondary">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Refresh Data
+      </button>
+      <button class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 3V13M13 8H3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Advance Workflow
+      </button>
+    </div>
+  </div>
+
+  <!-- Workflow Grid -->
+  <div class="workflow-grid">
+
+    <!-- ADMISSIONS SECTION -->
+    <section class="workflow-section">
+      <h3 class="section-title">ADMISSIONS</h3>
+
+      <div class="workflow-blocks">
+        <app-workflow-block
+          title="Inquiries"
+          subtitle="Manage inquiries"
+          icon="mail"
+          (select)="navigateTo('/students')">
+        </app-workflow-block>
+
+        <app-workflow-block
+          title="Applications"
+          subtitle="Review applications"
+          icon="document"
+          (select)="navigateTo('/students')">
+        </app-workflow-block>
+
+        <app-workflow-block
+          title="Review & Decision"
+          subtitle="Make admission decision"
+          icon="checkmark"
+          (select)="navigateTo('/students')">
+        </app-workflow-block>
+
+        <!-- Curved connector -->
+        <svg class="connector" viewBox="0 0 500 80" preserveAspectRatio="none">
+          <path d="M 10 40 Q 100 40, 190 40" stroke="#D0D7E5" stroke-width="2" fill="none"/>
+          <path d="M 210 40 Q 300 40, 390 40" stroke="#D0D7E5" stroke-width="2" fill="none"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- FINANCE & BANKING SECTION -->
+    <section class="workflow-section">
+      <h3 class="section-title">FINANCE & BANKING</h3>
+
+      <div class="workflow-blocks">
+        <app-workflow-block
+          title="Fee Plans"
+          subtitle="Setup fees"
+          icon="tag"
+          (select)="navigateTo('/fees')">
+        </app-workflow-block>
+
+        <app-workflow-block
+          title="Invoices"
+          subtitle="Create invoices"
+          icon="invoice"
+          (select)="navigateTo('/fees')">
+        </app-workflow-block>
+
+        <app-workflow-block
+          title="Receive Payments"
+          subtitle="Process payments"
+          icon="credit-card"
+          (select)="navigateTo('/fees')">
+        </app-workflow-block>
+
+        <app-workflow-block
+          title="Deposits"
+          subtitle="Bank deposits"
+          icon="bank"
+          (select)="navigateTo('/finance')">
+        </app-workflow-block>
+
+        <!-- Curved connector -->
+        <svg class="connector" viewBox="0 0 700 80" preserveAspectRatio="none">
+          <path d="M 10 40 Q 100 40, 190 40" stroke="#D0D7E5" stroke-width="2" fill="none"/>
+          <path d="M 210 40 Q 300 40, 390 40" stroke="#D0D7E5" stroke-width="2" fill="none"/>
+          <path d="M 410 40 Q 500 50, 590 40" stroke="#D0D7E5" stroke-width="2" fill="none"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ACADEMICS SECTION -->
+    <section class="workflow-section">
+      <h3 class="section-title">ACADEMICS</h3>
+
+      <div class="workflow-blocks">
+        <app-workflow-block
+          title="Course Catalog"
+          subtitle="Manage courses"
+          icon="book"
+          (select)="navigateTo('/academics')">
+        </app-workflow-block>
+
+        <app-workflow-block
+          title="Sections & Timetable"
+          subtitle="Schedule classes"
+          icon="calendar"
+          (select)="navigateTo('/academics')">
+        </app-workflow-block>
+
+        <app-workflow-block
+          title="Attendance"
+          subtitle="Take attendance"
+          icon="clipboard"
+          (select)="navigateTo('/attendance')">
+        </app-workflow-block>
+
+        <app-workflow-block
+          title="Enter Grades"
+          subtitle="Grade students"
+          icon="edit"
+          (select)="navigateTo('/academics')">
+        </app-workflow-block>
+
+        <app-workflow-block
+          title="Report Cards"
+          subtitle="Generate reports"
+          icon="chart"
+          (select)="navigateTo('/academics')">
+        </app-workflow-block>
+
+        <!-- Curved connector -->
+        <svg class="connector wide" viewBox="0 0 900 100" preserveAspectRatio="none">
+          <path d="M 10 50 Q 100 50, 190 50" stroke="#D0D7E5" stroke-width="2" fill="none"/>
+          <path d="M 210 50 Q 300 50, 390 50" stroke="#D0D7E5" stroke-width="2" fill="none"/>
+          <path d="M 410 50 Q 500 60, 590 50" stroke="#D0D7E5" stroke-width="2" fill="none"/>
+          <path d="M 610 50 Q 700 50, 790 50" stroke="#D0D7E5" stroke-width="2" fill="none"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ADMINISTRATION SECTION -->
+    <section class="workflow-section">
+      <h3 class="section-title">ADMINISTRATION</h3>
+
+      <div class="workflow-blocks">
+        <app-workflow-block
+          title="School Setup"
+          subtitle="Configure school"
+          icon="settings"
+          (select)="navigateTo('/setup')">
+        </app-workflow-block>
+
+        <app-workflow-block
+          title="Users & Roles"
+          subtitle="Manage users and roles"
+          icon="user"
+          (select)="navigateTo('/setup')">
+        </app-workflow-block>
+
+        <!-- Curved connector -->
+        <svg class="connector short" viewBox="0 0 350 80" preserveAspectRatio="none">
+          <path d="M 10 40 Q 100 40, 190 40" stroke="#D0D7E5" stroke-width="2" fill="none"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- LIBRARY SECTION -->
+    <section class="workflow-section">
+      <h3 class="section-title">LIBRARY</h3>
+
+      <div class="workflow-blocks">
+        <app-workflow-block
+          title="Catalog"
+          subtitle="Library catalog"
+          icon="library"
+          (select)="navigateTo('/library')">
+        </app-workflow-block>
+
+        <app-workflow-block
+          title="Issue/Return"
+          subtitle="Circulation"
+          icon="return"
+          (select)="navigateTo('/library')">
+        </app-workflow-block>
+
+        <!-- Curved connector -->
+        <svg class="connector short" viewBox="0 0 350 80" preserveAspectRatio="none">
+          <path d="M 10 40 Q 100 40, 190 40" stroke="#D0D7E5" stroke-width="2" fill="none"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- HR / PAYROLL SECTION -->
+    <section class="workflow-section">
+      <h3 class="section-title">HR / PAYROLL</h3>
+
+      <div class="workflow-blocks">
+        <app-workflow-block
+          title="Employees"
+          subtitle="Manage employees"
+          icon="people"
+          (select)="navigateTo('/hr')">
+        </app-workflow-block>
+
+        <app-workflow-block
+          title="Enter Time"
+          subtitle="Staff timesheets"
+          icon="clock"
+          (select)="navigateTo('/hr')">
+        </app-workflow-block>
+
+        <app-workflow-block
+          title="Pay Staff"
+          subtitle="Process payroll"
+          icon="credit-card"
+          (select)="navigateTo('/payroll')">
+        </app-workflow-block>
+
+        <!-- Curved connector -->
+        <svg class="connector" viewBox="0 0 500 80" preserveAspectRatio="none">
+          <path d="M 10 40 Q 100 40, 190 40" stroke="#D0D7E5" stroke-width="2" fill="none"/>
+          <path d="M 210 40 Q 300 40, 390 40" stroke="#D0D7E5" stroke-width="2" fill="none"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- COMMS & REPORTS SECTION -->
+    <section class="workflow-section">
+      <h3 class="section-title">COMMS & REPORTS</h3>
+
+      <div class="workflow-blocks">
+        <app-workflow-block
+          title="Messages"
+          subtitle="Message center"
+          icon="message"
+          (select)="navigateTo('/dashboard')">
+        </app-workflow-block>
+
+        <app-workflow-block
+          title="Reports & Dashboards"
+          subtitle="Analytics"
+          icon="chart"
+          (select)="navigateTo('/dashboard')">
+        </app-workflow-block>
+
+        <!-- Curved connector -->
+        <svg class="connector short" viewBox="0 0 350 80" preserveAspectRatio="none">
+          <path d="M 10 40 Q 100 40, 190 40" stroke="#D0D7E5" stroke-width="2" fill="none"/>
+        </svg>
+      </div>
+    </section>
+
+  </div>
+</div>
