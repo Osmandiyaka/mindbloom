@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { ThemeService, Theme } from '../../../core/services/theme.service';
 
 @Component({
-  selector: 'app-theme-switcher',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-theme-switcher',
+    standalone: true,
+    imports: [CommonModule],
+    template: `
     <div class="theme-switcher">
       <button 
         class="theme-btn"
@@ -52,7 +52,7 @@ import { ThemeService, Theme } from '../../../core/services/theme.service';
       </button>
     </div>
   `,
-  styles: [`
+    styles: [`
     .theme-switcher {
       display: flex;
       align-items: center;
@@ -120,12 +120,12 @@ import { ThemeService, Theme } from '../../../core/services/theme.service';
   `]
 })
 export class ThemeSwitcherComponent {
-  currentTheme = this.themeService.currentTheme;
-  effectiveTheme = this.themeService.effectiveTheme;
+    currentTheme = this.themeService.currentTheme;
+    effectiveTheme = this.themeService.effectiveTheme;
 
-  constructor(private themeService: ThemeService) {}
+    constructor(private themeService: ThemeService) { }
 
-  setTheme(theme: Theme): void {
-    this.themeService.setTheme(theme);
-  }
+    setTheme(theme: Theme): void {
+        this.themeService.setTheme(theme);
+    }
 }
