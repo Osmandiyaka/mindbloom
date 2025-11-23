@@ -15,6 +15,10 @@ export class RegisterDto {
     @IsString()
     name: string;
 
+    @ApiProperty()
+    @IsString()
+    tenantId: string;
+
     @ApiProperty({ required: false })
     @IsString()
     @IsOptional()
