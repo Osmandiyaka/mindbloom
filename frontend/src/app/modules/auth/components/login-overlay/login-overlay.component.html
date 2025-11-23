@@ -1,0 +1,120 @@
+<div class="login-overlay">
+    <div class="overlay-backdrop"></div>
+
+    <div class="login-card">
+        <!-- Left Brand Panel -->
+        <div class="brand-panel">
+            <div class="brand-content">
+                <h1 class="brand-title">SchoolStudio Pro</h1>
+                <p class="brand-subtitle">
+                    Sign in to manage Admissions,<br>
+                    Academics, Finance & more.
+                </p>
+
+                <div class="brand-illustration">
+                    <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+                        <!-- School building illustration -->
+                        <g>
+                            <!-- Main building -->
+                            <rect x="40" y="60" width="120" height="80" fill="#3B82F6" rx="4" />
+
+                            <!-- Roof -->
+                            <path d="M 30 60 L 100 30 L 170 60 Z" fill="#2563EB" />
+
+                            <!-- Windows row 1 -->
+                            <rect x="55" y="75" width="18" height="18" fill="#60A5FA" rx="2" />
+                            <rect x="91" y="75" width="18" height="18" fill="#60A5FA" rx="2" />
+                            <rect x="127" y="75" width="18" height="18" fill="#60A5FA" rx="2" />
+
+                            <!-- Windows row 2 -->
+                            <rect x="55" y="105" width="18" height="18" fill="#60A5FA" rx="2" />
+                            <rect x="91" y="105" width="18" height="18" fill="#60A5FA" rx="2" />
+                            <rect x="127" y="105" width="18" height="18" fill="#60A5FA" rx="2" />
+
+                            <!-- Door -->
+                            <rect x="85" y="110" width="30" height="30" fill="#1E3A8A" rx="2" />
+                            <circle cx="108" cy="125" r="2" fill="#60A5FA" />
+                        </g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Login Panel -->
+        <div class="login-panel">
+            <h2 class="welcome-title">Welcome back</h2>
+
+            <form (ngSubmit)="onSubmit()" class="login-form">
+                <!-- School Code -->
+                <div class="form-group">
+                    <label class="form-label">School Code</label>
+                    <div class="tenant-field">
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path
+                                    d="M2 6L8 2L14 6V13C14 13.5304 13.7893 14.0391 13.4142 14.4142C13.0391 14.7893 12.5304 15 12 15H4C3.46957 15 2.96086 14.7893 2.58579 14.4142C2.21071 14.0391 2 13.5304 2 13V6Z"
+                                    stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            <input type="text" class="form-input" [value]="currentTenant" readonly />
+                        </div>
+                        <button type="button" class="change-btn" (click)="onChangeTenant()">
+                            Change
+                        </button>
+                    </div>
+                    <p class="form-help">This is your tenancy name (school code).</p>
+                </div>
+
+                <!-- Username -->
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path
+                                d="M13 14V12.6667C13 11.9594 12.719 11.2811 12.219 10.781C11.7189 10.281 11.0406 10 10.3333 10H5.66667C4.95942 10 4.28115 10.281 3.78105 10.781C3.28095 11.2811 3 11.9594 3 12.6667V14M10.6667 4.66667C10.6667 6.13943 9.47276 7.33333 8 7.33333C6.52724 7.33333 5.33333 6.13943 5.33333 4.66667C5.33333 3.19391 6.52724 2 8 2C9.47276 2 10.6667 3.19391 10.6667 4.66667Z"
+                                stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <input type="text" class="form-input" placeholder="admin" [value]="username()"
+                            (input)="username.set($any($event.target).value)" required />
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path
+                                d="M12.6667 7.33333H3.33333C2.59695 7.33333 2 7.93029 2 8.66667V13.3333C2 14.0697 2.59695 14.6667 3.33333 14.6667H12.6667C13.403 14.6667 14 14.0697 14 13.3333V8.66667C14 7.93029 13.403 7.33333 12.6667 7.33333Z"
+                                stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <path
+                                d="M4.66675 7.33333V4.66667C4.66675 3.78261 5.01794 2.93477 5.64306 2.30964C6.26818 1.68452 7.11603 1.33333 8.00008 1.33333C8.88414 1.33333 9.73198 1.68452 10.3571 2.30964C10.9822 2.93477 11.3334 3.78261 11.3334 4.66667V7.33333"
+                                stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <input type="password" class="form-input" [value]="password()"
+                            (input)="password.set($any($event.target).value)" required />
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                @if (errorMessage()) {
+                <div class="error-message">{{ errorMessage() }}</div>
+                }
+
+                <!-- Remember Me -->
+                <div class="form-group remember-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="checkbox-input" [checked]="rememberMe()"
+                            (change)="rememberMe.set($any($event.target).checked)" />
+                        <span class="checkbox-text">Remember me</span>
+                    </label>
+                </div>
+
+                <!-- Sign In Button -->
+                <button type="submit" class="signin-btn" [disabled]="isLoading()">
+                    {{ isLoading() ? 'Signing in...' : 'Sign in' }}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

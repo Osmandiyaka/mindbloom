@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
@@ -27,6 +27,9 @@ export class AuthService {
 
     private currentUserSubject = new BehaviorSubject<User | null>(this.getUserFromStorage());
     public currentUser$ = this.currentUserSubject.asObservable();
+
+    // Signal for login overlay visibility
+    public showLoginOverlay = signal(!this.isAuthenticated());
 
     constructor(
         private http: HttpClient,
@@ -65,6 +68,7 @@ export class AuthService {
         localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
         localStorage.setItem('user', JSON.stringify(response.user));
         this.currentUserSubject.next(response.user);
+        this.showLoginOverlay.set(false); // Hide overlay on successful login
     }
 
     private getUserFromStorage(): User | null {
