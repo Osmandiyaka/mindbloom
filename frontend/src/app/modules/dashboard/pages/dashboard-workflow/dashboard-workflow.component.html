@@ -1,230 +1,43 @@
-<div class="workflow-container">
-    <!-- Header -->
+<div class="workflow-page">
     <div class="workflow-header">
         <h2>Workflow Overview</h2>
-
-        <div class="workflow-actions">
-            <button class="btn-secondary">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5" />
-                    <path d="M8 5V8L10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                </svg>
-                Show Info
-            </button>
-            <button class="btn-secondary">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2"
-                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                </svg>
-                Refresh Data
-            </button>
-            <button class="btn-primary">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M8 3V13M13 8H3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                </svg>
-                Advance Workflow
-            </button>
-        </div>
     </div>
 
-    <!-- Workflow Grid -->
-    <div class="workflow-grid">
+    <div class="workflow-canvas">
+        <!-- Section Background Bands -->
+        <div class="section-band admissions-band">
+            <span class="section-label">ADMISSIONS</span>
+        </div>
+        <div class="section-band finance-band">
+            <span class="section-label">FINANCE</span>
+        </div>
+        <div class="section-band academics-band">
+            <span class="section-label">ACADEMICS</span>
+        </div>
+        <div class="section-band hr-band">
+            <span class="section-label">HR / PAYROLL</span>
+        </div>
 
-        <!-- ADMISSIONS SECTION -->
-        <section class="workflow-section">
-            <h3 class="section-title">ADMISSIONS</h3>
+        <!-- SVG Connectors -->
+        <svg class="workflow-connections">
+            <defs>
+                <marker id="arrowHead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6"
+                    orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#B0B8C3"></path>
+                </marker>
+            </defs>
 
-            <div class="workflow-blocks" style="position: relative;">
-                <app-workflow-block title="Inquiries" subtitle="Manage inquiries" icon="mail"
-                    (select)="navigateTo('/students')">
-                </app-workflow-block>
-                <app-workflow-block title="Applications" subtitle="Review applications" icon="document"
-                    (select)="navigateTo('/students')">
-                </app-workflow-block>
-                <app-workflow-block title="Review & Decision" subtitle="Make admission decision" icon="checkmark"
-                    (select)="navigateTo('/students')">
-                </app-workflow-block>
+            <g *ngFor="let edge of edges">
+                <path [attr.d]="buildPath(edge)" stroke="#B0B8C3" stroke-width="2" fill="none"
+                    marker-end="url(#arrowHead)" />
+            </g>
+        </svg>
 
-                <!-- Connectors -->
-                <svg
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
-                    <line x1="132" y1="22" x2="166" y2="22" stroke="#C5CFD9" stroke-width="1.5" />
-                    <polygon points="166,22 161,20 161,24" fill="#C5CFD9" />
-                    <line x1="298" y1="22" x2="332" y2="22" stroke="#C5CFD9" stroke-width="1.5" />
-                    <polygon points="332,22 327,20 327,24" fill="#C5CFD9" />
-                </svg>
-            </div>
-        </section>
-
-        <!-- FINANCE & BANKING SECTION -->
-        <section class="workflow-section">
-            <h3 class="section-title">FINANCE & BANKING</h3>
-
-            <div class="workflow-blocks" style="position: relative;">
-                <app-workflow-block title="Fee Plans" subtitle="Setup fees" icon="tag" (select)="navigateTo('/fees')">
-                </app-workflow-block>
-                <app-workflow-block title="Invoices" subtitle="Create invoices" icon="invoice"
-                    (select)="navigateTo('/fees')">
-                </app-workflow-block>
-                <app-workflow-block title="Receive Payments" subtitle="Process payments" icon="credit-card"
-                    (select)="navigateTo('/fees')">
-                </app-workflow-block>
-
-                <div
-                    style="width: 100%; display: flex; justify-content: flex-start; margin-top: 4px; padding-left: 20px;">
-                    <app-workflow-block title="Deposits" subtitle="Bank deposits" icon="bank"
-                        (select)="navigateTo('/finance')">
-                    </app-workflow-block>
-                </div>
-
-                <!-- Connectors -->
-                <svg
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
-                    <line x1="132" y1="22" x2="166" y2="22" stroke="#C5CFD9" stroke-width="1.5" />
-                    <polygon points="166,22 161,20 161,24" fill="#C5CFD9" />
-                    <line x1="298" y1="22" x2="332" y2="22" stroke="#C5CFD9" stroke-width="1.5" />
-                    <polygon points="332,22 327,20 327,24" fill="#C5CFD9" />
-                    <!-- Arrow down from Receive Payments to Deposits -->
-                    <line x1="464" y1="22" x2="464" y2="38" stroke="#C5CFD9" stroke-width="1.5" />
-                    <line x1="464" y1="38" x2="152" y2="38" stroke="#C5CFD9" stroke-width="1.5" />
-                    <line x1="152" y1="38" x2="152" y2="66" stroke="#C5CFD9" stroke-width="1.5" />
-                    <polygon points="152,66 150,61 154,61" fill="#C5CFD9" />
-                </svg>
-            </div>
-        </section>
-
-        <!-- ACADEMICS SECTION -->
-        <section class="workflow-section">
-            <h3 class="section-title">ACADEMICS</h3>
-
-            <div class="workflow-blocks" style="position: relative;">
-                <app-workflow-block title="Course Catalog" subtitle="Manage courses" icon="book"
-                    (select)="navigateTo('/academics')">
-                </app-workflow-block>
-                <app-workflow-block title="Sections & Timetable" subtitle="Schedule classes" icon="calendar"
-                    (select)="navigateTo('/academics')">
-                </app-workflow-block>
-
-                <div
-                    style="width: 100%; display: flex; gap: 6px; align-items: center; margin-top: 4px; padding-left: 20px;">
-                    <app-workflow-block title="Attendance" subtitle="Take attendance" icon="clipboard"
-                        (select)="navigateTo('/attendance')">
-                    </app-workflow-block>
-                    <app-workflow-block title="Enter Grades" subtitle="Grade students" icon="edit"
-                        (select)="navigateTo('/academics')">
-                    </app-workflow-block>
-                    <app-workflow-block title="Report Cards" subtitle="Generate reports" icon="chart"
-                        (select)="navigateTo('/academics')">
-                    </app-workflow-block>
-                </div>
-
-                <!-- Connectors -->
-                <svg
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
-                    <line x1="132" y1="22" x2="166" y2="22" stroke="#C5CFD9" stroke-width="1.5" />
-                    <polygon points="166,22 161,20 161,24" fill="#C5CFD9" />
-                    <!-- Arrow down from Sections to Attendance -->
-                    <line x1="298" y1="22" x2="298" y2="40" stroke="#C5CFD9" stroke-width="1.5" />
-                    <line x1="298" y1="40" x2="152" y2="40" stroke="#C5CFD9" stroke-width="1.5" />
-                    <line x1="152" y1="40" x2="152" y2="66" stroke="#C5CFD9" stroke-width="1.5" />
-                    <polygon points="152,66 150,61 154,61" fill="#C5CFD9" />
-                    <!-- Second row arrows -->
-                    <line x1="284" y1="66" x2="318" y2="66" stroke="#C5CFD9" stroke-width="1.5" />
-                    <polygon points="318,66 313,64 313,68" fill="#C5CFD9" />
-                    <line x1="450" y1="66" x2="484" y2="66" stroke="#C5CFD9" stroke-width="1.5" />
-                    <polygon points="484,66 479,64 479,68" fill="#C5CFD9" />
-                </svg>
-            </div>
-        </section>
-
-        <!-- ADMINISTRATION SECTION -->
-        <section class="workflow-section">
-            <h3 class="section-title">ADMINISTRATION</h3>
-
-            <div class="workflow-blocks" style="position: relative;">
-                <app-workflow-block title="School Setup" subtitle="Configure school" icon="settings"
-                    (select)="navigateTo('/setup')">
-                </app-workflow-block>
-                <app-workflow-block title="Users & Roles" subtitle="Manage users and roles" icon="user"
-                    (select)="navigateTo('/setup')">
-                </app-workflow-block>
-
-                <!-- Connectors -->
-                <svg
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
-                    <line x1="132" y1="22" x2="166" y2="22" stroke="#C5CFD9" stroke-width="1.5" />
-                    <polygon points="166,22 161,20 161,24" fill="#C5CFD9" />
-                </svg>
-            </div>
-        </section>
-
-        <!-- LIBRARY SECTION -->
-        <section class="workflow-section">
-            <h3 class="section-title">LIBRARY</h3>
-
-            <div class="workflow-blocks" style="position: relative;">
-                <app-workflow-block title="Book Catalog" subtitle="Manage books" icon="book"
-                    (select)="navigateTo('/library')">
-                </app-workflow-block>
-                <app-workflow-block title="Book Issue & Return" subtitle="Circulation" icon="swap"
-                    (select)="navigateTo('/library')">
-                </app-workflow-block>
-
-                <!-- Connectors -->
-                <svg
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
-                    <line x1="132" y1="22" x2="166" y2="22" stroke="#C5CFD9" stroke-width="1.5" />
-                    <polygon points="166,22 161,20 161,24" fill="#C5CFD9" />
-                </svg>
-            </div>
-        </section>
-
-        <!-- HR / PAYROLL SECTION -->
-        <section class="workflow-section">
-            <h3 class="section-title">HR / PAYROLL</h3>
-
-            <div class="workflow-blocks" style="position: relative;">
-                <app-workflow-block title="Employees" subtitle="Manage employees" icon="people"
-                    (select)="navigateTo('/hr')">
-                </app-workflow-block>
-                <app-workflow-block title="Enter Time" subtitle="Staff timesheets" icon="clock"
-                    (select)="navigateTo('/hr')">
-                </app-workflow-block>
-                <app-workflow-block title="Pay Staff" subtitle="Process payroll" icon="credit-card"
-                    (select)="navigateTo('/payroll')">
-                </app-workflow-block>
-
-                <!-- Connectors -->
-                <svg
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
-                    <line x1="132" y1="22" x2="166" y2="22" stroke="#C5CFD9" stroke-width="1.5" />
-                    <polygon points="166,22 161,20 161,24" fill="#C5CFD9" />
-                    <line x1="298" y1="22" x2="332" y2="22" stroke="#C5CFD9" stroke-width="1.5" />
-                    <polygon points="332,22 327,20 327,24" fill="#C5CFD9" />
-                </svg>
-            </div>
-        </section>
-
-        <!-- COMMS & REPORTS SECTION -->
-        <section class="workflow-section">
-            <h3 class="section-title">COMMS & REPORTS</h3>
-
-            <div class="workflow-blocks" style="position: relative;">
-                <app-workflow-block title="Messages" subtitle="Message center" icon="message"
-                    (select)="navigateTo('/dashboard')">
-                </app-workflow-block>
-                <app-workflow-block title="Reports & Dashboards" subtitle="Analytics" icon="chart"
-                    (select)="navigateTo('/dashboard')">
-                </app-workflow-block>
-
-                <!-- Connectors -->
-                <svg
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
-                    <line x1="132" y1="22" x2="166" y2="22" stroke="#C5CFD9" stroke-width="1.5" />
-                    <polygon points="166,22 161,20 161,24" fill="#C5CFD9" />
-                </svg>
-            </div>
-        </section>
-
+        <!-- Workflow Nodes -->
+        <div *ngFor="let node of nodes" class="workflow-node" [style.left.px]="node.x" [style.top.px]="node.y">
+            <app-workflow-node [title]="node.title" [subtitle]="node.subtitle" [icon]="node.icon"
+                (select)="onNodeClick(node)">
+            </app-workflow-node>
+        </div>
     </div>
 </div>
