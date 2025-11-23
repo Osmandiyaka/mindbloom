@@ -138,6 +138,7 @@ export class MongooseUserRepository implements IUserRepository {
             roleId,
             role,
             permissions,
+            doc.profilePicture,
             doc.createdAt,
             doc.updatedAt,
         );

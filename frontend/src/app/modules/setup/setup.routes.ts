@@ -22,6 +22,14 @@ export const SETUP_ROUTES: Routes = [
         loadComponent: () => import('./pages/users/user-list.component').then(m => m.UserListComponent)
     },
     {
+        path: 'users/create',
+        loadComponent: () => import('./pages/users/user-form.component').then(m => m.UserFormComponent)
+    },
+    {
+        path: 'users/edit/:id',
+        loadComponent: () => import('./pages/users/user-form.component').then(m => m.UserFormComponent)
+    },
+    {
         path: 'students',
         loadComponent: () => import('./pages/students/student-list/student-list.component').then(m => m.StudentListComponent)
     }

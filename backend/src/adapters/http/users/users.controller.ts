@@ -2,6 +2,7 @@ import {
     Controller,
     Get,
     Post,
+    Patch,
     Param,
     Body,
     UseGuards,
@@ -11,8 +12,12 @@ import { IsArray, IsString } from 'class-validator';
 import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard';
 import { TenantGuard } from '../../../common/tenant/tenant.guard';
 import { AddPermissionsToUserUseCase } from '../../../application/rbac/use-cases/add-permissions-to-user.use-case';
+import { CreateUserUseCase, UpdateUserUseCase } from '../../../application/user/use-cases';
 import { IUserRepository, USER_REPOSITORY } from '../../../domain/user/ports/user.repository.interface';
 import { Inject } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UserResponseDto } from '../auth/dto/user-response.dto';
 
 class AddPermissionsDto {
     @IsArray()
@@ -27,6 +32,8 @@ export class UsersController {
         @Inject(USER_REPOSITORY)
         private readonly userRepository: IUserRepository,
         private readonly addPermissionsToUser: AddPermissionsToUserUseCase,
+        private readonly createUserUseCase: CreateUserUseCase,
+        private readonly updateUserUseCase: UpdateUserUseCase,
     ) { }
 
     @Get()
@@ -38,15 +45,34 @@ export class UsersController {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role,
+            roleId: user.roleId,
+            role: user.role ? {
+                id: user.role.id,
+                name: user.role.name,
+            } : null,
             permissions: user.permissions.map(p => ({
                 id: p.id,
                 resource: p.resource,
                 displayName: p.displayName,
                 actions: p.actions,
             })),
+            profilePicture: user.profilePicture,
             createdAt: user.createdAt,
         }));
+    }
+
+    @Post()
+    async createUser(@Request() req, @Body() dto: CreateUserDto): Promise<UserResponseDto> {
+        const user = await this.createUserUseCase.execute({
+            tenantId: req.user.tenantId,
+            email: dto.email,
+            name: dto.name,
+            password: dto.password,
+            roleId: dto.roleId,
+            profilePicture: dto.profilePicture,
+        });
+
+        return UserResponseDto.fromDomain(user);
     }
 
     @Get(':id')
@@ -61,15 +87,33 @@ export class UsersController {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role,
+            roleId: user.roleId,
+            role: user.role ? {
+                id: user.role.id,
+                name: user.role.name,
+            } : null,
             permissions: user.permissions.map(p => ({
                 id: p.id,
                 resource: p.resource,
                 displayName: p.displayName,
                 actions: p.actions,
             })),
+            profilePicture: user.profilePicture,
             createdAt: user.createdAt,
         };
+    }
+
+    @Patch(':id')
+    async updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto): Promise<UserResponseDto> {
+        const user = await this.updateUserUseCase.execute({
+            userId: id,
+            email: dto.email,
+            name: dto.name,
+            roleId: dto.roleId,
+            profilePicture: dto.profilePicture,
+        });
+
+        return UserResponseDto.fromDomain(user);
     }
 
     @Post(':id/permissions')
