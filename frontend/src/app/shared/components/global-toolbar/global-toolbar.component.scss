@@ -110,6 +110,39 @@
         min-width: 100px;
     }
 
+    .logout-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border: none;
+        background: transparent;
+        color: #4a5568;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        font-size: 14px;
+        font-weight: 500;
+
+        svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        span {
+            font-family: inherit;
+        }
+
+        &:hover {
+            background: #FEF2F2;
+            color: #DC2626;
+        }
+
+        &:active {
+            transform: scale(0.98);
+        }
+    }
+
     @media (max-width: 768px) {
         padding: 0 12px;
         height: 52px;

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
     selector: 'app-global-toolbar',
@@ -11,6 +12,8 @@ import { FormsModule } from '@angular/forms';
 })
 export class GlobalToolbarComponent {
     searchQuery: string = '';
+
+    constructor(private authService: AuthService) { }
 
     onSearch() {
         console.log('Search:', this.searchQuery);
@@ -39,5 +42,9 @@ export class GlobalToolbarComponent {
 
     onMessagesClick() {
         // Navigate to messages
+    }
+
+    onLogout() {
+        this.authService.logout();
     }
 }
