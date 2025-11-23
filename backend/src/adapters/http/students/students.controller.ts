@@ -87,117 +87,6 @@ export class StudentsController {
         return students.map(StudentResponseDto.fromDomain);
     }
 
-    @Get(':id')
-    @ApiOperation({ summary: 'Get student by ID' })
-    @ApiResponse({ status: 200, description: 'Student found', type: StudentResponseDto })
-    @ApiResponse({ status: 404, description: 'Student not found' })
-    async findOne(@Param('id') id: string): Promise<StudentResponseDto> {
-        const tenantId = this.tenantContext.tenantId;
-        const student = await this.getStudentByIdUseCase.execute(id, tenantId);
-        return StudentResponseDto.fromDomain(student);
-    }
-
-    @Patch(':id')
-    @ApiOperation({ summary: 'Update student' })
-    @ApiResponse({ status: 200, description: 'Student updated successfully', type: StudentResponseDto })
-    @ApiResponse({ status: 404, description: 'Student not found' })
-    async update(
-        @Param('id') id: string,
-        @Body() updateStudentDto: UpdateStudentDto,
-    ): Promise<StudentResponseDto> {
-        const tenantId = this.tenantContext.tenantId;
-        const student = await this.updateStudentUseCase.execute(id, tenantId, updateStudentDto as any);
-        return StudentResponseDto.fromDomain(student);
-    }
-
-    @Delete(':id')
-    @HttpCode(HttpStatus.NO_CONTENT)
-    @ApiOperation({ summary: 'Delete student' })
-    @ApiResponse({ status: 204, description: 'Student deleted successfully' })
-    @ApiResponse({ status: 404, description: 'Student not found' })
-    async remove(@Param('id') id: string): Promise<void> {
-        const tenantId = this.tenantContext.tenantId;
-        await this.deleteStudentUseCase.execute(id, tenantId);
-    }
-
-    @Post(':id/guardians')
-    @ApiOperation({ summary: 'Add a guardian to student' })
-    @ApiResponse({ status: 200, description: 'Guardian added successfully', type: StudentResponseDto })
-    async addGuardian(
-        @Param('id') id: string,
-        @Body() guardianDto: any,
-    ): Promise<StudentResponseDto> {
-        const tenantId = this.tenantContext.tenantId;
-        const student = await this.addGuardianUseCase.execute(id, tenantId, guardianDto);
-        return StudentResponseDto.fromDomain(student);
-    }
-
-    @Patch(':id/enrollment')
-    @ApiOperation({ summary: 'Update student enrollment information' })
-    @ApiResponse({ status: 200, description: 'Enrollment updated successfully', type: StudentResponseDto })
-    async updateEnrollment(
-        @Param('id') id: string,
-        @Body() enrollmentDto: any,
-    ): Promise<StudentResponseDto> {
-        const tenantId = this.tenantContext.tenantId;
-        const student = await this.updateEnrollmentUseCase.execute(id, tenantId, enrollmentDto);
-        return StudentResponseDto.fromDomain(student);
-    }
-
-    @Post('import')
-    @UseInterceptors(FileInterceptor('file'))
-    @ApiOperation({ summary: 'Import students from CSV file' })
-    @ApiConsumes('multipart/form-data')
-    @ApiResponse({ status: 200, description: 'Import result' })
-    async importStudents(
-        @UploadedFile() file: any,
-    ): Promise<any> {
-        const tenantId = this.tenantContext.tenantId;
-
-        if (!file) {
-            throw new Error('No file uploaded');
-        }
-
-        // Parse CSV file
-        const content = file.buffer.toString('utf-8');
-        const lines = content.split('\n').filter(line => line.trim());
-
-        if (lines.length < 2) {
-            throw new Error('File must contain at least a header row and one data row');
-        }
-
-        const headers = this.parseCSVLine(lines[0]);
-        const results = {
-            total: 0,
-            successful: 0,
-            failed: 0,
-            errors: [] as any[],
-        };
-
-        for (let i = 1; i < lines.length; i++) {
-            try {
-                const values = this.parseCSVLine(lines[i]);
-
-                // Skip empty rows
-                if (values.every(v => !v || v.trim() === '')) continue;
-
-                results.total++;
-
-                const studentData = this.mapCSVToStudent(headers, values);
-                await this.createStudentUseCase.execute(studentData, tenantId);
-                results.successful++;
-            } catch (error) {
-                results.failed++;
-                results.errors.push({
-                    row: i + 1,
-                    message: error.message,
-                });
-            }
-        }
-
-        return results;
-    }
-
     @Get('export')
     @ApiOperation({ summary: 'Export students to CSV' })
     @ApiResponse({ status: 200, description: 'CSV file' })
@@ -268,6 +157,117 @@ export class StudentsController {
         }
 
         return new StreamableFile(buffer);
+    }
+
+    @Post('import')
+    @UseInterceptors(FileInterceptor('file'))
+    @ApiOperation({ summary: 'Import students from CSV file' })
+    @ApiConsumes('multipart/form-data')
+    @ApiResponse({ status: 200, description: 'Import result' })
+    async importStudents(
+        @UploadedFile() file: any,
+    ): Promise<any> {
+        const tenantId = this.tenantContext.tenantId;
+
+        if (!file) {
+            throw new Error('No file uploaded');
+        }
+
+        // Parse CSV file
+        const content = file.buffer.toString('utf-8');
+        const lines = content.split('\n').filter(line => line.trim());
+
+        if (lines.length < 2) {
+            throw new Error('File must contain at least a header row and one data row');
+        }
+
+        const headers = this.parseCSVLine(lines[0]);
+        const results = {
+            total: 0,
+            successful: 0,
+            failed: 0,
+            errors: [] as any[],
+        };
+
+        for (let i = 1; i < lines.length; i++) {
+            try {
+                const values = this.parseCSVLine(lines[i]);
+
+                // Skip empty rows
+                if (values.every(v => !v || v.trim() === '')) continue;
+
+                results.total++;
+
+                const studentData = this.mapCSVToStudent(headers, values);
+                await this.createStudentUseCase.execute(studentData, tenantId);
+                results.successful++;
+            } catch (error) {
+                results.failed++;
+                results.errors.push({
+                    row: i + 1,
+                    message: error.message,
+                });
+            }
+        }
+
+        return results;
+    }
+
+    @Get(':id')
+    @ApiOperation({ summary: 'Get student by ID' })
+    @ApiResponse({ status: 200, description: 'Student found', type: StudentResponseDto })
+    @ApiResponse({ status: 404, description: 'Student not found' })
+    async findOne(@Param('id') id: string): Promise<StudentResponseDto> {
+        const tenantId = this.tenantContext.tenantId;
+        const student = await this.getStudentByIdUseCase.execute(id, tenantId);
+        return StudentResponseDto.fromDomain(student);
+    }
+
+    @Patch(':id')
+    @ApiOperation({ summary: 'Update student' })
+    @ApiResponse({ status: 200, description: 'Student updated successfully', type: StudentResponseDto })
+    @ApiResponse({ status: 404, description: 'Student not found' })
+    async update(
+        @Param('id') id: string,
+        @Body() updateStudentDto: UpdateStudentDto,
+    ): Promise<StudentResponseDto> {
+        const tenantId = this.tenantContext.tenantId;
+        const student = await this.updateStudentUseCase.execute(id, tenantId, updateStudentDto as any);
+        return StudentResponseDto.fromDomain(student);
+    }
+
+    @Delete(':id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Delete student' })
+    @ApiResponse({ status: 204, description: 'Student deleted successfully' })
+    @ApiResponse({ status: 404, description: 'Student not found' })
+    async remove(@Param('id') id: string): Promise<void> {
+        const tenantId = this.tenantContext.tenantId;
+        await this.deleteStudentUseCase.execute(id, tenantId);
+    }
+
+    @Post(':id/guardians')
+    @ApiOperation({ summary: 'Add a guardian to student' })
+    @ApiResponse({ status: 200, description: 'Guardian added successfully', type: StudentResponseDto })
+    async addGuardian(
+        @Param('id') id: string,
+        @Body() guardianDto: any,
+    ): Promise<StudentResponseDto> {
+        const tenantId = this.tenantContext.tenantId;
+        const student = await this.addGuardianUseCase.execute(id, tenantId, guardianDto);
+        return StudentResponseDto.fromDomain(student);
+    }
+
+    @Patch(':id/enrollment')
+    @ApiOperation({ summary: 'Update student enrollment information' })
+    @ApiResponse({ status: 200, description: 'Enrollment updated successfully', type: StudentResponseDto })
+    async updateEnrollment(
+        @Param('id') id: string,
+        @Body() enrollmentDto: any,
+    ): Promise<StudentResponseDto> {
+        const tenantId = this.tenantContext.tenantId;
+        const student = await this.updateEnrollmentUseCase.execute(id, tenantId, enrollmentDto);
+        return StudentResponseDto.fromDomain(student);
     }
 
     private parseCSVLine(line: string): string[] {
