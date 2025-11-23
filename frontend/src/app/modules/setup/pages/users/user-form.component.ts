@@ -298,23 +298,12 @@ import { Role } from '../../../../core/models/role.model';
       box-shadow: 
         0 8px 24px rgba(102, 126, 234, 0.3),
         0 4px 12px rgba(118, 75, 162, 0.2);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
       border: 4px solid white;
       position: relative;
       overflow: hidden;
     }
 
-    .avatar-circle::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
-      background-size: 200% 200%;
-      animation: shimmer 3s infinite;
-    }
-
     .avatar-circle:hover {
-      transform: scale(1.05);
       box-shadow: 
         0 12px 32px rgba(102, 126, 234, 0.4),
         0 6px 16px rgba(118, 75, 162, 0.3);
