@@ -20,7 +20,7 @@ export class TenantController {
     @ApiResponse({ status: 404, description: 'Tenant not found' })
     async getTenantByCode(@Param('code') code: string): Promise<TenantResponseDto | null> {
         const tenant = await this.getTenantBySubdomainUseCase.execute(code);
-        
+
         if (!tenant) {
             return null;
         }

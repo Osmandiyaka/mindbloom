@@ -12,8 +12,8 @@ export class CreateTenantDto {
     @IsNotEmpty()
     subdomain: string;
 
-    @ApiProperty({ 
-        description: 'Tenant plan', 
+    @ApiProperty({
+        description: 'Tenant plan',
         enum: ['free', 'basic', 'premium', 'enterprise'],
         required: false,
         default: 'free'

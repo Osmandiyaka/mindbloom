@@ -37,6 +37,7 @@ export class AuthController {
             password: registerDto.password,
             name: registerDto.name,
             role: registerDto.role,
+            tenantId: registerDto.tenantId,
         });
 
         return UserResponseDto.fromDomain(user);
