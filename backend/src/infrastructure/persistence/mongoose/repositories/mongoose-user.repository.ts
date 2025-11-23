@@ -59,6 +59,7 @@ export class MongooseUserRepository implements IUserRepository {
             doc.email,
             doc.name,
             doc.role,
+            [], // permissions - will be populated separately
             doc.createdAt,
             doc.updatedAt,
         );

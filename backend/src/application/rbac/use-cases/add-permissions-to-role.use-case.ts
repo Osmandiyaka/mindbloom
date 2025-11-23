@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { RoleRepository } from '../../../domain/rbac/ports/role.repository.interface';
+import { Injectable, Inject } from '@nestjs/common';
+import { IRoleRepository, ROLE_REPOSITORY } from '../../../domain/rbac/ports/role.repository.interface';
 import { GetPermissionTreeUseCase } from './get-permission-tree.use-case';
 
 /**
@@ -9,9 +9,10 @@ import { GetPermissionTreeUseCase } from './get-permission-tree.use-case';
 @Injectable()
 export class AddPermissionsToRoleUseCase {
     constructor(
-        private readonly roleRepository: RoleRepository,
+        @Inject(ROLE_REPOSITORY)
+        private readonly roleRepository: IRoleRepository,
         private readonly getPermissionTree: GetPermissionTreeUseCase,
-    ) {}
+    ) { }
 
     async execute(roleId: string, permissionIds: string[], tenantId: string) {
         // Get the role
