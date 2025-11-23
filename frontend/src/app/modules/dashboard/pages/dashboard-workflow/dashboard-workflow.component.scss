@@ -28,8 +28,8 @@
     border-radius: 10px;
     border: 1px solid #E5EBF4;
     flex: 1;
-    overflow: auto;
-    min-height: 600px;
+    overflow: hidden;
+    min-height: 580px;
 }
 
 // Section background bands
@@ -38,44 +38,48 @@
     border-radius: 8px;
     border: 1px solid #E8EDF2;
     background: #FAFBFC;
-    
+    z-index: 0;
+
     .section-label {
         position: absolute;
-        top: 12px;
-        right: 16px;
+        top: 8px;
+        left: 12px;
         font-size: 10px;
         font-weight: 700;
         letter-spacing: 0.5px;
         color: #8B95A5;
+        background: #FAFBFC;
+        padding: 4px 8px;
+        border-radius: 4px;
     }
 }
 
 .admissions-band {
     left: 40px;
     top: 40px;
-    width: 600px;
-    height: 100px;
+    width: 520px;
+    height: 95px;
 }
 
 .finance-band {
-    left: 680px;
+    left: 560px;
     top: 40px;
-    width: 640px;
-    height: 220px;
+    width: 520px;
+    height: 200px;
 }
 
 .academics-band {
     left: 40px;
-    top: 280px;
-    width: 820px;
-    height: 220px;
+    top: 260px;
+    width: 680px;
+    height: 200px;
 }
 
 .hr-band {
-    left: 880px;
-    top: 280px;
-    width: 440px;
-    height: 220px;
+    left: 730px;
+    top: 260px;
+    width: 350px;
+    height: 200px;
 }
 
 // SVG connectors layer
