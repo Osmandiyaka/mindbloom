@@ -5,7 +5,8 @@
 .sidebar {
     width: 260px;
     height: 100vh;
-    background: $sidebar-bg;
+    background: var(--color-surface);
+    border-right: 1px solid var(--color-border);
     display: flex;
     flex-direction: column;
     position: fixed;
@@ -13,18 +14,18 @@
     top: 0;
     z-index: 100;
     @include transition(all, 0.3s, ease);
-    box-shadow: $shadow-lg;
+    box-shadow: var(--shadow-lg);
 
     // Sidebar header (logo/brand)
     .sidebar-header {
         padding: $spacing-6 $spacing-4;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid var(--color-border);
 
         .sidebar-logo {
             display: flex;
             align-items: center;
             gap: $spacing-3;
-            color: $sidebar-text-active;
+            color: var(--color-text-primary);
             font-size: $font-size-lg;
             font-weight: $font-weight-bold;
 
@@ -51,7 +52,7 @@
             padding: 0 $spacing-4;
             font-size: $font-size-xs;
             font-weight: $font-weight-semibold;
-            color: $sidebar-text;
+            color: var(--color-text-tertiary);
             text-transform: uppercase;
             letter-spacing: $letter-spacing-wide;
             margin-bottom: $spacing-2;
@@ -67,7 +68,7 @@
             align-items: center;
             gap: $spacing-3;
             padding: $spacing-3 $spacing-4;
-            color: $sidebar-text;
+            color: var(--color-text-secondary);
             font-size: $font-size-sm;
             font-weight: $font-weight-medium;
             @include transition(all, 0.2s, ease);
@@ -84,18 +85,20 @@
                 padding: 0.125rem 0.5rem;
                 font-size: $font-size-xs;
                 font-weight: $font-weight-semibold;
-                background: rgba(255, 255, 255, 0.1);
+                background: var(--color-primary);
+                color: white;
                 border-radius: $badge-radius;
             }
 
             &:hover {
-                background: $sidebar-hover;
-                color: $sidebar-text-active;
+                background: var(--color-surface-hover);
+                color: var(--color-text-primary);
             }
 
             &.active {
-                color: $sidebar-text-active;
-                background: rgba(59, 130, 246, 0.15);
+                color: var(--color-text-primary);
+                background: var(--color-primary-light);
+                background: rgba(var(--color-primary-rgb, 59, 130, 246), 0.15);
 
                 &::before {
                     content: '';
@@ -104,7 +107,7 @@
                     top: 0;
                     bottom: 0;
                     width: 3px;
-                    background: $sidebar-selected;
+                    background: var(--color-primary);
                 }
             }
         }
@@ -113,7 +116,7 @@
     // Sidebar footer (user profile)
     .sidebar-footer {
         padding: $spacing-4;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 1px solid var(--color-border);
 
         .user-profile {
             display: flex;
@@ -125,14 +128,14 @@
             cursor: pointer;
 
             &:hover {
-                background: $sidebar-hover;
+                background: var(--color-surface-hover);
             }
 
             .user-avatar {
                 width: 40px;
                 height: 40px;
                 border-radius: $radius-full;
-                background: $accent-blue;
+                background: var(--color-primary);
                 @include flex-center;
                 color: white;
                 font-weight: $font-weight-semibold;
@@ -146,13 +149,13 @@
                 .user-name {
                     font-size: $font-size-sm;
                     font-weight: $font-weight-medium;
-                    color: $sidebar-text-active;
+                    color: var(--color-text-primary);
                     @include truncate;
                 }
 
                 .user-role {
                     font-size: $font-size-xs;
-                    color: $sidebar-text;
+                    color: var(--color-text-secondary);
                 }
             }
         }

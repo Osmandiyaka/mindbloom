@@ -71,93 +71,6 @@ export class ThemeService {
             }
         },
         {
-            id: 'ocean-light',
-            name: 'Ocean Blue',
-            mode: 'light',
-            colors: {
-                primary: '#0ea5e9',
-                primaryDark: '#0284c7',
-                primaryLight: '#38bdf8',
-                secondary: '#06b6d4',
-                accent: '#14b8a6',
-                background: '#f0f9ff',
-                surface: '#ffffff',
-                surfaceHover: '#e0f2fe',
-                textPrimary: '#0c4a6e',
-                textSecondary: '#475569',
-                textTertiary: '#94a3b8',
-                border: '#bae6fd',
-                borderLight: '#e0f2fe',
-                success: '#10b981',
-                warning: '#f59e0b',
-                error: '#ef4444',
-                info: '#3b82f6'
-            },
-            shadows: {
-                sm: '0 1px 2px rgba(14, 165, 233, 0.08)',
-                md: '0 4px 6px rgba(14, 165, 233, 0.12)',
-                lg: '0 10px 15px rgba(14, 165, 233, 0.15)'
-            }
-        },
-        {
-            id: 'forest-light',
-            name: 'Forest Green',
-            mode: 'light',
-            colors: {
-                primary: '#16a34a',
-                primaryDark: '#15803d',
-                primaryLight: '#22c55e',
-                secondary: '#84cc16',
-                accent: '#10b981',
-                background: '#f7fee7',
-                surface: '#ffffff',
-                surfaceHover: '#ecfccb',
-                textPrimary: '#14532d',
-                textSecondary: '#475569',
-                textTertiary: '#94a3b8',
-                border: '#d9f99d',
-                borderLight: '#ecfccb',
-                success: '#10b981',
-                warning: '#f59e0b',
-                error: '#ef4444',
-                info: '#3b82f6'
-            },
-            shadows: {
-                sm: '0 1px 2px rgba(22, 163, 74, 0.08)',
-                md: '0 4px 6px rgba(22, 163, 74, 0.12)',
-                lg: '0 10px 15px rgba(22, 163, 74, 0.15)'
-            }
-        },
-        {
-            id: 'sunset-light',
-            name: 'Sunset Orange',
-            mode: 'light',
-            colors: {
-                primary: '#f97316',
-                primaryDark: '#ea580c',
-                primaryLight: '#fb923c',
-                secondary: '#dc2626',
-                accent: '#f59e0b',
-                background: '#fff7ed',
-                surface: '#ffffff',
-                surfaceHover: '#ffedd5',
-                textPrimary: '#7c2d12',
-                textSecondary: '#475569',
-                textTertiary: '#94a3b8',
-                border: '#fed7aa',
-                borderLight: '#ffedd5',
-                success: '#10b981',
-                warning: '#f59e0b',
-                error: '#ef4444',
-                info: '#3b82f6'
-            },
-            shadows: {
-                sm: '0 1px 2px rgba(249, 115, 22, 0.08)',
-                md: '0 4px 6px rgba(249, 115, 22, 0.12)',
-                lg: '0 10px 15px rgba(249, 115, 22, 0.15)'
-            }
-        },
-        {
             id: 'default-dark',
             name: 'Default Dark',
             mode: 'dark',
@@ -187,61 +100,32 @@ export class ThemeService {
             }
         },
         {
-            id: 'midnight-dark',
-            name: 'Midnight Blue',
+            id: 'aspnet-zero-dark',
+            name: 'ASP.NET Zero Dark',
             mode: 'dark',
             colors: {
-                primary: '#60a5fa',
-                primaryDark: '#3b82f6',
-                primaryLight: '#93c5fd',
-                secondary: '#818cf8',
-                accent: '#38bdf8',
-                background: '#020617',
-                surface: '#0c1629',
-                surfaceHover: '#1e293b',
-                textPrimary: '#f8fafc',
-                textSecondary: '#cbd5e1',
-                textTertiary: '#94a3b8',
-                border: '#1e293b',
-                borderLight: '#334155',
-                success: '#22c55e',
-                warning: '#fbbf24',
-                error: '#f87171',
-                info: '#60a5fa'
+                primary: '#5b9bd5',
+                primaryDark: '#4a8ac4',
+                primaryLight: '#7db3e0',
+                secondary: '#a259ff',
+                accent: '#e74856',
+                background: '#1a1d29',
+                surface: '#252835',
+                surfaceHover: '#2d3142',
+                textPrimary: '#e8eaed',
+                textSecondary: '#b4b8c5',
+                textTertiary: '#8b91a7',
+                border: '#3a3f52',
+                borderLight: '#464c5e',
+                success: '#34c759',
+                warning: '#f7ad42',
+                error: '#e74856',
+                info: '#5b9bd5'
             },
             shadows: {
-                sm: '0 1px 2px rgba(0, 0, 0, 0.4)',
-                md: '0 4px 6px rgba(0, 0, 0, 0.5)',
-                lg: '0 10px 15px rgba(0, 0, 0, 0.6)'
-            }
-        },
-        {
-            id: 'nature-dark',
-            name: 'Nature Dark',
-            mode: 'dark',
-            colors: {
-                primary: '#34d399',
-                primaryDark: '#10b981',
-                primaryLight: '#6ee7b7',
-                secondary: '#4ade80',
-                accent: '#22d3ee',
-                background: '#0a1612',
-                surface: '#1a2e23',
-                surfaceHover: '#2d4a3e',
-                textPrimary: '#ecfdf5',
-                textSecondary: '#a7f3d0',
-                textTertiary: '#6ee7b7',
-                border: '#2d4a3e',
-                borderLight: '#3f6250',
-                success: '#22c55e',
-                warning: '#fbbf24',
-                error: '#f87171',
-                info: '#60a5fa'
-            },
-            shadows: {
-                sm: '0 1px 2px rgba(0, 0, 0, 0.4)',
-                md: '0 4px 6px rgba(0, 0, 0, 0.5)',
-                lg: '0 10px 15px rgba(0, 0, 0, 0.6)'
+                sm: '0 1px 3px rgba(0, 0, 0, 0.5)',
+                md: '0 4px 8px rgba(0, 0, 0, 0.6)',
+                lg: '0 10px 20px rgba(0, 0, 0, 0.7)'
             }
         }
     ];
