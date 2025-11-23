@@ -94,23 +94,15 @@ import { Role } from '../../../../core/models/role.model';
             <div class="profile-picture-preview">
               <div class="avatar-circle" [style.background-image]="profilePictureUrl() ? 'url(' + profilePictureUrl() + ')' : 'none'">
                 <span *ngIf="!profilePictureUrl()" class="avatar-placeholder">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64">
-                    <!-- Background circle -->
-                    <circle cx="50" cy="50" r="50" fill="url(#avatarGradient)"/>
-                    <!-- Person icon -->
-                    <g fill="white" opacity="0.95">
-                      <!-- Head -->
-                      <circle cx="50" cy="35" r="16"/>
-                      <!-- Body -->
-                      <path d="M50 54c-15 0-27 8-27 18v8c0 3 2 5 5 5h44c3 0 5-2 5-5v-8c0-10-12-18-27-18z"/>
-                    </g>
-                    <!-- Gradient definition -->
-                    <defs>
-                      <linearGradient id="avatarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
-                      </linearGradient>
-                    </defs>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100" height="100">
+                    <!-- Background -->
+                    <rect width="200" height="200" fill="#E8EBF0" rx="100"/>
+                    <!-- Head -->
+                    <ellipse cx="100" cy="75" rx="35" ry="38" fill="#ffffff"/>
+                    <!-- Shoulders/Body -->
+                    <path d="M 40 200 Q 45 140, 100 140 Q 155 140, 160 200 Z" fill="#ffffff"/>
+                    <!-- Hair suggestion (top curve) -->
+                    <path d="M 65 45 Q 70 35, 85 35 Q 100 30, 115 35 Q 130 35, 135 45" fill="#ffffff" opacity="0.7"/>
                   </svg>
                 </span>
               </div>
@@ -342,10 +334,12 @@ import { Role } from '../../../../core/models/role.model';
       justify-content: center;
       width: 100%;
       height: 100%;
+      background: #E8EBF0;
+      border-radius: 50%;
     }
 
     .avatar-placeholder svg {
-      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+      display: block;
     }
 
     .profile-picture-controls {
