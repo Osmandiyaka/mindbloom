@@ -2,17 +2,21 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
+import { GlobalToolbarComponent } from '../../shared/components/global-toolbar/global-toolbar.component';
 
 @Component({
     selector: 'app-main-layout',
     standalone: true,
-    imports: [CommonModule, RouterModule, SidebarComponent],
+    imports: [CommonModule, RouterModule, SidebarComponent, GlobalToolbarComponent],
     template: `
     <div class="app-layout">
       <app-sidebar />
-      <main class="main-content">
-        <router-outlet />
-      </main>
+      <div class="content-wrapper">
+        <app-global-toolbar />
+        <main class="main-content">
+          <router-outlet />
+        </main>
+      </div>
     </div>
   `,
     styles: [`
@@ -22,14 +26,23 @@ import { SidebarComponent } from '../../shared/components/sidebar/sidebar.compon
       background: var(--bg-primary);
     }
 
-    .main-content {
+    .content-wrapper {
       flex: 1;
       margin-left: 260px;
-      padding: 2rem;
+      display: flex;
+      flex-direction: column;
       min-height: 100vh;
 
       @media (max-width: 768px) {
         margin-left: 0;
+      }
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 2rem;
+
+      @media (max-width: 768px) {
         padding: 1rem;
       }
     }
