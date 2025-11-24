@@ -18,5 +18,9 @@ export const PLUGINS_ROUTES: Routes = [
                 loadComponent: () => import('./pages/sms-settings/sms-settings.component').then(m => m.SmsSettingsComponent)
             }
         ]
+    },
+    {
+        path: 'library',
+        loadChildren: () => import('./pages/library/library.routes').then(m => m.LIBRARY_ROUTES)
     }
 ];
