@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { PluginService, Plugin } from '../../../../core/services/plugin.service';
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
@@ -53,7 +54,7 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
 
       <!-- Plugin Grid -->
       <div *ngIf="!loading() && !error()" class="plugins-grid">
-        <div *ngFor="let plugin of filteredPlugins()" class="plugin-card">
+        <div *ngFor="let plugin of filteredPlugins()" class="plugin-card" (click)="viewPluginDetail(plugin)">
           <div class="plugin-header">
             <div class="plugin-icon">{{ plugin.iconUrl }}</div>
             <div class="plugin-info">
@@ -88,7 +89,7 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
           <div class="plugin-actions">
             <ng-container *ngIf="!plugin.isInstalled">
               <button
-                (click)="installPlugin(plugin)"
+                (click)="installPlugin(plugin); $event.stopPropagation()"
                 [disabled]="installing() === plugin.pluginId"
                 class="btn-install"
               >
@@ -104,7 +105,7 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
                 <div class="installed-actions">
                   <button
                     *ngIf="plugin.installedStatus === 'disabled'"
-                    (click)="enablePlugin(plugin)"
+                    (click)="enablePlugin(plugin); $event.stopPropagation()"
                     [disabled]="processing() === plugin.pluginId"
                     class="btn-enable"
                   >
@@ -112,14 +113,14 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
                   </button>
                   <button
                     *ngIf="plugin.installedStatus === 'enabled'"
-                    (click)="disablePlugin(plugin)"
+                    (click)="disablePlugin(plugin); $event.stopPropagation()"
                     [disabled]="processing() === plugin.pluginId"
                     class="btn-disable"
                   >
                     ⏸ Disable
                   </button>
                   <button
-                    (click)="uninstallPlugin(plugin)"
+                    (click)="uninstallPlugin(plugin); $event.stopPropagation()"
                     [disabled]="processing() === plugin.pluginId"
                     class="btn-uninstall"
                   >
@@ -301,6 +302,7 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       border: 2px solid transparent;
       display: flex;
       flex-direction: column;
+      cursor: pointer;
     }
 
     .plugin-card:hover {
@@ -539,9 +541,7 @@ export class MarketplaceComponent implements OnInit {
     return result;
   });
 
-  constructor(private pluginService: PluginService) { }
-
-  ngOnInit() {
+  constructor(private pluginService: PluginService, private router: Router) { } ngOnInit() {
     this.loadPlugins();
   }
 
@@ -600,6 +600,10 @@ export class MarketplaceComponent implements OnInit {
         });
       }
     };
+  }
+
+  viewPluginDetail(plugin: Plugin) {
+    this.router.navigate(['/setup/marketplace', plugin.pluginId]);
   }
 
   enablePlugin(plugin: Plugin) {

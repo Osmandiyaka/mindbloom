@@ -34,6 +34,10 @@ export const SETUP_ROUTES: Routes = [
         loadComponent: () => import('./pages/marketplace/marketplace.component').then(m => m.MarketplaceComponent)
     },
     {
+        path: 'marketplace/:id',
+        loadComponent: () => import('./pages/plugin-detail/plugin-detail.component').then(m => m.PluginDetailComponent)
+    },
+    {
         path: 'students',
         loadComponent: () => import('./pages/students/student-list/student-list.component').then(m => m.StudentListComponent)
     }
