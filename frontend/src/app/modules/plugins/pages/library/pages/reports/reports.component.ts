@@ -1,10 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { LibraryApiService } from '../../services/library-api.service';
+import { BookTitle, BorrowTransaction } from '../../models/library.models';
 
 @Component({
     selector: 'app-reports',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, FormsModule],
     template: `
         <div class="reports-container">
             <div class="reports-header">

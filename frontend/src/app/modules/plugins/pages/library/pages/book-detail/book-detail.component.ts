@@ -1,7 +1,10 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { LibraryService, Book } from '../../services/library.service';
+import { ActivatedRoute, RouterLink, Router } from '@angular/router';
+import { LibraryApiService } from '../../services/library-api.service';
+import { ToastService } from '../../services/toast.service';
+import { DialogService } from '../../services/dialog.service';
+import { BookTitle, BookCopy } from '../../models/library.models';
 
 @Component({
     selector: 'app-book-detail',
@@ -25,7 +28,7 @@ import { LibraryService, Book } from '../../services/library.service';
                         <div class="book-cover-large">📖</div>
                         <div class="book-info">
                             <h1>{{ book()?.title }}</h1>
-                            <p class="author">by {{ book()?.author }}</p>
+                            <p class="author">by {{ book()?.authors?.join(', ') }}</p>
                             <div class="book-meta">
                                 <div class="meta-item">
                                     <span class="label">ISBN:</span>
@@ -37,7 +40,7 @@ import { LibraryService, Book } from '../../services/library.service';
                                 </div>
                                 <div class="meta-item">
                                     <span class="label">Year:</span>
-                                    <span>{{ book()?.publicationYear }}</span>
+                                    <span>{{ book()?.publishedYear }}</span>
                                 </div>
                             </div>
                             <p class="description">{{ book()?.description }}</p>
@@ -94,19 +97,93 @@ import { LibraryService, Book } from '../../services/library.service';
 })
 export class BookDetailComponent implements OnInit {
     private route = inject(ActivatedRoute);
-    private libraryService = inject(LibraryService);
+    private router = inject(Router);
+    private apiService = inject(LibraryApiService);
+    private toast = inject(ToastService);
+    private dialog = inject(DialogService);
 
     loading = signal(true);
-    book = signal<Book | null>(null);
+    book = signal<BookTitle | null>(null);
+    copies = signal<BookCopy[]>([]);
+    error = signal<string | null>(null);
 
     ngOnInit() {
-        const id = this.route.snapshot.params['id'];
-        this.libraryService.getBook(id).subscribe({
+        const id = this.route.snapshot.paramMap.get('id');
+        if (id) {
+            this.loadBookDetails(id);
+            this.loadCopies(id);
+        }
+    }
+
+    private loadBookDetails(id: string) {
+        this.loading.set(true);
+        this.apiService.getTitle(id).subscribe({
             next: (book) => {
                 this.book.set(book);
                 this.loading.set(false);
             },
-            error: () => this.loading.set(false)
+            error: (err) => {
+                this.toast.error('Failed to load book details');
+                this.loading.set(false);
+            }
+        });
+    }
+
+    private loadCopies(titleId: string) {
+        this.apiService.getCopies({ bookTitleId: titleId }).subscribe({
+            next: (response) => {
+                this.copies.set(response.data);
+            },
+            error: (err) => {
+                console.error('Failed to load copies:', err);
+            }
+        });
+    }
+
+    editBook() {
+        this.toast.info('Edit functionality coming soon!');
+    }
+
+    deleteBook() {
+        const bookId = this.book()?._id;
+        const bookTitle = this.book()?.title;
+        if (!bookId) return;
+
+        this.dialog.confirmDelete(
+            `Are you sure you want to delete "${bookTitle}"? This action cannot be undone.`,
+            () => {
+                this.apiService.deleteTitle(bookId).subscribe({
+                    next: () => {
+                        this.toast.success('Book deleted successfully');
+                        this.router.navigate(['/plugins/library/catalog']);
+                    },
+                    error: (err) => {
+                        this.toast.error('Failed to delete book');
+                    }
+                });
+            }
+        );
+    }
+
+    addCopies() {
+        const bookId = this.book()?._id;
+        if (!bookId) return;
+
+        const quantity = prompt('How many copies to add?');
+        if (!quantity || isNaN(Number(quantity))) return;
+
+        this.apiService.bulkCreateCopies({
+            bookTitleId: bookId,
+            quantity: parseInt(quantity)
+        }).subscribe({
+            next: () => {
+                this.toast.success(`Added ${quantity} copies successfully`);
+                this.loadBookDetails(bookId);
+                this.loadCopies(bookId);
+            },
+            error: (err) => {
+                this.toast.error('Failed to add copies');
+            }
         });
     }
 }

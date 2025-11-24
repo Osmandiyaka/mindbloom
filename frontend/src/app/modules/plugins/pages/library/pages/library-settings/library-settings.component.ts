@@ -1,6 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { LibraryApiService } from '../../services/library-api.service';
+import { LibrarySettings } from '../../models/library.models';
 
 @Component({
     selector: 'app-library-settings',
@@ -13,53 +15,79 @@ import { FormsModule } from '@angular/forms';
                 <p class="subtitle">Configure library policies and preferences</p>
             </div>
 
-            <div class="settings-form">
-                <div class="settings-section">
-                    <h2>📋 Loan Policies</h2>
-                    <div class="form-group">
-                        <label>Default Loan Duration (days)</label>
-                        <input type="number" [(ngModel)]="settings.loanDuration" class="form-input" />
+            @if (loading()) {
+                <div class="loading">Loading settings...</div>
+            } @else if (settings()) {
+                <div class="settings-form">
+                    <div class="settings-section">
+                        <h2>📋 Loan Policies</h2>
+                        <div class="form-group">
+                            <label>Default Loan Duration (days)</label>
+                            <input type="number" [(ngModel)]="settings()!.defaultLoanPolicy.loanPeriodDays" class="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <label>Maximum Books Per Member</label>
+                            <input type="number" [(ngModel)]="settings()!.defaultLoanPolicy.maxItemsCheckedOut" class="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <label>Maximum Renewals</label>
+                            <input type="number" [(ngModel)]="settings()!.defaultLoanPolicy.maxRenewals" class="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <label>Maximum Reservations</label>
+                            <input type="number" [(ngModel)]="settings()!.defaultLoanPolicy.maxReservations" class="form-input" />
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Maximum Books Per Member</label>
-                        <input type="number" [(ngModel)]="settings.maxBooks" class="form-input" />
-                    </div>
-                    <div class="form-group">
-                        <label>Maximum Renewals</label>
-                        <input type="number" [(ngModel)]="settings.maxRenewals" class="form-input" />
-                    </div>
-                </div>
 
-                <div class="settings-section">
-                    <h2>💰 Fine Settings</h2>
-                    <div class="form-group">
-                        <label>Fine Per Day ($)</label>
-                        <input type="number" [(ngModel)]="settings.finePerDay" step="0.01" class="form-input" />
+                    <div class="settings-section">
+                        <h2>💰 Fine Settings</h2>
+                        <div class="form-group">
+                            <label>Fine Per Day ($)</label>
+                            <input type="number" [(ngModel)]="settings()!.finePolicy.overdueRatePerDay" step="0.01" class="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <label>Maximum Fine Amount ($)</label>
+                            <input type="number" [(ngModel)]="settings()!.finePolicy.maxFineAmount" class="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <label>Grace Period (days)</label>
+                            <input type="number" [(ngModel)]="settings()!.finePolicy.gracePeriodDays" class="form-input" />
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Maximum Fine Before Block ($)</label>
-                        <input type="number" [(ngModel)]="settings.maxFine" class="form-input" />
-                    </div>
-                </div>
 
-                <div class="settings-section">
-                    <h2>🔔 Notifications</h2>
-                    <div class="form-checkbox">
-                        <input type="checkbox" [(ngModel)]="settings.enableNotifications" id="notifications" />
-                        <label for="notifications">Enable overdue notifications</label>
+                    <div class="settings-section">
+                        <h2>🔧 Features</h2>
+                        <div class="form-checkbox">
+                            <input type="checkbox" [(ngModel)]="settings()!.featureFlags.enableReservations" id="reservations" />
+                            <label for="reservations">Enable reservations system</label>
+                        </div>
+                        <div class="form-checkbox">
+                            <input type="checkbox" [(ngModel)]="settings()!.featureFlags.enableFines" id="fines" />
+                            <label for="fines">Enable fines collection</label>
+                        </div>
+                        <div class="form-checkbox">
+                            <input type="checkbox" [(ngModel)]="settings()!.featureFlags.enableBarcodeScanner" id="scanner" />
+                            <label for="scanner">Enable barcode scanner</label>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Notification Interval (days)</label>
-                        <input type="number" [(ngModel)]="settings.notificationInterval" class="form-input" />
-                    </div>
-                </div>
 
-                <div class="form-actions">
-                    <button class="btn-primary" (click)="saveSettings()">
-                        {{ saving() ? 'Saving...' : '💾 Save Settings' }}
-                    </button>
+                    <div class="form-actions">
+                        @if (success()) {
+                            <div class="success-message">✅ {{ success() }}</div>
+                        }
+                        @if (error()) {
+                            <div class="error-message">❌ {{ error() }}</div>
+                        }
+                        <button class="btn-primary" (click)="saveSettings()" [disabled]="saving()">
+                            @if (saving()) {
+                                <span class="spinner"></span>
+                            } @else {
+                                💾 Save Settings
+                            }
+                        </button>
+                    </div>
                 </div>
-            </div>
+            }
         </div>
     `,
     styles: [`
@@ -79,28 +107,61 @@ import { FormsModule } from '@angular/forms';
         .form-checkbox input { width: 20px; height: 20px; cursor: pointer; }
         .form-checkbox label { margin: 0; cursor: pointer; }
         .form-actions { margin-top: 2rem; }
-        .btn-primary { width: 100%; padding: 1rem 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; }
-        .btn-primary:hover { opacity: 0.9; }
+        .success-message { padding: 1rem; background: #d1fae5; color: #065f46; border-radius: 8px; margin-bottom: 1rem; }
+        .error-message { padding: 1rem; background: #fee2e2; color: #991b1b; border-radius: 8px; margin-bottom: 1rem; }
+        .loading { text-align: center; padding: 3rem; color: #666; }
+        .btn-primary { width: 100%; padding: 1rem 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s; }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, 0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     `]
 })
-export class LibrarySettingsComponent {
-    saving = signal(false);
+export class LibrarySettingsComponent implements OnInit {
+    private apiService = inject(LibraryApiService);
 
-    settings = {
-        loanDuration: 14,
-        maxBooks: 5,
-        maxRenewals: 2,
-        finePerDay: 1.00,
-        maxFine: 50.00,
-        enableNotifications: true,
-        notificationInterval: 3
-    };
+    loading = signal(true);
+    saving = signal(false);
+    error = signal<string | null>(null);
+    success = signal<string | null>(null);
+
+    settings = signal<LibrarySettings | null>(null);
+
+    ngOnInit() {
+        this.loadSettings();
+    }
+
+    private loadSettings() {
+        this.loading.set(true);
+        this.apiService.getSettings().subscribe({
+            next: (settings) => {
+                this.settings.set(settings);
+                this.loading.set(false);
+            },
+            error: (err) => {
+                this.error.set('Failed to load settings');
+                this.loading.set(false);
+            }
+        });
+    }
 
     saveSettings() {
+        if (!this.settings()) return;
+
         this.saving.set(true);
-        setTimeout(() => {
-            this.saving.set(false);
-            alert('Settings saved successfully!');
-        }, 1000);
+        this.error.set(null);
+        this.success.set(null);
+
+        this.apiService.updateSettings(this.settings()!).subscribe({
+            next: (updated) => {
+                this.settings.set(updated);
+                this.success.set('Settings saved successfully!');
+                this.saving.set(false);
+            },
+            error: (err) => {
+                this.error.set('Failed to save settings');
+                this.saving.set(false);
+            }
+        });
     }
 }
