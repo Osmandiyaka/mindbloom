@@ -12,7 +12,7 @@ export class MongoosePluginRepository implements PluginRepository {
 
     async findAll(): Promise<Plugin[]> {
         const docs = await this.pluginModel.find().exec();
-        return docs.map((doc) => this.toDomain(doc));
+        return docs.map((doc) => this.toDomain(doc)).filter(p => p !== null);
     }
 
     async findById(id: string): Promise<Plugin | null> {
@@ -63,6 +63,9 @@ export class MongoosePluginRepository implements PluginRepository {
     }
 
     private toDomain(doc: any): Plugin {
+        if (!doc || !doc._id) {
+            return null;
+        }
         return new Plugin(
             doc._id.toString(),
             doc.pluginId,
