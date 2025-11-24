@@ -1,5 +1,4 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import { InstalledPlugin } from '../../../domain/plugin/entities/installed-plugin.entity';
 import { InstalledPluginRepository } from '../../../domain/plugin/ports/installed-plugin.repository';
 import { PluginRepository } from '../../../domain/plugin/ports/plugin.repository';
@@ -41,7 +40,7 @@ export class InstallPluginUseCase {
 
         // Create installed plugin
         const installedPlugin = InstalledPlugin.create(
-            uuidv4(),
+            '', // MongoDB will generate ObjectId
             command.tenantId,
             command.pluginId,
             plugin.version,

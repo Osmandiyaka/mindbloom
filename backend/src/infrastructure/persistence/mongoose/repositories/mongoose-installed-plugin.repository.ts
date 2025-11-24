@@ -41,18 +41,18 @@ export class MongooseInstalledPluginRepository
     }
 
     async save(plugin: InstalledPlugin): Promise<InstalledPlugin> {
-        const existing = await this.installedPluginModel.findById(plugin.id).exec();
-
-        if (existing) {
-            const updated = await this.installedPluginModel
-                .findByIdAndUpdate(plugin.id, this.toDocument(plugin), { new: true })
-                .exec();
-            return this.toDomain(updated);
+        // For new plugins (no id), create new document
+        if (!plugin.id || plugin.id === '') {
+            const doc = new this.installedPluginModel(this.toDocument(plugin));
+            const saved = await doc.save();
+            return this.toDomain(saved);
         }
 
-        const doc = new this.installedPluginModel(this.toDocument(plugin));
-        const saved = await doc.save();
-        return this.toDomain(saved);
+        // For existing plugins, update by _id
+        const updated = await this.installedPluginModel
+            .findByIdAndUpdate(plugin.id, this.toDocument(plugin), { new: true })
+            .exec();
+        return this.toDomain(updated);
     }
 
     async delete(id: string, tenantId: string): Promise<void> {
@@ -77,8 +77,7 @@ export class MongooseInstalledPluginRepository
     }
 
     private toDocument(plugin: InstalledPlugin): any {
-        return {
-            _id: plugin.id,
+        const doc: any = {
             tenantId: plugin.tenantId,
             pluginId: plugin.pluginId,
             version: plugin.version,
@@ -90,5 +89,12 @@ export class MongooseInstalledPluginRepository
             disabledAt: plugin.disabledAt,
             lastError: plugin.lastError,
         };
+        
+        // Only include _id for existing documents
+        if (plugin.id && plugin.id !== '') {
+            doc._id = plugin.id;
+        }
+        
+        return doc;
     }
 }
