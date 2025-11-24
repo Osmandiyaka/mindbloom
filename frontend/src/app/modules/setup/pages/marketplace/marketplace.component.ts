@@ -2,12 +2,13 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PluginService, Plugin } from '../../../../core/services/plugin.service';
+import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
-    selector: 'app-marketplace',
-    standalone: true,
-    imports: [CommonModule, FormsModule],
-    template: `
+  selector: 'app-marketplace',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ConfirmationDialogComponent],
+  template: `
     <div class="marketplace-container">
       <!-- Header -->
       <div class="page-header">
@@ -59,7 +60,6 @@ import { PluginService, Plugin } from '../../../../core/services/plugin.service'
               <h3>{{ plugin.name }}</h3>
               <p class="plugin-author">by {{ plugin.author }}</p>
             </div>
-            <span *ngIf="plugin.isOfficial" class="badge-official">✓ Official</span>
           </div>
 
           <p class="plugin-description">{{ plugin.description }}</p>
@@ -139,8 +139,20 @@ import { PluginService, Plugin } from '../../../../core/services/plugin.service'
         <p>Try adjusting your search or filters</p>
       </div>
     </div>
+
+    <!-- Confirmation Dialog -->
+    <app-confirmation-dialog
+      [isOpen]="confirmDialog.isOpen"
+      [title]="confirmDialog.title"
+      [message]="confirmDialog.message"
+      [type]="confirmDialog.type"
+      [confirmText]="confirmDialog.confirmText"
+      [processing]="confirmDialog.processing"
+      (confirmed)="onConfirmAction()"
+      (cancelled)="closeConfirmDialog()"
+    />
   `,
-    styles: [`
+  styles: [`
     .marketplace-container {
       padding: 2rem;
       max-width: 1400px;
@@ -334,18 +346,6 @@ import { PluginService, Plugin } from '../../../../core/services/plugin.service'
       color: #6b7280;
     }
 
-    .badge-official {
-      position: absolute;
-      top: 0;
-      right: 0;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-
     .plugin-description {
       color: #4b5563;
       font-size: 0.875rem;
@@ -495,146 +495,208 @@ import { PluginService, Plugin } from '../../../../core/services/plugin.service'
   `],
 })
 export class MarketplaceComponent implements OnInit {
-    plugins = signal<Plugin[]>([]);
-    loading = signal(true);
-    error = signal('');
-    selectedCategory = signal<string | undefined>(undefined);
-    searchQuery = '';
-    installing = signal<string | null>(null);
-    processing = signal<string | null>(null);
+  plugins = signal<Plugin[]>([]);
+  loading = signal(true);
+  error = signal('');
+  selectedCategory = signal<string | undefined>(undefined);
+  searchQuery = '';
+  installing = signal<string | null>(null);
+  processing = signal<string | null>(null);
 
-    categories = [
-        { label: 'All', value: undefined, icon: '🏪' },
-        { label: 'Communication', value: 'communication', icon: '📱' },
-        { label: 'Payment', value: 'payment', icon: '💳' },
-        { label: 'Analytics', value: 'analytics', icon: '📊' },
-        { label: 'Attendance', value: 'attendance', icon: '👆' },
-        { label: 'Reporting', value: 'reporting', icon: '📄' },
-        { label: 'Library', value: 'library', icon: '📚' },
-    ];
+  confirmDialog = {
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'warning' as 'warning' | 'danger' | 'info' | 'success',
+    confirmText: 'Confirm',
+    processing: false,
+    action: null as (() => void) | null
+  };
 
-    filteredPlugins = computed(() => {
-        let result = this.plugins();
+  categories = [
+    { label: 'All', value: undefined, icon: '🏪' },
+    { label: 'Communication', value: 'communication', icon: '📱' },
+    { label: 'Payment', value: 'payment', icon: '💳' },
+    { label: 'Analytics', value: 'analytics', icon: '📊' },
+    { label: 'Attendance', value: 'attendance', icon: '👆' },
+    { label: 'Reporting', value: 'reporting', icon: '📄' },
+    { label: 'Library', value: 'library', icon: '📚' },
+  ];
 
-        if (this.searchQuery) {
-            const query = this.searchQuery.toLowerCase();
-            result = result.filter(
-                (p) =>
-                    p.name.toLowerCase().includes(query) ||
-                    p.description.toLowerCase().includes(query) ||
-                    p.tags.some((t) => t.toLowerCase().includes(query))
-            );
-        }
+  filteredPlugins = computed(() => {
+    let result = this.plugins();
 
-        return result;
+    if (this.searchQuery) {
+      const query = this.searchQuery.toLowerCase();
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(query) ||
+          p.description.toLowerCase().includes(query) ||
+          p.tags.some((t) => t.toLowerCase().includes(query))
+      );
+    }
+
+    return result;
+  });
+
+  constructor(private pluginService: PluginService) { }
+
+  ngOnInit() {
+    this.loadPlugins();
+  }
+
+  loadPlugins() {
+    this.loading.set(true);
+    this.error.set('');
+
+    this.pluginService
+      .getMarketplace(this.selectedCategory(), undefined)
+      .subscribe({
+        next: (plugins) => {
+          this.plugins.set(plugins);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          this.error.set('Failed to load plugins. Please try again.');
+          this.loading.set(false);
+          console.error('Error loading plugins:', err);
+        },
+      });
+  }
+
+  selectCategory(category: string | undefined) {
+    this.selectedCategory.set(category);
+    this.loadPlugins();
+  }
+
+  onSearchChange() {
+    // Search is handled by computed signal
+  }
+
+  installPlugin(plugin: Plugin) {
+    this.confirmDialog = {
+      isOpen: true,
+      title: 'Install Plugin',
+      message: `Install ${plugin.name}? ${plugin.price > 0 ? `This will charge $${plugin.price} to your account.` : 'This plugin is free.'}`,
+      type: 'info',
+      confirmText: plugin.price > 0 ? `Pay $${plugin.price}` : 'Install',
+      processing: false,
+      action: () => {
+        this.confirmDialog.processing = true;
+        this.installing.set(plugin.pluginId);
+
+        this.pluginService.installPlugin(plugin.pluginId).subscribe({
+          next: () => {
+            this.installing.set(null);
+            this.closeConfirmDialog();
+            this.loadPlugins();
+          },
+          error: (err) => {
+            this.installing.set(null);
+            this.confirmDialog.processing = false;
+            this.showError('Failed to install plugin', err.error?.message || 'Unknown error');
+            console.error('Installation error:', err);
+          },
+        });
+      }
+    };
+  }
+
+  enablePlugin(plugin: Plugin) {
+    this.processing.set(plugin.pluginId);
+
+    this.pluginService.enablePlugin(plugin.pluginId).subscribe({
+      next: () => {
+        this.processing.set(null);
+        this.loadPlugins();
+      },
+      error: (err) => {
+        this.processing.set(null);
+        this.showError('Failed to enable plugin', err.error?.message || 'Unknown error');
+        console.error('Enable error:', err);
+      },
     });
+  }
 
-    constructor(private pluginService: PluginService) { }
+  disablePlugin(plugin: Plugin) {
+    this.processing.set(plugin.pluginId);
 
-    ngOnInit() {
+    this.pluginService.disablePlugin(plugin.pluginId).subscribe({
+      next: () => {
+        this.processing.set(null);
         this.loadPlugins();
-    }
+      },
+      error: (err) => {
+        this.processing.set(null);
+        this.showError('Failed to disable plugin', err.error?.message || 'Unknown error');
+        console.error('Disable error:', err);
+      },
+    });
+  }
 
-    loadPlugins() {
-        this.loading.set(true);
-        this.error.set('');
-
-        this.pluginService
-            .getMarketplace(this.selectedCategory(), undefined)
-            .subscribe({
-                next: (plugins) => {
-                    this.plugins.set(plugins);
-                    this.loading.set(false);
-                },
-                error: (err) => {
-                    this.error.set('Failed to load plugins. Please try again.');
-                    this.loading.set(false);
-                    console.error('Error loading plugins:', err);
-                },
-            });
-    }
-
-    selectCategory(category: string | undefined) {
-        this.selectedCategory.set(category);
-        this.loadPlugins();
-    }
-
-    onSearchChange() {
-        // Search is handled by computed signal
-    }
-
-    installPlugin(plugin: Plugin) {
-        if (confirm(`Install ${plugin.name}?`)) {
-            this.installing.set(plugin.pluginId);
-
-            this.pluginService.installPlugin(plugin.pluginId).subscribe({
-                next: () => {
-                    this.installing.set(null);
-                    this.loadPlugins(); // Refresh to show installed status
-                },
-                error: (err) => {
-                    this.installing.set(null);
-                    alert('Failed to install plugin: ' + (err.error?.message || 'Unknown error'));
-                    console.error('Installation error:', err);
-                },
-            });
-        }
-    }
-
-    enablePlugin(plugin: Plugin) {
+  uninstallPlugin(plugin: Plugin) {
+    this.confirmDialog = {
+      isOpen: true,
+      title: 'Uninstall Plugin',
+      message: `Are you sure you want to uninstall ${plugin.name}? All plugin data will be removed. This action cannot be undone.`,
+      type: 'danger',
+      confirmText: 'Uninstall',
+      processing: false,
+      action: () => {
+        this.confirmDialog.processing = true;
         this.processing.set(plugin.pluginId);
 
-        this.pluginService.enablePlugin(plugin.pluginId).subscribe({
-            next: () => {
-                this.processing.set(null);
-                this.loadPlugins();
-            },
-            error: (err) => {
-                this.processing.set(null);
-                alert('Failed to enable plugin');
-                console.error('Enable error:', err);
-            },
+        this.pluginService.uninstallPlugin(plugin.pluginId).subscribe({
+          next: () => {
+            this.processing.set(null);
+            this.closeConfirmDialog();
+            this.loadPlugins();
+          },
+          error: (err) => {
+            this.processing.set(null);
+            this.confirmDialog.processing = false;
+            this.showError('Failed to uninstall plugin', err.error?.message || 'Unknown error');
+            console.error('Uninstall error:', err);
+          },
         });
+      }
+    };
+  }
+
+  formatDownloads(count: number): string {
+    if (count >= 1000) {
+      return (count / 1000).toFixed(1) + 'k';
     }
+    return count.toString();
+  }
 
-    disablePlugin(plugin: Plugin) {
-        this.processing.set(plugin.pluginId);
-
-        this.pluginService.disablePlugin(plugin.pluginId).subscribe({
-            next: () => {
-                this.processing.set(null);
-                this.loadPlugins();
-            },
-            error: (err) => {
-                this.processing.set(null);
-                alert('Failed to disable plugin');
-                console.error('Disable error:', err);
-            },
-        });
+  onConfirmAction() {
+    if (this.confirmDialog.action) {
+      this.confirmDialog.action();
     }
+  }
 
-    uninstallPlugin(plugin: Plugin) {
-        if (confirm(`Uninstall ${plugin.name}? This action cannot be undone.`)) {
-            this.processing.set(plugin.pluginId);
+  closeConfirmDialog() {
+    this.confirmDialog = {
+      isOpen: false,
+      title: '',
+      message: '',
+      type: 'warning',
+      confirmText: 'Confirm',
+      processing: false,
+      action: null
+    };
+  }
 
-            this.pluginService.uninstallPlugin(plugin.pluginId).subscribe({
-                next: () => {
-                    this.processing.set(null);
-                    this.loadPlugins();
-                },
-                error: (err) => {
-                    this.processing.set(null);
-                    alert('Failed to uninstall plugin');
-                    console.error('Uninstall error:', err);
-                },
-            });
-        }
-    }
-
-    formatDownloads(count: number): string {
-        if (count >= 1000) {
-            return (count / 1000).toFixed(1) + 'k';
-        }
-        return count.toString();
-    }
+  showError(title: string, message: string) {
+    this.confirmDialog = {
+      isOpen: true,
+      title: title,
+      message: message,
+      type: 'danger',
+      confirmText: 'OK',
+      processing: false,
+      action: () => this.closeConfirmDialog()
+    };
+  }
 }
