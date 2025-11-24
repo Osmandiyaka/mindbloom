@@ -1,9 +1,11 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LibraryService, ScanResult } from '../../services/library.service';
+import { LibraryApiService } from '../../services/library-api.service';
+import { ToastService } from '../../services/toast.service';
+import { BookCopy, BorrowTransaction, BookTitle, CopyStatus, CopyCondition } from '../../models/library.models';
 
-type OperationMode = 'issue' | 'return';
+type OperationMode = 'checkout' | 'checkin';
 
 @Component({
     selector: 'app-circulation',
@@ -20,25 +22,25 @@ type OperationMode = 'issue' | 'return';
             <!-- Mode Selector -->
             <div class="mode-selector">
                 <button 
-                    [class.active]="mode() === 'issue'"
-                    (click)="mode.set('issue')"
+                    [class.active]="mode() === 'checkout'"
+                    (click)="mode.set('checkout')"
                     class="mode-btn issue-btn"
                 >
                     <span class="mode-icon">📤</span>
                     <div>
-                        <div class="mode-title">Issue Book</div>
-                        <div class="mode-desc">Lend book to member</div>
+                        <div class="mode-title">Checkout Book</div>
+                        <div class="mode-desc">Lend book to patron</div>
                     </div>
                 </button>
                 <button 
-                    [class.active]="mode() === 'return'"
-                    (click)="mode.set('return')"
+                    [class.active]="mode() === 'checkin'"
+                    (click)="mode.set('checkin')"
                     class="mode-btn return-btn"
                 >
                     <span class="mode-icon">📥</span>
                     <div>
-                        <div class="mode-title">Return Book</div>
-                        <div class="mode-desc">Accept book from member</div>
+                        <div class="mode-title">Checkin Book</div>
+                        <div class="mode-desc">Accept book from patron</div>
                     </div>
                 </button>
             </div>
@@ -47,7 +49,7 @@ type OperationMode = 'issue' | 'return';
             <div class="scanner-section">
                 <div class="scanner-header">
                     <h2>
-                        @if (mode() === 'issue') {
+                        @if (mode() === 'checkout') {
                             📚 Scan Book Barcode
                         } @else {
                             📖 Scan Book to Return
@@ -110,7 +112,7 @@ type OperationMode = 'issue' | 'return';
                                     </div>
                                     <div class="book-detail-row">
                                         <span class="detail-label">Author:</span>
-                                        <span class="detail-value">{{ scanResult()?.book?.author }}</span>
+                                        <span class="detail-value">{{ scanResult()?.book?.authors?.join(', ') }}</span>
                                     </div>
                                     <div class="book-detail-row">
                                         <span class="detail-label">Barcode:</span>
@@ -138,16 +140,16 @@ type OperationMode = 'issue' | 'return';
                                         <div class="info-content">
                                             <div class="info-row">
                                                 <span>Issue Date:</span>
-                                                <span>{{ formatDate(scanResult()?.transaction?.issueDate) }}</span>
+                                                <span>{{ formatDate(scanResult()?.transaction?.borrowedAt) }}</span>
                                             </div>
                                             <div class="info-row">
                                                 <span>Due Date:</span>
                                                 <span>{{ formatDate(scanResult()?.transaction?.dueDate) }}</span>
                                             </div>
-                                            @if (scanResult()?.transaction && scanResult()!.transaction!.fineAmount > 0) {
+                                            @if (scanResult()?.transaction && scanResult()!.transaction!.totalFines > 0) {
                                                 <div class="info-row fine-row">
                                                     <span>Fine Amount:</span>
-                                                    <span class="fine-amount">{{ '$' + scanResult()?.transaction?.fineAmount }}</span>
+                                                    <span class="fine-amount">{{ '$' + scanResult()?.transaction?.totalFines }}</span>
                                                 </div>
                                             }
                                         </div>
@@ -159,8 +161,8 @@ type OperationMode = 'issue' | 'return';
                 }
             </div>
 
-            <!-- Member Selection (for Issue) -->
-            @if (mode() === 'issue' && scanResult() && !scanResult()?.error) {
+            <!-- Member Selection (for Checkout) -->
+            @if (mode() === 'checkout' && scanResult() && !scanResult()?.error) {
                 <div class="member-section">
                     <h2>👤 Select Member</h2>
                     <div class="member-search">
@@ -193,7 +195,7 @@ type OperationMode = 'issue' | 'return';
             <!-- Action Buttons -->
             @if (scanResult() && !scanResult()?.error) {
                 <div class="action-section">
-                    @if (mode() === 'issue') {
+                    @if (mode() === 'checkout') {
                         <button 
                             class="action-btn issue-action"
                             [disabled]="processing()"
@@ -228,21 +230,21 @@ type OperationMode = 'issue' | 'return';
             <div class="recent-transactions">
                 <h2>📊 Recent Transactions</h2>
                 <div class="transactions-list">
-                    @for (transaction of recentTransactions(); track transaction.id) {
+                    @for (transaction of recentTransactions(); track transaction._id) {
                         <div class="transaction-item">
-                            <div class="transaction-icon" [class]="transaction.type.toLowerCase()">
-                                {{ transaction.type === 'ISSUE' ? '📤' : '📥' }}
+                            <div class="transaction-icon" [class]="transaction.status.toLowerCase()">
+                                {{ transaction.returnedAt ? '📥' : '📤' }}
                             </div>
                             <div class="transaction-details">
-                                <div class="transaction-title">{{ transaction.bookTitle }}</div>
+                                <div class="transaction-title">Book ID: {{ transaction.bookTitleId }}</div>
                                 <div class="transaction-meta">
-                                    <span>{{ transaction.memberName }}</span>
+                                    <span>Borrower: {{ transaction.borrowerId }}</span>
                                     <span class="separator">•</span>
-                                    <span>{{ transaction.time }}</span>
+                                    <span>{{ formatDate(transaction.borrowedAt) }}</span>
                                 </div>
                             </div>
-                            <div class="transaction-status" [class]="transaction.type.toLowerCase()">
-                                {{ transaction.type }}
+                            <div class="transaction-status" [class]="transaction.status.toLowerCase()">
+                                {{ transaction.status }}
                             </div>
                         </div>
                     }
@@ -800,74 +802,161 @@ type OperationMode = 'issue' | 'return';
         }
     `]
 })
-export class CirculationComponent {
-    private libraryService = inject(LibraryService);
+export class CirculationComponent implements OnInit {
+    private apiService = inject(LibraryApiService);
+    private toast = inject(ToastService);
 
-    mode = signal<OperationMode>('issue');
+    mode = signal<OperationMode>('checkout');
     barcodeInput = '';
+    borrowerId = '';
     memberSearch = '';
     scanning = signal(false);
     processing = signal(false);
-    scanResult = signal<(ScanResult & { error?: string }) | null>(null);
+    scannedCopy = signal<BookCopy | null>(null);
 
-    recentTransactions = signal([
-        { id: 1, type: 'ISSUE', bookTitle: 'Clean Code', memberName: 'John Doe', time: '2 mins ago' },
-        { id: 2, type: 'RETURN', bookTitle: 'The Pragmatic Programmer', memberName: 'Jane Smith', time: '15 mins ago' },
-        { id: 3, type: 'ISSUE', bookTitle: 'Design Patterns', memberName: 'Mike Johnson', time: '1 hour ago' },
-        { id: 4, type: 'RETURN', bookTitle: 'Refactoring', memberName: 'Sarah Williams', time: '2 hours ago' }
-    ]);
+    scanResult = signal<{
+        book?: BookTitle;
+        copy?: BookCopy;
+        transaction?: BorrowTransaction;
+        action?: 'CHECKOUT' | 'RETURN';
+        error?: string;
+    } | null>(null);
+
+    recentTransactions = signal<BorrowTransaction[]>([]);
+    overdueTransactions = signal<BorrowTransaction[]>([]);
+
+    loading = signal(false);
+
+    ngOnInit() {
+        this.loadRecentTransactions();
+        this.loadOverdueTransactions();
+    }
+
+    private loadRecentTransactions() {
+        this.apiService.getTransactions({ page: 1 }).subscribe({
+            next: (response) => {
+                this.recentTransactions.set(response.data.slice(0, 10));
+            },
+            error: (err) => console.error('Failed to load transactions:', err)
+        });
+    }
+
+    private loadOverdueTransactions() {
+        this.apiService.getOverdueTransactions().subscribe({
+            next: (transactions) => {
+                this.overdueTransactions.set(transactions);
+            },
+            error: (err) => console.error('Failed to load overdue:', err)
+        });
+    }
 
     scanBarcode() {
-        if (!this.barcodeInput) return;
+        if (!this.barcodeInput.trim()) return;
 
         this.scanning.set(true);
-        this.libraryService.scanBarcode(this.barcodeInput).subscribe({
-            next: (result) => {
-                this.scanResult.set(result);
+
+        this.apiService.getCopyByBarcode(this.barcodeInput).subscribe({
+            next: (copy) => {
+                this.scannedCopy.set(copy);
                 this.scanning.set(false);
+                this.toast.success('Book scanned successfully');
+
+                // Auto-process if in checkin mode
+                if (this.mode() === 'checkin') {
+                    this.processCheckin();
+                }
             },
-            error: (error) => {
-                this.scanResult.set({
-                    error: 'Barcode not found or invalid',
-                    copy: null,
-                    book: null,
-                    action: 'ISSUE'
-                });
+            error: (err) => {
+                this.toast.error('Barcode not found or invalid');
                 this.scanning.set(false);
+                this.scannedCopy.set(null);
+            }
+        });
+    }
+
+    processCheckout() {
+        if (!this.scannedCopy() || !this.borrowerId.trim()) {
+            this.toast.warning('Please scan a book and enter borrower ID');
+            return;
+        }
+
+        this.processing.set(true);
+
+        this.apiService.checkout({
+            copyId: this.scannedCopy()!._id,
+            borrowerId: this.borrowerId
+        }).subscribe({
+            next: (transaction) => {
+                this.toast.success(`Book checked out! Due: ${new Date(transaction.dueDate).toLocaleDateString()}`);
+                this.processing.set(false);
+                this.reset();
+                this.loadRecentTransactions();
+            },
+            error: (err) => {
+                this.toast.error(err.error?.message || 'Failed to checkout book');
+                this.processing.set(false);
+            }
+        });
+    }
+
+    processCheckin() {
+        if (!this.scannedCopy()) return;
+
+        this.processing.set(true);
+
+        this.apiService.checkin({
+            copyId: this.scannedCopy()!._id
+        }).subscribe({
+            next: (transaction) => {
+                this.toast.success('Book returned successfully!');
+                this.processing.set(false);
+                this.reset();
+                this.loadRecentTransactions();
+                this.loadOverdueTransactions();
+            },
+            error: (err) => {
+                this.toast.error(err.error?.message || 'Failed to return book');
+                this.processing.set(false);
+            }
+        });
+    }
+
+    renewTransaction(transactionId: string) {
+        this.apiService.renew(transactionId).subscribe({
+            next: () => {
+                this.toast.success('Book renewed successfully!');
+                this.loadRecentTransactions();
+            },
+            error: (err) => {
+                this.toast.error(err.error?.message || 'Failed to renew book');
             }
         });
     }
 
     selectMember(memberId: string) {
-        console.log('Selected member:', memberId);
+        this.borrowerId = memberId;
+        this.toast.info(`Member ${memberId} selected`);
     }
 
     processIssue() {
-        this.processing.set(true);
-        setTimeout(() => {
-            this.processing.set(false);
-            this.reset();
-            // Add to recent transactions
-            alert('Book issued successfully!');
-        }, 1500);
+        // This is same as checkout
+        this.processCheckout();
     }
 
     processReturn() {
-        this.processing.set(true);
-        setTimeout(() => {
-            this.processing.set(false);
-            this.reset();
-            alert('Book returned successfully!');
-        }, 1500);
+        // This is same as checkin
+        this.processCheckin();
     }
 
     reset() {
         this.barcodeInput = '';
-        this.scanResult.set(null);
+        this.borrowerId = '';
         this.memberSearch = '';
+        this.scannedCopy.set(null);
+        this.scanResult.set(null);
     }
 
-    formatDate(date: any): string {
+    formatDate(date: Date | string | undefined): string {
         if (!date) return 'N/A';
         return new Date(date).toLocaleDateString();
     }

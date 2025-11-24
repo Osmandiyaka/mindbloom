@@ -1,18 +1,8 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { LibraryService } from '../../services/library.service';
-
-interface LibraryStats {
-    totalBooks: number;
-    totalCopies: number;
-    availableCopies: number;
-    issuedBooks: number;
-    activeMembers: number;
-    overdueBooks: number;
-    pendingFines: number;
-    reservations: number;
-}
+import { LibraryApiService } from '../../services/library-api.service';
+import { DashboardStats } from '../../models/library.models';
 
 @Component({
     selector: 'app-library-dashboard',
@@ -20,6 +10,19 @@ interface LibraryStats {
     imports: [CommonModule, RouterLink],
     template: `
         <div class="library-dashboard">
+            <!-- Loading State -->
+            <div class="loading-overlay" *ngIf="loading()">
+                <div class="spinner"></div>
+                <p>Loading dashboard...</p>
+            </div>
+
+            <!-- Error State -->
+            <div class="error-banner" *ngIf="error()">
+                <span class="error-icon">⚠️</span>
+                <span>{{ error() }}</span>
+                <button class="retry-btn" (click)="loadDashboardData()">Retry</button>
+            </div>
+
             <!-- Header -->
             <div class="dashboard-header">
                 <div>
@@ -43,10 +46,10 @@ interface LibraryStats {
                 <div class="stat-card primary">
                     <div class="stat-icon">📖</div>
                     <div class="stat-content">
-                        <div class="stat-value">{{ stats().totalBooks.toLocaleString() }}</div>
-                        <div class="stat-label">Total Books</div>
+                        <div class="stat-value">{{ stats().totalTitles.toLocaleString() }}</div>
+                        <div class="stat-label">Total Titles</div>
                     </div>
-                    <div class="stat-trend positive">+{{ stats().totalCopies }} copies</div>
+                    <div class="stat-trend positive">{{ stats().totalCopies.toLocaleString() }} copies</div>
                 </div>
 
                 <div class="stat-card success">
@@ -65,30 +68,30 @@ interface LibraryStats {
                 <div class="stat-card warning">
                     <div class="stat-icon">📤</div>
                     <div class="stat-content">
-                        <div class="stat-value">{{ stats().issuedBooks.toLocaleString() }}</div>
-                        <div class="stat-label">Issued Books</div>
+                        <div class="stat-value">{{ stats().checkedOutCopies.toLocaleString() }}</div>
+                        <div class="stat-label">Checked Out</div>
                     </div>
                     <button class="stat-action" routerLink="/plugins/library/circulation">
                         View All →
                     </button>
                 </div>
 
-                <div class="stat-card danger" *ngIf="stats().overdueBooks > 0">
-                    <div class="stat-icon">⚠️</div>
+                <div class="stat-card danger" *ngIf="stats().overdueItems > 0">
+                    <div class="stat-icon danger">⚠️</div>
                     <div class="stat-content">
-                        <div class="stat-value">{{ stats().overdueBooks }}</div>
+                        <div class="stat-value">{{ stats().overdueItems }}</div>
                         <div class="stat-label">Overdue</div>
                     </div>
                     <div class="stat-trend negative">Needs attention</div>
                 </div>
 
                 <div class="stat-card info">
-                    <div class="stat-icon">👥</div>
+                    <div class="stat-icon">📋</div>
                     <div class="stat-content">
-                        <div class="stat-value">{{ stats().activeMembers.toLocaleString() }}</div>
-                        <div class="stat-label">Active Members</div>
+                        <div class="stat-value">{{ stats().checkedOutCopies.toLocaleString() }}</div>
+                        <div class="stat-label">Active Loans</div>
                     </div>
-                    <button class="stat-action" routerLink="/plugins/library/members">
+                    <button class="stat-action" routerLink="/plugins/library/circulation">
                         Manage →
                     </button>
                 </div>
@@ -96,10 +99,10 @@ interface LibraryStats {
                 <div class="stat-card accent">
                     <div class="stat-icon">💰</div>
                     <div class="stat-content">
-                        <div class="stat-value">{{ '$' + stats().pendingFines.toLocaleString() }}</div>
-                        <div class="stat-label">Pending Fines</div>
+                        <div class="stat-value">{{ '$' + stats().totalFinesCollected.toLocaleString() }}</div>
+                        <div class="stat-label">Total Fines</div>
                     </div>
-                    <div class="stat-trend">{{ stats().overdueBooks }} overdue</div>
+                    <div class="stat-trend">{{ stats().overdueItems }} overdue</div>
                 </div>
             </div>
 
@@ -193,6 +196,71 @@ interface LibraryStats {
             padding: 2rem;
             max-width: 1400px;
             margin: 0 auto;
+            position: relative;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #f3f4f6;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-overlay p {
+            margin-top: 1rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .error-banner {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .error-icon {
+            font-size: 1.5rem;
+        }
+
+        .retry-btn {
+            margin-left: auto;
+            padding: 0.5rem 1rem;
+            background: white;
+            color: #991b1b;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .retry-btn:hover {
+            background: #fef2f2;
         }
 
         .dashboard-header {
@@ -485,28 +553,39 @@ interface LibraryStats {
     `]
 })
 export class LibraryDashboardComponent implements OnInit {
-    private libraryService = inject(LibraryService);
+    private apiService = inject(LibraryApiService);
 
     loading = signal(true);
-    stats = signal<LibraryStats>({
-        totalBooks: 1245,
-        totalCopies: 3678,
-        availableCopies: 2456,
-        issuedBooks: 1222,
-        activeMembers: 856,
-        overdueBooks: 34,
-        pendingFines: 680,
-        reservations: 45
+    error = signal<string | null>(null);
+    stats = signal<DashboardStats>({
+        totalTitles: 0,
+        totalCopies: 0,
+        availableCopies: 0,
+        checkedOutCopies: 0,
+        overdueItems: 0,
+        activeReservations: 0,
+        totalFinesCollected: 0,
+        patronsWithFines: 0
     });
 
     ngOnInit() {
         this.loadDashboardData();
     }
 
-    private loadDashboardData() {
-        // TODO: Load actual stats from API
-        setTimeout(() => {
-            this.loading.set(false);
-        }, 500);
+    loadDashboardData() {
+        this.loading.set(true);
+        this.error.set(null);
+
+        this.apiService.getDashboardStats().subscribe({
+            next: (data) => {
+                this.stats.set(data);
+                this.loading.set(false);
+            },
+            error: (err) => {
+                console.error('Failed to load dashboard stats:', err);
+                this.error.set('Failed to load dashboard data. Please try again.');
+                this.loading.set(false);
+            }
+        });
     }
 }

@@ -23,7 +23,7 @@ export class ReservationsService {
         private readonly tenantContext: TenantContext,
         private readonly titlesService: TitlesService,
         private readonly copiesService: CopiesService,
-    ) {}
+    ) { }
 
     /**
      * Create a new reservation

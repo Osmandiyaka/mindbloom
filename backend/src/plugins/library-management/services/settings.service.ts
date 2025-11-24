@@ -11,7 +11,7 @@ export class SettingsService {
         @InjectModel('LibrarySettings')
         private readonly settingsModel: Model<LibrarySettings>,
         private readonly tenantContext: TenantContext,
-    ) {}
+    ) { }
 
     /**
      * Get settings for current tenant

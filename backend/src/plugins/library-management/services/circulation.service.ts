@@ -30,7 +30,7 @@ export class CirculationService {
         private readonly reservationsService: ReservationsService,
         private readonly finesService: FinesService,
         private readonly settingsService: SettingsService,
-    ) {}
+    ) { }
 
     /**
      * Checkout a copy to a patron
@@ -44,7 +44,7 @@ export class CirculationService {
 
         // Get copy and validate
         const copy = await this.copiesService.findById(checkoutDto.copyId);
-        
+
         if (copy.status !== CopyStatus.AVAILABLE && copy.status !== CopyStatus.ON_HOLD_SHELF) {
             throw new BadRequestException(`Copy is not available for checkout. Current status: ${copy.status}`);
         }
@@ -65,7 +65,7 @@ export class CirculationService {
         if (settings.circulationSettings?.blockCheckoutIfFines) {
             const balance = await this.finesService.getPatronBalance(checkoutDto.borrowerId);
             const threshold = settings.circulationSettings.fineThresholdForBlock || 0;
-            
+
             if (balance > threshold) {
                 throw new ForbiddenException(
                     `Patron has outstanding fines of ${balance}. Please clear fines before checkout.`
@@ -204,8 +204,8 @@ export class CirculationService {
         // Update copy status
         await this.copiesService.updateStatus(checkinDto.copyId, {
             newStatus: newCopyStatus,
-            reason: nextReservation 
-                ? `Placed on hold for reservation` 
+            reason: nextReservation
+                ? `Placed on hold for reservation`
                 : `Returned and available`,
             updatedBy: librarianId,
         });
@@ -275,10 +275,10 @@ export class CirculationService {
         transaction.renewalCount += 1;
         transaction.dueDate = newDueDate;
         transaction.expectedReturnDate = newDueDate;
-        
+
         if (!transaction.renewalDates) transaction.renewalDates = [];
         transaction.renewalDates.push(new Date());
-        
+
         if (renewDto.renewalNotes) {
             if (!transaction.renewalNotes) transaction.renewalNotes = [];
             transaction.renewalNotes.push(renewDto.renewalNotes);
@@ -317,7 +317,7 @@ export class CirculationService {
         if (bookTitleId) filter.bookTitleId = bookTitleId;
         if (status) filter.status = status;
         if (isOverdue !== undefined) filter.isOverdue = isOverdue;
-        
+
         if (fromDate || toDate) {
             filter.borrowedAt = {};
             if (fromDate) filter.borrowedAt.$gte = fromDate;
@@ -396,7 +396,7 @@ export class CirculationService {
                 borrowerId: bulkDto.borrowerId,
                 checkoutMethod: bulkDto.checkoutMethod,
             }, librarianId);
-            
+
             transactions.push(transaction);
         }
 
@@ -415,7 +415,7 @@ export class CirculationService {
                 returnCondition: bulkDto.returnCondition,
                 checkinMethod: bulkDto.checkinMethod,
             }, librarianId);
-            
+
             transactions.push(transaction);
         }
 

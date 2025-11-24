@@ -15,6 +15,10 @@ import { LibrarySettingsSchema } from './schemas/settings.schema';
 import { LibraryNotificationLogSchema } from './schemas/notification-log.schema';
 
 // Legacy schemas (to be deprecated)
+import { LibraryBookSchema } from './schemas/book.schema';
+import { LibraryBookCopySchema as LegacyLibraryBookCopySchema } from './schemas/book-copy.schema';
+import { LibraryTransactionSchema } from './schemas/transaction.schema';
+import { LibraryFineSchema } from './schemas/fine.schema';
 import { LibraryCategorySchema } from './schemas/category.schema';
 import { LibraryMemberSchema } from './schemas/member.schema';
 
@@ -32,9 +36,9 @@ import { TenantContext } from '../../common/tenant/tenant.context';
 @Module({
     imports: [
         MongooseModule.forFeature([
-            // New comprehensive schemas
+            // New comprehensive schemas (used by new services)
             { name: 'LibraryBookTitle', schema: LibraryBookTitleSchema },
-            { name: 'LibraryBookCopy', schema: NewLibraryBookCopySchema },
+            { name: 'LibraryBookCopy', schema: NewLibraryBookCopySchema }, // New comprehensive copy schema
             { name: 'LibraryLocation', schema: LibraryLocationSchema },
             { name: 'LibraryBorrowTransaction', schema: LibraryBorrowTransactionSchema },
             { name: 'LibraryReservation', schema: LibraryReservationSchema },
@@ -42,7 +46,11 @@ import { TenantContext } from '../../common/tenant/tenant.context';
             { name: 'LibrarySettings', schema: LibrarySettingsSchema },
             { name: 'LibraryNotificationLog', schema: LibraryNotificationLogSchema },
 
-            // Legacy schemas (keeping for backward compatibility during migration)
+            // Legacy schemas (keeping for backward compatibility - used by old LibraryService)
+            { name: 'LibraryBook', schema: LibraryBookSchema },
+            // Note: Legacy LibraryBookCopy removed - using new comprehensive schema above
+            { name: 'LibraryTransaction', schema: LibraryTransactionSchema },
+            { name: 'LibraryFine', schema: LibraryFineSchema },
             { name: 'LibraryCategory', schema: LibraryCategorySchema },
             { name: 'LibraryMember', schema: LibraryMemberSchema },
         ]),

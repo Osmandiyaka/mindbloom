@@ -1,8 +1,10 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LibraryService } from '../../services/library.service';
+import { LibraryApiService } from '../../services/library-api.service';
+import { ToastService } from '../../services/toast.service';
+import { BookTitle } from '../../models/library.models';
 
 @Component({
     selector: 'app-add-book',
@@ -48,7 +50,7 @@ import { LibraryService } from '../../services/library.service';
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Author *</label>
-                            <input type="text" [(ngModel)]="bookData.author" name="author" class="form-input" required />
+                            <input type="text" [(ngModel)]="authorInput" name="author" class="form-input" required />
                         </div>
                         <div class="form-group">
                             <label class="form-label">ISBN</label>
@@ -63,14 +65,14 @@ import { LibraryService } from '../../services/library.service';
                         </div>
                         <div class="form-group">
                             <label class="form-label">Publication Year</label>
-                            <input type="number" [(ngModel)]="bookData.publicationYear" name="year" class="form-input" />
+                            <input type="number" [(ngModel)]="publishedYearInput" name="year" class="form-input" />
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Category</label>
-                            <select [(ngModel)]="bookData.categoryId" name="category" class="form-select">
+                            <select [(ngModel)]="categoryInput" name="category" class="form-select">
                                 <option value="">Select category</option>
                                 <option value="fiction">Fiction</option>
                                 <option value="non-fiction">Non-Fiction</option>
@@ -266,51 +268,98 @@ import { LibraryService } from '../../services/library.service';
         }
     `]
 })
-export class AddBookComponent {
-    private libraryService = inject(LibraryService);
+export class AddBookComponent implements OnInit {
+    private apiService = inject(LibraryApiService);
     private router = inject(Router);
+    private toast = inject(ToastService);
 
     isbnLookup = '';
     saving = signal(false);
     numberOfCopies = 1;
+    categories = signal<string[]>([]);
 
-    bookData: any = {
+    // Helper properties for form binding
+    authorInput = '';
+    publishedYearInput: number | undefined = new Date().getFullYear();
+    categoryInput = '';
+
+    bookData: Partial<BookTitle> = {
         title: '',
-        author: '',
+        authors: [''],
         isbn: '',
         publisher: '',
-        publicationYear: new Date().getFullYear(),
-        categoryId: '',
+        publishedYear: new Date().getFullYear(),
+        categories: [],
+        genres: [],
+        tags: [],
         description: ''
     };
 
+    ngOnInit() {
+        this.loadCategories();
+    }
+
+    private loadCategories() {
+        this.apiService.getAllCategories().subscribe({
+            next: (categories) => {
+                this.categories.set(categories);
+            },
+            error: (err) => console.error('Failed to load categories:', err)
+        });
+    }
+
     lookupISBN() {
-        // Mock ISBN lookup
         if (this.isbnLookup) {
             this.bookData.isbn = this.isbnLookup;
-            alert('ISBN lookup feature coming soon!');
+            this.toast.info('ISBN lookup feature coming soon!');
         }
     }
 
     saveBook() {
+        if (!this.bookData.title || !this.authorInput) {
+            this.toast.warning('Title and Author are required');
+            return;
+        }
+
         this.saving.set(true);
-        this.libraryService.createBook(this.bookData).subscribe({
-            next: (book) => {
+
+        // Map form inputs to BookTitle structure
+        const titleData = {
+            ...this.bookData,
+            authors: this.authorInput ? [this.authorInput] : [],
+            publishedYear: this.publishedYearInput,
+            categories: this.categoryInput ? [this.categoryInput] : [],
+            totalCopies: 0,
+            availableCopies: 0,
+            isActive: true
+        };
+
+        this.apiService.createTitle(titleData).subscribe({
+            next: (title) => {
                 if (this.numberOfCopies > 0) {
-                    this.libraryService.addCopies(book._id, this.numberOfCopies).subscribe({
+                    this.apiService.bulkCreateCopies({
+                        bookTitleId: title._id,
+                        quantity: this.numberOfCopies
+                    }).subscribe({
                         next: () => {
+                            this.toast.success(`Book added with ${this.numberOfCopies} copies!`);
                             this.saving.set(false);
                             this.router.navigate(['/plugins/library/catalog']);
+                        },
+                        error: (err) => {
+                            this.toast.error('Failed to create copies');
+                            this.saving.set(false);
                         }
                     });
                 } else {
+                    this.toast.success('Book added successfully!');
                     this.saving.set(false);
                     this.router.navigate(['/plugins/library/catalog']);
                 }
             },
-            error: () => {
+            error: (err) => {
+                this.toast.error(err.error?.message || 'Failed to save book');
                 this.saving.set(false);
-                alert('Error saving book');
             }
         });
     }

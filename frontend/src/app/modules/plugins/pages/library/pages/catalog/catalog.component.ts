@@ -1,8 +1,9 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { LibraryService, Book } from '../../services/library.service';
+import { LibraryApiService } from '../../services/library-api.service';
+import { BookTitle } from '../../models/library.models';
 
 @Component({
     selector: 'app-catalog',
@@ -41,11 +42,9 @@ import { LibraryService, Book } from '../../services/library.service';
                 <div class="filter-controls">
                     <select class="filter-select" [(ngModel)]="selectedCategory" (change)="onFilterChange()">
                         <option value="">All Categories</option>
-                        <option value="fiction">Fiction</option>
-                        <option value="non-fiction">Non-Fiction</option>
-                        <option value="science">Science</option>
-                        <option value="technology">Technology</option>
-                        <option value="history">History</option>
+                        @for (category of categories(); track category) {
+                            <option [value]="category">{{ category }}</option>
+                        }
                     </select>
 
                     <select class="filter-select" [(ngModel)]="availability" (change)="onFilterChange()">
@@ -76,7 +75,7 @@ import { LibraryService, Book } from '../../services/library.service';
             <!-- Results Summary -->
             <div class="results-summary" *ngIf="!loading()">
                 <span class="result-count">
-                    {{ filteredBooks().length }} books found
+                    {{ totalBooks() }} books found
                 </span>
                 <span class="result-info">
                     {{ availableCount() }} available
@@ -92,7 +91,7 @@ import { LibraryService, Book } from '../../services/library.service';
             }
 
             <!-- Empty State -->
-            @if (!loading() && filteredBooks().length === 0) {
+            @if (!loading() && books().length === 0) {
                 <div class="empty-state">
                     <div class="empty-icon">📚</div>
                     <h3>No books found</h3>
@@ -104,13 +103,13 @@ import { LibraryService, Book } from '../../services/library.service';
             }
 
             <!-- Grid View -->
-            @if (!loading() && filteredBooks().length > 0 && viewMode() === 'grid') {
+            @if (!loading() && books().length > 0 && viewMode() === 'grid') {
                 <div class="books-grid">
-                    @for (book of filteredBooks(); track book._id) {
+                    @for (book of books(); track book._id) {
                         <div class="book-card" [routerLink]="['/plugins/library/books', book._id]">
                             <div class="book-cover">
-                                @if (book.thumbnailUrl) {
-                                    <img [src]="book.thumbnailUrl" [alt]="book.title" />
+                                @if (book.coverImageUrl) {
+                                    <img [src]="book.coverImageUrl" [alt]="book.title" />
                                 } @else {
                                     <div class="book-cover-placeholder">
                                         <span class="book-icon">📖</span>
@@ -124,7 +123,7 @@ import { LibraryService, Book } from '../../services/library.service';
                             </div>
                             <div class="book-content">
                                 <h3 class="book-title">{{ book.title }}</h3>
-                                <p class="book-author">by {{ book.author }}</p>
+                                <p class="book-author">by {{ book.authors.join(', ') }}</p>
                                 <div class="book-meta">
                                     <span class="meta-item">
                                         <span class="meta-icon">📚</span>
@@ -137,12 +136,6 @@ import { LibraryService, Book } from '../../services/library.service';
                                         </span>
                                     }
                                 </div>
-                                @if (book.rating > 0) {
-                                    <div class="book-rating">
-                                        <span class="stars">{{ getStars(book.rating) }}</span>
-                                        <span class="rating-text">{{ book.rating.toFixed(1) }} ({{ book.ratingCount }})</span>
-                                    </div>
-                                }
                             </div>
                         </div>
                     }
@@ -150,7 +143,7 @@ import { LibraryService, Book } from '../../services/library.service';
             }
 
             <!-- List View -->
-            @if (!loading() && filteredBooks().length > 0 && viewMode() === 'list') {
+            @if (!loading() && books().length > 0 && viewMode() === 'list') {
                 <div class="books-list">
                     <div class="list-header">
                         <div class="col-title">Book Details</div>
@@ -158,18 +151,18 @@ import { LibraryService, Book } from '../../services/library.service';
                         <div class="col-status">Status</div>
                         <div class="col-actions">Actions</div>
                     </div>
-                    @for (book of filteredBooks(); track book._id) {
+                    @for (book of books(); track book._id) {
                         <div class="list-row" [routerLink]="['/plugins/library/books', book._id]">
                             <div class="col-title">
                                 <div class="book-info">
-                                    @if (book.thumbnailUrl) {
-                                        <img [src]="book.thumbnailUrl" [alt]="book.title" class="list-thumbnail" />
+                                    @if (book.coverImageUrl) {
+                                        <img [src]="book.coverImageUrl" [alt]="book.title" class="list-thumbnail" />
                                     } @else {
                                         <div class="list-thumbnail-placeholder">📖</div>
                                     }
                                     <div>
                                         <div class="list-book-title">{{ book.title }}</div>
-                                        <div class="list-book-author">{{ book.author }}</div>
+                                        <div class="list-book-author">{{ book.authors.join(', ') }}</div>
                                         @if (book.isbn) {
                                             <div class="list-book-isbn">ISBN: {{ book.isbn }}</div>
                                         }
@@ -202,6 +195,29 @@ import { LibraryService, Book } from '../../services/library.service';
                             </div>
                         </div>
                     }
+                </div>
+            }
+
+            <!-- Pagination -->
+            @if (!loading() && books().length > 0) {
+                <div class="pagination">
+                    <button 
+                        class="pagination-btn" 
+                        [disabled]="currentPage() === 1"
+                        (click)="previousPage()">
+                        ← Previous
+                    </button>
+                    
+                    <div class="pagination-info">
+                        Page {{ currentPage() }} of {{ totalPages() }}
+                    </div>
+
+                    <button 
+                        class="pagination-btn" 
+                        [disabled]="currentPage() === totalPages()"
+                        (click)="nextPage()">
+                        Next →
+                    </button>
                 </div>
             }
         </div>
@@ -691,140 +707,150 @@ import { LibraryService, Book } from '../../services/library.service';
         .action-btn:hover {
             background: #f7f8fc;
         }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin-top: 3rem;
+            padding: 2rem 0;
+        }
+
+        .pagination-btn {
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            border-color: #667eea;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            font-weight: 600;
+            color: #666;
+        }
     `]
 })
 export class CatalogComponent implements OnInit {
-    private libraryService = inject(LibraryService);
+    private apiService = inject(LibraryApiService);
 
     loading = signal(true);
-    books = signal<Book[]>([]);
-    filteredBooks = signal<Book[]>([]);
+    error = signal<string | null>(null);
+    books = signal<BookTitle[]>([]);
+    categories = signal<string[]>([]);
     viewMode = signal<'grid' | 'list'>('grid');
+
+    // Pagination
+    currentPage = signal(1);
+    pageSize = 10;
+    totalBooks = signal(0);
 
     searchQuery = '';
     selectedCategory = '';
     availability = '';
 
+    availableCount = computed(() =>
+        this.books().filter(b => b.availableCopies > 0).length
+    );
+
+    totalPages = computed(() =>
+        Math.ceil(this.totalBooks() / this.pageSize)
+    );
+
     ngOnInit() {
+        this.loadCategories();
         this.loadBooks();
     }
 
-    private loadBooks() {
-        this.libraryService.getBooks().subscribe({
-            next: (books) => {
-                this.books.set(books);
-                this.filteredBooks.set(books);
-                this.loading.set(false);
+    private loadCategories() {
+        this.apiService.getAllCategories().subscribe({
+            next: (categories) => {
+                this.categories.set(categories);
             },
-            error: (error) => {
-                console.error('Error loading books:', error);
-                this.loading.set(false);
-                // Mock data for demo
-                this.loadMockData();
+            error: (err) => {
+                console.error('Failed to load categories:', err);
             }
         });
     }
 
-    private loadMockData() {
-        const mockBooks: Book[] = [
-            {
-                _id: '1',
-                tenantId: 'demo',
-                title: 'Introduction to Algorithms',
-                isbn: '978-0262033848',
-                author: 'Thomas H. Cormen',
-                categoryId: 'technology',
-                totalCopies: 5,
-                availableCopies: 3,
-                totalIssued: 245,
-                rating: 4.8,
-                ratingCount: 42,
-                isActive: true,
-                description: 'A comprehensive textbook on computer algorithms',
-                publicationYear: 2009
-            },
-            {
-                _id: '2',
-                tenantId: 'demo',
-                title: 'Clean Code',
-                isbn: '978-0132350884',
-                author: 'Robert C. Martin',
-                categoryId: 'technology',
-                totalCopies: 3,
-                availableCopies: 0,
-                totalIssued: 189,
-                rating: 4.9,
-                ratingCount: 38,
-                isActive: true,
-                description: 'A handbook of agile software craftsmanship',
-                publicationYear: 2008
-            },
-            {
-                _id: '3',
-                tenantId: 'demo',
-                title: 'The Pragmatic Programmer',
-                isbn: '978-0135957059',
-                author: 'David Thomas',
-                categoryId: 'technology',
-                totalCopies: 4,
-                availableCopies: 2,
-                totalIssued: 167,
-                rating: 4.7,
-                ratingCount: 31,
-                isActive: true,
-                description: 'Your journey to mastery',
-                publicationYear: 2019
-            }
-        ];
+    private loadBooks() {
+        this.loading.set(true);
+        this.error.set(null);
 
-        this.books.set(mockBooks);
-        this.filteredBooks.set(mockBooks);
-        this.loading.set(false);
+        const params: any = {
+            page: this.currentPage(),
+            limit: this.pageSize
+        };
+
+        if (this.searchQuery) {
+            params.search = this.searchQuery;
+        }
+
+        if (this.selectedCategory) {
+            params.categories = [this.selectedCategory];
+        }
+
+        this.apiService.getTitles(params).subscribe({
+            next: (response) => {
+                this.books.set(response.data);
+                this.totalBooks.set(response.total);
+                this.loading.set(false);
+            },
+            error: (err) => {
+                console.error('Failed to load books:', err);
+                this.error.set('Failed to load books. Please try again.');
+                this.loading.set(false);
+            }
+        });
     }
 
     onSearch() {
-        this.filterBooks();
+        this.currentPage.set(1);
+        this.loadBooks();
     }
 
     onFilterChange() {
-        this.filterBooks();
-    }
-
-    private filterBooks() {
-        let filtered = [...this.books()];
-
-        // Search filter
-        if (this.searchQuery) {
-            const query = this.searchQuery.toLowerCase();
-            filtered = filtered.filter(book =>
-                book.title.toLowerCase().includes(query) ||
-                book.author.toLowerCase().includes(query) ||
-                book.isbn?.toLowerCase().includes(query)
-            );
-        }
-
-        // Category filter
-        if (this.selectedCategory) {
-            filtered = filtered.filter(book => book.categoryId === this.selectedCategory);
-        }
-
-        // Availability filter
-        if (this.availability === 'available') {
-            filtered = filtered.filter(book => book.availableCopies > 0);
-        } else if (this.availability === 'issued') {
-            filtered = filtered.filter(book => book.availableCopies === 0);
-        }
-
-        this.filteredBooks.set(filtered);
+        this.currentPage.set(1);
+        this.loadBooks();
     }
 
     clearSearch() {
         this.searchQuery = '';
-        this.filterBooks();
+        this.currentPage.set(1);
+        this.loadBooks();
     }
 
-    availableCount(): number {
-        return this.filteredBooks().filter(b => b.availableCopies > 0).length;
+    nextPage() {
+        if (this.currentPage() < this.totalPages()) {
+            this.currentPage.update(p => p + 1);
+            this.loadBooks();
+        }
+    }
+
+    previousPage() {
+        if (this.currentPage() > 1) {
+            this.currentPage.update(p => p - 1);
+            this.loadBooks();
+        }
+    }
+
+    goToPage(page: number) {
+        this.currentPage.set(page);
+        this.loadBooks();
     }
 
     getStars(rating: number): string {

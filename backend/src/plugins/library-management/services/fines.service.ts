@@ -19,7 +19,7 @@ export class FinesService {
         @InjectModel('LibraryFineLedger')
         private readonly ledgerModel: Model<LibraryFineLedger>,
         private readonly tenantContext: TenantContext,
-    ) {}
+    ) { }
 
     /**
      * Assess a fine for a patron
