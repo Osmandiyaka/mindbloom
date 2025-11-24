@@ -2,6 +2,7 @@ import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { LibraryApiService } from '../../services/library-api.service';
 import { ToastService } from '../../services/toast.service';
 import { BookTitle } from '../../models/library.models';
@@ -27,11 +28,19 @@ import { BookTitle } from '../../models/library.models';
                             [(ngModel)]="isbnLookup"
                             placeholder="Enter ISBN to auto-fill details..."
                             class="isbn-input"
+                            (keyup.enter)="lookupISBN()"
                         />
-                        <button class="lookup-btn" (click)="lookupISBN()">
-                            Lookup
+                        <button class="lookup-btn" (click)="lookupISBN()" [disabled]="lookingUp()">
+                            @if (lookingUp()) {
+                                <span class="spinner-small"></span>
+                            } @else {
+                                Lookup
+                            }
                         </button>
                     </div>
+                    @if (lookupError()) {
+                        <div class="lookup-error">{{ lookupError() }}</div>
+                    }
                 </div>
 
                 <div class="divider">
@@ -160,6 +169,31 @@ import { BookTitle } from '../../models/library.models';
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
+            min-width: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lookup-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .lookup-error {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .spinner-small {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: inline-block;
         }
 
         .divider {
@@ -272,9 +306,12 @@ export class AddBookComponent implements OnInit {
     private apiService = inject(LibraryApiService);
     private router = inject(Router);
     private toast = inject(ToastService);
+    private http = inject(HttpClient);
 
     isbnLookup = '';
     saving = signal(false);
+    lookingUp = signal(false);
+    lookupError = signal<string | null>(null);
     numberOfCopies = 1;
     categories = signal<string[]>([]);
 
@@ -309,13 +346,77 @@ export class AddBookComponent implements OnInit {
     }
 
     lookupISBN() {
-        if (this.isbnLookup) {
-            this.bookData.isbn = this.isbnLookup;
-            this.toast.info('ISBN lookup feature coming soon!');
+        if (!this.isbnLookup.trim()) {
+            this.toast.warning('Please enter an ISBN');
+            return;
         }
-    }
 
-    saveBook() {
+        // Clean ISBN (remove hyphens and spaces)
+        const cleanIsbn = this.isbnLookup.replace(/[-\s]/g, '');
+
+        // Validate ISBN format (10 or 13 digits)
+        if (!/^\d{10}(\d{3})?$/.test(cleanIsbn)) {
+            this.lookupError.set('Invalid ISBN format. Please enter a 10 or 13 digit ISBN.');
+            return;
+        }
+
+        this.lookingUp.set(true);
+        this.lookupError.set(null);
+
+        // Use backend proxy to avoid CORS
+        const apiUrl = `/api/library/isbn-lookup?isbn=${cleanIsbn}`;
+
+        this.http.get<any>(apiUrl).subscribe({
+            next: (response) => {
+                // Populate form with fetched data
+                this.bookData.title = response.title || '';
+                this.bookData.isbn = cleanIsbn;
+                this.bookData.publisher = response.publisher || '';
+                this.bookData.description = response.description || '';
+
+                // Set publication year
+                if (response.publishedDate) {
+                    const yearMatch = response.publishedDate.match(/\d{4}/);
+                    if (yearMatch) {
+                        this.publishedYearInput = parseInt(yearMatch[0]);
+                    }
+                }
+
+                // Set authors
+                if (response.authors && response.authors.length > 0) {
+                    this.authorInput = response.authors.join(', ');
+                }
+
+                // Set category based on subjects
+                if (response.subjects && response.subjects.length > 0) {
+                    const category = response.subjects[0].toLowerCase();
+                    if (category.includes('fiction')) {
+                        this.categoryInput = 'fiction';
+                    } else if (category.includes('science')) {
+                        this.categoryInput = 'science';
+                    } else if (category.includes('technology') || category.includes('computer')) {
+                        this.categoryInput = 'technology';
+                    } else {
+                        this.categoryInput = 'non-fiction';
+                    }
+                }
+
+                this.toast.success(`Book details loaded from ${response.source === 'openlibrary' ? 'Open Library' : 'Google Books'}!`);
+                this.lookingUp.set(false);
+            },
+            error: (err) => {
+                console.error('ISBN lookup failed:', err);
+                if (err.status === 404) {
+                    this.lookupError.set('Book not found. Please enter details manually.');
+                    this.toast.warning('Book not found for this ISBN');
+                } else {
+                    this.lookupError.set('Failed to lookup ISBN. Please enter details manually.');
+                    this.toast.error('ISBN lookup service unavailable');
+                }
+                this.lookingUp.set(false);
+            }
+        });
+    } saveBook() {
         if (!this.bookData.title || !this.authorInput) {
             this.toast.warning('Title and Author are required');
             return;
