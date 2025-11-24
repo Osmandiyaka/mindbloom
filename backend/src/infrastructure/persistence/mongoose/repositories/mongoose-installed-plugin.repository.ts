@@ -89,12 +89,12 @@ export class MongooseInstalledPluginRepository
             disabledAt: plugin.disabledAt,
             lastError: plugin.lastError,
         };
-        
+
         // Only include _id for existing documents
         if (plugin.id && plugin.id !== '') {
             doc._id = plugin.id;
         }
-        
+
         return doc;
     }
 }
