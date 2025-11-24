@@ -13,8 +13,6 @@ import {
     GetInstalledPluginsUseCase,
 } from '../../application/plugin/use-cases';
 import { PluginsController } from '../../adapters/http/plugins/plugins.controller';
-import { PluginRegistry } from '../../core/plugins/plugin.registry';
-import { EventBus } from '../../core/plugins/event-bus.service';
 
 @Module({
     imports: [
@@ -33,8 +31,6 @@ import { EventBus } from '../../core/plugins/event-bus.service';
             provide: 'InstalledPluginRepository',
             useClass: MongooseInstalledPluginRepository,
         },
-        EventBus,
-        PluginRegistry,
         BrowsePluginsUseCase,
         InstallPluginUseCase,
         EnablePluginUseCase,
@@ -45,7 +41,6 @@ import { EventBus } from '../../core/plugins/event-bus.service';
     exports: [
         'PluginRepository',
         'InstalledPluginRepository',
-        PluginRegistry,
         GetInstalledPluginsUseCase,
     ],
 })

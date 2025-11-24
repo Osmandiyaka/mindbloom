@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { PluginCategory, PluginStatus } from '../../../domain/plugin/entities/plugin.entity';
+import { PluginCategory, PluginStatus } from '@domain/plugin/entities/plugin.entity';
 
 export const PluginSchema = new Schema(
     {

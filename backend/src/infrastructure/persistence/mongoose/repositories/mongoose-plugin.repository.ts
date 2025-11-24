@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Plugin, PluginCategory } from '../../../domain/plugin/entities/plugin.entity';
-import { PluginRepository } from '../../../domain/plugin/ports/plugin.repository';
+import { Plugin, PluginCategory } from '@domain/plugin/entities/plugin.entity';
+import { PluginRepository } from '@domain/plugin/ports/plugin.repository';
 
 @Injectable()
 export class MongoosePluginRepository implements PluginRepository {
