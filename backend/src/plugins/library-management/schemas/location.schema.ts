@@ -26,10 +26,10 @@ export class LibraryLocation extends Document {
     @Prop({ required: true })
     code: string; // Short code like "MB-2F-RR-FS-A-3-5"
 
-    @Prop({ 
-        type: String, 
-        enum: Object.values(LocationType), 
-        required: true 
+    @Prop({
+        type: String,
+        enum: Object.values(LocationType),
+        required: true
     })
     type: LocationType;
 

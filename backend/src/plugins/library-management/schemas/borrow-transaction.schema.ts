@@ -43,11 +43,11 @@ export class LibraryBorrowTransaction extends Document {
     expectedReturnDate: Date; // After renewals
 
     // Status
-    @Prop({ 
-        type: String, 
-        enum: Object.values(TransactionStatus), 
+    @Prop({
+        type: String,
+        enum: Object.values(TransactionStatus),
         default: TransactionStatus.ACTIVE,
-        index: true 
+        index: true
     })
     status: TransactionStatus;
 

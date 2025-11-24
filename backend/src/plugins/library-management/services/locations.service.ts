@@ -11,7 +11,7 @@ export class LocationsService {
         @InjectModel('LibraryLocation')
         private readonly locationModel: Model<LibraryLocation>,
         private readonly tenantContext: TenantContext,
-    ) {}
+    ) { }
 
     /**
      * Create a new location
@@ -24,12 +24,12 @@ export class LocationsService {
         // Validate parent exists if provided
         let level = 0;
         let fullPath = createDto.name;
-        
+
         if (createDto.parentId) {
             const parent = await this.findById(createDto.parentId.toString());
             level = parent.level + 1;
             fullPath = `${parent.fullPath}/${createDto.name}`;
-            
+
             // Add this location to parent's childIds
             await this.locationModel.updateOne(
                 { _id: createDto.parentId, tenantId },
@@ -84,7 +84,7 @@ export class LocationsService {
      */
     async findById(id: string): Promise<LibraryLocation> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const location = await this.locationModel
             .findOne({ _id: id, tenantId })
             .populate('parentId', 'name code type fullPath');
@@ -101,7 +101,7 @@ export class LocationsService {
      */
     async findByCode(code: string): Promise<LibraryLocation> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const location = await this.locationModel
             .findOne({ tenantId, code })
             .populate('parentId', 'name code type fullPath');
@@ -118,7 +118,7 @@ export class LocationsService {
      */
     async getChildren(parentId: string): Promise<LibraryLocation[]> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         return this.locationModel
             .find({ tenantId, parentId })
             .sort({ name: 1 });
@@ -129,9 +129,9 @@ export class LocationsService {
      */
     async buildHierarchy(rootId?: string): Promise<any[]> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const filter: any = { tenantId };
-        
+
         if (rootId) {
             filter.parentId = rootId;
         } else {
@@ -161,7 +161,7 @@ export class LocationsService {
      */
     async update(id: string, updateDto: UpdateLocationDto): Promise<LibraryLocation> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const location = await this.locationModel.findOneAndUpdate(
             { _id: id, tenantId },
             { ...updateDto },
@@ -180,7 +180,7 @@ export class LocationsService {
      */
     async delete(id: string): Promise<void> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const location = await this.findById(id);
 
         // Check for children
@@ -213,7 +213,7 @@ export class LocationsService {
      */
     async softDelete(id: string): Promise<LibraryLocation> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const location = await this.locationModel.findOneAndUpdate(
             { _id: id, tenantId },
             { isActive: false },
@@ -232,7 +232,7 @@ export class LocationsService {
      */
     async incrementCount(locationId: string, count: number = 1): Promise<void> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         await this.locationModel.updateOne(
             { _id: locationId, tenantId },
             { $inc: { currentCount: count } }
@@ -244,7 +244,7 @@ export class LocationsService {
      */
     async decrementCount(locationId: string, count: number = 1): Promise<void> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         await this.locationModel.updateOne(
             { _id: locationId, tenantId },
             { $inc: { currentCount: -count } }
@@ -260,7 +260,7 @@ export class LocationsService {
 
         while (currentLocation) {
             path.unshift(currentLocation);
-            
+
             if (currentLocation.parentId) {
                 currentLocation = await this.findById(currentLocation.parentId.toString());
             } else {
@@ -276,7 +276,7 @@ export class LocationsService {
      */
     async getRootLocations(): Promise<LibraryLocation[]> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         return this.locationModel.find({
             tenantId,
             level: 0,
@@ -289,9 +289,9 @@ export class LocationsService {
      */
     async isOverCapacity(locationId: string): Promise<boolean> {
         const location = await this.findById(locationId);
-        
+
         if (!location.capacity) return false;
-        
+
         return location.currentCount >= location.capacity;
     }
 }

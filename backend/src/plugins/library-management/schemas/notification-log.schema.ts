@@ -41,26 +41,26 @@ export class LibraryNotificationLog extends Document {
     @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
     recipientId: Types.ObjectId;
 
-    @Prop({ 
-        type: String, 
-        enum: Object.values(NotificationType), 
+    @Prop({
+        type: String,
+        enum: Object.values(NotificationType),
         required: true,
-        index: true 
+        index: true
     })
     type: NotificationType;
 
-    @Prop({ 
-        type: String, 
-        enum: Object.values(NotificationChannel), 
-        required: true 
+    @Prop({
+        type: String,
+        enum: Object.values(NotificationChannel),
+        required: true
     })
     channel: NotificationChannel;
 
-    @Prop({ 
-        type: String, 
-        enum: Object.values(NotificationStatus), 
+    @Prop({
+        type: String,
+        enum: Object.values(NotificationStatus),
         default: NotificationStatus.PENDING,
-        index: true 
+        index: true
     })
     status: NotificationStatus;
 

@@ -19,7 +19,7 @@ export class TitlesService {
         @InjectModel('LibraryBookTitle')
         private readonly titleModel: Model<LibraryBookTitle>,
         private readonly tenantContext: TenantContext,
-    ) {}
+    ) { }
 
     /**
      * Create a new book title
@@ -29,7 +29,7 @@ export class TitlesService {
      */
     async create(createDto: CreateTitleDto): Promise<LibraryBookTitle> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         // Check for duplicate ISBN within tenant
         const existing = await this.titleModel.findOne({
             tenantId,
@@ -64,16 +64,16 @@ export class TitlesService {
      */
     async findAll(queryDto: TitleQueryDto): Promise<PaginatedResponse<LibraryBookTitle>> {
         const tenantId = this.tenantContext.tenantId;
-        const { 
-            search, 
-            isbn, 
-            categories, 
-            authors, 
-            publishedYear, 
-            language, 
-            isActive, 
+        const {
+            search,
+            isbn,
+            categories,
+            authors,
+            publishedYear,
+            language,
+            isActive,
             hasAvailableCopies,
-            page = 1, 
+            page = 1,
             limit = 20,
             sortBy = 'title',
             sortOrder = 'asc'
@@ -117,7 +117,7 @@ export class TitlesService {
 
         // Pagination
         const skip = (page - 1) * limit;
-        
+
         // Sort configuration
         const sortConfig: any = {};
         if (search && sortBy === 'relevance') {
@@ -151,9 +151,9 @@ export class TitlesService {
      */
     async findById(id: string): Promise<LibraryBookTitle> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const title = await this.titleModel.findOne({ _id: id, tenantId });
-        
+
         if (!title) {
             throw new NotFoundException(`Book title with ID ${id} not found`);
         }
@@ -166,7 +166,7 @@ export class TitlesService {
      */
     async findByISBN(isbn: string): Promise<LibraryBookTitle | null> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         return this.titleModel.findOne({
             tenantId,
             $or: [{ isbn }, { isbn10: isbn }]
@@ -178,7 +178,7 @@ export class TitlesService {
      */
     async update(id: string, updateDto: UpdateTitleDto): Promise<LibraryBookTitle> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const title = await this.titleModel.findOneAndUpdate(
             { _id: id, tenantId },
             { ...updateDto },
@@ -197,10 +197,10 @@ export class TitlesService {
      */
     async softDelete(id: string): Promise<LibraryBookTitle> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         // Check if there are any copies associated
         const title = await this.findById(id);
-        
+
         if (title.totalCopies > 0) {
             throw new BadRequestException(
                 `Cannot delete title with existing copies. Please remove all copies first.`
@@ -226,9 +226,9 @@ export class TitlesService {
      */
     async hardDelete(id: string): Promise<void> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const title = await this.findById(id);
-        
+
         if (title.totalCopies > 0) {
             throw new BadRequestException(
                 `Cannot delete title with existing copies. Please remove all copies first.`
@@ -236,7 +236,7 @@ export class TitlesService {
         }
 
         const result = await this.titleModel.deleteOne({ _id: id, tenantId });
-        
+
         if (result.deletedCount === 0) {
             throw new NotFoundException(`Book title with ID ${id} not found`);
         }
@@ -246,12 +246,12 @@ export class TitlesService {
      * Update inventory counts (called when copies are added/removed)
      */
     async updateInventoryCounts(
-        titleId: string, 
-        totalChange: number, 
+        titleId: string,
+        totalChange: number,
         availableChange: number
     ): Promise<void> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         await this.titleModel.updateOne(
             { _id: titleId, tenantId },
             {
@@ -268,7 +268,7 @@ export class TitlesService {
      */
     async getLowStockTitles(threshold: number = 2): Promise<LibraryBookTitle[]> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         return this.titleModel.find({
             tenantId,
             isActive: true,
@@ -282,7 +282,7 @@ export class TitlesService {
      */
     async getOutOfStockTitles(): Promise<LibraryBookTitle[]> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         return this.titleModel.find({
             tenantId,
             isActive: true,
@@ -296,7 +296,7 @@ export class TitlesService {
      */
     async getPopularTitles(limit: number = 10): Promise<LibraryBookTitle[]> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         return this.titleModel
             .find({ tenantId, isActive: true })
             .sort({ 'popularity.borrowCount': -1 })
@@ -308,7 +308,7 @@ export class TitlesService {
      */
     async getRecentlyAdded(limit: number = 10): Promise<LibraryBookTitle[]> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         return this.titleModel
             .find({ tenantId, isActive: true })
             .sort({ createdAt: -1 })
@@ -320,10 +320,10 @@ export class TitlesService {
      */
     async incrementBorrowCount(titleId: string): Promise<void> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         await this.titleModel.updateOne(
             { _id: titleId, tenantId },
-            { 
+            {
                 $inc: { 'popularity.borrowCount': 1 },
                 $set: { 'popularity.lastBorrowedAt': new Date() }
             }
@@ -335,12 +335,12 @@ export class TitlesService {
      */
     async findByCategory(category: string, limit: number = 20): Promise<LibraryBookTitle[]> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         return this.titleModel
-            .find({ 
-                tenantId, 
+            .find({
+                tenantId,
                 isActive: true,
-                categories: category 
+                categories: category
             })
             .sort({ title: 1 })
             .limit(limit);
@@ -351,12 +351,12 @@ export class TitlesService {
      */
     async getAllCategories(): Promise<string[]> {
         const tenantId = this.tenantContext.tenantId;
-        
-        const categories = await this.titleModel.distinct('categories', { 
-            tenantId, 
-            isActive: true 
+
+        const categories = await this.titleModel.distinct('categories', {
+            tenantId,
+            isActive: true
         });
-        
+
         return categories.sort();
     }
 
@@ -365,12 +365,12 @@ export class TitlesService {
      */
     async getAllAuthors(): Promise<string[]> {
         const tenantId = this.tenantContext.tenantId;
-        
-        const authors = await this.titleModel.distinct('authors', { 
-            tenantId, 
-            isActive: true 
+
+        const authors = await this.titleModel.distinct('authors', {
+            tenantId,
+            isActive: true
         });
-        
+
         return authors.sort();
     }
 

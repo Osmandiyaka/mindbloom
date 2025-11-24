@@ -40,11 +40,11 @@ export class LibraryReservation extends Document {
     initialQueueLength: number; // Queue length when patron reserved
 
     // Status
-    @Prop({ 
-        type: String, 
-        enum: Object.values(ReservationStatus), 
+    @Prop({
+        type: String,
+        enum: Object.values(ReservationStatus),
         default: ReservationStatus.WAITING,
-        index: true 
+        index: true
     })
     status: ReservationStatus;
 
@@ -77,12 +77,14 @@ export class LibraryReservation extends Document {
     holdDays: number; // Days to pick up once notified (policy)
 
     // Notifications
-    @Prop({ type: [{ 
-        channel: { type: String, enum: Object.values(NotificationChannel) },
-        sentAt: Date,
-        success: Boolean,
-        error: String 
-    }] })
+    @Prop({
+        type: [{
+            channel: { type: String, enum: Object.values(NotificationChannel) },
+            sentAt: Date,
+            success: Boolean,
+            error: String
+        }]
+    })
     notifications: {
         channel: NotificationChannel;
         sentAt: Date;

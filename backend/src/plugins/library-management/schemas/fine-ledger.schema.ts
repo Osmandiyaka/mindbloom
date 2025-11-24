@@ -41,11 +41,11 @@ export class LibraryFineLedger extends Document {
     patronId: Types.ObjectId;
 
     // Entry Type
-    @Prop({ 
-        type: String, 
-        enum: Object.values(FineEntryType), 
+    @Prop({
+        type: String,
+        enum: Object.values(FineEntryType),
         required: true,
-        index: true 
+        index: true
     })
     entryType: FineEntryType;
 
@@ -74,10 +74,10 @@ export class LibraryFineLedger extends Document {
     bookTitleId: Types.ObjectId;
 
     // Fine Details
-    @Prop({ 
-        type: String, 
+    @Prop({
+        type: String,
         enum: Object.values(FineReason),
-        index: true 
+        index: true
     })
     reason: FineReason;
 
@@ -91,9 +91,9 @@ export class LibraryFineLedger extends Document {
     fineRatePerDay: number;
 
     // Payment Details (if entryType is PAID)
-    @Prop({ 
-        type: String, 
-        enum: Object.values(PaymentMethod) 
+    @Prop({
+        type: String,
+        enum: Object.values(PaymentMethod)
     })
     paymentMethod: PaymentMethod;
 

@@ -18,6 +18,15 @@ import { LibraryNotificationLogSchema } from './schemas/notification-log.schema'
 import { LibraryCategorySchema } from './schemas/category.schema';
 import { LibraryMemberSchema } from './schemas/member.schema';
 
+// New services
+import { TitlesService } from './services/titles.service';
+import { CopiesService } from './services/copies.service';
+import { LocationsService } from './services/locations.service';
+import { CirculationService } from './services/circulation.service';
+import { ReservationsService } from './services/reservations.service';
+import { FinesService } from './services/fines.service';
+import { SettingsService } from './services/settings.service';
+
 import { TenantContext } from '../../common/tenant/tenant.context';
 
 @Module({
@@ -32,7 +41,7 @@ import { TenantContext } from '../../common/tenant/tenant.context';
             { name: 'LibraryFineLedger', schema: LibraryFineLedgerSchema },
             { name: 'LibrarySettings', schema: LibrarySettingsSchema },
             { name: 'LibraryNotificationLog', schema: LibraryNotificationLogSchema },
-            
+
             // Legacy schemas (keeping for backward compatibility during migration)
             { name: 'LibraryCategory', schema: LibraryCategorySchema },
             { name: 'LibraryMember', schema: LibraryMemberSchema },
@@ -43,6 +52,14 @@ import { TenantContext } from '../../common/tenant/tenant.context';
         LibraryManagementPlugin,
         LibraryService,
         TenantContext,
+        // New services
+        TitlesService,
+        CopiesService,
+        LocationsService,
+        CirculationService,
+        ReservationsService,
+        FinesService,
+        SettingsService,
     ],
     exports: [LibraryManagementPlugin],
 })

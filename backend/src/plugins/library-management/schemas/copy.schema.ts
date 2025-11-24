@@ -54,11 +54,11 @@ export class LibraryBookCopy extends Document {
     accessionNumber: string; // sequential number within library
 
     // Status
-    @Prop({ 
-        type: String, 
-        enum: Object.values(CopyStatus), 
+    @Prop({
+        type: String,
+        enum: Object.values(CopyStatus),
         default: CopyStatus.AVAILABLE,
-        index: true 
+        index: true
     })
     status: CopyStatus;
 
@@ -72,10 +72,10 @@ export class LibraryBookCopy extends Document {
     statusNote: string; // reason for status change
 
     // Physical Condition
-    @Prop({ 
-        type: String, 
-        enum: Object.values(CopyCondition), 
-        default: CopyCondition.GOOD 
+    @Prop({
+        type: String,
+        enum: Object.values(CopyCondition),
+        default: CopyCondition.GOOD
     })
     condition: CopyCondition;
 
@@ -90,10 +90,10 @@ export class LibraryBookCopy extends Document {
     shelfLocation: string; // human-readable: "A-3-5" (Aisle-Shelf-Bin)
 
     // Item Type & Circulation Rules
-    @Prop({ 
-        type: String, 
-        enum: Object.values(ItemType), 
-        default: ItemType.BOOK 
+    @Prop({
+        type: String,
+        enum: Object.values(ItemType),
+        default: ItemType.BOOK
     })
     itemType: ItemType;
 

@@ -35,7 +35,7 @@ export class CopiesService {
         private readonly copyModel: Model<LibraryBookCopy>,
         private readonly tenantContext: TenantContext,
         private readonly titlesService: TitlesService,
-    ) {}
+    ) { }
 
     /**
      * Create a new book copy
@@ -85,10 +85,10 @@ export class CopiesService {
         await this.titlesService.findById(bulkDto.bookTitleId);
 
         const copies: LibraryBookCopy[] = [];
-        
+
         for (let i = 0; i < bulkDto.quantity; i++) {
             const barcode = await this.generateBarcode();
-            
+
             const copy = new this.copyModel({
                 tenantId,
                 bookTitleId: bulkDto.bookTitleId,
@@ -121,14 +121,14 @@ export class CopiesService {
      */
     async findAll(queryDto: CopyQueryDto): Promise<PaginatedResponse<LibraryBookCopy>> {
         const tenantId = this.tenantContext.tenantId;
-        const { 
-            bookTitleId, 
-            barcode, 
-            status, 
-            condition, 
+        const {
+            bookTitleId,
+            barcode,
+            status,
+            condition,
             locationId,
-            page = 1, 
-            limit = 50 
+            page = 1,
+            limit = 50
         } = queryDto;
 
         const filter: FilterQuery<LibraryBookCopy> = { tenantId };
@@ -167,7 +167,7 @@ export class CopiesService {
      */
     async findByBarcode(barcode: string): Promise<LibraryBookCopy> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const copy = await this.copyModel
             .findOne({ tenantId, barcode })
             .populate('bookTitleId', 'title authors isbn coverImageUrl')
@@ -185,7 +185,7 @@ export class CopiesService {
      */
     async findById(id: string): Promise<LibraryBookCopy> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const copy = await this.copyModel
             .findOne({ _id: id, tenantId })
             .populate('bookTitleId', 'title authors isbn coverImageUrl')
@@ -203,7 +203,7 @@ export class CopiesService {
      */
     async updateStatus(id: string, updateDto: UpdateCopyStatusDto): Promise<LibraryBookCopy> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const copy = await this.findById(id);
         const currentStatus = copy.status;
         const newStatus = updateDto.newStatus;
@@ -243,13 +243,13 @@ export class CopiesService {
      */
     async update(id: string, updateDto: UpdateCopyDto): Promise<LibraryBookCopy> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const copy = await this.copyModel.findOneAndUpdate(
             { _id: id, tenantId },
             { ...updateDto },
             { new: true }
         ).populate('bookTitleId', 'title authors isbn coverImageUrl')
-         .populate('locationId', 'name code fullPath');
+            .populate('locationId', 'name code fullPath');
 
         if (!copy) {
             throw new NotFoundException(`Copy with ID ${id} not found`);
@@ -263,7 +263,7 @@ export class CopiesService {
      */
     async delete(id: string): Promise<void> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         const copy = await this.findById(id);
 
         // Check if copy is currently borrowed
@@ -288,14 +288,14 @@ export class CopiesService {
      */
     async generateBarcode(): Promise<string> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         // Simple barcode generation (can be enhanced with settings)
         const prefix = 'LIB';
         const timestamp = Date.now().toString().slice(-8);
         const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-        
+
         let barcode = `${prefix}${timestamp}${random}`;
-        
+
         // Ensure uniqueness
         let existing = await this.copyModel.findOne({ tenantId, barcode });
         while (existing) {
@@ -312,7 +312,7 @@ export class CopiesService {
      */
     private isValidTransition(from: CopyStatus, to: CopyStatus): boolean {
         if (from === to) return true; // Same status is allowed
-        
+
         const allowedTransitions = this.STATUS_TRANSITIONS.get(from);
         return allowedTransitions ? allowedTransitions.includes(to) : false;
     }
@@ -322,7 +322,7 @@ export class CopiesService {
      */
     async getCopiesByTitle(titleId: string): Promise<LibraryBookCopy[]> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         return this.copyModel
             .find({ tenantId, bookTitleId: titleId })
             .populate('locationId', 'name code fullPath')
@@ -334,7 +334,7 @@ export class CopiesService {
      */
     async getAvailableCopiesByTitle(titleId: string): Promise<LibraryBookCopy[]> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         return this.copyModel.find({
             tenantId,
             bookTitleId: titleId,
@@ -347,10 +347,10 @@ export class CopiesService {
      */
     async incrementCirculationCount(copyId: string): Promise<void> {
         const tenantId = this.tenantContext.tenantId;
-        
+
         await this.copyModel.updateOne(
             { _id: copyId, tenantId },
-            { 
+            {
                 $inc: { 'usageStatistics.circulationCount': 1 },
                 $set: { 'usageStatistics.lastBorrowedAt': new Date() }
             }
