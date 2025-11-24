@@ -5,11 +5,12 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { TenantService } from '../../../core/services/tenant.service';
 import { ThemeSelectorComponent } from '../theme-selector/theme-selector.component';
+import { TooltipDirective } from '../../directives/tooltip.directive';
 
 @Component({
     selector: 'app-global-toolbar',
     standalone: true,
-    imports: [CommonModule, FormsModule, ThemeSelectorComponent],
+    imports: [CommonModule, FormsModule, ThemeSelectorComponent, TooltipDirective],
     templateUrl: './global-toolbar.component.html',
     styleUrl: './global-toolbar.component.scss'
 })

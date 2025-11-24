@@ -1,7 +1,7 @@
 <div class="global-toolbar">
     <div class="toolbar-left">
         <!-- Dashboard Button -->
-        <button class="toolbar-btn" (click)="onDashboardClick()" title="Dashboard">
+        <button class="toolbar-btn" (click)="onDashboardClick()" [appTooltip]="'Dashboard'" tooltipPosition="bottom">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="7" height="9" />
@@ -12,7 +12,7 @@
         </button>
 
         <!-- Students Button -->
-        <button class="toolbar-btn" (click)="onStudentsClick()" title="Students">
+        <button class="toolbar-btn" (click)="onStudentsClick()" [appTooltip]="'Students'" tooltipPosition="bottom">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -23,7 +23,7 @@
         </button>
 
         <!-- Calendar Button -->
-        <button class="toolbar-btn" (click)="onCalendarClick()" title="Calendar">
+        <button class="toolbar-btn" (click)="onCalendarClick()" [appTooltip]="'Calendar'" tooltipPosition="bottom">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -34,7 +34,7 @@
         </button>
 
         <!-- Reports Button -->
-        <button class="toolbar-btn" (click)="onReportsClick()" title="Reports">
+        <button class="toolbar-btn" (click)="onReportsClick()" [appTooltip]="'Reports'" tooltipPosition="bottom">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="20" x2="12" y2="10" />
@@ -46,7 +46,8 @@
         <div class="toolbar-divider"></div>
 
         <!-- Marketplace Button -->
-        <button class="toolbar-btn marketplace-btn" (click)="onMarketplaceClick()" title="Plugin Marketplace">
+        <button class="toolbar-btn marketplace-btn" (click)="onMarketplaceClick()" [appTooltip]="'Plugin Marketplace'"
+            tooltipPosition="bottom">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="9" cy="21" r="1" />
@@ -58,7 +59,8 @@
         <div class="toolbar-divider"></div>
 
         <!-- Notifications Button -->
-        <button class="toolbar-btn" (click)="onNotificationsClick()" title="Notifications">
+        <button class="toolbar-btn" (click)="onNotificationsClick()" [appTooltip]="'Notifications'"
+            tooltipPosition="bottom">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -67,7 +69,7 @@
         </button>
 
         <!-- Messages Button -->
-        <button class="toolbar-btn" (click)="onMessagesClick()" title="Messages">
+        <button class="toolbar-btn" (click)="onMessagesClick()" [appTooltip]="'Messages'" tooltipPosition="bottom">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -105,7 +107,7 @@
         <div class="toolbar-divider"></div>
 
         <!-- Logout Button -->
-        <button class="logout-btn" (click)="onLogout()" title="Logout">
+        <button class="logout-btn" (click)="onLogout()" [appTooltip]="'Logout'" tooltipPosition="bottom">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
