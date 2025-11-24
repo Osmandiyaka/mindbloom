@@ -382,4 +382,37 @@ export class TitlesService {
         // This would auto-populate title, author, description, cover image, etc.
         return null;
     }
+
+    /**
+     * Get distinct categories
+     */
+    async getDistinctCategories(): Promise<string[]> {
+        const tenantId = this.tenantContext.tenantId;
+        return this.getAllCategories();
+    }
+
+    /**
+     * Find popular titles (most borrowed)
+     */
+    async findPopular(limit: number = 10): Promise<LibraryBookTitle[]> {
+        const tenantId = this.tenantContext.tenantId;
+        return this.titleModel
+            .find({ tenantId, isActive: true })
+            .sort({ totalCheckouts: -1 })
+            .limit(limit)
+            .exec();
+    }
+
+    /**
+     * Find recently added titles
+     */
+    async findRecent(limit: number = 10): Promise<LibraryBookTitle[]> {
+        const tenantId = this.tenantContext.tenantId;
+        return this.titleModel
+            .find({ tenantId, isActive: true })
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .exec();
+    }
 }
+
