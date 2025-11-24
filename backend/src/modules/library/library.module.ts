@@ -1,4 +1,7 @@
 import { Module } from '@nestjs/common';
+import { IsbnLookupController } from './isbn-lookup.controller';
 
-@Module({})
+@Module({
+    controllers: [IsbnLookupController],
+})
 export class LibraryModule { }
