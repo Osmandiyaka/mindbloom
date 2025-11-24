@@ -41,10 +41,12 @@ import { GlobalToolbarComponent } from '../../shared/components/global-toolbar/g
     .main-content {
       flex: 1;
       padding: 2rem;
+      padding-top: calc(56px + 2rem);
       overflow-y: auto;
 
       @media (max-width: 768px) {
         padding: 1rem;
+        padding-top: calc(52px + 1rem);
       }
     }
   `]
