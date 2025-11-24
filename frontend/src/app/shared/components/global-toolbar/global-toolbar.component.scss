@@ -1,14 +1,18 @@
 .global-toolbar {
+    position: fixed;
+    top: 0;
+    left: 260px;
+    right: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: var(--color-surface);
     border-bottom: 1px solid var(--color-border);
     padding: 0 16px;
     height: 56px;
-    width: 100%;
-    z-index: 100;
+    z-index: 1000;
     box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(8px);
+    background: var(--color-surface);
 
     .toolbar-left {
         display: flex;
@@ -170,6 +174,7 @@
     }
 
     @media (max-width: 768px) {
+        left: 0;
         padding: 0 12px;
         height: 52px;
 
