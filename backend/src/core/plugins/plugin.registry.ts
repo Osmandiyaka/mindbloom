@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { IPlugin } from './plugin.interface';
 import { PluginContext } from './plugin.context';
 import { SmsNotificationPlugin } from '../../plugins/sms-notification/sms-notification.plugin';
+import { LibraryManagementPlugin } from '../../plugins/library-management/library.plugin';
 
 /**
  * Plugin Registry - Manages all available plugins
@@ -13,6 +14,7 @@ export class PluginRegistry {
 
     constructor(
         private readonly smsPlugin: SmsNotificationPlugin,
+        private readonly libraryPlugin: LibraryManagementPlugin,
         // Add more plugins here as they are created
     ) {
         this.registerPlugins();
@@ -23,6 +25,7 @@ export class PluginRegistry {
      */
     private registerPlugins(): void {
         this.register(this.smsPlugin);
+        this.register(this.libraryPlugin);
         // Register more plugins as they are created
 
         this.logger.log(`Registered ${this.plugins.size} plugins`);

@@ -19,6 +19,8 @@ import { PluginRegistry } from '../../core/plugins/plugin.registry';
 import { EventBus } from '../../core/plugins/event-bus.service';
 import { SmsNotificationPluginModule } from '../../plugins/sms-notification/sms-notification.module';
 import { SmsNotificationPlugin } from '../../plugins/sms-notification/sms-notification.plugin';
+import { LibraryManagementModule } from '../../plugins/library-management/library.module';
+import { LibraryManagementPlugin } from '../../plugins/library-management/library.plugin';
 
 @Module({
     imports: [
@@ -28,6 +30,7 @@ import { SmsNotificationPlugin } from '../../plugins/sms-notification/sms-notifi
         ]),
         EventEmitterModule.forRoot(),
         SmsNotificationPluginModule,
+        LibraryManagementModule,
     ],
     controllers: [PluginsController],
     providers: [
@@ -49,6 +52,7 @@ import { SmsNotificationPlugin } from '../../plugins/sms-notification/sms-notifi
         EventBus,
         PluginRegistry,
         SmsNotificationPlugin,
+        LibraryManagementPlugin,
     ],
     exports: [
         'PluginRepository',
