@@ -129,12 +129,22 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
 
                 <!-- Enable Button -->
                 <button 
-                  *ngIf="plugin()!.isInstalled && plugin()!.installedStatus === 'disabled'"
+                  *ngIf="plugin()!.isInstalled && (plugin()!.installedStatus === 'disabled' || plugin()!.installedStatus === 'installed')"
                   (click)="enablePlugin()"
                   [disabled]="processing()"
                   class="btn-enable"
                 >
                   {{ processing() ? 'Enabling...' : 'Enable' }}
+                </button>
+
+                <!-- Disable Button -->
+                <button 
+                  *ngIf="plugin()!.isInstalled && plugin()!.installedStatus === 'enabled'"
+                  (click)="disablePlugin()"
+                  [disabled]="processing()"
+                  class="btn-disable"
+                >
+                  {{ processing() ? 'Disabling...' : 'Disable' }}
                 </button>
 
                 <!-- Uninstall Button -->
@@ -533,6 +543,15 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
 
     .btn-enable:hover:not(:disabled) {
       background: #059669;
+    }
+
+    .btn-disable {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .btn-disable:hover:not(:disabled) {
+      background: #d97706;
     }
 
     .btn-uninstall {

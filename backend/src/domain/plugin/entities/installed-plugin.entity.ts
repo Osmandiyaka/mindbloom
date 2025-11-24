@@ -26,11 +26,11 @@ export class InstalledPlugin {
             tenantId,
             pluginId,
             version,
-            InstalledPluginStatus.INSTALLED,
+            InstalledPluginStatus.ENABLED,
             {},
             permissions,
             new Date(),
-            undefined,
+            new Date(), // Set enabledAt to current time
             undefined,
             undefined,
             new Date(),
