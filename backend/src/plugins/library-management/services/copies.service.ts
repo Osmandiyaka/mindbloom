@@ -55,9 +55,13 @@ export class CopiesService {
             throw new ConflictException(`A copy with barcode ${createDto.barcode} already exists`);
         }
 
+        // Generate accession number
+        const accessionNumber = await this.generateAccessionNumber();
+
         const copy = new this.copyModel({
             ...createDto,
             tenantId,
+            accessionNumber,
             status: createDto.status || CopyStatus.AVAILABLE,
             condition: createDto.condition || CopyCondition.GOOD,
         });
@@ -88,11 +92,13 @@ export class CopiesService {
 
         for (let i = 0; i < bulkDto.quantity; i++) {
             const barcode = await this.generateBarcode();
+            const accessionNumber = await this.generateAccessionNumber();
 
             const copy = new this.copyModel({
                 tenantId,
                 bookTitleId: bulkDto.bookTitleId,
                 barcode,
+                accessionNumber,
                 status: CopyStatus.AVAILABLE,
                 condition: bulkDto.condition || CopyCondition.GOOD,
                 locationId: bulkDto.locationId,
@@ -305,6 +311,31 @@ export class CopiesService {
         }
 
         return barcode;
+    }
+
+    /**
+     * Generate sequential accession number
+     */
+    async generateAccessionNumber(): Promise<string> {
+        const tenantId = this.tenantContext.tenantId;
+
+        // Get the highest existing accession number for this tenant
+        const lastCopy = await this.copyModel
+            .findOne({ tenantId })
+            .sort({ accessionNumber: -1 })
+            .limit(1);
+
+        let nextNumber = 1;
+        if (lastCopy && lastCopy.accessionNumber) {
+            // Extract the numeric part from the accession number
+            const match = lastCopy.accessionNumber.match(/\d+$/);
+            if (match) {
+                nextNumber = parseInt(match[0], 10) + 1;
+            }
+        }
+
+        // Format: ACC-000001, ACC-000002, etc.
+        return `ACC-${nextNumber.toString().padStart(6, '0')}`;
     }
 
     /**
