@@ -51,15 +51,15 @@ export class MongooseInstalledPluginRepository
         // For existing plugins, update by _id (don't include _id in update data)
         const updateData = this.toDocument(plugin);
         delete updateData._id; // Remove _id from update data
-        
+
         const updated = await this.installedPluginModel
             .findByIdAndUpdate(plugin.id, updateData, { new: true })
             .exec();
-            
+
         if (!updated) {
             throw new Error(`Failed to update installed plugin with id: ${plugin.id}`);
         }
-        
+
         return this.toDomain(updated);
     }
 
