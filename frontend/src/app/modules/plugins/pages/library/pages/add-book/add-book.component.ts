@@ -429,10 +429,7 @@ export class AddBookComponent implements OnInit {
             ...this.bookData,
             authors: this.authorInput ? [this.authorInput] : [],
             publishedYear: this.publishedYearInput,
-            categories: this.categoryInput ? [this.categoryInput] : [],
-            totalCopies: 0,
-            availableCopies: 0,
-            isActive: true
+            categories: this.categoryInput ? [this.categoryInput] : []
         };
 
         this.apiService.createTitle(titleData).subscribe({
