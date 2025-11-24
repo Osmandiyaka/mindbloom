@@ -30,6 +30,10 @@ export const SETUP_ROUTES: Routes = [
         loadComponent: () => import('./pages/users/user-form.component').then(m => m.UserFormComponent)
     },
     {
+        path: 'marketplace',
+        loadComponent: () => import('./pages/marketplace/marketplace.component').then(m => m.MarketplaceComponent)
+    },
+    {
         path: 'students',
         loadComponent: () => import('./pages/students/student-list/student-list.component').then(m => m.StudentListComponent)
     }

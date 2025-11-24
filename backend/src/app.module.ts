@@ -16,6 +16,7 @@ import { SetupModule } from './modules/setup/setup.module';
 import { DatabaseModule } from './common/database/database.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { UsersModule } from './modules/users/users.module';
+import { PluginsModule } from './modules/plugins/plugins.module';
 
 @Module({
     imports: [
@@ -27,6 +28,7 @@ import { UsersModule } from './modules/users/users.module';
         TenantModule,
         RolesModule,
         UsersModule,
+        PluginsModule,
         StudentsModule,
         AcademicsModule,
         AttendanceModule,
