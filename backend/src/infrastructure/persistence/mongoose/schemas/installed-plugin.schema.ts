@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { InstalledPluginStatus } from '../../../domain/plugin/entities/installed-plugin.entity';
+import { InstalledPluginStatus } from '@domain/plugin/entities/installed-plugin.entity';
 
 export const InstalledPluginSchema = new Schema(
     {

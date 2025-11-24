@@ -38,6 +38,7 @@ import { InstalledPlugin } from '../../../domain/plugin/entities/installed-plugi
 @UseGuards(JwtAuthGuard, TenantGuard)
 export class PluginsController {
     constructor(
+        private readonly tenantContext: TenantContext,
         private readonly browsePluginsUseCase: BrowsePluginsUseCase,
         private readonly installPluginUseCase: InstallPluginUseCase,
         private readonly enablePluginUseCase: EnablePluginUseCase,
@@ -55,7 +56,7 @@ export class PluginsController {
         const command = new BrowsePluginsCommand(category, search);
         const plugins = await this.browsePluginsUseCase.execute(command);
 
-        const tenantId = TenantContext.getCurrentTenant();
+        const tenantId = this.tenantContext.tenantId;
         const installedPlugins = await this.getInstalledPluginsUseCase.execute(
             new GetInstalledPluginsCommand(tenantId),
         );
@@ -66,7 +67,7 @@ export class PluginsController {
     @Get('installed')
     @ApiOperation({ summary: 'Get all installed plugins for current tenant' })
     async getInstalled(): Promise<InstalledPluginResponseDto[]> {
-        const tenantId = TenantContext.getCurrentTenant();
+        const tenantId = this.tenantContext.tenantId;
         const command = new GetInstalledPluginsCommand(tenantId);
         const plugins = await this.getInstalledPluginsUseCase.execute(command);
         return plugins.map((p) => this.toInstalledPluginDto(p));
@@ -77,7 +78,7 @@ export class PluginsController {
     async install(
         @Body() dto: InstallPluginDto,
     ): Promise<InstalledPluginResponseDto> {
-        const tenantId = TenantContext.getCurrentTenant();
+        const tenantId = this.tenantContext.tenantId;
         const command = new InstallPluginCommand(dto.pluginId, tenantId);
         const installed = await this.installPluginUseCase.execute(command);
         return this.toInstalledPluginDto(installed);
@@ -88,7 +89,7 @@ export class PluginsController {
     async enable(
         @Param('pluginId') pluginId: string,
     ): Promise<InstalledPluginResponseDto> {
-        const tenantId = TenantContext.getCurrentTenant();
+        const tenantId = this.tenantContext.tenantId;
         const command = new EnablePluginCommand(pluginId, tenantId);
         const enabled = await this.enablePluginUseCase.execute(command);
         return this.toInstalledPluginDto(enabled);
@@ -99,7 +100,7 @@ export class PluginsController {
     async disable(
         @Param('pluginId') pluginId: string,
     ): Promise<InstalledPluginResponseDto> {
-        const tenantId = TenantContext.getCurrentTenant();
+        const tenantId = this.tenantContext.tenantId;
         const command = new DisablePluginCommand(pluginId, tenantId);
         const disabled = await this.disablePluginUseCase.execute(command);
         return this.toInstalledPluginDto(disabled);
@@ -108,7 +109,7 @@ export class PluginsController {
     @Delete(':pluginId')
     @ApiOperation({ summary: 'Uninstall a plugin' })
     async uninstall(@Param('pluginId') pluginId: string): Promise<void> {
-        const tenantId = TenantContext.getCurrentTenant();
+        const tenantId = this.tenantContext.tenantId;
         const command = new UninstallPluginCommand(pluginId, tenantId);
         await this.uninstallPluginUseCase.execute(command);
     }
