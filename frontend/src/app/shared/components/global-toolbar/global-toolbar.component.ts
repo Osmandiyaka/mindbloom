@@ -1,6 +1,7 @@
 import { Component, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { TenantService } from '../../../core/services/tenant.service';
 import { ThemeSelectorComponent } from '../theme-selector/theme-selector.component';
@@ -18,7 +19,8 @@ export class GlobalToolbarComponent {
 
     constructor(
         private authService: AuthService,
-        private tenantService: TenantService
+        private tenantService: TenantService,
+        private router: Router
     ) { }
 
     onSearch() {
@@ -40,6 +42,10 @@ export class GlobalToolbarComponent {
 
     onReportsClick() {
         // Navigate to reports
+    }
+
+    onMarketplaceClick() {
+        this.router.navigate(['/setup/marketplace']);
     }
 
     onNotificationsClick() {

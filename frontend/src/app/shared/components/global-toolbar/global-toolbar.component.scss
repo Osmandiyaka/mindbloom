@@ -47,6 +47,15 @@
         &:active {
             transform: scale(0.95);
         }
+
+        &.marketplace-btn {
+            color: var(--color-primary);
+            
+            &:hover {
+                background: var(--color-primary);
+                color: white;
+            }
+        }
     }
 
     .toolbar-divider {
