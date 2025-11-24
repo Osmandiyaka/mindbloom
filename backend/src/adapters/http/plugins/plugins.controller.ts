@@ -2,6 +2,7 @@ import {
     Controller,
     Get,
     Post,
+    Put,
     Delete,
     Param,
     Query,
@@ -25,12 +26,16 @@ import {
     UninstallPluginCommand,
     GetInstalledPluginsUseCase,
     GetInstalledPluginsCommand,
+    UpdatePluginSettingsUseCase,
+    UpdatePluginSettingsCommand,
 } from '../../../application/plugin/use-cases';
 import { InstallPluginDto } from './dto/install-plugin.dto';
+import { UpdatePluginSettingsDto } from './dto/update-plugin-settings.dto';
 import { PluginResponseDto } from './dto/plugin-response.dto';
 import { InstalledPluginResponseDto } from './dto/installed-plugin-response.dto';
 import { Plugin } from '../../../domain/plugin/entities/plugin.entity';
 import { InstalledPlugin } from '../../../domain/plugin/entities/installed-plugin.entity';
+import { PluginRegistry } from '../../../core/plugins/plugin.registry';
 
 @ApiTags('Plugins')
 @ApiBearerAuth()
@@ -45,6 +50,8 @@ export class PluginsController {
         private readonly disablePluginUseCase: DisablePluginUseCase,
         private readonly uninstallPluginUseCase: UninstallPluginUseCase,
         private readonly getInstalledPluginsUseCase: GetInstalledPluginsUseCase,
+        private readonly updatePluginSettingsUseCase: UpdatePluginSettingsUseCase,
+        private readonly pluginRegistry: PluginRegistry,
     ) { }
 
     @Get('marketplace')
@@ -69,8 +76,20 @@ export class PluginsController {
     async getInstalled(): Promise<InstalledPluginResponseDto[]> {
         const tenantId = this.tenantContext.tenantId;
         const command = new GetInstalledPluginsCommand(tenantId);
-        const plugins = await this.getInstalledPluginsUseCase.execute(command);
-        return plugins.map((p) => this.toInstalledPluginDto(p));
+        const installedPlugins = await this.getInstalledPluginsUseCase.execute(command);
+
+        // Only return plugins that are actually installed in the database
+        // The installedPlugins array comes from the database, so this is already correct
+        return installedPlugins.map((installed) => {
+            // Get manifest from plugin registry (for registered plugins)
+            const registeredPlugin = this.pluginRegistry.getPlugin(installed.pluginId);
+            const manifest = registeredPlugin?.manifest;
+
+            return {
+                ...this.toInstalledPluginDto(installed),
+                manifest,
+            };
+        });
     }
 
     @Post('install')
@@ -112,6 +131,38 @@ export class PluginsController {
         const tenantId = this.tenantContext.tenantId;
         const command = new UninstallPluginCommand(pluginId, tenantId);
         await this.uninstallPluginUseCase.execute(command);
+    }
+
+    @Put(':pluginId/settings')
+    @ApiOperation({ summary: 'Update plugin settings' })
+    async updateSettings(
+        @Param('pluginId') pluginId: string,
+        @Body() dto: UpdatePluginSettingsDto,
+    ): Promise<InstalledPluginResponseDto> {
+        const tenantId = this.tenantContext.tenantId;
+        const command = new UpdatePluginSettingsCommand(
+            pluginId,
+            tenantId,
+            dto.settings,
+        );
+        const updated = await this.updatePluginSettingsUseCase.execute(command);
+        return this.toInstalledPluginDto(updated);
+    }
+
+    @Get(':pluginId/settings')
+    @ApiOperation({ summary: 'Get plugin settings' })
+    async getSettings(@Param('pluginId') pluginId: string): Promise<any> {
+        const tenantId = this.tenantContext.tenantId;
+        const installed = await this.getInstalledPluginsUseCase.execute(
+            new GetInstalledPluginsCommand(tenantId),
+        );
+        const plugin = installed.find((p) => p.pluginId === pluginId);
+
+        if (!plugin) {
+            throw new Error('Plugin not installed');
+        }
+
+        return plugin.settings;
     }
 
     private toPluginDto(

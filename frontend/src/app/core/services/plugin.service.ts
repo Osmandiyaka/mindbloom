@@ -43,6 +43,22 @@ export interface InstalledPlugin {
     disabledAt?: Date;
     lastError?: string;
     updatedAt: Date;
+    manifest?: {
+        id: string;
+        name: string;
+        description: string;
+        author: string;
+        provides?: {
+            menuItems?: Array<{
+                label: string;
+                icon: string;
+                route: string;
+                parent?: string;
+                order?: number;
+            }>;
+            routes?: Array<any>;
+        };
+    };
 }
 
 @Injectable({
@@ -84,5 +100,13 @@ export class PluginService {
 
     uninstallPlugin(pluginId: string): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${pluginId}`);
+    }
+
+    getPluginSettings(pluginId: string): Observable<Record<string, any>> {
+        return this.http.get<Record<string, any>>(`${this.apiUrl}/${pluginId}/settings`);
+    }
+
+    updatePluginSettings(pluginId: string, settings: Record<string, any>): Observable<InstalledPlugin> {
+        return this.http.put<InstalledPlugin>(`${this.apiUrl}/${pluginId}/settings`, { settings });
     }
 }

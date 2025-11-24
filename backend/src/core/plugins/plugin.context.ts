@@ -69,15 +69,33 @@ export class PluginContext {
      * Get plugin configuration/settings
      */
     async getConfig<T = any>(): Promise<T> {
-        // TODO: Implement config retrieval from database
-        return {} as T;
+        const mongoose = await import('mongoose');
+        const InstalledPlugin = mongoose.model('InstalledPlugin');
+
+        const installedPlugin = await InstalledPlugin.findOne({
+            tenantId: this._tenantId,
+            pluginId: this._pluginId,
+        });
+
+        return installedPlugin?.settings || {} as T;
     }
 
     /**
      * Update plugin configuration/settings
      */
     async setConfig<T = any>(config: T): Promise<void> {
-        // TODO: Implement config persistence to database
+        const mongoose = await import('mongoose');
+        const InstalledPlugin = mongoose.model('InstalledPlugin');
+
+        await InstalledPlugin.updateOne(
+            {
+                tenantId: this._tenantId,
+                pluginId: this._pluginId,
+            },
+            {
+                $set: { settings: config, updatedAt: new Date() },
+            }
+        );
     }
 }
 

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PluginSchema } from '../../infrastructure/persistence/mongoose/schemas/plugin.schema';
 import { InstalledPluginSchema } from '../../infrastructure/persistence/mongoose/schemas/installed-plugin.schema';
 import { MongoosePluginRepository } from '../../infrastructure/persistence/mongoose/repositories/mongoose-plugin.repository';
@@ -11,8 +12,13 @@ import {
     DisablePluginUseCase,
     UninstallPluginUseCase,
     GetInstalledPluginsUseCase,
+    UpdatePluginSettingsUseCase,
 } from '../../application/plugin/use-cases';
 import { PluginsController } from '../../adapters/http/plugins/plugins.controller';
+import { PluginRegistry } from '../../core/plugins/plugin.registry';
+import { EventBus } from '../../core/plugins/event-bus.service';
+import { SmsNotificationPluginModule } from '../../plugins/sms-notification/sms-notification.module';
+import { SmsNotificationPlugin } from '../../plugins/sms-notification/sms-notification.plugin';
 
 @Module({
     imports: [
@@ -20,6 +26,8 @@ import { PluginsController } from '../../adapters/http/plugins/plugins.controlle
             { name: 'Plugin', schema: PluginSchema },
             { name: 'InstalledPlugin', schema: InstalledPluginSchema },
         ]),
+        EventEmitterModule.forRoot(),
+        SmsNotificationPluginModule,
     ],
     controllers: [PluginsController],
     providers: [
@@ -37,11 +45,17 @@ import { PluginsController } from '../../adapters/http/plugins/plugins.controlle
         DisablePluginUseCase,
         UninstallPluginUseCase,
         GetInstalledPluginsUseCase,
+        UpdatePluginSettingsUseCase,
+        EventBus,
+        PluginRegistry,
+        SmsNotificationPlugin,
     ],
     exports: [
         'PluginRepository',
         'InstalledPluginRepository',
         GetInstalledPluginsUseCase,
+        PluginRegistry,
+        EventBus,
     ],
 })
 export class PluginsModule { }

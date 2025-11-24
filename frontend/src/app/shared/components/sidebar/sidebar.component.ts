@@ -101,7 +101,8 @@ export class SidebarComponent implements OnInit {
       title: 'System',
       items: [
         { label: 'Setup', path: '/setup', icon: '⚙️' },
-        { label: 'Marketplace', path: '/setup/marketplace', icon: '🛒' }
+        { label: 'Marketplace', path: '/setup/marketplace', icon: '🛒' },
+        { label: 'Plugins', path: '/plugins', icon: '🔌' }
       ]
     }
   ];

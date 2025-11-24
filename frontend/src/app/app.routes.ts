@@ -62,6 +62,10 @@ export const routes: Routes = [
             {
                 path: 'setup',
                 loadChildren: () => import('./modules/setup/setup.routes').then(m => m.SETUP_ROUTES)
+            },
+            {
+                path: 'plugins',
+                loadChildren: () => import('./modules/plugins/plugins.routes').then(m => m.PLUGINS_ROUTES)
             }
         ]
     },

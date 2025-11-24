@@ -36,4 +36,7 @@ export class InstalledPluginResponseDto {
 
     @ApiProperty()
     updatedAt: Date;
+
+    @ApiProperty({ required: false })
+    manifest?: Record<string, any>;
 }

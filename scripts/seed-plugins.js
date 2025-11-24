@@ -25,10 +25,29 @@ const samplePlugins = [
         manifest: {
             id: 'sms-twilio',
             permissions: ['communications:sms:send', 'students:read'],
+            provides: {
+                routes: [
+                    { path: '/plugins/sms/send', method: 'POST', handler: 'sendSMS' },
+                    { path: '/plugins/sms/send-bulk', method: 'POST', handler: 'sendBulkSMS' },
+                    { path: '/plugins/sms/templates', method: 'GET', handler: 'getTemplates' },
+                    { path: '/plugins/sms/history', method: 'GET', handler: 'getHistory' },
+                ],
+                menuItems: [
+                    {
+                        label: 'SMS Notifications',
+                        icon: '📱',
+                        route: '/plugins/sms',
+                        parent: 'communications',
+                        order: 10,
+                    },
+                ],
+            },
             settings: [
                 { key: 'accountSid', label: 'Twilio Account SID', type: 'text', required: true },
                 { key: 'authToken', label: 'Twilio Auth Token', type: 'password', required: true },
                 { key: 'fromNumber', label: 'From Phone Number', type: 'text', required: true },
+                { key: 'enableFeeReminders', label: 'Enable Fee Reminders', type: 'boolean', defaultValue: true },
+                { key: 'enableAttendanceAlerts', label: 'Enable Attendance Alerts', type: 'boolean', defaultValue: true },
             ],
         },
         changelog: [

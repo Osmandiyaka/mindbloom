@@ -74,9 +74,19 @@ export class EventBus {
      * @param event Event name
      * @param tenantId Tenant ID
      */
-    unsubscribeAll(event: string, tenantId: string): void {
+    unsubscribe(event: string, tenantId: string): void {
         const tenantedEvent = this.getTenantedEvent(event, tenantId);
         this.eventEmitter.removeAllListeners(tenantedEvent);
+    }
+
+    /**
+     * Unsubscribe all listeners for an event (alias for backward compatibility)
+     * 
+     * @param event Event name
+     * @param tenantId Tenant ID
+     */
+    unsubscribeAll(event: string, tenantId: string): void {
+        this.unsubscribe(event, tenantId);
     }
 
     /**
