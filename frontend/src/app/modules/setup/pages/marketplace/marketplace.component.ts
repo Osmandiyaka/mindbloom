@@ -4,10 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { PluginService, Plugin } from '../../../../core/services/plugin.service';
 
 @Component({
-  selector: 'app-marketplace',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
+    selector: 'app-marketplace',
+    standalone: true,
+    imports: [CommonModule, FormsModule],
+    template: `
     <div class="marketplace-container">
       <!-- Header -->
       <div class="page-header">
@@ -140,7 +140,7 @@ import { PluginService, Plugin } from '../../../../core/services/plugin.service'
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .marketplace-container {
       padding: 2rem;
       max-width: 1400px;
@@ -495,146 +495,146 @@ import { PluginService, Plugin } from '../../../../core/services/plugin.service'
   `],
 })
 export class MarketplaceComponent implements OnInit {
-  plugins = signal<Plugin[]>([]);
-  loading = signal(true);
-  error = signal('');
-  selectedCategory = signal<string | undefined>(undefined);
-  searchQuery = '';
-  installing = signal<string | null>(null);
-  processing = signal<string | null>(null);
+    plugins = signal<Plugin[]>([]);
+    loading = signal(true);
+    error = signal('');
+    selectedCategory = signal<string | undefined>(undefined);
+    searchQuery = '';
+    installing = signal<string | null>(null);
+    processing = signal<string | null>(null);
 
-  categories = [
-    { label: 'All', value: undefined, icon: '🏪' },
-    { label: 'Communication', value: 'communication', icon: '📱' },
-    { label: 'Payment', value: 'payment', icon: '💳' },
-    { label: 'Analytics', value: 'analytics', icon: '📊' },
-    { label: 'Attendance', value: 'attendance', icon: '👆' },
-    { label: 'Reporting', value: 'reporting', icon: '📄' },
-    { label: 'Library', value: 'library', icon: '📚' },
-  ];
+    categories = [
+        { label: 'All', value: undefined, icon: '🏪' },
+        { label: 'Communication', value: 'communication', icon: '📱' },
+        { label: 'Payment', value: 'payment', icon: '💳' },
+        { label: 'Analytics', value: 'analytics', icon: '📊' },
+        { label: 'Attendance', value: 'attendance', icon: '👆' },
+        { label: 'Reporting', value: 'reporting', icon: '📄' },
+        { label: 'Library', value: 'library', icon: '📚' },
+    ];
 
-  filteredPlugins = computed(() => {
-    let result = this.plugins();
+    filteredPlugins = computed(() => {
+        let result = this.plugins();
 
-    if (this.searchQuery) {
-      const query = this.searchQuery.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(query) ||
-          p.description.toLowerCase().includes(query) ||
-          p.tags.some((t) => t.toLowerCase().includes(query))
-      );
-    }
+        if (this.searchQuery) {
+            const query = this.searchQuery.toLowerCase();
+            result = result.filter(
+                (p) =>
+                    p.name.toLowerCase().includes(query) ||
+                    p.description.toLowerCase().includes(query) ||
+                    p.tags.some((t) => t.toLowerCase().includes(query))
+            );
+        }
 
-    return result;
-  });
-
-  constructor(private pluginService: PluginService) {}
-
-  ngOnInit() {
-    this.loadPlugins();
-  }
-
-  loadPlugins() {
-    this.loading.set(true);
-    this.error.set('');
-
-    this.pluginService
-      .getMarketplace(this.selectedCategory(), undefined)
-      .subscribe({
-        next: (plugins) => {
-          this.plugins.set(plugins);
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.error.set('Failed to load plugins. Please try again.');
-          this.loading.set(false);
-          console.error('Error loading plugins:', err);
-        },
-      });
-  }
-
-  selectCategory(category: string | undefined) {
-    this.selectedCategory.set(category);
-    this.loadPlugins();
-  }
-
-  onSearchChange() {
-    // Search is handled by computed signal
-  }
-
-  installPlugin(plugin: Plugin) {
-    if (confirm(`Install ${plugin.name}?`)) {
-      this.installing.set(plugin.pluginId);
-
-      this.pluginService.installPlugin(plugin.pluginId).subscribe({
-        next: () => {
-          this.installing.set(null);
-          this.loadPlugins(); // Refresh to show installed status
-        },
-        error: (err) => {
-          this.installing.set(null);
-          alert('Failed to install plugin: ' + (err.error?.message || 'Unknown error'));
-          console.error('Installation error:', err);
-        },
-      });
-    }
-  }
-
-  enablePlugin(plugin: Plugin) {
-    this.processing.set(plugin.pluginId);
-
-    this.pluginService.enablePlugin(plugin.pluginId).subscribe({
-      next: () => {
-        this.processing.set(null);
-        this.loadPlugins();
-      },
-      error: (err) => {
-        this.processing.set(null);
-        alert('Failed to enable plugin');
-        console.error('Enable error:', err);
-      },
+        return result;
     });
-  }
 
-  disablePlugin(plugin: Plugin) {
-    this.processing.set(plugin.pluginId);
+    constructor(private pluginService: PluginService) { }
 
-    this.pluginService.disablePlugin(plugin.pluginId).subscribe({
-      next: () => {
-        this.processing.set(null);
+    ngOnInit() {
         this.loadPlugins();
-      },
-      error: (err) => {
-        this.processing.set(null);
-        alert('Failed to disable plugin');
-        console.error('Disable error:', err);
-      },
-    });
-  }
-
-  uninstallPlugin(plugin: Plugin) {
-    if (confirm(`Uninstall ${plugin.name}? This action cannot be undone.`)) {
-      this.processing.set(plugin.pluginId);
-
-      this.pluginService.uninstallPlugin(plugin.pluginId).subscribe({
-        next: () => {
-          this.processing.set(null);
-          this.loadPlugins();
-        },
-        error: (err) => {
-          this.processing.set(null);
-          alert('Failed to uninstall plugin');
-          console.error('Uninstall error:', err);
-        },
-      });
     }
-  }
 
-  formatDownloads(count: number): string {
-    if (count >= 1000) {
-      return (count / 1000).toFixed(1) + 'k';
+    loadPlugins() {
+        this.loading.set(true);
+        this.error.set('');
+
+        this.pluginService
+            .getMarketplace(this.selectedCategory(), undefined)
+            .subscribe({
+                next: (plugins) => {
+                    this.plugins.set(plugins);
+                    this.loading.set(false);
+                },
+                error: (err) => {
+                    this.error.set('Failed to load plugins. Please try again.');
+                    this.loading.set(false);
+                    console.error('Error loading plugins:', err);
+                },
+            });
     }
-    return count.toString();
-  }
+
+    selectCategory(category: string | undefined) {
+        this.selectedCategory.set(category);
+        this.loadPlugins();
+    }
+
+    onSearchChange() {
+        // Search is handled by computed signal
+    }
+
+    installPlugin(plugin: Plugin) {
+        if (confirm(`Install ${plugin.name}?`)) {
+            this.installing.set(plugin.pluginId);
+
+            this.pluginService.installPlugin(plugin.pluginId).subscribe({
+                next: () => {
+                    this.installing.set(null);
+                    this.loadPlugins(); // Refresh to show installed status
+                },
+                error: (err) => {
+                    this.installing.set(null);
+                    alert('Failed to install plugin: ' + (err.error?.message || 'Unknown error'));
+                    console.error('Installation error:', err);
+                },
+            });
+        }
+    }
+
+    enablePlugin(plugin: Plugin) {
+        this.processing.set(plugin.pluginId);
+
+        this.pluginService.enablePlugin(plugin.pluginId).subscribe({
+            next: () => {
+                this.processing.set(null);
+                this.loadPlugins();
+            },
+            error: (err) => {
+                this.processing.set(null);
+                alert('Failed to enable plugin');
+                console.error('Enable error:', err);
+            },
+        });
+    }
+
+    disablePlugin(plugin: Plugin) {
+        this.processing.set(plugin.pluginId);
+
+        this.pluginService.disablePlugin(plugin.pluginId).subscribe({
+            next: () => {
+                this.processing.set(null);
+                this.loadPlugins();
+            },
+            error: (err) => {
+                this.processing.set(null);
+                alert('Failed to disable plugin');
+                console.error('Disable error:', err);
+            },
+        });
+    }
+
+    uninstallPlugin(plugin: Plugin) {
+        if (confirm(`Uninstall ${plugin.name}? This action cannot be undone.`)) {
+            this.processing.set(plugin.pluginId);
+
+            this.pluginService.uninstallPlugin(plugin.pluginId).subscribe({
+                next: () => {
+                    this.processing.set(null);
+                    this.loadPlugins();
+                },
+                error: (err) => {
+                    this.processing.set(null);
+                    alert('Failed to uninstall plugin');
+                    console.error('Uninstall error:', err);
+                },
+            });
+        }
+    }
+
+    formatDownloads(count: number): string {
+        if (count >= 1000) {
+            return (count / 1000).toFixed(1) + 'k';
+        }
+        return count.toString();
+    }
 }
