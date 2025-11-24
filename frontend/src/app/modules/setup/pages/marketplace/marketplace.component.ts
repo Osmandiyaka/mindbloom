@@ -53,7 +53,10 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       <!-- Sleek Plugin Grid -->
       <div *ngIf="!loading() && !error()" class="grid">
         <div *ngFor="let plugin of filteredPlugins()" class="card" (click)="viewPluginDetail(plugin)">
-          <div class="card-icon">{{ plugin.iconUrl }}</div>
+          <!-- Card Image Banner -->
+          <div class="card-image" [style.background]="getPluginGradient(plugin)">
+            <div class="card-icon-large">{{ plugin.iconUrl }}</div>
+          </div>
           
           <div class="card-body">
             <h3>{{ plugin.name }}</h3>
@@ -242,12 +245,11 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       background: white;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
-      padding: 1.25rem;
       cursor: pointer;
       transition: all 0.15s;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      overflow: hidden;
     }
 
     .card:hover {
@@ -255,15 +257,18 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
     }
 
-    .card-icon {
-      font-size: 2.5rem;
-      width: 56px;
-      height: 56px;
+    /* Card Image Banner */
+    .card-image {
+      height: 140px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f9fafb;
-      border-radius: 8px;
+      position: relative;
+    }
+
+    .card-icon-large {
+      font-size: 3.5rem;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
     }
 
     .card-body {
@@ -271,6 +276,8 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      padding: 1.25rem;
+      padding-bottom: 0.75rem;
     }
 
     .card-body h3 {
@@ -306,7 +313,7 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
     }
 
     .card-footer {
-      padding-top: 0.75rem;
+      padding: 0.75rem 1.25rem 1.25rem;
       border-top: 1px solid #f3f4f6;
     }
 
@@ -525,6 +532,25 @@ export class MarketplaceComponent implements OnInit {
       return (count / 1000).toFixed(1) + 'k';
     }
     return count.toString();
+  }
+
+  getPluginGradient(plugin: Plugin): string {
+    const gradients = [
+      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+      'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+      'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+      'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+      'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+      'linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%)',
+    ];
+    
+    // Use plugin ID to consistently select a gradient
+    const index = plugin.pluginId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % gradients.length;
+    return gradients[index];
   }
 
   onConfirmAction() {
