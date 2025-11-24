@@ -5,10 +5,10 @@ import { PluginService, Plugin } from '../../../../core/services/plugin.service'
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
-    selector: 'app-plugin-detail',
-    standalone: true,
-    imports: [CommonModule, ConfirmationDialogComponent],
-    template: `
+  selector: 'app-plugin-detail',
+  standalone: true,
+  imports: [CommonModule, ConfirmationDialogComponent],
+  template: `
     <div class="plugin-detail-page">
       <!-- Loading State -->
       <div *ngIf="loading()" class="loading-state">
@@ -223,7 +223,7 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       (cancelled)="closeConfirmDialog()"
     />
   `,
-    styles: [`
+  styles: [`
     .plugin-detail-page {
       min-height: calc(100vh - 56px);
       background: #f5f7fa;
