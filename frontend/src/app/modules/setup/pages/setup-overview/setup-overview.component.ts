@@ -57,8 +57,8 @@ import { HeroComponent } from '../../../../shared/components/hero/hero.component
     }
 
     .setup-card {
-      background: white;
-      border: 1px solid #E5E7EB;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
       border-radius: 12px;
       padding: 2rem;
       transition: all 0.2s;
@@ -68,9 +68,9 @@ import { HeroComponent } from '../../../../shared/components/hero/hero.component
     }
 
     .setup-card:not(.disabled):hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-md);
       transform: translateY(-4px);
-      border-color: #3B82F6;
+      border-color: var(--color-primary);
     }
 
     .setup-card.disabled {
@@ -97,7 +97,7 @@ import { HeroComponent } from '../../../../shared/components/hero/hero.component
     }
 
     .card-link {
-      color: #3B82F6;
+      color: var(--color-primary);
       font-weight: 500;
       font-size: 0.875rem;
     }

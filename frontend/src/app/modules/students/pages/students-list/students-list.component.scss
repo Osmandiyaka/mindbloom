@@ -1,0 +1,177 @@
+@import 'styles/theme/index';
+
+.students-page {
+    padding: 1.5rem;
+    background: var(--content-background, var(--color-background));
+    min-height: 100vh;
+}
+
+.table-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    gap: 1rem;
+}
+
+.search-input .form-control {
+    background: var(--surface-highlight, var(--color-surface));
+    border: 1px solid var(--border-dark, var(--color-border));
+    color: var(--color-text-primary);
+
+    &::placeholder {
+        color: var(--color-text-secondary);
+    }
+}
+
+.data-table {
+    width: 100%;
+    background: var(--surface-dark, var(--color-surface));
+    border: 1px solid var(--border-dark, var(--color-border));
+    border-radius: $card-radius;
+    overflow: hidden;
+    box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,0.2));
+
+    .table-wrapper {
+        overflow-x: auto;
+        @include custom-scrollbar;
+        background: var(--surface-dark, var(--color-surface));
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: $font-size-sm;
+
+        thead {
+            background: color-mix(in srgb, var(--surface-dark, var(--color-surface)) 95%, #ffffff 5%);
+            border-bottom: 1px solid var(--border-dark, var(--color-border));
+
+            tr th {
+                padding: $spacing-3 $spacing-4;
+                text-align: left;
+                font-weight: $font-weight-semibold;
+                color: var(--color-text-primary);
+                font-size: $font-size-xs;
+                text-transform: uppercase;
+                letter-spacing: $letter-spacing-wide;
+                white-space: nowrap;
+
+                &.sortable {
+                    cursor: pointer;
+                    user-select: none;
+                    @include transition(all, 0.2s, ease);
+
+                    &:hover {
+                        background: var(--surface-highlight, var(--color-surface-hover));
+                    }
+                }
+            }
+        }
+
+        tbody {
+            tr {
+                border-bottom: 1px solid var(--border-dark, var(--color-border));
+                @include transition(all, 0.15s, ease);
+
+                &:last-child {
+                    border-bottom: none;
+                }
+
+                &:hover {
+                    background: color-mix(in srgb, var(--surface-dark, var(--color-surface)) 85%, var(--color-primary) 15%);
+                }
+
+                &.row-clickable {
+                    cursor: pointer;
+                }
+
+                td {
+                    padding: $spacing-4;
+                    color: var(--color-text-secondary);
+                    vertical-align: middle;
+
+                    &.col-primary {
+                        color: var(--color-text-primary);
+                        font-weight: $font-weight-medium;
+                    }
+
+                    .cell-actions {
+                        display: flex;
+                        gap: $spacing-2;
+                        align-items: center;
+
+                        button {
+                            padding: $spacing-1;
+                            color: var(--color-text-secondary);
+                            background: transparent;
+                            border: none;
+                            cursor: pointer;
+                            @include transition(color, 0.15s, ease);
+
+                            &:hover {
+                                color: var(--color-primary);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .table-footer {
+        padding: $spacing-4;
+        border-top: 1px solid var(--border-dark, var(--color-border));
+        background: var(--surface-dark, var(--color-surface));
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: $spacing-4;
+
+        .table-info {
+            font-size: $font-size-sm;
+            color: var(--color-text-secondary);
+        }
+
+        .table-pagination {
+            display: flex;
+            gap: $spacing-2;
+            align-items: center;
+
+            button {
+                padding: $spacing-2 $spacing-3;
+                border: 1px solid var(--border-dark, var(--color-border));
+                border-radius: $radius-md;
+                background: var(--surface-highlight, var(--color-surface));
+                color: var(--color-text-secondary);
+                font-size: $font-size-sm;
+                @include transition(all, 0.15s, ease);
+
+                &:hover:not(:disabled) {
+                    border-color: var(--color-primary);
+                    color: var(--color-primary);
+                    box-shadow: 0 10px 20px rgba(var(--color-primary-rgb, 123, 140, 255), 0.2);
+                }
+
+                &.active {
+                    background: linear-gradient(135deg, var(--color-primary-light, #9fd0ff), var(--color-primary, #7ab8ff));
+                    color: #0f1320;
+                    border-color: transparent;
+                    box-shadow: 0 10px 20px rgba(var(--color-primary-rgb, 123, 140, 255), 0.35);
+                }
+
+                &:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+            }
+        }
+    }
+
+    .empty-state {
+        padding: $spacing-12 $spacing-6;
+        text-align: center;
+        background: var(--surface-dark, var(--color-surface));
+        color: var(--color-text-primary);
+    }
+}

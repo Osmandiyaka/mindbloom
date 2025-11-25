@@ -12,6 +12,7 @@ import { Student, StudentStatus } from '../../../../core/models/student.model';
   selector: 'app-students-list',
   standalone: true,
   imports: [CommonModule, RouterModule, HeroComponent, CardComponent, ButtonComponent, BadgeComponent],
+  styleUrls: ['./students-list.component.scss'],
   template: `
     <div class="students-page">
       <!-- Hero Section -->
