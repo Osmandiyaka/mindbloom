@@ -483,6 +483,19 @@
     .progress-fill {
         background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-success) 100%);
     }
+
+    .review-group {
+        border-bottom: 1px solid var(--border-dark, #383a4a);
+    }
+
+    .review-group-title,
+    .review-value {
+        color: var(--color-text-primary);
+    }
+
+    .review-label {
+        color: var(--color-text-secondary);
+    }
 }
 
 .review-group {
