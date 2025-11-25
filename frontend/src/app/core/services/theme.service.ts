@@ -71,6 +71,35 @@ export class ThemeService {
             }
         },
         {
+            id: 'neumorphism-light',
+            name: 'Neumorphism',
+            mode: 'light',
+            colors: {
+                primary: '#8a9ff9',
+                primaryDark: '#6f84e0',
+                primaryLight: '#b7c4ff',
+                secondary: '#c1cffc',
+                accent: '#9f8ff7',
+                background: '#e9edf5',
+                surface: '#f5f7fb',
+                surfaceHover: '#eef1f9',
+                textPrimary: '#1f2748',
+                textSecondary: '#56627a',
+                textTertiary: '#8b96b1',
+                border: '#d2d9e6',
+                borderLight: '#e9eef7',
+                success: '#69c3aa',
+                warning: '#f3c178',
+                error: '#ef8f9c',
+                info: '#9db7ff'
+            },
+            shadows: {
+                sm: '4px 4px 8px rgba(163, 177, 198, 0.45), -4px -4px 8px rgba(255, 255, 255, 0.8)',
+                md: '10px 10px 20px rgba(163, 177, 198, 0.4), -10px -10px 20px rgba(255, 255, 255, 0.85)',
+                lg: '20px 20px 40px rgba(163, 177, 198, 0.35), -20px -20px 40px rgba(255, 255, 255, 0.9)'
+            }
+        },
+        {
             id: 'default-dark',
             name: 'Default Dark',
             mode: 'dark',
@@ -249,8 +278,29 @@ export class ThemeService {
         root.style.setProperty('--color-error', colors.error);
         root.style.setProperty('--color-info', colors.info);
 
+        root.style.setProperty('--color-primary-rgb', this.hexToRgb(colors.primary));
+        root.style.setProperty('--color-accent-rgb', this.hexToRgb(colors.accent));
+        root.style.setProperty('--color-error-rgb', this.hexToRgb(colors.error));
+        root.style.setProperty('--color-success-rgb', this.hexToRgb(colors.success));
+        root.style.setProperty('--color-warning-rgb', this.hexToRgb(colors.warning));
+        root.style.setProperty('--color-info-rgb', this.hexToRgb(colors.info));
+
         root.style.setProperty('--shadow-sm', shadows.sm);
         root.style.setProperty('--shadow-md', shadows.md);
         root.style.setProperty('--shadow-lg', shadows.lg);
+    }
+
+    private hexToRgb(hex: string): string {
+        const normalized = hex.replace('#', '');
+        const value = normalized.length === 3
+            ? normalized.split('').map(char => char + char).join('')
+            : normalized;
+
+        const int = parseInt(value, 16);
+        const r = (int >> 16) & 255;
+        const g = (int >> 8) & 255;
+        const b = int & 255;
+
+        return `${r}, ${g}, ${b}`;
     }
 }

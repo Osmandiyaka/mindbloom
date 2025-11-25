@@ -1,0 +1,227 @@
+:root[data-theme-id="neumorphism-light"] {
+    --neumo-background: #e9edf5;
+    --neumo-surface: #f5f7fb;
+    --neumo-highlight: rgba(255, 255, 255, 0.9);
+    --neumo-shadow-color: rgba(163, 177, 198, 0.35);
+    --neumo-shadow-outer: 12px 12px 24px var(--neumo-shadow-color), -12px -12px 24px var(--neumo-highlight);
+    --neumo-shadow-soft: 8px 8px 16px var(--neumo-shadow-color), -8px -8px 16px var(--neumo-highlight);
+    --neumo-shadow-inset: inset 6px 6px 12px rgba(163, 177, 198, 0.35), inset -6px -6px 12px rgba(255, 255, 255, 0.95);
+    --neumo-shadow-inset-strong: inset 8px 8px 16px rgba(163, 177, 198, 0.4), inset -8px -8px 16px rgba(255, 255, 255, 0.9);
+    --neumo-glow: 0 10px 30px rgba(var(--color-primary-rgb, 138, 159, 249), 0.3);
+}
+
+[data-theme-id="neumorphism-light"] body {
+    background:
+        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.95), transparent 35%),
+        radial-gradient(circle at 80% 0%, rgba(154, 183, 255, 0.18), transparent 40%),
+        radial-gradient(circle at 10% 80%, rgba(111, 193, 255, 0.12), transparent 35%),
+        var(--neumo-background);
+    color: var(--color-text-primary);
+}
+
+[data-theme-id="neumorphism-light"] .app-shell {
+    background: transparent;
+}
+
+[data-theme-id="neumorphism-light"] .app-content {
+    background: transparent;
+    padding: 24px;
+}
+
+[data-theme-id="neumorphism-light"] .sidebar {
+    background: var(--neumo-surface);
+    border-right: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow-lg), var(--neumo-shadow-soft);
+
+    .nav-section-title {
+        color: var(--color-text-tertiary);
+        letter-spacing: 0.08em;
+    }
+
+    .nav-item a {
+        margin: 2px 12px;
+        border-radius: 14px;
+        background: var(--neumo-surface);
+        border: 1px solid transparent;
+        box-shadow: var(--neumo-shadow-soft);
+
+        &:hover {
+            background: var(--color-surface-hover);
+            color: var(--color-text-primary);
+            box-shadow: var(--neumo-shadow-outer);
+        }
+
+        &.active {
+            background: linear-gradient(145deg, var(--color-primary-light), var(--color-primary));
+            color: #ffffff;
+            box-shadow: var(--neumo-glow);
+
+            &::before {
+                display: none;
+            }
+        }
+    }
+
+    .user-profile {
+        background: var(--neumo-surface);
+        box-shadow: var(--neumo-shadow-soft);
+
+        &:hover {
+            box-shadow: var(--neumo-shadow-outer);
+        }
+
+        .user-avatar {
+            box-shadow: var(--neumo-shadow-soft);
+        }
+    }
+}
+
+[data-theme-id="neumorphism-light"] .global-toolbar {
+    border-bottom: none;
+    box-shadow: var(--neumo-shadow-soft);
+    background: var(--neumo-surface);
+
+    .toolbar-btn {
+        background: var(--neumo-surface);
+        box-shadow: var(--neumo-shadow-soft);
+        border: 1px solid transparent;
+
+        &:hover {
+            background: var(--color-surface-hover);
+            box-shadow: var(--neumo-shadow-outer);
+        }
+    }
+
+    .school-name {
+        background: linear-gradient(145deg, var(--color-primary-light), var(--color-primary));
+        box-shadow: var(--neumo-glow);
+    }
+
+    .search-input {
+        border: 1px solid var(--color-border-light);
+        background: var(--neumo-surface);
+        box-shadow: var(--neumo-shadow-inset);
+
+        &:focus {
+            box-shadow: var(--neumo-shadow-inset-strong), 0 0 0 2px rgba(var(--color-primary-rgb, 138, 159, 249), 0.2);
+        }
+    }
+}
+
+[data-theme-id="neumorphism-light"] .card,
+[data-theme-id="neumorphism-light"] .data-table,
+[data-theme-id="neumorphism-light"] .table-toolbar,
+[data-theme-id="neumorphism-light"] .table-footer,
+[data-theme-id="neumorphism-light"] .theme-dropdown,
+[data-theme-id="neumorphism-light"] .theme-toggle {
+    background: var(--neumo-surface);
+    border: 1px solid var(--color-border-light);
+    box-shadow: var(--neumo-shadow-outer);
+    border-radius: 18px;
+}
+
+[data-theme-id="neumorphism-light"] .card {
+    .card-header,
+    .card-footer {
+        border-color: var(--color-border-light);
+    }
+}
+
+[data-theme-id="neumorphism-light"] .stats-card .stats-icon {
+    background: var(--color-background);
+    box-shadow: var(--neumo-shadow-inset);
+}
+
+[data-theme-id="neumorphism-light"] .data-table {
+    table {
+        thead {
+            background: var(--neumo-surface);
+            box-shadow: var(--neumo-shadow-inset);
+        }
+
+        tbody tr {
+            border-bottom-color: var(--color-border);
+
+            &:hover {
+                background: var(--color-surface-hover);
+                box-shadow: inset 2px 2px 4px rgba(163, 177, 198, 0.25), inset -2px -2px 4px rgba(255, 255, 255, 0.9);
+            }
+        }
+    }
+
+    .table-footer {
+        background: var(--neumo-surface);
+    }
+}
+
+[data-theme-id="neumorphism-light"] .form-control {
+    background: var(--neumo-surface);
+    border: 1px solid var(--color-border-light);
+    box-shadow: var(--neumo-shadow-inset);
+    border-radius: 12px;
+    color: var(--color-text-primary);
+
+    &::placeholder {
+        color: var(--color-text-tertiary);
+    }
+
+    &:focus {
+        border-color: var(--color-primary);
+        box-shadow: var(--neumo-shadow-inset-strong), 0 0 0 2px rgba(var(--color-primary-rgb, 138, 159, 249), 0.2);
+    }
+}
+
+[data-theme-id="neumorphism-light"] .btn {
+    border-radius: 14px;
+    border: 1px solid var(--color-border-light);
+    background: var(--neumo-surface);
+    color: var(--color-text-primary);
+    box-shadow: var(--neumo-shadow-soft);
+
+    &:hover:not(:disabled) {
+        box-shadow: var(--neumo-shadow-outer);
+        background: var(--color-surface-hover);
+    }
+
+    &:active:not(:disabled) {
+        box-shadow: var(--neumo-shadow-inset);
+    }
+
+    &.btn-primary {
+        background: linear-gradient(145deg, var(--color-primary-light), var(--color-primary));
+        color: #ffffff;
+        box-shadow: var(--neumo-glow), var(--neumo-shadow-soft);
+
+        &:hover:not(:disabled) {
+            box-shadow: var(--neumo-glow), var(--neumo-shadow-outer);
+        }
+    }
+
+    &.btn-secondary {
+        background: var(--neumo-surface);
+    }
+}
+
+[data-theme-id="neumorphism-light"] .theme-selector .theme-dropdown {
+    box-shadow: var(--neumo-shadow-outer);
+}
+
+[data-theme-id="neumorphism-light"] .theme-selector .theme-option {
+    border-radius: 12px;
+    box-shadow: var(--neumo-shadow-soft);
+    border: 1px solid transparent;
+
+    &:hover {
+        box-shadow: var(--neumo-shadow-outer);
+    }
+
+    &.active {
+        background: linear-gradient(145deg, var(--color-primary-light), var(--color-primary));
+        color: #ffffff;
+        box-shadow: var(--neumo-glow);
+
+        .check {
+            color: #ffffff;
+        }
+    }
+}

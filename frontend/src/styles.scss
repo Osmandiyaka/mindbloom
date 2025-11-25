@@ -18,8 +18,8 @@ body {
     font-family: $font-family-base;
     font-size: $font-size-base;
     line-height: $line-height-base;
-    color: $text-primary;
-    background-color: $bg-primary;
+    color: var(--color-text-primary, $text-primary);
+    background-color: var(--color-background, $bg-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -31,15 +31,15 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-    background: $slate-0;
+    background: var(--color-surface, $slate-0);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: $slate-3;
+    background: var(--color-border, $slate-3);
     border-radius: 4px;
 
     &:hover {
-        background: $slate-4;
+        background: var(--color-border-light, $slate-4);
     }
 }
 
