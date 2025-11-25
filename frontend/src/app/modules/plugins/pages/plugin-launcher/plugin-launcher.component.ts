@@ -123,13 +123,14 @@ import { PluginService, InstalledPlugin } from '../../../../core/services/plugin
 
     /* Plugin Grid */
     .plugins-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
-    .plugin-card { background: linear-gradient(180deg, var(--color-surface) 0%, color-mix(in srgb, var(--color-surface) 90%, #000) 100%); border-radius: 18px; padding: 2rem; cursor: pointer; transition: all 0.25s ease; border: 1px solid var(--color-border); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18); }
+    .plugin-card { background: linear-gradient(180deg, var(--color-surface) 0%, color-mix(in srgb, var(--color-surface) 90%, #000) 100%); border-radius: 18px; padding: 2rem; cursor: pointer; transition: all 0.25s ease; border: 1px solid var(--color-border); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18); display: flex; flex-direction: column; gap: 1rem; }
     .plugin-card:hover { transform: translateY(-6px); box-shadow: 0 26px 50px rgba(0, 0, 0, 0.24), 0 0 0 1px rgba(var(--color-primary-rgb, 123,140,255), 0.1); border-color: var(--color-primary); }
-    .plugin-icon { font-size: 3rem; margin-bottom: 1rem; text-align: center; width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, rgba(123,140,255,0.18), rgba(181,140,255,0.18)); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 0 rgba(255,255,255,0.35); }
-    .plugin-info h3 { font-size: 1.25rem; font-weight: 700; color: var(--color-text-primary); margin: 0 0 0.5rem 0; }
+    .plugin-icon { font-size: 3rem; margin-bottom: 0.5rem; text-align: center; width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, rgba(123,140,255,0.18), rgba(181,140,255,0.18)); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 0 rgba(255,255,255,0.35); }
+    .plugin-info { flex: 1; display: flex; flex-direction: column; gap: 0.35rem; }
+    .plugin-info h3 { font-size: 1.25rem; font-weight: 700; color: var(--color-text-primary); margin: 0; }
     .plugin-info p { font-size: 0.95rem; color: var(--color-text-secondary); margin: 0; line-height: 1.5; }
-    .plugin-actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; }
-    .btn-launch { padding: 0.625rem 1.25rem; background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s; box-shadow: 0 14px 26px rgba(124, 58, 237, 0.35); }
+    .plugin-actions { margin-top: auto; display: flex; justify-content: flex-end; }
+    .btn-launch { padding: 0.625rem 1.25rem; background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; box-shadow: 0 14px 26px rgba(124, 58, 237, 0.35); min-width: 120px; justify-content: center; }
     .btn-launch:hover { transform: translateY(-1px); box-shadow: 0 18px 30px rgba(124, 58, 237, 0.4); }
 
     /* Disabled Plugins Section */
