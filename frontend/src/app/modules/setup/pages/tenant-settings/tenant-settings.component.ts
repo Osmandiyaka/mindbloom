@@ -45,16 +45,16 @@ import { RouterModule } from '@angular/router';
               <div class="card-body form-grid">
                 <label>
                   <span>Logo URL</span>
-                  <input type="text" [(ngModel)]="draft.customization.logo" placeholder="https://yourcdn/logo.png" />
+                  <input type="text" [(ngModel)]="draft.customization!.logo" placeholder="https://yourcdn/logo.png" />
                 </label>
                 <div class="color-row">
-                  <label><span>Primary Color</span><input type="color" [(ngModel)]="draft.customization.primaryColor" /></label>
-                  <label><span>Secondary Color</span><input type="color" [(ngModel)]="draft.customization.secondaryColor" /></label>
-                  <label><span>Accent Color</span><input type="color" [(ngModel)]="draft.customization.accentColor" /></label>
+                  <label><span>Primary Color</span><input type="color" [(ngModel)]="draft.customization!.primaryColor" /></label>
+                  <label><span>Secondary Color</span><input type="color" [(ngModel)]="draft.customization!.secondaryColor" /></label>
+                  <label><span>Accent Color</span><input type="color" [(ngModel)]="draft.customization!.accentColor" /></label>
                 </div>
-                <div class="logo-preview" *ngIf="draft.customization.logo">
+                <div class="logo-preview" *ngIf="draft.customization?.logo">
                   <span>Preview</span>
-                  <img [src]="draft.customization.logo" alt="Logo preview" />
+                  <img [src]="draft.customization!.logo" alt="Logo preview" />
                 </div>
               </div>
             </div>
@@ -83,8 +83,8 @@ import { RouterModule } from '@angular/router';
                 <p>Set start and end dates for reporting and scheduling.</p>
               </div>
               <div class="card-body form-grid">
-                <label><span>Academic Year Start</span><input type="date" [(ngModel)]="draft.academicYear.start" /></label>
-                <label><span>Academic Year End</span><input type="date" [(ngModel)]="draft.academicYear.end" /></label>
+                <label><span>Academic Year Start</span><input type="date" [(ngModel)]="draft.academicYear!.start" /></label>
+                <label><span>Academic Year End</span><input type="date" [(ngModel)]="draft.academicYear!.end" /></label>
               </div>
             </div>
           </div>

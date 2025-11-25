@@ -63,7 +63,7 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
               </td>
               <td>{{ user.email }}</td>
               <td>
-                <span *ngIf="user.role" class="role-badge" [class.admin]="user.role.name?.includes('Admin')">
+                <span *ngIf="user.role" class="role-badge" [class.admin]="user.role?.name?.includes('Admin')">
                   {{ user.role.name }}
                 </span>
                 <span *ngIf="!user.role" class="role-badge no-role">
