@@ -12,6 +12,8 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
+    background: var(--content-background, var(--color-background, $bg-primary)) !important;
+    background-color: var(--content-background, var(--color-background, $bg-primary)) !important;
 }
 
 body {
@@ -19,9 +21,58 @@ body {
     font-size: $font-size-base;
     line-height: $line-height-base;
     color: var(--color-text-primary, $text-primary);
-    background-color: var(--color-background, $bg-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+// Theme-tinted canvas for content areas
+:root {
+    /* solid fallbacks */
+    --content-background: var(--color-background, #f8f9fb);
+    --content-background-solid: var(--color-background, #f8f9fb);
+    --surface-dark: #1e2130;
+    --surface-highlight: #2a2d3f;
+    --border-dark: #383a4a;
+}
+
+@supports (background: color-mix(in srgb, red, blue)) {
+    :root {
+        --content-background: radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--color-background, $bg-primary) 90%, var(--color-surface, #ffffff) 10%), transparent 36%),
+                             radial-gradient(circle at 85% 0%, color-mix(in srgb, var(--color-primary, #667eea) 10%, transparent), transparent 48%),
+                             radial-gradient(circle at 10% 80%, color-mix(in srgb, var(--color-primary, #667eea) 6%, transparent), transparent 40%),
+                             color-mix(in srgb, var(--color-background, $bg-primary) 90%, var(--color-surface, #ffffff) 10%);
+        --content-background-solid: color-mix(in srgb, var(--color-background, #f8f9fb) 92%, var(--color-surface, #ffffff) 8%);
+    }
+
+    [data-theme="dark"] {
+        --content-background: radial-gradient(circle at 22% 18%, color-mix(in srgb, var(--color-background, #12141b) 92%, #1b2438 8%), transparent 34%),
+                             radial-gradient(circle at 80% 0%, color-mix(in srgb, var(--color-primary, #7ab8ff) 8%, transparent), transparent 45%),
+                             radial-gradient(circle at 12% 80%, color-mix(in srgb, var(--color-primary, #7ab8ff) 5%, transparent), transparent 40%),
+                             color-mix(in srgb, var(--color-background, #12141b) 96%, var(--color-surface, #1e2130) 4%);
+        --content-background-solid: color-mix(in srgb, var(--color-background, #12141b) 96%, var(--color-surface, #1e2130) 4%);
+    }
+}
+
+[data-theme="dark"] {
+    /* ensure solid fallback when gradients unsupported */
+    --content-background: var(--content-background, #12141b);
+    --content-background-solid: var(--content-background-solid, #12141b);
+
+    html, body, .app-shell, .app-content {
+        background: var(--content-background-solid, #12141b) !important;
+    }
+}
+
+.app-content {
+    background: var(--content-background, var(--content-background-solid, var(--color-background, $bg-primary))) !important;
+    background-color: var(--content-background, var(--content-background-solid, var(--color-background, $bg-primary))) !important;
+    min-height: 100vh;
+    padding: 24px;
+}
+
+.app-shell {
+    background: var(--content-background, var(--content-background-solid, var(--color-background, $bg-primary))) !important;
+    background-color: var(--content-background, var(--content-background-solid, var(--color-background, $bg-primary))) !important;
 }
 
 // Scrollbar styling
@@ -31,15 +82,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--color-surface, $slate-0);
+    background: color-mix(in srgb, var(--color-background, $slate-0) 70%, var(--color-surface, $slate-1) 30%);
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--color-border, $slate-3);
+    background: color-mix(in srgb, var(--color-border, $slate-3) 70%, var(--color-primary, #667eea) 30%);
     border-radius: 4px;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-surface, $slate-1) 70%, transparent);
 
     &:hover {
-        background: var(--color-border-light, $slate-4);
+        background: color-mix(in srgb, var(--color-border-light, $slate-4) 60%, var(--color-primary, #667eea) 40%);
     }
 }
 

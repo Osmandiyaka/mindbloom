@@ -42,6 +42,8 @@
         overflow-y: auto;
         padding: $spacing-4 0;
         @include custom-scrollbar;
+        scrollbar-color: var(--color-border) var(--color-surface);
+        scrollbar-width: thin;
     }
 
     // Nav section

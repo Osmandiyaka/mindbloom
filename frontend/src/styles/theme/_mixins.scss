@@ -118,16 +118,17 @@ $breakpoint-2xl: 1536px;
     }
 
     &::-webkit-scrollbar-track {
-        background: $slate-1;
+        background: color-mix(in srgb, var(--color-background, $slate-1) 70%, var(--color-surface, $slate-1) 30%);
         border-radius: $radius-sm;
     }
 
     &::-webkit-scrollbar-thumb {
-        background: $slate-3;
+        background: color-mix(in srgb, var(--color-border, $slate-3) 70%, var(--color-primary, $accent-blue) 30%);
         border-radius: $radius-sm;
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-surface, $slate-1) 70%, transparent);
 
         &:hover {
-            background: $slate-4;
+            background: color-mix(in srgb, var(--color-border-light, $slate-4) 60%, var(--color-primary, $accent-blue) 40%);
         }
     }
 }

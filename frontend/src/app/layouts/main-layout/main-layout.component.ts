@@ -23,7 +23,7 @@ import { GlobalToolbarComponent } from '../../shared/components/global-toolbar/g
     .app-layout {
       display: flex;
       min-height: 100vh;
-      background: var(--bg-primary);
+      background: var(--content-background, var(--color-background, #12141b));
     }
 
     .content-wrapper {
@@ -43,6 +43,8 @@ import { GlobalToolbarComponent } from '../../shared/components/global-toolbar/g
       padding: 2rem;
       padding-top: calc(56px + 2rem);
       overflow-y: auto;
+      background: var(--content-background, var(--color-background, #12141b));
+      background-color: var(--content-background, var(--color-background, #12141b));
 
       @media (max-width: 768px) {
         padding: 1rem;
