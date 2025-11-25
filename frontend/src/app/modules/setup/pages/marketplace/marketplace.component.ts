@@ -239,11 +239,11 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
     .search-box {
       max-width: 700px;
       position: relative;
-      background: color-mix(in srgb, var(--color-surface, #ffffff) 90%, rgba(255,255,255,0.1));
+      background: color-mix(in srgb, var(--color-surface, #ffffff) 85%, rgba(255,255,255,0.15));
       border-radius: 16px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
-      border: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
       overflow: hidden;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -290,7 +290,7 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
     .categories button {
       padding: 0.75rem 1.5rem;
       border: none;
-      background: color-mix(in srgb, var(--color-surface, #2a2d3f) 70%, rgba(255,255,255,0.08));
+      background: color-mix(in srgb, var(--color-surface, #2a2d3f) 60%, rgba(255,255,255,0.18));
       backdrop-filter: blur(10px);
       color: var(--color-text-primary, #fff);
       font-size: 0.9375rem;
@@ -461,6 +461,7 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       justify-content: center;
       position: relative;
       overflow: hidden;
+      color: #ffffff;
     }
 
     .plugin-header::before {
@@ -901,16 +902,14 @@ export class MarketplaceComponent implements OnInit {
 
   getPluginGradient(plugin: Plugin): string {
     const gradients = [
-      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-      'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-      'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-      'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
-      'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-      'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
-      'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-      'linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%)',
+      `linear-gradient(135deg, var(--color-primary, #7ab8ff) 0%, var(--color-secondary, #8f7cff) 100%)`,
+      `linear-gradient(135deg, color-mix(in srgb, var(--color-primary, #7ab8ff) 70%, #ffffff 30%) 0%, var(--color-primary-dark, #4e8ddb) 100%)`,
+      `linear-gradient(135deg, color-mix(in srgb, var(--color-secondary, #8f7cff) 70%, #ffffff 30%) 0%, var(--color-primary, #7ab8ff) 100%)`,
+      `linear-gradient(135deg, #43e97b 0%, color-mix(in srgb, var(--color-primary, #7ab8ff) 30%, #38f9d7 70%) 100%)`,
+      `linear-gradient(135deg, #fa709a 0%, color-mix(in srgb, var(--color-secondary, #8f7cff) 30%, #fee140 70%) 100%)`,
+      `linear-gradient(135deg, color-mix(in srgb, var(--color-primary, #7ab8ff) 40%, #30cfd0 60%) 0%, #330867 100%)`,
+      `linear-gradient(135deg, color-mix(in srgb, var(--color-secondary, #8f7cff) 40%, #a8edea 60%) 0%, #fed6e3 100%)`,
+      `linear-gradient(135deg, color-mix(in srgb, var(--color-primary, #7ab8ff) 45%, #ff9a9e 55%) 0%, #fecfef 100%)`,
     ];
 
     // Use plugin ID to consistently select a gradient
