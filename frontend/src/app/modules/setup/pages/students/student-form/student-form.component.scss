@@ -432,6 +432,50 @@
         color: var(--color-text-tertiary);
     }
 
+    label,
+    .form-heading,
+    .subsection-title {
+        color: var(--color-text-primary);
+    }
+
+    .form-description {
+        color: var(--color-text-secondary);
+    }
+
+    input:disabled,
+    select:disabled,
+    textarea:disabled {
+        background: color-mix(in srgb, var(--surface-highlight, #2a2d3f) 92%, #ffffff 8%);
+        color: var(--color-text-tertiary);
+        border-color: var(--border-dark, #383a4a);
+        box-shadow: inset 1px 1px 2px rgba(0,0,0,0.4), inset -1px -1px 2px rgba(255,255,255,0.05);
+    }
+
+    .form-actions {
+        background: var(--surface-dark, #1e2130);
+        border-top: 1px solid var(--border-dark, #383a4a);
+        box-shadow: -2px -2px 6px rgba(255,255,255,0.04), 4px 4px 12px rgba(0,0,0,0.35);
+    }
+
+    .btn-back,
+    .btn-cancel {
+        background: var(--surface-highlight, #2a2d3f);
+        color: var(--color-text-secondary);
+        border: 1px solid var(--border-dark, #383a4a);
+
+        &:hover:not(:disabled) {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            background: color-mix(in srgb, var(--surface-highlight, #2a2d3f) 88%, var(--color-primary, #7ab8ff) 12%);
+        }
+    }
+
+    .btn-next,
+    .btn-save,
+    .btn-save-new {
+        color: #0f1320;
+    }
+
     .progress-bar {
         background: var(--border-dark, #383a4a);
     }

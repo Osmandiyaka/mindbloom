@@ -12,6 +12,12 @@
     align-items: center;
     margin-top: 1.5rem;
     gap: 1rem;
+    background: transparent;
+
+    .search-input {
+        width: 320px;
+        max-width: 100%;
+    }
 }
 
 .search-input .form-control {
@@ -173,5 +179,46 @@
         text-align: center;
         background: var(--surface-dark, var(--color-surface));
         color: var(--color-text-primary);
+    }
+}
+
+// Dark theme refinements to remove bright surfaces and improve contrast
+[data-theme="dark"] {
+    .students-page {
+        color: var(--color-text-primary);
+    }
+
+    .search-input .form-control {
+        background: var(--surface-highlight, #2a2d3f);
+        color: var(--color-text-primary);
+        box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.4), inset -1px -1px 2px rgba(255, 255, 255, 0.05);
+    }
+
+    .data-table {
+        .table-wrapper {
+            background: var(--surface-dark, #1e2130);
+        }
+
+        table {
+            thead {
+                background: color-mix(in srgb, var(--surface-dark, #1e2130) 88%, #ffffff 12%);
+
+                th {
+                    color: var(--color-text-primary);
+                }
+            }
+
+            tbody tr {
+                color: var(--color-text-secondary);
+
+                &:hover {
+                    color: var(--color-text-primary);
+                }
+            }
+        }
+
+        .table-footer {
+            background: var(--surface-dark, #1e2130);
+        }
     }
 }
