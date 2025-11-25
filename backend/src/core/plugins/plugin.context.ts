@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { EventBus } from './event-bus.service';
+import { InstalledPluginRepository } from '../../domain/plugin/ports/installed-plugin.repository';
 
 /**
  * Plugin Context - Provides isolated, tenant-aware access to platform services
@@ -17,6 +18,7 @@ export class PluginContext {
         private readonly _pluginId: string,
         private readonly _eventBus: EventBus,
         private readonly _logger: Logger,
+        private readonly installedRepo?: InstalledPluginRepository,
     ) { }
 
     /**
@@ -69,33 +71,21 @@ export class PluginContext {
      * Get plugin configuration/settings
      */
     async getConfig<T = any>(): Promise<T> {
-        const mongoose = await import('mongoose');
-        const InstalledPlugin = mongoose.model('InstalledPlugin');
-
-        const installedPlugin = await InstalledPlugin.findOne({
-            tenantId: this._tenantId,
-            pluginId: this._pluginId,
-        });
-
-        return installedPlugin?.settings || {} as T;
+        if (!this.installedRepo) return {} as T;
+        const installedPlugin = await this.installedRepo.findByPluginId(this._pluginId, this._tenantId);
+        return installedPlugin ? (installedPlugin.settings as T) : ({} as T);
     }
 
     /**
      * Update plugin configuration/settings
      */
     async setConfig<T = any>(config: T): Promise<void> {
-        const mongoose = await import('mongoose');
-        const InstalledPlugin = mongoose.model('InstalledPlugin');
+        if (!this.installedRepo) return;
+        const installedPlugin = await this.installedRepo.findByPluginId(this._pluginId, this._tenantId);
+        if (!installedPlugin) return;
 
-        await InstalledPlugin.updateOne(
-            {
-                tenantId: this._tenantId,
-                pluginId: this._pluginId,
-            },
-            {
-                $set: { settings: config, updatedAt: new Date() },
-            }
-        );
+        const updated = installedPlugin.updateSettings(config as Record<string, any>);
+        await this.installedRepo.save(updated);
     }
 }
 
@@ -121,8 +111,12 @@ export class DatabaseAdapter {
      */
     async createCollection(name: string): Promise<void> {
         const collectionName = this.getCollectionName(name);
-        // TODO: Implement collection creation
-        console.log(`Creating collection: ${collectionName}`);
+        const mongoose = await import('mongoose');
+        const connection = mongoose.connection;
+        const exists = await connection.db.listCollections({ name: collectionName }).hasNext();
+        if (!exists) {
+            await connection.createCollection(collectionName);
+        }
     }
 
     /**
@@ -130,38 +124,53 @@ export class DatabaseAdapter {
      */
     async dropCollection(name: string): Promise<void> {
         const collectionName = this.getCollectionName(name);
-        // TODO: Implement collection drop
-        console.log(`Dropping collection: ${collectionName}`);
+        const mongoose = await import('mongoose');
+        const connection = mongoose.connection;
+        const exists = await connection.db.listCollections({ name: collectionName }).hasNext();
+        if (exists) {
+            await connection.db.dropCollection(collectionName);
+        }
     }
 
     /**
      * Insert document into collection
      */
     async insert(collectionName: string, document: any): Promise<any> {
-        // TODO: Implement insert
-        return document;
+        const mongoose = await import('mongoose');
+        const connection = mongoose.connection;
+        const collection = connection.collection(this.getCollectionName(collectionName));
+        const result = await collection.insertOne({ ...document, tenantId: this.tenantId, pluginId: this.pluginId });
+        return { ...document, _id: result.insertedId };
     }
 
     /**
      * Find documents in collection
      */
     async find(collectionName: string, query: any): Promise<any[]> {
-        // TODO: Implement find
-        return [];
+        const mongoose = await import('mongoose');
+        const connection = mongoose.connection;
+        const collection = connection.collection(this.getCollectionName(collectionName));
+        return collection.find({ tenantId: this.tenantId, pluginId: this.pluginId, ...query }).toArray();
     }
 
     /**
      * Update document in collection
      */
     async update(collectionName: string, query: any, update: any): Promise<void> {
-        // TODO: Implement update
+        const mongoose = await import('mongoose');
+        const connection = mongoose.connection;
+        const collection = connection.collection(this.getCollectionName(collectionName));
+        await collection.updateMany({ tenantId: this.tenantId, pluginId: this.pluginId, ...query }, update);
     }
 
     /**
      * Delete documents from collection
      */
     async delete(collectionName: string, query: any): Promise<void> {
-        // TODO: Implement delete
+        const mongoose = await import('mongoose');
+        const connection = mongoose.connection;
+        const collection = connection.collection(this.getCollectionName(collectionName));
+        await collection.deleteMany({ tenantId: this.tenantId, pluginId: this.pluginId, ...query });
     }
 }
 

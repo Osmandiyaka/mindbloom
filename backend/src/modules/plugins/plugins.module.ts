@@ -21,6 +21,8 @@ import { SmsNotificationPluginModule } from '../../plugins/sms-notification/sms-
 import { SmsNotificationPlugin } from '../../plugins/sms-notification/sms-notification.plugin';
 import { LibraryManagementModule } from '../../plugins/library-management/library.module';
 import { LibraryManagementPlugin } from '../../plugins/library-management/library.plugin';
+import { PluginContextFactory } from '../../core/plugins/plugin-context.factory';
+import { PluginManifestValidator } from '../../core/plugins/pluginManifest.validator';
 
 @Module({
     imports: [
@@ -53,6 +55,8 @@ import { LibraryManagementPlugin } from '../../plugins/library-management/librar
         PluginRegistry,
         SmsNotificationPlugin,
         LibraryManagementPlugin,
+        PluginContextFactory,
+        PluginManifestValidator,
     ],
     exports: [
         'PluginRepository',

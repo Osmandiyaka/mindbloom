@@ -3,6 +3,7 @@ import { IPlugin } from './plugin.interface';
 import { PluginContext } from './plugin.context';
 import { SmsNotificationPlugin } from '../../plugins/sms-notification/sms-notification.plugin';
 import { LibraryManagementPlugin } from '../../plugins/library-management/library.plugin';
+import { PluginManifestValidator } from './pluginManifest.validator';
 
 /**
  * Plugin Registry - Manages all available plugins
@@ -15,6 +16,7 @@ export class PluginRegistry {
     constructor(
         private readonly smsPlugin: SmsNotificationPlugin,
         private readonly libraryPlugin: LibraryManagementPlugin,
+        private readonly manifestValidator: PluginManifestValidator,
         // Add more plugins here as they are created
     ) {
         this.registerPlugins();
@@ -36,6 +38,8 @@ export class PluginRegistry {
      */
     private register(plugin: IPlugin): void {
         const pluginId = plugin.manifest.id;
+        this.manifestValidator.validate(plugin.manifest);
+
         if (this.plugins.has(pluginId)) {
             this.logger.warn(`Plugin ${pluginId} is already registered`);
             return;

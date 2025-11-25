@@ -3,6 +3,45 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+export type PluginStatus = 'installed' | 'enabled' | 'disabled' | 'error';
+
+export interface PluginMenuItem {
+    label: string;
+    icon: string;
+    route: string;
+    parent?: string;
+    order?: number;
+}
+
+export interface PluginSettingField {
+    key: string;
+    label: string;
+    type: 'text' | 'number' | 'boolean' | 'select' | 'password';
+    required?: boolean;
+    defaultValue?: any;
+    options?: Array<{ label: string; value: any }>;
+    validation?: {
+        min?: number;
+        max?: number;
+        pattern?: string;
+    };
+}
+
+export interface PluginManifest {
+    id: string;
+    name: string;
+    version: string;
+    description: string;
+    author: string;
+    permissions: string[];
+    provides?: {
+        menuItems?: PluginMenuItem[];
+        routes?: Array<{ path: string; method: string; permissions?: string[] }>;
+        dashboardWidgets?: Array<{ id: string; title: string; component: string }>;
+        settings?: PluginSettingField[];
+    };
+}
+
 export interface Plugin {
     id: string;
     pluginId: string;
@@ -11,7 +50,7 @@ export interface Plugin {
     description: string;
     author: string;
     category: string;
-    status: string;
+    status: PluginStatus | string;
     isOfficial: boolean;
     iconUrl: string;
     bannerUrl: string;
@@ -21,13 +60,13 @@ export interface Plugin {
     rating: number;
     ratingCount: number;
     tags: string[];
-    manifest: any;
+    manifest: PluginManifest | null;
     changelog: any[];
     createdAt: Date;
     updatedAt: Date;
     isInstalled?: boolean;
     installedVersion?: string;
-    installedStatus?: string;
+    installedStatus?: PluginStatus | string;
 }
 
 export interface InstalledPlugin {
@@ -35,7 +74,7 @@ export interface InstalledPlugin {
     tenantId: string;
     pluginId: string;
     version: string;
-    status: string;
+    status: PluginStatus | string;
     settings: Record<string, any>;
     permissions: string[];
     installedAt: Date;
@@ -43,22 +82,7 @@ export interface InstalledPlugin {
     disabledAt?: Date;
     lastError?: string;
     updatedAt: Date;
-    manifest?: {
-        id: string;
-        name: string;
-        description: string;
-        author: string;
-        provides?: {
-            menuItems?: Array<{
-                label: string;
-                icon: string;
-                route: string;
-                parent?: string;
-                order?: number;
-            }>;
-            routes?: Array<any>;
-        };
-    };
+    manifest?: PluginManifest;
 }
 
 @Injectable({

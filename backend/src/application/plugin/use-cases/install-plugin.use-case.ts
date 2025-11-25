@@ -2,6 +2,9 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InstalledPlugin } from '../../../domain/plugin/entities/installed-plugin.entity';
 import { InstalledPluginRepository } from '../../../domain/plugin/ports/installed-plugin.repository';
 import { PluginRepository } from '../../../domain/plugin/ports/plugin.repository';
+import { PluginRegistry } from '../../../core/plugins/plugin.registry';
+import { PluginContextFactory } from '../../../core/plugins/plugin-context.factory';
+import { EventBus, PlatformEvent } from '../../../core/plugins/event-bus.service';
 
 export class InstallPluginCommand {
     constructor(
@@ -17,6 +20,9 @@ export class InstallPluginUseCase {
         private readonly pluginRepository: PluginRepository,
         @Inject('InstalledPluginRepository')
         private readonly installedPluginRepository: InstalledPluginRepository,
+        private readonly pluginRegistry: PluginRegistry,
+        private readonly pluginContextFactory: PluginContextFactory,
+        private readonly eventBus: EventBus,
     ) { }
 
     async execute(command: InstallPluginCommand): Promise<InstalledPlugin> {
@@ -49,6 +55,13 @@ export class InstallPluginUseCase {
 
         // Save installed plugin
         const saved = await this.installedPluginRepository.save(installedPlugin);
+
+        // Execute plugin install hook
+        const context = this.pluginContextFactory.create(command.tenantId, command.pluginId);
+        await this.pluginRegistry.installPlugin(command.pluginId, context);
+
+        // Emit platform event
+        this.eventBus.publish(PlatformEvent.PLUGIN_INSTALLED, { pluginId: command.pluginId, tenantId: command.tenantId }, command.tenantId);
 
         // Increment download count
         const updatedPlugin = plugin.incrementDownloads();

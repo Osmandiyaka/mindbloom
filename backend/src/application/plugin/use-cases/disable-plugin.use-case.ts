@@ -1,5 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InstalledPluginRepository } from '../../../domain/plugin/ports/installed-plugin.repository';
+import { PluginRegistry } from '../../../core/plugins/plugin.registry';
+import { PluginContextFactory } from '../../../core/plugins/plugin-context.factory';
+import { EventBus, PlatformEvent } from '../../../core/plugins/event-bus.service';
 
 export class DisablePluginCommand {
     constructor(
@@ -13,6 +16,9 @@ export class DisablePluginUseCase {
     constructor(
         @Inject('InstalledPluginRepository')
         private readonly installedPluginRepository: InstalledPluginRepository,
+        private readonly pluginRegistry: PluginRegistry,
+        private readonly pluginContextFactory: PluginContextFactory,
+        private readonly eventBus: EventBus,
     ) { }
 
     async execute(command: DisablePluginCommand) {
@@ -26,6 +32,12 @@ export class DisablePluginUseCase {
         }
 
         const disabled = installedPlugin.disable();
-        return await this.installedPluginRepository.save(disabled);
+        const saved = await this.installedPluginRepository.save(disabled);
+
+        const context = this.pluginContextFactory.create(command.tenantId, command.pluginId);
+        await this.pluginRegistry.disablePlugin(command.pluginId, context);
+        this.eventBus.publish(PlatformEvent.PLUGIN_DISABLED, { pluginId: command.pluginId, tenantId: command.tenantId }, command.tenantId);
+
+        return saved;
     }
 }
