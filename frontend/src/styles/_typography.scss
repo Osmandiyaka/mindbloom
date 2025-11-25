@@ -4,55 +4,67 @@
 h1,
 .h1 {
     font-size: $font-size-h1;
-    font-weight: $font-weight-bold;
+    font-family: var(--font-heading, $font-family-base);
+    font-weight: 700;
     line-height: $line-height-tight;
     color: $text-primary;
     margin-bottom: $spacing-3;
+    letter-spacing: $letter-spacing-tight;
 }
 
 h2,
 .h2 {
     font-size: $font-size-h2;
-    font-weight: $font-weight-semibold;
+    font-family: var(--font-heading, $font-family-base);
+    font-weight: 700;
     line-height: $line-height-tight;
     color: $text-primary;
     margin-bottom: $spacing-3;
+    letter-spacing: $letter-spacing-tight;
 }
 
 h3,
 .h3 {
     font-size: $font-size-h3;
-    font-weight: $font-weight-semibold;
+    font-family: var(--font-heading, $font-family-base);
+    font-weight: 600;
     line-height: $line-height-normal;
     color: $text-primary;
     margin-bottom: $spacing-2;
+    letter-spacing: $letter-spacing-tight;
 }
 
 h4,
 .h4 {
     font-size: $font-size-h4;
-    font-weight: $font-weight-medium;
+    font-family: var(--font-heading, $font-family-base);
+    font-weight: 600;
     line-height: $line-height-normal;
     color: $text-primary;
     margin-bottom: $spacing-2;
+    letter-spacing: $letter-spacing-normal;
 }
 
 h5,
 .h5 {
     font-size: $font-size-h5;
-    font-weight: $font-weight-medium;
+    font-family: var(--font-heading, $font-family-base);
+    font-weight: 600;
     line-height: $line-height-normal;
     color: $text-primary;
     margin-bottom: $spacing-2;
+    letter-spacing: $letter-spacing-normal;
 }
 
 h6,
 .h6 {
     font-size: $font-size-h6;
-    font-weight: $font-weight-medium;
+    font-family: var(--font-heading, $font-family-base);
+    font-weight: 600;
     line-height: $line-height-normal;
     color: $text-secondary;
     margin-bottom: $spacing-2;
+    letter-spacing: $letter-spacing-wide;
 }
 
 p {
@@ -60,6 +72,7 @@ p {
     line-height: $line-height-relaxed;
     color: $text-secondary;
     margin-bottom: $spacing-3;
+    font-family: var(--font-base, $font-family-base);
 }
 
 .text-sm {
@@ -76,6 +89,12 @@ p {
 
 .text-xl {
     font-size: $font-size-xl;
+}
+
+.label,
+label {
+    font-family: var(--font-base, $font-family-base);
+    letter-spacing: 0.005em;
 }
 
 .font-light {
