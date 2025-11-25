@@ -184,15 +184,21 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
   styles: [`
     .marketplace {
       min-height: 100vh;
-      background: linear-gradient(to bottom, #fafbfc 0%, #ffffff 100%);
+      background: var(--content-background, var(--color-background, #0f1320));
+      color: var(--color-text-primary);
     }
 
     /* Hero Section */
     .hero {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(140deg,
+        color-mix(in srgb, var(--color-primary, #667eea) 70%, var(--color-surface, #1e2130) 30%),
+        color-mix(in srgb, var(--color-secondary, #8f7cff) 60%, var(--color-primary-dark, #4e8ddb) 40%));
       padding: 4rem 2rem 3rem;
       position: relative;
       overflow: hidden;
+      border-bottom-left-radius: 28px;
+      border-bottom-right-radius: 28px;
+      box-shadow: 0 28px 60px rgba(0,0,0,0.25);
     }
 
     .hero::before {
@@ -204,6 +210,7 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       bottom: 0;
       background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
       opacity: 0.3;
+      pointer-events: none;
     }
 
     .hero-content {
@@ -232,9 +239,11 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
     .search-box {
       max-width: 700px;
       position: relative;
-      background: white;
+      background: color-mix(in srgb, var(--color-surface, #ffffff) 90%, rgba(255,255,255,0.1));
       border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
       overflow: hidden;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -249,7 +258,7 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       left: 1.5rem;
       top: 50%;
       transform: translateY(-50%);
-      color: #9ca3af;
+      color: var(--color-text-tertiary, #9ca3af);
       z-index: 2;
     }
 
@@ -260,11 +269,11 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       font-size: 1.0625rem;
       outline: none;
       background: transparent;
-      color: #111827;
+      color: var(--color-text-primary, #111827);
     }
 
     .search-box input::placeholder {
-      color: #9ca3af;
+      color: var(--color-text-tertiary, #9ca3af);
     }
 
     /* Floating Categories */
@@ -281,25 +290,26 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
     .categories button {
       padding: 0.75rem 1.5rem;
       border: none;
-      background: rgba(255, 255, 255, 0.2);
+      background: color-mix(in srgb, var(--color-surface, #2a2d3f) 70%, rgba(255,255,255,0.08));
       backdrop-filter: blur(10px);
-      color: white;
+      color: var(--color-text-primary, #fff);
       font-size: 0.9375rem;
       font-weight: 600;
       cursor: pointer;
       border-radius: 12px;
       transition: all 0.2s;
       white-space: nowrap;
+      border: 1px solid rgba(255,255,255,0.06);
     }
 
     .categories button:hover {
-      background: rgba(255, 255, 255, 0.3);
+      background: color-mix(in srgb, var(--color-primary, #667eea) 30%, var(--color-surface, #2a2d3f) 70%);
       transform: translateY(-2px);
     }
 
     .categories button.active {
-      background: white;
-      color: #667eea;
+      background: #ffffff;
+      color: var(--color-primary, #667eea);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     }
 
@@ -315,17 +325,17 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
 
     .results-count {
       font-size: 0.9375rem;
-      color: #6b7280;
+      color: var(--color-text-secondary);
       font-weight: 600;
     }
 
     .view-toggle {
       display: flex;
       gap: 0.5rem;
-      background: white;
+      background: var(--color-surface, #ffffff);
       padding: 0.25rem;
       border-radius: 10px;
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--color-border, #e5e7eb);
     }
 
     .view-toggle button {
@@ -338,16 +348,16 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       align-items: center;
       justify-content: center;
       transition: all 0.2s;
-      color: #6b7280;
+      color: var(--color-text-secondary);
     }
 
     .view-toggle button:hover {
-      background: #f9fafb;
+      background: color-mix(in srgb, var(--color-surface, #f9fafb) 90%, #ffffff 10%);
     }
 
     .view-toggle button.active {
-      background: #111827;
-      color: white;
+      background: var(--color-primary, #111827);
+      color: #ffffff;
     }
 
     /* States */
@@ -425,19 +435,22 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
 
     /* Premium Plugin Card */
     .plugin {
-      background: white;
+      background: var(--color-surface, #ffffff);
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
-      border: 1px solid transparent;
+      border: 1px solid var(--color-border, #e5e7eb);
+      display: flex;
+      flex-direction: column;
+      min-height: 360px;
     }
 
     .plugin:hover {
       transform: translateY(-6px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-      border-color: #e5e7eb;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(var(--color-primary-rgb, 118, 75, 162), 0.18);
+      border-color: rgba(var(--color-primary-rgb, 118, 75, 162), 0.35);
     }
 
     /* Plugin Header with Gradient */
@@ -498,6 +511,7 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
+      height: 100%;
     }
 
     .plugin-title-row {
@@ -511,15 +525,15 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       margin: 0;
       font-size: 1.125rem;
       font-weight: 700;
-      color: #111827;
+      color: var(--color-text-primary, #111827);
       line-height: 1.3;
       flex: 1;
     }
 
     .version {
       font-size: 0.75rem;
-      color: #9ca3af;
-      background: #f3f4f6;
+      color: var(--color-text-tertiary, #9ca3af);
+      background: color-mix(in srgb, var(--color-surface, #f3f4f6) 92%, #ffffff 8%);
       padding: 0.25rem 0.625rem;
       border-radius: 6px;
       font-weight: 600;
@@ -529,14 +543,14 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
     .author {
       margin: 0;
       font-size: 0.875rem;
-      color: #6b7280;
+      color: var(--color-text-secondary, #6b7280);
       font-weight: 500;
     }
 
     .description {
       margin: 0;
       font-size: 0.875rem;
-      color: #6b7280;
+      color: var(--color-text-secondary, #6b7280);
       line-height: 1.6;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -550,7 +564,7 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       display: flex;
       gap: 1.25rem;
       padding-top: 0.5rem;
-      border-top: 1px solid #f3f4f6;
+      border-top: 1px solid var(--color-border, #f3f4f6);
     }
 
     .stat {
@@ -558,16 +572,19 @@ import { ConfirmationDialogComponent } from '../../../../shared/components/confi
       align-items: center;
       gap: 0.375rem;
       font-size: 0.8125rem;
-      color: #6b7280;
+      color: var(--color-text-secondary, #6b7280);
     }
 
     .stat svg {
-      color: #9ca3af;
+      color: var(--color-text-tertiary, #9ca3af);
     }
 
     /* Action Button */
     .plugin-action {
       padding-top: 0.75rem;
+      margin-top: auto;
+      display: flex;
+      align-items: center;
     }
 
     .btn-install {
