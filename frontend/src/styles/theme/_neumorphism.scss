@@ -333,3 +333,236 @@
 [data-theme-id="neumorphism-light"] .table-footer {
     border-color: var(--color-border-light);
 }
+
+// ========================================
+// STUDENT WIZARD
+// ========================================
+[data-theme-id="neumorphism-light"] .wizard-container {
+    background: var(--neumo-background);
+
+    .progress-steps {
+        background: var(--neumo-surface);
+        color: var(--color-text-primary);
+        box-shadow: var(--neumo-shadow-outer);
+        border-radius: 18px;
+        margin: 24px;
+        padding: 2.5rem 2rem;
+
+        .wizard-subtitle {
+            color: var(--color-text-tertiary);
+        }
+    }
+
+    .step {
+        padding: 1.25rem 0;
+
+        &:not(:last-child)::after {
+            background: var(--color-border);
+        }
+
+        .step-circle {
+            background: var(--neumo-surface);
+            border-color: var(--color-border);
+            color: var(--color-text-secondary);
+            box-shadow: var(--neumo-shadow-pill);
+        }
+
+        .step-title {
+            color: var(--color-text-secondary);
+        }
+
+        .step-status {
+            color: var(--color-text-tertiary);
+        }
+
+        &.active {
+            .step-circle {
+                background: linear-gradient(145deg, var(--color-primary-light), var(--color-primary));
+                color: #ffffff;
+                border-color: transparent;
+                box-shadow: var(--neumo-glow);
+            }
+
+            .step-title {
+                color: var(--color-text-primary);
+            }
+
+            .step-status {
+                color: var(--color-primary);
+            }
+        }
+
+        &.completed {
+            &::after {
+                background: var(--color-success);
+            }
+
+            .step-circle {
+                background: linear-gradient(145deg, var(--color-success), #5ebd9e);
+                border-color: transparent;
+                color: #ffffff;
+                box-shadow: var(--neumo-shadow-soft);
+            }
+
+            .step-title {
+                color: var(--color-text-primary);
+            }
+
+            .step-status {
+                color: var(--color-success);
+            }
+        }
+    }
+
+    .progress-bar {
+        background: var(--color-border);
+    }
+
+    .progress-fill {
+        background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-success) 100%);
+        box-shadow: var(--neumo-shadow-soft);
+    }
+
+    .progress-text {
+        color: var(--color-text-tertiary);
+    }
+
+    .form-content {
+        background: transparent;
+    }
+
+    .content-with-sidebar {
+        background: transparent;
+    }
+
+    .main-form-area,
+    .review-section,
+    .guardian-card,
+    .photo-upload-card,
+    .btn-add-guardian {
+        background: var(--neumo-surface);
+        border: 1px solid var(--color-border-light);
+        box-shadow: var(--neumo-shadow-outer);
+        border-radius: 16px;
+    }
+
+    .photo-preview {
+        background: var(--neumo-surface);
+        border-color: var(--color-border-light);
+        box-shadow: var(--neumo-shadow-soft);
+    }
+
+    .photo-placeholder {
+        background: var(--color-surface-hover);
+        color: var(--color-text-tertiary);
+    }
+
+    .btn-photo-action,
+    .btn-upload,
+    .btn-remove,
+    .btn-text,
+    .btn-icon-danger,
+    .btn-add-item,
+    .btn-remove-item {
+        border-radius: 14px;
+        border: 1px solid var(--color-border-light);
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(232, 238, 248, 0.92));
+        color: var(--color-text-primary);
+        box-shadow: var(--neumo-shadow-pill);
+
+        &:hover {
+            box-shadow: var(--neumo-shadow-outer);
+            color: var(--color-primary);
+        }
+    }
+
+    .btn-photo-action:first-child,
+    .btn-upload,
+    .btn-save,
+    .btn-save-new,
+    .btn-next {
+        background: linear-gradient(145deg, var(--color-primary-light), var(--color-primary));
+        color: #ffffff;
+        box-shadow: var(--neumo-glow);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+
+        &:hover:not(:disabled) {
+            box-shadow: var(--neumo-shadow-outer), var(--neumo-glow);
+        }
+
+        &:active:not(:disabled) {
+            box-shadow: var(--neumo-shadow-inset);
+        }
+    }
+
+    .btn-remove,
+    .btn-icon-danger {
+        background: linear-gradient(145deg, var(--color-error), #d35463);
+        color: #ffffff;
+        border-color: transparent;
+        box-shadow: 0 12px 24px rgba(var(--color-error-rgb, 239, 143, 156), 0.35);
+    }
+
+    .btn-back,
+    .btn-cancel {
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(232, 238, 248, 0.92));
+        color: var(--color-text-secondary);
+        box-shadow: var(--neumo-shadow-pill);
+
+        &:hover:not(:disabled) {
+            color: var(--color-primary);
+            box-shadow: var(--neumo-shadow-outer);
+        }
+    }
+
+    .btn-save {
+        background: linear-gradient(145deg, var(--color-success), #5ebd9e);
+        box-shadow: 0 12px 24px rgba(var(--color-success-rgb, 105, 195, 170), 0.35);
+    }
+
+    .btn-save-new {
+        background: linear-gradient(145deg, var(--color-accent), #8e7ff3);
+        box-shadow: 0 12px 24px rgba(var(--color-accent-rgb, 159, 143, 247), 0.35);
+    }
+
+    .btn-add-guardian {
+        border-style: solid;
+    }
+
+    .subsection-title {
+        border-color: var(--color-border);
+        color: var(--color-text-primary);
+    }
+
+    .guardian-card {
+        .btn-text {
+            background: transparent;
+            box-shadow: none;
+            color: var(--color-primary);
+
+            &:hover {
+                text-decoration: underline;
+                box-shadow: none;
+            }
+        }
+
+        .btn-icon-danger {
+            box-shadow: var(--neumo-shadow-pill);
+        }
+    }
+
+    .form-actions {
+        background: var(--neumo-surface);
+        border-top: 1px solid var(--color-border-light);
+        box-shadow: var(--neumo-shadow-soft);
+    }
+
+    .card-header {
+        border-color: var(--color-border-light);
+    }
+
+    .primary-badge {
+        background: rgba(var(--color-primary-rgb, 138, 159, 249), 0.12);
+        color: var(--color-primary);
+    }
+}
