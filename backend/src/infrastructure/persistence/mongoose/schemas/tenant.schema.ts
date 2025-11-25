@@ -25,6 +25,15 @@ export class TenantDocument extends Document {
             logo?: string;
             primaryColor?: string;
             secondaryColor?: string;
+            accentColor?: string;
+        };
+        locale?: string;
+        timezone?: string;
+        weekStartsOn?: string;
+        currency?: string;
+        academicYear?: {
+            start: string;
+            end: string;
         };
     };
 

@@ -46,5 +46,14 @@ export interface TenantSettings {
         logo?: string;
         primaryColor?: string;
         secondaryColor?: string;
+        accentColor?: string;
+    };
+    locale?: string;
+    timezone?: string;
+    weekStartsOn?: 'monday' | 'sunday';
+    currency?: string;
+    academicYear?: {
+        start: string; // ISO date
+        end: string; // ISO date
     };
 }

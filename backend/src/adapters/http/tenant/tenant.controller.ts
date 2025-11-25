@@ -1,9 +1,13 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { GetTenantBySubdomainUseCase, CreateTenantUseCase } from '../../../application/tenant/use-cases';
+import { GetTenantBySubdomainUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, UpdateTenantSettingsCommand } from '../../../application/tenant/use-cases';
 import { TenantResponseDto } from './dto/tenant-response.dto';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { Public } from '../../../common/tenant/public.decorator';
+import { TenantGuard } from '../../../common/tenant/tenant.guard';
+import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard';
+import { TenantContext } from '../../../common/tenant/tenant.context';
+import { UpdateTenantSettingsDto } from './dto/update-tenant-settings.dto';
 
 @ApiTags('Tenants')
 @Controller('tenants')
@@ -11,6 +15,9 @@ export class TenantController {
     constructor(
         private readonly getTenantBySubdomainUseCase: GetTenantBySubdomainUseCase,
         private readonly createTenantUseCase: CreateTenantUseCase,
+        private readonly getTenantSettingsUseCase: GetTenantSettingsUseCase,
+        private readonly updateTenantSettingsUseCase: UpdateTenantSettingsUseCase,
+        private readonly tenantContext: TenantContext,
     ) { }
 
     @Public()
@@ -40,5 +47,37 @@ export class TenantController {
         });
 
         return TenantResponseDto.fromDomain(tenant);
+    }
+
+    @UseGuards(JwtAuthGuard, TenantGuard)
+    @Get('settings')
+    @ApiOperation({ summary: 'Get tenant settings for current tenant' })
+    async getSettings() {
+        const settings = await this.getTenantSettingsUseCase.execute(this.tenantContext.tenantId);
+        return settings;
+    }
+
+    @UseGuards(JwtAuthGuard, TenantGuard)
+    @Put('settings')
+    @ApiOperation({ summary: 'Update tenant settings for current tenant' })
+    async updateSettings(@Body() dto: UpdateTenantSettingsDto) {
+        const command = new UpdateTenantSettingsCommand(this.tenantContext.tenantId, {
+            customization: {
+                logo: dto.logo,
+                primaryColor: dto.primaryColor,
+                secondaryColor: dto.secondaryColor,
+                accentColor: dto.accentColor,
+            },
+            locale: dto.locale,
+            timezone: dto.timezone,
+            weekStartsOn: dto.weekStartsOn,
+            currency: dto.currency,
+            academicYear: dto.academicYearStart && dto.academicYearEnd ? {
+                start: dto.academicYearStart,
+                end: dto.academicYearEnd,
+            } : undefined,
+            ...dto.extras,
+        });
+        return await this.updateTenantSettingsUseCase.execute(command);
     }
 }

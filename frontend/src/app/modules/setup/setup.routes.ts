@@ -38,6 +38,10 @@ export const SETUP_ROUTES: Routes = [
         loadComponent: () => import('./pages/plugin-detail/plugin-detail.component').then(m => m.PluginDetailComponent)
     },
     {
+        path: 'tenant-settings',
+        loadComponent: () => import('./pages/tenant-settings/tenant-settings.component').then(m => m.TenantSettingsComponent)
+    },
+    {
         path: 'students',
         loadComponent: () => import('./pages/students/student-list/student-list.component').then(m => m.StudentListComponent)
     }

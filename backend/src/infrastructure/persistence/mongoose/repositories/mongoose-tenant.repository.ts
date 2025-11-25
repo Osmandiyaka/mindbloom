@@ -72,7 +72,10 @@ export class MongooseTenantRepository implements ITenantRepository {
             doc.subdomain,
             doc.status as 'active' | 'suspended' | 'inactive',
             doc.plan as 'free' | 'basic' | 'premium' | 'enterprise',
-            doc.settings,
+            {
+                ...doc.settings,
+                weekStartsOn: doc.settings?.weekStartsOn === 'sunday' ? 'sunday' : 'monday',
+            },
             doc.createdAt,
             doc.updatedAt,
         );
