@@ -9,14 +9,14 @@
         display: block;
         font-size: $font-size-sm;
         font-weight: $font-weight-medium;
-        color: $text-primary;
+        color: var(--color-text-primary, $text-primary);
         margin-bottom: $spacing-2;
     }
 
     .form-hint {
         display: block;
         font-size: $font-size-xs;
-        color: $text-muted;
+        color: var(--color-text-tertiary, $text-muted);
         margin-top: $spacing-1;
     }
 
@@ -44,32 +44,32 @@
     padding: $input-padding-y $input-padding-x;
     font-size: $font-size-sm;
     line-height: 1.5;
-    color: $text-primary;
-    background-color: $bg-secondary;
-    border: $border-default;
+    color: var(--color-text-primary, $text-primary);
+    background-color: var(--color-surface, $bg-secondary);
+    border: 1px solid var(--color-border, $border-default);
     border-radius: $input-radius;
     @include transition(all, 0.15s, ease);
     min-height: 36px;
 
     &::placeholder {
-        color: $text-muted;
+        color: var(--color-text-tertiary, $text-muted);
         opacity: 1;
     }
 
     &:hover:not(:disabled):not(:focus) {
-        border-color: $border-dark;
+        border-color: var(--color-border-light, $border-dark);
     }
 
     &:focus {
         outline: none;
-        border-color: $accent-blue;
+        border-color: var(--color-primary, $accent-blue);
         @include focus-ring;
     }
 
     &:disabled {
-        background-color: $slate-1;
+        background-color: color-mix(in srgb, var(--color-surface, $bg-secondary) 90%, #ffffff 10%);
         cursor: not-allowed;
-        opacity: 0.6;
+        opacity: 0.75;
     }
 
     // Sizes
@@ -95,7 +95,7 @@ textarea.form-control {
 // Select
 select.form-control {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A0AEC0' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     padding-right: 2.5rem;
@@ -114,7 +114,9 @@ select.form-control {
         height: 18px;
         margin: 0;
         cursor: pointer;
-        accent-color: $accent-blue;
+        accent-color: var(--color-primary, $accent-blue);
+        background: var(--color-surface, $bg-secondary);
+        border: 1px solid var(--color-border, $border-default);
     }
 
     label {
@@ -122,7 +124,7 @@ select.form-control {
         cursor: pointer;
         font-size: $font-size-sm;
         font-weight: $font-weight-regular;
-        color: $text-secondary;
+        color: var(--color-text-secondary, $text-secondary);
     }
 }
 

@@ -3,7 +3,12 @@
 // ========================================
 
 .card {
-    @include card;
+    background: var(--color-surface, $card-bg);
+    border: 1px solid var(--color-border, $card-border);
+    border-radius: $card-radius;
+    box-shadow: var(--shadow-md, $card-shadow);
+    padding: $card-padding;
+    color: var(--color-text-primary, $text-primary);
     @include transition(all, 0.2s, ease);
 
     &.card-hover {
@@ -22,7 +27,7 @@
     // Card header
     .card-header {
         padding-bottom: $spacing-4;
-        border-bottom: $border-default;
+        border-bottom: 1px solid var(--color-border, $border-default);
         margin-bottom: $spacing-4;
 
         h1,
@@ -44,13 +49,13 @@
     .card-title {
         font-size: $font-size-lg;
         font-weight: $font-weight-semibold;
-        color: $text-primary;
+        color: var(--color-text-primary, $text-primary);
         margin: 0;
     }
 
     .card-subtitle {
         font-size: $font-size-sm;
-        color: $text-secondary;
+        color: var(--color-text-secondary, $text-secondary);
         margin-top: $spacing-1;
     }
 
@@ -64,7 +69,7 @@
     // Card footer
     .card-footer {
         padding-top: $spacing-4;
-        border-top: $border-default;
+        border-top: 1px solid var(--color-border, $border-default);
         margin-top: $spacing-4;
         display: flex;
         align-items: center;
@@ -103,7 +108,11 @@
 
 // Stats card
 .stats-card {
-    @include card;
+    background: var(--color-surface, $card-bg);
+    border: 1px solid var(--color-border, $card-border);
+    border-radius: $card-radius;
+    box-shadow: var(--shadow-md, $card-shadow);
+    padding: $card-padding;
     display: flex;
     align-items: center;
     gap: $spacing-4;
@@ -142,14 +151,14 @@
 
         .stats-label {
             font-size: $font-size-sm;
-            color: $text-secondary;
+            color: var(--color-text-secondary, $text-secondary);
             margin-bottom: $spacing-1;
         }
 
         .stats-value {
             font-size: $font-size-2xl;
             font-weight: $font-weight-bold;
-            color: $text-primary;
+            color: var(--color-text-primary, $text-primary);
             line-height: 1;
         }
 

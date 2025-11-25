@@ -11,6 +11,11 @@
     --soft-shadow-in: inset -1px -1px 2px rgba(255, 255, 255, 0.06), inset 2px 2px 4px rgba(0, 0, 0, 0.45);
     --soft-shadow-focus: 0 0 0 3px rgba(var(--color-primary-rgb, 138, 180, 248), 0.45);
     --soft-divider: rgba(255, 255, 255, 0.06);
+    --soft-glass: color-mix(in srgb, var(--soft-surface) 90%, rgba(255, 255, 255, 0.04) 10%);
+    --soft-glass-strong: color-mix(in srgb, var(--soft-surface-alt) 85%, rgba(255, 255, 255, 0.08) 15%);
+    --soft-blur: blur(10px);
+    --soft-motion: cubic-bezier(0.4, 0.14, 0.3, 1);
+    --soft-speed: 240ms;
 }
 
 [data-theme="dark"] {
@@ -58,23 +63,39 @@
     .table-card,
     .modal-dialog,
     .modal-content {
-        background: var(--soft-surface);
+        background: var(--soft-glass);
         border: 1px solid var(--soft-border);
         color: var(--soft-text);
         box-shadow: var(--soft-shadow-out);
+        backdrop-filter: var(--soft-blur);
+        transition: transform var(--soft-speed) var(--soft-motion), box-shadow var(--soft-speed) var(--soft-motion), background var(--soft-speed) var(--soft-motion);
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: -4px -4px 10px rgba(255, 255, 255, 0.05), 6px 6px 16px rgba(0, 0, 0, 0.5);
+        }
     }
 
     .hero-card {
-        background: linear-gradient(145deg,
-                color-mix(in srgb, var(--soft-surface) 85%, var(--color-primary, #8ab4f8) 15%),
-                color-mix(in srgb, var(--soft-surface-alt) 85%, var(--color-primary-dark, #5c6bd6) 15%));
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--soft-surface) 70%, var(--color-primary, #8ab4f8) 30%),
+                color-mix(in srgb, var(--soft-surface-alt) 70%, var(--color-primary-dark, #5c6bd6) 30%));
         border: 1px solid var(--soft-border);
         box-shadow: -4px -4px 10px rgba(255, 255, 255, 0.05), 6px 6px 16px rgba(0, 0, 0, 0.45);
+        background-size: 180% 180%;
+        animation: hero-glow 12s ease-in-out infinite alternate;
+        backdrop-filter: blur(14px);
 
         .hero-title,
         .hero-subtitle {
             color: var(--soft-text);
         }
+    }
+
+    @keyframes hero-glow {
+        0% { background-position: 15% 20%; }
+        50% { background-position: 85% 30%; }
+        100% { background-position: 30% 80%; }
     }
 
     // Form scaffolding
@@ -109,6 +130,7 @@
         border: 1px solid var(--soft-border);
         color: var(--soft-text);
         box-shadow: var(--soft-shadow-in);
+        transition: box-shadow var(--soft-speed) var(--soft-motion), background var(--soft-speed) var(--soft-motion), border-color var(--soft-speed) var(--soft-motion);
 
         &::placeholder {
             color: var(--soft-text-muted);
@@ -145,7 +167,7 @@
         background: linear-gradient(145deg, var(--soft-surface-alt), var(--soft-surface));
         color: var(--soft-text);
         box-shadow: var(--soft-shadow-out);
-        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        transition: transform var(--soft-speed) var(--soft-motion), box-shadow var(--soft-speed) var(--soft-motion), filter var(--soft-speed) var(--soft-motion), background var(--soft-speed) var(--soft-motion);
 
         &:hover:not(:disabled) {
             filter: brightness(1.05);
