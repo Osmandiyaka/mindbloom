@@ -75,28 +75,28 @@ export class ThemeService {
             name: 'Neumorphism',
             mode: 'light',
             colors: {
-                primary: '#8a9ff9',
-                primaryDark: '#6f84e0',
-                primaryLight: '#b7c4ff',
-                secondary: '#c1cffc',
-                accent: '#9f8ff7',
-                background: '#e9edf5',
-                surface: '#f5f7fb',
-                surfaceHover: '#eef1f9',
-                textPrimary: '#1f2748',
-                textSecondary: '#56627a',
-                textTertiary: '#8b96b1',
-                border: '#d2d9e6',
-                borderLight: '#e9eef7',
-                success: '#69c3aa',
-                warning: '#f3c178',
-                error: '#ef8f9c',
-                info: '#9db7ff'
+                primary: '#7b8cff',
+                primaryDark: '#5c6bd6',
+                primaryLight: '#a8b3ff',
+                secondary: '#cfd7ff',
+                accent: '#b58cff',
+                background: '#e7ecf5',
+                surface: '#f7f9fd',
+                surfaceHover: '#eef2f9',
+                textPrimary: '#1d2340',
+                textSecondary: '#55607a',
+                textTertiary: '#8b95ad',
+                border: '#d5ddeb',
+                borderLight: '#ecf1f9',
+                success: '#5ec6ad',
+                warning: '#f2bf77',
+                error: '#f0899c',
+                info: '#8fb6ff'
             },
             shadows: {
-                sm: '4px 4px 8px rgba(163, 177, 198, 0.45), -4px -4px 8px rgba(255, 255, 255, 0.8)',
-                md: '10px 10px 20px rgba(163, 177, 198, 0.4), -10px -10px 20px rgba(255, 255, 255, 0.85)',
-                lg: '20px 20px 40px rgba(163, 177, 198, 0.35), -20px -20px 40px rgba(255, 255, 255, 0.9)'
+                sm: '6px 6px 12px rgba(152, 168, 193, 0.35), -6px -6px 12px rgba(255, 255, 255, 0.9)',
+                md: '12px 12px 24px rgba(152, 168, 193, 0.32), -12px -12px 24px rgba(255, 255, 255, 0.92)',
+                lg: '24px 24px 48px rgba(152, 168, 193, 0.3), -24px -24px 48px rgba(255, 255, 255, 0.94)'
             }
         },
         {
@@ -133,28 +133,28 @@ export class ThemeService {
             name: 'ASP.NET Zero Dark',
             mode: 'dark',
             colors: {
-                primary: '#5b9bd5',
-                primaryDark: '#4a8ac4',
-                primaryLight: '#7db3e0',
-                secondary: '#a259ff',
-                accent: '#e74856',
-                background: '#1a1d29',
-                surface: '#252835',
-                surfaceHover: '#2d3142',
-                textPrimary: '#e8eaed',
-                textSecondary: '#b4b8c5',
-                textTertiary: '#8b91a7',
-                border: '#3a3f52',
-                borderLight: '#464c5e',
-                success: '#34c759',
-                warning: '#f7ad42',
-                error: '#e74856',
-                info: '#5b9bd5'
+                primary: '#7ab8ff',
+                primaryDark: '#4e8ddb',
+                primaryLight: '#9fd0ff',
+                secondary: '#8f7cff',
+                accent: '#ff7b95',
+                background: '#0f1320',
+                surface: '#151a29',
+                surfaceHover: '#1f2434',
+                textPrimary: '#e5e9f5',
+                textSecondary: '#b8c0d6',
+                textTertiary: '#8d95ad',
+                border: '#252c3d',
+                borderLight: '#32394c',
+                success: '#5bd7a6',
+                warning: '#f6c56a',
+                error: '#ff6b87',
+                info: '#7ab8ff'
             },
             shadows: {
-                sm: '0 1px 3px rgba(0, 0, 0, 0.5)',
-                md: '0 4px 8px rgba(0, 0, 0, 0.6)',
-                lg: '0 10px 20px rgba(0, 0, 0, 0.7)'
+                sm: '0 4px 10px rgba(0, 0, 0, 0.45)',
+                md: '0 8px 20px rgba(0, 0, 0, 0.55)',
+                lg: '0 16px 32px rgba(0, 0, 0, 0.6)'
             }
         }
     ];

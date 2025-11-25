@@ -1,0 +1,266 @@
+// Dark soft UI overrides for neumorphic-tinted surfaces
+:root[data-theme="dark"] {
+    --soft-bg: #12141b;
+    --soft-surface: #1e2130;
+    --soft-surface-alt: #2a2d3f;
+    --soft-surface-highlight: #2a2d3f;
+    --soft-border: #383a4a;
+    --soft-text: #e0e0e0;
+    --soft-text-muted: #c7c9d7;
+    --soft-shadow-out: -2px -2px 6px rgba(255, 255, 255, 0.05), 3px 3px 12px rgba(0, 0, 0, 0.45);
+    --soft-shadow-in: inset -1px -1px 2px rgba(255, 255, 255, 0.06), inset 2px 2px 4px rgba(0, 0, 0, 0.45);
+    --soft-shadow-focus: 0 0 0 3px rgba(var(--color-primary-rgb, 138, 180, 248), 0.45);
+    --soft-divider: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] {
+    color: var(--soft-text);
+
+    // Tinted canvas + scrollbars
+    body,
+    .app-layout,
+    .content-wrapper,
+    .main-content,
+    .app-shell,
+    .app-content {
+        background: var(--content-background, var(--soft-bg));
+        color: var(--soft-text);
+    }
+
+    ::-webkit-scrollbar-track {
+        background: color-mix(in srgb, var(--soft-bg) 70%, var(--soft-surface) 30%);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: color-mix(in srgb, var(--soft-border) 70%, var(--color-primary, #8ab4f8) 30%);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--soft-surface) 70%, transparent);
+    }
+
+    // Core surfaces
+    .card,
+    .hero-card,
+    .panel,
+    .data-table,
+    .table-wrapper,
+    .table-footer,
+    .table-toolbar,
+    .wizard-form,
+    .wizard-content,
+    .main-form-area,
+    .photo-upload-card,
+    .photo-upload-section,
+    .guardian-card,
+    .review-section,
+    .list-card,
+    .tile-card,
+    .setup-card,
+    .summary-card,
+    .table-card,
+    .modal-dialog,
+    .modal-content {
+        background: var(--soft-surface);
+        border: 1px solid var(--soft-border);
+        color: var(--soft-text);
+        box-shadow: var(--soft-shadow-out);
+    }
+
+    .hero-card {
+        background: linear-gradient(145deg,
+                color-mix(in srgb, var(--soft-surface) 85%, var(--color-primary, #8ab4f8) 15%),
+                color-mix(in srgb, var(--soft-surface-alt) 85%, var(--color-primary-dark, #5c6bd6) 15%));
+        border: 1px solid var(--soft-border);
+        box-shadow: -4px -4px 10px rgba(255, 255, 255, 0.05), 6px 6px 16px rgba(0, 0, 0, 0.45);
+
+        .hero-title,
+        .hero-subtitle {
+            color: var(--soft-text);
+        }
+    }
+
+    // Form controls
+    input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+    select,
+    textarea,
+    .form-control,
+    .search-input .form-control {
+        background: var(--soft-surface-alt);
+        border: 1px solid var(--soft-border);
+        color: var(--soft-text);
+        box-shadow: var(--soft-shadow-in);
+
+        &::placeholder {
+            color: var(--soft-text-muted);
+        }
+
+        &:hover {
+            box-shadow: var(--soft-shadow-in), 0 0 0 1px rgba(var(--color-primary-rgb, 138, 180, 248), 0.12);
+        }
+
+        &:focus {
+            outline: none;
+            border-color: var(--color-primary, #8ab4f8);
+            box-shadow: var(--soft-shadow-in), var(--soft-shadow-focus);
+            background: color-mix(in srgb, var(--soft-surface-alt) 95%, var(--color-primary, #8ab4f8) 5%);
+        }
+    }
+
+    label {
+        color: var(--soft-text-muted);
+    }
+
+    .required {
+        color: var(--color-error, #e58b8b);
+    }
+
+    .form-description,
+    .wizard-subtitle,
+    .step-status,
+    .form-hint {
+        color: var(--soft-text-muted);
+    }
+
+    // Buttons
+    .btn,
+    button {
+        border-radius: 10px;
+        border: 1px solid var(--soft-border);
+        background: linear-gradient(145deg, var(--soft-surface-alt), var(--soft-surface));
+        color: var(--soft-text);
+        box-shadow: var(--soft-shadow-out);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+
+        &:hover:not(:disabled) {
+            filter: brightness(1.05);
+            box-shadow: -3px -3px 8px rgba(255, 255, 255, 0.06), 4px 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        &:active:not(:disabled) {
+            box-shadow: var(--soft-shadow-in);
+            transform: translateY(0);
+        }
+
+        &:disabled {
+            opacity: 0.6;
+        }
+    }
+
+    .btn-primary,
+    button.btn-primary {
+        background: linear-gradient(145deg, var(--color-primary-light, #a5c7ff), var(--color-primary, #8ab4f8));
+        color: #0f1320;
+        border: none;
+        box-shadow: 0 10px 24px rgba(var(--color-primary-rgb, 138, 180, 248), 0.35), var(--soft-shadow-out);
+
+        &:hover:not(:disabled) {
+            filter: brightness(1.08);
+        }
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--soft-text);
+        box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.1);
+
+        &:hover:not(:disabled) {
+            color: var(--color-primary);
+            box-shadow: inset 0 0 0 2px var(--color-primary);
+        }
+    }
+
+    // Tables
+    table,
+    .table {
+        background: var(--soft-surface);
+        color: var(--soft-text);
+    }
+
+    .data-table table thead,
+    .table thead {
+        background: color-mix(in srgb, var(--soft-surface) 88%, #ffffff 12%);
+
+        th {
+            color: var(--soft-text);
+            border-bottom: 1px solid var(--soft-border);
+        }
+    }
+
+    .data-table table tbody tr,
+    .table tbody tr {
+        background: var(--soft-surface);
+        border-bottom: 1px solid var(--soft-border);
+
+        &:nth-child(even) {
+            background: color-mix(in srgb, var(--soft-surface) 94%, #ffffff 6%);
+        }
+
+        &:hover {
+            background: color-mix(in srgb, var(--soft-surface) 80%, var(--color-primary, #8ab4f8) 20%);
+            box-shadow: inset 0 0 0 1px rgba(var(--color-primary-rgb, 138, 180, 248), 0.35);
+        }
+    }
+
+    .table-footer {
+        background: var(--soft-surface);
+        border-top: 1px solid var(--soft-border);
+    }
+
+    // Dropdowns & menus
+    .dropdown-menu,
+    .select-menu,
+    .cdk-overlay-pane .menu-panel,
+    .cdk-overlay-pane .select-panel {
+        background: var(--soft-surface);
+        border: 1px solid var(--soft-border);
+        box-shadow: -4px -4px 8px rgba(255, 255, 255, 0.05), 8px 8px 16px rgba(0, 0, 0, 0.45);
+        color: var(--soft-text);
+
+        li,
+        .menu-item {
+            color: var(--soft-text);
+
+            &:hover {
+                background: color-mix(in srgb, var(--soft-surface-alt) 85%, var(--color-primary) 15%);
+            }
+
+            &.selected {
+                background: rgba(var(--color-primary-rgb, 138, 180, 248), 0.2);
+                color: var(--color-primary);
+            }
+        }
+    }
+
+    // Checkboxes & radios
+    input[type="checkbox"],
+    input[type="radio"] {
+        accent-color: var(--color-primary, #8ab4f8);
+        background: var(--soft-surface-alt);
+        border: 1px solid var(--soft-border);
+        box-shadow: var(--soft-shadow-in);
+    }
+
+    // Tree navigation
+    .tree-node,
+    .permission-tree .node {
+        background: transparent;
+        color: var(--soft-text);
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
+
+        &:hover {
+            background: rgba(var(--color-primary-rgb, 138, 180, 248), 0.12);
+        }
+
+        &.selected {
+            background: rgba(var(--color-primary-rgb, 138, 180, 248), 0.2);
+            color: var(--color-primary);
+            border-left: 3px solid var(--color-primary);
+        }
+    }
+
+    // Modals / overlays
+    .modal-backdrop,
+    .cdk-overlay-backdrop {
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(6px);
+    }
+}

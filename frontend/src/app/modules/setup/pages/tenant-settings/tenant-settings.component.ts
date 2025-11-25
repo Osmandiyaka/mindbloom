@@ -187,24 +187,28 @@ import { RouterModule } from '@angular/router';
     </div>
   `,
     styles: [`
-    .tenant-settings { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .tenant-settings { max-width: 1200px; margin: 0 auto; padding: 2rem; background: var(--content-background, var(--color-background)); color: var(--color-text-primary); }
     .page-header { margin-bottom: 1rem; }
     .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-tertiary); font-size: 12px; margin: 0 0 4px 0; }
     h1 { margin: 0; }
     .subtitle { margin: 4px 0 0 0; color: var(--color-text-secondary); }
-    .tabs { display: flex; gap: 0.5rem; margin: 1rem 0 1.5rem 0; }
-    .tabs button { padding: 0.65rem 1rem; border-radius: 10px; border: 1px solid var(--color-border); background: var(--color-surface); cursor: pointer; }
-    .tabs button.active { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: #fff; border: none; }
-    .actions { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
-    .btn { padding: 0.65rem 1.25rem; border-radius: 10px; border: 1px solid var(--color-border); cursor: pointer; }
+    .tabs { display: flex; gap: 0.5rem; margin: 1rem 0 1.5rem 0; flex-wrap: wrap; }
+    .tabs button { padding: 0.65rem 1rem; border-radius: 12px; border: 1px solid var(--color-border); background: var(--color-surface); cursor: pointer; transition: all 0.2s ease; color: var(--color-text-primary); box-shadow: var(--shadow-sm); }
+    .tabs button:hover { border-color: var(--color-border-light); box-shadow: var(--shadow-md); }
+    .tabs button.active { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: #fff; border: none; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb, 123, 140, 255), 0.3); }
+    .actions { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .btn { padding: 0.65rem 1.25rem; border-radius: 10px; border: 1px solid var(--color-border); cursor: pointer; background: var(--color-surface); color: var(--color-text-primary); transition: all 0.2s ease; box-shadow: var(--shadow-sm); }
     .btn.ghost { background: var(--color-surface); }
     .btn.primary { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: #fff; border: none; box-shadow: var(--shadow-md); }
+    .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .btn:active { transform: translateY(0); }
     .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap: 1.5rem; }
-    .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
+    .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: var(--shadow-md); display: flex; flex-direction: column; }
     .card-header { padding: 1.25rem 1.25rem 0.5rem 1.25rem; }
     .card-body { padding: 0 1.25rem 1.25rem 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
     .form-grid label { display: flex; flex-direction: column; gap: 0.35rem; color: var(--color-text-secondary); }
-    input, select { padding: 0.65rem 0.75rem; border-radius: 10px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-primary); }
+    input, select { padding: 0.65rem 0.75rem; border-radius: 10px; border: 1px solid var(--color-border); background: var(--color-background); color: var(--color-text-primary); transition: all 0.2s ease; }
+    input:focus, select:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb,123,140,255),0.18); background: var(--color-surface); }
     .color-row { display: grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap: 0.75rem; }
     .logo-preview { display: flex; flex-direction: column; gap: 0.5rem; }
     .logo-preview img { max-height: 80px; max-width: 200px; object-fit: contain; border: 1px dashed var(--color-border); padding: 6px; border-radius: 8px; }

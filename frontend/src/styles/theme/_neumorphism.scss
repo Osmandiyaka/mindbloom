@@ -1,14 +1,16 @@
 :root[data-theme-id="neumorphism-light"] {
-    --neumo-background: #e9edf5;
-    --neumo-surface: #f5f7fb;
+    --neumo-background: #e7ecf5;
+    --neumo-surface: #f7f9fd;
     --neumo-highlight: rgba(255, 255, 255, 0.92);
     --neumo-shadow-color: rgba(163, 177, 198, 0.35);
-    --neumo-shadow-outer: 14px 14px 28px var(--neumo-shadow-color), -14px -14px 28px var(--neumo-highlight);
-    --neumo-shadow-soft: 10px 10px 20px var(--neumo-shadow-color), -10px -10px 20px var(--neumo-highlight);
-    --neumo-shadow-pill: 8px 8px 16px rgba(163, 177, 198, 0.32), -8px -8px 16px rgba(255, 255, 255, 0.92);
-    --neumo-shadow-inset: inset 7px 7px 14px rgba(163, 177, 198, 0.38), inset -7px -7px 14px rgba(255, 255, 255, 0.94);
-    --neumo-shadow-inset-strong: inset 9px 9px 18px rgba(163, 177, 198, 0.42), inset -9px -9px 18px rgba(255, 255, 255, 0.9);
-    --neumo-glow: 0 12px 32px rgba(var(--color-primary-rgb, 138, 159, 249), 0.32);
+    --neumo-shadow-outer: 16px 16px 32px var(--neumo-shadow-color), -16px -16px 32px var(--neumo-highlight);
+    --neumo-shadow-soft: 12px 12px 24px var(--neumo-shadow-color), -12px -12px 24px var(--neumo-highlight);
+    --neumo-shadow-pill: 10px 10px 20px rgba(163, 177, 198, 0.32), -10px -10px 20px rgba(255, 255, 255, 0.92);
+    --neumo-shadow-inset: inset 8px 8px 16px rgba(163, 177, 198, 0.38), inset -8px -8px 16px rgba(255, 255, 255, 0.94);
+    --neumo-shadow-inset-strong: inset 10px 10px 20px rgba(163, 177, 198, 0.42), inset -10px -10px 20px rgba(255, 255, 255, 0.9);
+    --neumo-glow: 0 14px 34px rgba(var(--color-primary-rgb, 138, 159, 249), 0.32);
+    --motion-ease: cubic-bezier(0.4, 0.14, 0.3, 1);
+    --motion-duration: 220ms;
 }
 
 [data-theme-id="neumorphism-light"] body {
@@ -119,6 +121,12 @@
     border: 1px solid var(--color-border-light);
     box-shadow: var(--neumo-shadow-outer);
     border-radius: 18px;
+    transition: background var(--motion-duration) var(--motion-ease), box-shadow var(--motion-duration) var(--motion-ease), transform var(--motion-duration) var(--motion-ease);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--neumo-shadow-outer), 0 12px 30px rgba(123, 140, 255, 0.15);
+    }
 }
 
 [data-theme-id="neumorphism-light"] .pill-surface {
@@ -203,10 +211,12 @@
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(232, 238, 248, 0.9));
     color: var(--color-text-primary);
     box-shadow: var(--neumo-shadow-pill);
+    transition: background var(--motion-duration) var(--motion-ease), box-shadow var(--motion-duration) var(--motion-ease), transform var(--motion-duration) var(--motion-ease);
 
     &:hover:not(:disabled) {
         box-shadow: var(--neumo-shadow-outer);
         background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(232, 238, 248, 0.95));
+        transform: translateY(-1px);
     }
 
     &:active:not(:disabled) {

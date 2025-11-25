@@ -28,6 +28,7 @@ import { environment } from '../environments/environment';
             grid-template-columns: 260px 1fr;
             height: 100vh;
             transition: filter 0.3s ease, opacity 0.3s ease;
+            background: var(--content-background, var(--color-background, #f7f9fc));
         }
 
         .app-shell.dimmed {
@@ -36,8 +37,9 @@ import { environment } from '../environments/environment';
         }
 
         .app-content {
-            background: var(--color-background, #f7f9fc);
+            background: var(--content-background, var(--color-background, #f7f9fc));
             overflow: auto;
+            transition: background 0.4s ease;
         }
     `]
 })
