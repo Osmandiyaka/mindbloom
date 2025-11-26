@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { RecordPaymentDto } from './dto/record-payment.dto';
+import { AccountingService } from '../accounting/accounting.service';
 
 @Injectable()
 export class InvoicesService {
     constructor(
         @InjectModel('Invoice') private invoiceModel: Model<any>,
         @InjectModel('Payment') private paymentModel: Model<any>,
+        private accounting: AccountingService,
     ) { }
 
     async findAll(filters: any = {}) {
@@ -52,7 +54,20 @@ export class InvoicesService {
             status: 'issued',
             paidAmount: 0,
         });
-        return created.save();
+        const saved = await created.save();
+        await this.accounting.ensureSeedAccounts();
+        await this.accounting.postJournal({
+            refNo: saved.reference || saved._id?.toString(),
+            date: saved.issuedDate || saved.createdAt || new Date(),
+            memo: `Invoice ${saved.studentName}`,
+            source: 'fees.invoice',
+            sourceId: saved._id?.toString(),
+            lines: [
+                { accountCode: '1100', debit: saved.amount, credit: 0, entityType: 'student', entityId: saved.studentId },
+                { accountCode: '4000', debit: 0, credit: saved.amount, entityType: 'student', entityId: saved.studentId },
+            ],
+        });
+        return saved;
     }
 
     async recordPayment(id: string, dto: RecordPaymentDto) {
@@ -78,6 +93,18 @@ export class InvoicesService {
         invoice.lastPaymentAt = payment.paidAt;
         invoice.status = newPaid >= invoice.amount ? 'paid' : invoice.status === 'overdue' ? 'overdue' : 'issued';
         await invoice.save();
+
+        await this.accounting.postJournal({
+            refNo: payment.reference || payment._id?.toString(),
+            date: payment.paidAt,
+            memo: `Payment ${invoice.studentName}`,
+            source: 'fees.payment',
+            sourceId: payment._id?.toString(),
+            lines: [
+                { accountCode: '1000', debit: dto.amount, credit: 0, entityType: 'student', entityId: invoice.studentId },
+                { accountCode: '1100', debit: 0, credit: dto.amount, entityType: 'student', entityId: invoice.studentId },
+            ],
+        });
 
         return {
             invoice,

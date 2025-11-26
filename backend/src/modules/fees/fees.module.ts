@@ -7,6 +7,7 @@ import { InvoicesService } from './invoices.service';
 import { FeePlanSchema } from '../../infrastructure/persistence/mongoose/schemas/fee-plan.schema';
 import { InvoiceSchema } from '../../infrastructure/persistence/mongoose/schemas/invoice.schema';
 import { PaymentSchema } from '../../infrastructure/persistence/mongoose/schemas/payment.schema';
+import { AccountingModule } from '../accounting/accounting.module';
 
 @Module({
     imports: [
@@ -15,6 +16,7 @@ import { PaymentSchema } from '../../infrastructure/persistence/mongoose/schemas
             { name: 'Invoice', schema: InvoiceSchema },
             { name: 'Payment', schema: PaymentSchema },
         ]),
+        AccountingModule,
     ],
     controllers: [FeePlansController, InvoicesController],
     providers: [FeePlansService, InvoicesService],

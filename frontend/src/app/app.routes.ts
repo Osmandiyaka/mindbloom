@@ -36,6 +36,10 @@ export const routes: Routes = [
                 loadChildren: () => import('./modules/fees/fees.routes').then(m => m.FEES_ROUTES)
             },
             {
+                path: 'accounting',
+                loadChildren: () => import('./modules/accounting/accounting.routes').then(m => m.ACCOUNTING_ROUTES)
+            },
+            {
                 path: 'finance',
                 loadChildren: () => import('./modules/finance/finance.routes').then(m => m.FINANCE_ROUTES)
             },

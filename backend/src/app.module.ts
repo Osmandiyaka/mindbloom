@@ -6,6 +6,7 @@ import { StudentsModule } from './modules/students/students.module';
 import { AcademicsModule } from './modules/academics/academics.module';
 import { AttendanceModule } from './modules/attendance/attendance.module';
 import { FeesModule } from './modules/fees/fees.module';
+import { AccountingModule } from './modules/accounting/accounting.module';
 import { FinanceModule } from './modules/finance/finance.module';
 import { HrModule } from './modules/hr/hr.module';
 import { PayrollModule } from './modules/payroll/payroll.module';
@@ -39,6 +40,7 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
         AcademicsModule,
         AttendanceModule,
         FeesModule,
+        AccountingModule,
         FinanceModule,
         HrModule,
         PayrollModule,

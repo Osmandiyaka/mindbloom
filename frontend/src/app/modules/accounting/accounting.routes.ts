@@ -1,0 +1,24 @@
+import { Routes } from '@angular/router';
+
+export const ACCOUNTING_ROUTES: Routes = [
+  {
+    path: '',
+    loadComponent: () => import('./pages/accounting-overview/accounting-overview.component').then(m => m.AccountingOverviewComponent)
+  },
+  {
+    path: 'accounts',
+    loadComponent: () => import('./pages/accounts/accounts.component').then(m => m.AccountsComponent)
+  },
+  {
+    path: 'journals',
+    loadComponent: () => import('./pages/journals/journals.component').then(m => m.JournalsComponent)
+  },
+  {
+    path: 'trial-balance',
+    loadComponent: () => import('./pages/trial-balance/trial-balance.component').then(m => m.TrialBalanceComponent)
+  },
+  {
+    path: 'periods',
+    loadComponent: () => import('./pages/periods/periods.component').then(m => m.PeriodsComponent)
+  }
+];

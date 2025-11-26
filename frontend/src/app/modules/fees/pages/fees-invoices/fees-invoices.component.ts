@@ -4,6 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { FeesService } from '../../../../core/services/fees.service';
 import { StudentService } from '../../../../core/services/student.service';
 import { Student } from '../../../../core/models/student.model';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
+import { Payment } from '../../../../core/models/fees.model';
 
 @Component({
   selector: 'app-fees-invoices',
@@ -92,6 +95,7 @@ import { Student } from '../../../../core/models/student.model';
               [class.overdue]="inv.status === 'overdue'">{{ inv.status | titlecase }}</span></span>
           <span class="actions-cell">
             <button class="btn-sm ghost" (click)="openPayment(inv)" [disabled]="inv.status === 'paid'">Record Payment</button>
+            <button class="btn-sm ghost" (click)="openPayments(inv)">History</button>
           </span>
         </div>
       </div>
@@ -124,6 +128,33 @@ import { Student } from '../../../../core/models/student.model';
               <button class="btn primary" type="submit">Save Payment</button>
             </div>
           </form>
+        </div>
+      </div>
+
+      <div class="modal-backdrop" *ngIf="paymentsModal">
+        <div class="modal">
+          <div class="modal-header">
+            <h3>Payment History</h3>
+            <button class="chip" type="button" (click)="closePayments()">✕</button>
+          </div>
+          <div class="muted">Invoice {{ paymentsModal?.studentName }} — {{ paymentsModal?.amount | currency:paymentsModal?.currency || 'USD' }}</div>
+          <div class="table small-table">
+            <div class="table-head">
+              <span>Date</span>
+              <span>Amount</span>
+              <span>Method</span>
+              <span>Ref</span>
+            </div>
+            <div class="table-row" *ngFor="let p of payments">
+              <span>{{ p.paidAt | date:'medium' }}</span>
+              <span>{{ p.amount | currency:p.currency || 'USD' }}</span>
+              <span>{{ p.method | titlecase }}</span>
+              <span>{{ p.reference || '—' }}</span>
+            </div>
+            <div class="table-row" *ngIf="!payments.length">
+              <span class="muted" style="grid-column:1/5">No payments yet</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -180,8 +211,10 @@ export class FeesInvoicesComponent implements OnInit {
   };
   paymentModal: any = null;
   payment = { amount: 0, method: 'cash', reference: '' };
+  paymentsModal: any = null;
+  payments: Payment[] = [];
 
-  constructor(public fees: FeesService, private studentService: StudentService) {}
+  constructor(public fees: FeesService, private studentService: StudentService, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.studentService.getStudents({}).subscribe(studs => this.students = studs);
@@ -228,6 +261,20 @@ export class FeesInvoicesComponent implements OnInit {
     });
     this.closePayment();
   }
+
+  openPayments(inv: any) {
+    this.paymentsModal = inv;
+    this.payments = [];
+    this.http.get<any[]>(`${environment.apiUrl}/fees/invoices/${inv.id}/payments`).subscribe((res: any[]) => {
+      this.payments = res.map((p: any) => ({
+        ...p,
+        paidAt: p.paidAt ? new Date(p.paidAt) : undefined,
+        id: p.id || p._id,
+      }));
+    });
+  }
+
+  closePayments() { this.paymentsModal = null; }
 
   setStatus(status: string) {
     this.statusFilter = status;
