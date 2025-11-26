@@ -25,6 +25,9 @@ export const SchoolSettingsSchema = new Schema(
             type: { type: String, default: 'Percentage' },
             passThreshold: { type: Number, default: 40 },
         },
+        departments: [{ name: String, code: String }],
+        grades: [{ name: String, code: String, level: String }],
+        subjects: [{ name: String, code: String }],
     },
     { timestamps: true },
 );

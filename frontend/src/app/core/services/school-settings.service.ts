@@ -20,6 +20,9 @@ export interface SchoolSettings {
     website?: string;
     logoUrl?: string;
     gradingScheme?: { type?: string; passThreshold?: number };
+    departments?: { name?: string; code?: string }[];
+    grades?: { name?: string; code?: string; level?: string }[];
+    subjects?: { name?: string; code?: string }[];
 }
 
 @Injectable({ providedIn: 'root' })

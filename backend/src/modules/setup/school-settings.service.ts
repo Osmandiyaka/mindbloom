@@ -13,12 +13,13 @@ export class SchoolSettingsService {
     }
 
     async upsertSettings(dto: UpdateSchoolSettingsDto) {
-        const existing = await this.settingsModel.findOne();
-        if (existing) {
-            Object.assign(existing, dto);
-            return existing.save();
-        }
-        const created = new this.settingsModel(dto);
-        return created.save();
+        return this.settingsModel
+            .findOneAndUpdate(
+                {},
+                { $set: dto },
+                { new: true, upsert: true, setDefaultsOnInsert: true },
+            )
+            .lean()
+            .exec();
     }
 }
