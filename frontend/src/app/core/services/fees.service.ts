@@ -39,6 +39,14 @@ export class FeesService {
         });
     }
 
+    createPlan(dto: Partial<FeePlan> & { name: string; amount: number; frequency: FeePlan['frequency'] }) {
+        return this.http.post(`${environment.apiUrl}/fees/plans`, dto).subscribe(() => this.refreshPlans());
+    }
+
+    deletePlan(id: string) {
+        return this.http.delete(`${environment.apiUrl}/fees/plans/${id}`).subscribe(() => this.refreshPlans());
+    }
+
     refreshInvoices(filters?: { status?: string }) {
         let params = new HttpParams();
         if (filters?.status) params = params.set('status', filters.status);
