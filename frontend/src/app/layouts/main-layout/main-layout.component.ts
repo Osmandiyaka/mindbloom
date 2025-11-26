@@ -3,16 +3,18 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 import { GlobalToolbarComponent } from '../../shared/components/global-toolbar/global-toolbar.component';
+import { TaskStickyComponent } from '../../shared/components/task-sticky/task-sticky.component';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, SidebarComponent, GlobalToolbarComponent],
+  imports: [CommonModule, RouterModule, SidebarComponent, GlobalToolbarComponent, TaskStickyComponent],
   template: `
     <div class="app-layout">
       <app-sidebar />
       <div class="content-wrapper">
         <app-global-toolbar />
+        <app-task-sticky />
         <main class="main-content">
           <router-outlet />
         </main>
