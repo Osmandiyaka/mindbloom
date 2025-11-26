@@ -30,12 +30,12 @@ import { HeroComponent } from '../../../../shared/components/hero/hero.component
           <span class="card-link">Manage Users →</span>
         </a>
 
-        <div class="setup-card disabled">
+        <a routerLink="/setup/school-settings" class="setup-card">
           <div class="card-icon">⚙️</div>
           <h3>School Settings</h3>
           <p>Configure school information, academic year, and general settings.</p>
-          <span class="card-link">Coming Soon</span>
-        </div>
+          <span class="card-link">Configure →</span>
+        </a>
 
         <div class="setup-card disabled">
           <div class="card-icon">🔌</div>

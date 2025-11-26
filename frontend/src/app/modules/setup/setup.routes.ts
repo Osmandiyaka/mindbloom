@@ -34,6 +34,10 @@ export const SETUP_ROUTES: Routes = [
         loadComponent: () => import('./pages/marketplace/marketplace.component').then(m => m.MarketplaceComponent)
     },
     {
+        path: 'school-settings',
+        loadComponent: () => import('./pages/school-settings/school-settings.component').then(m => m.SchoolSettingsComponent)
+    },
+    {
         path: 'marketplace/:id',
         loadComponent: () => import('./pages/plugin-detail/plugin-detail.component').then(m => m.PluginDetailComponent)
     },
