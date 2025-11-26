@@ -1,4 +1,4 @@
-export type ApplicationStatus = 'inquiry' | 'submitted' | 'in_review' | 'offer' | 'waitlist' | 'rejected' | 'enrolled';
+export type ApplicationStatus = 'review' | 'rejected' | 'enrolled';
 
 export interface AdmissionApplication {
     id: string;

@@ -8,8 +8,8 @@ export const AdmissionSchema = new Schema(
         phone: { type: String, required: true },
         status: {
             type: String,
-            enum: ['inquiry', 'submitted', 'in_review', 'offer', 'waitlist', 'rejected', 'enrolled'],
-            default: 'submitted',
+            enum: ['review', 'rejected', 'enrolled'],
+            default: 'review',
         },
         notes: { type: String },
         documents: [{ name: String, type: String, url: String }],

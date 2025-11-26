@@ -49,8 +49,7 @@ import { FeesService } from '../../../../core/services/fees.service';
               </div>
               <p class="muted">{{ app.email }}</p>
               <div class="app-actions">
-                <button class="btn-sm ghost" (click)="updateStatus(app, 'in_review')">Review</button>
-                <button class="btn-sm success" (click)="updateStatus(app, 'offer')">Offer</button>
+                <button class="btn-sm ghost" (click)="updateStatus(app, 'review')">Review</button>
                 <button class="btn-sm danger" (click)="updateStatus(app, 'rejected')">Reject</button>
                 <button class="btn-sm" (click)="enroll(app)">Enroll</button>
               </div>
@@ -117,11 +116,7 @@ export class AdmissionsDashboardComponent {
   stages = computed(() => {
     const list = this.admissions.applications();
     const labels: { label: string; key: ApplicationStatus }[] = [
-      { label: 'Inquiry', key: 'inquiry' },
-      { label: 'Submitted', key: 'submitted' },
-      { label: 'In Review', key: 'in_review' },
-      { label: 'Offer', key: 'offer' },
-      { label: 'Waitlist', key: 'waitlist' },
+      { label: 'Review', key: 'review' },
       { label: 'Rejected', key: 'rejected' },
       { label: 'Enrolled', key: 'enrolled' },
     ];
