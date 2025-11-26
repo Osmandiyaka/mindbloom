@@ -1,15 +1,37 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { StudentStubSchema } from '../../infrastructure/persistence/mongoose/schemas/student-stub.schema';
-import { StudentsController } from './students.controller';
-import { StudentsService } from './students.service';
+import { STUDENT_REPOSITORY } from '../../domain/student/ports/student.repository.interface';
+import { MongooseStudentRepository } from '../../infrastructure/persistence/mongoose/repositories/mongoose-student.repository';
+import { StudentSchema } from '../../infrastructure/persistence/mongoose/schemas/student.schema';
+import {
+    CreateStudentUseCase,
+    GetAllStudentsUseCase,
+    GetStudentByIdUseCase,
+    UpdateStudentUseCase,
+    DeleteStudentUseCase,
+} from '../../application/student/use-cases';
+import { AddGuardianToStudentUseCase } from '../../application/student/use-cases/add-guardian-to-student.use-case';
+import { UpdateStudentEnrollmentUseCase } from '../../application/student/use-cases/update-student-enrollment.use-case';
+import { StudentsController } from '../../adapters/http/students/students.controller';
 
 @Module({
     imports: [
-        MongooseModule.forFeature([{ name: 'StudentStub', schema: StudentStubSchema }]),
+        MongooseModule.forFeature([{ name: 'Student', schema: StudentSchema }]),
     ],
     controllers: [StudentsController],
-    providers: [StudentsService],
-    exports: [StudentsService],
+    providers: [
+        {
+            provide: STUDENT_REPOSITORY,
+            useClass: MongooseStudentRepository,
+        },
+        CreateStudentUseCase,
+        GetAllStudentsUseCase,
+        GetStudentByIdUseCase,
+        UpdateStudentUseCase,
+        DeleteStudentUseCase,
+        AddGuardianToStudentUseCase,
+        UpdateStudentEnrollmentUseCase,
+    ],
+    exports: [STUDENT_REPOSITORY],
 })
 export class StudentsModule { }

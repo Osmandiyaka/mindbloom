@@ -4,7 +4,6 @@ import { RouterModule } from '@angular/router';
 import { AdmissionsService } from '../../../../core/services/admissions.service';
 import { AdmissionApplication, ApplicationStatus } from '../../../../core/models/admission.model';
 import { FeesService } from '../../../../core/services/fees.service';
-import { StudentsService } from '../../../../core/services/students.service';
 
 @Component({
   selector: 'app-admissions-dashboard',
@@ -22,6 +21,16 @@ import { StudentsService } from '../../../../core/services/students.service';
           <a routerLink="/admissions/apply" class="btn btn-primary">New Application</a>
         </div>
       </header>
+
+      <section class="info-banner">
+        <div>
+          <h3>How enrollment works</h3>
+          <p class="muted">
+            Clicking <strong>Enroll</strong> will create a student record stub, pick your default fee plan ({{ defaultPlanName || 'no plan configured' }}),
+            and generate an invoice due in 7 days. Recent invoices are listed on the right.
+          </p>
+        </div>
+      </section>
 
       <div class="pipeline">
         <div *ngFor="let stage of stages()" class="stage">
@@ -71,6 +80,8 @@ import { StudentsService } from '../../../../core/services/students.service';
     .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-tertiary); font-weight: 700; margin:0 0 0.25rem; }
     h1 { margin:0 0 0.35rem; color: var(--color-text-primary); }
     .sub { margin:0; color: var(--color-text-secondary); }
+    .info-banner { grid-column:1 / -1; background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem 1.25rem; box-shadow: var(--shadow-sm); margin-bottom:0.75rem; }
+    .info-banner h3 { margin:0 0 0.35rem; color: var(--color-text-primary); }
     .actions { display:flex; gap:0.75rem; }
     .btn { border:none; border-radius:10px; padding:0.75rem 1.25rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
     .btn-primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
@@ -124,10 +135,13 @@ export class AdmissionsDashboardComponent {
     return this.fees.invoices().slice(0, 5);
   }
 
+  get defaultPlanName() {
+    return this.fees.plans()[0]?.name;
+  }
+
   constructor(
     private admissions: AdmissionsService,
-    private fees: FeesService,
-    private students: StudentsService
+    private fees: FeesService
   ) {}
 
   updateStatus(app: AdmissionApplication, status: ApplicationStatus) {
@@ -135,7 +149,6 @@ export class AdmissionsDashboardComponent {
   }
 
   enroll(app: AdmissionApplication) {
-    this.students.createFromAdmission({ name: app.applicantName, grade: app.gradeApplying, email: app.email });
     const planId = this.fees.defaultPlanId();
     if (planId) {
       this.fees.addInvoice({
