@@ -12,5 +12,9 @@ export const FEES_ROUTES: Routes = [
     {
         path: 'plans',
         loadComponent: () => import('./pages/fee-plans/fee-plans.component').then(m => m.FeePlansComponent)
+    },
+    {
+        path: 'bulk-invoices',
+        loadComponent: () => import('./pages/bulk-invoices/bulk-invoices.component').then(m => m.BulkInvoicesComponent)
     }
 ];

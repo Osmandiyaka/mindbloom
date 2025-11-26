@@ -15,18 +15,22 @@ export class FeesService {
         this.refreshInvoices();
     }
 
+    createInvoice$(invoice: Partial<Invoice> & { studentName: string; planId: string; dueDate: Date; amount: number; studentId?: string }) {
+        const payload: any = {
+            ...invoice,
+            dueDate: invoice.dueDate.toISOString(),
+        };
+        if (!payload.studentId) delete payload.studentId;
+        return this.http.post(`${environment.apiUrl}/fees/invoices`, payload);
+    }
+
     recordPayment(id: string, payment: Omit<Payment, 'invoiceId'>) {
         this.http.patch(`${environment.apiUrl}/fees/invoices/${id}/pay`, payment)
             .subscribe(() => this.refreshInvoices());
     }
 
     addInvoice(invoice: Partial<Invoice> & { studentName: string; planId: string; dueDate: Date; amount: number; studentId?: string }) {
-        const payload: any = {
-            ...invoice,
-            dueDate: invoice.dueDate.toISOString(),
-        };
-        if (!payload.studentId) delete payload.studentId;
-        this.http.post(`${environment.apiUrl}/fees/invoices`, payload).subscribe(() => this.refreshInvoices());
+        this.createInvoice$(invoice).subscribe(() => this.refreshInvoices());
     }
 
     defaultPlanId(): string | undefined {
