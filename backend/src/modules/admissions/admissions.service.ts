@@ -34,9 +34,16 @@ export class AdmissionsService {
     }
 
     private async ensureStudentAndTask(admission: any) {
-        const existing = await this.studentModel.findOne({ admissionId: admission.id || admission._id });
+        const admissionKey = admission.id || admission._id;
+        const existing = await this.studentModel.findOne({
+            $or: [
+                { admissionId: admissionKey },
+                admission.email ? { email: admission.email } : null,
+            ].filter(Boolean)
+        });
+
         const student = existing || await this.studentModel.create({
-            admissionId: admission.id || admission._id,
+            admissionId: admissionKey,
             firstName: admission.applicantName,
             enrollment: { class: admission.gradeApplying },
             email: admission.email,
