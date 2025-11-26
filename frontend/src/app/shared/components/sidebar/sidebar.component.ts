@@ -109,7 +109,8 @@ export class SidebarComponent implements OnInit {
         { label: 'Marketplace', path: '/setup/marketplace', icon: '🛒' },
         { label: 'Plugins', path: '/plugins', icon: '🔌' },
         { label: 'Tenant Settings', path: '/setup/tenant-settings', icon: '🏫' },
-        { label: 'Tasks', path: '/tasks', icon: '✅' }
+        { label: 'Tasks', path: '/tasks', icon: '✅' },
+        { label: 'HR', path: '/hr', icon: '👥' }
       ]
     }
   ];
