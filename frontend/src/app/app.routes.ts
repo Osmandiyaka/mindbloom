@@ -64,6 +64,10 @@ export const routes: Routes = [
                 loadChildren: () => import('./modules/roles/roles.routes').then(m => m.rolesRoutes)
             },
             {
+                path: 'tasks',
+                loadChildren: () => import('./modules/tasks/tasks.routes').then(m => m.TASKS_ROUTES)
+            },
+            {
                 path: 'setup',
                 loadChildren: () => import('./modules/setup/setup.routes').then(m => m.SETUP_ROUTES)
             },
