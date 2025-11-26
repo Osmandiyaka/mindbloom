@@ -15,36 +15,36 @@ import { Student } from '../../../../core/models/student.model';
       <header class="page-header">
         <div>
           <p class="eyebrow">Fees</p>
-          <h1>Bulk Invoice</h1>
+          <h1>📥 Bulk Invoice</h1>
           <p class="sub">Create invoices for multiple students by class/grade.</p>
         </div>
       </header>
 
       <div class="filters card">
         <div class="filter">
-          <label>Class / Grade</label>
+          <label>🎓 Class / Grade</label>
           <select [(ngModel)]="filterClass" (change)="loadStudents()">
             <option value="">All</option>
             <option *ngFor="let cls of classOptions" [value]="cls">{{ cls }}</option>
           </select>
         </div>
         <div class="filter">
-          <label>Fee Plan</label>
+          <label>🗂️ Fee Plan</label>
           <select [(ngModel)]="planId">
             <option value="" disabled>Select plan</option>
             <option *ngFor="let p of fees.plans()" [value]="p.id">{{ p.name }} — {{ p.amount | currency:p.currency || 'USD' }}</option>
           </select>
         </div>
         <div class="filter">
-          <label>Due Date</label>
+          <label>📅 Due Date</label>
           <input type="date" [(ngModel)]="dueDate" />
         </div>
         <div class="summary">
           <span class="pill">Selected: {{ selectedCount }}</span>
           <span class="pill primary">Total: {{ totalAmount | currency:currentPlan?.currency || 'USD' }}</span>
           <button class="btn primary" (click)="bulkCreate()" [disabled]="!canCreate || processing">
-            <span *ngIf="!processing">Create Invoices</span>
-            <span *ngIf="processing">Creating {{ progressDone }}/{{ selectedCount }}</span>
+            <span *ngIf="!processing">🚀 Create Invoices</span>
+            <span *ngIf="processing">⏳ {{ progressDone }}/{{ selectedCount }}</span>
           </button>
         </div>
       </div>
@@ -52,9 +52,9 @@ import { Student } from '../../../../core/models/student.model';
       <div class="card table-card">
         <div class="table-head">
           <span><input type="checkbox" [checked]="allSelected" (change)="toggleAll($event)" /></span>
-          <span>Student</span>
-          <span>Class</span>
-          <span>Amount</span>
+          <span>👤 Student</span>
+          <span>🎓 Class</span>
+          <span>💲 Amount</span>
         </div>
         <div class="table-row" *ngFor="let s of students">
           <span><input type="checkbox" [checked]="selected.has(s.id)" (change)="toggle(s.id)" /></span>

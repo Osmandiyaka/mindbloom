@@ -17,7 +17,7 @@ import { Payment } from '../../../../core/models/fees.model';
       <header class="page-header">
         <div>
           <p class="eyebrow">Fees</p>
-          <h1>Invoices & Payments</h1>
+          <h1>🧾 Invoices & Payments</h1>
           <p class="sub">Issue invoices, record payments, and monitor balances.</p>
         </div>
       </header>
@@ -26,7 +26,7 @@ import { Payment } from '../../../../core/models/fees.model';
         <div class="card-header">
           <div>
             <p class="eyebrow">Create Invoice</p>
-            <h3>Issue a new invoice</h3>
+            <h3>➕ Issue a new invoice</h3>
           </div>
           <span class="pill ghost">Step 1 · Issue</span>
         </div>
@@ -70,23 +70,27 @@ import { Payment } from '../../../../core/models/fees.model';
           <button class="chip" [class.active]="statusFilter === 'paid'" (click)="setStatus('paid')">Paid</button>
         </div>
         <span class="muted" *ngIf="fees.loading()">Loading…</span>
+        <div class="actions-cell">
+          <button class="btn-sm ghost" (click)="printTable()">🖨 Print</button>
+          <button class="btn-sm ghost" (click)="downloadPdf()">📄 PDF</button>
+        </div>
       </div>
 
       <div class="table">
-        <div class="table-head">
-          <span>Student</span>
-          <span>Plan</span>
-          <span>Due</span>
-          <span>Amount</span>
-          <span>Paid</span>
-          <span>Balance</span>
-          <span>Status</span>
-          <span>Action</span>
-        </div>
-        <div *ngFor="let inv of fees.invoices()" class="table-row">
-          <span class="strong">{{ inv.studentName }}</span>
-          <span>{{ inv.planName || inv.planId }}</span>
-          <span>{{ inv.dueDate | date:'mediumDate' }}</span>
+          <div class="table-head">
+            <span>👤 Student</span>
+            <span>🗂️ Plan</span>
+            <span>📅 Due</span>
+            <span>💲 Amount</span>
+            <span>✅ Paid</span>
+            <span>⚖️ Balance</span>
+            <span>⏱ Status</span>
+            <span>🔧 Action</span>
+          </div>
+          <div *ngFor="let inv of fees.invoices()" class="table-row">
+            <span class="strong">{{ inv.studentName }}</span>
+            <span>{{ inv.planName || inv.planId }}</span>
+            <span>{{ inv.dueDate | date:'mediumDate' }}</span>
           <span>{{ inv.amount | currency:inv.currency || 'USD' }}</span>
           <span>{{ (inv.paidAmount || 0) | currency:inv.currency || 'USD' }}</span>
           <span [class.danger]="(inv.balance||0) > 0">{{ (inv.balance || (inv.amount - (inv.paidAmount||0))) | currency:inv.currency || 'USD' }}</span>
@@ -94,8 +98,8 @@ import { Payment } from '../../../../core/models/fees.model';
               [class.paid]="inv.status === 'paid'"
               [class.overdue]="inv.status === 'overdue'">{{ inv.status | titlecase }}</span></span>
           <span class="actions-cell">
-            <button class="btn-sm ghost" (click)="openPayment(inv)" [disabled]="inv.status === 'paid'">Record Payment</button>
-            <button class="btn-sm ghost" (click)="openPayments(inv)">History</button>
+            <button class="btn-sm ghost" (click)="openPayment(inv)" [disabled]="inv.status === 'paid'">💳 Record</button>
+            <button class="btn-sm ghost" (click)="openPayments(inv)">📜 History</button>
           </span>
         </div>
       </div>
@@ -275,6 +279,60 @@ export class FeesInvoicesComponent implements OnInit {
   }
 
   closePayments() { this.paymentsModal = null; }
+
+  printTable() {
+    window.print();
+  }
+
+  downloadPdf() {
+    const rows = this.fees.invoices().map(inv => `
+      <tr>
+        <td>${inv.studentName}</td>
+        <td>${inv.planName || inv.planId}</td>
+        <td>${inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : ''}</td>
+        <td>${inv.amount?.toFixed(2) || ''}</td>
+        <td>${inv.paidAmount?.toFixed(2) || ''}</td>
+        <td>${(inv.balance ?? (inv.amount - (inv.paidAmount||0)))?.toFixed(2) || ''}</td>
+        <td>${inv.status}</td>
+      </tr>
+    `).join('');
+
+    const html = `
+      <html>
+        <head>
+          <title>Invoices</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { margin-bottom: 12px; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+            th { background: #f5f5f5; }
+          </style>
+        </head>
+        <body>
+          <h1>Invoices</h1>
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th><th>Plan</th><th>Due</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const w = window.open('', '_blank');
+    if (w) {
+      w.document.write(html);
+      w.document.close();
+      w.focus();
+      w.print();
+    }
+  }
 
   setStatus(status: string) {
     this.statusFilter = status;
