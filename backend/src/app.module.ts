@@ -13,6 +13,7 @@ import { LibraryModule } from './modules/library/library.module';
 import { HostelModule } from './modules/hostel/hostel.module';
 import { TransportModule } from './modules/transport/transport.module';
 import { SetupModule } from './modules/setup/setup.module';
+import { AdmissionsModule } from './modules/admissions/admissions.module';
 import { DatabaseModule } from './common/database/database.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { UsersModule } from './modules/users/users.module';
@@ -44,6 +45,7 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
         HostelModule,
         TransportModule,
         SetupModule,
+        AdmissionsModule,
     ],
 })
 export class AppModule { }

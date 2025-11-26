@@ -20,6 +20,10 @@ export const routes: Routes = [
                 loadChildren: () => import('./modules/students/students.routes').then(m => m.STUDENTS_ROUTES)
             },
             {
+                path: 'admissions',
+                loadChildren: () => import('./modules/admissions/admissions.routes').then(m => m.ADMISSIONS_ROUTES)
+            },
+            {
                 path: 'academics',
                 loadChildren: () => import('./modules/academics/academics.routes').then(m => m.ACADEMICS_ROUTES)
             },
