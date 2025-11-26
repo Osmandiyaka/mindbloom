@@ -34,6 +34,7 @@ export class TasksService {
         if (filters.assignedToRole) query.assignedToRole = filters.assignedToRole;
         if (filters.assignedToUserId) query.assignedToUserId = filters.assignedToUserId;
         if (filters.searchTerm) query.title = { $regex: filters.searchTerm, $options: 'i' };
+        if (filters.systemTaskKey) query.systemTaskKey = filters.systemTaskKey;
         return this.taskModel.find(query).sort({ priority: -1, dueDate: 1 }).lean().exec();
     }
 

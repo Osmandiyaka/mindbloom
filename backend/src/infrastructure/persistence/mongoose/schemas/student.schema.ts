@@ -118,23 +118,26 @@ class EnrollmentInfo {
 
 @Schema({ collection: 'students', timestamps: true })
 export class StudentDocument extends Document {
-    @Prop({ type: Types.ObjectId, ref: 'Tenant', required: true, index: true })
+    @Prop({ type: Types.ObjectId, ref: 'Tenant', required: false, index: true })
     tenantId: Types.ObjectId;
 
+    @Prop()
+    admissionId?: string;
+
     // Personal Information
-    @Prop({ required: true })
+    @Prop()
     firstName: string;
 
-    @Prop({ required: true })
+    @Prop()
     lastName: string;
 
     @Prop()
     middleName?: string;
 
-    @Prop({ required: true })
+    @Prop()
     dateOfBirth: Date;
 
-    @Prop({ required: true, enum: ['male', 'female', 'other'] })
+    @Prop({ enum: ['male', 'female', 'other'] })
     gender: string;
 
     @Prop()
@@ -160,16 +163,16 @@ export class StudentDocument extends Document {
     address?: Address;
 
     // Guardians
-    @Prop({ type: [Guardian], required: true })
-    guardians: Guardian[];
+    @Prop({ type: [Guardian] })
+    guardians?: Guardian[];
 
     // Medical Information
     @Prop({ type: MedicalInfo })
     medicalInfo?: MedicalInfo;
 
     // Enrollment Information
-    @Prop({ type: EnrollmentInfo, required: true })
-    enrollment: EnrollmentInfo;
+    @Prop({ type: EnrollmentInfo })
+    enrollment?: EnrollmentInfo;
 
     // Status
     @Prop({
