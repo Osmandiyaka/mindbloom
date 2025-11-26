@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from '@nestjs/common';
 import { FeePlansService } from './plans.service';
+import { CreateFeePlanDto } from './dto/create-fee-plan.dto';
 
 @Controller('fees/plans')
 export class FeePlansController {
@@ -11,7 +12,8 @@ export class FeePlansController {
     }
 
     @Post()
-    create(@Body() dto: any) {
+    @UsePipes(new ValidationPipe({ transform: true }))
+    create(@Body() dto: CreateFeePlanDto) {
         return this.plansService.create(dto);
     }
 }

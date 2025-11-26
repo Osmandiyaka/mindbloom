@@ -6,6 +6,7 @@ export const FeePlanSchema = new Schema(
         description: String,
         amount: { type: Number, required: true },
         frequency: { type: String, enum: ['one-time', 'monthly', 'term'], default: 'monthly' },
+        currency: { type: String, default: 'USD' },
     },
     { timestamps: true }
 );

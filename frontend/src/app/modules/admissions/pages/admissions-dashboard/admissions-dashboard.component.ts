@@ -67,7 +67,7 @@ import { FeesService } from '../../../../core/services/fees.service';
               <div class="pill" [class.paid]="inv.status === 'paid'" [class.overdue]="inv.status === 'overdue'">{{ inv.status | titlecase }}</div>
             </div>
             <div class="amount">\${{ inv.amount }}</div>
-            <button class="btn-sm" [disabled]="inv.status === 'paid'" (click)="pay(inv.id)">Mark Paid</button>
+            <button class="btn-sm" [disabled]="inv.status === 'paid'" (click)="pay(inv)">Mark Paid</button>
           </div>
         </div>
       </section>
@@ -157,7 +157,8 @@ export class AdmissionsDashboardComponent {
     this.updateStatus(app, 'enrolled');
   }
 
-  pay(id: string) {
-    this.fees.recordPayment(id);
+  pay(inv: any) {
+    const balance = (inv.balance ?? inv.amount ?? 0) - (inv.paidAmount ?? 0);
+    this.fees.recordPayment(inv.id, { amount: balance > 0 ? balance : inv.amount, method: 'cash', reference: 'Admission desk' });
   }
 }
