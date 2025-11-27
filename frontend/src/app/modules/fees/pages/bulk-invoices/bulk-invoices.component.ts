@@ -59,7 +59,7 @@ import { Student } from '../../../../core/models/student.model';
         <div class="table-row" *ngFor="let s of students">
           <span><input type="checkbox" [checked]="selected.has(s.id)" (change)="toggle(s.id)" /></span>
           <span class="strong">{{ s.fullName || (s.firstName + ' ' + s.lastName) }}</span>
-          <span>{{ s.enrollment?.class || '—' }}</span>
+          <span>{{ s.enrollment.class || '—' }}</span>
           <span>{{ planAmount | currency:currentPlan?.currency || 'USD' }}</span>
         </div>
         <div class="table-row" *ngIf="!students.length && !loading">
@@ -105,13 +105,13 @@ export class BulkInvoicesComponent implements OnInit {
   loading = false;
   filterClass = '';
   planId = '';
-  dueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0,10);
+  dueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   selected = new Set<string>();
   processing = false;
   progressDone = 0;
   doneMessage = '';
 
-  constructor(public fees: FeesService, private studentService: StudentService) {}
+  constructor(public fees: FeesService, private studentService: StudentService) { }
 
   ngOnInit(): void {
     this.loadStudents();

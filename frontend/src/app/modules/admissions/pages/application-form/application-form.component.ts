@@ -84,7 +84,7 @@ export class ApplicationFormComponent {
     documents: [] as { name: string; type: string }[]
   };
 
-  constructor(private admissions: AdmissionsService, private router: Router) {}
+  constructor(public admissions: AdmissionsService, private router: Router) { }
 
   onFiles(event: Event) {
     const input = event.target as HTMLInputElement;
