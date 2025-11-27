@@ -6,11 +6,11 @@ import { TasksService } from '../tasks/tasks.service';
 import { FeePlansService } from '../fees/plans.service';
 import { InvoicesService } from '../fees/invoices.service';
 import { EnrollmentService } from '../../application/enrollment/enrollment.service';
-import { 
-    AdmissionCreatedEvent, 
+import {
+    AdmissionCreatedEvent,
     AdmissionStatusChangedEvent,
     AdmissionApprovedEvent,
-    AdmissionRejectedEvent 
+    AdmissionRejectedEvent
 } from '../../core/events';
 import { CreateAdmissionDto } from './dto/create-admission.dto';
 import { UpdateAdmissionStatusDto } from './dto/update-admission-status.dto';
@@ -18,11 +18,12 @@ import { AdmissionsQueryDto } from './dto/admissions-query.dto';
 import { RecentInvoicesQueryDto } from './dto/recent-invoices-query.dto';
 
 // Enhanced status transitions with new workflow stages
+// Note: Admins can fast-track by going to 'accepted' first, then 'enrolled'
 const STATUS_TRANSITIONS: Record<string, string[]> = {
-    inquiry: ['application', 'withdrawn'],
-    application: ['under_review', 'withdrawn'],
-    under_review: ['interview_scheduled', 'decision_pending', 'rejected', 'withdrawn'],
-    interview_scheduled: ['decision_pending', 'withdrawn'],
+    inquiry: ['application', 'accepted', 'withdrawn'], // Allow fast-track to accepted
+    application: ['under_review', 'accepted', 'withdrawn'], // Allow fast-track to accepted
+    under_review: ['interview_scheduled', 'decision_pending', 'accepted', 'rejected', 'withdrawn'], // Allow skip to accepted
+    interview_scheduled: ['decision_pending', 'accepted', 'withdrawn'], // Allow skip to accepted
     decision_pending: ['accepted', 'waitlisted', 'rejected'],
     accepted: ['enrolled', 'withdrawn'],
     waitlisted: ['accepted', 'rejected', 'withdrawn'],
@@ -154,7 +155,7 @@ export class AdmissionsService {
         this.eventEmitter.emit(statusEvent.eventType, statusEvent);
 
         // Emit specific events for key transitions
-        if (dto.status === 'accepted' && previousStatus !== 'accepted') {
+        if (dto.status === 'accepted' as any && previousStatus !== 'accepted') {
             const approvedEvent = new AdmissionApprovedEvent(
                 { tenantId: admission.tenantId, userId: actor },
                 {
@@ -167,7 +168,7 @@ export class AdmissionsService {
             this.eventEmitter.emit(approvedEvent.eventType, approvedEvent);
         }
 
-        if (dto.status === 'rejected' && previousStatus !== 'rejected') {
+        if (dto.status === 'rejected' as any && previousStatus !== 'rejected') {
             const rejectedEvent = new AdmissionRejectedEvent(
                 { tenantId: admission.tenantId, userId: actor },
                 {
@@ -181,7 +182,7 @@ export class AdmissionsService {
         }
 
         // Use EnrollmentService for one-click enrollment
-        if (dto.status === 'enrolled' && previousStatus !== 'enrolled') {
+        if (dto.status === 'enrolled' as any && previousStatus !== 'enrolled') {
             const result = await this.enrollmentService.enrollStudent({
                 admissionId: admission._id.toString(),
                 tenantId: admission.tenantId,
