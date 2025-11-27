@@ -1,0 +1,374 @@
+<div class="detail-container" *ngIf="application() as app">
+  <!-- Header -->
+  <div class="detail-header">
+    <button class="btn-back" (click)="goBack()">
+      <span class="icon">←</span>
+      <span>Back to Pipeline</span>
+    </button>
+    
+    <div class="header-content">
+      <div class="applicant-info">
+        <img [src]="app.photo || 'https://i.pravatar.cc/150?img=0'" alt="{{ app.firstName }}" class="applicant-photo">
+        <div>
+          <h1 class="applicant-name">{{ app.firstName }} {{ app.lastName }}</h1>
+          <p class="applicant-meta">{{ app.gradeLevel }} • Age {{ getAge() }} • {{ app.gender }}</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <div class="status-badge" [style.background-color]="getStatusColor(app.status)">
+          {{ getStatusLabel(app.status) }}
+        </div>
+        <button *ngIf="canEnroll()" class="btn-primary btn-enroll" (click)="enrollStudent()">
+          🎓 Enroll Student
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Tabs -->
+  <div class="tabs-container">
+    <button 
+      class="tab"
+      [class.active]="activeTab() === 'overview'"
+      (click)="setActiveTab('overview')">
+      Overview
+    </button>
+    <button 
+      class="tab"
+      [class.active]="activeTab() === 'documents'"
+      (click)="setActiveTab('documents')">
+      Documents ({{ app.documents.length }})
+    </button>
+    <button 
+      class="tab"
+      [class.active]="activeTab() === 'scoring'"
+      (click)="setActiveTab('scoring')">
+      Scoring
+    </button>
+    <button 
+      class="tab"
+      [class.active]="activeTab() === 'interview'"
+      (click)="setActiveTab('interview')">
+      Interview
+    </button>
+    <button 
+      class="tab"
+      [class.active]="activeTab() === 'timeline'"
+      (click)="setActiveTab('timeline')">
+      Timeline
+    </button>
+  </div>
+  
+  <!-- Tab Content -->
+  <div class="tab-content">
+    
+    <!-- Overview Tab -->
+    <div *ngIf="activeTab() === 'overview'" class="tab-pane">
+      <div class="grid-2col">
+        
+        <!-- Personal Information -->
+        <div class="card">
+          <h2 class="card-title">Personal Information</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Full Name</span>
+              <span class="value">{{ app.firstName }} {{ app.lastName }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Date of Birth</span>
+              <span class="value">{{ app.dateOfBirth | date:'longDate' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Gender</span>
+              <span class="value">{{ app.gender }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Grade Level</span>
+              <span class="value">{{ app.gradeLevel }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Email</span>
+              <span class="value">{{ app.email }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Phone</span>
+              <span class="value">{{ app.phone }}</span>
+            </div>
+            <div class="info-item full-width">
+              <span class="label">Address</span>
+              <span class="value">{{ app.address }}</span>
+            </div>
+            <div class="info-item full-width" *ngIf="app.previousSchool">
+              <span class="label">Previous School</span>
+              <span class="value">{{ app.previousSchool }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Guardians -->
+        <div class="card">
+          <h2 class="card-title">Guardians</h2>
+          <div class="guardians-list">
+            <div *ngFor="let guardian of app.guardians" class="guardian-card">
+              <div class="guardian-header">
+                <span class="guardian-icon">👤</span>
+                <div>
+                  <h3 class="guardian-name">{{ guardian.name }}</h3>
+                  <p class="guardian-relationship">{{ guardian.relationship }}</p>
+                </div>
+              </div>
+              <div class="guardian-contacts">
+                <div class="contact-item">
+                  <span class="icon">📧</span>
+                  <span>{{ guardian.email }}</span>
+                </div>
+                <div class="contact-item">
+                  <span class="icon">📞</span>
+                  <span>{{ guardian.phone }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Application Status -->
+        <div class="card">
+          <h2 class="card-title">Application Status</h2>
+          <div class="status-info">
+            <div class="status-current">
+              <span class="label">Current Status:</span>
+              <span class="value" [style.color]="getStatusColor(app.status)">
+                {{ getStatusLabel(app.status) }}
+              </span>
+            </div>
+            <div class="status-time">
+              <span class="label">Time in Status:</span>
+              <span class="value">{{ getTimeInStatus() }}</span>
+            </div>
+            <div class="status-created">
+              <span class="label">Application Created:</span>
+              <span class="value">{{ app.createdAt | date:'medium' }}</span>
+            </div>
+            <div class="status-updated">
+              <span class="label">Last Updated:</span>
+              <span class="value">{{ app.updatedAt | date:'medium' }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Notes & Priority -->
+        <div class="card">
+          <h2 class="card-title">Notes & Priority</h2>
+          <div class="priority-badge" [class]="'priority-' + app.priority">
+            Priority: {{ app.priority | uppercase }}
+          </div>
+          <div class="notes-section">
+            <p class="notes-text">{{ app.notes }}</p>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- Documents Tab -->
+    <div *ngIf="activeTab() === 'documents'" class="tab-pane">
+      <div class="documents-grid">
+        <div *ngFor="let doc of app.documents" class="document-card">
+          <div class="document-icon">📄</div>
+          <div class="document-info">
+            <h3 class="document-name">{{ doc.name }}</h3>
+            <p class="document-meta">{{ doc.type | uppercase }} • {{ doc.uploadedAt | date:'shortDate' }}</p>
+          </div>
+          <div class="document-status" [class.verified]="doc.verified">
+            <span *ngIf="doc.verified" class="verified-badge">✓ Verified</span>
+            <span *ngIf="!doc.verified" class="pending-badge">Pending</span>
+          </div>
+        </div>
+        
+        <div *ngIf="app.documents.length === 0" class="empty-state">
+          <span class="empty-icon">📁</span>
+          <p class="empty-text">No documents uploaded yet</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Scoring Tab -->
+    <div *ngIf="activeTab() === 'scoring'" class="tab-pane">
+      <div class="scoring-container">
+        
+        <div class="score-summary" *ngIf="app.score && !editingScore()">
+          <div class="score-display" [class]="getScoreClass(app.score.total)">
+            <span class="score-value">{{ app.score.total }}</span>
+            <span class="score-max">/100</span>
+          </div>
+          <div class="score-breakdown-grid">
+            <div class="breakdown-item">
+              <span class="category">Academic</span>
+              <span class="score">{{ app.score.breakdown.academic }}/40</span>
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="(app.score.breakdown.academic / 40) * 100"></div>
+              </div>
+            </div>
+            <div class="breakdown-item">
+              <span class="category">Interview</span>
+              <span class="score">{{ app.score.breakdown.interview }}/30</span>
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="(app.score.breakdown.interview / 30) * 100"></div>
+              </div>
+            </div>
+            <div class="breakdown-item">
+              <span class="category">Documents</span>
+              <span class="score">{{ app.score.breakdown.documents }}/20</span>
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="(app.score.breakdown.documents / 20) * 100"></div>
+              </div>
+            </div>
+            <div class="breakdown-item">
+              <span class="category">Other</span>
+              <span class="score">{{ app.score.breakdown.other }}/10</span>
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="(app.score.breakdown.other / 10) * 100"></div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-secondary" (click)="toggleScoreEdit()">Edit Score</button>
+        </div>
+        
+        <div class="score-editor" *ngIf="!app.score || editingScore()">
+          <h3 class="editor-title">{{ app.score ? 'Edit' : 'Set' }} Application Score</h3>
+          
+          <div class="score-form">
+            <div class="form-group">
+              <label>Academic (0-40)</label>
+              <input 
+                type="number" 
+                [(ngModel)]="scoreForm.academic"
+                min="0" 
+                max="40"
+                class="form-input">
+              <span class="hint">Evaluate academic records, GPA, test scores</span>
+            </div>
+            
+            <div class="form-group">
+              <label>Interview (0-30)</label>
+              <input 
+                type="number" 
+                [(ngModel)]="scoreForm.interview"
+                min="0" 
+                max="30"
+                class="form-input">
+              <span class="hint">Interview performance, communication, motivation</span>
+            </div>
+            
+            <div class="form-group">
+              <label>Documents (0-20)</label>
+              <input 
+                type="number" 
+                [(ngModel)]="scoreForm.documents"
+                min="0" 
+                max="20"
+                class="form-input">
+              <span class="hint">Completeness and quality of submitted documents</span>
+            </div>
+            
+            <div class="form-group">
+              <label>Other (0-10)</label>
+              <input 
+                type="number" 
+                [(ngModel)]="scoreForm.other"
+                min="0" 
+                max="10"
+                class="form-input">
+              <span class="hint">Extracurriculars, special circumstances, etc.</span>
+            </div>
+            
+            <div class="total-score">
+              <span class="total-label">Total Score:</span>
+              <span class="total-value" [class]="getScoreClass(calculateTotalScore())">
+                {{ calculateTotalScore() }}/100
+              </span>
+            </div>
+            
+            <div class="form-actions">
+              <button class="btn-primary" (click)="saveScore()">Save Score</button>
+              <button class="btn-secondary" (click)="cancelScoreEdit()" *ngIf="app.score">Cancel</button>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- Interview Tab -->
+    <div *ngIf="activeTab() === 'interview'" class="tab-pane">
+      <div class="interview-container">
+        
+        <div *ngIf="app.interview" class="card">
+          <h2 class="card-title">Interview Details</h2>
+          
+          <div class="info-grid">
+            <div class="info-item" *ngIf="app.interview.scheduledAt">
+              <span class="label">Scheduled Date</span>
+              <span class="value">{{ app.interview.scheduledAt | date:'full' }}</span>
+            </div>
+            
+            <div class="info-item" *ngIf="app.interview.completedAt">
+              <span class="label">Completed Date</span>
+              <span class="value">{{ app.interview.completedAt | date:'full' }}</span>
+            </div>
+            
+            <div class="info-item" *ngIf="app.interview.interviewer">
+              <span class="label">Interviewer</span>
+              <span class="value">{{ app.interview.interviewer }}</span>
+            </div>
+            
+            <div class="info-item full-width" *ngIf="app.interview.notes">
+              <span class="label">Notes</span>
+              <span class="value notes">{{ app.interview.notes }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div *ngIf="!app.interview" class="empty-state">
+          <span class="empty-icon">📅</span>
+          <p class="empty-text">No interview scheduled yet</p>
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- Timeline Tab -->
+    <div *ngIf="activeTab() === 'timeline'" class="tab-pane">
+      <div class="timeline-container">
+        
+        <div class="timeline">
+          <div 
+            *ngFor="let history of app.statusHistory; let i = index"
+            class="timeline-item"
+            [class.latest]="i === app.statusHistory.length - 1">
+            
+            <div class="timeline-marker" [style.background-color]="getStatusColor(history.status)"></div>
+            
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <h3 class="timeline-status">{{ getStatusLabel(history.status) }}</h3>
+                <span class="timeline-date">{{ history.changedAt | date:'medium' }}</span>
+              </div>
+              
+              <p class="timeline-user">Changed by: {{ history.changedBy }}</p>
+              
+              <p class="timeline-notes" *ngIf="history.notes">{{ history.notes }}</p>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<div *ngIf="!application()" class="loading-state">
+  <p>Loading application...</p>
+</div>

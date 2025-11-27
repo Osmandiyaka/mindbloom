@@ -3,6 +3,11 @@ import { Routes } from '@angular/router';
 export const ADMISSIONS_ROUTES: Routes = [
     {
         path: '',
+        redirectTo: 'pipeline',
+        pathMatch: 'full'
+    },
+    {
+        path: 'dashboard',
         loadComponent: () => import('./pages/admissions-dashboard/admissions-dashboard.component').then(m => m.AdmissionsDashboardComponent)
     },
     {
@@ -12,5 +17,9 @@ export const ADMISSIONS_ROUTES: Routes = [
     {
         path: 'apply',
         loadComponent: () => import('./pages/application-form/application-form.component').then(m => m.ApplicationFormComponent)
+    },
+    {
+        path: ':id',
+        loadComponent: () => import('./pages/application-detail/application-detail.component').then(m => m.ApplicationDetailComponent)
     }
 ];
