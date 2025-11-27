@@ -1,18 +1,34 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Model } from 'mongoose';
 import { TasksService } from '../tasks/tasks.service';
 import { FeePlansService } from '../fees/plans.service';
 import { InvoicesService } from '../fees/invoices.service';
+import { EnrollmentService } from '../../application/enrollment/enrollment.service';
+import { 
+    AdmissionCreatedEvent, 
+    AdmissionStatusChangedEvent,
+    AdmissionApprovedEvent,
+    AdmissionRejectedEvent 
+} from '../../core/events';
 import { CreateAdmissionDto } from './dto/create-admission.dto';
 import { UpdateAdmissionStatusDto } from './dto/update-admission-status.dto';
 import { AdmissionsQueryDto } from './dto/admissions-query.dto';
 import { RecentInvoicesQueryDto } from './dto/recent-invoices-query.dto';
 
+// Enhanced status transitions with new workflow stages
 const STATUS_TRANSITIONS: Record<string, string[]> = {
-    review: ['review', 'rejected', 'enrolled'],
-    rejected: ['rejected', 'review'],
-    enrolled: ['enrolled'],
+    inquiry: ['application', 'withdrawn'],
+    application: ['under_review', 'withdrawn'],
+    under_review: ['interview_scheduled', 'decision_pending', 'rejected', 'withdrawn'],
+    interview_scheduled: ['decision_pending', 'withdrawn'],
+    decision_pending: ['accepted', 'waitlisted', 'rejected'],
+    accepted: ['enrolled', 'withdrawn'],
+    waitlisted: ['accepted', 'rejected', 'withdrawn'],
+    rejected: ['under_review'], // Allow reconsideration
+    enrolled: ['enrolled'], // Final state
+    withdrawn: ['withdrawn'], // Final state
 };
 
 @Injectable()
@@ -20,6 +36,8 @@ export class AdmissionsService {
     constructor(
         @InjectModel('Admission') private admissionModel: Model<any>,
         @InjectModel('Student') private studentModel: Model<any>,
+        private readonly eventEmitter: EventEmitter2,
+        private readonly enrollmentService: EnrollmentService,
         private readonly tasksService: TasksService,
         private readonly feePlansService: FeePlansService,
         private readonly invoicesService: InvoicesService,
@@ -36,25 +54,48 @@ export class AdmissionsService {
         const now = new Date();
         const created = new this.admissionModel({
             ...dto,
+            status: 'inquiry', // Start with inquiry stage
             statusHistory: [
                 {
-                    from: 'review',
-                    to: 'review',
+                    from: 'inquiry',
+                    to: 'inquiry',
                     changedAt: now,
                     changedBy: dto.tenantId || 'system',
                 },
             ],
             statusUpdatedAt: now,
         });
-        return created.save();
+        const saved = await created.save();
+
+        // Emit admission created event
+        const event = new AdmissionCreatedEvent(
+            { tenantId: dto.tenantId },
+            {
+                admissionId: saved._id.toString(),
+                applicantName: dto.applicantName,
+                gradeApplying: dto.gradeApplying,
+                email: dto.email,
+                phone: dto.phone,
+            }
+        );
+        this.eventEmitter.emit(event.eventType, event);
+
+        return saved;
     }
 
     async getPipeline(query: AdmissionsQueryDto = {}) {
         const admissions = await this.findAll(query);
         const labels: { label: string; key: string }[] = [
-            { label: 'Review', key: 'review' },
+            { label: 'Inquiry', key: 'inquiry' },
+            { label: 'Application', key: 'application' },
+            { label: 'Under Review', key: 'under_review' },
+            { label: 'Interview Scheduled', key: 'interview_scheduled' },
+            { label: 'Decision Pending', key: 'decision_pending' },
+            { label: 'Accepted', key: 'accepted' },
+            { label: 'Waitlisted', key: 'waitlisted' },
             { label: 'Rejected', key: 'rejected' },
             { label: 'Enrolled', key: 'enrolled' },
+            { label: 'Withdrawn', key: 'withdrawn' },
         ];
         return {
             stages: labels.map(stage => ({
@@ -79,7 +120,9 @@ export class AdmissionsService {
 
         const allowed = STATUS_TRANSITIONS[admission.status] || [];
         if (!allowed.includes(dto.status)) {
-            throw new BadRequestException('Invalid status transition');
+            throw new BadRequestException(
+                `Invalid status transition from '${admission.status}' to '${dto.status}'`
+            );
         }
 
         const previousStatus = admission.status;
@@ -94,8 +137,62 @@ export class AdmissionsService {
 
         await admission.save();
 
+        // Emit status changed event
+        const statusEvent = new AdmissionStatusChangedEvent(
+            { tenantId: admission.tenantId, userId: actor },
+            {
+                admissionId: admission._id.toString(),
+                previousStatus,
+                newStatus: dto.status,
+                applicantName: admission.applicantName,
+                gradeApplying: admission.gradeApplying,
+                email: admission.email,
+                phone: admission.phone,
+                note: dto.note,
+            }
+        );
+        this.eventEmitter.emit(statusEvent.eventType, statusEvent);
+
+        // Emit specific events for key transitions
+        if (dto.status === 'accepted' && previousStatus !== 'accepted') {
+            const approvedEvent = new AdmissionApprovedEvent(
+                { tenantId: admission.tenantId, userId: actor },
+                {
+                    admissionId: admission._id.toString(),
+                    applicantName: admission.applicantName,
+                    gradeApplying: admission.gradeApplying,
+                    email: admission.email,
+                }
+            );
+            this.eventEmitter.emit(approvedEvent.eventType, approvedEvent);
+        }
+
+        if (dto.status === 'rejected' && previousStatus !== 'rejected') {
+            const rejectedEvent = new AdmissionRejectedEvent(
+                { tenantId: admission.tenantId, userId: actor },
+                {
+                    admissionId: admission._id.toString(),
+                    applicantName: admission.applicantName,
+                    email: admission.email,
+                    reason: dto.note,
+                }
+            );
+            this.eventEmitter.emit(rejectedEvent.eventType, rejectedEvent);
+        }
+
+        // Use EnrollmentService for one-click enrollment
         if (dto.status === 'enrolled' && previousStatus !== 'enrolled') {
-            await this.ensureStudentAndTask(admission, actor);
+            const result = await this.enrollmentService.enrollStudent({
+                admissionId: admission._id.toString(),
+                tenantId: admission.tenantId,
+                userId: actor,
+            });
+
+            if (!result.success) {
+                throw new BadRequestException(
+                    `Enrollment failed: ${result.errors?.join(', ')}`
+                );
+            }
         }
 
         return admission.toObject();

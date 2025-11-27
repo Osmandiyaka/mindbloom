@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AuthModule } from './modules/auth/auth.module';
 import { TenantModule } from './modules/tenant/tenant.module';
 import { StudentsModule } from './modules/students/students.module';
@@ -27,6 +28,22 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
+        }),
+        EventEmitterModule.forRoot({
+            // Use wildcards to enable event namespacing
+            wildcard: true,
+            // Set the delimiter for namespaced events
+            delimiter: '.',
+            // Set this to `true` to use new wildcard listeners
+            newListener: false,
+            // Set this to `true` to allow removing a listener
+            removeListener: false,
+            // Set the maximum number of listeners for a single event
+            maxListeners: 10,
+            // Show event name in memory leak warning
+            verboseMemoryLeak: true,
+            // Disable throwing uncaught exceptions
+            ignoreErrors: false,
         }),
         DatabaseModule,
         AuthModule,
