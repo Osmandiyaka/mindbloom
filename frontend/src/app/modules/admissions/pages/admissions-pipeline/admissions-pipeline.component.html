@@ -1,0 +1,95 @@
+<div class="pipeline-container">
+  <!-- Header -->
+  <div class="pipeline-header">
+    <div class="header-content">
+      <h1 class="page-title">Admissions Pipeline</h1>
+      <p class="page-subtitle">Manage applications through the enrollment workflow</p>
+    </div>
+    
+    <div class="header-stats">
+      <div class="stat-card">
+        <span class="stat-value">{{ getTotalApplications() }}</span>
+        <span class="stat-label">Total Applications</span>
+      </div>
+      <div class="stat-card highlight">
+        <span class="stat-value">{{ getColumnCount('accepted') }}</span>
+        <span class="stat-label">Ready to Enroll</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ getColumnCount('enrolled') }}</span>
+        <span class="stat-label">Enrolled</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Pipeline Board -->
+  <div class="pipeline-board">
+    <div 
+      *ngFor="let column of columns()"
+      class="pipeline-column"
+      [style.--column-color]="column.color">
+      
+      <!-- Column Header -->
+      <div class="column-header">
+        <div class="column-title">
+          <span class="column-name">{{ column.title }}</span>
+          <span class="column-badge">{{ column.applications.length }}</span>
+        </div>
+        <div class="column-progress">
+          <div class="progress-bar">
+            <div 
+              class="progress-fill" 
+              [style.width.%]="getColumnPercentage(column.applications.length)">
+            </div>
+          </div>
+          <span class="progress-text">{{ getColumnPercentage(column.applications.length) }}%</span>
+        </div>
+      </div>
+      
+      <!-- Drop Zone -->
+      <div 
+        cdkDropList
+        [id]="column.id"
+        [cdkDropListData]="column.applications"
+        [cdkDropListConnectedTo]="getColumnIds()"
+        (cdkDropListDropped)="drop($event, column.id)"
+        class="column-content">
+        
+        <div 
+          *ngFor="let application of column.applications"
+          cdkDrag
+          class="card-wrapper">
+          <div class="drag-placeholder" *cdkDragPlaceholder></div>
+          <app-application-card
+            [application]="application"
+            [compact]="true"
+            (cardClick)="onCardClick($event)"
+            (enrollClick)="onEnrollClick($event)">
+          </app-application-card>
+        </div>
+        
+        <!-- Empty State -->
+        <div *ngIf="column.applications.length === 0" class="empty-state">
+          <span class="empty-icon">📋</span>
+          <p class="empty-text">No applications in {{ column.title }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Legend -->
+  <div class="pipeline-legend">
+    <div class="legend-item">
+      <span class="legend-icon">🖱️</span>
+      <span class="legend-text">Drag cards between columns to update status</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-icon">👆</span>
+      <span class="legend-text">Click card to view details</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-icon">🎓</span>
+      <span class="legend-text">Click "Enroll Now" to complete enrollment</span>
+    </div>
+  </div>
+</div>

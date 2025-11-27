@@ -1,0 +1,126 @@
+<div class="application-card" [class.compact]="compact" (click)="onCardClick()">
+    <!-- Header with photo and basic info -->
+    <div class="card-header">
+        <div class="avatar">
+            <img [src]="application.photo || 'https://i.pravatar.cc/150?img=0'" [alt]="application.firstName">
+        </div>
+
+        <div class="header-info">
+            <h3 class="applicant-name">{{ application.firstName }} {{ application.lastName }}</h3>
+            <p class="grade-level">{{ application.gradeLevel }} • Age {{ getAge() }}</p>
+        </div>
+
+        <div class="priority-badge" [class]="'priority-' + application.priority">
+            <span class="priority-icon">{{ getPriorityIcon(application.priority) }}</span>
+        </div>
+    </div>
+
+    <!-- Status Badge -->
+    <div class="status-badge" [class]="'status-' + getStatusColor(application.status)">
+        <span class="status-dot"></span>
+        {{ getStatusLabel(application.status) }}
+    </div>
+
+    <!-- Score Section -->
+    <div class="score-section" *ngIf="application.score">
+        <div class="score-display" [class]="getScoreClass(application.score.total)">
+            <span class="score-value">{{ application.score.total }}</span>
+            <span class="score-max">/100</span>
+        </div>
+        <div class="score-breakdown">
+            <div class="score-bar">
+                <div class="score-fill" [style.width.%]="application.score.total"></div>
+            </div>
+            <div class="breakdown-items">
+                <span class="breakdown-item" *ngIf="application.score.breakdown.academic">
+                    Academic: {{ application.score.breakdown.academic }}/40
+                </span>
+                <span class="breakdown-item" *ngIf="application.score.breakdown.interview">
+                    Interview: {{ application.score.breakdown.interview }}/30
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Waitlist Info -->
+    <div class="waitlist-info" *ngIf="application.status === 'waitlisted' && application.waitlist">
+        <div class="waitlist-badge">
+            Position #{{ application.waitlist.position }}
+        </div>
+        <p class="waitlist-expiry">Expires: {{ application.waitlist.expiryDate | date:'shortDate' }}</p>
+    </div>
+
+    <!-- Interview Info -->
+    <div class="interview-info" *ngIf="application.interview?.scheduledAt">
+        <div class="info-row">
+            <span class="icon">📅</span>
+            <span class="info-text">{{ application.interview.scheduledAt | date:'short' }}</span>
+        </div>
+        <p class="interview-note" *ngIf="application.interview.notes">{{ application.interview.notes }}</p>
+    </div>
+
+    <!-- Offer Info -->
+    <div class="offer-info" *ngIf="application.status === 'accepted' && application.offer">
+        <div class="info-row">
+            <span class="icon">✉️</span>
+            <span class="info-text">Offer sent {{ application.offer.sentAt | date:'shortDate' }}</span>
+        </div>
+        <p class="offer-expires" *ngIf="application.offer.expiresAt">
+            Expires: {{ application.offer.expiresAt | date:'shortDate' }}
+        </p>
+    </div>
+
+    <!-- Quick Info -->
+    <div class="quick-info">
+        <div class="info-item">
+            <span class="icon">📧</span>
+            <span class="text">{{ application.email }}</span>
+        </div>
+        <div class="info-item">
+            <span class="icon">📞</span>
+            <span class="text">{{ application.phone }}</span>
+        </div>
+        <div class="info-item" *ngIf="application.previousSchool">
+            <span class="icon">🏫</span>
+            <span class="text">{{ application.previousSchool }}</span>
+        </div>
+        <div class="info-item">
+            <span class="icon">👨‍👩‍👧</span>
+            <span class="text">{{ application.guardians.length }} Guardian(s)</span>
+        </div>
+    </div>
+
+    <!-- Documents -->
+    <div class="documents-section" *ngIf="application.documents.length > 0">
+        <div class="documents-header">
+            <span class="icon">📄</span>
+            <span>{{ application.documents.length }} Document(s)</span>
+        </div>
+        <div class="documents-list">
+            <span *ngFor="let doc of application.documents" class="document-badge" [class.verified]="doc.verified">
+                {{ doc.name }}
+                <span class="verify-icon" *ngIf="doc.verified">✓</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Notes Preview -->
+    <div class="notes-preview" *ngIf="application.notes">
+        <p class="notes-text">{{ application.notes }}</p>
+    </div>
+
+    <!-- Footer with Actions -->
+    <div class="card-footer">
+        <div class="time-info">
+            <span class="time-label">In status:</span>
+            <span class="time-value">{{ getDaysInStatus() }}d</span>
+        </div>
+
+        <div class="actions">
+            <button *ngIf="canEnroll()" class="btn-enroll" (click)="onEnrollClick($event)">
+                🎓 Enroll Now
+            </button>
+            <button class="btn-view">View Details</button>
+        </div>
+    </div>
+</div>
