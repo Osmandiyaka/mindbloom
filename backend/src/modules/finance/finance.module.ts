@@ -6,10 +6,12 @@ import { ExpenseClaimSchema } from '../../infrastructure/persistence/mongoose/sc
 import { FinanceService } from './finance.service';
 import { FinanceController } from './finance.controller';
 import { AccountingModule } from '../accounting/accounting.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
     imports: [
         AccountingModule,
+        UsersModule, // Import UsersModule for USER_REPOSITORY provider (required by PermissionGuard)
         MongooseModule.forFeature([
             { name: 'Budget', schema: BudgetSchema },
             { name: 'PurchaseRequest', schema: PurchaseRequestSchema },
