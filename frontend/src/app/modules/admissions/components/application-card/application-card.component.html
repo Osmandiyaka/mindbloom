@@ -50,16 +50,14 @@
         <p class="waitlist-expiry">Expires: {{ application.waitlist.expiryDate | date:'shortDate' }}</p>
     </div>
 
-    <!-- Interview Info -->
-    <div class="interview-info" *ngIf="application.interview?.scheduledAt">
-        <div class="info-row">
-            <span class="icon">📅</span>
-            <span class="info-text">{{ application.interview.scheduledAt | date:'short' }}</span>
-        </div>
-        <p class="interview-note" *ngIf="application.interview.notes">{{ application.interview.notes }}</p>
+  <!-- Interview Info -->
+  <div class="interview-info" *ngIf="application.interview?.scheduledAt">
+    <div class="info-row">
+      <span class="icon">📅</span>
+      <span class="info-text">{{ application.interview?.scheduledAt | date:'short' }}</span>
     </div>
-
-    <!-- Offer Info -->
+    <p class="interview-note" *ngIf="application.interview?.notes">{{ application.interview?.notes }}</p>
+  </div>    <!-- Offer Info -->
     <div class="offer-info" *ngIf="application.status === 'accepted' && application.offer">
         <div class="info-row">
             <span class="icon">✉️</span>
