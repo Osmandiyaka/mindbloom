@@ -2,6 +2,7 @@ import { Schema } from 'mongoose';
 
 export const InvoiceSchema = new Schema(
     {
+        tenantId: { type: String, index: true },
         studentId: { type: Schema.Types.ObjectId, ref: 'Student', index: true },
         studentName: { type: String, required: true },
         planId: { type: Schema.Types.ObjectId, ref: 'FeePlan', required: true },

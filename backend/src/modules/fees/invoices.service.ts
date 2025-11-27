@@ -17,6 +17,7 @@ export class InvoicesService {
         const query: any = {};
         if (filters.status) query.status = filters.status;
         if (filters.studentId) query.studentId = filters.studentId;
+        if (filters.tenantId) query.tenantId = filters.tenantId;
         const list: any[] = await this.invoiceModel.find(query).sort({ createdAt: -1 }).lean().exec() as any[];
         const now = new Date();
 
@@ -111,5 +112,21 @@ export class InvoicesService {
             payment,
             balance: Math.max(invoice.amount - invoice.paidAmount, 0),
         };
+    }
+
+    async findByReference(reference: string, tenantId?: string) {
+        const query: any = { reference };
+        if (tenantId) query.tenantId = tenantId;
+        return this.invoiceModel.findOne(query).lean();
+    }
+
+    async findRecent(limit = 5, tenantId?: string) {
+        const query: any = {};
+        if (tenantId) query.tenantId = tenantId;
+        const list: any[] = await this.invoiceModel.find(query).sort({ createdAt: -1 }).limit(limit).lean().exec() as any[];
+        return list.map(inv => ({
+            ...inv,
+            balance: Math.max((inv.amount || 0) - (inv.paidAmount || 0), 0),
+        }));
     }
 }

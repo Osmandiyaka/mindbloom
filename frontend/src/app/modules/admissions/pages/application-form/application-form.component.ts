@@ -15,6 +15,8 @@ import { AdmissionsService } from '../../../../core/services/admissions.service'
         <h1>New Application</h1>
         <p class="sub">Collect applicant information and required documents.</p>
 
+        <div *ngIf="admissions.error()" class="alert">{{ admissions.error() }}</div>
+
         <form (ngSubmit)="submit()" #form="ngForm">
           <div class="grid">
             <label>
@@ -69,6 +71,7 @@ import { AdmissionsService } from '../../../../core/services/admissions.service'
     .btn { border:none; border-radius:10px; padding:0.75rem 1.2rem; font-weight:600; cursor:pointer; }
     .btn.ghost { background: transparent; border:1px solid var(--color-border); color: var(--color-text-primary); }
     .btn-primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
+    .alert { padding:0.75rem 1rem; border-radius:10px; background: rgba(var(--color-error-rgb,239,68,68),0.1); border:1px solid rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); margin-bottom:0.75rem; }
   `]
 })
 export class ApplicationFormComponent {
@@ -98,8 +101,11 @@ export class ApplicationFormComponent {
       phone: this.model.phone,
       notes: this.model.notes,
       documents: this.model.documents,
+    }).subscribe(result => {
+      if (result) {
+        this.router.navigate(['/admissions']);
+      }
     });
-    this.router.navigate(['/admissions']);
   }
 
   cancel() {

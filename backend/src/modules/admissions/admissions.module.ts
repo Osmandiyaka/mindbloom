@@ -5,6 +5,7 @@ import { AdmissionsService } from './admissions.service';
 import { AdmissionSchema } from '../../infrastructure/persistence/mongoose/schemas/admission.schema';
 import { StudentSchema } from '../../infrastructure/persistence/mongoose/schemas/student.schema';
 import { TasksModule } from '../tasks/tasks.module';
+import { FeesModule } from '../fees/fees.module';
 
 @Module({
     imports: [
@@ -13,6 +14,7 @@ import { TasksModule } from '../tasks/tasks.module';
             { name: 'Student', schema: StudentSchema },
         ]),
         TasksModule,
+        FeesModule,
     ],
     controllers: [AdmissionsController],
     providers: [AdmissionsService],

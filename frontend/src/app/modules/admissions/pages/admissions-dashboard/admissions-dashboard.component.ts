@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AdmissionsService } from '../../../../core/services/admissions.service';
 import { AdmissionApplication, ApplicationStatus } from '../../../../core/models/admission.model';
@@ -22,6 +22,8 @@ import { FeesService } from '../../../../core/services/fees.service';
         </div>
       </header>
 
+      <div *ngIf="admissions.error()" class="alert">{{ admissions.error() }}</div>
+
       <section class="info-banner">
         <div>
           <h3>How enrollment works</h3>
@@ -32,7 +34,7 @@ import { FeesService } from '../../../../core/services/fees.service';
         </div>
       </section>
 
-      <div class="pipeline">
+      <div class="pipeline" *ngIf="stages().length > 0; else emptyState">
         <div *ngFor="let stage of stages()" class="stage">
           <div class="stage-header">
             <span class="stage-name">{{ stage.label }}</span>
@@ -49,21 +51,33 @@ import { FeesService } from '../../../../core/services/fees.service';
               </div>
               <p class="muted">{{ app.email }}</p>
               <div class="app-actions">
-                <button class="btn-sm ghost" (click)="updateStatus(app, 'review')">Review</button>
-                <button class="btn-sm danger" (click)="updateStatus(app, 'rejected')">Reject</button>
-                <button class="btn-sm" (click)="enroll(app)">Enroll</button>
+                <button class="btn-sm ghost" [disabled]="admissions.isBusy(app.id)" (click)="updateStatus(app, 'review')">
+                  {{ admissions.isBusy(app.id) ? 'Updating…' : 'Review' }}
+                </button>
+                <button class="btn-sm danger" [disabled]="admissions.isBusy(app.id)" (click)="updateStatus(app, 'rejected')">
+                  {{ admissions.isBusy(app.id) ? 'Updating…' : 'Reject' }}
+                </button>
+                <button class="btn-sm" [disabled]="admissions.isBusy(app.id)" (click)="enroll(app)">
+                  {{ admissions.isBusy(app.id) ? 'Enrolling…' : 'Enroll' }}
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
 
+      <ng-template #emptyState>
+        <div class="empty">
+          <p class="muted">No applications yet. Start by creating a new application.</p>
+        </div>
+      </ng-template>
+
       <section class="aside">
         <div class="card mini-panel">
           <h3>Recent Invoices</h3>
           <div class="invoice" *ngFor="let inv of recentInvoices">
             <div>
-              <div class="muted">{{ inv.id }} · {{ inv.studentName }}</div>
+              <div class="muted">{{ inv.id || inv._id }} · {{ inv.studentName }}</div>
               <div class="pill" [class.paid]="inv.status === 'paid'" [class.overdue]="inv.status === 'overdue'">{{ inv.status | titlecase }}</div>
             </div>
             <div class="amount">\${{ inv.amount }}</div>
@@ -110,24 +124,15 @@ import { FeesService } from '../../../../core/services/fees.service';
     .pill { padding:0.15rem 0.45rem; border-radius:10px; background: var(--color-surface-hover); color: var(--color-text-secondary); font-size:0.8rem; }
     .pill.paid { background: rgba(var(--color-success-rgb,16,185,129),0.15); color: var(--color-success,#10b981); }
     .pill.overdue { background: rgba(var(--color-error-rgb,239,68,68),0.15); color: var(--color-error,#ef4444); }
+    .alert { grid-column:1 / -1; padding:0.75rem 1rem; border-radius:10px; background: rgba(var(--color-error-rgb,239,68,68),0.1); border:1px solid rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); }
+    .empty { grid-column: 1 / -1; background: var(--color-surface); border:1px dashed var(--color-border); padding:1rem; border-radius:12px; text-align:center; color: var(--color-text-secondary); }
   `]
 })
 export class AdmissionsDashboardComponent {
-  stages = computed(() => {
-    const list = this.admissions.applications();
-    const labels: { label: string; key: ApplicationStatus }[] = [
-      { label: 'Review', key: 'review' },
-      { label: 'Rejected', key: 'rejected' },
-      { label: 'Enrolled', key: 'enrolled' },
-    ];
-    return labels.map(stage => ({
-      label: stage.label,
-      apps: list.filter(app => app.status === stage.key)
-    })).filter(stage => stage.apps.length > 0);
-  });
+  stages = computed(() => this.admissions.pipelineStages().map(stage => ({ label: stage.label, apps: stage.applications })));
 
   get recentInvoices() {
-    return this.fees.invoices().slice(0, 5);
+    return this.admissions.recentInvoices();
   }
 
   get defaultPlanName() {
@@ -135,30 +140,20 @@ export class AdmissionsDashboardComponent {
   }
 
   constructor(
-    private admissions: AdmissionsService,
+    public admissions: AdmissionsService,
     private fees: FeesService
   ) {}
 
-  updateStatus(app: AdmissionApplication, status: ApplicationStatus) {
-    this.admissions.updateStatus(app.id, status);
+  updateStatus(app: AdmissionApplication, status: ApplicationStatus, note?: string) {
+    this.admissions.updateStatus(app.id, status, note);
   }
 
   enroll(app: AdmissionApplication) {
-    const planId = this.fees.defaultPlanId();
-    if (planId) {
-      this.fees.addInvoice({
-        studentName: app.applicantName,
-        planId,
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        amount: this.fees.plans().find(p => p.id === planId)?.amount || 0,
-        reference: `ADM-${app.id}`
-      });
-    }
-    this.updateStatus(app, 'enrolled');
+    this.updateStatus(app, 'enrolled', 'Auto-enrolled from dashboard');
   }
 
   pay(inv: any) {
     const balance = (inv.balance ?? inv.amount ?? 0) - (inv.paidAmount ?? 0);
-    this.fees.recordPayment(inv.id, { amount: balance > 0 ? balance : inv.amount, method: 'cash', reference: 'Admission desk' });
+    this.fees.recordPayment(inv.id || inv._id, { amount: balance > 0 ? balance : inv.amount, method: 'cash', reference: 'Admission desk' });
   }
 }

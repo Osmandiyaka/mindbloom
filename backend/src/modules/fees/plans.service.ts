@@ -8,8 +8,10 @@ import { UpdateFeePlanDto } from './dto/update-fee-plan.dto';
 export class FeePlansService {
     constructor(@InjectModel('FeePlan') private feePlanModel: Model<any>) { }
 
-    async findAll() {
-        return this.feePlanModel.find().sort({ createdAt: -1 }).lean().exec();
+    async findAll(filters: { tenantId?: string } = {}) {
+        const query: any = {};
+        if (filters.tenantId) query.tenantId = filters.tenantId;
+        return this.feePlanModel.find(query).sort({ createdAt: -1 }).lean().exec();
     }
 
     async create(dto: CreateFeePlanDto) {
