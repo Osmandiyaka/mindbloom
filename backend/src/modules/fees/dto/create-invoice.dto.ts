@@ -34,4 +34,8 @@ export class CreateInvoiceDto {
     @IsString()
     @IsOptional()
     notes?: string;
+
+    @IsString()
+    @IsOptional()
+    tenantId?: string;
 }

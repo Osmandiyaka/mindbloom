@@ -2,6 +2,7 @@ import { Schema } from 'mongoose';
 
 export const FeePlanSchema = new Schema(
     {
+        tenantId: { type: String, index: true },
         name: { type: String, required: true },
         description: String,
         amount: { type: Number, required: true },
