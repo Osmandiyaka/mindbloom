@@ -23,7 +23,7 @@ export const AdmissionSchema = new Schema(
         phone: { type: String, required: true },
         dateOfBirth: { type: Date },
         previousSchool: { type: String },
-        
+
         // Enhanced status with full workflow stages
         status: {
             type: String,
@@ -31,7 +31,7 @@ export const AdmissionSchema = new Schema(
             default: AdmissionStatus.INQUIRY,
             index: true,
         },
-        
+
         // Status history for audit trail
         statusHistory: [{
             from: { type: String, enum: Object.values(AdmissionStatus) },
@@ -40,7 +40,7 @@ export const AdmissionSchema = new Schema(
             changedAt: { type: Date, default: Date.now },
             note: String,
         }],
-        
+
         // Application scoring and ranking
         score: {
             total: { type: Number, default: 0 },
@@ -54,14 +54,14 @@ export const AdmissionSchema = new Schema(
             scoredBy: String,
             scoredAt: Date,
         },
-        
+
         // Waitlist information
         waitlist: {
             position: Number,
             addedAt: Date,
             expiresAt: Date,
         },
-        
+
         // Offer management
         offer: {
             sentAt: Date,
@@ -69,7 +69,7 @@ export const AdmissionSchema = new Schema(
             acceptedAt: Date,
             declinedAt: Date,
         },
-        
+
         // Interview details
         interview: {
             scheduledAt: Date,
@@ -77,20 +77,20 @@ export const AdmissionSchema = new Schema(
             interviewer: String,
             notes: String,
         },
-        
+
         notes: { type: String },
-        documents: [{ 
-            name: String, 
-            type: String, 
+        documents: [{
+            name: String,
+            type: String,
             url: String,
             uploadedAt: { type: Date, default: Date.now },
         }],
         statusUpdatedAt: { type: Date },
-        
+
         // Reference to created student (once enrolled)
         studentId: { type: Schema.Types.ObjectId, ref: 'Student' },
     },
-    { 
+    {
         timestamps: true,
         collection: 'admissions',
     }

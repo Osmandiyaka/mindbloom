@@ -26,7 +26,7 @@ export class EnrollmentService {
         @InjectModel('Admission') private admissionModel: Model<any>,
         @InjectModel('Student') private studentModel: Model<any>,
         private eventEmitter: EventEmitter2,
-    ) {}
+    ) { }
 
     /**
      * One-click enrollment: Creates student from accepted admission
@@ -39,7 +39,7 @@ export class EnrollmentService {
      */
     async enrollStudent(payload: EnrollStudentPayload): Promise<EnrollmentResult> {
         const { admissionId, tenantId, userId } = payload;
-        
+
         this.logger.log(`Starting enrollment for admission ${admissionId}`);
 
         // Start a database session for transaction
@@ -124,8 +124,8 @@ export class EnrollmentService {
         const nameParts = admission.applicantName.trim().split(' ');
         const firstName = nameParts[0];
         const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
-        const middleName = nameParts.length > 2 
-            ? nameParts.slice(1, nameParts.length - 1).join(' ') 
+        const middleName = nameParts.length > 2
+            ? nameParts.slice(1, nameParts.length - 1).join(' ')
             : undefined;
 
         // Generate admission number (simple implementation - enhance as needed)
@@ -134,7 +134,7 @@ export class EnrollmentService {
         return {
             tenantId: payload.tenantId,
             admissionId: admission._id.toString(),
-            
+
             // Personal Information
             firstName,
             lastName,
@@ -142,7 +142,7 @@ export class EnrollmentService {
             dateOfBirth: admission.dateOfBirth,
             email: admission.email,
             phone: admission.phone,
-            
+
             // Enrollment Information
             enrollment: {
                 admissionNumber,
@@ -152,10 +152,10 @@ export class EnrollmentService {
                 section: payload.sectionId,
                 previousSchool: admission.previousSchool,
             },
-            
+
             // Status
             status: 'active',
-            
+
             // Documents from admission
             documents: admission.documents?.map((doc: any) => ({
                 ...doc,

@@ -14,4 +14,4 @@ import { StudentSchema } from '../../infrastructure/persistence/mongoose/schemas
     providers: [EnrollmentService],
     exports: [EnrollmentService],
 })
-export class EnrollmentModule {}
+export class EnrollmentModule { }

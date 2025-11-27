@@ -16,13 +16,13 @@ export class FinanceEventListeners {
     @OnEvent('student.enrolled')
     async handleStudentEnrolled(event: StudentEnrolledEvent) {
         this.logger.log(`Handling student.enrolled event for student ${event.payload.studentId}`);
-        
+
         try {
             // TODO: Implement logic to:
             // 1. Fetch default fee plan for the grade level
             // 2. Create fee assignment for the student
             // 3. Generate initial invoice with payment terms
-            
+
             this.logger.log(`Fee assignment created for student ${event.payload.studentId}`);
         } catch (error) {
             this.logger.error(`Failed to create fee assignment: ${error.message}`, error.stack);
@@ -36,7 +36,7 @@ export class FinanceEventListeners {
     @OnEvent('admission.approved')
     async handleAdmissionApproved(event: any) {
         this.logger.log(`Admission approved: ${event.payload.admissionId}`);
-        
+
         // TODO: Could trigger:
         // - Welcome email with payment instructions
         // - Create pending payment record
@@ -55,13 +55,13 @@ export class UsersEventListeners {
     @OnEvent('student.enrolled')
     async handleStudentEnrolled(event: StudentEnrolledEvent) {
         this.logger.log(`Creating user accounts for student ${event.payload.studentId}`);
-        
+
         try {
             // TODO: Implement logic to:
             // 1. Create student portal user account
             // 2. Create parent portal accounts for guardians
             // 3. Send welcome emails with login credentials
-            
+
             this.logger.log(`User accounts created for student ${event.payload.studentId}`);
         } catch (error) {
             this.logger.error(`Failed to create user accounts: ${error.message}`, error.stack);
@@ -83,13 +83,13 @@ export class CommunicationsEventListeners {
             `Admission status changed: ${event.payload.admissionId} ` +
             `from ${event.payload.previousStatus} to ${event.payload.newStatus}`
         );
-        
+
         try {
             // TODO: Implement logic to:
             // 1. Select appropriate email/SMS template for new status
             // 2. Populate template with admission data
             // 3. Send notification to applicant email/phone
-            
+
             this.logger.log(`Notification sent for admission ${event.payload.admissionId}`);
         } catch (error) {
             this.logger.error(`Failed to send notification: ${error.message}`, error.stack);
@@ -99,13 +99,13 @@ export class CommunicationsEventListeners {
     @OnEvent('student.enrolled')
     async handleStudentEnrolled(event: StudentEnrolledEvent) {
         this.logger.log(`Sending welcome communications for student ${event.payload.studentId}`);
-        
+
         try {
             // TODO: Send:
             // - Welcome email to student/parents
             // - Orientation schedule
             // - Important dates and documents needed
-            
+
             this.logger.log(`Welcome communications sent`);
         } catch (error) {
             this.logger.error(`Failed to send welcome communications: ${error.message}`, error.stack);
