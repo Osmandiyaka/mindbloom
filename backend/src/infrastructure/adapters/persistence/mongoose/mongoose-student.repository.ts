@@ -15,7 +15,7 @@ import {
     StudentProps
 } from '../../../../domain/student/entities/student.entity';
 import { IStudentRepository, StudentFilters } from '../../../../domain/student/ports/student.repository.interface';
-import { StudentDocument as StudentDoc } from '../schemas/student.schema';
+import { StudentDocument as StudentDoc } from './schemas/student.schema';
 
 @Injectable()
 export class MongooseStudentRepository implements IStudentRepository {

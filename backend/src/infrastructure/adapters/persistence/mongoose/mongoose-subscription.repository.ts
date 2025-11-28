@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Subscription } from '../../../../domain/subscription/entities/subscription.entity';
 import { SubscriptionRepository } from '../../../../domain/subscription/ports/subscription.repository';
-import { SubscriptionDocument } from '../schemas/subscription.schema';
+import { SubscriptionDocument } from './schemas/subscription.schema';
 
 @Injectable()
 export class MongooseSubscriptionRepository implements SubscriptionRepository {

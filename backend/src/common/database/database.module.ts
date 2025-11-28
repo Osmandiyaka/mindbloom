@@ -2,9 +2,9 @@ import { Module, Global } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/user.schema';
-import { StudentSchema } from '../../infrastructure/persistence/mongoose/schemas/student.schema';
-import { ClassSchema } from '../../infrastructure/persistence/mongoose/schemas/class.schema';
-import { TenantSchema } from '../../infrastructure/persistence/mongoose/schemas/tenant.schema';
+import { StudentSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/student.schema';
+import { ClassSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/class.schema';
+import { TenantSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/tenant.schema';
 import { TenantContext } from '../tenant/tenant.context';
 
 @Global()

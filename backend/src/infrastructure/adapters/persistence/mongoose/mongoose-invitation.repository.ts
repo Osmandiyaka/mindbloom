@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Invitation, InvitationStatus } from '../../../../domain/invitation/entities/invitation.entity';
 import { InvitationRepository } from '../../../../domain/invitation/ports/invitation.repository';
-import { InvitationDocument } from '../schemas/invitation.schema';
+import { InvitationDocument } from './schemas/invitation.schema';
 
 @Injectable()
 export class MongooseInvitationRepository implements InvitationRepository {

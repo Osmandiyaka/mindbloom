@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { PluginSchema } from '../../infrastructure/persistence/mongoose/schemas/plugin.schema';
-import { InstalledPluginSchema } from '../../infrastructure/persistence/mongoose/schemas/installed-plugin.schema';
-import { MongoosePluginRepository } from '../../infrastructure/persistence/mongoose/repositories/mongoose-plugin.repository';
-import { MongooseInstalledPluginRepository } from '../../infrastructure/persistence/mongoose/repositories/mongoose-installed-plugin.repository';
+import { PluginSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/plugin.schema';
+import { InstalledPluginSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/installed-plugin.schema';
+import { MongoosePluginRepository } from '../../infrastructure/adapters/persistence/mongoose/mongoose-plugin.repository';
+import { MongooseInstalledPluginRepository } from '../../infrastructure/adapters/persistence/mongoose/mongoose-installed-plugin.repository';
 import {
     BrowsePluginsUseCase,
     InstallPluginUseCase,

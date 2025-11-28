@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { DepartmentSchema } from '../../infrastructure/persistence/mongoose/schemas/department.schema';
-import { DesignationSchema } from '../../infrastructure/persistence/mongoose/schemas/designation.schema';
-import { StaffSchema } from '../../infrastructure/persistence/mongoose/schemas/staff.schema';
-import { LeaveTypeSchema } from '../../infrastructure/persistence/mongoose/schemas/leave-type.schema';
-import { LeaveRequestSchema } from '../../infrastructure/persistence/mongoose/schemas/leave-request.schema';
-import { StaffAttendanceSchema } from '../../infrastructure/persistence/mongoose/schemas/staff-attendance.schema';
+import { DepartmentSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/department.schema';
+import { DesignationSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/designation.schema';
+import { StaffSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/staff.schema';
+import { LeaveTypeSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/leave-type.schema';
+import { LeaveRequestSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/leave-request.schema';
+import { StaffAttendanceSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/staff-attendance.schema';
 import { HrService } from './hr.service';
 import { HrController } from './hr.controller';
 

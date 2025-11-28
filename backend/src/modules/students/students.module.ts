@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { STUDENT_REPOSITORY } from '../../domain/student/ports/student.repository.interface';
-import { MongooseStudentRepository } from '../../infrastructure/persistence/mongoose/repositories/mongoose-student.repository';
-import { StudentSchema } from '../../infrastructure/persistence/mongoose/schemas/student.schema';
+import { MongooseStudentRepository } from '../../infrastructure/adapters/persistence/mongoose/mongoose-student.repository';
+import { StudentSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/student.schema';
 import {
     CreateStudentUseCase,
     GetAllStudentsUseCase,

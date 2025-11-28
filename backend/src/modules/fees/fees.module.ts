@@ -4,9 +4,9 @@ import { FeePlansController } from './plans.controller';
 import { InvoicesController } from './invoices.controller';
 import { FeePlansService } from './plans.service';
 import { InvoicesService } from './invoices.service';
-import { FeePlanSchema } from '../../infrastructure/persistence/mongoose/schemas/fee-plan.schema';
-import { InvoiceSchema } from '../../infrastructure/persistence/mongoose/schemas/invoice.schema';
-import { PaymentSchema } from '../../infrastructure/persistence/mongoose/schemas/payment.schema';
+import { FeePlanSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/fee-plan.schema';
+import { InvoiceSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/invoice.schema';
+import { PaymentSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/payment.schema';
 import { AccountingModule } from '../accounting/accounting.module';
 
 @Module({

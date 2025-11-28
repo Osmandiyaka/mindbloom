@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { SchoolSettingsSchema } from '../../infrastructure/persistence/mongoose/schemas/school-settings.schema';
+import { SchoolSettingsSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/school-settings.schema';
 import { SchoolSettingsController } from './school-settings.controller';
 import { SchoolSettingsService } from './school-settings.service';
 

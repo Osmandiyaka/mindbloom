@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Tenant } from '../../../../domain/tenant/entities/tenant.entity';
 import { ITenantRepository } from '../../../../domain/tenant/ports/tenant.repository.interface';
-import { TenantDocument } from '../schemas/tenant.schema';
+import { TenantDocument } from './schemas/tenant.schema';
 
 @Injectable()
 export class MongooseTenantRepository implements ITenantRepository {

@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AdmissionsController } from './admissions.controller';
 import { AdmissionsService } from './admissions.service';
-import { AdmissionSchema } from '../../infrastructure/persistence/mongoose/schemas/admission.schema';
-import { StudentSchema } from '../../infrastructure/persistence/mongoose/schemas/student.schema';
+import { AdmissionSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/admission.schema';
+import { StudentSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/student.schema';
 import { TasksModule } from '../tasks/tasks.module';
 import { FeesModule } from '../fees/fees.module';
 

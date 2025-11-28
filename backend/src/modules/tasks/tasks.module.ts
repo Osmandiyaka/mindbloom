@@ -2,9 +2,9 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { MongooseModule, InjectModel } from '@nestjs/mongoose';
 import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
-import { TaskSchema } from '../../infrastructure/persistence/mongoose/schemas/task.schema';
-import { TaskCompletionSchema } from '../../infrastructure/persistence/mongoose/schemas/task-completion.schema';
-import { TaskHistorySchema } from '../../infrastructure/persistence/mongoose/schemas/task-history.schema';
+import { TaskSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/task.schema';
+import { TaskCompletionSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/task-completion.schema';
+import { TaskHistorySchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/task-history.schema';
 import { seedTasks } from './tasks.seed';
 import { Model } from 'mongoose';
 
