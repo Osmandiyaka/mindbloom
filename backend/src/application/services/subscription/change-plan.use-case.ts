@@ -1,16 +1,7 @@
 import { Inject, Injectable, BadRequestException } from '@nestjs/common';
 import { SUBSCRIPTION_REPOSITORY, SubscriptionRepository } from '../../../domain/ports/out/subscription-repository.port';
 import { SubscriptionPlan, Subscription } from '../../../domain/subscription/entities/subscription.entity';
-
-export class ChangePlanCommand {
-    constructor(
-        public readonly tenantId: string,
-        public readonly newPlan: SubscriptionPlan,
-        public readonly billingEmail: string,
-        public readonly paymentMethodLast4?: string,
-        public readonly paymentBrand?: string,
-    ) { }
-}
+import { ChangePlanCommand } from '../../ports/in/commands/change-plan.command';
 
 @Injectable()
 export class ChangePlanUseCase {
@@ -21,7 +12,7 @@ export class ChangePlanUseCase {
 
     async execute(command: ChangePlanCommand): Promise<Subscription> {
         const current = await this.subscriptionRepository.findByTenantId(command.tenantId);
-        const nextPlan = command.newPlan;
+        const nextPlan = command.plan;
 
         if (current && current.plan === nextPlan) {
             throw new BadRequestException('Already on this plan');

@@ -1,24 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { Student, Guardian, RelationshipType } from '../../../domain/student/entities/student.entity';
+import { Student, Guardian } from '../../../domain/student/entities/student.entity';
 import { IStudentRepository, STUDENT_REPOSITORY } from '../../../domain/ports/out/student-repository.port';
-
-export interface AddGuardianCommand {
-    name: string;
-    relationship: RelationshipType;
-    phone: string;
-    email?: string;
-    occupation?: string;
-    address?: {
-        street: string;
-        city: string;
-        state: string;
-        postalCode: string;
-        country: string;
-    };
-    isPrimary: boolean;
-    isEmergencyContact: boolean;
-}
+import { AddGuardianCommand } from '../../ports/in/commands/add-guardian.command';
 
 @Injectable()
 export class AddGuardianToStudentUseCase {
@@ -27,11 +11,11 @@ export class AddGuardianToStudentUseCase {
         private readonly studentRepository: IStudentRepository,
     ) { }
 
-    async execute(studentId: string, tenantId: string, command: AddGuardianCommand): Promise<Student> {
-        const student = await this.studentRepository.findById(studentId, tenantId);
+    async execute(command: AddGuardianCommand): Promise<Student> {
+        const student = await this.studentRepository.findById(command.studentId, command.tenantId);
 
         if (!student) {
-            throw new NotFoundException(`Student with ID ${studentId} not found`);
+            throw new NotFoundException(`Student with ID ${command.studentId} not found`);
         }
 
         const guardian: Guardian = {

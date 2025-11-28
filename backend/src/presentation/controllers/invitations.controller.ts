@@ -3,10 +3,13 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/tenant/tenant.guard';
 import { TenantContext } from '../../common/tenant/tenant.context';
-import { CreateInvitationUseCase, CreateInvitationCommand } from '../../application/services/invitation/create-invitation.use-case';
+import { CreateInvitationUseCase } from '../../application/services/invitation/create-invitation.use-case';
 import { ListInvitationsUseCase } from '../../application/services/invitation/list-invitations.use-case';
-import { ResendInvitationUseCase, ResendInvitationCommand } from '../../application/services/invitation/resend-invitation.use-case';
-import { RevokeInvitationUseCase, RevokeInvitationCommand } from '../../application/services/invitation/revoke-invitation.use-case';
+import { ResendInvitationUseCase } from '../../application/services/invitation/resend-invitation.use-case';
+import { RevokeInvitationUseCase } from '../../application/services/invitation/revoke-invitation.use-case';
+import { CreateInvitationCommand } from '../../application/ports/in/commands/create-invitation.command';
+import { ResendInvitationCommand } from '../../application/ports/in/commands/resend-invitation.command';
+import { RevokeInvitationCommand } from '../../application/ports/in/commands/revoke-invitation.command';
 import { Invitation } from '../../domain/invitation/entities/invitation.entity';
 
 class CreateInvitationDto {

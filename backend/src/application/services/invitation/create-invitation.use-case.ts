@@ -1,17 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Invitation, InvitationStatus } from '../../../domain/invitation/entities/invitation.entity';
+import { Invitation } from '../../../domain/invitation/entities/invitation.entity';
 import { INVITATION_REPOSITORY, InvitationRepository } from '../../../domain/ports/out/invitation-repository.port';
 import { v4 as uuidv4 } from 'uuid';
-
-export class CreateInvitationCommand {
-    constructor(
-        public readonly tenantId: string,
-        public readonly email: string,
-        public readonly roles: string[],
-        public readonly expiresAt?: Date,
-        public readonly createdBy?: string,
-    ) { }
-}
+import { CreateInvitationCommand } from '../../ports/in/commands/create-invitation.command';
 
 @Injectable()
 export class CreateInvitationUseCase {

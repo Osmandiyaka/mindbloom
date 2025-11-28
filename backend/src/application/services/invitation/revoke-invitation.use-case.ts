@@ -1,13 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { INVITATION_REPOSITORY, InvitationRepository } from '../../../domain/ports/out/invitation-repository.port';
 import { Invitation } from '../../../domain/invitation/entities/invitation.entity';
-
-export class RevokeInvitationCommand {
-    constructor(
-        public readonly tenantId: string,
-        public readonly invitationId: string,
-    ) { }
-}
+import { RevokeInvitationCommand } from '../../ports/in/commands/revoke-invitation.command';
 
 @Injectable()
 export class RevokeInvitationUseCase {

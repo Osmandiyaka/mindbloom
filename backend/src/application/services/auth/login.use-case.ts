@@ -3,11 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { IUserRepository } from '../../../domain/ports/out/user-repository.port';
 import { USER_REPOSITORY } from '../../../domain/ports/out/repository.tokens';
 import { MongooseUserRepository } from '../../../infrastructure/adapters/persistence/mongoose/user.repository';
-
-export interface LoginCommand {
-    email: string;
-    password: string;
-}
+import { LoginCommand } from '../../ports/in/commands/login.command';
 
 export interface LoginResult {
     access_token: string;

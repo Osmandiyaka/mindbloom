@@ -53,7 +53,10 @@ export class StudentsController {
     @ApiResponse({ status: 201, description: 'Student created successfully', type: StudentResponseDto })
     async create(@Body() createStudentDto: CreateStudentDto): Promise<StudentResponseDto> {
         const tenantId = this.tenantContext.tenantId;
-        const student = await this.createStudentUseCase.execute(createStudentDto as any, tenantId);
+        const student = await this.createStudentUseCase.execute({
+            ...(createStudentDto as any),
+            tenantId,
+        });
         return StudentResponseDto.fromDomain(student);
     }
 
@@ -199,7 +202,10 @@ export class StudentsController {
                 results.total++;
 
                 const studentData = this.mapCSVToStudent(headers, values);
-                await this.createStudentUseCase.execute(studentData, tenantId);
+                await this.createStudentUseCase.execute({
+                    ...studentData,
+                    tenantId,
+                });
                 results.successful++;
             } catch (error) {
                 results.failed++;
@@ -232,7 +238,11 @@ export class StudentsController {
         @Body() updateStudentDto: UpdateStudentDto,
     ): Promise<StudentResponseDto> {
         const tenantId = this.tenantContext.tenantId;
-        const student = await this.updateStudentUseCase.execute(id, tenantId, updateStudentDto as any);
+        const student = await this.updateStudentUseCase.execute({
+            id,
+            tenantId,
+            ...(updateStudentDto as any),
+        });
         return StudentResponseDto.fromDomain(student);
     }
 
@@ -254,7 +264,11 @@ export class StudentsController {
         @Body() guardianDto: any,
     ): Promise<StudentResponseDto> {
         const tenantId = this.tenantContext.tenantId;
-        const student = await this.addGuardianUseCase.execute(id, tenantId, guardianDto);
+        const student = await this.addGuardianUseCase.execute({
+            studentId: id,
+            tenantId,
+            ...guardianDto,
+        });
         return StudentResponseDto.fromDomain(student);
     }
 
@@ -266,7 +280,11 @@ export class StudentsController {
         @Body() enrollmentDto: any,
     ): Promise<StudentResponseDto> {
         const tenantId = this.tenantContext.tenantId;
-        const student = await this.updateEnrollmentUseCase.execute(id, tenantId, enrollmentDto);
+        const student = await this.updateEnrollmentUseCase.execute({
+            studentId: id,
+            tenantId,
+            ...enrollmentDto,
+        });
         return StudentResponseDto.fromDomain(student);
     }
 

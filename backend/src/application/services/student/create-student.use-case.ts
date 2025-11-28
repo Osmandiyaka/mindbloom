@@ -3,77 +3,7 @@ import { randomUUID } from 'crypto';
 import { Types } from 'mongoose';
 import { Student, StudentProps, StudentStatus } from '../../../domain/student/entities/student.entity';
 import { IStudentRepository, STUDENT_REPOSITORY } from '../../../domain/ports/out/student-repository.port';
-
-export interface CreateStudentCommand {
-    // Personal Information
-    firstName: string;
-    lastName: string;
-    middleName?: string;
-    dateOfBirth: Date;
-    gender: 'male' | 'female' | 'other';
-    nationality?: string;
-    religion?: string;
-    caste?: string;
-    motherTongue?: string;
-
-    // Contact Information
-    email?: string;
-    phone?: string;
-    address?: {
-        street: string;
-        city: string;
-        state: string;
-        postalCode: string;
-        country: string;
-    };
-
-    // Guardians
-    guardians: Array<{
-        id?: string;
-        name: string;
-        relationship: 'father' | 'mother' | 'guardian' | 'sibling' | 'grandparent' | 'other';
-        phone: string;
-        email?: string;
-        occupation?: string;
-        address?: {
-            street: string;
-            city: string;
-            state: string;
-            postalCode: string;
-            country: string;
-        };
-        isPrimary: boolean;
-        isEmergencyContact: boolean;
-    }>;
-
-    // Medical Information
-    medicalInfo?: {
-        bloodGroup?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
-        allergies?: string[];
-        medicalConditions?: string[];
-        medications?: string[];
-        doctorName?: string;
-        doctorPhone?: string;
-        insuranceProvider?: string;
-        insuranceNumber?: string;
-    };
-
-    // Enrollment Information
-    enrollment: {
-        admissionNumber: string;
-        admissionDate: Date;
-        academicYear: string;
-        class: string;
-        section?: string;
-        rollNumber?: string;
-        previousSchool?: string;
-        previousClass?: string;
-    };
-
-    // Additional Information
-    photo?: string;
-    notes?: string;
-}
+import { CreateStudentCommand } from '../../ports/in/commands/create-student.command';
 
 @Injectable()
 export class CreateStudentUseCase {
@@ -82,11 +12,11 @@ export class CreateStudentUseCase {
         private readonly studentRepository: IStudentRepository,
     ) { }
 
-    async execute(command: CreateStudentCommand, tenantId: string): Promise<Student> {
+    async execute(command: CreateStudentCommand): Promise<Student> {
         // Check if admission number already exists
         const existing = await this.studentRepository.findByAdmissionNumber(
             command.enrollment.admissionNumber,
-            tenantId,
+            command.tenantId,
         );
 
         if (existing) {
@@ -104,7 +34,7 @@ export class CreateStudentUseCase {
 
         const studentProps: StudentProps = {
             id: studentId,
-            tenantId,
+            tenantId: command.tenantId,
             firstName: command.firstName,
             lastName: command.lastName,
             middleName: command.middleName,

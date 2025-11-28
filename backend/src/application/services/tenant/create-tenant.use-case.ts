@@ -1,13 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Tenant } from '../../../domain/tenant/entities/tenant.entity';
 import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/ports/out/tenant-repository.port';
-
-export interface CreateTenantCommand {
-    name: string;
-    subdomain: string;
-    plan?: 'free' | 'basic' | 'premium' | 'enterprise';
-    status?: 'active' | 'suspended' | 'inactive';
-}
+import { CreateTenantCommand } from '../../ports/in/commands/create-tenant.command';
 
 @Injectable()
 export class CreateTenantUseCase {

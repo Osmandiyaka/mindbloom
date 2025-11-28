@@ -4,7 +4,8 @@ import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/tenant/tenant.guard';
 import { TenantContext } from '../../common/tenant/tenant.context';
 import { GetSubscriptionUseCase } from '../../application/services/subscription/get-subscription.use-case';
-import { ChangePlanUseCase, ChangePlanCommand } from '../../application/services/subscription/change-plan.use-case';
+import { ChangePlanUseCase } from '../../application/services/subscription/change-plan.use-case';
+import { ChangePlanCommand } from '../../application/ports/in/commands/change-plan.command';
 import { ChangePlanDto } from '../dtos/requests/subscription/change-plan.dto';
 
 @ApiTags('Subscription')
