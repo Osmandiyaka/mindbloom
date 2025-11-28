@@ -17,9 +17,9 @@ import {
     GetRoleByIdUseCase,
     UpdateRoleUseCase,
     DeleteRoleUseCase,
-} from '../../application/rbac/use-cases';
-import { GetPermissionTreeUseCase } from '../../application/rbac/use-cases/get-permission-tree.use-case';
-import { AddPermissionsToRoleUseCase } from '../../application/rbac/use-cases/add-permissions-to-role.use-case';
+} from '../../application/services/rbac';
+import { GetPermissionTreeUseCase } from '../../application/services/rbac/get-permission-tree.use-case';
+import { AddPermissionsToRoleUseCase } from '../../application/services/rbac/add-permissions-to-role.use-case';
 
 @ApiTags('Roles')
 @ApiBearerAuth()

@@ -6,7 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { USER_REPOSITORY } from '../../domain/ports/out/repository.tokens';
 import { MongooseUserRepository } from '../../infrastructure/adapters/persistence/mongoose/user.repository';
 import { UserSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/user.schema';
-import { LoginUseCase, RegisterUseCase } from '../../application/auth/use-cases';
+import { LoginUseCase, RegisterUseCase } from '../../application/services/auth';
 import { AuthController } from '../../presentation/controllers/auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';

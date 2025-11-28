@@ -7,7 +7,7 @@ import { IUserRepository } from '../../../../domain/ports/out/user-repository.po
 import { UserDocument } from './schemas/user.schema';
 import { RoleDocument } from './schemas/role.schema';
 import { TenantContext } from '../../../../common/tenant/tenant.context';
-import { GetPermissionTreeUseCase } from '../../../../application/rbac/use-cases/get-permission-tree.use-case';
+import { GetPermissionTreeUseCase } from '../../../../application/services/rbac/get-permission-tree.use-case';
 import { Permission } from '../../../../domain/rbac/entities/permission.entity';
 import { Role } from '../../../../domain/rbac/entities/role.entity';
 

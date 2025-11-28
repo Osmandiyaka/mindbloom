@@ -11,7 +11,7 @@ import {
 import { IsArray, IsString } from 'class-validator';
 import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/tenant/tenant.guard';
-import { AddPermissionsToUserUseCase } from '../../application/rbac/use-cases/add-permissions-to-user.use-case';
+import { AddPermissionsToUserUseCase } from '../../application/services/rbac/add-permissions-to-user.use-case';
 import { CreateUserUseCase, UpdateUserUseCase } from '../../application/services/user';
 import { IUserRepository } from '../../domain/ports/out/user-repository.port';
 import { USER_REPOSITORY } from '../../domain/ports/out/repository.tokens';

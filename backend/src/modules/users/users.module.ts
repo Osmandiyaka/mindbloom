@@ -4,8 +4,8 @@ import { UsersController } from '../../presentation/controllers/users.controller
 import { USER_REPOSITORY } from '../../domain/ports/out/repository.tokens';
 import { MongooseUserRepository } from '../../infrastructure/adapters/persistence/mongoose/user.repository';
 import { UserSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/user.schema';
-import { AddPermissionsToUserUseCase } from '../../application/rbac/use-cases/add-permissions-to-user.use-case';
-import { GetPermissionTreeUseCase } from '../../application/rbac/use-cases/get-permission-tree.use-case';
+import { AddPermissionsToUserUseCase } from '../../application/services/rbac/add-permissions-to-user.use-case';
+import { GetPermissionTreeUseCase } from '../../application/services/rbac/get-permission-tree.use-case';
 import { CreateUserUseCase, UpdateUserUseCase } from '../../application/services/user';
 
 @Module({
