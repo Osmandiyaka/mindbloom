@@ -6,10 +6,13 @@ import { ExpenseClaimSchema } from '../../infrastructure/persistence/mongoose/sc
 import { FinanceService } from './finance.service';
 import { FinanceController } from './finance.controller';
 import { AccountingModule } from '../accounting/accounting.module';
+import { UsersModule } from '../users/users.module';
+import { PermissionGuard } from '../../common/guards/permission.guard';
 
 @Module({
     imports: [
         AccountingModule,
+        UsersModule,
         MongooseModule.forFeature([
             { name: 'Budget', schema: BudgetSchema },
             { name: 'PurchaseRequest', schema: PurchaseRequestSchema },
@@ -17,7 +20,7 @@ import { AccountingModule } from '../accounting/accounting.module';
         ]),
     ],
     controllers: [FinanceController],
-    providers: [FinanceService],
+    providers: [FinanceService, PermissionGuard],
     exports: [FinanceService],
 })
 export class FinanceModule { }

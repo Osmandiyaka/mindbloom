@@ -1,5 +1,5 @@
-import { Permission } from '../../rbac/entities/permission.entity';
-import { Role } from '../../rbac/entities/role.entity';
+import { Permission } from '../rbac/entities/permission.entity';
+import { Role } from '../rbac/entities/role.entity';
 
 export class User {
     constructor(

@@ -1,7 +1,8 @@
 import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PermissionAction } from '../../domain/rbac/entities/permission.entity';
-import { IUserRepository, USER_REPOSITORY } from '../../domain/user/ports/user.repository.interface';
+import { IUserRepository } from '../../domain/ports/out/user-repository.port';
+import { USER_REPOSITORY } from '../../domain/ports/out/repository.tokens';
 
 export const PERMISSIONS_KEY = 'permissions';
 

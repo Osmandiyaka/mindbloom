@@ -9,15 +9,16 @@ import {
     Request,
 } from '@nestjs/common';
 import { IsArray, IsString } from 'class-validator';
-import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard';
-import { TenantGuard } from '../../../common/tenant/tenant.guard';
-import { AddPermissionsToUserUseCase } from '../../../application/rbac/use-cases/add-permissions-to-user.use-case';
-import { CreateUserUseCase, UpdateUserUseCase } from '../../../application/user/use-cases';
-import { IUserRepository, USER_REPOSITORY } from '../../../domain/user/ports/user.repository.interface';
+import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
+import { TenantGuard } from '../../common/tenant/tenant.guard';
+import { AddPermissionsToUserUseCase } from '../../application/rbac/use-cases/add-permissions-to-user.use-case';
+import { CreateUserUseCase, UpdateUserUseCase } from '../../application/services/user';
+import { IUserRepository } from '../../domain/ports/out/user-repository.port';
+import { USER_REPOSITORY } from '../../domain/ports/out/repository.tokens';
 import { Inject } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UserResponseDto } from '../auth/dto/user-response.dto';
+import { CreateUserDto } from '../dtos/requests/users/create-user.dto';
+import { UpdateUserDto } from '../dtos/requests/users/update-user.dto';
+import { UserResponseDto } from '../dtos/responses/user-response.dto';
 
 class AddPermissionsDto {
     @IsArray()

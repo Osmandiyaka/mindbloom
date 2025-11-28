@@ -1,15 +1,8 @@
 import { Inject, Injectable, ConflictException } from '@nestjs/common';
-import { IUserRepository, USER_REPOSITORY } from '../../../domain/user/ports/user.repository.interface';
-import { User } from '../../../domain/user/entities/user.entity';
-
-export interface CreateUserCommand {
-    tenantId: string;
-    email: string;
-    name: string;
-    password: string;
-    roleId?: string;
-    profilePicture?: string;
-}
+import { IUserRepository } from '../../../domain/ports/out/user-repository.port';
+import { USER_REPOSITORY } from '../../../domain/ports/out/repository.tokens';
+import { User } from '../../../domain/entities/user.entity';
+import { CreateUserCommand } from '../../ports/in/commands/create-user.command';
 
 @Injectable()
 export class CreateUserUseCase {

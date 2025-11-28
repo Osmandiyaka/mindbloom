@@ -4,7 +4,7 @@ import { LoginUseCase, RegisterUseCase } from '../../../application/auth/use-cas
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
-import { UserResponseDto } from './dto/user-response.dto';
+import { UserResponseDto } from '../../../presentation/dtos/responses/user-response.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')

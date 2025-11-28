@@ -1,7 +1,8 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { IUserRepository, USER_REPOSITORY } from '../../../domain/user/ports/user.repository.interface';
-import { MongooseUserRepository } from '../../../infrastructure/persistence/mongoose/repositories/mongoose-user.repository';
+import { IUserRepository } from '../../../domain/ports/out/user-repository.port';
+import { USER_REPOSITORY } from '../../../domain/ports/out/repository.tokens';
+import { MongooseUserRepository } from '../../../infrastructure/adapters/persistence/mongoose/user.repository';
 
 export interface LoginCommand {
     email: string;

@@ -5,7 +5,7 @@ import { Role } from '../../../../domain/rbac/entities/role.entity';
 import { Permission } from '../../../../domain/rbac/entities/permission.entity';
 import { createSystemRoles } from '../../../../domain/rbac/entities/system-roles';
 import { IRoleRepository } from '../../../../domain/rbac/ports/role.repository.interface';
-import { RoleDocument } from '../schemas/role.schema';
+import { RoleDocument } from './schemas/role.schema';
 
 @Injectable()
 export class MongooseRoleRepository implements IRoleRepository {

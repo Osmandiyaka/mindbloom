@@ -1,5 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { IUserRepository, USER_REPOSITORY } from '../../../domain/user/ports/user.repository.interface';
+import { IUserRepository } from '../../../domain/ports/out/user-repository.port';
+import { USER_REPOSITORY } from '../../../domain/ports/out/repository.tokens';
 import { GetPermissionTreeUseCase } from './get-permission-tree.use-case';
 
 /**

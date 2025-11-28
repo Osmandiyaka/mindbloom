@@ -1,6 +1,7 @@
 import { Inject, Injectable, ConflictException } from '@nestjs/common';
-import { User } from '../../../domain/user/entities/user.entity';
-import { IUserRepository, USER_REPOSITORY } from '../../../domain/user/ports/user.repository.interface';
+import { User } from '../../../domain/entities/user.entity';
+import { IUserRepository } from '../../../domain/ports/out/user-repository.port';
+import { USER_REPOSITORY } from '../../../domain/ports/out/repository.tokens';
 
 export interface RegisterCommand {
     tenantId: string;
