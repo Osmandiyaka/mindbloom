@@ -1,13 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/ports/out/tenant-repository.port';
 import { TenantSettings } from '../../../domain/tenant/entities/tenant.entity';
-
-export class UpdateTenantSettingsCommand {
-    constructor(
-        public readonly tenantId: string,
-        public readonly settings: TenantSettings,
-    ) { }
-}
+import { UpdateTenantSettingsCommand } from '../../ports/in/commands/update-tenant-settings.command';
 
 @Injectable()
 export class UpdateTenantSettingsUseCase {

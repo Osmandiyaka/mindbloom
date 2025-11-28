@@ -3,13 +3,7 @@ import { InstalledPluginRepository } from '../../../domain/ports/out/installed-p
 import { PluginRegistry } from '../../../core/plugins/plugin.registry';
 import { PluginContextFactory } from '../../../core/plugins/plugin-context.factory';
 import { EventBus, PlatformEvent } from '../../../core/plugins/event-bus.service';
-
-export class DisablePluginCommand {
-    constructor(
-        public readonly pluginId: string,
-        public readonly tenantId: string,
-    ) { }
-}
+import { DisablePluginCommand } from '../../ports/in/commands/plugin/disable-plugin.command';
 
 @Injectable()
 export class DisablePluginUseCase {

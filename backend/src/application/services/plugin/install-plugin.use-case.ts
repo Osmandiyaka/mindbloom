@@ -5,13 +5,7 @@ import { PluginRepository } from '../../../domain/ports/out/plugin-repository.po
 import { PluginRegistry } from '../../../core/plugins/plugin.registry';
 import { PluginContextFactory } from '../../../core/plugins/plugin-context.factory';
 import { EventBus, PlatformEvent } from '../../../core/plugins/event-bus.service';
-
-export class InstallPluginCommand {
-    constructor(
-        public readonly pluginId: string,
-        public readonly tenantId: string,
-    ) { }
-}
+import { InstallPluginCommand } from '../../ports/in/commands/plugin/install-plugin.command';
 
 @Injectable()
 export class InstallPluginUseCase {

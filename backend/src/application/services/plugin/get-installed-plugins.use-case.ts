@@ -1,9 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InstalledPluginRepository } from '../../../domain/ports/out/installed-plugin-repository.port';
-
-export class GetInstalledPluginsCommand {
-    constructor(public readonly tenantId: string) { }
-}
+import { GetInstalledPluginsCommand } from '../../ports/in/commands/plugin/get-installed-plugins.command';
 
 @Injectable()
 export class GetInstalledPluginsUseCase {

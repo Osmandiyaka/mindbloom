@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Put, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { GetTenantBySubdomainUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, UpdateTenantSettingsCommand } from '../../application/services/tenant';
+import { GetTenantBySubdomainUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase } from '../../application/services/tenant';
+import { UpdateTenantSettingsCommand } from '../../application/ports/in/commands/update-tenant-settings.command';
 import { TenantResponseDto } from '../dtos/responses/tenant/tenant-response.dto';
 import { CreateTenantDto } from '../dtos/requests/tenant/create-tenant.dto';
 import { Public } from '../../common/tenant/public.decorator';

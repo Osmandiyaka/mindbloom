@@ -3,13 +3,7 @@ import { InstalledPluginRepository } from '../../../domain/ports/out/installed-p
 import { PluginRegistry } from '../../../core/plugins/plugin.registry';
 import { PluginContextFactory } from '../../../core/plugins/plugin-context.factory';
 import { EventBus, PlatformEvent } from '../../../core/plugins/event-bus.service';
-
-export class EnablePluginCommand {
-    constructor(
-        public readonly pluginId: string,
-        public readonly tenantId: string,
-    ) { }
-}
+import { EnablePluginCommand } from '../../ports/in/commands/plugin/enable-plugin.command';
 
 @Injectable()
 export class EnablePluginUseCase {

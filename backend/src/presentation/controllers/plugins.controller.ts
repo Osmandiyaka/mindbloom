@@ -15,20 +15,20 @@ import { TenantGuard } from '../../common/tenant/tenant.guard';
 import { TenantContext } from '../../common/tenant/tenant.context';
 import {
     BrowsePluginsUseCase,
-    BrowsePluginsCommand,
     InstallPluginUseCase,
-    InstallPluginCommand,
     EnablePluginUseCase,
-    EnablePluginCommand,
     DisablePluginUseCase,
-    DisablePluginCommand,
     UninstallPluginUseCase,
-    UninstallPluginCommand,
     GetInstalledPluginsUseCase,
-    GetInstalledPluginsCommand,
     UpdatePluginSettingsUseCase,
-    UpdatePluginSettingsCommand,
 } from '../../application/services/plugin';
+import { BrowsePluginsQuery } from '../../application/ports/in/queries/browse-plugins.query';
+import { InstallPluginCommand } from '../../application/ports/in/commands/plugin/install-plugin.command';
+import { EnablePluginCommand } from '../../application/ports/in/commands/plugin/enable-plugin.command';
+import { DisablePluginCommand } from '../../application/ports/in/commands/plugin/disable-plugin.command';
+import { UninstallPluginCommand } from '../../application/ports/in/commands/plugin/uninstall-plugin.command';
+import { GetInstalledPluginsCommand } from '../../application/ports/in/commands/plugin/get-installed-plugins.command';
+import { UpdatePluginSettingsCommand } from '../../application/ports/in/commands/plugin/update-plugin-settings.command';
 import { InstallPluginDto } from '../dtos/requests/plugins/install-plugin.dto';
 import { UpdatePluginSettingsDto } from '../dtos/requests/plugins/update-plugin-settings.dto';
 import { PluginResponseDto } from '../dtos/responses/plugins/plugin-response.dto';
@@ -60,8 +60,8 @@ export class PluginsController {
         @Query('category') category?: string,
         @Query('search') search?: string,
     ): Promise<PluginResponseDto[]> {
-        const command = new BrowsePluginsCommand(category, search);
-        const plugins = await this.browsePluginsUseCase.execute(command);
+        const query = new BrowsePluginsQuery(category, search);
+        const plugins = await this.browsePluginsUseCase.execute(query);
 
         const tenantId = this.tenantContext.tenantId;
         const installedPlugins = await this.getInstalledPluginsUseCase.execute(

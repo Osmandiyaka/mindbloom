@@ -1,12 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PluginRepository } from '../../../domain/ports/out/plugin-repository.port';
-
-export class BrowsePluginsCommand {
-    constructor(
-        public readonly category?: string,
-        public readonly search?: string,
-    ) { }
-}
+import { BrowsePluginsQuery } from '../../ports/in/queries/browse-plugins.query';
 
 @Injectable()
 export class BrowsePluginsUseCase {
@@ -15,13 +9,13 @@ export class BrowsePluginsUseCase {
         private readonly pluginRepository: PluginRepository,
     ) { }
 
-    async execute(command: BrowsePluginsCommand) {
-        if (command.search) {
-            return await this.pluginRepository.search(command.search);
+    async execute(query: BrowsePluginsQuery) {
+        if (query.search) {
+            return await this.pluginRepository.search(query.search);
         }
 
-        if (command.category) {
-            return await this.pluginRepository.findByCategory(command.category);
+        if (query.category) {
+            return await this.pluginRepository.findByCategory(query.category);
         }
 
         return await this.pluginRepository.findAll();
