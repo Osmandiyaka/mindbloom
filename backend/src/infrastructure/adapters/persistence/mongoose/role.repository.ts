@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { Role } from '../../../../domain/rbac/entities/role.entity';
 import { Permission } from '../../../../domain/rbac/entities/permission.entity';
 import { createSystemRoles } from '../../../../domain/rbac/entities/system-roles';
-import { IRoleRepository } from '../../../../domain/rbac/ports/role.repository.interface';
+import { IRoleRepository } from '../../../../domain/ports/out/role-repository.port';
 import { RoleDocument } from './schemas/role.schema';
 
 @Injectable()

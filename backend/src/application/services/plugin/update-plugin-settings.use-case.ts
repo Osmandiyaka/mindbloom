@@ -1,5 +1,5 @@
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
-import { InstalledPluginRepository } from '../../../domain/plugin/ports/installed-plugin.repository';
+import { InstalledPluginRepository } from '../../../domain/ports/out/installed-plugin-repository.port';
 import { InstalledPlugin } from '../../../domain/plugin/entities/installed-plugin.entity';
 import { PluginRegistry } from '../../../core/plugins/plugin.registry';
 

@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
     IRoleRepository,
     ROLE_REPOSITORY,
-} from '../../../domain/rbac/ports/role.repository.interface';
+} from '../../../domain/ports/out/role-repository.port';
 
 @Injectable()
 export class DeleteRoleUseCase {

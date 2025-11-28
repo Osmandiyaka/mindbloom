@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RoleSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/role.schema';
 import { MongooseRoleRepository } from '../../infrastructure/adapters/persistence/mongoose/role.repository';
-import { ROLE_REPOSITORY } from '../../domain/rbac/ports/role.repository.interface';
+import { ROLE_REPOSITORY } from '../../domain/ports/out/role-repository.port';
 import {
     CreateRoleUseCase,
     GetAllRolesUseCase,

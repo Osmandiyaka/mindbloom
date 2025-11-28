@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { INVITATION_REPOSITORY, InvitationRepository } from '../../../domain/invitation/ports/invitation.repository';
+import { INVITATION_REPOSITORY, InvitationRepository } from '../../../domain/ports/out/invitation-repository.port';
 import { Invitation } from '../../../domain/invitation/entities/invitation.entity';
 
 @Injectable()

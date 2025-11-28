@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { SUBSCRIPTION_REPOSITORY, SubscriptionRepository } from '../../../domain/subscription/ports/subscription.repository';
+import { SUBSCRIPTION_REPOSITORY, SubscriptionRepository } from '../../../domain/ports/out/subscription-repository.port';
 import { Subscription } from '../../../domain/subscription/entities/subscription.entity';
 
 @Injectable()

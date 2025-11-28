@@ -24,9 +24,9 @@ import {
     GetStudentByIdUseCase,
     UpdateStudentUseCase,
     DeleteStudentUseCase,
-} from '../../application/student/use-cases';
-import { AddGuardianToStudentUseCase } from '../../application/student/use-cases/add-guardian-to-student.use-case';
-import { UpdateStudentEnrollmentUseCase } from '../../application/student/use-cases/update-student-enrollment.use-case';
+} from '../../application/services/student';
+import { AddGuardianToStudentUseCase } from '../../application/services/student/add-guardian-to-student.use-case';
+import { UpdateStudentEnrollmentUseCase } from '../../application/services/student/update-student-enrollment.use-case';
 import { CreateStudentDto } from '../dtos/requests/students/create-student.dto';
 import { UpdateStudentDto } from '../dtos/requests/students/update-student.dto';
 import { StudentResponseDto } from '../dtos/responses/students/student-response.dto';

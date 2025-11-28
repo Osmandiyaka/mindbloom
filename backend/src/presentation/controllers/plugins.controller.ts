@@ -28,7 +28,7 @@ import {
     GetInstalledPluginsCommand,
     UpdatePluginSettingsUseCase,
     UpdatePluginSettingsCommand,
-} from '../../application/plugin/use-cases';
+} from '../../application/services/plugin';
 import { InstallPluginDto } from '../dtos/requests/plugins/install-plugin.dto';
 import { UpdatePluginSettingsDto } from '../dtos/requests/plugins/update-plugin-settings.dto';
 import { PluginResponseDto } from '../dtos/responses/plugins/plugin-response.dto';

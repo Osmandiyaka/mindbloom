@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { IRoleRepository, ROLE_REPOSITORY } from '../../../domain/rbac/ports/role.repository.interface';
+import { IRoleRepository, ROLE_REPOSITORY } from '../../../domain/ports/out/role-repository.port';
 import { GetPermissionTreeUseCase } from './get-permission-tree.use-case';
 
 /**

@@ -3,8 +3,8 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/tenant/tenant.guard';
 import { TenantContext } from '../../common/tenant/tenant.context';
-import { GetSubscriptionUseCase } from '../../application/subscription/use-cases/get-subscription.use-case';
-import { ChangePlanUseCase, ChangePlanCommand } from '../../application/subscription/use-cases/change-plan.use-case';
+import { GetSubscriptionUseCase } from '../../application/services/subscription/get-subscription.use-case';
+import { ChangePlanUseCase, ChangePlanCommand } from '../../application/services/subscription/change-plan.use-case';
 import { ChangePlanDto } from '../dtos/requests/subscription/change-plan.dto';
 
 @ApiTags('Subscription')

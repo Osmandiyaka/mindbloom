@@ -1,10 +1,10 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { InstalledPluginRepository } from '../../../domain/plugin/ports/installed-plugin.repository';
+import { InstalledPluginRepository } from '../../../domain/ports/out/installed-plugin-repository.port';
 import { PluginRegistry } from '../../../core/plugins/plugin.registry';
 import { PluginContextFactory } from '../../../core/plugins/plugin-context.factory';
 import { EventBus, PlatformEvent } from '../../../core/plugins/event-bus.service';
 
-export class DisablePluginCommand {
+export class EnablePluginCommand {
     constructor(
         public readonly pluginId: string,
         public readonly tenantId: string,
@@ -12,7 +12,7 @@ export class DisablePluginCommand {
 }
 
 @Injectable()
-export class DisablePluginUseCase {
+export class EnablePluginUseCase {
     constructor(
         @Inject('InstalledPluginRepository')
         private readonly installedPluginRepository: InstalledPluginRepository,
@@ -21,7 +21,7 @@ export class DisablePluginUseCase {
         private readonly eventBus: EventBus,
     ) { }
 
-    async execute(command: DisablePluginCommand) {
+    async execute(command: EnablePluginCommand) {
         const installedPlugin = await this.installedPluginRepository.findByPluginId(
             command.pluginId,
             command.tenantId,
@@ -31,12 +31,12 @@ export class DisablePluginUseCase {
             throw new NotFoundException('Plugin not installed');
         }
 
-        const disabled = installedPlugin.disable();
-        const saved = await this.installedPluginRepository.save(disabled);
+        const enabled = installedPlugin.enable();
+        const saved = await this.installedPluginRepository.save(enabled);
 
         const context = this.pluginContextFactory.create(command.tenantId, command.pluginId);
-        await this.pluginRegistry.disablePlugin(command.pluginId, context);
-        this.eventBus.publish(PlatformEvent.PLUGIN_DISABLED, { pluginId: command.pluginId, tenantId: command.tenantId }, command.tenantId);
+        await this.pluginRegistry.enablePlugin(command.pluginId, context);
+        this.eventBus.publish(PlatformEvent.PLUGIN_ENABLED, { pluginId: command.pluginId, tenantId: command.tenantId }, command.tenantId);
 
         return saved;
     }

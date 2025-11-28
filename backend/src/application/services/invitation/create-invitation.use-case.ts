@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Invitation, InvitationStatus } from '../../../domain/invitation/entities/invitation.entity';
-import { INVITATION_REPOSITORY, InvitationRepository } from '../../../domain/invitation/ports/invitation.repository';
+import { INVITATION_REPOSITORY, InvitationRepository } from '../../../domain/ports/out/invitation-repository.port';
 import { v4 as uuidv4 } from 'uuid';
 
 export class CreateInvitationCommand {

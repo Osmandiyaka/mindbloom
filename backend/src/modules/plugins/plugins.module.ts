@@ -13,7 +13,7 @@ import {
     UninstallPluginUseCase,
     GetInstalledPluginsUseCase,
     UpdatePluginSettingsUseCase,
-} from '../../application/plugin/use-cases';
+} from '../../application/services/plugin';
 import { PluginsController } from '../../presentation/controllers/plugins.controller';
 import { PluginRegistry } from '../../core/plugins/plugin.registry';
 import { EventBus } from '../../core/plugins/event-bus.service';

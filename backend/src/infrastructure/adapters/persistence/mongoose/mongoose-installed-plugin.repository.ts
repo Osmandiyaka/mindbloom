@@ -5,7 +5,7 @@ import {
     InstalledPlugin,
     InstalledPluginStatus,
 } from '@domain/plugin/entities/installed-plugin.entity';
-import { InstalledPluginRepository } from '@domain/plugin/ports/installed-plugin.repository'; @Injectable()
+import { InstalledPluginRepository } from '@domain/ports/out/installed-plugin-repository.port'; @Injectable()
 export class MongooseInstalledPluginRepository
     implements InstalledPluginRepository {
     constructor(

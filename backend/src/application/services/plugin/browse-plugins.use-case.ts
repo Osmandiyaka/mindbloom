@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PluginRepository } from '../../../domain/plugin/ports/plugin.repository';
+import { PluginRepository } from '../../../domain/ports/out/plugin-repository.port';
 
 export class BrowsePluginsCommand {
     constructor(

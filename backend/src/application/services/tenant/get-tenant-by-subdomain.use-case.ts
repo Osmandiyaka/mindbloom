@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Tenant } from '../../../domain/tenant/entities/tenant.entity';
-import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/tenant/ports/tenant.repository.interface';
+import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/ports/out/tenant-repository.port';
 
 @Injectable()
 export class GetTenantBySubdomainUseCase {

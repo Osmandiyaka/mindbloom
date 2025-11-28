@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { InstalledPluginRepository } from '../../../domain/plugin/ports/installed-plugin.repository';
+import { InstalledPluginRepository } from '../../../domain/ports/out/installed-plugin-repository.port';
 
 export class GetInstalledPluginsCommand {
     constructor(public readonly tenantId: string) { }

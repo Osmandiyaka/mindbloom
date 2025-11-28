@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Tenant } from '../../../../domain/tenant/entities/tenant.entity';
-import { ITenantRepository } from '../../../../domain/tenant/ports/tenant.repository.interface';
+import { ITenantRepository } from '../../../../domain/ports/out/tenant-repository.port';
 import { TenantDocument } from './schemas/tenant.schema';
 
 @Injectable()

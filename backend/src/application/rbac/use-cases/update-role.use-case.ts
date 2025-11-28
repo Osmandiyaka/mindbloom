@@ -4,7 +4,7 @@ import { Permission } from '../../../domain/rbac/entities/permission.entity';
 import {
     IRoleRepository,
     ROLE_REPOSITORY,
-} from '../../../domain/rbac/ports/role.repository.interface';
+} from '../../../domain/ports/out/role-repository.port';
 
 export interface UpdateRoleDto {
     id: string;

@@ -1,5 +1,5 @@
 import { Inject, Injectable, BadRequestException } from '@nestjs/common';
-import { SUBSCRIPTION_REPOSITORY, SubscriptionRepository } from '../../../domain/subscription/ports/subscription.repository';
+import { SUBSCRIPTION_REPOSITORY, SubscriptionRepository } from '../../../domain/ports/out/subscription-repository.port';
 import { SubscriptionPlan, Subscription } from '../../../domain/subscription/entities/subscription.entity';
 
 export class ChangePlanCommand {

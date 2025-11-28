@@ -3,7 +3,7 @@ import { Role } from '../../../domain/rbac/entities/role.entity';
 import {
     IRoleRepository,
     ROLE_REPOSITORY,
-} from '../../../domain/rbac/ports/role.repository.interface';
+} from '../../../domain/ports/out/role-repository.port';
 
 @Injectable()
 export class GetRoleByIdUseCase {

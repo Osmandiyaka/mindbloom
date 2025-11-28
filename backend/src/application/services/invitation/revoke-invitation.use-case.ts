@@ -1,8 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { INVITATION_REPOSITORY, InvitationRepository } from '../../../domain/invitation/ports/invitation.repository';
+import { INVITATION_REPOSITORY, InvitationRepository } from '../../../domain/ports/out/invitation-repository.port';
 import { Invitation } from '../../../domain/invitation/entities/invitation.entity';
 
-export class ResendInvitationCommand {
+export class RevokeInvitationCommand {
     constructor(
         public readonly tenantId: string,
         public readonly invitationId: string,
@@ -10,18 +10,18 @@ export class ResendInvitationCommand {
 }
 
 @Injectable()
-export class ResendInvitationUseCase {
+export class RevokeInvitationUseCase {
     constructor(
         @Inject(INVITATION_REPOSITORY)
         private readonly invitationRepository: InvitationRepository,
     ) { }
 
-    async execute(command: ResendInvitationCommand): Promise<Invitation> {
+    async execute(command: RevokeInvitationCommand): Promise<Invitation> {
         const existing = await this.invitationRepository.findById(command.invitationId, command.tenantId);
         if (!existing) {
             throw new NotFoundException('Invitation not found');
         }
-        const resent = existing.markSent();
-        return this.invitationRepository.save(resent);
+        const revoked = existing.revoke();
+        return this.invitationRepository.save(revoked);
     }
 }

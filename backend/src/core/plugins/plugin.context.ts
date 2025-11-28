@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { EventBus } from './event-bus.service';
-import { InstalledPluginRepository } from '../../domain/plugin/ports/installed-plugin.repository';
+import { InstalledPluginRepository } from '../../domain/ports/out/installed-plugin-repository.port';
 
 /**
  * Plugin Context - Provides isolated, tenant-aware access to platform services

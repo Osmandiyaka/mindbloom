@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InstalledPlugin } from '../../../domain/plugin/entities/installed-plugin.entity';
-import { InstalledPluginRepository } from '../../../domain/plugin/ports/installed-plugin.repository';
-import { PluginRepository } from '../../../domain/plugin/ports/plugin.repository';
+import { InstalledPluginRepository } from '../../../domain/ports/out/installed-plugin-repository.port';
+import { PluginRepository } from '../../../domain/ports/out/plugin-repository.port';
 import { PluginRegistry } from '../../../core/plugins/plugin.registry';
 import { PluginContextFactory } from '../../../core/plugins/plugin-context.factory';
 import { EventBus, PlatformEvent } from '../../../core/plugins/event-bus.service';

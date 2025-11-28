@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/tenant/ports/tenant.repository.interface';
+import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/ports/out/tenant-repository.port';
 import { TenantSettings } from '../../../domain/tenant/entities/tenant.entity';
 
 export class UpdateTenantSettingsCommand {
