@@ -10,9 +10,9 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard';
-import { TenantGuard } from '../../../common/tenant/tenant.guard';
-import { TenantContext } from '../../../common/tenant/tenant.context';
+import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
+import { TenantGuard } from '../../common/tenant/tenant.guard';
+import { TenantContext } from '../../common/tenant/tenant.context';
 import {
     BrowsePluginsUseCase,
     BrowsePluginsCommand,
@@ -28,14 +28,14 @@ import {
     GetInstalledPluginsCommand,
     UpdatePluginSettingsUseCase,
     UpdatePluginSettingsCommand,
-} from '../../../application/plugin/use-cases';
-import { InstallPluginDto } from './dto/install-plugin.dto';
-import { UpdatePluginSettingsDto } from './dto/update-plugin-settings.dto';
-import { PluginResponseDto } from './dto/plugin-response.dto';
-import { InstalledPluginResponseDto } from './dto/installed-plugin-response.dto';
-import { Plugin } from '../../../domain/plugin/entities/plugin.entity';
-import { InstalledPlugin } from '../../../domain/plugin/entities/installed-plugin.entity';
-import { PluginRegistry } from '../../../core/plugins/plugin.registry';
+} from '../../application/plugin/use-cases';
+import { InstallPluginDto } from '../dtos/requests/plugins/install-plugin.dto';
+import { UpdatePluginSettingsDto } from '../dtos/requests/plugins/update-plugin-settings.dto';
+import { PluginResponseDto } from '../dtos/responses/plugins/plugin-response.dto';
+import { InstalledPluginResponseDto } from '../dtos/responses/plugins/installed-plugin-response.dto';
+import { Plugin } from '../../domain/plugin/entities/plugin.entity';
+import { InstalledPlugin } from '../../domain/plugin/entities/installed-plugin.entity';
+import { PluginRegistry } from '../../core/plugins/plugin.registry';
 
 @ApiTags('Plugins')
 @ApiBearerAuth()

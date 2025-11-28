@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { TenantController } from '../../adapters/http/tenant/tenant.controller';
+import { TenantController } from '../../presentation/controllers/tenant.controller';
 import { GetTenantBySubdomainUseCase, GetTenantByIdUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase } from '../../application/tenant/use-cases';
 import { TenantSchema } from '../../infrastructure/persistence/mongoose/schemas/tenant.schema';
 import { MongooseTenantRepository } from '../../infrastructure/persistence/mongoose/repositories/mongoose-tenant.repository';

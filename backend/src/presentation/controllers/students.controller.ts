@@ -24,14 +24,14 @@ import {
     GetStudentByIdUseCase,
     UpdateStudentUseCase,
     DeleteStudentUseCase,
-} from '../../../application/student/use-cases';
-import { AddGuardianToStudentUseCase } from '../../../application/student/use-cases/add-guardian-to-student.use-case';
-import { UpdateStudentEnrollmentUseCase } from '../../../application/student/use-cases/update-student-enrollment.use-case';
-import { CreateStudentDto } from './dto/create-student.dto';
-import { UpdateStudentDto } from './dto/update-student.dto';
-import { StudentResponseDto } from './dto/student-response.dto';
-import { TenantGuard } from '../../../common/tenant/tenant.guard';
-import { TenantContext } from '../../../common/tenant/tenant.context';
+} from '../../application/student/use-cases';
+import { AddGuardianToStudentUseCase } from '../../application/student/use-cases/add-guardian-to-student.use-case';
+import { UpdateStudentEnrollmentUseCase } from '../../application/student/use-cases/update-student-enrollment.use-case';
+import { CreateStudentDto } from '../dtos/requests/students/create-student.dto';
+import { UpdateStudentDto } from '../dtos/requests/students/update-student.dto';
+import { StudentResponseDto } from '../dtos/responses/students/student-response.dto';
+import { TenantGuard } from '../../common/tenant/tenant.guard';
+import { TenantContext } from '../../common/tenant/tenant.context';
 
 @ApiTags('students')
 @Controller('students')

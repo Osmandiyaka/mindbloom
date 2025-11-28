@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Put, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { GetTenantBySubdomainUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, UpdateTenantSettingsCommand } from '../../../application/tenant/use-cases';
-import { TenantResponseDto } from './dto/tenant-response.dto';
-import { CreateTenantDto } from './dto/create-tenant.dto';
-import { Public } from '../../../common/tenant/public.decorator';
-import { TenantGuard } from '../../../common/tenant/tenant.guard';
-import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard';
-import { TenantContext } from '../../../common/tenant/tenant.context';
-import { UpdateTenantSettingsDto } from './dto/update-tenant-settings.dto';
+import { GetTenantBySubdomainUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, UpdateTenantSettingsCommand } from '../../application/tenant/use-cases';
+import { TenantResponseDto } from '../dtos/responses/tenant/tenant-response.dto';
+import { CreateTenantDto } from '../dtos/requests/tenant/create-tenant.dto';
+import { Public } from '../../common/tenant/public.decorator';
+import { TenantGuard } from '../../common/tenant/tenant.guard';
+import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
+import { TenantContext } from '../../common/tenant/tenant.context';
+import { UpdateTenantSettingsDto } from '../dtos/requests/tenant/update-tenant-settings.dto';
 
 @ApiTags('Tenants')
 @Controller('tenants')

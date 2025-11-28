@@ -14,7 +14,7 @@ import {
     GetInstalledPluginsUseCase,
     UpdatePluginSettingsUseCase,
 } from '../../application/plugin/use-cases';
-import { PluginsController } from '../../adapters/http/plugins/plugins.controller';
+import { PluginsController } from '../../presentation/controllers/plugins.controller';
 import { PluginRegistry } from '../../core/plugins/plugin.registry';
 import { EventBus } from '../../core/plugins/event-bus.service';
 import { SmsNotificationPluginModule } from '../../plugins/sms-notification/sms-notification.module';

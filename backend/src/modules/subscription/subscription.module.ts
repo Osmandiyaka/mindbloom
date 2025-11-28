@@ -4,7 +4,7 @@ import { SubscriptionSchema } from '../../infrastructure/persistence/mongoose/sc
 import { MongooseSubscriptionRepository } from '../../infrastructure/persistence/mongoose/repositories/mongoose-subscription.repository';
 import { SUBSCRIPTION_REPOSITORY } from '../../domain/subscription/ports/subscription.repository';
 import { GetSubscriptionUseCase, ChangePlanUseCase } from '../../application/subscription/use-cases';
-import { SubscriptionController } from '../../adapters/http/subscription/subscription.controller';
+import { SubscriptionController } from '../../presentation/controllers/subscription.controller';
 
 @Module({
     imports: [

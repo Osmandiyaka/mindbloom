@@ -12,7 +12,7 @@ import {
 } from '../../application/student/use-cases';
 import { AddGuardianToStudentUseCase } from '../../application/student/use-cases/add-guardian-to-student.use-case';
 import { UpdateStudentEnrollmentUseCase } from '../../application/student/use-cases/update-student-enrollment.use-case';
-import { StudentsController } from '../../adapters/http/students/students.controller';
+import { StudentsController } from '../../presentation/controllers/students.controller';
 
 @Module({
     imports: [

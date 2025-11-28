@@ -1,18 +1,11 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../../modules/auth/guards/jwt-auth.guard';
-import { TenantGuard } from '../../../common/tenant/tenant.guard';
-import { TenantContext } from '../../../common/tenant/tenant.context';
-import { GetSubscriptionUseCase } from '../../../application/subscription/use-cases/get-subscription.use-case';
-import { ChangePlanUseCase, ChangePlanCommand } from '../../../application/subscription/use-cases/change-plan.use-case';
-import { SubscriptionPlan } from '../../../domain/subscription/entities/subscription.entity';
-
-class ChangePlanDto {
-    plan!: SubscriptionPlan;
-    billingEmail!: string;
-    paymentMethodLast4?: string;
-    paymentBrand?: string;
-}
+import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
+import { TenantGuard } from '../../common/tenant/tenant.guard';
+import { TenantContext } from '../../common/tenant/tenant.context';
+import { GetSubscriptionUseCase } from '../../application/subscription/use-cases/get-subscription.use-case';
+import { ChangePlanUseCase, ChangePlanCommand } from '../../application/subscription/use-cases/change-plan.use-case';
+import { ChangePlanDto } from '../dtos/requests/subscription/change-plan.dto';
 
 @ApiTags('Subscription')
 @UseGuards(JwtAuthGuard, TenantGuard)
