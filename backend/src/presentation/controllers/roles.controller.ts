@@ -10,16 +10,16 @@ import {
     Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { CreateRoleDto, UpdateRoleDto } from './roles.dto';
+import { CreateRoleDto, UpdateRoleDto } from '../dtos/requests/roles/roles.dto';
 import {
     CreateRoleUseCase,
     GetAllRolesUseCase,
     GetRoleByIdUseCase,
     UpdateRoleUseCase,
     DeleteRoleUseCase,
-} from '../../../application/rbac/use-cases';
-import { GetPermissionTreeUseCase } from '../../../application/rbac/use-cases/get-permission-tree.use-case';
-import { AddPermissionsToRoleUseCase } from '../../../application/rbac/use-cases/add-permissions-to-role.use-case';
+} from '../../application/rbac/use-cases';
+import { GetPermissionTreeUseCase } from '../../application/rbac/use-cases/get-permission-tree.use-case';
+import { AddPermissionsToRoleUseCase } from '../../application/rbac/use-cases/add-permissions-to-role.use-case';
 
 @ApiTags('Roles')
 @ApiBearerAuth()

@@ -13,7 +13,7 @@ import {
 } from '../../application/rbac/use-cases';
 import { GetPermissionTreeUseCase } from '../../application/rbac/use-cases/get-permission-tree.use-case';
 import { AddPermissionsToRoleUseCase } from '../../application/rbac/use-cases/add-permissions-to-role.use-case';
-import { RolesController, PermissionsController } from '../../adapters/http/roles/roles.controller';
+import { RolesController, PermissionsController } from '../../presentation/controllers/roles.controller';
 
 @Module({
     imports: [

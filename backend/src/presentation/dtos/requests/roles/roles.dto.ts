@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsArray, IsNotEmpty, IsEnum, ValidateNested, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
-import { PermissionAction, PermissionScope } from '../../../domain/rbac/entities/permission.entity';
+import { PermissionAction, PermissionScope } from '../../../../domain/rbac/entities/permission.entity';
 
 export class PermissionDto {
     @ApiProperty({ example: 'students', required: false })
