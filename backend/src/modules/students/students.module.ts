@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { STUDENT_REPOSITORY } from '../../domain/student/ports/student.repository.interface';
+import { STUDENT_REPOSITORY } from '../../domain/ports/out/student-repository.port';
 import { MongooseStudentRepository } from '../../infrastructure/adapters/persistence/mongoose/mongoose-student.repository';
 import { StudentSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/student.schema';
 import {

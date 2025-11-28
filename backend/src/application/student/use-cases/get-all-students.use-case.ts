@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Student } from '../../../domain/student/entities/student.entity';
-import { IStudentRepository, STUDENT_REPOSITORY, StudentFilters } from '../../../domain/student/ports/student.repository.interface';
+import { IStudentRepository, STUDENT_REPOSITORY, StudentFilters } from '../../../domain/ports/out/student-repository.port';
 
 @Injectable()
 export class GetAllStudentsUseCase {

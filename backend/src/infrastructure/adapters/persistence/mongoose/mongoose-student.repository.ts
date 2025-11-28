@@ -14,7 +14,7 @@ import {
     EnrollmentInfo,
     StudentProps
 } from '../../../../domain/student/entities/student.entity';
-import { IStudentRepository, StudentFilters } from '../../../../domain/student/ports/student.repository.interface';
+import { IStudentRepository, StudentFilters } from '../../../../domain/ports/out/student-repository.port';
 import { StudentDocument as StudentDoc } from './schemas/student.schema';
 
 @Injectable()
