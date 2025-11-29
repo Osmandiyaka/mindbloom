@@ -5,12 +5,14 @@ import { MongooseSubscriptionRepository } from '../../infrastructure/adapters/pe
 import { SUBSCRIPTION_REPOSITORY } from '../../domain/ports/out/subscription-repository.port';
 import { GetSubscriptionUseCase, ChangePlanUseCase } from '../../application/services/subscription';
 import { SubscriptionController } from '../../presentation/controllers/subscription.controller';
+import { TenantModule } from '../tenant/tenant.module';
 
 @Module({
     imports: [
         MongooseModule.forFeature([
             { name: 'Subscription', schema: SubscriptionSchema },
         ]),
+        TenantModule,
     ],
     controllers: [SubscriptionController],
     providers: [

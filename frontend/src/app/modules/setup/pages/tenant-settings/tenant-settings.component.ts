@@ -231,14 +231,14 @@ import { RoleService } from '../../../../core/services/role.service';
           </div>
         </div>
 
-        <div *ngSwitchCase="'billing'" class="panel">
-          <div class="panel-header">
-            <div>
+        <div *ngSwitchCase="'billing'" class="panel billing-panel">
+          <div class="panel-header spaced">
+            <div class="stacked">
               <h2>Subscription</h2>
-              <p>Current plan: {{ subscription()?.plan || 'free' }} • Status: {{ subscription()?.status }}</p>
+              <p class="subtitle">Current plan: {{ subscription()?.plan || 'free' }} • Status: {{ subscription()?.status }}</p>
             </div>
           </div>
-          <div class="plans">
+          <div class="plans padded">
             <div *ngFor="let plan of plans" class="plan-card" [class.active]="subscription()?.plan === plan.id">
               <div class="plan-head">
                 <h3>{{ plan.label }}</h3>
@@ -247,12 +247,14 @@ import { RoleService } from '../../../../core/services/role.service';
               <ul>
                 <li *ngFor="let perk of plan.perks">{{ perk }}</li>
               </ul>
-              <button class="btn primary" (click)="changePlan(plan.id)" [disabled]="billingLoading() || subscription()?.plan === plan.id">
-                {{ subscription()?.plan === plan.id ? 'Current Plan' : 'Switch' }}
-              </button>
+              <div class="plan-footer">
+                <button class="btn primary" (click)="changePlan(plan.id)" [disabled]="billingLoading() || subscription()?.plan === plan.id">
+                  {{ subscription()?.plan === plan.id ? 'Current Plan' : 'Switch' }}
+                </button>
+              </div>
             </div>
           </div>
-          <div class="card">
+          <div class="card padded">
             <div class="card-header">
               <h3>Invoices</h3>
             </div>
@@ -264,7 +266,7 @@ import { RoleService } from '../../../../core/services/role.service';
                     <td>{{ inv.id }}</td>
                     <td>{{ inv.amount | currency:inv.currency }}</td>
                     <td>{{ inv.status }}</td>
-                    <td>{{ inv.createdAt | date:'medium' }}</td>
+                    <td>{{ inv.createdAt | date:'mediumDate' }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -314,6 +316,7 @@ import { RoleService } from '../../../../core/services/role.service';
     .btn:active { transform: translateY(0); }
     .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap: 1.5rem; }
     .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: var(--shadow-md); display: flex; flex-direction: column; }
+    .card.padded { padding: 0.35rem 0.35rem 0.75rem; }
     .card-header { padding: 1.25rem 1.25rem 0.5rem 1.25rem; }
     .card-body { padding: 0 1.25rem 1.25rem 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
     .form-grid label { display: flex; flex-direction: column; gap: 0.35rem; color: var(--color-text-secondary); }
@@ -360,9 +363,11 @@ import { RoleService } from '../../../../core/services/role.service';
     .btn.small { padding: 0.4rem 0.8rem; font-size: 0.875rem; }
     .btn.danger { color: var(--color-error); }
     .plans { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 1rem; }
-    .plan-card { border: 1px solid var(--color-border); border-radius: 14px; padding: 1rem; background: var(--color-surface); box-shadow: var(--shadow-sm); }
+    .plans.padded { padding: 0.5rem; }
+    .plan-card { border: 1px solid var(--color-border); border-radius: 14px; padding: 1rem; background: var(--color-surface); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 0.75rem; }
     .plan-card.active { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb,102,126,234),0.2); }
     .plan-head { display: flex; justify-content: space-between; align-items: center; }
+    .plan-footer { margin-top: auto; display: flex; justify-content: flex-end; }
     .price { margin: 0; font-weight: 700; }
     .invites-card { width: 100%; margin-top: 0; }
     .invites-card.tight { padding: 0.75rem 0.75rem 0.75rem; box-shadow: none; border-radius: 12px; }
