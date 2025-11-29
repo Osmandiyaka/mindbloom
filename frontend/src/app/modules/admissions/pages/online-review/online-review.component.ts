@@ -1,14 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { AdmissionsService } from '../../../../core/services/admissions.service';
+import { AdmissionApplication, ApplicationStatus } from '../../../../core/models/admission.model';
 
 @Component({
   selector: 'app-online-review',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <section class="page-shell">
+    <section class="page-shell" *ngIf="application(); else missing">
       <header class="page-header">
         <div>
           <p class="eyebrow">Admissions · Review</p>
@@ -17,7 +19,7 @@ import { FormsModule } from '@angular/forms';
         </div>
         <div class="actions">
           <button class="btn ghost" (click)="setStatus('review')">Move to Review</button>
-          <button class="btn" (click)="setStatus('approved')">Approve</button>
+          <button class="btn" (click)="setStatus('enrolled')">Enroll</button>
           <button class="btn danger" (click)="setStatus('rejected')">Reject</button>
         </div>
       </header>
@@ -27,14 +29,14 @@ import { FormsModule } from '@angular/forms';
           <div class="panel">
             <div class="panel-header">
               <div>
-                <div class="pill status" [class.review]="status() === 'review'" [class.approved]="status() === 'approved'" [class.rejected]="status() === 'rejected'">
-                  {{ status() | titlecase }}
+                <div class="pill status" [class.review]="application()?.status === 'review'" [class.approved]="application()?.status === 'enrolled'" [class.rejected]="application()?.status === 'rejected'">
+                  {{ application()?.status | titlecase }}
                 </div>
-                <h3>{{ applicant.name }}</h3>
-                <p class="muted">{{ applicant.grade }} • {{ applicant.email }} • {{ applicant.phone }}</p>
+                <h3>{{ application()?.applicantName }}</h3>
+                <p class="muted">{{ application()?.gradeApplying }} • {{ application()?.email }} • {{ application()?.phone }}</p>
               </div>
               <div class="meta">
-                <div>Applied: {{ applicant.applied | date:'mediumDate' }}</div>
+                <div>Applied: {{ application()?.submittedAt | date:'mediumDate' }}</div>
                 <div>Days pending: 3</div>
               </div>
             </div>
@@ -47,8 +49,8 @@ import { FormsModule } from '@angular/forms';
 
             <div class="tab-body" *ngIf="activeTab() === 'Personal Info'">
               <div class="grid">
-                <div><label>Student Name</label><div class="strong">{{ applicant.name }}</div></div>
-                <div><label>Grade Applied</label><div>{{ applicant.grade }}</div></div>
+                <div><label>Student Name</label><div class="strong">{{ application()?.applicantName }}</div></div>
+                <div><label>Grade Applied</label><div>{{ application()?.gradeApplying }}</div></div>
                 <div><label>Parent Name</label><div>{{ applicant.parent }}</div></div>
                 <div><label>Parent Contact</label><div>{{ applicant.parentPhone }}</div></div>
               </div>
@@ -108,6 +110,11 @@ import { FormsModule } from '@angular/forms';
         </div>
       </div>
     </section>
+    <ng-template #missing>
+      <section class="page-shell">
+        <p class="muted">Application not found.</p>
+      </section>
+    </ng-template>
   `,
   styles: [
     `.page-shell{padding:1rem 1.5rem; display:flex; flex-direction:column; gap:1rem;}`,
@@ -115,12 +122,12 @@ import { FormsModule } from '@angular/forms';
     `.eyebrow{text-transform:uppercase; letter-spacing:0.08em; margin:0; font-size:12px; color:var(--color-text-secondary);}`,
     `h2{margin:0 0 0.35rem;}`,
     `.muted{margin:0; color:var(--color-text-secondary);}`,
-    `.actions{display:flex; gap:0.5rem; flex-wrap:wrap;}`,
-    `.btn{border:1px solid var(--color-border); border-radius:10px; padding:0.55rem 0.9rem; font-weight:600; cursor:pointer; background:var(--color-surface); color:var(--color-text-primary);}`,
+    `.actions{display:flex; gap:0.4rem; flex-wrap:wrap;}`,
+    `.btn{border:1px solid var(--color-border); border-radius:7px; padding:0.32rem 0.65rem; font-weight:600; cursor:pointer; background:var(--color-surface); color:var(--color-text-primary); line-height:1; font-size:0.95rem; height:34px;}`,
     `.btn.primary{background:linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow:0 8px 20px rgba(var(--color-primary-rgb,123,140,255),0.35);}`,
     `.btn.ghost{background:transparent;}`,
     `.btn.danger{background:rgba(var(--color-error-rgb,239,68,68),0.12); color:var(--color-error,#ef4444); border-color:rgba(var(--color-error-rgb,239,68,68),0.4);}`,
-    `.btn.tiny{padding:0.35rem 0.6rem; font-size:0.85rem; border-radius:8px;}`,
+    `.btn.tiny{padding:0.3rem 0.55rem; font-size:0.85rem; border-radius:8px;}`,
     `.btn.full{width:100%; margin-top:0.6rem;}`,
     `.layout{display:grid; grid-template-columns:2fr 1fr; gap:1rem; align-items:start;}`,
     `.panel{background:var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem 1.1rem; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:0.75rem;}`,
@@ -151,7 +158,6 @@ import { FormsModule } from '@angular/forms';
 export class OnlineReviewComponent {
   applicationId = '';
   activeTab = signal<'Personal Info' | 'Documents' | 'Review History'>('Personal Info');
-  status = signal<'review' | 'approved' | 'rejected'>('review');
   tabs: Array<'Personal Info' | 'Documents' | 'Review History'> = ['Personal Info', 'Documents', 'Review History'];
   recommendation = 'approve';
   comment = '';
@@ -176,16 +182,22 @@ export class OnlineReviewComponent {
     ],
   };
 
-  constructor(route: ActivatedRoute) {
+  application = computed<AdmissionApplication | undefined>(() => {
+    return this.admissions.getApplication(this.applicationId) ?? this.fallbackApplication();
+  });
+
+  constructor(route: ActivatedRoute, private readonly admissions: AdmissionsService) {
     this.applicationId = route.snapshot.paramMap.get('id') ?? '';
+    this.admissions.refresh();
   }
 
   totalScore() {
     return this.scores.academic + this.scores.ec + this.scores.interview + this.scores.fit;
   }
 
-  setStatus(next: 'review' | 'approved' | 'rejected') {
-    this.status.set(next);
+  setStatus(next: ApplicationStatus) {
+    if (!this.application()) return;
+    this.admissions.setApplicationStatusLocal(this.application()!.id, next, this.comment || 'Updated in review');
     this.reviewHistory = [
       { action: `Status set to ${next}`, by: 'You', date: new Date(), note: this.comment || 'No comment' },
       ...this.reviewHistory,
@@ -197,5 +209,20 @@ export class OnlineReviewComponent {
       { action: `Decision: ${this.recommendation}`, by: 'You', date: new Date(), note: this.comment || 'No comment' },
       ...this.reviewHistory,
     ];
+  }
+
+  private fallbackApplication(): AdmissionApplication {
+    return {
+      id: this.applicationId || 'mock-review',
+      applicantName: this.applicant.name,
+      gradeApplying: this.applicant.grade,
+      email: this.applicant.email,
+      phone: this.applicant.phone,
+      status: 'review',
+      submittedAt: new Date(),
+      updatedAt: new Date(),
+      notes: this.applicant.notes,
+      documents: [],
+    };
   }
 }

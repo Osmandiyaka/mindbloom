@@ -37,23 +37,41 @@ export class AdmissionsService {
         }));
     }
 
+    getApplication(id: string): AdmissionApplication | undefined {
+        return this.applications().find(a => a.id === id);
+    }
+
+    private rebuildPipelineFromApps(apps: AdmissionApplication[]) {
+        const labels: Record<ApplicationStatus, string> = {
+            review: 'In Review',
+            rejected: 'Rejected',
+            enrolled: 'Enrolled',
+        };
+        const grouped = Object.keys(labels).map(status => {
+            const cast = status as ApplicationStatus;
+            const items = apps.filter(a => a.status === cast);
+            return { status: cast, label: labels[cast], applications: items, count: items.length };
+        });
+        this.pipelineStages.set(grouped);
+    }
+
+    private setApplications(apps: AdmissionApplication[]) {
+        this.applications.set(apps);
+        this.rebuildPipelineFromApps(apps);
+    }
+
+    setApplicationStatusLocal(id: string, status: ApplicationStatus, note?: string) {
+        const next = this.applications().map(a => a.id === id ? { ...a, status, updatedAt: new Date(), notes: note ?? a.notes } : a);
+        this.setApplications(next);
+    }
+
     private mockPipeline() {
         const mockApps: AdmissionApplication[] = [
             { id: 'mock-1', applicantName: 'Amaka Obi', gradeApplying: 'Grade 6', email: 'amaka@school.com', phone: '+2348011111111', status: 'review', submittedAt: new Date(), updatedAt: new Date(), documents: [] },
             { id: 'mock-2', applicantName: 'Chidi Okeke', gradeApplying: 'Grade 5', email: 'chidi@school.com', phone: '+2348022222222', status: 'review', submittedAt: new Date(), updatedAt: new Date(), documents: [] },
             { id: 'mock-3', applicantName: 'Sara Danjuma', gradeApplying: 'Grade 7', email: 'sara@school.com', phone: '+2348033333333', status: 'enrolled', submittedAt: new Date(), updatedAt: new Date(), documents: [] },
         ];
-        const grouped: Record<ApplicationStatus, AdmissionApplication[]> = {
-            review: mockApps.filter(a => a.status === 'review'),
-            rejected: [],
-            enrolled: mockApps.filter(a => a.status === 'enrolled'),
-        };
-        const mockStages = [
-            { status: 'review' as ApplicationStatus, label: 'In Review', applications: grouped.review, count: grouped.review.length },
-            { status: 'enrolled' as ApplicationStatus, label: 'Enrolled', applications: grouped.enrolled, count: grouped.enrolled.length },
-        ];
-        this.pipelineStages.set(mockStages);
-        this.applications.set(mockApps);
+        this.setApplications(mockApps);
     }
 
     private mockInvoices() {
@@ -132,6 +150,8 @@ export class AdmissionsService {
                 tap(() => this.refresh()),
                 catchError(err => {
                     this.error.set(err?.error?.message || 'Unable to update status');
+                    // optimistic local fallback
+                    this.setApplicationStatusLocal(id, status, note);
                     return of(null);
                 }),
                 finalize(() => this.actionState.update(state => ({ ...state, [id]: false }))),
