@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/ports/out/tenant-repository.port';
-import { TenantSettings } from '../../../domain/tenant/entities/tenant.entity';
+import { Tenant } from '../../../domain/tenant/entities/tenant.entity';
 
 @Injectable()
 export class GetTenantSettingsUseCase {
@@ -9,11 +9,11 @@ export class GetTenantSettingsUseCase {
         private readonly tenantRepository: ITenantRepository,
     ) { }
 
-    async execute(tenantId: string): Promise<TenantSettings> {
+    async execute(tenantId: string): Promise<Tenant> {
         const tenant = await this.tenantRepository.findById(tenantId);
         if (!tenant) {
             throw new NotFoundException('Tenant not found');
         }
-        return tenant.settings || {};
+        return tenant;
     }
 }

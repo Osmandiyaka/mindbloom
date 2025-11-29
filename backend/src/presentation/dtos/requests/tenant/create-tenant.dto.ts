@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsOptional, IsEmail } from 'class-validator';
 
 export class CreateTenantDto {
     @ApiProperty({ description: 'Tenant name', example: 'Greenfield High School' })
@@ -12,13 +12,22 @@ export class CreateTenantDto {
     @IsNotEmpty()
     subdomain: string;
 
+    @ApiProperty({ description: 'Primary contact email', example: 'admin@greenfield.edu' })
+    @IsEmail()
+    contactEmail: string;
+
+    @ApiProperty({ description: 'Owner user id', required: false })
+    @IsOptional()
+    @IsString()
+    ownerId?: string;
+
     @ApiProperty({
         description: 'Tenant plan',
-        enum: ['free', 'basic', 'premium', 'enterprise'],
+        enum: ['trial', 'free', 'basic', 'premium', 'enterprise'],
         required: false,
-        default: 'free'
+        default: 'trial'
     })
-    @IsEnum(['free', 'basic', 'premium', 'enterprise'])
+    @IsEnum(['trial', 'free', 'basic', 'premium', 'enterprise'])
     @IsOptional()
-    plan?: 'free' | 'basic' | 'premium' | 'enterprise';
+    plan?: 'trial' | 'free' | 'basic' | 'premium' | 'enterprise';
 }

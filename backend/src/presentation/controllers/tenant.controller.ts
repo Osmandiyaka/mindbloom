@@ -44,7 +44,9 @@ export class TenantController {
         const tenant = await this.createTenantUseCase.execute({
             name: createTenantDto.name,
             subdomain: createTenantDto.subdomain,
-            plan: createTenantDto.plan || 'free',
+            contactEmail: createTenantDto.contactEmail,
+            ownerId: createTenantDto.ownerId,
+            plan: createTenantDto.plan || 'trial',
         });
 
         return TenantResponseDto.fromDomain(tenant);
@@ -74,8 +76,8 @@ export class TenantController {
             weekStartsOn: dto.weekStartsOn,
             currency: dto.currency,
             academicYear: dto.academicYearStart && dto.academicYearEnd ? {
-                start: dto.academicYearStart,
-                end: dto.academicYearEnd,
+                start: new Date(dto.academicYearStart),
+                end: new Date(dto.academicYearEnd),
             } : undefined,
             ...dto.extras,
         });

@@ -11,11 +11,17 @@ export class TenantResponseDto {
     @ApiProperty({ description: 'Tenant subdomain/code' })
     subdomain: string;
 
-    @ApiProperty({ description: 'Tenant status', enum: ['active', 'suspended', 'inactive'] })
-    status: 'active' | 'suspended' | 'inactive';
+    @ApiProperty({ description: 'Tenant status' })
+    status: string;
 
-    @ApiProperty({ description: 'Tenant plan', enum: ['free', 'basic', 'premium', 'enterprise'] })
-    plan: 'free' | 'basic' | 'premium' | 'enterprise';
+    @ApiProperty({ description: 'Tenant plan' })
+    plan: string;
+
+    @ApiProperty({ description: 'Owner user id', required: false })
+    ownerId?: string | null;
+
+    @ApiProperty({ description: 'Contact email' })
+    contactEmail: string;
 
     static fromDomain(tenant: Tenant): TenantResponseDto {
         return {
@@ -24,6 +30,8 @@ export class TenantResponseDto {
             subdomain: tenant.subdomain,
             status: tenant.status,
             plan: tenant.plan,
+            ownerId: tenant.ownerId,
+            contactEmail: tenant.contactInfo.email,
         };
     }
 }
