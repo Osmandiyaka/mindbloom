@@ -67,25 +67,11 @@
                     only.</p>
             </div>
 
-            <!-- Contact Person -->
-            <div class="form-group">
-                <label class="form-label">Contact Person</label>
-                <input type="text" class="form-input" placeholder="e.g., John Doe" [value]="contactPerson()"
-                    (input)="contactPerson.set($any($event.target).value)" />
-            </div>
-
             <!-- Email -->
             <div class="form-group">
-                <label class="form-label">Email Address *</label>
+                <label class="form-label">Primary Contact Email *</label>
                 <input type="email" class="form-input" placeholder="admin@yourschool.edu" [value]="email()"
                     (input)="email.set($any($event.target).value)" required />
-            </div>
-
-            <!-- Phone -->
-            <div class="form-group">
-                <label class="form-label">Phone Number</label>
-                <input type="tel" class="form-input" placeholder="+1 (555) 123-4567" [value]="phone()"
-                    (input)="phone.set($any($event.target).value)" />
             </div>
 
             <!-- Plan Selection -->

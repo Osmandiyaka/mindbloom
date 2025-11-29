@@ -1,7 +1,7 @@
 import { Component, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TenantService, Tenant } from '../../../../core/services/tenant.service';
+import { TenantService, Tenant, TenantPlan } from '../../../../core/services/tenant.service';
 
 @Component({
     selector: 'app-tenant-registration',
@@ -16,7 +16,7 @@ export class TenantRegistrationComponent {
     contactPerson = signal('');
     email = signal('');
     phone = signal('');
-    selectedPlan = signal<'free' | 'basic' | 'premium' | 'enterprise'>('free');
+    selectedPlan = signal<TenantPlan>('trial');
     
     isRegistering = signal(false);
     errorMessage = signal('');
@@ -62,7 +62,8 @@ export class TenantRegistrationComponent {
         const tenantData = {
             name: this.schoolName(),
             subdomain: this.schoolCode(),
-            plan: this.selectedPlan()
+            contactEmail: this.email(),
+            plan: this.selectedPlan(),
         };
 
         this.tenantService.createTenant(tenantData).subscribe({
@@ -82,7 +83,7 @@ export class TenantRegistrationComponent {
         });
     }
 
-    selectPlan(plan: 'free' | 'basic' | 'premium' | 'enterprise'): void {
+    selectPlan(plan: TenantPlan): void {
         this.selectedPlan.set(plan);
     }
 }

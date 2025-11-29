@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TenantSettingsService, TenantSettings } from '../../../../core/services/tenant-settings.service';
+import { TenantSettingsService } from '../../../../core/services/tenant-settings.service';
 import { InvitationService, Invitation } from '../../../../core/services/invitation.service';
 import { SubscriptionService, Subscription, SubscriptionPlan } from '../../../../core/services/subscription.service';
 import { PluginLauncherComponent } from '../../../plugins/pages/plugin-launcher/plugin-launcher.component';
 import { RouterModule } from '@angular/router';
+import { Tenant } from '../../../../core/services/tenant.service';
 
 @Component({
     selector: 'app-tenant-settings',
@@ -242,17 +243,17 @@ export class TenantSettingsComponent implements OnInit {
     success = signal<string | null>(null);
     activeTab: 'branding' | 'invitations' | 'billing' | 'plugins' = 'branding';
 
-    draft: TenantSettings = {
+    draft: Partial<Tenant> = {
         customization: {
             primaryColor: '#667eea',
             secondaryColor: '#764ba2',
             accentColor: '#1EA7FF',
         },
-        locale: 'en-US',
+        locale: 'en',
         timezone: 'UTC',
         weekStartsOn: 'monday',
         currency: 'USD',
-        academicYear: { start: '', end: '' },
+        academicYear: {},
     };
 
     invitations = signal<Invitation[]>([]);
@@ -283,12 +284,12 @@ export class TenantSettingsComponent implements OnInit {
         this.loading.set(true);
         this.error.set(null);
         this.tenantSettingsService.getSettings().subscribe({
-            next: (settings) => {
+            next: (tenant) => {
                 this.draft = {
                     ...this.draft,
-                    ...settings,
-                    customization: { ...this.draft.customization, ...(settings.customization || {}) },
-                    academicYear: settings.academicYear || { start: '', end: '' },
+                    ...tenant,
+                    customization: { ...this.draft.customization, ...(tenant.customization || {}) },
+                    academicYear: tenant.academicYear || {},
                 };
                 this.loading.set(false);
             },
@@ -303,14 +304,21 @@ export class TenantSettingsComponent implements OnInit {
         this.saving.set(true);
         this.error.set(null);
         this.success.set(null);
-        this.tenantSettingsService.updateSettings(this.draft).subscribe({
-            next: (settings) => {
+        this.tenantSettingsService.updateSettings({
+            customization: this.draft.customization,
+            locale: this.draft.locale,
+            timezone: this.draft.timezone,
+            weekStartsOn: this.draft.weekStartsOn as any,
+            currency: this.draft.currency,
+            academicYear: this.draft.academicYear as any,
+        }).subscribe({
+            next: (tenant) => {
                 this.success.set('Settings saved');
                 this.draft = {
                     ...this.draft,
-                    ...settings,
-                    customization: { ...this.draft.customization, ...(settings.customization || {}) },
-                    academicYear: settings.academicYear || { start: '', end: '' },
+                    ...tenant,
+                    customization: { ...this.draft.customization, ...(tenant.customization || {}) },
+                    academicYear: tenant.academicYear || {},
                 };
                 this.saving.set(false);
             },

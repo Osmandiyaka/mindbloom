@@ -3,23 +3,51 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+export type TenantStatus = 'pending' | 'active' | 'suspended' | 'inactive' | 'deleted';
+export type TenantPlan = 'trial' | 'free' | 'basic' | 'premium' | 'enterprise';
+
 export interface Tenant {
     id: string;
     name: string;
     subdomain: string;
-    status: 'active' | 'suspended' | 'inactive';
-    plan: 'free' | 'basic' | 'premium' | 'enterprise';
-    settings?: {
-        maxStudents?: number;
-        maxTeachers?: number;
-        maxClasses?: number;
-        features?: string[];
-        customization?: {
-            logo?: string;
-            primaryColor?: string;
-            secondaryColor?: string;
+    status: TenantStatus;
+    plan: TenantPlan;
+    ownerId?: string | null;
+    contactInfo: {
+        email: string;
+        phone?: string;
+        alternateEmail?: string;
+        address?: {
+            street?: string;
+            city?: string;
+            state?: string;
+            postalCode?: string;
+            country?: string;
         };
     };
+    customization?: {
+        logo?: string;
+        favicon?: string;
+        primaryColor?: string;
+        secondaryColor?: string;
+        accentColor?: string;
+        customDomain?: string;
+        emailTemplate?: string;
+    };
+    enabledModules?: string[];
+    locale?: string;
+    timezone?: string;
+    weekStartsOn?: 'monday' | 'sunday';
+    currency?: string;
+    academicYear?: {
+        start?: string | Date;
+        end?: string | Date;
+        name?: string;
+    };
+    limits?: Record<string, any>;
+    usage?: Record<string, any>;
+    trialEndsAt?: string;
+    metadata?: Record<string, any>;
 }
 
 @Injectable({
@@ -55,7 +83,7 @@ export class TenantService {
         );
     }
 
-    createTenant(data: { name: string; subdomain: string; plan: string }): Observable<Tenant> {
+    createTenant(data: { name: string; subdomain: string; contactEmail: string; ownerId?: string; plan?: TenantPlan }): Observable<Tenant> {
         return this.http.post<Tenant>(`${this.API_URL}/tenants`, data).pipe(
             tap(tenant => {
                 if (tenant) {
@@ -90,7 +118,8 @@ export class TenantService {
         const tenant = this.getCurrentTenantValue();
         if (!tenant) return false;
 
-        const featuresByPlan = {
+        const featuresByPlan: Record<TenantPlan, string[]> = {
+            trial: ['basic_features', 'student_management', 'attendance', 'grades'],
             free: ['basic_features'],
             basic: ['basic_features', 'student_management', 'attendance'],
             premium: ['basic_features', 'student_management', 'attendance', 'finance', 'library'],

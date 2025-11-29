@@ -3,7 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
-export interface TenantSettings {
+import { Tenant } from './tenant.service';
+
+export interface TenantSettingsUpdate {
     customization?: {
         logo?: string;
         primaryColor?: string;
@@ -15,8 +17,9 @@ export interface TenantSettings {
     weekStartsOn?: 'monday' | 'sunday';
     currency?: string;
     academicYear?: {
-        start: string;
-        end: string;
+        start?: string | Date;
+        end?: string | Date;
+        name?: string;
     };
 }
 
@@ -27,22 +30,22 @@ export class TenantSettingsService {
     private http = inject(HttpClient);
     private baseUrl = `${environment.apiUrl}/tenants/settings`;
 
-    getSettings(): Observable<TenantSettings> {
-        return this.http.get<TenantSettings>(this.baseUrl);
+    getSettings(): Observable<Tenant> {
+        return this.http.get<Tenant>(this.baseUrl);
     }
 
-    updateSettings(payload: Partial<TenantSettings>): Observable<TenantSettings> {
+    updateSettings(payload: TenantSettingsUpdate): Observable<Tenant> {
         const body: any = {
             ...payload,
             primaryColor: payload.customization?.primaryColor,
             secondaryColor: payload.customization?.secondaryColor,
             accentColor: payload.customization?.accentColor,
             logo: payload.customization?.logo,
-            academicYearStart: payload.academicYear?.start,
-            academicYearEnd: payload.academicYear?.end,
+            academicYearStart: payload.academicYear?.start ? new Date(payload.academicYear.start) : undefined,
+            academicYearEnd: payload.academicYear?.end ? new Date(payload.academicYear.end) : undefined,
         };
         delete body.customization;
         delete body.academicYear;
-        return this.http.put<TenantSettings>(this.baseUrl, body);
+        return this.http.put<Tenant>(this.baseUrl, body);
     }
 }
