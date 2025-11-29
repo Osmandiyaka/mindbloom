@@ -9,21 +9,22 @@ import { Permission, PermissionNode } from '../../../core/models/role.model';
     imports: [CommonModule, FormsModule],
     template: `
     <div class="permission-tree-selector">
-      <div class="search-box">
-        <input 
-          type="text" 
-          [(ngModel)]="searchQuery"
-          (ngModelChange)="onSearchChange($event)"
-          placeholder="🔍 Search permissions..."
-          class="search-input"
-        />
-      </div>
-
-      <div class="tree-actions">
-        <button type="button" class="btn-link" (click)="expandAll()">Expand All</button>
-        <button type="button" class="btn-link" (click)="collapseAll()">Collapse All</button>
-        <button type="button" class="btn-link" (click)="selectAll()">Select All</button>
-        <button type="button" class="btn-link" (click)="clearAll()">Clear All</button>
+      <div class="header-row">
+        <div class="search-box">
+          <input 
+            type="text" 
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchChange($event)"
+            placeholder="Search permissions..."
+            class="search-input"
+          />
+        </div>
+        <div class="tree-actions">
+          <button type="button" class="pill-btn" (click)="expandAll()">Expand</button>
+          <button type="button" class="pill-btn" (click)="collapseAll()">Collapse</button>
+          <button type="button" class="pill-btn" (click)="selectAll()">Select All</button>
+          <button type="button" class="pill-btn ghost" (click)="clearAll()">Clear</button>
+        </div>
       </div>
 
       <div class="permission-tree">
@@ -145,82 +146,30 @@ import { Permission, PermissionNode } from '../../../core/models/role.model';
     </ng-template>
   `,
     styles: [`
-    .permission-tree-selector {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      max-height: 600px;
-    }
+    .permission-tree-selector { display: flex; flex-direction: column; gap: 0.75rem; max-height: 680px; width: 100%; }
+    .header-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .search-box { flex: 1; }
+    .search-input { width: 100%; padding: 0.65rem 0.85rem; border: 1px solid var(--color-border, #e5e7eb); border-radius: 10px; font-size: 0.9rem; background: var(--color-background, #0b0f16); color: var(--color-text-primary, #e5e7eb); }
+    .search-input:focus { outline: none; border-color: var(--color-primary, #10b981); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb,123,140,255),0.15); background: var(--color-surface, #0e1116); }
+    .tree-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .pill-btn { padding: 0.45rem 0.75rem; border-radius: 12px; border: 1px solid var(--color-border, #1f2937); background: var(--color-surface, #0e1116); color: var(--color-text-primary, #e5e7eb); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s ease; box-shadow: var(--shadow-sm, 0 6px 16px rgba(0,0,0,0.12)); }
+    .pill-btn:hover { border-color: var(--color-primary, #10b981); box-shadow: var(--shadow-md, 0 10px 24px rgba(0,0,0,0.16)); }
+    .pill-btn.ghost { background: transparent; color: var(--color-text-secondary, #9ca3af); }
+    .permission-tree { flex: 1; overflow-y: auto; border: 1px solid var(--color-border, #1f2937); border-radius: 12px; padding: 0.65rem; background: var(--color-surface, #0e1116); }
 
-    .search-box {
-      position: sticky;
-      top: 0;
-      background: white;
-      z-index: 10;
-      padding-bottom: 0.5rem;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid #E5E7EB;
-      border-radius: 8px;
-      font-size: 0.875rem;
-    }
-
-    .search-input:focus {
-      outline: none;
-      border-color: #3B82F6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .tree-actions {
-      display: flex;
-      gap: 1rem;
-      padding: 0.5rem;
-      background: #F9FAFB;
-      border-radius: 6px;
-    }
-
-    .btn-link {
-      background: none;
-      border: none;
-      color: #3B82F6;
-      cursor: pointer;
-      font-size: 0.875rem;
-      padding: 0.25rem 0.5rem;
-      transition: color 0.2s;
-    }
-
-    .btn-link:hover {
-      color: #2563EB;
-      text-decoration: underline;
-    }
-
-    .permission-tree {
-      flex: 1;
-      overflow-y: auto;
-      border: 1px solid #E5E7EB;
-      border-radius: 8px;
-      padding: 0.5rem;
-    }
-
-    .tree-node {
-      margin: 0.125rem 0;
-    }
+    .tree-node { margin: 0.125rem 0; }
+    .tree-node:nth-child(even) .node-content { background: rgba(var(--color-primary-rgb,123,140,255),0.04); }
 
     .node-content {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.5rem;
-      border-radius: 6px;
-      transition: background 0.2s;
+      padding: 0.65rem;
+      border-radius: 10px;
+      transition: background 0.2s, border-color 0.2s;
     }
 
-    .node-content:hover {
-      background: #F9FAFB;
-    }
+    .node-content:hover { background: rgba(var(--color-primary-rgb,123,140,255),0.08); }
 
     .expand-btn {
       background: none;
@@ -266,66 +215,16 @@ import { Permission, PermissionNode } from '../../../core/models/role.model';
       color: #6B7280;
     }
 
-    .node-meta {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-    }
+    .node-meta { display: flex; gap: 0.5rem; align-items: center; }
+    .scope-badge { padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; border: 1px solid var(--color-border, #1f2937); color: var(--color-text-secondary, #9ca3af); }
+    .scope-badge[data-scope="own"] { background: rgba(99,102,241,0.08); color: #a5b4fc; }
+    .scope-badge[data-scope="department"] { background: rgba(251,191,36,0.12); color: #fcd34d; }
+    .scope-badge[data-scope="all"] { background: rgba(16,185,129,0.1); color: #6ee7b7; }
+    .actions-badge { padding: 0.2rem 0.5rem; background: rgba(var(--color-primary-rgb,123,140,255),0.1); border-radius: 8px; font-size: 0.8rem; color: var(--color-text-secondary, #9ca3af); }
 
-    .scope-badge {
-      padding: 0.125rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      text-transform: uppercase;
-    }
-
-    .scope-badge[data-scope="own"] {
-      background: #DBEAFE;
-      color: #1E40AF;
-    }
-
-    .scope-badge[data-scope="department"] {
-      background: #FEF3C7;
-      color: #92400E;
-    }
-
-    .scope-badge[data-scope="all"] {
-      background: #D1FAE5;
-      color: #065F46;
-    }
-
-    .actions-badge {
-      padding: 0.125rem 0.5rem;
-      background: #F3F4F6;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      color: #6B7280;
-    }
-
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 3rem;
-      color: #9CA3AF;
-    }
-
-    .empty-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-    }
-
-    .selected-count {
-      padding: 0.75rem;
-      background: #F9FAFB;
-      border-radius: 6px;
-      text-align: center;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #6B7280;
-    }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem; color: var(--color-text-tertiary, #9ca3af); }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .selected-count { padding: 0.75rem; background: var(--color-surface, #0e1116); border: 1px solid var(--color-border, #1f2937); border-radius: 10px; text-align: center; font-size: 0.9rem; font-weight: 600; color: var(--color-text-secondary, #9ca3af); }
   `]
 })
 export class PermissionTreeSelectorComponent {

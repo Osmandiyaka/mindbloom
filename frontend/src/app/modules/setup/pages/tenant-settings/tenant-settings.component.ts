@@ -285,7 +285,7 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
               </div>
               <footer class="modal-footer">
                 <button class="ghost" (click)="closePermissionModal()">Cancel</button>
-                <button class="primary" (click)="assignPermissions()" [disabled]="!selectedPermissionIds().length">
+                <button class="primary emphasized" (click)="assignPermissions()" [disabled]="!selectedPermissionIds().length">
                   Assign to {{ selectedUserIds().size }} user(s)
                 </button>
               </footer>
@@ -380,6 +380,7 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
     .btn.primary { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: #fff; border: none; box-shadow: var(--shadow-md); }
     .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
     .btn:active { transform: translateY(0); }
+    .btn.emphasized { padding: 0.7rem 1.4rem; box-shadow: 0 12px 28px rgba(var(--color-primary-rgb,123,140,255),0.28); }
     .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap: 1.5rem; }
     .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; box-shadow: var(--shadow-md); display: flex; flex-direction: column; }
     .card.padded { padding: 0.35rem 0.35rem 0.75rem; }
