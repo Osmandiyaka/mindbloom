@@ -7,11 +7,13 @@ import { SubscriptionService, Subscription, SubscriptionPlan } from '../../../..
 import { PluginLauncherComponent } from '../../../plugins/pages/plugin-launcher/plugin-launcher.component';
 import { RouterModule } from '@angular/router';
 import { Tenant } from '../../../../core/services/tenant.service';
+import { RoleSelectorComponent } from '../../../../shared/components/role-selector/role-selector.component';
+import { Role } from '../../../../core/models/role.model';
 
 @Component({
     selector: 'app-tenant-settings',
     standalone: true,
-    imports: [CommonModule, FormsModule, PluginLauncherComponent, RouterModule],
+    imports: [CommonModule, FormsModule, PluginLauncherComponent, RouterModule, RoleSelectorComponent],
     template: `
     <div class="tenant-settings">
       <div class="page-header">
@@ -92,17 +94,22 @@ import { Tenant } from '../../../../core/services/tenant.service';
         </div>
 
         <div *ngSwitchCase="'invitations'" class="panel">
-          <div class="panel-header">
-            <div>
-              <h2>User Invitations</h2>
-              <p>Invite staff or partners with roles. Invitations auto-expire in 7 days by default.</p>
+            <div class="panel-header">
+              <div>
+                <h2>User Invitations</h2>
+                <p>Invite staff or partners with roles. Invitations auto-expire in 7 days by default.</p>
+              </div>
+              <div class="invite-form">
+                <input type="email" [(ngModel)]="inviteEmail" placeholder="user@school.com" />
+                <app-role-selector
+                  [selectedRoleIds]="selectedRoleIds()"
+                  (selectionChange)="onRoleSelection($event)" />
+                <div class="selected-roles" *ngIf="selectedRoles().length">
+                  <span *ngFor="let r of selectedRoles()" class="chip">{{ r.name }}</span>
+                </div>
+                <button class="btn primary" (click)="sendInvite()" [disabled]="inviteLoading()">Send Invite</button>
+              </div>
             </div>
-            <div class="invite-form">
-              <input type="email" [(ngModel)]="inviteEmail" placeholder="user@school.com" />
-              <input type="text" [(ngModel)]="inviteRoles" placeholder="roles (comma separated)" />
-              <button class="btn primary" (click)="sendInvite()" [disabled]="inviteLoading()">Send Invite</button>
-            </div>
-          </div>
           <div class="card">
             <div class="card-body">
               <table class="table">
@@ -217,7 +224,9 @@ import { Tenant } from '../../../../core/services/tenant.service';
     .alert.success { background: rgba(var(--color-success-rgb,16,185,129),0.08); color: var(--color-success); }
     .panel { display: flex; flex-direction: column; gap: 1rem; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
-    .invite-form { display: flex; gap: 0.5rem; align-items: center; }
+    .invite-form { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; }
+    .selected-roles .chip { background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(16,185,129,0.25); font-weight: 700; }
     .table { width: 100%; border-collapse: collapse; }
     .table th, .table td { padding: 0.65rem; border-bottom: 1px solid var(--color-border); text-align: left; }
     .table th { color: var(--color-text-tertiary); font-weight: 600; font-size: 0.9rem; }
@@ -258,7 +267,8 @@ export class TenantSettingsComponent implements OnInit {
 
     invitations = signal<Invitation[]>([]);
     inviteEmail = '';
-    inviteRoles = '';
+    selectedRoles = signal<Role[]>([]);
+    selectedRoleIds = signal<string[]>([]);
 
     subscription = signal<Subscription | null>(null);
     plans = [
@@ -348,15 +358,28 @@ export class TenantSettingsComponent implements OnInit {
         });
     }
 
+    onRoleSelection(roles: Role[]): void {
+        this.selectedRoles.set(roles);
+        this.selectedRoleIds.set(roles.map(r => r.id));
+    }
+
     sendInvite(): void {
-        if (!this.inviteEmail) return;
+        if (!this.inviteEmail) {
+            this.error.set('Please enter an email to invite');
+            return;
+        }
+        if (!this.selectedRoles().length) {
+            this.error.set('Select at least one role');
+            return;
+        }
         this.inviteLoading.set(true);
-        const roles = this.inviteRoles.split(',').map(r => r.trim()).filter(Boolean);
+        const roles = this.selectedRoles().map(r => r.name);
         this.invitationService.create(this.inviteEmail, roles).subscribe({
             next: (inv) => {
                 this.invitations.set([inv, ...this.invitations()]);
                 this.inviteEmail = '';
-                this.inviteRoles = '';
+                this.selectedRoles.set([]);
+                this.selectedRoleIds.set([]);
                 this.inviteLoading.set(false);
                 this.success.set('Invitation sent');
             },
