@@ -13,6 +13,8 @@ export interface User {
     permissions: Permission[];
     profilePicture: string | null;
     createdAt: Date;
+    forcePasswordReset?: boolean;
+    mfaEnabled?: boolean;
 }
 
 export interface CreateUserDto {
@@ -21,6 +23,8 @@ export interface CreateUserDto {
     password: string;
     roleId?: string;
     profilePicture?: string;
+    forcePasswordReset?: boolean;
+    mfaEnabled?: boolean;
 }
 
 export interface UpdateUserDto {
@@ -28,6 +32,8 @@ export interface UpdateUserDto {
     name?: string;
     roleId?: string;
     profilePicture?: string;
+    forcePasswordReset?: boolean;
+    mfaEnabled?: boolean;
 }
 
 @Injectable({
@@ -57,5 +63,9 @@ export class UserService {
         return this.http.post<User>(`${this.apiUrl}/${userId}/permissions`, {
             permissionIds
         });
+    }
+
+    deleteUser(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
 }

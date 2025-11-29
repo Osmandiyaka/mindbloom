@@ -11,6 +11,8 @@ export class User {
         public readonly role: Role | null = null,
         public readonly permissions: Permission[] = [],
         public readonly profilePicture: string | null = null,
+        public readonly forcePasswordReset: boolean = false,
+        public readonly mfaEnabled: boolean = false,
         public readonly createdAt: Date = new Date(),
         public readonly updatedAt: Date = new Date(),
     ) { }
@@ -47,13 +49,15 @@ export class User {
                 this.email,
                 this.name,
                 this.roleId,
-                this.role,
-                [...this.permissions, permission],
-                this.profilePicture,
-                this.createdAt,
-                new Date(),
-            );
-        }
+            this.role,
+            [...this.permissions, permission],
+            this.profilePicture,
+            this.forcePasswordReset,
+            this.mfaEnabled,
+            this.createdAt,
+            new Date(),
+        );
+    }
         return this;
     }
 
@@ -70,6 +74,8 @@ export class User {
             this.role,
             this.permissions.filter(p => p.id !== permissionId),
             this.profilePicture,
+            this.forcePasswordReset,
+            this.mfaEnabled,
             this.createdAt,
             new Date(),
         );
@@ -84,6 +90,10 @@ export class User {
         role?: Role | null;
         permissions?: Permission[];
         profilePicture?: string | null;
+        forcePasswordReset?: boolean;
+        mfaEnabled?: boolean;
+        createdAt?: Date;
+        updatedAt?: Date;
     }): User {
         return new User(
             data.id || crypto.randomUUID(),
@@ -94,6 +104,10 @@ export class User {
             data.role || null,
             data.permissions || [],
             data.profilePicture || null,
+            data.forcePasswordReset ?? false,
+            data.mfaEnabled ?? false,
+            data.createdAt || new Date(),
+            data.updatedAt || new Date(),
         );
     }
 }

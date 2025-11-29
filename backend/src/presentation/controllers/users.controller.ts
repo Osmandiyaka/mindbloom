@@ -7,12 +7,13 @@ import {
     Body,
     UseGuards,
     Request,
+    Delete,
 } from '@nestjs/common';
 import { IsArray, IsString } from 'class-validator';
 import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/tenant/tenant.guard';
 import { AddPermissionsToUserUseCase } from '../../application/services/rbac/add-permissions-to-user.use-case';
-import { CreateUserUseCase, UpdateUserUseCase } from '../../application/services/user';
+import { CreateUserUseCase, UpdateUserUseCase, DeleteUserUseCase } from '../../application/services/user';
 import { IUserRepository } from '../../domain/ports/out/user-repository.port';
 import { USER_REPOSITORY } from '../../domain/ports/out/repository.tokens';
 import { Inject } from '@nestjs/common';
@@ -35,6 +36,7 @@ export class UsersController {
         private readonly addPermissionsToUser: AddPermissionsToUserUseCase,
         private readonly createUserUseCase: CreateUserUseCase,
         private readonly updateUserUseCase: UpdateUserUseCase,
+        private readonly deleteUserUseCase: DeleteUserUseCase,
     ) { }
 
     @Get()
@@ -71,6 +73,8 @@ export class UsersController {
             password: dto.password,
             roleId: dto.roleId,
             profilePicture: dto.profilePicture,
+            forcePasswordReset: dto.forcePasswordReset,
+            mfaEnabled: dto.mfaEnabled,
         });
 
         return UserResponseDto.fromDomain(user);
@@ -112,9 +116,17 @@ export class UsersController {
             name: dto.name,
             roleId: dto.roleId,
             profilePicture: dto.profilePicture,
+            forcePasswordReset: dto.forcePasswordReset,
+            mfaEnabled: dto.mfaEnabled,
         });
 
         return UserResponseDto.fromDomain(user);
+    }
+
+    @Delete(':id')
+    async deleteUser(@Request() req, @Param('id') id: string) {
+        await this.deleteUserUseCase.execute(id, req.user.tenantId);
+        return { success: true };
     }
 
     @Post(':id/permissions')

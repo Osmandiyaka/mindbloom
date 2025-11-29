@@ -24,6 +24,12 @@ export class UserDocument extends Document {
     @Prop({ type: String, default: null })
     profilePicture: string | null;
 
+    @Prop({ type: Boolean, default: false })
+    forcePasswordReset: boolean;
+
+    @Prop({ type: Boolean, default: false })
+    mfaEnabled: boolean;
+
     createdAt: Date;
     updatedAt: Date;
 }

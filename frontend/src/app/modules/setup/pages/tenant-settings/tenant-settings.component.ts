@@ -11,11 +11,12 @@ import { RoleSelectorComponent } from '../../../../shared/components/role-select
 import { Role } from '../../../../core/models/role.model';
 import { UserService, User } from '../../../../core/services/user.service';
 import { RoleService } from '../../../../core/services/role.service';
+import { PermissionTreeSelectorComponent } from '../../../../shared/components/permission-tree-selector/permission-tree-selector.component';
 
 @Component({
     selector: 'app-tenant-settings',
     standalone: true,
-    imports: [CommonModule, FormsModule, PluginLauncherComponent, RouterModule, RoleSelectorComponent],
+    imports: [CommonModule, FormsModule, PluginLauncherComponent, RouterModule, RoleSelectorComponent, PermissionTreeSelectorComponent],
     template: `
     <div class="tenant-settings compact">
 
@@ -163,13 +164,38 @@ import { RoleService } from '../../../../core/services/role.service';
             </button>
           </div>
           <div class="card invites-card tight users-card">
+            <div class="card-body toolbar">
+              <div class="left">
+                <span class="selected-count" *ngIf="selectedUserIds().size">{{ selectedUserIds().size }} selected</span>
+              </div>
+              <div class="actions">
+                <button class="btn ghost small" [disabled]="!selectedUserIds().size" (click)="bulkDelete()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18" />
+                    <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" />
+                    <path d="M10 10v6" />
+                    <path d="M14 10v6" />
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                  </svg>
+                  Bulk Delete
+                </button>
+                <button class="btn primary small" [disabled]="!selectedUserIds().size" (click)="openPermissionModal()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                    <path d="m9 12 2 2 4-4" />
+                  </svg>
+                  Assign Permissions
+                </button>
+              </div>
+            </div>
             <div class="card-body tight-body">
               <table class="table invites">
                 <thead>
-                  <tr><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th></tr>
+                  <tr><th style="width:48px;"><input type="checkbox" [checked]="selectAllUsers()" (change)="toggleSelectAll($event)" /></th><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let user of users()">
+                    <td><input type="checkbox" [checked]="selectedUserIds().has(user.id)" (change)="toggleUserSelection(user)" /></td>
                     <td>{{ user.name }}</td>
                     <td>{{ user.email }}</td>
                     <td>{{ user.role?.name || '—' }}</td>
@@ -204,9 +230,13 @@ import { RoleService } from '../../../../core/services/role.service';
                   <label>Email</label>
                   <input type="email" [(ngModel)]="userForm.email" placeholder="user@school.com" />
                 </div>
-                <div class="field" *ngIf="!editingUser()">
+                <div class="field password-field" *ngIf="!editingUser()">
                   <label>Password</label>
-                  <input type="password" [(ngModel)]="userForm.password" placeholder="Minimum 8 characters" />
+                  <div class="password-row">
+                    <input type="text" [(ngModel)]="userForm.password" placeholder="Minimum 8 characters" />
+                    <button class="btn ghost small" type="button" (click)="generatePassword()">Generate</button>
+                  </div>
+                  <p class="hint">Generate a strong random password or enter your own.</p>
                 </div>
                 <div class="field">
                   <label>Roles</label>
@@ -220,11 +250,43 @@ import { RoleService } from '../../../../core/services/role.service';
                     </span>
                   </div>
                 </div>
+                <div class="field inline-toggles">
+                  <label>Security</label>
+                  <label class="toggle"><input type="checkbox" [(ngModel)]="userForm.forcePasswordReset" /> <span>Force password reset on first login</span></label>
+                  <label class="toggle"><input type="checkbox" [(ngModel)]="userForm.mfaEnabled" /> <span>Require MFA</span></label>
+                </div>
               </div>
               <footer class="modal-footer">
                 <button class="ghost" (click)="closeUserModal()">Cancel</button>
                 <button class="primary" (click)="saveUser()" [disabled]="userSaving()">
                   {{ userSaving() ? 'Saving...' : 'Save User' }}
+                </button>
+              </footer>
+            </div>
+          </div>
+
+          <div class="overlay" *ngIf="showPermissionModal()">
+            <div class="modal users-modal">
+              <header class="modal-header">
+                <div>
+                  <p class="eyebrow">Permissions</p>
+                  <h2>Assign permissions to users ({{ selectedUserIds().size }})</h2>
+                </div>
+                <button class="icon-btn" (click)="closePermissionModal()" aria-label="Close">
+                  <svg viewBox="0 0 24 24"><path d="M6 6l12 12M6 18 18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+              </header>
+              <div class="modal-body">
+                <app-permission-tree-selector
+                  [permissions]="roleService.permissionTree()"
+                  [selectedPermissionIds]="selectedPermissionIds()"
+                  (selectionChange)="selectedPermissionIds.set($event)"
+                />
+              </div>
+              <footer class="modal-footer">
+                <button class="ghost" (click)="closePermissionModal()">Cancel</button>
+                <button class="primary" (click)="assignPermissions()" [disabled]="!selectedPermissionIds().length">
+                  Assign to {{ selectedUserIds().size }} user(s)
                 </button>
               </footer>
             </div>
@@ -313,7 +375,7 @@ import { RoleService } from '../../../../core/services/role.service';
     .actions.sticky-actions .action-buttons { display: flex; gap: 0.75rem; }
     .actions.sticky-actions .spacer { flex: 1; }
     .btn { padding: 0.65rem 1.25rem; border-radius: 10px; border: 1px solid var(--color-border); cursor: pointer; background: var(--color-surface); color: var(--color-text-primary); transition: all 0.2s ease; box-shadow: var(--shadow-sm); display: inline-flex; align-items: center; gap: 0.4rem; }
-    .btn svg { width: 16px; height: 16px; }
+    .btn svg { width: 18px; height: 18px; }
     .btn.ghost { background: var(--color-surface); }
     .btn.primary { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: #fff; border: none; box-shadow: var(--shadow-md); }
     .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
@@ -360,6 +422,15 @@ import { RoleService } from '../../../../core/services/role.service';
     .user-form label { font-weight: 700; color: var(--color-text-secondary); font-size: 0.9rem; }
     .user-form input, .user-form select { width: 100%; padding: 0.65rem 0.75rem; border-radius: 10px; border: 1px solid var(--color-border); background: var(--color-background); color: var(--color-text-primary); transition: all 0.18s ease; }
     .user-form input:focus, .user-form select:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb,123,140,255),0.18); background: var(--color-surface); }
+    .password-row { display: flex; gap: 0.5rem; align-items: center; }
+    .password-row input { flex: 1; }
+    .password-row .btn { padding: 0.55rem 0.9rem; }
+    .hint { margin: 0; color: var(--color-text-tertiary); font-size: 0.85rem; }
+    .inline-toggles { gap: 0.35rem !important; }
+    .inline-toggles .toggle { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 600; color: var(--color-text-secondary); padding: 0.35rem 0.5rem; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface); }
+    .inline-toggles .toggle input { appearance: none; width: 18px; height: 18px; border: 2px solid var(--color-border); border-radius: 6px; background: var(--color-background); transition: all 0.15s ease; display: inline-flex; align-items: center; justify-content: center; position: relative; }
+    .inline-toggles .toggle input:checked { border-color: var(--color-primary); background: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb,123,140,255),0.15); }
+    .inline-toggles .toggle input:checked::after { content: '✓'; color: #fff; font-weight: 700; font-size: 12px; line-height: 1; position: absolute; }
     .user-form .selected-roles { margin-top: 0.25rem; }
     .muted { color: var(--color-text-tertiary); }
     .badge { padding: 0.2rem 0.6rem; border-radius: 999px; background: var(--color-surface-hover); }
@@ -423,7 +494,11 @@ export class TenantSettingsComponent implements OnInit {
     editingUser = signal<User | null>(null);
     userRoles = signal<Role[]>([]);
     userRoleIds = signal<string[]>([]);
-    userForm: { name: string; email: string; password: string } = { name: '', email: '', password: '' };
+    userForm: { name: string; email: string; password: string; forcePasswordReset?: boolean; mfaEnabled?: boolean } = { name: '', email: '', password: '', forcePasswordReset: true, mfaEnabled: true };
+    selectedUserIds = signal<Set<string>>(new Set());
+    selectAllUsers = signal(false);
+    showPermissionModal = signal(false);
+    selectedPermissionIds = signal<string[]>([]);
 
     subscription = signal<Subscription | null>(null);
     plans = [
@@ -438,7 +513,7 @@ export class TenantSettingsComponent implements OnInit {
         private invitationService: InvitationService,
         private subscriptionService: SubscriptionService,
         private userService: UserService,
-        private roleService: RoleService,
+        public roleService: RoleService,
     ) { }
 
     ngOnInit(): void {
@@ -612,6 +687,8 @@ export class TenantSettingsComponent implements OnInit {
         this.userService.getUsers().subscribe({
             next: (list) => {
                 this.users.set(list);
+                this.selectedUserIds.set(new Set());
+                this.selectAllUsers.set(false);
                 this.usersLoading.set(false);
             },
             error: (err) => {
@@ -624,14 +701,14 @@ export class TenantSettingsComponent implements OnInit {
     openUserModal(user?: User): void {
         if (user) {
             this.editingUser.set(user);
-            this.userForm = { name: user.name, email: user.email, password: '' };
+            this.userForm = { name: user.name, email: user.email, password: '', forcePasswordReset: user.forcePasswordReset || false, mfaEnabled: user.mfaEnabled || false };
             const matchedRole = user.role ? this.roles().find(r => r.id === user.role!.id) : undefined;
             const roleList = matchedRole ? [matchedRole] : [];
             this.userRoles.set(roleList);
             this.userRoleIds.set(roleList.map(r => r.id));
         } else {
             this.editingUser.set(null);
-            this.userForm = { name: '', email: '', password: '' };
+            this.userForm = { name: '', email: '', password: '', forcePasswordReset: true, mfaEnabled: true };
             this.userRoles.set([]);
             this.userRoleIds.set([]);
         }
@@ -646,8 +723,85 @@ export class TenantSettingsComponent implements OnInit {
         this.userRoleIds.set(roles.map(r => r.id));
     }
 
+    generatePassword(): void {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@#$%^&*';
+        let pwd = '';
+        for (let i = 0; i < 14; i++) {
+            pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        this.userForm.password = pwd;
+    }
+
     closeUserModal(): void {
         this.showUserModal.set(false);
+    }
+
+    toggleUserSelection(user: User): void {
+        const next = new Set(this.selectedUserIds());
+        if (next.has(user.id)) {
+            next.delete(user.id);
+        } else {
+            next.add(user.id);
+        }
+        this.selectedUserIds.set(next);
+        this.selectAllUsers.set(next.size === this.users().length);
+    }
+
+    toggleSelectAll(event: any): void {
+        const checked = event.target.checked;
+        this.selectAllUsers.set(checked);
+        if (checked) {
+            this.selectedUserIds.set(new Set(this.users().map(u => u.id)));
+        } else {
+            this.selectedUserIds.set(new Set());
+        }
+    }
+
+    bulkDelete(): void {
+        if (!this.selectedUserIds().size) return;
+        if (!confirm(`Delete ${this.selectedUserIds().size} user(s)?`)) return;
+        const ids = Array.from(this.selectedUserIds());
+        ids.forEach((id) => {
+            this.userService.deleteUser(id).subscribe({
+                next: () => {
+                    this.users.set(this.users().filter(u => u.id !== id));
+                    const next = new Set(this.selectedUserIds());
+                    next.delete(id);
+                    this.selectedUserIds.set(next);
+                    this.selectAllUsers.set(false);
+                },
+                error: (err) => {
+                    this.error.set(err.error?.message || 'Failed to delete user');
+                }
+            });
+        });
+    }
+
+    openPermissionModal(): void {
+        if (!this.roleService.permissionTree().length) {
+            this.roleService.getPermissionTree().subscribe();
+        }
+        this.showPermissionModal.set(true);
+    }
+
+    closePermissionModal(): void {
+        this.showPermissionModal.set(false);
+        this.selectedPermissionIds.set([]);
+    }
+
+    assignPermissions(): void {
+        const permissionIds = this.selectedPermissionIds();
+        const ids = Array.from(this.selectedUserIds());
+        ids.forEach((id) => {
+            this.userService.addPermissionsToUser(id, permissionIds).subscribe({
+                next: () => { },
+                error: (err) => {
+                    this.error.set(err.error?.message || 'Failed to assign permissions');
+                }
+            });
+        });
+        this.success.set('Permissions assigned');
+        this.closePermissionModal();
     }
 
     saveUser(): void {
@@ -657,6 +811,8 @@ export class TenantSettingsComponent implements OnInit {
             name: this.userForm.name,
             email: this.userForm.email,
             roleId: selectedRoleId,
+            forcePasswordReset: this.userForm.forcePasswordReset,
+            mfaEnabled: this.userForm.mfaEnabled,
         };
         if (this.editingUser()) {
             this.userService.updateUser(this.editingUser()!.id, payload).subscribe({

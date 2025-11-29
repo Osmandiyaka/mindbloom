@@ -27,6 +27,8 @@ export class CreateUserUseCase {
             roleId: command.roleId || null,
             role: null, // Will be populated by repository
             profilePicture: command.profilePicture || null,
+            forcePasswordReset: command.forcePasswordReset ?? false,
+            mfaEnabled: command.mfaEnabled ?? false,
         });
 
         // Save user with password

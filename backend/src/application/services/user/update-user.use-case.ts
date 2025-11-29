@@ -29,6 +29,8 @@ export class UpdateUserUseCase {
             role: user.role,
             permissions: user.permissions,
             profilePicture: command.profilePicture !== undefined ? command.profilePicture : user.profilePicture,
+            forcePasswordReset: command.forcePasswordReset !== undefined ? command.forcePasswordReset : user.forcePasswordReset,
+            mfaEnabled: command.mfaEnabled !== undefined ? command.mfaEnabled : user.mfaEnabled,
         });
 
         // Save user

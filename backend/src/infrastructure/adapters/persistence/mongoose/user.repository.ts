@@ -45,6 +45,8 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
             name: user.name,
             password: hashedPassword,
             roleId: user.roleId || null,
+            forcePasswordReset: user.forcePasswordReset ?? false,
+            mfaEnabled: user.mfaEnabled ?? false,
         });
 
         return this.toDomain(created);
@@ -64,6 +66,10 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
             {
                 roleId: user.roleId,
                 permissions: permissionIds,
+                forcePasswordReset: user.forcePasswordReset,
+                mfaEnabled: user.mfaEnabled,
+                name: user.name,
+                email: user.email,
                 updatedAt: new Date(),
             },
             { new: true }
@@ -74,6 +80,13 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
         }
 
         return this.toDomain(updated);
+    }
+
+    async delete(id: string, tenantId: string): Promise<void> {
+        const result = await this.userModel.deleteOne({ _id: id, tenantId: this.requireTenant(tenantId) }).exec();
+        if (result.deletedCount === 0) {
+            throw new Error(`User with ID ${id} not found`);
+        }
     }
 
     async validatePassword(email: string, password: string): Promise<boolean> {
@@ -143,6 +156,8 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
             role,
             permissions,
             doc.profilePicture,
+            doc.forcePasswordReset ?? false,
+            doc.mfaEnabled ?? false,
             doc.createdAt,
             doc.updatedAt,
         );
