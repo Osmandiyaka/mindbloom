@@ -153,6 +153,18 @@ class ResourceUsageSchema {
     lastCalculated?: Date;
 }
 
+@Schema({ _id: false })
+class SsoConfigSchema {
+    @Prop()
+    provider: string;
+
+    @Prop()
+    clientId: string;
+
+    @Prop()
+    issuer: string;
+}
+
 @Schema({
     collection: 'tenants',
     timestamps: true,
@@ -220,12 +232,8 @@ export class TenantDocument extends Document {
     @Prop({ default: false })
     ssoEnabled: boolean;
 
-    @Prop()
-    ssoConfig?: {
-        provider: string;
-        clientId: string;
-        issuer: string;
-    };
+    @Prop({ type: SsoConfigSchema })
+    ssoConfig?: SsoConfigSchema;
 
     @Prop()
     dataRetentionDays?: number;
