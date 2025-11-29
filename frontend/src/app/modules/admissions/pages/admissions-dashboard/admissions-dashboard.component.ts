@@ -18,11 +18,13 @@ import { FeesService } from '../../../../core/services/fees.service';
           <p class="sub">Track inquiries through decision and enrollment.</p>
         </div>
         <div class="actions">
-          <a routerLink="/admissions/apply" class="btn btn-primary">New Application</a>
+          <button class="btn ghost" (click)="refresh()">Refresh</button>
+          <a routerLink="/apply/application/new" class="btn btn-primary">New Application</a>
         </div>
       </header>
 
       <div *ngIf="admissions.error()" class="alert">{{ admissions.error() }}</div>
+      <div *ngIf="admissions.loading()" class="banner info">Loading latest pipeline…</div>
 
       <section class="info-banner">
         <div>
@@ -95,8 +97,9 @@ import { FeesService } from '../../../../core/services/fees.service';
     .sub { margin:0; color: var(--color-text-secondary); }
     .info-banner { grid-column:1 / -1; background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem 1.25rem; box-shadow: var(--shadow-sm); margin-bottom:0.75rem; }
     .info-banner h3 { margin:0 0 0.35rem; color: var(--color-text-primary); }
-    .actions { display:flex; gap:0.75rem; }
-    .btn { border:none; border-radius:10px; padding:0.75rem 1.25rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+    .actions { display:flex; gap:0.75rem; flex-wrap:wrap; }
+    .btn { border:1px solid var(--color-border); border-radius:10px; padding:0.75rem 1.25rem; font-weight:600; cursor:pointer; transition:all 0.2s; background: var(--color-surface); color: var(--color-text-primary); }
+    .btn.ghost { background: transparent; }
     .btn-primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
     .pipeline { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap:1rem; }
     .stage { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-md); }
@@ -125,6 +128,7 @@ import { FeesService } from '../../../../core/services/fees.service';
     .pill.paid { background: rgba(var(--color-success-rgb,16,185,129),0.15); color: var(--color-success,#10b981); }
     .pill.overdue { background: rgba(var(--color-error-rgb,239,68,68),0.15); color: var(--color-error,#ef4444); }
     .alert { grid-column:1 / -1; padding:0.75rem 1rem; border-radius:10px; background: rgba(var(--color-error-rgb,239,68,68),0.1); border:1px solid rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); }
+    .banner.info { grid-column:1 / -1; padding:0.75rem 1rem; border-radius:10px; background: rgba(var(--color-primary-rgb,79,139,255),0.12); border:1px solid rgba(var(--color-primary-rgb,79,139,255),0.3); color: var(--color-text-primary); }
     .empty { grid-column: 1 / -1; background: var(--color-surface); border:1px dashed var(--color-border); padding:1rem; border-radius:12px; text-align:center; color: var(--color-text-secondary); }
   `]
 })
@@ -143,6 +147,10 @@ export class AdmissionsDashboardComponent {
     public admissions: AdmissionsService,
     private fees: FeesService
   ) {}
+
+  refresh() {
+    this.admissions.refresh();
+  }
 
   updateStatus(app: AdmissionApplication, status: ApplicationStatus, note?: string) {
     this.admissions.updateStatus(app.id, status, note);
