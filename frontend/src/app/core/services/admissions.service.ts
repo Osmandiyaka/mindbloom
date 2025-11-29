@@ -41,6 +41,29 @@ export class AdmissionsService {
         return this.applications().find(a => a.id === id);
     }
 
+    getApplicationDetail(id: string): {
+        parentName: string;
+        parentContact: string;
+        parentEmail?: string;
+        documents: { name: string; type: string; url?: string }[];
+    } | undefined {
+        const app = this.getApplication(id);
+        if (!app) return undefined;
+        const docs = app.documents?.length
+            ? app.documents
+            : [
+                { name: 'Birth Certificate', type: 'PDF' },
+                { name: 'Report Card', type: 'PDF' },
+                { name: 'ID Photo', type: 'Image' },
+            ];
+        return {
+            parentName: `Parent of ${app.applicantName}`,
+            parentContact: app.phone || '+2348000000000',
+            parentEmail: app.email,
+            documents: docs,
+        };
+    }
+
     private rebuildPipelineFromApps(apps: AdmissionApplication[]) {
         const labels: Record<ApplicationStatus, string> = {
             review: 'In Review',
@@ -67,9 +90,9 @@ export class AdmissionsService {
 
     private mockPipeline() {
         const mockApps: AdmissionApplication[] = [
-            { id: 'mock-1', applicantName: 'Amaka Obi', gradeApplying: 'Grade 6', email: 'amaka@school.com', phone: '+2348011111111', status: 'review', submittedAt: new Date(), updatedAt: new Date(), documents: [] },
-            { id: 'mock-2', applicantName: 'Chidi Okeke', gradeApplying: 'Grade 5', email: 'chidi@school.com', phone: '+2348022222222', status: 'review', submittedAt: new Date(), updatedAt: new Date(), documents: [] },
-            { id: 'mock-3', applicantName: 'Sara Danjuma', gradeApplying: 'Grade 7', email: 'sara@school.com', phone: '+2348033333333', status: 'enrolled', submittedAt: new Date(), updatedAt: new Date(), documents: [] },
+            { id: 'mock-1', applicantName: 'Amaka Obi', gradeApplying: 'Grade 6', email: 'amaka@school.com', phone: '+2348011111111', status: 'review', submittedAt: new Date(), updatedAt: new Date(), documents: [{ name: 'Birth Certificate', type: 'PDF' }, { name: 'Report Card', type: 'PDF' }] },
+            { id: 'mock-2', applicantName: 'Chidi Okeke', gradeApplying: 'Grade 5', email: 'chidi@school.com', phone: '+2348022222222', status: 'review', submittedAt: new Date(), updatedAt: new Date(), documents: [{ name: 'Transfer Certificate', type: 'PDF' }] },
+            { id: 'mock-3', applicantName: 'Sara Danjuma', gradeApplying: 'Grade 7', email: 'sara@school.com', phone: '+2348033333333', status: 'enrolled', submittedAt: new Date(), updatedAt: new Date(), documents: [{ name: 'ID Photo', type: 'Image' }] },
         ];
         this.setApplications(mockApps);
     }

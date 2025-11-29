@@ -51,15 +51,15 @@ import { AdmissionApplication, ApplicationStatus } from '../../../../core/models
               <div class="grid">
                 <div><label>Student Name</label><div class="strong">{{ application()?.applicantName }}</div></div>
                 <div><label>Grade Applied</label><div>{{ application()?.gradeApplying }}</div></div>
-                <div><label>Parent Name</label><div>{{ applicant.parent }}</div></div>
-                <div><label>Parent Contact</label><div>{{ applicant.parentPhone }}</div></div>
+                <div><label>Parent Name</label><div>{{ detail()?.parentName }}</div></div>
+                <div><label>Parent Contact</label><div>{{ detail()?.parentContact }}</div></div>
               </div>
-              <div><label>Notes</label><p class="muted">{{ applicant.notes }}</p></div>
+              <div><label>Notes</label><p class="muted">{{ application()?.notes || 'No notes provided' }}</p></div>
             </div>
 
             <div class="tab-body" *ngIf="activeTab() === 'Documents'">
               <div class="doc-list">
-                <div class="doc-row" *ngFor="let doc of applicant.documents">
+                <div class="doc-row" *ngFor="let doc of detail()?.documents">
                   <div>
                     <div class="strong">{{ doc.name }}</div>
                     <div class="muted small">{{ doc.type }}</div>
@@ -123,7 +123,7 @@ import { AdmissionApplication, ApplicationStatus } from '../../../../core/models
     `h2{margin:0 0 0.35rem;}`,
     `.muted{margin:0; color:var(--color-text-secondary);}`,
     `.actions{display:flex; gap:0.4rem; flex-wrap:wrap;}`,
-    `.btn{border:1px solid var(--color-border); border-radius:7px; padding:0.32rem 0.65rem; font-weight:600; cursor:pointer; background:var(--color-surface); color:var(--color-text-primary); line-height:1; font-size:0.95rem; height:34px;}`,
+    `.btn{border:1px solid var(--color-border); border-radius:7px; padding:0.28rem 0.6rem; font-weight:600; cursor:pointer; background:var(--color-surface); color:var(--color-text-primary); line-height:1; font-size:0.92rem; height:32px;}`,
     `.btn.primary{background:linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow:0 8px 20px rgba(var(--color-primary-rgb,123,140,255),0.35);}`,
     `.btn.ghost{background:transparent;}`,
     `.btn.danger{background:rgba(var(--color-error-rgb,239,68,68),0.12); color:var(--color-error,#ef4444); border-color:rgba(var(--color-error-rgb,239,68,68),0.4);}`,
@@ -166,24 +166,20 @@ export class OnlineReviewComponent {
     { action: 'Submitted application', by: 'Parent Portal', date: new Date(), note: 'Initial submission' },
     { action: 'Moved to review', by: 'Admissions Bot', date: new Date(), note: 'Auto stage change' },
   ];
-  applicant = {
-    name: 'Amaka Obi',
-    grade: 'Grade 6',
-    email: 'amaka@school.com',
-    phone: '+2348011111111',
-    parent: 'Mr. Obi',
-    parentPhone: '+2348099999999',
-    applied: new Date(),
-    notes: 'Prefers morning sessions; interested in STEM club.',
-    documents: [
-      { name: 'Birth Certificate', type: 'PDF' },
-      { name: 'Report Card', type: 'PDF' },
-      { name: 'ID Photo', type: 'Image' },
-    ],
-  };
-
   application = computed<AdmissionApplication | undefined>(() => {
     return this.admissions.getApplication(this.applicationId) ?? this.fallbackApplication();
+  });
+
+  detail = computed(() => {
+    return this.admissions.getApplicationDetail(this.applicationId) ?? {
+      parentName: 'Parent not provided',
+      parentContact: '+2348000000000',
+      parentEmail: this.application()?.email,
+      documents: [
+        { name: 'Birth Certificate', type: 'PDF' },
+        { name: 'Report Card', type: 'PDF' },
+      ]
+    };
   });
 
   constructor(route: ActivatedRoute, private readonly admissions: AdmissionsService) {
@@ -214,14 +210,14 @@ export class OnlineReviewComponent {
   private fallbackApplication(): AdmissionApplication {
     return {
       id: this.applicationId || 'mock-review',
-      applicantName: this.applicant.name,
-      gradeApplying: this.applicant.grade,
-      email: this.applicant.email,
-      phone: this.applicant.phone,
+      applicantName: 'Amaka Obi',
+      gradeApplying: 'Grade 6',
+      email: 'amaka@school.com',
+      phone: '+2348011111111',
       status: 'review',
       submittedAt: new Date(),
       updatedAt: new Date(),
-      notes: this.applicant.notes,
+      notes: 'Prefers morning sessions; interested in STEM club.',
       documents: [],
     };
   }

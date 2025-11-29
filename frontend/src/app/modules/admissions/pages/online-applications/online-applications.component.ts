@@ -54,13 +54,13 @@ import { GradeSelectorComponent } from '../../../../shared/components/grade-sele
 
       <div class="table" *ngIf="filtered().length; else empty">
         <div class="table-head">
-          <div>Name</div>
-          <div>Grade</div>
-          <div>Status</div>
-          <div>Submitted</div>
+          <div class="clickable" (click)="sortBy('name')">Name</div>
+          <div class="clickable" (click)="sortBy('grade')">Grade</div>
+          <div class="clickable" (click)="sortBy('status')">Status</div>
+          <div class="clickable" (click)="sortBy('date')">Submitted</div>
           <div class="actions-col">Actions</div>
         </div>
-        <div class="table-row" *ngFor="let app of filtered()">
+        <div class="table-row" *ngFor="let app of paged()">
           <div>
             <div class="strong">{{ app.applicantName }}</div>
             <div class="muted small">{{ app.email }}</div>
@@ -76,6 +76,22 @@ import { GradeSelectorComponent } from '../../../../shared/components/grade-sele
             <a class="btn tiny ghost" [routerLink]="['/admissions/online/review', app.id]">Review</a>
             <button class="btn tiny" (click)="advance(app)">Advance</button>
           </div>
+        </div>
+      </div>
+
+      <div class="pager" *ngIf="filtered().length">
+        <div class="muted small">Showing page {{ page() }} of {{ totalPages() }} ({{ filtered().length }} results)</div>
+        <div class="pager-actions">
+          <label>
+            Page size
+            <select [(ngModel)]="pageSizeInput" (ngModelChange)="setPageSize($event)">
+              <option [ngValue]="5">5</option>
+              <option [ngValue]="10">10</option>
+              <option [ngValue]="20">20</option>
+            </select>
+          </label>
+          <button class="btn tiny ghost" (click)="prevPage()" [disabled]="page() === 1">Prev</button>
+          <button class="btn tiny" (click)="nextPage()" [disabled]="page() >= totalPages()">Next</button>
         </div>
       </div>
 
@@ -121,6 +137,10 @@ import { GradeSelectorComponent } from '../../../../shared/components/grade-sele
 
     .alert { padding:0.75rem 1rem; border-radius:10px; background: rgba(var(--color-error-rgb,239,68,68),0.1); border:1px solid rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); }
     .empty { border:1px dashed var(--color-border); border-radius:12px; padding:1rem; text-align:center; }
+    .clickable { cursor:pointer; }
+    .pager { display:flex; justify-content:space-between; align-items:center; gap:0.75rem; margin-top:0.5rem; }
+    .pager-actions { display:flex; gap:0.5rem; align-items:center; }
+    .pager select { padding:0.35rem 0.5rem; border-radius:8px; border:1px solid var(--color-border); background:var(--color-surface); color:var(--color-text-primary); }
   `]
 })
 export class OnlineApplicationsComponent {
@@ -129,6 +149,13 @@ export class OnlineApplicationsComponent {
   statusFilter = signal<string>('');
   statuses = ['all', 'review', 'enrolled', 'rejected'];
   filtered = computed(() => this.applyFilters());
+  page = signal(1);
+  pageSize = signal(5);
+  sortField = signal<'name' | 'grade' | 'status' | 'date'>('date');
+  sortDir = signal<'asc' | 'desc'>('desc');
+  paged = computed(() => this.applyPaging());
+  totalPages = computed(() => Math.max(1, Math.ceil(this.filtered().length / this.pageSize())));
+  pageSizeInput = 5;
 
   constructor(public admissions: AdmissionsService) {}
 
@@ -161,5 +188,41 @@ export class OnlineApplicationsComponent {
   advance(app: AdmissionApplication) {
     const nextStatus = app.status === 'review' ? 'enrolled' : app.status === 'enrolled' ? 'rejected' : 'review';
     this.admissions.updateStatus(app.id, nextStatus, 'Advanced via online queue');
+  }
+
+  sortBy(field: 'name' | 'grade' | 'status' | 'date') {
+    if (this.sortField() === field) {
+      this.sortDir.set(this.sortDir() === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortField.set(field);
+      this.sortDir.set('asc');
+    }
+    this.page.set(1);
+  }
+
+  private applyPaging(): AdmissionApplication[] {
+    const sorted = [...this.filtered()].sort((a, b) => {
+      const dir = this.sortDir() === 'asc' ? 1 : -1;
+      const field = this.sortField();
+      if (field === 'name') return dir * a.applicantName.localeCompare(b.applicantName);
+      if (field === 'grade') return dir * a.gradeApplying.localeCompare(b.gradeApplying);
+      if (field === 'status') return dir * a.status.localeCompare(b.status);
+      return dir * ((a.submittedAt?.getTime?.() || 0) - (b.submittedAt?.getTime?.() || 0));
+    });
+    const start = (this.page() - 1) * this.pageSize();
+    return sorted.slice(start, start + this.pageSize());
+  }
+
+  setPageSize(size: number) {
+    this.pageSize.set(size);
+    this.page.set(1);
+  }
+
+  prevPage() {
+    if (this.page() > 1) this.page.update(p => p - 1);
+  }
+
+  nextPage() {
+    if (this.page() < this.totalPages()) this.page.update(p => p + 1);
   }
 }
