@@ -11,10 +11,23 @@ import { CreateInvitationCommand } from '../../application/ports/in/commands/cre
 import { ResendInvitationCommand } from '../../application/ports/in/commands/resend-invitation.command';
 import { RevokeInvitationCommand } from '../../application/ports/in/commands/revoke-invitation.command';
 import { Invitation } from '../../domain/invitation/entities/invitation.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, ArrayNotEmpty, IsEmail, IsOptional, IsString, IsDateString } from 'class-validator';
 
 class CreateInvitationDto {
+    @ApiProperty({ example: 'user@school.com' })
+    @IsEmail()
     email!: string;
+
+    @ApiProperty({ example: ['Teacher', 'Librarian'] })
+    @IsArray()
+    @ArrayNotEmpty()
+    @IsString({ each: true })
     roles!: string[];
+
+    @ApiProperty({ required: false, example: '2024-12-31T00:00:00.000Z' })
+    @IsOptional()
+    @IsDateString()
     expiresAt?: string;
 }
 

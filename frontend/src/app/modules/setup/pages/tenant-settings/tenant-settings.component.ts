@@ -94,6 +94,12 @@ import { Role } from '../../../../core/models/role.model';
         </div>
 
         <div *ngSwitchCase="'invitations'" class="panel invitations-panel">
+          <div class="panel-header stacked slim">
+            <div>
+              <h2>User Invitations</h2>
+              <p class="subtitle">Invite staff or partners with roles. Invitations auto-expire in 7 days by default.</p>
+            </div>
+          </div>
           <div class="card invites-card tight">
             <div class="invite-row compact">
               <div class="input-icon">
@@ -238,6 +244,7 @@ import { Role } from '../../../../core/models/role.model';
     .invitations-panel { max-width: 1100px; gap: 0.25rem; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
     .panel-header.stacked { flex-direction: column; align-items: stretch; }
+    .panel-header.slim { margin-bottom: 0.25rem; padding: 0 0.75rem; }
     .invite-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 1rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 0.75rem; }
     .invite-card.flat { box-shadow: none; border-radius: 12px; border-color: var(--color-border); }
     .invite-row { display: grid; grid-template-columns: 1.2fr auto auto; gap: 0.5rem; align-items: center; }
