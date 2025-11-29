@@ -74,6 +74,32 @@
                     (input)="email.set($any($event.target).value)" required />
             </div>
 
+            <!-- Tenant Admin -->
+            <div class="form-group">
+                <label class="form-label">Admin Full Name *</label>
+                <input type="text" class="form-input" placeholder="Jane Doe"
+                    [value]="adminName()" (input)="adminName.set($any($event.target).value)" required />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Admin Email *</label>
+                <input type="email" class="form-input" placeholder="admin@yourschool.edu"
+                    [value]="adminEmail()" (input)="adminEmail.set($any($event.target).value)" required />
+            </div>
+
+            <div class="form-group two-column">
+                <div>
+                    <label class="form-label">Admin Password *</label>
+                    <input type="password" class="form-input" placeholder="Minimum 8 characters"
+                        [value]="adminPassword()" (input)="adminPassword.set($any($event.target).value)" required />
+                </div>
+                <div>
+                    <label class="form-label">Confirm Password *</label>
+                    <input type="password" class="form-input" placeholder="Re-enter password"
+                        [value]="adminPasswordConfirm()" (input)="adminPasswordConfirm.set($any($event.target).value)" required />
+                </div>
+            </div>
+
             <!-- Plan Selection -->
             <div class="form-group">
                 <label class="form-label">Select Plan</label>

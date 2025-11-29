@@ -15,6 +15,10 @@ export class TenantRegistrationComponent {
     schoolCode = signal('');
     contactPerson = signal('');
     email = signal('');
+    adminName = signal('');
+    adminEmail = signal('');
+    adminPassword = signal('');
+    adminPasswordConfirm = signal('');
     phone = signal('');
     selectedPlan = signal<TenantPlan>('trial');
     
@@ -48,6 +52,27 @@ export class TenantRegistrationComponent {
             return;
         }
 
+        if (!this.adminName().trim()) {
+            this.errorMessage.set('Please enter admin full name');
+            return;
+        }
+
+        if (!this.adminEmail().trim()) {
+            this.errorMessage.set('Please enter admin email address');
+            return;
+        }
+
+        const password = this.adminPassword().trim();
+        if (password.length < 8) {
+            this.errorMessage.set('Admin password must be at least 8 characters');
+            return;
+        }
+
+        if (password !== this.adminPasswordConfirm().trim()) {
+            this.errorMessage.set('Admin passwords do not match');
+            return;
+        }
+
         // Validate school code format (alphanumeric, no spaces)
         const codeRegex = /^[a-z0-9-]+$/;
         if (!codeRegex.test(this.schoolCode())) {
@@ -63,6 +88,9 @@ export class TenantRegistrationComponent {
             name: this.schoolName(),
             subdomain: this.schoolCode(),
             contactEmail: this.email(),
+            adminName: this.adminName(),
+            adminEmail: this.adminEmail(),
+            adminPassword: this.adminPassword(),
             plan: this.selectedPlan(),
         };
 

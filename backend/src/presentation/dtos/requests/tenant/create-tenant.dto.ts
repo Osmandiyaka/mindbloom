@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsEmail } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsOptional, IsEmail, MinLength } from 'class-validator';
 
 export class CreateTenantDto {
     @ApiProperty({ description: 'Tenant name', example: 'Greenfield High School' })
@@ -30,4 +30,19 @@ export class CreateTenantDto {
     @IsEnum(['trial', 'free', 'basic', 'premium', 'enterprise'])
     @IsOptional()
     plan?: 'trial' | 'free' | 'basic' | 'premium' | 'enterprise';
+
+    @ApiProperty({ description: 'Admin full name', example: 'Jane Doe' })
+    @IsString()
+    @IsNotEmpty()
+    adminName: string;
+
+    @ApiProperty({ description: 'Admin email', example: 'admin@greenfield.edu' })
+    @IsEmail()
+    adminEmail: string;
+
+    @ApiProperty({ description: 'Admin password', example: 'Str0ngP@ssw0rd!' })
+    @IsString()
+    @IsNotEmpty()
+    @MinLength(8)
+    adminPassword: string;
 }

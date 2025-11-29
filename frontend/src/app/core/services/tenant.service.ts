@@ -83,7 +83,16 @@ export class TenantService {
         );
     }
 
-    createTenant(data: { name: string; subdomain: string; contactEmail: string; ownerId?: string; plan?: TenantPlan }): Observable<Tenant> {
+    createTenant(data: {
+        name: string;
+        subdomain: string;
+        contactEmail: string;
+        adminName: string;
+        adminEmail: string;
+        adminPassword: string;
+        ownerId?: string;
+        plan?: TenantPlan;
+    }): Observable<Tenant> {
         return this.http.post<Tenant>(`${this.API_URL}/tenants`, data).pipe(
             tap(tenant => {
                 if (tenant) {

@@ -23,6 +23,6 @@ import { CreateUserUseCase, UpdateUserUseCase } from '../../application/services
         CreateUserUseCase,
         UpdateUserUseCase,
     ],
-    exports: [USER_REPOSITORY],
+    exports: [USER_REPOSITORY, CreateUserUseCase],
 })
 export class UsersModule { }
