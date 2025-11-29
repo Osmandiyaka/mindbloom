@@ -17,14 +17,7 @@ import { RoleService } from '../../../../core/services/role.service';
     standalone: true,
     imports: [CommonModule, FormsModule, PluginLauncherComponent, RouterModule, RoleSelectorComponent],
     template: `
-    <div class="tenant-settings">
-      <div class="page-header">
-        <div>
-          <p class="eyebrow">Tenant</p>
-          <h1>Self-Service</h1>
-          <p class="subtitle">Branding, locale, invitations, billing, and extensions in one place.</p>
-        </div>
-      </div>
+    <div class="tenant-settings compact">
 
       <div class="tabs">
         <button [class.active]="activeTab === 'branding'" (click)="activeTab = 'branding'">Branding & Locale</button>
@@ -36,12 +29,6 @@ import { RoleService } from '../../../../core/services/role.service';
 
       <ng-container [ngSwitch]="activeTab">
         <div *ngSwitchCase="'branding'">
-          <div class="actions">
-            <button class="btn ghost" (click)="reset()" [disabled]="loading()">Reset</button>
-            <button class="btn primary" (click)="save()" [disabled]="loading() || saving()">
-              {{ saving() ? 'Saving...' : 'Save Changes' }}
-            </button>
-          </div>
           <div class="grid">
             <div class="card">
               <div class="card-header">
@@ -92,6 +79,15 @@ import { RoleService } from '../../../../core/services/role.service';
                 <label><span>Academic Year Start</span><input type="date" [(ngModel)]="draft.academicYear!.start" /></label>
                 <label><span>Academic Year End</span><input type="date" [(ngModel)]="draft.academicYear!.end" /></label>
               </div>
+            </div>
+          </div>
+          <div class="actions sticky-actions">
+            <div class="spacer"></div>
+            <div class="action-buttons">
+              <button class="btn ghost" (click)="reset()" [disabled]="loading()">Reset</button>
+              <button class="btn primary" (click)="save()" [disabled]="loading() || saving()">
+                {{ saving() ? 'Saving...' : 'Save Changes' }}
+              </button>
             </div>
           </div>
         </div>
@@ -296,8 +292,9 @@ import { RoleService } from '../../../../core/services/role.service';
     </div>
   `,
     styles: [`
-    .tenant-settings { max-width: 1200px; margin: 0 auto; padding: 2rem; background: var(--content-background, var(--color-background)); color: var(--color-text-primary); }
-    .page-header { margin-bottom: 1rem; }
+    .tenant-settings { max-width: 1200px; margin: 0 auto; padding: 0.75rem 1.25rem 1.25rem; background: var(--content-background, var(--color-background)); color: var(--color-text-primary); }
+    .tenant-settings.compact { padding-top: 0.5rem; }
+    .page-header { margin-bottom: 0; }
     .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-tertiary); font-size: 12px; margin: 0 0 4px 0; }
     h1 { margin: 0; }
     .subtitle { margin: 4px 0 0 0; color: var(--color-text-secondary); }
@@ -306,6 +303,9 @@ import { RoleService } from '../../../../core/services/role.service';
     .tabs button:hover { border-color: var(--color-border-light); box-shadow: var(--shadow-md); }
     .tabs button.active { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: #fff; border: none; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb, 123, 140, 255), 0.3); }
     .actions { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .actions.sticky-actions { justify-content: flex-end; margin-top: 0.75rem; padding-right: 0.25rem; }
+    .actions.sticky-actions .action-buttons { display: flex; gap: 0.75rem; }
+    .actions.sticky-actions .spacer { flex: 1; }
     .btn { padding: 0.65rem 1.25rem; border-radius: 10px; border: 1px solid var(--color-border); cursor: pointer; background: var(--color-surface); color: var(--color-text-primary); transition: all 0.2s ease; box-shadow: var(--shadow-sm); display: inline-flex; align-items: center; gap: 0.4rem; }
     .btn svg { width: 16px; height: 16px; }
     .btn.ghost { background: var(--color-surface); }
