@@ -136,11 +136,11 @@ import { Role } from '../../../../core/models/role.model';
                     <td>{{ inv.expiresAt | date:'mediumDate' }}</td>
                     <td class="actions">
                       <button class="btn ghost small" (click)="resend(inv); $event.stopPropagation()">
-                        <svg viewBox="0 0 24 24"><path d="M12 5V2L8 6l4 4V7c2.76 0 5 2.24 5 5a5 5 0 0 1-8.66 3.32l-1.41 1.41A7 7 0 0 0 19 12c0-3.87-3.13-7-7-7Z" fill="currentColor"/></svg>
+                        <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 8 8v-2.5l4 3.5-4 3.5V18a6 6 0 1 0-6-6H4Z" fill="currentColor"/></svg>
                         Resend
                       </button>
                       <button class="btn ghost small danger" (click)="revoke(inv); $event.stopPropagation()">
-                        <svg viewBox="0 0 24 24"><path d="M7 4h10l-1 14H8L7 4Zm11-2H6L4.5 18.5A1.5 1.5 0 0 0 6 20h12a1.5 1.5 0 0 0 1.5-1.5L18 2Z" fill="currentColor"/></svg>
+                        <svg viewBox="0 0 24 24"><path d="M6 6h12l-1 14H7L6 6Zm2-4h8l1 4H7l1-4Zm2 8h2v6h-2v-6Zm4 0h2v6h-2v-6Z" fill="currentColor"/></svg>
                         Revoke
                       </button>
                     </td>
@@ -258,6 +258,9 @@ import { Role } from '../../../../core/models/role.model';
     .table { width: 100%; border-collapse: collapse; }
     .table th, .table td { padding: 0.65rem; border-bottom: 1px solid var(--color-border); text-align: left; }
     .table th { color: var(--color-text-tertiary); font-weight: 600; font-size: 0.9rem; }
+    .table.invites th, .table.invites td { padding: 0.45rem 0.65rem; line-height: 1.2; vertical-align: middle; }
+    .table.invites td.email-cell { display: flex; align-items: center; gap: 0.4rem; }
+    .table.invites td.email-cell svg { width: 18px; height: 18px; flex-shrink: 0; }
     .muted { color: var(--color-text-tertiary); }
     .badge { padding: 0.2rem 0.6rem; border-radius: 999px; background: var(--color-surface-hover); }
     .badge.revoked { background: rgba(var(--color-error-rgb,239,68,68),0.1); color: var(--color-error); }
