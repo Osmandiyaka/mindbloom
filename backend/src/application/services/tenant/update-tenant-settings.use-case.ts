@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/ports/out/tenant-repository.port';
-import { TenantSettings } from '../../../domain/tenant/entities/tenant.entity';
+import { Tenant } from '../../../domain/tenant/entities/tenant.entity';
 import { UpdateTenantSettingsCommand } from '../../ports/in/commands/update-tenant-settings.command';
 
 @Injectable()
@@ -10,26 +10,45 @@ export class UpdateTenantSettingsUseCase {
         private readonly tenantRepository: ITenantRepository,
     ) { }
 
-    async execute(command: UpdateTenantSettingsCommand): Promise<TenantSettings> {
+    async execute(command: UpdateTenantSettingsCommand): Promise<Tenant> {
         const tenant = await this.tenantRepository.findById(command.tenantId);
         if (!tenant) {
             throw new NotFoundException('Tenant not found');
         }
 
-        const merged: TenantSettings = {
-            ...tenant.settings,
+        const updated = await this.tenantRepository.update(tenant.id, {
+            ...tenant,
             ...command.settings,
             customization: {
-                ...(tenant.settings?.customization || {}),
+                ...(tenant.customization || {}),
                 ...(command.settings.customization || {}),
             },
-            academicYear: command.settings.academicYear || tenant.settings?.academicYear,
-        };
+            contactInfo: {
+                ...(tenant.contactInfo || {}),
+                ...(command.settings.contactInfo || {}),
+                address: {
+                    ...(tenant.contactInfo?.address || {}),
+                    ...(command.settings.contactInfo?.address || {}),
+                },
+            },
+            billing: {
+                ...(tenant.billing || {}),
+                ...(command.settings.billing || {}),
+            },
+            limits: {
+                ...(tenant.limits || {}),
+                ...(command.settings.limits || {}),
+            },
+            usage: {
+                ...(tenant.usage || {}),
+                ...(command.settings.usage || {}),
+            },
+            academicYear: {
+                ...(tenant.academicYear || {}),
+                ...(command.settings.academicYear || {}),
+            },
+        } as any);
 
-        const updated = await this.tenantRepository.update(tenant.id, {
-            settings: merged,
-        });
-
-        return updated.settings || {};
+        return updated;
     }
 }

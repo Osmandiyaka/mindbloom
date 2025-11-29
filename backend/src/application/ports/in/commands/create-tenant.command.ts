@@ -1,6 +1,9 @@
 export interface CreateTenantCommand {
     name: string;
     subdomain: string;
-    plan?: 'free' | 'basic' | 'premium' | 'enterprise';
-    status?: 'active' | 'suspended' | 'inactive';
+    contactEmail: string;
+    ownerId?: string;
+    plan?: 'trial' | 'free' | 'basic' | 'premium' | 'enterprise';
+    status?: 'pending' | 'active' | 'suspended' | 'inactive';
+    contactPhone?: string;
 }
