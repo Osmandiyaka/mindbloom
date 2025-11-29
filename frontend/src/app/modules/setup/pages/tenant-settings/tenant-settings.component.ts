@@ -9,6 +9,8 @@ import { RouterModule } from '@angular/router';
 import { Tenant } from '../../../../core/services/tenant.service';
 import { RoleSelectorComponent } from '../../../../shared/components/role-selector/role-selector.component';
 import { Role } from '../../../../core/models/role.model';
+import { UserService, User } from '../../../../core/services/user.service';
+import { RoleService } from '../../../../core/services/role.service';
 
 @Component({
     selector: 'app-tenant-settings',
@@ -27,6 +29,7 @@ import { Role } from '../../../../core/models/role.model';
       <div class="tabs">
         <button [class.active]="activeTab === 'branding'" (click)="activeTab = 'branding'">Branding & Locale</button>
         <button [class.active]="activeTab === 'invitations'" (click)="activeTab = 'invitations'">Invitations</button>
+        <button [class.active]="activeTab === 'users'" (click)="openUsersTab()">Users</button>
         <button [class.active]="activeTab === 'billing'" (click)="activeTab = 'billing'">Billing & Subscription</button>
         <button [class.active]="activeTab === 'plugins'" (click)="activeTab = 'plugins'">Plugins</button>
       </div>
@@ -152,6 +155,86 @@ import { Role } from '../../../../core/models/role.model';
           </div>
         </div>
 
+        <div *ngSwitchCase="'users'" class="panel users-panel">
+          <div class="panel-header spaced padded">
+            <div class="stacked">
+              <h2>Tenant Users</h2>
+              <p class="subtitle">Create and manage tenant users with roles.</p>
+            </div>
+            <button class="btn primary" (click)="openUserModal()">
+              <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Zm7-3h-2v-2h-2V7h2V5h2v2h2v2h-2v2Z" fill="currentColor"/></svg>
+              Add User
+            </button>
+          </div>
+          <div class="card invites-card tight users-card">
+            <div class="card-body tight-body">
+              <table class="table invites">
+                <thead>
+                  <tr><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let user of users()">
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.role?.name || '—' }}</td>
+                    <td>{{ user.createdAt | date:'mediumDate' }}</td>
+                    <td class="actions">
+                      <button class="btn ghost small" (click)="openUserModal(user)">Edit</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <p *ngIf="!users().length" class="muted">No users yet.</p>
+            </div>
+          </div>
+
+          <div class="overlay" *ngIf="showUserModal()">
+            <div class="modal users-modal">
+              <header class="modal-header">
+                <div>
+                  <p class="eyebrow">User</p>
+                  <h2>{{ editingUser() ? 'Edit User' : 'Add User' }}</h2>
+                </div>
+                <button class="icon-btn" (click)="closeUserModal()" aria-label="Close">
+                  <svg viewBox="0 0 24 24"><path d="M6 6l12 12M6 18 18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+              </header>
+              <div class="modal-body user-form">
+                <div class="field">
+                  <label>Name</label>
+                  <input type="text" [(ngModel)]="userForm.name" placeholder="Jane Doe" />
+                </div>
+                <div class="field">
+                  <label>Email</label>
+                  <input type="email" [(ngModel)]="userForm.email" placeholder="user@school.com" />
+                </div>
+                <div class="field" *ngIf="!editingUser()">
+                  <label>Password</label>
+                  <input type="password" [(ngModel)]="userForm.password" placeholder="Minimum 8 characters" />
+                </div>
+                <div class="field">
+                  <label>Roles</label>
+                  <app-role-selector
+                    [selectedRoleIds]="userRoleIds()"
+                    (selectionChange)="setUserRoles($event)" />
+                  <div class="selected-roles" *ngIf="userRoles().length">
+                    <span *ngFor="let r of userRoles()" class="chip">
+                      <svg viewBox="0 0 24 24"><path d="M9.5 17 5 12.5l1.5-1.5L9.5 14l8-8 1.5 1.5-9.5 9.5Z" fill="currentColor"/></svg>
+                      {{ r.name }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <footer class="modal-footer">
+                <button class="ghost" (click)="closeUserModal()">Cancel</button>
+                <button class="primary" (click)="saveUser()" [disabled]="userSaving()">
+                  {{ userSaving() ? 'Saving...' : 'Save User' }}
+                </button>
+              </footer>
+            </div>
+          </div>
+        </div>
+
         <div *ngSwitchCase="'billing'" class="panel">
           <div class="panel-header">
             <div>
@@ -223,7 +306,8 @@ import { Role } from '../../../../core/models/role.model';
     .tabs button:hover { border-color: var(--color-border-light); box-shadow: var(--shadow-md); }
     .tabs button.active { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: #fff; border: none; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb, 123, 140, 255), 0.3); }
     .actions { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
-    .btn { padding: 0.65rem 1.25rem; border-radius: 10px; border: 1px solid var(--color-border); cursor: pointer; background: var(--color-surface); color: var(--color-text-primary); transition: all 0.2s ease; box-shadow: var(--shadow-sm); }
+    .btn { padding: 0.65rem 1.25rem; border-radius: 10px; border: 1px solid var(--color-border); cursor: pointer; background: var(--color-surface); color: var(--color-text-primary); transition: all 0.2s ease; box-shadow: var(--shadow-sm); display: inline-flex; align-items: center; gap: 0.4rem; }
+    .btn svg { width: 16px; height: 16px; }
     .btn.ghost { background: var(--color-surface); }
     .btn.primary { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: #fff; border: none; box-shadow: var(--shadow-md); }
     .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
@@ -245,6 +329,8 @@ import { Role } from '../../../../core/models/role.model';
     .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
     .panel-header.stacked { flex-direction: column; align-items: stretch; }
     .panel-header.slim { margin-bottom: 0.25rem; padding: 0 0.75rem; }
+    .panel-header.spaced { padding: 0 0.75rem; }
+    .panel-header.padded { padding: 0 0.75rem; }
     .invite-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 1rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 0.75rem; }
     .invite-card.flat { box-shadow: none; border-radius: 12px; border-color: var(--color-border); }
     .invite-row { display: grid; grid-template-columns: 1.2fr auto auto; gap: 0.5rem; align-items: center; }
@@ -261,6 +347,12 @@ import { Role } from '../../../../core/models/role.model';
     .table.invites th, .table.invites td { padding: 0.45rem 0.65rem; line-height: 1.2; vertical-align: middle; }
     .table.invites td.email-cell { display: flex; align-items: center; gap: 0.4rem; }
     .table.invites td.email-cell svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .user-form { display: flex; flex-direction: column; gap: 0.9rem; padding: 0.5rem 0.75rem 1rem; background: var(--color-surface); border-radius: 12px; border: 1px solid var(--color-border); }
+    .user-form .field { display: flex; flex-direction: column; gap: 0.35rem; }
+    .user-form label { font-weight: 700; color: var(--color-text-secondary); font-size: 0.9rem; }
+    .user-form input, .user-form select { width: 100%; padding: 0.65rem 0.75rem; border-radius: 10px; border: 1px solid var(--color-border); background: var(--color-background); color: var(--color-text-primary); transition: all 0.18s ease; }
+    .user-form input:focus, .user-form select:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb,123,140,255),0.18); background: var(--color-surface); }
+    .user-form .selected-roles { margin-top: 0.25rem; }
     .muted { color: var(--color-text-tertiary); }
     .badge { padding: 0.2rem 0.6rem; border-radius: 999px; background: var(--color-surface-hover); }
     .badge.revoked { background: rgba(var(--color-error-rgb,239,68,68),0.1); color: var(--color-error); }
@@ -276,6 +368,12 @@ import { Role } from '../../../../core/models/role.model';
     .invites-card.tight { padding: 0.75rem 0.75rem 0.75rem; box-shadow: none; border-radius: 12px; }
     .invites-card .card-body { display: block; padding: 0.25rem 0.5rem 0.5rem; }
     .invites-card .table { margin: 0; }
+    .users-card .card-body { padding-top: 0.5rem; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: grid; place-items: center; padding: 24px; z-index: 9999; }
+    .modal.users-modal { width: min(520px, 92vw); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; box-shadow: 0 18px 48px rgba(0,0,0,0.35); display: flex; flex-direction: column; overflow: hidden; }
+    .modal.users-modal .modal-header { padding: 14px 16px 8px; }
+    .modal.users-modal .modal-body { padding: 12px 16px 8px; }
+    .modal.users-modal .modal-footer { padding: 12px 16px 16px; }
   `]
 })
 export class TenantSettingsComponent implements OnInit {
@@ -283,9 +381,11 @@ export class TenantSettingsComponent implements OnInit {
     saving = signal(false);
     billingLoading = signal(false);
     inviteLoading = signal(false);
+    usersLoading = signal(false);
+    userSaving = signal(false);
     error = signal<string | null>(null);
     success = signal<string | null>(null);
-    activeTab: 'branding' | 'invitations' | 'billing' | 'plugins' = 'branding';
+    activeTab: 'branding' | 'invitations' | 'users' | 'billing' | 'plugins' = 'branding';
 
     draft: Partial<Tenant> = {
         customization: {
@@ -305,6 +405,14 @@ export class TenantSettingsComponent implements OnInit {
     selectedRoles = signal<Role[]>([]);
     selectedRoleIds = signal<string[]>([]);
 
+    users = signal<User[]>([]);
+    roles = this.roleService.roles;
+    showUserModal = signal(false);
+    editingUser = signal<User | null>(null);
+    userRoles = signal<Role[]>([]);
+    userRoleIds = signal<string[]>([]);
+    userForm: { name: string; email: string; password: string } = { name: '', email: '', password: '' };
+
     subscription = signal<Subscription | null>(null);
     plans = [
         { id: 'free' as SubscriptionPlan, label: 'Free', price: '$0', perks: ['Basic features', 'Community support'] },
@@ -317,12 +425,22 @@ export class TenantSettingsComponent implements OnInit {
         private tenantSettingsService: TenantSettingsService,
         private invitationService: InvitationService,
         private subscriptionService: SubscriptionService,
+        private userService: UserService,
+        private roleService: RoleService,
     ) { }
 
     ngOnInit(): void {
         this.load();
         this.loadInvitations();
         this.loadSubscription();
+    }
+
+    openUsersTab(): void {
+        this.activeTab = 'users';
+        this.loadUsers();
+        if (!this.roles().length) {
+            this.roleService.getRoles().subscribe();
+        }
     }
 
     load(): void {
@@ -474,5 +592,86 @@ export class TenantSettingsComponent implements OnInit {
                 this.billingLoading.set(false);
             }
         });
+    }
+
+    // Users
+    loadUsers(): void {
+        this.usersLoading.set(true);
+        this.userService.getUsers().subscribe({
+            next: (list) => {
+                this.users.set(list);
+                this.usersLoading.set(false);
+            },
+            error: (err) => {
+                this.error.set(err.error?.message || 'Failed to load users');
+                this.usersLoading.set(false);
+            }
+        });
+    }
+
+    openUserModal(user?: User): void {
+        if (user) {
+            this.editingUser.set(user);
+            this.userForm = { name: user.name, email: user.email, password: '' };
+            const matchedRole = user.role ? this.roles().find(r => r.id === user.role!.id) : undefined;
+            const roleList = matchedRole ? [matchedRole] : [];
+            this.userRoles.set(roleList);
+            this.userRoleIds.set(roleList.map(r => r.id));
+        } else {
+            this.editingUser.set(null);
+            this.userForm = { name: '', email: '', password: '' };
+            this.userRoles.set([]);
+            this.userRoleIds.set([]);
+        }
+        if (!this.roles().length) {
+            this.roleService.getRoles().subscribe();
+        }
+        this.showUserModal.set(true);
+    }
+
+    setUserRoles(roles: Role[]): void {
+        this.userRoles.set(roles);
+        this.userRoleIds.set(roles.map(r => r.id));
+    }
+
+    closeUserModal(): void {
+        this.showUserModal.set(false);
+    }
+
+    saveUser(): void {
+        this.userSaving.set(true);
+        const selectedRoleId = this.userRoles().length ? this.userRoles()[0].id : undefined;
+        const payload = {
+            name: this.userForm.name,
+            email: this.userForm.email,
+            roleId: selectedRoleId,
+        };
+        if (this.editingUser()) {
+            this.userService.updateUser(this.editingUser()!.id, payload).subscribe({
+                next: (user) => {
+                    this.users.set(this.users().map(u => u.id === user.id ? user : u));
+                    this.userSaving.set(false);
+                    this.success.set('User updated');
+                    this.closeUserModal();
+                },
+                error: (err) => {
+                    this.error.set(err.error?.message || 'Failed to update user');
+                    this.userSaving.set(false);
+                }
+            });
+        } else {
+            this.userService.createUser({ ...payload, password: this.userForm.password }).subscribe({
+                next: (user) => {
+                    this.users.set([user, ...this.users()]);
+                    this.userSaving.set(false);
+                    this.success.set('User created');
+                    this.closeUserModal();
+                },
+                error: (err) => {
+                    this.error.set(err.error?.message || 'Failed to create user');
+                    this.userSaving.set(false);
+                }
+            });
+        }
     }
 }
