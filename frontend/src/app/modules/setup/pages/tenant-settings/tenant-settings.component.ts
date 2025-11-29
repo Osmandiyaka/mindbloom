@@ -93,38 +93,50 @@ import { Role } from '../../../../core/models/role.model';
           </div>
         </div>
 
-        <div *ngSwitchCase="'invitations'" class="panel">
-            <div class="panel-header">
-              <div>
-                <h2>User Invitations</h2>
-                <p>Invite staff or partners with roles. Invitations auto-expire in 7 days by default.</p>
-              </div>
-              <div class="invite-form">
+        <div *ngSwitchCase="'invitations'" class="panel invitations-panel">
+          <div class="card invites-card tight">
+            <div class="invite-row compact">
+              <div class="input-icon">
+                <svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v.51l8 5.33 8-5.33V6H4Zm0 3.36V18h16V9.36l-7.47 4.98a2 2 0 0 1-2.06 0L4 9.36Z" fill="currentColor"/></svg>
                 <input type="email" [(ngModel)]="inviteEmail" placeholder="user@school.com" />
-                <app-role-selector
-                  [selectedRoleIds]="selectedRoleIds()"
-                  (selectionChange)="onRoleSelection($event)" />
-                <div class="selected-roles" *ngIf="selectedRoles().length">
-                  <span *ngFor="let r of selectedRoles()" class="chip">{{ r.name }}</span>
-                </div>
-                <button class="btn primary" (click)="sendInvite()" [disabled]="inviteLoading()">Send Invite</button>
               </div>
+              <app-role-selector
+                [selectedRoleIds]="selectedRoleIds()"
+                (selectionChange)="onRoleSelection($event)" />
+              <button class="btn primary" (click)="sendInvite()" [disabled]="inviteLoading()">
+                <svg viewBox="0 0 24 24"><path d="m3.4 21 18.3-9L3.4 3v6.5l13.1 2-13.1 2V21Z" fill="currentColor"/></svg>
+                {{ inviteLoading() ? 'Sending...' : 'Send Invite' }}
+              </button>
             </div>
-          <div class="card">
-            <div class="card-body">
-              <table class="table">
+            <div class="selected-roles" *ngIf="selectedRoles().length">
+              <span *ngFor="let r of selectedRoles()" class="chip">
+                <svg viewBox="0 0 24 24"><path d="M9.5 17 5 12.5l1.5-1.5L9.5 14l8-8 1.5 1.5-9.5 9.5Z" fill="currentColor"/></svg>
+                {{ r.name }}
+              </span>
+            </div>
+            <div class="card-body tight-body">
+              <table class="table invites">
                 <thead>
                   <tr><th>Email</th><th>Roles</th><th>Status</th><th>Expires</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let inv of invitations()">
-                    <td>{{ inv.email }}</td>
-                    <td>{{ inv.roles.join(', ') || '—' }}</td>
+                    <td class="email-cell">
+                      <svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v.51l8 5.33 8-5.33V6H4Zm0 3.36V18h16V9.36l-7.47 4.98a2 2 0 0 1-2.06 0L4 9.36Z" fill="currentColor"/></svg>
+                      {{ inv.email }}
+                    </td>
+                    <td><span class="pill neutral">{{ inv.roles.join(', ') || '—' }}</span></td>
                     <td><span class="badge" [class.revoked]="inv.status === 'revoked'">{{ inv.status }}</span></td>
                     <td>{{ inv.expiresAt | date:'mediumDate' }}</td>
                     <td class="actions">
-                      <button class="btn ghost small" (click)="resend(inv); $event.stopPropagation()">Resend</button>
-                      <button class="btn ghost small danger" (click)="revoke(inv); $event.stopPropagation()">Revoke</button>
+                      <button class="btn ghost small" (click)="resend(inv); $event.stopPropagation()">
+                        <svg viewBox="0 0 24 24"><path d="M12 5V2L8 6l4 4V7c2.76 0 5 2.24 5 5a5 5 0 0 1-8.66 3.32l-1.41 1.41A7 7 0 0 0 19 12c0-3.87-3.13-7-7-7Z" fill="currentColor"/></svg>
+                        Resend
+                      </button>
+                      <button class="btn ghost small danger" (click)="revoke(inv); $event.stopPropagation()">
+                        <svg viewBox="0 0 24 24"><path d="M7 4h10l-1 14H8L7 4Zm11-2H6L4.5 18.5A1.5 1.5 0 0 0 6 20h12a1.5 1.5 0 0 0 1.5-1.5L18 2Z" fill="currentColor"/></svg>
+                        Revoke
+                      </button>
                     </td>
                   </tr>
                 </tbody>
@@ -222,11 +234,20 @@ import { Role } from '../../../../core/models/role.model';
     .logo-preview img { max-height: 80px; max-width: 200px; object-fit: contain; border: 1px dashed var(--color-border); padding: 6px; border-radius: 8px; }
     .alert { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 10px; background: rgba(var(--color-error-rgb,239,68,68),0.08); color: var(--color-error); }
     .alert.success { background: rgba(var(--color-success-rgb,16,185,129),0.08); color: var(--color-success); }
-    .panel { display: flex; flex-direction: column; gap: 1rem; }
+    .panel { display: flex; flex-direction: column; gap: 0.75rem; }
+    .invitations-panel { max-width: 1100px; gap: 0.25rem; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
-    .invite-form { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .panel-header.stacked { flex-direction: column; align-items: stretch; }
+    .invite-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 1rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 0.75rem; }
+    .invite-card.flat { box-shadow: none; border-radius: 12px; border-color: var(--color-border); }
+    .invite-row { display: grid; grid-template-columns: 1.2fr auto auto; gap: 0.5rem; align-items: center; }
+    .invite-row.compact { margin-bottom: 0.25rem; }
+    .input-icon { display: flex; align-items: center; gap: 10px; padding: 0.65rem 0.75rem; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-background); }
+    .input-icon svg { width: 18px; height: 18px; color: var(--color-text-tertiary); }
+    .input-icon input { border: none; outline: none; background: transparent; width: 100%; color: var(--color-text-primary); }
     .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; }
-    .selected-roles .chip { background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(16,185,129,0.25); font-weight: 700; }
+    .selected-roles .chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(16,185,129,0.25); font-weight: 700; }
+    .selected-roles .chip svg { width: 14px; height: 14px; }
     .table { width: 100%; border-collapse: collapse; }
     .table th, .table td { padding: 0.65rem; border-bottom: 1px solid var(--color-border); text-align: left; }
     .table th { color: var(--color-text-tertiary); font-weight: 600; font-size: 0.9rem; }
@@ -241,6 +262,10 @@ import { Role } from '../../../../core/models/role.model';
     .plan-card.active { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb,102,126,234),0.2); }
     .plan-head { display: flex; justify-content: space-between; align-items: center; }
     .price { margin: 0; font-weight: 700; }
+    .invites-card { width: 100%; margin-top: 0; }
+    .invites-card.tight { padding: 0.75rem 0.75rem 0.75rem; box-shadow: none; border-radius: 12px; }
+    .invites-card .card-body { display: block; padding: 0.25rem 0.5rem 0.5rem; }
+    .invites-card .table { margin: 0; }
   `]
 })
 export class TenantSettingsComponent implements OnInit {
