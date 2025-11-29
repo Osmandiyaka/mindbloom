@@ -275,17 +275,21 @@ import { RoleService } from '../../../../core/services/role.service';
           </div>
         </div>
 
-        <div *ngSwitchCase="'plugins'" class="panel">
-          <div class="panel-header">
-            <div>
+        <div *ngSwitchCase="'plugins'" class="panel plugins-panel">
+          <div class="panel-header padded">
+            <div class="stacked">
               <h2>Plugins</h2>
-              <p>Manage installed extensions or browse the marketplace.</p>
+              <p class="subtitle">Manage installed extensions or browse the marketplace.</p>
             </div>
             <div class="actions">
               <a routerLink="/setup/marketplace" class="btn ghost">Open Marketplace</a>
             </div>
           </div>
-          <app-plugin-launcher />
+          <div class="card padded plugin-card">
+            <div class="card-body plugin-body">
+              <app-plugin-launcher />
+            </div>
+          </div>
         </div>
       </ng-container>
 
@@ -329,6 +333,7 @@ import { RoleService } from '../../../../core/services/role.service';
     .alert.success { background: rgba(var(--color-success-rgb,16,185,129),0.08); color: var(--color-success); }
     .panel { display: flex; flex-direction: column; gap: 0.75rem; }
     .invitations-panel { max-width: 1100px; gap: 0.25rem; }
+    .plugins-panel { max-width: 1100px; gap: 0.35rem; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
     .panel-header.stacked { flex-direction: column; align-items: stretch; }
     .panel-header.slim { margin-bottom: 0.25rem; padding: 0 0.75rem; }
@@ -374,6 +379,8 @@ import { RoleService } from '../../../../core/services/role.service';
     .invites-card .card-body { display: block; padding: 0.25rem 0.5rem 0.5rem; }
     .invites-card .table { margin: 0; }
     .users-card .card-body { padding-top: 0.5rem; }
+    .plugin-card { padding: 0.35rem 0.35rem 0.75rem; }
+    .plugin-body { padding: 0.75rem 0.75rem 0.5rem; }
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: grid; place-items: center; padding: 24px; z-index: 9999; }
     .modal.users-modal { width: min(520px, 92vw); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; box-shadow: 0 18px 48px rgba(0,0,0,0.35); display: flex; flex-direction: column; overflow: hidden; }
     .modal.users-modal .modal-header { padding: 14px 16px 8px; }

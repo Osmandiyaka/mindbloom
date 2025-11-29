@@ -13,7 +13,7 @@ import { PluginService, InstalledPlugin } from '../../../../core/services/plugin
       <div class="page-header">
         <div class="header-content">
           <div class="eyebrow">Extensions</div>
-          <h1>My Plugins</h1>
+          <h1></h1>
           <p>Launch and manage your installed plugins.</p>
         </div>
       </div>
@@ -130,8 +130,8 @@ import { PluginService, InstalledPlugin } from '../../../../core/services/plugin
     .plugin-info h3 { font-size: 1.25rem; font-weight: 700; color: var(--color-text-primary); margin: 0; }
     .plugin-info p { font-size: 0.95rem; color: var(--color-text-secondary); margin: 0; line-height: 1.5; }
     .plugin-actions { margin-top: auto; display: flex; justify-content: flex-end; }
-    .btn-launch { padding: 0.625rem 1.25rem; background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; box-shadow: 0 14px 26px rgba(124, 58, 237, 0.35); min-width: 120px; justify-content: center; }
-    .btn-launch:hover { transform: translateY(-1px); box-shadow: 0 18px 30px rgba(124, 58, 237, 0.4); }
+    .btn-launch { padding: 0.625rem 1.25rem; background: linear-gradient(135deg, var(--color-primary, #10b981), var(--color-primary-dark, #0f766e)); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; box-shadow: 0 14px 26px rgba(16, 185, 129, 0.3); min-width: 120px; justify-content: center; }
+    .btn-launch:hover { transform: translateY(-1px); box-shadow: 0 18px 30px rgba(16, 185, 129, 0.35); }
 
     /* Disabled Plugins Section */
     .disabled-section { margin-top: 4rem; padding-top: 2rem; border-top: 2px solid var(--color-border); }
