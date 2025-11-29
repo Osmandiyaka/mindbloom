@@ -45,8 +45,10 @@ export class TenantController {
             name: createTenantDto.name,
             subdomain: createTenantDto.subdomain,
             contactEmail: createTenantDto.contactEmail,
-            ownerId: createTenantDto.ownerId,
             plan: createTenantDto.plan || 'trial',
+            adminName: createTenantDto.adminName,
+            adminEmail: createTenantDto.adminEmail,
+            adminPassword: createTenantDto.adminPassword,
         });
 
         return TenantResponseDto.fromDomain(tenant);

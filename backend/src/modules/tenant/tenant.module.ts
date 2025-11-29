@@ -5,12 +5,16 @@ import { GetTenantBySubdomainUseCase, GetTenantByIdUseCase, CreateTenantUseCase,
 import { TenantSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/tenant.schema';
 import { MongooseTenantRepository } from '../../infrastructure/adapters/persistence/mongoose/mongoose-tenant.repository';
 import { TENANT_REPOSITORY } from '../../domain/ports/out/tenant-repository.port';
+import { RolesModule } from '../roles/roles.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
     imports: [
         MongooseModule.forFeature([
             { name: 'Tenant', schema: TenantSchema },
         ]),
+        RolesModule,
+        UsersModule,
     ],
     controllers: [TenantController],
     providers: [
