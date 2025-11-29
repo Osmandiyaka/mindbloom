@@ -10,15 +10,18 @@ import { TenantContext } from '../../../../common/tenant/tenant.context';
 import { GetPermissionTreeUseCase } from '../../../../application/services/rbac/get-permission-tree.use-case';
 import { Permission } from '../../../../domain/rbac/entities/permission.entity';
 import { Role } from '../../../../domain/rbac/entities/role.entity';
+import { TenantScopedRepository } from '../../../../common/tenant/tenant-scoped.repository';
 
 @Injectable()
-export class MongooseUserRepository implements IUserRepository {
+export class MongooseUserRepository extends TenantScopedRepository<UserDocument, User> implements IUserRepository {
     constructor(
         @InjectModel('User')
         private readonly userModel: Model<UserDocument>,
-        private readonly tenantContext: TenantContext,
+        tenantContext: TenantContext,
         @Optional() private readonly getPermissionTree?: GetPermissionTreeUseCase,
-    ) { }
+    ) {
+        super(tenantContext);
+    }
 
     async findByEmail(email: string): Promise<User | null> {
         // For login, we might not have tenant context yet
@@ -34,7 +37,7 @@ export class MongooseUserRepository implements IUserRepository {
 
     async create(user: User, password: string): Promise<User> {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const tenantId = user.tenantId;
+        const tenantId = this.requireTenant(user.tenantId);
 
         const created = await this.userModel.create({
             tenantId,
@@ -48,7 +51,8 @@ export class MongooseUserRepository implements IUserRepository {
     }
 
     async findAll(tenantId: string): Promise<User[]> {
-        const users = await this.userModel.find({ tenantId }).populate('roleId').exec();
+        const resolved = this.requireTenant(tenantId);
+        const users = await this.userModel.find({ tenantId: resolved }).populate('roleId').exec();
         return users.map(user => this.toDomain(user));
     }
 

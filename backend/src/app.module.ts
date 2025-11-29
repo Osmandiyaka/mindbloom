@@ -22,6 +22,7 @@ import { UsersModule } from './modules/users/users.module';
 import { PluginsModule } from './modules/plugins/plugins.module';
 import { InvitationsModule } from './modules/invitations/invitations.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
+import { TenantSupportModule } from './common/tenant/tenant.module';
 
 @Module({
     imports: [
@@ -50,6 +51,7 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
         SetupModule,
         AdmissionsModule,
         TasksModule,
+        TenantSupportModule,
     ],
 })
 export class AppModule { }

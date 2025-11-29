@@ -5,21 +5,31 @@ import {
     InstalledPlugin,
     InstalledPluginStatus,
 } from '@domain/plugin/entities/installed-plugin.entity';
-import { InstalledPluginRepository } from '@domain/ports/out/installed-plugin-repository.port'; @Injectable()
+import { InstalledPluginRepository } from '@domain/ports/out/installed-plugin-repository.port';
+import { TenantScopedRepository } from '../../../../common/tenant/tenant-scoped.repository';
+import { TenantContext } from '../../../../common/tenant/tenant.context';
+
+@Injectable()
 export class MongooseInstalledPluginRepository
+    extends TenantScopedRepository<any, InstalledPlugin>
     implements InstalledPluginRepository {
     constructor(
         @InjectModel('InstalledPlugin')
         private readonly installedPluginModel: Model<any>,
-    ) { }
+        tenantContext: TenantContext,
+    ) {
+        super(tenantContext);
+    }
 
     async findAll(tenantId: string): Promise<InstalledPlugin[]> {
-        const docs = await this.installedPluginModel.find({ tenantId }).exec();
+        const resolved = this.requireTenant(tenantId);
+        const docs = await this.installedPluginModel.find({ tenantId: resolved }).exec();
         return docs.map((doc) => this.toDomain(doc));
     }
 
     async findById(id: string, tenantId: string): Promise<InstalledPlugin | null> {
-        const doc = await this.installedPluginModel.findOne({ _id: id, tenantId }).exec();
+        const resolved = this.requireTenant(tenantId);
+        const doc = await this.installedPluginModel.findOne({ _id: id, tenantId: resolved }).exec();
         return doc ? this.toDomain(doc) : null;
     }
 
@@ -27,15 +37,17 @@ export class MongooseInstalledPluginRepository
         pluginId: string,
         tenantId: string,
     ): Promise<InstalledPlugin | null> {
+        const resolved = this.requireTenant(tenantId);
         const doc = await this.installedPluginModel
-            .findOne({ pluginId, tenantId })
+            .findOne({ pluginId, tenantId: resolved })
             .exec();
         return doc ? this.toDomain(doc) : null;
     }
 
     async findEnabledPlugins(tenantId: string): Promise<InstalledPlugin[]> {
+        const resolved = this.requireTenant(tenantId);
         const docs = await this.installedPluginModel
-            .find({ tenantId, status: InstalledPluginStatus.ENABLED })
+            .find({ tenantId: resolved, status: InstalledPluginStatus.ENABLED })
             .exec();
         return docs.map((doc) => this.toDomain(doc));
     }

@@ -4,16 +4,22 @@ import { Model } from 'mongoose';
 import { Subscription } from '../../../../domain/subscription/entities/subscription.entity';
 import { SubscriptionRepository } from '../../../../domain/ports/out/subscription-repository.port';
 import { SubscriptionDocument } from './schemas/subscription.schema';
+import { TenantScopedRepository } from '../../../../common/tenant/tenant-scoped.repository';
+import { TenantContext } from '../../../../common/tenant/tenant.context';
 
 @Injectable()
-export class MongooseSubscriptionRepository implements SubscriptionRepository {
+export class MongooseSubscriptionRepository extends TenantScopedRepository<SubscriptionDocument, Subscription> implements SubscriptionRepository {
     constructor(
         @InjectModel('Subscription')
         private readonly subscriptionModel: Model<SubscriptionDocument>,
-    ) { }
+        tenantContext: TenantContext,
+    ) {
+        super(tenantContext);
+    }
 
     async findByTenantId(tenantId: string): Promise<Subscription | null> {
-        const doc = await this.subscriptionModel.findOne({ tenantId }).exec();
+        const resolved = this.requireTenant(tenantId);
+        const doc = await this.subscriptionModel.findOne({ tenantId: resolved }).exec();
         return doc ? this.toDomain(doc) : null;
     }
 

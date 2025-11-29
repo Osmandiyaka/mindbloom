@@ -6,13 +6,18 @@ import { Permission } from '../../../../domain/rbac/entities/permission.entity';
 import { createSystemRoles } from '../../../../domain/rbac/entities/system-roles';
 import { IRoleRepository } from '../../../../domain/ports/out/role-repository.port';
 import { RoleDocument } from './schemas/role.schema';
+import { TenantScopedRepository } from '../../../../common/tenant/tenant-scoped.repository';
+import { TenantContext } from '../../../../common/tenant/tenant.context';
 
 @Injectable()
-export class MongooseRoleRepository implements IRoleRepository {
+export class MongooseRoleRepository extends TenantScopedRepository<RoleDocument, Role> implements IRoleRepository {
     constructor(
         @InjectModel('Role')
         private readonly roleModel: Model<RoleDocument>,
-    ) { }
+        tenantContext: TenantContext,
+    ) {
+        super(tenantContext);
+    }
 
     async create(role: Role): Promise<Role> {
         const doc = new this.roleModel({
@@ -34,38 +39,44 @@ export class MongooseRoleRepository implements IRoleRepository {
     }
 
     async findById(id: string, tenantId: string): Promise<Role | null> {
-        const doc = await this.roleModel.findOne({ _id: id, tenantId }).exec();
+        const resolved = this.requireTenant(tenantId);
+        const doc = await this.roleModel.findOne({ _id: id, tenantId: resolved }).exec();
         return doc ? this.mapToEntity(doc) : null;
     }
 
     async findByName(name: string, tenantId: string): Promise<Role | null> {
-        const doc = await this.roleModel.findOne({ name, tenantId }).exec();
+        const resolved = this.requireTenant(tenantId);
+        const doc = await this.roleModel.findOne({ name, tenantId: resolved }).exec();
         return doc ? this.mapToEntity(doc) : null;
     }
 
     async findAll(tenantId: string): Promise<Role[]> {
-        const docs = await this.roleModel.find({ tenantId }).exec();
+        const resolved = this.requireTenant(tenantId);
+        const docs = await this.roleModel.find({ tenantId: resolved }).exec();
         return docs.map((doc) => this.mapToEntity(doc));
     }
 
     async findSystemRoles(tenantId: string): Promise<Role[]> {
+        const resolved = this.requireTenant(tenantId);
         const docs = await this.roleModel
-            .find({ tenantId, isSystemRole: true })
+            .find({ tenantId: resolved, isSystemRole: true })
             .exec();
         return docs.map((doc) => this.mapToEntity(doc));
     }
 
     async findCustomRoles(tenantId: string): Promise<Role[]> {
+        const resolved = this.requireTenant(tenantId);
         const docs = await this.roleModel
-            .find({ tenantId, isSystemRole: false })
+            .find({ tenantId: resolved, isSystemRole: false })
             .exec();
         return docs.map((doc) => this.mapToEntity(doc));
     }
 
     async update(role: Role): Promise<Role> {
+        const resolved = this.requireTenant(role.tenantId);
         const updated = await this.roleModel
             .findOneAndUpdate(
-                { _id: role.id, tenantId: role.tenantId },
+                { _id: role.id, tenantId: resolved },
                 {
                     name: role.name,
                     description: role.description,

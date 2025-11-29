@@ -4,21 +4,28 @@ import { Model } from 'mongoose';
 import { Invitation, InvitationStatus } from '../../../../domain/invitation/entities/invitation.entity';
 import { InvitationRepository } from '../../../../domain/ports/out/invitation-repository.port';
 import { InvitationDocument } from './schemas/invitation.schema';
+import { TenantScopedRepository } from '../../../../common/tenant/tenant-scoped.repository';
+import { TenantContext } from '../../../../common/tenant/tenant.context';
 
 @Injectable()
-export class MongooseInvitationRepository implements InvitationRepository {
+export class MongooseInvitationRepository extends TenantScopedRepository<InvitationDocument, Invitation> implements InvitationRepository {
     constructor(
         @InjectModel('Invitation')
         private readonly invitationModel: Model<InvitationDocument>,
-    ) { }
+        tenantContext: TenantContext,
+    ) {
+        super(tenantContext);
+    }
 
     async findByTenant(tenantId: string): Promise<Invitation[]> {
-        const docs = await this.invitationModel.find({ tenantId }).sort({ createdAt: -1 }).exec();
+        const resolved = this.requireTenant(tenantId);
+        const docs = await this.invitationModel.find({ tenantId: resolved }).sort({ createdAt: -1 }).exec();
         return docs.map(this.toDomain);
     }
 
     async findById(id: string, tenantId: string): Promise<Invitation | null> {
-        const doc = await this.invitationModel.findOne({ _id: id, tenantId }).exec();
+        const resolved = this.requireTenant(tenantId);
+        const doc = await this.invitationModel.findOne({ _id: id, tenantId: resolved }).exec();
         return doc ? this.toDomain(doc) : null;
     }
 
@@ -64,12 +71,14 @@ export class MongooseInvitationRepository implements InvitationRepository {
     }
 
     async delete(id: string, tenantId: string): Promise<void> {
-        await this.invitationModel.deleteOne({ _id: id, tenantId }).exec();
+        const resolved = this.requireTenant(tenantId);
+        await this.invitationModel.deleteOne({ _id: id, tenantId: resolved }).exec();
     }
 
     async updateStatus(id: string, tenantId: string, status: InvitationStatus): Promise<Invitation | null> {
+        const resolved = this.requireTenant(tenantId);
         const updated = await this.invitationModel.findOneAndUpdate(
-            { _id: id, tenantId },
+            { _id: id, tenantId: resolved },
             { status, updatedAt: new Date() },
             { new: true }
         ).exec();

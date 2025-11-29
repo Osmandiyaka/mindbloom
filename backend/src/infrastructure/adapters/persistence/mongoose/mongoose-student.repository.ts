@@ -16,18 +16,24 @@ import {
 } from '../../../../domain/student/entities/student.entity';
 import { IStudentRepository, StudentFilters } from '../../../../domain/ports/out/student-repository.port';
 import { StudentDocument as StudentDoc } from './schemas/student.schema';
+import { TenantScopedRepository } from '../../../../common/tenant/tenant-scoped.repository';
+import { TenantContext } from '../../../../common/tenant/tenant.context';
 
 @Injectable()
-export class MongooseStudentRepository implements IStudentRepository {
+export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc, Student> implements IStudentRepository {
     constructor(
         @InjectModel('Student')
         private readonly studentModel: Model<StudentDoc>,
-    ) { }
+        tenantContext: TenantContext,
+    ) {
+        super(tenantContext);
+    }
 
     async create(student: Student): Promise<Student> {
+        const tenantId = this.requireTenant(student.tenantId);
         const studentDoc = new this.studentModel({
             _id: new Types.ObjectId(student.id), // Use the ObjectId from domain
-            tenantId: new Types.ObjectId(student.tenantId),
+            tenantId: new Types.ObjectId(tenantId),
             firstName: student.firstName,
             lastName: student.lastName,
             middleName: student['props'].middleName,
@@ -54,25 +60,28 @@ export class MongooseStudentRepository implements IStudentRepository {
     }
 
     async findById(id: string, tenantId: string): Promise<Student | null> {
+        const resolved = this.requireTenant(tenantId);
         const doc = await this.studentModel.findOne({
             _id: id,
-            tenantId: new Types.ObjectId(tenantId),
+            tenantId: new Types.ObjectId(resolved),
         });
 
         return doc ? this.toDomain(doc) : null;
     }
 
     async findByAdmissionNumber(admissionNumber: string, tenantId: string): Promise<Student | null> {
+        const resolved = this.requireTenant(tenantId);
         const doc = await this.studentModel.findOne({
             'enrollment.admissionNumber': admissionNumber,
-            tenantId: new Types.ObjectId(tenantId),
+            tenantId: new Types.ObjectId(resolved),
         });
 
         return doc ? this.toDomain(doc) : null;
     }
 
     async findAll(tenantId: string, filters?: StudentFilters): Promise<Student[]> {
-        const query: any = { tenantId: new Types.ObjectId(tenantId) };
+        const resolved = this.requireTenant(tenantId);
+        const query: any = { tenantId: new Types.ObjectId(resolved) };
 
         if (filters) {
             if (filters.search) {
@@ -105,8 +114,9 @@ export class MongooseStudentRepository implements IStudentRepository {
     }
 
     async update(student: Student): Promise<Student> {
+        const resolved = this.requireTenant(student.tenantId);
         const doc = await this.studentModel.findOneAndUpdate(
-            { _id: student.id, tenantId: new Types.ObjectId(student.tenantId) },
+            { _id: student.id, tenantId: new Types.ObjectId(resolved) },
             {
                 $set: {
                     firstName: student.firstName,
