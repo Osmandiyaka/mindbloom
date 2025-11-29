@@ -88,6 +88,11 @@ export class AdmissionsService {
         this.setApplications(next);
     }
 
+    setApplicationDocumentsLocal(id: string, documents: { name: string; type: string; url?: string }[]) {
+        const next = this.applications().map(a => a.id === id ? { ...a, documents } : a);
+        this.setApplications(next);
+    }
+
     private mockPipeline() {
         const mockApps: AdmissionApplication[] = [
             { id: 'mock-1', applicantName: 'Amaka Obi', gradeApplying: 'Grade 6', email: 'amaka@school.com', phone: '+2348011111111', status: 'review', submittedAt: new Date(), updatedAt: new Date(), documents: [{ name: 'Birth Certificate', type: 'PDF' }, { name: 'Report Card', type: 'PDF' }] },

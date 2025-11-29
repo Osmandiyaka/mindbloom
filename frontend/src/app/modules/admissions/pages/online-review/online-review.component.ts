@@ -51,20 +51,20 @@ import { AdmissionApplication, ApplicationStatus } from '../../../../core/models
               <div class="grid">
                 <div><label>Student Name</label><div class="strong">{{ application()?.applicantName }}</div></div>
                 <div><label>Grade Applied</label><div>{{ application()?.gradeApplying }}</div></div>
-                <div><label>Parent Name</label><div>{{ detail()?.parentName }}</div></div>
-                <div><label>Parent Contact</label><div>{{ detail()?.parentContact }}</div></div>
+                <div><label>Parent Name</label><div>{{ detail().parentName }}</div></div>
+                <div><label>Parent Contact</label><div>{{ detail().parentContact }}</div></div>
               </div>
               <div><label>Notes</label><p class="muted">{{ application()?.notes || 'No notes provided' }}</p></div>
             </div>
 
             <div class="tab-body" *ngIf="activeTab() === 'Documents'">
               <div class="doc-list">
-                <div class="doc-row" *ngFor="let doc of detail()?.documents">
+                <div class="doc-row" *ngFor="let doc of detail().documents">
                   <div>
                     <div class="strong">{{ doc.name }}</div>
                     <div class="muted small">{{ doc.type }}</div>
                   </div>
-                  <button class="btn tiny ghost">View</button>
+                  <button class="btn tiny ghost" (click)="openDoc(doc)">View</button>
                 </div>
               </div>
             </div>
@@ -107,14 +107,56 @@ import { AdmissionApplication, ApplicationStatus } from '../../../../core/models
             </div>
             <div class="strong">Total: {{ totalScore() }}/40</div>
           </div>
+          <div class="panel">
+            <h4>Assign Reviewer</h4>
+            <select [(ngModel)]="assignedReviewer">
+              <option *ngFor="let r of reviewers" [value]="r">{{ r }}</option>
+            </select>
+            <p class="muted small">Reviewer: {{ assignedReviewer() }}</p>
+          </div>
+          <div class="panel">
+            <h4>Notes</h4>
+            <textarea [(ngModel)]="noteInput" rows="3" placeholder="Add internal note"></textarea>
+            <button class="btn primary full" (click)="addNote()">Add Note</button>
+            <div class="note" *ngFor="let n of notes()">
+              <div class="strong">{{ n.by }}</div>
+              <div class="muted small">{{ n.date | date:'short' }}</div>
+              <p class="muted">{{ n.text }}</p>
+            </div>
+          </div>
+          <div class="panel">
+            <h4>Attachments</h4>
+            <div class="attachment" *ngFor="let a of attachments()">
+              <div>{{ a.name }} ({{ a.type }})</div>
+            </div>
+            <button class="btn tiny ghost" (click)="addAttachment()">Add Mock Attachment</button>
+          </div>
         </div>
       </div>
+
+      <div class="toast" *ngIf="toast()">{{ toast() }}</div>
     </section>
     <ng-template #missing>
       <section class="page-shell">
         <p class="muted">Application not found.</p>
       </section>
     </ng-template>
+
+    <div class="overlay" *ngIf="showDoc() && selectedDoc()">
+      <div class="doc-modal">
+        <header class="modal-header">
+          <div>
+            <p class="eyebrow">Document</p>
+            <h3>{{ selectedDoc()?.name }}</h3>
+            <p class="muted small">{{ selectedDoc()?.type }}</p>
+          </div>
+          <button class="btn ghost" (click)="closeDoc()">Close</button>
+        </header>
+        <div class="doc-body">
+          <p class="muted">Preview not available in mock. URL: {{ selectedDoc()?.url || 'N/A' }}</p>
+        </div>
+      </div>
+    </div>
   `,
   styles: [
     `.page-shell{padding:1rem 1.5rem; display:flex; flex-direction:column; gap:1rem;}`,
@@ -152,7 +194,12 @@ import { AdmissionApplication, ApplicationStatus } from '../../../../core/models
     `.timeline-item .dot{width:10px; height:10px; border-radius:999px; background:var(--color-primary,#7ab8ff); margin-top:0.35rem;}`,
     `select, textarea, input[type=\"range\"]{width:100%; background:var(--color-surface); border:1px solid var(--color-border); border-radius:8px; padding:0.45rem 0.55rem; color:var(--color-text-primary);}`,
     `textarea{resize:vertical;}`,
-    `.right{display:flex; flex-direction:column; gap:1rem;}`
+    `.right{display:flex; flex-direction:column; gap:1rem;}`,
+    `.toast{margin-top:0.5rem; padding:0.6rem 0.8rem; border-radius:10px; background:rgba(var(--color-primary-rgb,123,140,255),0.15); border:1px solid rgba(var(--color-primary-rgb,123,140,255),0.35);}`,
+    `.overlay{position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:999;}`,
+    `.doc-modal{width:min(540px,90vw); background:var(--color-surface); border:1px solid var(--color-border); border-radius:14px; padding:1rem 1.2rem; box-shadow:0 20px 60px rgba(0,0,0,0.35);}`,
+    `.doc-body{padding:0.5rem 0;}`,
+    `.modal-header{display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem;}`
   ]
 })
 export class OnlineReviewComponent {
@@ -166,6 +213,18 @@ export class OnlineReviewComponent {
     { action: 'Submitted application', by: 'Parent Portal', date: new Date(), note: 'Initial submission' },
     { action: 'Moved to review', by: 'Admissions Bot', date: new Date(), note: 'Auto stage change' },
   ];
+  toast = signal<string | null>(null);
+  showDoc = signal(false);
+  selectedDoc = signal<{ name: string; type: string; url?: string } | null>(null);
+  reviewers = ['Adaeze Bello', 'John Mensah', 'Fatima Yusuf'];
+  assignedReviewer = signal('Adaeze Bello');
+  noteInput = '';
+  notes = signal<{ text: string; by: string; date: Date }[]>([
+    { text: 'Please verify documents.', by: 'Admissions Bot', date: new Date() }
+  ]);
+  attachments = signal<{ name: string; type: string }[]>([
+    { name: 'Personal Essay', type: 'PDF' },
+  ]);
   application = computed<AdmissionApplication | undefined>(() => {
     return this.admissions.getApplication(this.applicationId) ?? this.fallbackApplication();
   });
@@ -198,6 +257,8 @@ export class OnlineReviewComponent {
       { action: `Status set to ${next}`, by: 'You', date: new Date(), note: this.comment || 'No comment' },
       ...this.reviewHistory,
     ];
+    this.toast.set(`Status updated to ${next}`);
+    setTimeout(() => this.toast.set(null), 2500);
   }
 
   saveDecision() {
@@ -205,6 +266,33 @@ export class OnlineReviewComponent {
       { action: `Decision: ${this.recommendation}`, by: 'You', date: new Date(), note: this.comment || 'No comment' },
       ...this.reviewHistory,
     ];
+    this.toast.set(`Decision recorded: ${this.recommendation}`);
+    setTimeout(() => this.toast.set(null), 2500);
+  }
+
+  openDoc(doc: { name: string; type: string; url?: string }) {
+    this.selectedDoc.set(doc);
+    this.showDoc.set(true);
+  }
+
+  closeDoc() {
+    this.showDoc.set(false);
+    this.selectedDoc.set(null);
+  }
+
+  addNote() {
+    if (!this.noteInput.trim()) return;
+    this.notes.set([{ text: this.noteInput.trim(), by: 'You', date: new Date() }, ...this.notes()]);
+    this.noteInput = '';
+    this.toast.set('Note added');
+    setTimeout(() => this.toast.set(null), 2000);
+  }
+
+  addAttachment() {
+    const next = { name: `Attachment ${this.attachments().length + 1}`, type: 'PDF' };
+    this.attachments.set([next, ...this.attachments()]);
+    this.toast.set('Attachment added (mock)');
+    setTimeout(() => this.toast.set(null), 2000);
   }
 
   private fallbackApplication(): AdmissionApplication {

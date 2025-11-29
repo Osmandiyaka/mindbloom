@@ -52,6 +52,8 @@ import { GradeSelectorComponent } from '../../../../shared/components/grade-sele
         </div>
       </div>
 
+      <div *ngIf="toast()" class="toast">{{ toast() }}</div>
+
       <div class="table" *ngIf="filtered().length; else empty">
         <div class="table-head">
           <div class="clickable" (click)="sortBy('name')">Name</div>
@@ -141,6 +143,7 @@ import { GradeSelectorComponent } from '../../../../shared/components/grade-sele
     .pager { display:flex; justify-content:space-between; align-items:center; gap:0.75rem; margin-top:0.5rem; }
     .pager-actions { display:flex; gap:0.5rem; align-items:center; }
     .pager select { padding:0.35rem 0.5rem; border-radius:8px; border:1px solid var(--color-border); background:var(--color-surface); color:var(--color-text-primary); }
+    .toast { margin-top:0.35rem; padding:0.6rem 0.8rem; border-radius:10px; background:rgba(var(--color-primary-rgb,123,140,255),0.15); border:1px solid rgba(var(--color-primary-rgb,123,140,255),0.35); color:var(--color-text-primary); }
   `]
 })
 export class OnlineApplicationsComponent {
@@ -156,6 +159,7 @@ export class OnlineApplicationsComponent {
   paged = computed(() => this.applyPaging());
   totalPages = computed(() => Math.max(1, Math.ceil(this.filtered().length / this.pageSize())));
   pageSizeInput = 5;
+  toast = signal<string | null>(null);
 
   constructor(public admissions: AdmissionsService) {}
 
@@ -188,6 +192,8 @@ export class OnlineApplicationsComponent {
   advance(app: AdmissionApplication) {
     const nextStatus = app.status === 'review' ? 'enrolled' : app.status === 'enrolled' ? 'rejected' : 'review';
     this.admissions.updateStatus(app.id, nextStatus, 'Advanced via online queue');
+    this.toast.set(`Moved "${app.applicantName}" to ${nextStatus}`);
+    setTimeout(() => this.toast.set(null), 2500);
   }
 
   sortBy(field: 'name' | 'grade' | 'status' | 'date') {
