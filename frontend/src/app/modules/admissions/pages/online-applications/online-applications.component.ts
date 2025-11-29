@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AdmissionsService } from '../../../../core/services/admissions.service';
 import { AdmissionApplication } from '../../../../core/models/admission.model';
+import { GradeSelectorComponent } from '../../../../shared/components/grade-selector/grade-selector.component';
 
 @Component({
   selector: 'app-online-applications',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, GradeSelectorComponent],
   template: `
     <section class="page-shell">
       <header class="page-header">
@@ -39,11 +40,11 @@ import { AdmissionApplication } from '../../../../core/models/admission.model';
           </div>
         </div>
         <div class="filter-group">
-          <label>Grade</label>
-          <select [(ngModel)]="gradeFilter">
-            <option value="">All grades</option>
-            <option *ngFor="let grade of grades()" [value]="grade">{{ grade }}</option>
-          </select>
+          <label>Grades</label>
+          <app-grade-selector
+            [selectedGradeIds]="gradeIds"
+            (selectionChange)="onGradesSelected($event)">
+          </app-grade-selector>
         </div>
         <div class="filter-group">
           <label>Search</label>
@@ -123,11 +124,10 @@ import { AdmissionApplication } from '../../../../core/models/admission.model';
   `]
 })
 export class OnlineApplicationsComponent {
-  gradeFilter = '';
+  gradeIds: string[] = [];
   search = '';
   statusFilter = signal<string>('');
   statuses = ['all', 'review', 'enrolled', 'rejected'];
-  grades = computed(() => Array.from(new Set(this.admissions.applications().map(a => a.gradeApplying))).sort());
   filtered = computed(() => this.applyFilters());
 
   constructor(public admissions: AdmissionsService) {}
@@ -143,15 +143,19 @@ export class OnlineApplicationsComponent {
   private applyFilters(): AdmissionApplication[] {
     const term = this.search.toLowerCase().trim();
     const status = this.statusFilter();
-    const grade = this.gradeFilter;
+    const grades = this.gradeIds;
     const source = this.admissions.applications();
 
     return source.filter(app => {
       const matchesTerm = !term || app.applicantName.toLowerCase().includes(term) || app.email.toLowerCase().includes(term);
       const matchesStatus = !status || app.status === status;
-      const matchesGrade = !grade || app.gradeApplying === grade;
+      const matchesGrade = !grades.length || grades.includes(app.gradeApplying);
       return matchesTerm && matchesStatus && matchesGrade;
     });
+  }
+
+  onGradesSelected(grades: { id: string }[]) {
+    this.gradeIds = grades.map(g => g.id);
   }
 
   advance(app: AdmissionApplication) {

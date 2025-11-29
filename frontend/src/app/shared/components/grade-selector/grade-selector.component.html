@@ -1,0 +1,76 @@
+<button type="button" class="selector-trigger" (click)="open()">
+  <div class="icon-chip">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 5h16v2H4V5Zm2 6h12v2H6v-2Zm3 6h6v2H9v-2Z" fill="currentColor" />
+    </svg>
+  </div>
+  <div class="trigger-text">
+    <span>Select grades</span>
+    <small>{{ selectedCount() ? selectedCount() + ' selected' : 'Pick one or more grades' }}</small>
+  </div>
+  <span class="pill" *ngIf="selectedCount()">{{ selectedCount() }}</span>
+</button>
+
+<div class="overlay" *ngIf="isOpen()">
+  <div class="modal" role="dialog" aria-modal="true">
+    <header class="modal-header">
+      <div>
+        <p class="eyebrow">Grades</p>
+        <h2>Select applicable grades</h2>
+        <p class="subtitle">Choose multiple grades to target flows like invites or assignments.</p>
+      </div>
+      <button class="icon-btn" (click)="close()" aria-label="Close">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M6 18 18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+
+    <div class="toolbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24"><path d="m19 19-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+        <input type="text" placeholder="Search grades (name, code, level)" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+      </div>
+      <span class="selected-indicator">
+        <svg viewBox="0 0 24 24"><path d="M9.5 17 5 12.5l1.5-1.5L9.5 14l8-8 1.5 1.5-9.5 9.5Z" fill="currentColor"/></svg>
+        {{ selectedCount() }} selected
+      </span>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 48px;"></th>
+            <th>Grade</th>
+            <th>Level</th>
+            <th>Code</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let grade of filteredGrades()">
+            <td>
+              <label class="checkbox">
+                <input type="checkbox" [checked]="isSelected(grade.id)" (change)="toggle(grade)" />
+                <span></span>
+              </label>
+            </td>
+            <td>
+              <div class="name">{{ grade.name }}</div>
+              <div class="meta">{{ grade.description || 'No description' }}</div>
+            </td>
+            <td><span class="chip">{{ grade.level || 'N/A' }}</span></td>
+            <td><span class="pill neutral">{{ grade.code || '—' }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p *ngIf="!filteredGrades().length" class="empty">No grades match your search.</p>
+    </div>
+
+    <footer class="modal-footer">
+      <button class="ghost" (click)="close()">Cancel</button>
+      <button class="primary" (click)="confirm()">
+        <svg viewBox="0 0 24 24"><path d="m9 16-4-4 1.41-1.41L9 13.17l8.59-8.58L19 6l-10 10Z" fill="currentColor"/></svg>
+        Use {{ selectedCount() }} grade{{ selectedCount() === 1 ? '' : 's' }}
+      </button>
+    </footer>
+  </div>
+</div>
