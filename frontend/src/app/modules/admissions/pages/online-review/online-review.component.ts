@@ -14,8 +14,8 @@ import { AdmissionApplication, ApplicationStatus } from '../../../../core/models
       <header class="page-header">
         <div>
           <p class="eyebrow">Admissions · Review</p>
-          <h2>Application #{{ applicationId }}</h2>
-          <p class="muted">Review details, documents, and make a decision.</p>
+          <h2>{{ application()?.applicantName }}</h2>
+          <p class="muted">Grade {{ application()?.gradeApplying }} · {{ application()?.email }} · {{ application()?.phone }}</p>
         </div>
         <div class="actions">
           <button class="btn ghost" (click)="setStatus('review')">Move to Review</button>
@@ -24,14 +24,19 @@ import { AdmissionApplication, ApplicationStatus } from '../../../../core/models
         </div>
       </header>
 
+      <div class="banner">
+        <div class="pill status" [class.review]="application()?.status === 'review'" [class.approved]="application()?.status === 'enrolled'" [class.rejected]="application()?.status === 'rejected'">
+          {{ application()?.status | titlecase }}
+        </div>
+        <div class="muted small">Applied {{ application()?.submittedAt | date:'mediumDate' }} · Last update {{ application()?.updatedAt | date:'medium' }} · Reviewer {{ assignedReviewer() }}</div>
+      </div>
+
       <div class="layout">
         <div class="left">
           <div class="panel">
             <div class="panel-header">
               <div>
-                <div class="pill status" [class.review]="application()?.status === 'review'" [class.approved]="application()?.status === 'enrolled'" [class.rejected]="application()?.status === 'rejected'">
-                  {{ application()?.status | titlecase }}
-                </div>
+                <p class="muted small">Applicant</p>
                 <h3>{{ application()?.applicantName }}</h3>
                 <p class="muted">{{ application()?.gradeApplying }} • {{ application()?.email }} • {{ application()?.phone }}</p>
               </div>
@@ -40,7 +45,9 @@ import { AdmissionApplication, ApplicationStatus } from '../../../../core/models
                 <div>Days pending: 3</div>
               </div>
             </div>
+          </div>
 
+          <div class="panel">
             <div class="tabs">
               <button *ngFor="let tab of tabs" class="tab" [class.active]="activeTab() === tab" (click)="activeTab.set(tab)">
                 {{ tab }}
@@ -85,7 +92,7 @@ import { AdmissionApplication, ApplicationStatus } from '../../../../core/models
         </div>
 
         <div class="right">
-          <div class="panel">
+          <div class="panel sticky">
             <h4>Decision</h4>
             <label>Recommendation</label>
             <select [(ngModel)]="recommendation">
@@ -94,10 +101,11 @@ import { AdmissionApplication, ApplicationStatus } from '../../../../core/models
               <option value="waitlist">Waitlist</option>
             </select>
             <label>Comments</label>
-            <textarea [(ngModel)]="comment" rows="4" placeholder="Add review notes..."></textarea>
+            <textarea [(ngModel)]="comment" rows="3" placeholder="Add review notes..."></textarea>
             <button class="btn primary full" (click)="saveDecision()">Save Decision</button>
           </div>
-          <div class="panel">
+
+          <div class="panel sticky">
             <h4>Score</h4>
             <div class="grid two">
               <label>Academic</label><input type="range" min="0" max="10" [(ngModel)]="scores.academic">
@@ -107,24 +115,29 @@ import { AdmissionApplication, ApplicationStatus } from '../../../../core/models
             </div>
             <div class="strong">Total: {{ totalScore() }}/40</div>
           </div>
-          <div class="panel">
+
+          <div class="panel sticky">
             <h4>Assign Reviewer</h4>
             <select [(ngModel)]="assignedReviewer">
               <option *ngFor="let r of reviewers" [value]="r">{{ r }}</option>
             </select>
             <p class="muted small">Reviewer: {{ assignedReviewer() }}</p>
           </div>
-          <div class="panel">
-            <h4>Notes</h4>
+
+          <div class="panel sticky sticky-notes">
+            <h4>Notes (sticky)</h4>
             <textarea [(ngModel)]="noteInput" rows="3" placeholder="Add internal note"></textarea>
             <button class="btn primary full" (click)="addNote()">Add Note</button>
             <div class="note" *ngFor="let n of notes()">
-              <div class="strong">{{ n.by }}</div>
-              <div class="muted small">{{ n.date | date:'short' }}</div>
+              <div class="note-head">
+                <div class="strong">{{ n.by }}</div>
+                <div class="muted small">{{ n.date | date:'short' }}</div>
+              </div>
               <p class="muted">{{ n.text }}</p>
             </div>
           </div>
-          <div class="panel">
+
+          <div class="panel sticky">
             <h4>Attachments</h4>
             <div class="attachment" *ngFor="let a of attachments()">
               <div>{{ a.name }} ({{ a.type }})</div>
@@ -199,7 +212,12 @@ import { AdmissionApplication, ApplicationStatus } from '../../../../core/models
     `.overlay{position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:999;}`,
     `.doc-modal{width:min(540px,90vw); background:var(--color-surface); border:1px solid var(--color-border); border-radius:14px; padding:1rem 1.2rem; box-shadow:0 20px 60px rgba(0,0,0,0.35);}`,
     `.doc-body{padding:0.5rem 0;}`,
-    `.modal-header{display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem;}`
+    `.modal-header{display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem;}`,
+    `.banner{display:flex; align-items:center; gap:0.75rem; padding:0.65rem 0.8rem; border:1px solid var(--color-border); border-radius:12px; background:var(--color-surface);}`,
+    `.sticky{position:sticky; top:12px;}`,
+    `.sticky-notes{position:sticky; top:12px;}`,
+    `.note{border:1px solid var(--color-border); border-radius:10px; padding:0.5rem 0.65rem; background:var(--color-surface-hover); margin-top:0.4rem;}`,
+    `.note-head{display:flex; justify-content:space-between; align-items:center;}`
   ]
 })
 export class OnlineReviewComponent {
