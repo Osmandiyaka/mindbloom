@@ -100,11 +100,11 @@ import { FeesService } from '../../../../core/services/fees.service';
     .actions { display:flex; gap:0.75rem; flex-wrap:wrap; }
     .btn { border:1px solid var(--color-border); border-radius:10px; padding:0.75rem 1.25rem; font-weight:600; cursor:pointer; transition:all 0.2s; background: var(--color-surface); color: var(--color-text-primary); }
     .btn.ghost { background: transparent; }
-    .btn-primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
+    .btn-primary { background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary)); color:var(--color-background, #0f172a); box-shadow: var(--shadow-md, 0 10px 24px rgba(0,0,0,0.22)); }
     .pipeline { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap:1rem; }
     .stage { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-md); }
     .stage-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; font-weight:700; color: var(--color-text-primary); }
-    .stage-count { background: var(--color-surface-hover,#f3f4f6); padding:0.25rem 0.6rem; border-radius:8px; font-size:0.8rem; color: var(--color-text-secondary); }
+    .stage-count { background: var(--color-surface-hover); padding:0.25rem 0.6rem; border-radius:8px; font-size:0.8rem; color: var(--color-text-secondary); }
     .stage-list { display:flex; flex-direction:column; gap:0.75rem; }
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:0.9rem; box-shadow: var(--shadow-sm); transition:all 0.2s; }
     .card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
@@ -115,8 +115,8 @@ import { FeesService } from '../../../../core/services/fees.service';
     .app-actions { display:flex; gap:0.35rem; flex-wrap:wrap; margin-top:0.5rem; }
     .btn-sm { border:1px solid var(--color-border); background: var(--color-surface-hover); color: var(--color-text-primary); border-radius:8px; padding:0.35rem 0.7rem; font-size:0.85rem; cursor:pointer; }
     .btn-sm.ghost { background: transparent; }
-    .btn-sm.success { background: rgba(var(--color-success-rgb,16,185,129),0.15); color: var(--color-success,#10b981); border-color: rgba(var(--color-success-rgb,16,185,129),0.3); }
-    .btn-sm.danger { background: rgba(var(--color-error-rgb,239,68,68),0.12); color: var(--color-error,#ef4444); border-color: rgba(var(--color-error-rgb,239,68,68),0.3); }
+    .btn-sm.success { background: color-mix(in srgb, var(--color-success) 15%, transparent); color: var(--color-success); border-color: color-mix(in srgb, var(--color-success) 30%, transparent); }
+    .btn-sm.danger { background: color-mix(in srgb, var(--color-error) 14%, transparent); color: var(--color-error); border-color: color-mix(in srgb, var(--color-error) 30%, transparent); }
 
     .aside { display:flex; flex-direction:column; gap:1rem; }
     .mini-panel { box-shadow: var(--shadow-md); }
@@ -125,9 +125,9 @@ import { FeesService } from '../../../../core/services/fees.service';
     .invoice:first-child { border-top:none; }
     .amount { font-weight:700; color: var(--color-text-primary); }
     .pill { padding:0.15rem 0.45rem; border-radius:10px; background: var(--color-surface-hover); color: var(--color-text-secondary); font-size:0.8rem; }
-    .pill.paid { background: rgba(var(--color-success-rgb,16,185,129),0.15); color: var(--color-success,#10b981); }
-    .pill.overdue { background: rgba(var(--color-error-rgb,239,68,68),0.15); color: var(--color-error,#ef4444); }
-    .alert { grid-column:1 / -1; padding:0.75rem 1rem; border-radius:10px; background: rgba(var(--color-error-rgb,239,68,68),0.1); border:1px solid rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); }
+    .pill.paid { background: color-mix(in srgb, var(--color-success) 15%, transparent); color: var(--color-success); }
+    .pill.overdue { background: color-mix(in srgb, var(--color-error) 15%, transparent); color: var(--color-error); }
+    .alert { grid-column:1 / -1; padding:0.75rem 1rem; border-radius:10px; background: color-mix(in srgb, var(--color-error) 10%, transparent); border:1px solid color-mix(in srgb, var(--color-error) 30%, transparent); color: var(--color-error); }
     .banner.info { grid-column:1 / -1; padding:0.75rem 1rem; border-radius:10px; background: rgba(var(--color-primary-rgb,79,139,255),0.12); border:1px solid rgba(var(--color-primary-rgb,79,139,255),0.3); color: var(--color-text-primary); }
     .empty { grid-column: 1 / -1; background: var(--color-surface); border:1px dashed var(--color-border); padding:1rem; border-radius:12px; text-align:center; color: var(--color-text-secondary); }
   `]

@@ -44,11 +44,11 @@ interface AdmissionNavItem {
     .title { margin:0.1rem 0; font-size:22px; }
     .subtitle { margin:0; color:var(--color-text-secondary); }
     .nav-actions { display:flex; gap:0.5rem; flex-wrap:wrap; }
-    .nav-chip { display:inline-flex; align-items:center; gap:0.35rem; padding:0.55rem 0.85rem; border-radius:999px; background:var(--surface-2, #1d2333); color:inherit; text-decoration:none; transition:all 0.2s ease; border:1px solid transparent; }
+    .nav-chip { display:inline-flex; align-items:center; gap:0.35rem; padding:0.55rem 0.85rem; border-radius:999px; background:var(--color-surface); color:var(--color-text-primary); text-decoration:none; transition:all 0.2s ease; border:1px solid var(--color-border); box-shadow:var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.18)); }
     .nav-chip .icon { font-size:14px; }
-    .nav-chip:hover { border-color:var(--primary-400, #4f8bff); box-shadow:0 8px 24px rgba(0,0,0,0.18); transform:translateY(-1px); }
-    .nav-chip.active { background:var(--primary-600, #2f6fe2); color:#fff; }
-    .admissions-content { background:var(--surface-1, #0f1424); border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:1rem 1.25rem; min-height:60vh; }
+    .nav-chip:hover { border-color:var(--color-primary); box-shadow:var(--shadow-md, 0 8px 24px rgba(0,0,0,0.18)); transform:translateY(-1px); background:var(--color-surface-hover); }
+    .nav-chip.active { background:color-mix(in srgb, var(--color-primary) 20%, var(--color-surface) 80%); border-color:var(--color-primary); color:var(--color-text-primary); }
+    .admissions-content { background:var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem 1.25rem; min-height:60vh; box-shadow:var(--shadow-md, 0 8px 24px rgba(0,0,0,0.15)); }
   `]
 })
 export class AdmissionsShellComponent {

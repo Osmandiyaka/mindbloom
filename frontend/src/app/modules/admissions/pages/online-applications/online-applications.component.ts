@@ -112,9 +112,9 @@ import { GradeSelectorComponent } from '../../../../shared/components/grade-sele
     .muted { color: var(--color-text-secondary); margin: 0; }
     .muted.small { font-size: 0.85rem; }
     .actions { display:flex; gap:0.5rem; flex-wrap:wrap; }
-    .btn { border:1px solid var(--color-border); border-radius:10px; padding:0.55rem 0.9rem; font-weight:600; cursor:pointer; background:var(--color-surface); color:var(--color-text-primary); transition:all 0.2s; text-decoration:none; display:inline-flex; align-items:center; gap:0.35rem; }
+    .btn { border:1px solid var(--color-border); border-radius:10px; padding:0.55rem 0.9rem; font-weight:600; cursor:pointer; background:var(--color-surface); color:var(--color-text-primary); transition:all 0.2s; text-decoration:none; display:inline-flex; align-items:center; gap:0.35rem; box-shadow:var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.12)); }
     .btn.ghost { background: transparent; }
-    .btn.primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border: none; box-shadow:0 8px 20px rgba(var(--color-primary-rgb,123,140,255),0.35); }
+    .btn.primary { background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary)); color:var(--color-background, #0f172a); border: none; box-shadow:var(--shadow-md, 0 8px 20px rgba(0,0,0,0.22)); }
     .btn.tiny { padding:0.35rem 0.6rem; border-radius:8px; font-size:0.85rem; }
 
     .filters { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:0.75rem; background:var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:0.9rem 1rem; }
@@ -123,21 +123,21 @@ import { GradeSelectorComponent } from '../../../../shared/components/grade-sele
     select, input[type="search"] { padding:0.55rem 0.65rem; border-radius:8px; border:1px solid var(--color-border); background:var(--color-surface); color:var(--color-text-primary); }
     .chips { display:flex; gap:0.35rem; flex-wrap:wrap; }
     .chip { padding:0.4rem 0.75rem; border-radius:999px; border:1px solid var(--color-border); background:var(--color-surface); cursor:pointer; }
-    .chip.active { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; }
+    .chip.active { background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary)); color:var(--color-background, #0f172a); border:none; }
 
-    .table { border:1px solid var(--color-border); border-radius:12px; overflow:hidden; background:var(--color-surface); }
+    .table { border:1px solid var(--color-border); border-radius:12px; overflow:hidden; background:var(--color-surface); box-shadow:var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.12)); }
     .table-head, .table-row { display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr; gap:0.5rem; padding:0.75rem 1rem; align-items:center; }
-    .table-head { background: var(--color-surface-hover,#121a2b); font-weight:700; color:var(--color-text-primary); }
+    .table-head { background: var(--color-surface-hover); font-weight:700; color:var(--color-text-primary); }
     .table-row { border-top:1px solid var(--color-border); }
-    .table-row:hover { background: var(--color-surface-hover,#0f1728); }
+    .table-row:hover { background: var(--color-surface-hover); }
     .actions-col { text-align:right; }
     .row-actions { display:flex; gap:0.4rem; justify-content:flex-end; }
     .strong { font-weight:700; color:var(--color-text-primary); }
     .pill { padding:0.25rem 0.6rem; border-radius:10px; background: var(--color-surface-hover); color:var(--color-text-secondary); font-size:0.85rem; }
-    .pill.enrolled { background: rgba(var(--color-success-rgb,16,185,129),0.18); color: var(--color-success,#10b981); }
-    .pill.rejected { background: rgba(var(--color-error-rgb,239,68,68),0.15); color: var(--color-error,#ef4444); }
+    .pill.enrolled { background: color-mix(in srgb, var(--color-success) 18%, transparent); color: var(--color-success); }
+    .pill.rejected { background: color-mix(in srgb, var(--color-error) 18%, transparent); color: var(--color-error); }
 
-    .alert { padding:0.75rem 1rem; border-radius:10px; background: rgba(var(--color-error-rgb,239,68,68),0.1); border:1px solid rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); }
+    .alert { padding:0.75rem 1rem; border-radius:10px; background: color-mix(in srgb, var(--color-error) 12%, transparent); border:1px solid color-mix(in srgb, var(--color-error) 35%, transparent); color: var(--color-error); }
     .empty { border:1px dashed var(--color-border); border-radius:12px; padding:1rem; text-align:center; }
     .clickable { cursor:pointer; }
     .pager { display:flex; justify-content:space-between; align-items:center; gap:0.75rem; margin-top:0.5rem; }

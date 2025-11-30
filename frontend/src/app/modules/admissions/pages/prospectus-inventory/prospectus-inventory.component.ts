@@ -66,9 +66,9 @@ interface StockItem {
     .actions{display:flex; gap:0.35rem;}
     .btn{border:1px solid var(--color-border); border-radius:8px; padding:0.35rem 0.7rem; cursor:pointer;}
     .btn.tiny{font-size:0.85rem;}
-    .btn.primary{background:linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow:0 8px 20px rgba(var(--color-primary-rgb,123,140,255),0.35);} 
+    .btn.primary{background:linear-gradient(135deg, var(--color-primary-light), var(--color-primary)); color:var(--color-background, #0f172a); border:none; box-shadow:var(--shadow-md, 0 8px 20px rgba(0,0,0,0.22));} 
     .btn.ghost{background:transparent;}
-    .low{color:var(--color-error,#ef4444); font-weight:700;}
+    .low{color:var(--color-error); font-weight:700;}
     .grid{display:grid; gap:0.75rem;}
     .grid.two{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));}
     select, input{border:1px solid var(--color-border); border-radius:10px; padding:0.55rem 0.65rem; background:var(--color-surface-hover); color:var(--color-text-primary);} 

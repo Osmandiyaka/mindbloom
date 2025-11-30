@@ -63,15 +63,15 @@ import { AdmissionsService } from '../../../../core/services/admissions.service'
     .sub { margin:0 0 1.25rem; color: var(--color-text-secondary); }
     form { display:flex; flex-direction:column; gap:1rem; }
     label { display:flex; flex-direction:column; gap:0.35rem; color: var(--color-text-primary); font-weight:600; }
-    input, textarea { border:1px solid var(--color-border); border-radius:10px; padding:0.75rem; background: var(--color-surface-hover,#f8fafc); color: var(--color-text-primary); }
+    input, textarea { border:1px solid var(--color-border); border-radius:10px; padding:0.75rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
     textarea { resize: vertical; }
     .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:1rem; }
     .upload input { padding:0.5rem 0; }
     .actions { display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem; }
     .btn { border:none; border-radius:10px; padding:0.75rem 1.2rem; font-weight:600; cursor:pointer; }
     .btn.ghost { background: transparent; border:1px solid var(--color-border); color: var(--color-text-primary); }
-    .btn-primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
-    .alert { padding:0.75rem 1rem; border-radius:10px; background: rgba(var(--color-error-rgb,239,68,68),0.1); border:1px solid rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); margin-bottom:0.75rem; }
+    .btn-primary { background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary)); color:var(--color-background, #0f172a); box-shadow: var(--shadow-md, 0 10px 24px rgba(0,0,0,0.22)); }
+    .alert { padding:0.75rem 1rem; border-radius:10px; background: color-mix(in srgb, var(--color-error) 10%, transparent); border:1px solid color-mix(in srgb, var(--color-error) 30%, transparent); color: var(--color-error); margin-bottom:0.75rem; }
   `]
 })
 export class ApplicationFormComponent {

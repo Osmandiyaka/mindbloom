@@ -71,7 +71,7 @@ import { FormsModule } from '@angular/forms';
     `.full{grid-column:1 / -1;}`,
     `.summary{display:flex; justify-content:space-between; align-items:center; gap:1rem;}`,
     `.btn{border:1px solid var(--color-border); border-radius:10px; padding:0.6rem 1rem; font-weight:700; cursor:pointer; background:var(--color-surface); color:var(--color-text-primary);}`,
-    `.primary{background:linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow:0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.35);}`,
+    `.primary{background:linear-gradient(135deg, var(--color-primary-light), var(--color-primary)); color:var(--color-background, #0f172a); border:none; box-shadow:var(--shadow-md, 0 10px 24px rgba(0,0,0,0.22));}`,
     `.summary-cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:0.5rem;}`,
     `.card{border:1px solid var(--color-border); border-radius:10px; padding:0.65rem 0.8rem; background:var(--color-surface-hover);}`,
     `.table{border:1px solid var(--color-border); border-radius:12px; overflow:hidden;}`,

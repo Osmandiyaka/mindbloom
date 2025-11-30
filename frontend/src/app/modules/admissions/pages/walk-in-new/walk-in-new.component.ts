@@ -157,20 +157,20 @@ import { WalkInService } from '../../../../core/services/walkin.service';
     .actions { display:flex; gap:0.5rem; }
     .btn { border:1px solid var(--color-border); border-radius:10px; padding:0.65rem 1rem; background:var(--color-surface); color:var(--color-text-primary); cursor:pointer; font-weight:700; }
     .btn.ghost { background:transparent; }
-    .btn.primary { background:linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow:0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.35); }
+    .btn.primary { background:linear-gradient(135deg, var(--color-primary-light), var(--color-primary)); color:var(--color-background, #0f172a); border:none; box-shadow:var(--shadow-md, 0 10px 24px rgba(0,0,0,0.22)); }
 
     .stepper { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:0.75rem; }
     .step { display:flex; gap:0.75rem; padding:0.75rem; border:1px solid var(--color-border); border-radius:12px; background:var(--color-surface); align-items:flex-start; }
     .step .circle { width:32px; height:32px; border-radius:50%; display:grid; place-items:center; background:var(--color-surface-hover); color:var(--color-text-primary); font-weight:700; }
-    .step.active { border-color: rgba(var(--color-primary-rgb,123,140,255),0.6); box-shadow:0 8px 20px rgba(var(--color-primary-rgb,123,140,255),0.25); }
-    .step.done .circle { background:linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; }
+    .step.active { border-color: color-mix(in srgb, var(--color-primary) 55%, transparent); box-shadow:0 8px 20px color-mix(in srgb, var(--color-primary) 22%, transparent); }
+    .step.done .circle { background:linear-gradient(135deg, var(--color-primary-light), var(--color-primary)); color:var(--color-background, #0f172a); }
     .label { font-weight:700; color:var(--color-text-primary); }
 
     .card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:14px; padding:1rem 1.1rem; box-shadow:var(--shadow-sm); }
     .grid { display:grid; gap:0.8rem; }
     .grid.two { grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); }
     label { display:flex; flex-direction:column; gap:0.35rem; font-weight:600; color:var(--color-text-primary); }
-    input, select, textarea { border:1px solid var(--color-border); border-radius:10px; background:var(--color-surface-hover); padding:0.55rem 0.65rem; color:var(--color-text-primary); }
+    input, select, textarea { border:1px solid var(--color-border); border-radius:10px; background:var(--color-surface); padding:0.55rem 0.65rem; color:var(--color-text-primary); }
     .full { grid-column: 1 / -1; }
 
     .checklist { display:flex; flex-direction:column; gap:0.65rem; }
@@ -183,7 +183,7 @@ import { WalkInService } from '../../../../core/services/walkin.service';
     .summary { display:flex; gap:1rem; flex-wrap:wrap; padding:0.75rem; border-radius:10px; background:var(--color-surface-hover); border:1px dashed var(--color-border); }
 
     .completion { display:flex; flex-direction:column; align-items:center; gap:0.75rem; text-align:center; }
-    .completion .check { width:48px; height:48px; border-radius:50%; background:rgba(var(--color-success-rgb,16,185,129),0.2); color:var(--color-success,#10b981); display:grid; place-items:center; font-size:1.4rem; }
+    .completion .check { width:48px; height:48px; border-radius:50%; background:color-mix(in srgb, var(--color-success) 20%, transparent); color:var(--color-success); display:grid; place-items:center; font-size:1.4rem; }
     .summary-box { padding:0.9rem 1rem; border-radius:12px; border:1px solid var(--color-border); background:var(--color-surface-hover); display:flex; flex-direction:column; gap:0.35rem; }
 
     .wizard-footer { display:flex; align-items:center; gap:0.6rem; }
