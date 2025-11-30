@@ -10,6 +10,8 @@ pnpm-debug.log*
 dist/
 build/
 out/
+!backend/src/domain/ports/out/
+!backend/src/domain/ports/out/**
 .next/
 
 # Environment files
