@@ -39,8 +39,67 @@ export class ThemeService {
     private readonly STORAGE_KEY = 'mindbloom_theme';
     private readonly MODE_STORAGE_KEY = 'mindbloom_theme_mode';
 
+
     // Available themes
     readonly themes: ThemeDefinition[] = [
+        {
+            id: 'retro-light',
+            name: 'Retro Light',
+            mode: 'light',
+            colors: {
+                primary: '#E8BE14',
+                primaryDark: '#BF9532',
+                primaryLight: '#F5DF68',
+                secondary: '#CD8223',
+                accent: '#5EB5D7',
+                background: 'linear-gradient(to bottom right, #FFF1E3 0%, #24180E 50%, #FFF1E3 100%)',
+                surface: '#D0C5B9',
+                surfaceHover: '#D9D0C7',
+                textPrimary: '#4E351A',
+                textSecondary: '#604929',
+                textTertiary: '#8C6D5E',
+                border: '#928576',
+                borderLight: '#AB9F95',
+                success: '#334F2D',
+                warning: '#884B39',
+                error: '#813626',
+                info: '#5EB5D7'
+            },
+            shadows: {
+                sm: '2px 2px 4px rgba(0,0,0,0.2), -2px -2px 4px rgba(255,255,255,0.7)',
+                md: '4px 4px 8px rgba(0,0,0,0.2), -4px -4px 8px rgba(255,255,255,0.6)',
+                lg: '8px 8px 16px rgba(0,0,0,0.2), -8px -8px 16px rgba(255,255,255,0.5)'
+            }
+        },
+        {
+            id: 'retro-dark',
+            name: 'Retro Dark',
+            mode: 'dark',
+            colors: {
+                primary: '#E8BE14',
+                primaryDark: '#BF9532',
+                primaryLight: '#F5DF68',
+                secondary: '#CD8223',
+                accent: '#5EB5D7',
+                background: 'linear-gradient(to bottom right, #1C120C 0%, #6B4E2F 50%, #1C120C 100%)',
+                surface: '#443123',
+                surfaceHover: '#564539',
+                textPrimary: '#F4ECE5',
+                textSecondary: '#D0C5B9',
+                textTertiary: '#AB9F95',
+                border: '#645B52',
+                borderLight: '#8C6D5E',
+                success: '#99A796',
+                warning: '#B79388',
+                error: '#A67267',
+                info: '#5EB5D7'
+            },
+            shadows: {
+                sm: '2px 2px 4px rgba(0,0,0,0.5), -2px -2px 4px rgba(244,236,229,0.1)',
+                md: '4px 4px 8px rgba(0,0,0,0.5), -4px -4px 8px rgba(244,236,229,0.08)',
+                lg: '8px 8px 16px rgba(0,0,0,0.5), -8px -8px 16px rgba(244,236,229,0.06)'
+            }
+        },
         {
             id: 'default-light',
             name: 'Default Light',
