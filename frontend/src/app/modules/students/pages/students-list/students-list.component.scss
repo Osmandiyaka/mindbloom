@@ -4,20 +4,68 @@
     padding: 1.5rem;
     background: var(--content-background, var(--color-background));
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-.table-toolbar {
+.toolbar {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-top: 1.5rem;
+    align-items: flex-start;
     gap: 1rem;
-    background: transparent;
+    flex-wrap: wrap;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    box-shadow: var(--shadow-sm);
+}
 
-    .search-input {
-        width: 320px;
-        max-width: 100%;
-    }
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.toolbar-left h2 {
+    margin: 0;
+    color: var(--color-text-primary);
+}
+
+.toolbar-left .muted {
+    margin: 0;
+}
+
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.view-toggle {
+    display: inline-flex;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.view-toggle button {
+    background: transparent;
+    border: none;
+    padding: 0.45rem 0.65rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.view-toggle button.active {
+    background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff));
+    color: #0f1320;
+}
+
+.search-input {
+    width: 260px;
+    max-width: 100%;
 }
 
 .search-input .form-control {
@@ -180,6 +228,106 @@
         background: var(--surface-dark, var(--color-surface));
         color: var(--color-text-primary);
     }
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 0.9rem;
+}
+
+.student-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 0.85rem 0.9rem 0.8rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-height: 0;
+    height: 100%;
+}
+
+.student-card .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    position: relative;
+}
+
+.student-card .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--color-primary,#7ab8ff) 25%, transparent);
+    display: grid;
+    place-items: center;
+    color: #0f1320;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.student-card .name {
+    color: var(--color-text-primary);
+    font-weight: 700;
+    line-height: 1.2;
+    max-width: 16ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 1rem;
+}
+
+.student-card .muted {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.student-card app-badge {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.student-card .card-meta {
+    display: flex;
+    justify-content: space-between;
+    color: var(--color-text-secondary);
+    font-size: $font-size-sm;
+    gap: 0.5rem;
+    white-space: nowrap;
+    flex-wrap: wrap;
+    line-height: 1.3;
+}
+
+.student-card .divider {
+    height: 1px;
+    background: var(--color-border);
+    opacity: 1;
+    border-radius: 1px;
+}
+
+.student-card .card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+}
+
+.student-card .card-actions button {
+    flex: 1;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-hover);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    min-width: 0;
+    font-weight: 600;
 }
 
 // Dark theme refinements to remove bright surfaces and improve contrast

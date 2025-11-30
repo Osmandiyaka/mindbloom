@@ -1,7 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { HeroComponent } from '../../../../shared/components/hero/hero.component';
 import { CardComponent } from '../../../../shared/components/card/card.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
@@ -11,41 +10,38 @@ import { Student, StudentStatus } from '../../../../core/models/student.model';
 @Component({
   selector: 'app-students-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, HeroComponent, CardComponent, ButtonComponent, BadgeComponent],
+  imports: [CommonModule, RouterModule, CardComponent, ButtonComponent, BadgeComponent],
   styleUrls: ['./students-list.component.scss'],
   template: `
     <div class="students-page">
-      <!-- Hero Section -->
-      <app-hero
-        title="Students"
-        subtitle="Manage student profiles, records, and academic information"
-        image="assets/illustrations/students.svg"
-        [showActions]="true">
-        <div actions>
-          <app-button variant="primary" (click)="addNewStudent()">
-            + Add New Student
-          </app-button>
-        </div>
-      </app-hero>
-
-      <!-- Table Toolbar -->
-      <div class="table-toolbar mt-6">
+      <div class="toolbar">
         <div class="toolbar-left">
+          <div>
+            <h2>Students</h2>
+            <p class="muted">{{ students().length }} total</p>
+          </div>
           <div class="search-input">
             <input
               type="search"
               class="form-control"
-              placeholder="Search students..."
+              placeholder="Search"
               (input)="onSearchChange($event)"
             />
           </div>
         </div>
         <div class="toolbar-right">
+          <div class="view-toggle" role="group" aria-label="View switch">
+            <button [class.active]="viewMode() === 'table'" (click)="setView('table')" title="Table view">▦</button>
+            <button [class.active]="viewMode() === 'grid'" (click)="setView('grid')" title="Grid view">▢</button>
+          </div>
           <app-button variant="secondary" size="sm" (click)="exportStudents()">
-            Export
+            ⬇️ Export
           </app-button>
-          <app-button variant="primary" size="sm" (click)="importStudents()">
-            Import
+          <app-button variant="secondary" size="sm" (click)="importStudents()">
+            ⬆️ Import
+          </app-button>
+          <app-button variant="primary" size="sm" (click)="addNewStudent()">
+            👩‍🎓+ Add Student
           </app-button>
         </div>
       </div>
@@ -77,52 +73,69 @@ import { Student, StudentStatus } from '../../../../core/models/student.model';
         </div>
       }
 
-      <!-- Data Table -->
       @if (!loading() && !error() && students().length > 0) {
-      <div class="data-table">
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th class="sortable">Student ID</th>
-                <th class="sortable">Name</th>
-                <th>Class</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let student of students()" class="row-clickable" [routerLink]="['/students', student.id]">
-                <td class="col-primary">{{ student.enrollment.admissionNumber }}</td>
-                <td class="col-primary">{{ student.fullName }}</td>
-                <td>{{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</td>
-                <td>{{ student.email || 'N/A' }}</td>
-                <td>
-                  <app-badge [variant]="student.status === 'active' ? 'success' : 'neutral'" size="sm">
-                    {{ student.status }}
-                  </app-badge>
-                </td>
-                <td>
-                  <div class="cell-actions">
-                    <button (click)="editStudent($event, student.id)" title="Edit">✏️</button>
-                    <button (click)="deleteStudent($event, student)" title="Delete">🗑️</button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="table-footer">
-          <div class="table-info">Showing {{ students().length }} student(s)</div>
-          <div class="table-pagination">
-            <button disabled>Previous</button>
-            <button class="active">1</button>
-            <button>Next</button>
+        <ng-container [ngSwitch]="viewMode()">
+          <div *ngSwitchCase="'table'" class="data-table">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="sortable">Student ID</th>
+                    <th class="sortable">Name</th>
+                    <th>Class</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let student of students()" class="row-clickable" [routerLink]="['/students', student.id]">
+                    <td class="col-primary">{{ student.enrollment.admissionNumber }}</td>
+                    <td class="col-primary">{{ student.fullName }}</td>
+                    <td>{{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</td>
+                    <td>{{ student.email || 'N/A' }}</td>
+                    <td>
+                      <app-badge [variant]="student.status === 'active' ? 'success' : 'neutral'" size="sm">
+                        {{ student.status }}
+                      </app-badge>
+                    </td>
+                    <td>
+                      <div class="cell-actions">
+                        <button (click)="editStudent($event, student.id)" title="Edit">✏️</button>
+                        <button (click)="deleteStudent($event, student)" title="Delete">🗑️</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      </div>
+
+          <div *ngSwitchCase="'grid'" class="card-grid">
+            <div class="student-card" *ngFor="let student of students()">
+              <div class="card-header">
+                <div class="avatar">{{ student.fullName.charAt(0) }}</div>
+                <div>
+                  <div class="name">{{ student.fullName }}</div>
+                  <div class="muted small email">{{ student.email || 'N/A' }}</div>
+                </div>
+                <app-badge [variant]="student.status === 'active' ? 'success' : 'neutral'" size="sm">
+                  {{ student.status }}
+                </app-badge>
+              </div>
+              <div class="card-meta">
+                <span>Adm: {{ student.enrollment.admissionNumber }}</span>
+                <span>Class: {{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</span>
+              </div>
+              <div class="divider"></div>
+              <div class="card-actions">
+                <button (click)="viewStudent($event, student.id)">View</button>
+                <button (click)="editStudent($event, student.id)">Edit</button>
+                <button (click)="deleteStudent($event, student)">Delete</button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
       }
     </div>
   `
@@ -132,6 +145,7 @@ export class StudentsListComponent implements OnInit {
   loading = signal(false);
   error = signal<string | null>(null);
   searchTerm = '';
+  viewMode = signal<'table' | 'grid'>('table');
 
   constructor(
     private router: Router,
@@ -218,5 +232,14 @@ export class StudentsListComponent implements OnInit {
         console.error('Error exporting students:', err);
       }
     });
+  }
+
+  viewStudent(event: Event, id: string): void {
+    event.stopPropagation();
+    this.router.navigate(['/students', id]);
+  }
+
+  setView(mode: 'table' | 'grid') {
+    this.viewMode.set(mode);
   }
 }

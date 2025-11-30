@@ -14,7 +14,7 @@ import { Student, Gender, BloodGroup, RelationshipType } from '../../../../../co
 })
 export class StudentFormComponent implements OnInit {
     currentStep = signal(1);
-    totalSteps = 5;
+    totalSteps = 6;
     isEditMode = signal(false);
     studentId = signal<string | null>(null);
     loading = signal(false);

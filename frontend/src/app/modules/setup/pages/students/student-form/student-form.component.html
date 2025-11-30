@@ -18,7 +18,7 @@
         <div class="step" [class.completed]="currentStep() > 2" [class.active]="currentStep() === 2">
             <div class="step-circle">2</div>
             <div class="step-info">
-                <div class="step-title">Enrollment</div>
+                <div class="step-title">Address</div>
                 <div class="step-status">{{ currentStep() > 2 ? 'Completed' : currentStep() === 2 ? 'In Progress' :
                     'Pending' }}</div>
             </div>
@@ -27,7 +27,7 @@
         <div class="step" [class.completed]="currentStep() > 3" [class.active]="currentStep() === 3">
             <div class="step-circle">3</div>
             <div class="step-info">
-                <div class="step-title">Guardians</div>
+                <div class="step-title">Enrollment</div>
                 <div class="step-status">{{ currentStep() > 3 ? 'Completed' : currentStep() === 3 ? 'In Progress' :
                     'Pending' }}</div>
             </div>
@@ -36,7 +36,7 @@
         <div class="step" [class.completed]="currentStep() > 4" [class.active]="currentStep() === 4">
             <div class="step-circle">4</div>
             <div class="step-info">
-                <div class="step-title">Medical Info</div>
+                <div class="step-title">Guardians</div>
                 <div class="step-status">{{ currentStep() > 4 ? 'Completed' : currentStep() === 4 ? 'In Progress' :
                     'Pending' }}</div>
             </div>
@@ -45,8 +45,17 @@
         <div class="step" [class.completed]="currentStep() > 5" [class.active]="currentStep() === 5">
             <div class="step-circle">5</div>
             <div class="step-info">
-                <div class="step-title">Review</div>
+                <div class="step-title">Medical Info</div>
                 <div class="step-status">{{ currentStep() > 5 ? 'Completed' : currentStep() === 5 ? 'In Progress' :
+                    'Pending' }}</div>
+            </div>
+        </div>
+
+        <div class="step" [class.completed]="currentStep() > 6" [class.active]="currentStep() === 6">
+            <div class="step-circle">6</div>
+            <div class="step-info">
+                <div class="step-title">Review</div>
+                <div class="step-status">{{ currentStep() > 6 ? 'Completed' : currentStep() === 6 ? 'In Progress' :
                     'Pending' }}</div>
             </div>
         </div>
@@ -71,15 +80,10 @@
                     <!-- Step 1: Personal Information -->
                     @if (currentStep() === 1) {
                     <form [formGroup]="personalInfoForm" class="wizard-form">
-                        <h2 class="form-heading">Personal Information</h2>
-                        <p class="form-description">Enter the student's personal details as they should appear in
-                            official
-                            records</p>
-
                         <div class="form-row">
                             <div class="form-field">
                                 <label>First Name <span class="required">*</span></label>
-                                <input type="text" formControlName="firstName" placeholder="Legal first name" />
+                                <input type="text" formControlName="firstName" />
                                 @if (personalInfoForm.get('firstName')?.invalid &&
                                 personalInfoForm.get('firstName')?.touched) {
                                 <span class="field-error">
@@ -95,14 +99,14 @@
                             <div class="form-field">
                                 <label>Middle Name</label>
                                 <input type="text" formControlName="middleName"
-                                    placeholder="Optional middle name or initial" />
+                                    />
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-field full-width">
                                 <label>Last Name <span class="required">*</span></label>
-                                <input type="text" formControlName="lastName" placeholder="Legal last name" />
+                                <input type="text" formControlName="lastName" />
                                 @if (personalInfoForm.get('lastName')?.invalid &&
                                 personalInfoForm.get('lastName')?.touched) {
                                 <span class="field-error">
@@ -120,7 +124,7 @@
                             <div class="form-field">
                                 <label>Email Address <span class="required">*</span></label>
                                 <input type="email" formControlName="email"
-                                    placeholder="Primary email for notifications and password reset" />
+                                    />
                                 @if (personalInfoForm.get('email')?.invalid && personalInfoForm.get('email')?.touched) {
                                 <span class="field-error">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -135,7 +139,7 @@
                             <div class="form-field">
                                 <label>Phone Number</label>
                                 <input type="tel" formControlName="phone"
-                                    placeholder="Contact phone number (optional)" />
+                                    />
                             </div>
                         </div>
 
@@ -179,68 +183,62 @@
                         <div class="form-row">
                             <div class="form-field">
                                 <label>Nationality</label>
-                                <input type="text" formControlName="nationality" placeholder="Enter nationality" />
+                                <input type="text" formControlName="nationality" />
                             </div>
 
                             <div class="form-field">
                                 <label>Religion</label>
-                                <input type="text" formControlName="religion" placeholder="Enter religion (optional)" />
+                                <input type="text" formControlName="religion" />
                             </div>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-field">
-                                <label>Caste/Category</label>
-                                <input type="text" formControlName="caste"
-                                    placeholder="Enter caste or category (optional)" />
-                            </div>
-
-                            <div class="form-field">
-                                <label>Mother Tongue</label>
-                                <input type="text" formControlName="motherTongue" placeholder="Primary language" />
-                            </div>
+                        <div class="form-row"></div>
+                        <div class="form-field full-width">
+                            <label>Notes</label>
+                            <textarea formControlName="notes" rows="3"
+                               ></textarea>
                         </div>
+                    </form>
+                    }
 
+                    <!-- Step 2: Address -->
+                    @if (currentStep() === 3) {
+                    <form [formGroup]="personalInfoForm" class="wizard-form">
+                        <h2 class="form-heading">Address</h2>
+                        <p class="form-description">Add the student's primary address</p>
                         <div formGroupName="address" class="address-section">
-                            <h3 class="subsection-title">Address</h3>
                             <div class="form-row">
                                 <div class="form-field full-width">
                                     <label>Street Address</label>
-                                    <input type="text" formControlName="street" placeholder="Street address" />
+                                    <input type="text" formControlName="street" />
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-field">
                                     <label>City</label>
-                                    <input type="text" formControlName="city" placeholder="City" />
+                                    <input type="text" formControlName="city" />
                                 </div>
                                 <div class="form-field">
                                     <label>State/Province</label>
-                                    <input type="text" formControlName="state" placeholder="State or province" />
+                                    <input type="text" formControlName="state" />
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-field">
                                     <label>Postal Code</label>
-                                    <input type="text" formControlName="postalCode" placeholder="Postal/ZIP code" />
+                                    <input type="text" formControlName="postalCode" />
                                 </div>
                                 <div class="form-field">
                                     <label>Country</label>
-                                    <input type="text" formControlName="country" placeholder="Country" />
+                                    <input type="text" formControlName="country" />
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="form-field full-width">
-                            <label>Notes</label>
-                            <textarea formControlName="notes" rows="3"
-                                placeholder="Any additional notes about the student (optional)"></textarea>
                         </div>
                     </form>
                     }
 
-                    <!-- Step 2: Enrollment Information -->
-                    @if (currentStep() === 2) {
+                    <!-- Step 3: Enrollment Information -->
+                    @if (currentStep() === 3) {
                     <form [formGroup]="enrollmentForm" class="wizard-form">
                         <h2 class="form-heading">Enrollment Information</h2>
                         <p class="form-description">Enter academic enrollment details</p>
@@ -250,7 +248,7 @@
                                 <div class="form-field">
                                     <label>Admission Number <span class="required">*</span></label>
                                     <input type="text" formControlName="admissionNumber"
-                                        placeholder="Enter admission number" />
+                                        />
                                     @if (enrollmentForm.get('enrollment.admissionNumber')?.invalid &&
                                     enrollmentForm.get('enrollment.admissionNumber')?.touched) {
                                     <span class="field-error">
@@ -282,7 +280,7 @@
                             <div class="form-row">
                                 <div class="form-field">
                                     <label>Academic Year <span class="required">*</span></label>
-                                    <input type="text" formControlName="academicYear" placeholder="e.g., 2024-2025" />
+                                    <input type="text" formControlName="academicYear" />
                                     @if (enrollmentForm.get('enrollment.academicYear')?.invalid &&
                                     enrollmentForm.get('enrollment.academicYear')?.touched) {
                                     <span class="field-error">
@@ -297,7 +295,7 @@
 
                                 <div class="form-field">
                                     <label>Class <span class="required">*</span></label>
-                                    <input type="text" formControlName="class" placeholder="e.g., Grade 10" />
+                                    <input type="text" formControlName="class" />
                                     @if (enrollmentForm.get('enrollment.class')?.invalid &&
                                     enrollmentForm.get('enrollment.class')?.touched) {
                                     <span class="field-error">
@@ -314,12 +312,12 @@
                             <div class="form-row">
                                 <div class="form-field">
                                     <label>Section</label>
-                                    <input type="text" formControlName="section" placeholder="e.g., A, B, C" />
+                                    <input type="text" formControlName="section" />
                                 </div>
 
                                 <div class="form-field">
                                     <label>Roll Number</label>
-                                    <input type="text" formControlName="rollNumber" placeholder="Class roll number" />
+                                    <input type="text" formControlName="rollNumber" />
                                 </div>
                             </div>
 
@@ -327,21 +325,21 @@
                                 <div class="form-field">
                                     <label>Previous School</label>
                                     <input type="text" formControlName="previousSchool"
-                                        placeholder="Name of previous school (optional)" />
+                                        />
                                 </div>
 
                                 <div class="form-field">
                                     <label>Previous Class</label>
                                     <input type="text" formControlName="previousClass"
-                                        placeholder="Last class attended (optional)" />
+                                        />
                                 </div>
                             </div>
                         </div>
                     </form>
                     }
 
-                    <!-- Step 3: Guardians -->
-                    @if (currentStep() === 3) {
+                    <!-- Step 4: Guardians -->
+                    @if (currentStep() === 4) {
                     <form [formGroup]="guardiansForm" class="wizard-form">
                         <h2 class="form-heading">Guardian Information</h2>
                         <p class="form-description">Add at least one guardian or parent</p>
@@ -374,7 +372,7 @@
                                 <div class="form-row">
                                     <div class="form-field full-width">
                                         <label>Full Name <span class="required">*</span></label>
-                                        <input type="text" formControlName="name" placeholder="Guardian's full name" />
+                                        <input type="text" formControlName="name" />
                                     </div>
                                 </div>
 
@@ -394,7 +392,7 @@
 
                                     <div class="form-field">
                                         <label>Phone <span class="required">*</span></label>
-                                        <input type="tel" formControlName="phone" placeholder="Contact number" />
+                                        <input type="tel" formControlName="phone" />
                                     </div>
                                 </div>
 
@@ -402,13 +400,13 @@
                                     <div class="form-field">
                                         <label>Email</label>
                                         <input type="email" formControlName="email"
-                                            placeholder="Email address (optional)" />
+                                            />
                                     </div>
 
                                     <div class="form-field">
                                         <label>Occupation</label>
                                         <input type="text" formControlName="occupation"
-                                            placeholder="Occupation (optional)" />
+                                            />
                                     </div>
                                 </div>
 
@@ -432,8 +430,8 @@
                     </form>
                     }
 
-                    <!-- Step 4: Medical Information & Review -->
-                    @if (currentStep() === 4) {
+                    <!-- Step 5: Medical Information & Review -->
+                    @if (currentStep() === 5) {
                     <form [formGroup]="medicalForm" class="wizard-form">
                         <h2 class="form-heading">Medical Information</h2>
                         <p class="form-description">Health and medical details (optional)</p>
@@ -459,13 +457,13 @@
                             <div class="form-row">
                                 <div class="form-field">
                                     <label>Doctor Name</label>
-                                    <input type="text" formControlName="doctorName" placeholder="Family doctor name" />
+                                    <input type="text" formControlName="doctorName" />
                                 </div>
 
                                 <div class="form-field">
                                     <label>Doctor Phone</label>
                                     <input type="tel" formControlName="doctorPhone"
-                                        placeholder="Doctor's contact number" />
+                                        />
                                 </div>
                             </div>
 
@@ -473,13 +471,13 @@
                                 <div class="form-field">
                                     <label>Insurance Provider</label>
                                     <input type="text" formControlName="insuranceProvider"
-                                        placeholder="Health insurance provider" />
+                                        />
                                 </div>
 
                                 <div class="form-field">
                                     <label>Insurance Number</label>
                                     <input type="text" formControlName="insuranceNumber"
-                                        placeholder="Policy/member number" />
+                                        />
                                 </div>
                             </div>
 
@@ -489,7 +487,7 @@
                                     <div class="list-items">
                                         @for (item of getArrayItems('allergies').controls; let i = $index; track i) {
                                         <div class="list-item">
-                                            <input type="text" [formControl]="$any(item)" placeholder="Enter allergy" />
+                                            <input type="text" [formControl]="$any(item)" />
                                             <button type="button" class="btn-remove-item"
                                                 (click)="removeArrayItem('allergies', i)">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -511,7 +509,7 @@
                                         i) {
                                         <div class="list-item">
                                             <input type="text" [formControl]="$any(item)"
-                                                placeholder="Enter condition" />
+                                                />
                                             <button type="button" class="btn-remove-item"
                                                 (click)="removeArrayItem('medicalConditions', i)">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -533,7 +531,7 @@
                                         @for (item of getArrayItems('medications').controls; let i = $index; track i) {
                                         <div class="list-item">
                                             <input type="text" [formControl]="$any(item)"
-                                                placeholder="Enter medication" />
+                                                />
                                             <button type="button" class="btn-remove-item"
                                                 (click)="removeArrayItem('medications', i)">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -553,8 +551,8 @@
                     </form>
                     }
 
-                    <!-- Step 5: Review -->
-                    @if (currentStep() === 5) {
+                    <!-- Step 6: Review -->
+                    @if (currentStep() === 6) {
                     <div class="wizard-form">
                         <h2 class="form-heading">Review & Submit</h2>
                         <p class="form-description">Please review all information before submitting</p>
@@ -584,6 +582,32 @@
                                     <div class="review-item">
                                         <span class="review-label">Phone:</span>
                                         <span class="review-value">{{ personalInfoForm.value.phone }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="review-group">
+                                <h3 class="review-group-title">Address</h3>
+                                <div class="review-grid">
+                                    <div class="review-item full">
+                                        <span class="review-label">Street:</span>
+                                        <span class="review-value">{{ personalInfoForm.value.address?.street }}</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="review-label">City:</span>
+                                        <span class="review-value">{{ personalInfoForm.value.address?.city }}</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="review-label">State:</span>
+                                        <span class="review-value">{{ personalInfoForm.value.address?.state }}</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="review-label">Postal Code:</span>
+                                        <span class="review-value">{{ personalInfoForm.value.address?.postalCode }}</span>
+                                    </div>
+                                    <div class="review-item">
+                                        <span class="review-label">Country:</span>
+                                        <span class="review-value">{{ personalInfoForm.value.address?.country }}</span>
                                     </div>
                                 </div>
                             </div>
