@@ -206,13 +206,13 @@ import { Permission, PermissionNode } from '../../../core/models/role.model';
 
     .node-name {
       font-weight: 500;
-      color: #111827;
+      color: var(--color-text-primary, #e5e7eb);
       font-size: 0.875rem;
     }
 
     .node-description {
       font-size: 0.75rem;
-      color: #6B7280;
+      color: var(--color-text-secondary, #9ca3af);
     }
 
     .node-meta { display: flex; gap: 0.5rem; align-items: center; }

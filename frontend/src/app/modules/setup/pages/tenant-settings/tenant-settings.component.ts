@@ -12,11 +12,12 @@ import { Role } from '../../../../core/models/role.model';
 import { UserService, User } from '../../../../core/services/user.service';
 import { RoleService } from '../../../../core/services/role.service';
 import { PermissionTreeSelectorComponent } from '../../../../shared/components/permission-tree-selector/permission-tree-selector.component';
+import { RoleListComponent } from '../roles/role-list.component';
 
 @Component({
     selector: 'app-tenant-settings',
     standalone: true,
-    imports: [CommonModule, FormsModule, PluginLauncherComponent, RouterModule, RoleSelectorComponent, PermissionTreeSelectorComponent],
+    imports: [CommonModule, FormsModule, PluginLauncherComponent, RouterModule, RoleSelectorComponent, PermissionTreeSelectorComponent, RoleListComponent],
     template: `
     <div class="tenant-settings compact">
 
@@ -24,6 +25,7 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
         <button [class.active]="activeTab === 'branding'" (click)="activeTab = 'branding'">Branding & Locale</button>
         <button [class.active]="activeTab === 'invitations'" (click)="activeTab = 'invitations'">Invitations</button>
         <button [class.active]="activeTab === 'users'" (click)="openUsersTab()">Users</button>
+        <button [class.active]="activeTab === 'roles'" (click)="activeTab = 'roles'">Roles & Permissions</button>
         <button [class.active]="activeTab === 'billing'" (click)="activeTab = 'billing'">Billing & Subscription</button>
         <button [class.active]="activeTab === 'plugins'" (click)="activeTab = 'plugins'">Plugins</button>
       </div>
@@ -293,6 +295,10 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
           </div>
         </div>
 
+        <div *ngSwitchCase="'roles'" class="panel roles-panel">
+          <app-role-list />
+        </div>
+
         <div *ngSwitchCase="'billing'" class="panel billing-panel">
           <div class="panel-header spaced">
             <div class="stacked">
@@ -469,7 +475,7 @@ export class TenantSettingsComponent implements OnInit {
     userSaving = signal(false);
     error = signal<string | null>(null);
     success = signal<string | null>(null);
-    activeTab: 'branding' | 'invitations' | 'users' | 'billing' | 'plugins' = 'branding';
+    activeTab: 'branding' | 'invitations' | 'users' | 'roles' | 'billing' | 'plugins' = 'branding';
 
     draft: Partial<Tenant> = {
         customization: {
