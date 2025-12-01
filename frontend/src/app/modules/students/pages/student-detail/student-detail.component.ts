@@ -443,10 +443,30 @@ import { Student } from '../../../../core/models/student.model';
                 <app-card>
                   <div class="card-header">
                     <h3 class="card-title">Notes</h3>
+                    <div class="note-actions">
+                      <textarea
+                        rows="2"
+                        placeholder="Add a note..."
+                        [value]="newNote()"
+                        (input)="onNoteInput($event)"></textarea>
+                      <button type="button" class="note-add" (click)="addNote()" [disabled]="!newNote().trim()">
+                        <span class="note-icon">📝</span>
+                        Add Note
+                      </button>
+                    </div>
                   </div>
                   <div class="card-body">
-                    @if (student()!.notes) {
-                      <p>{{ student()!.notes }}</p>
+                    @if (notesList().length) {
+                      <ul class="note-list">
+                        @for (note of notesList(); track $index) {
+                          <li class="note-item">
+                            <div class="note-text">{{ note }}</div>
+                            <button type="button" class="note-delete" (click)="deleteNote($index)" aria-label="Delete note">
+                              🗑️
+                            </button>
+                          </li>
+                        }
+                      </ul>
                     } @else {
                       <div class="empty-state">
                         <p>No notes added.</p>
@@ -895,6 +915,83 @@ import { Student } from '../../../../core/models/student.model';
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     }
 
+    .note-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .note-actions textarea {
+      flex: 1;
+      padding: 0.6rem 0.75rem;
+      border-radius: 10px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .note-add {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.55rem 0.9rem;
+      border-radius: 10px;
+      border: 1px solid var(--color-border);
+      background: var(--color-primary);
+      color: var(--color-on-primary, #0b1223);
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .note-add:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .note-icon {
+      font-size: 1rem;
+    }
+
+    .note-list {
+      list-style: none;
+      padding: 0;
+      margin: 0.75rem 0 0;
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      border-top: none;
+    }
+
+    .note-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      background: var(--color-surface-hover);
+    }
+
+    .note-text {
+      color: var(--color-text-primary);
+      white-space: pre-wrap;
+      margin-right: 0.75rem;
+      flex: 1;
+    }
+
+    .note-delete {
+      border: 1px solid var(--color-border);
+      background: color-mix(in srgb, var(--color-danger, #e11d48) 12%, var(--color-surface));
+      color: var(--color-text-primary);
+      border-radius: 8px;
+      padding: 0.35rem 0.6rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-xs, var(--shadow-sm));
+    }
+
     .document-item {
       display: flex;
       align-items: center;
@@ -997,6 +1094,8 @@ import { Student } from '../../../../core/models/student.model';
 export class StudentDetailComponent implements OnInit {
   studentId = signal<string | null>(null);
   student = signal<Student | null>(null);
+  notesList = signal<string[]>([]);
+  newNote = signal<string>('');
   loading = signal(false);
   error = signal<string | null>(null);
   activeTab = signal<'guardians' | 'medical' | 'academic' | 'fees' | 'documents' | 'notes'>('guardians');
@@ -1036,6 +1135,7 @@ export class StudentDetailComponent implements OnInit {
     this.studentService.getStudent(id).subscribe({
       next: (student) => {
         this.student.set(student);
+        this.notesList.set(student.notes ? student.notes.split('\n').filter(n => n.trim().length) : []);
         this.loading.set(false);
       },
       error: (err) => {
@@ -1156,6 +1256,50 @@ export class StudentDetailComponent implements OnInit {
     this.tempAddress.set({
       ...this.tempAddress(),
       [field]: value
+    });
+  }
+
+  onNoteInput(event: Event): void {
+    this.newNote.set((event.target as HTMLTextAreaElement).value);
+  }
+
+  addNote(): void {
+    const id = this.studentId();
+    if (!id) return;
+    const note = this.newNote().trim();
+    if (!note) return;
+
+    const updatedNotes = [...this.notesList(), note];
+    this.loading.set(true);
+    this.studentService.updateStudent(id, { notes: updatedNotes.join('\n') }).subscribe({
+      next: (updated) => {
+        this.student.set(updated);
+        this.notesList.set(updatedNotes);
+        this.newNote.set('');
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error adding note:', err);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  deleteNote(index: number): void {
+    const id = this.studentId();
+    if (!id) return;
+    const updatedNotes = this.notesList().filter((_, i) => i !== index);
+    this.loading.set(true);
+    this.studentService.updateStudent(id, { notes: updatedNotes.join('\n') }).subscribe({
+      next: (updated) => {
+        this.student.set(updated);
+        this.notesList.set(updatedNotes);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error deleting note:', err);
+        this.loading.set(false);
+      }
     });
   }
 }
