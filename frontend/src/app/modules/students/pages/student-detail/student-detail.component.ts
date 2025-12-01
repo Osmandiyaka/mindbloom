@@ -439,41 +439,37 @@ import { Student } from '../../../../core/models/student.model';
 
             <!-- Notes Tab -->
             @if (activeTab() === 'notes') {
-              <div class="tab-pane">
-                <app-card class="notes-card">
-                  <div class="card-header">
-                    <h3 class="card-title">Notes</h3>
-                    <div class="note-actions">
-                      <textarea
-                        rows="2"
-                        placeholder="Add a note..."
-                        [value]="newNote()"
-                        (input)="onNoteInput($event)"></textarea>
-                      <button type="button" class="note-add" (click)="addNote()" [disabled]="!newNote().trim()">
-                        <span class="note-icon">📝</span>
-                        Add Note
-                      </button>
-                    </div>
+              <div class="tab-pane notes-plain">
+                <div class="notes-header">
+                  <h3 class="card-title">Notes</h3>
+                  <div class="note-actions">
+                    <textarea
+                      rows="2"
+                      placeholder="Add a note..."
+                      [value]="newNote()"
+                      (input)="onNoteInput($event)"></textarea>
+                    <button type="button" class="note-add" (click)="addNote()" [disabled]="!newNote().trim()">
+                      <span class="note-icon">📝</span>
+                      Add Note
+                    </button>
                   </div>
-                  <div class="card-body">
-                    @if (notesList().length) {
-                      <ul class="note-list">
-                        @for (note of notesList(); track $index) {
-                          <li class="note-item">
-                            <div class="note-text">{{ note }}</div>
-                            <button type="button" class="note-delete" (click)="deleteNote($index)" aria-label="Delete note">
-                              🗑️
-                            </button>
-                          </li>
-                        }
-                      </ul>
-                    } @else {
-                      <div class="empty-state">
-                        <p>No notes added.</p>
-                      </div>
+                </div>
+                @if (notesList().length) {
+                  <ul class="note-list">
+                    @for (note of notesList(); track $index) {
+                      <li class="note-item">
+                        <div class="note-text">{{ note }}</div>
+                        <button type="button" class="note-delete" (click)="deleteNote($index)" aria-label="Delete note">
+                          🗑️
+                        </button>
+                      </li>
                     }
+                  </ul>
+                } @else {
+                  <div class="empty-state">
+                    <p>No notes added.</p>
                   </div>
-                </app-card>
+                }
               </div>
             }
           </div>
@@ -965,14 +961,16 @@ import { Student } from '../../../../core/models/student.model';
       border-top: none;
     }
 
-    /* Remove divider line for notes card */
-    .notes-card .card-header {
-      border-bottom: none;
-      padding-bottom: 0.5rem;
+    .notes-plain {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
     }
 
-    .notes-card .card-body {
-      padding-top: 0.5rem;
+    .notes-header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
     }
 
     .note-item {
