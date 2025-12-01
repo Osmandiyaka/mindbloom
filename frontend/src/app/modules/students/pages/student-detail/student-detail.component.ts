@@ -51,21 +51,96 @@ import { Student } from '../../../../core/models/student.model';
                 }
               </div>
               <div class="student-info">
-                <h1>{{ student()!.fullName }}</h1>
-                <p class="admission-number">{{ student()!.enrollment.admissionNumber }}</p>
-                <div class="meta-info">
+                <div class="student-name-row">
+                  <h1>{{ student()!.fullName }}</h1>
                   <span class="badge" [class.badge-success]="student()!.status === 'active'" 
                         [class.badge-secondary]="student()!.status !== 'active'">
                     {{ student()!.status }}
                   </span>
+                </div>
+                <div class="meta-info">
                   <span class="meta-item">
-                    <i class="icon-book"></i>
-                    Class {{ student()!.enrollment.class }}{{ student()!.enrollment.section ? '-' + student()!.enrollment.section : '' }}
+                    <div class="meta-label">
+                      <i class="icon-hash"></i>
+                      Admission #
+                    </div>
+                    <div class="meta-value">
+                      {{ student()!.enrollment.admissionNumber }}
+                    </div>
                   </span>
                   <span class="meta-item">
-                    <i class="icon-calendar"></i>
-                    Age {{ student()!.age }}
+                    <div class="meta-label">
+                      <i class="icon-calendar"></i>
+                      Admission date
+                    </div>
+                    <div class="meta-value">
+                      {{ formatDate(student()!.enrollment.admissionDate) }}
+                    </div>
                   </span>
+                  <span class="meta-item">
+                    <div class="meta-label">
+                      <i class="icon-book"></i>
+                      Class
+                    </div>
+                    <div class="meta-value">
+                      {{ student()!.enrollment.class }}{{ student()!.enrollment.section ? '-' + student()!.enrollment.section : '' }}
+                    </div>
+                  </span>
+                  <span class="meta-item">
+                    <div class="meta-label">
+                      <i class="icon-gift"></i>
+                      Date of birth
+                    </div>
+                    <div class="meta-value">
+                      {{ formatDate(student()!.dateOfBirth) }}
+                    </div>
+                  </span>
+                  @if (student()!.email) {
+                    <span class="meta-item">
+                      <div class="meta-label">
+                        <i class="icon-mail"></i>
+                        Email
+                      </div>
+                      <div class="meta-value">
+                        {{ student()!.email }}
+                      </div>
+                    </span>
+                  }
+                  @if (student()!.phone) {
+                    <span class="meta-item">
+                      <div class="meta-label">
+                        <i class="icon-phone"></i>
+                        Phone
+                      </div>
+                      <div class="meta-value">
+                        {{ student()!.phone }}
+                      </div>
+                    </span>
+                  }
+                  @if (student()!.nationality) {
+                    <span class="meta-item">
+                      <div class="meta-label">
+                        <i class="icon-globe"></i>
+                        Nationality
+                      </div>
+                      <div class="meta-value">
+                        {{ student()!.nationality }}
+                      </div>
+                    </span>
+                  }
+                  @if (student()!.address) {
+                    <span class="meta-item">
+                      <div class="meta-label">
+                        <i class="icon-map-pin"></i>
+                        Address
+                      </div>
+                      <div class="meta-value">
+                        {{ student()!.address!.street }}<br>
+                        {{ student()!.address!.city }}, {{ student()!.address!.state }} {{ student()!.address!.postalCode }}<br>
+                        {{ student()!.address!.country }}
+                      </div>
+                    </span>
+                  }
                 </div>
               </div>
             </div>
@@ -83,10 +158,6 @@ import { Student } from '../../../../core/models/student.model';
         <!-- Tabs Navigation -->
         <div class="tabs-container">
           <div class="tabs-nav">
-            <button class="tab-button" [class.active]="activeTab() === 'overview'" 
-                    (click)="activeTab.set('overview')">
-              Overview
-            </button>
             <button class="tab-button" [class.active]="activeTab() === 'guardians'" 
                     (click)="activeTab.set('guardians')">
               Guardians
@@ -107,101 +178,6 @@ import { Student } from '../../../../core/models/student.model';
 
           <!-- Tab Content -->
           <div class="tab-content">
-            <!-- Overview Tab -->
-            @if (activeTab() === 'overview') {
-              <div class="tab-pane">
-                <div class="cards-grid">
-                  <!-- Personal Information -->
-                  <app-card>
-                    <div class="card-header">
-                      <h3 class="card-title">Personal Information</h3>
-                    </div>
-                    <div class="card-body">
-                      <div class="info-grid">
-                        <div class="info-item">
-                          <label>Full Name</label>
-                          <p>{{ student()!.fullName }}</p>
-                        </div>
-                        <div class="info-item">
-                          <label>Date of Birth</label>
-                          <p>{{ formatDate(student()!.dateOfBirth) }}</p>
-                        </div>
-                        <div class="info-item">
-                          <label>Gender</label>
-                          <p>{{ student()!.gender }}</p>
-                        </div>
-                        @if (student()!.nationality) {
-                          <div class="info-item">
-                            <label>Nationality</label>
-                            <p>{{ student()!.nationality }}</p>
-                          </div>
-                        }
-                        @if (student()!.email) {
-                          <div class="info-item">
-                            <label>Email</label>
-                            <p>{{ student()!.email }}</p>
-                          </div>
-                        }
-                        @if (student()!.phone) {
-                          <div class="info-item">
-                            <label>Phone</label>
-                            <p>{{ student()!.phone }}</p>
-                          </div>
-                        }
-                      </div>
-                    </div>
-                  </app-card>
-
-                  <!-- Enrollment Information -->
-                  <app-card>
-                    <div class="card-header">
-                      <h3 class="card-title">Enrollment Information</h3>
-                    </div>
-                    <div class="card-body">
-                      <div class="info-grid">
-                        <div class="info-item">
-                          <label>Admission Number</label>
-                          <p>{{ student()!.enrollment.admissionNumber }}</p>
-                        </div>
-                        <div class="info-item">
-                          <label>Admission Date</label>
-                          <p>{{ formatDate(student()!.enrollment.admissionDate) }}</p>
-                        </div>
-                        <div class="info-item">
-                          <label>Academic Year</label>
-                          <p>{{ student()!.enrollment.academicYear }}</p>
-                        </div>
-                        <div class="info-item">
-                          <label>Class</label>
-                          <p>{{ student()!.enrollment.class }}{{ student()!.enrollment.section ? '-' + student()!.enrollment.section : '' }}</p>
-                        </div>
-                        @if (student()!.enrollment.rollNumber) {
-                          <div class="info-item">
-                            <label>Roll Number</label>
-                            <p>{{ student()!.enrollment.rollNumber }}</p>
-                          </div>
-                        }
-                      </div>
-                    </div>
-                  </app-card>
-
-                  <!-- Address -->
-                  @if (student()!.address) {
-                    <app-card>
-                      <div class="card-header">
-                        <h3 class="card-title">Address</h3>
-                      </div>
-                      <div class="card-body">
-                        <p>{{ student()!.address!.street }}<br>
-                        {{ student()!.address!.city }}, {{ student()!.address!.state }} {{ student()!.address!.postalCode }}<br>
-                        {{ student()!.address!.country }}</p>
-                      </div>
-                    </app-card>
-                  }
-                </div>
-              </div>
-            }
-
             <!-- Guardians Tab -->
             @if (activeTab() === 'guardians') {
               <div class="tab-pane">
@@ -368,19 +344,28 @@ import { Student } from '../../../../core/models/student.model';
   `,
   styles: [`
     .student-detail-page {
-      padding: 2rem;
+      padding: 1.5rem 2rem;
       max-width: 1400px;
       margin: 0 auto;
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
     }
 
     .loading-state, .error-state {
       text-align: center;
       padding: 4rem 2rem;
+      background: var(--color-surface-hover);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      color: var(--color-text-primary);
     }
 
     .spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #3b82f6;
+      border: 3px solid var(--color-border);
+      border-top: 3px solid var(--color-primary);
       border-radius: 50%;
       width: 50px;
       height: 50px;
@@ -403,11 +388,11 @@ import { Student } from '../../../../core/models/student.model';
 
     .breadcrumb {
       font-size: 0.875rem;
-      color: #64748b;
+      color: var(--color-text-secondary);
       margin-bottom: 1rem;
       
       a {
-        color: #3b82f6;
+        color: var(--color-primary);
         text-decoration: none;
         
         &:hover {
@@ -424,6 +409,11 @@ import { Student } from '../../../../core/models/student.model';
       display: flex;
       gap: 1.5rem;
       align-items: flex-start;
+      background: var(--color-surface-hover);
+      border: 1px solid var(--color-border);
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
     }
 
     .student-avatar {
@@ -443,7 +433,7 @@ import { Student } from '../../../../core/models/student.model';
     .avatar-placeholder {
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark, var(--color-primary)));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -456,34 +446,56 @@ import { Student } from '../../../../core/models/student.model';
       h1 {
         font-size: 2rem;
         font-weight: 700;
-        color: #1e293b;
+        color: var(--color-text-primary);
         margin: 0 0 0.5rem;
       }
       
       .admission-number {
         font-size: 0.875rem;
-        color: #64748b;
+        color: var(--color-text-secondary);
         margin: 0 0 1rem;
       }
     }
 
     .meta-info {
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
       flex-wrap: wrap;
       align-items: center;
     }
 
     .meta-item {
       display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 200px;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      background: var(--color-surface-hover);
+      box-shadow: var(--shadow-xs, var(--shadow-sm));
+    }
+
+    .meta-label {
+      display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.875rem;
-      color: #64748b;
-      
-      i {
-        font-size: 1rem;
-      }
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-text-secondary);
+      font-weight: 600;
+    }
+
+    .meta-label i {
+      font-size: 1rem;
+    }
+
+    .meta-value {
+      font-size: 0.95rem;
+      color: var(--color-text-primary);
+      font-weight: 600;
+      line-height: 1.35;
     }
 
     .badge {
@@ -495,23 +507,23 @@ import { Student } from '../../../../core/models/student.model';
       letter-spacing: 0.05em;
       
       &.badge-success {
-        background: #dcfce7;
-        color: #166534;
+        background: color-mix(in srgb, var(--color-success) 15%, transparent);
+        color: var(--color-success);
       }
       
       &.badge-secondary {
-        background: #f1f5f9;
-        color: #475569;
+        background: var(--color-surface-hover);
+        color: var(--color-text-secondary);
       }
       
       &.badge-primary {
-        background: #dbeafe;
-        color: #1e40af;
+        background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+        color: color-mix(in srgb, var(--color-primary) 80%, #0f172a 20%);
       }
       
       &.badge-warning {
-        background: #fef3c7;
-        color: #92400e;
+        background: color-mix(in srgb, var(--color-warning) 18%, transparent);
+        color: var(--color-warning);
       }
     }
 
@@ -521,49 +533,74 @@ import { Student } from '../../../../core/models/student.model';
     }
 
     .tabs-container {
-      background: white;
+      background: var(--color-surface);
       border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-sm);
       overflow: hidden;
+      border: 1px solid var(--color-border);
     }
 
     .tabs-nav {
       display: flex;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid var(--color-border);
       padding: 0 1.5rem;
       gap: 0.5rem;
     }
 
     .tab-button {
       padding: 1rem 1.5rem;
-      background: none;
-      border: none;
+      background: var(--color-surface);
+      border: 1px solid transparent;
       border-bottom: 2px solid transparent;
       font-size: 0.875rem;
       font-weight: 500;
-      color: #64748b;
+      color: var(--color-text-secondary);
       cursor: pointer;
       transition: all 0.2s;
       
       &:hover {
-        color: #3b82f6;
-        background: #f8fafc;
+        color: var(--color-primary);
+        background: var(--color-surface-hover);
       }
       
       &.active {
-        color: #3b82f6;
-        border-bottom-color: #3b82f6;
+        color: var(--color-primary);
+        border-bottom-color: var(--color-primary);
       }
     }
 
     .tab-content {
       padding: 2rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Force card surfaces to use theme vars (override global dark-soft glass) */
+    :host ::ng-deep [data-theme] app-card,
+    :host ::ng-deep [data-theme] app-card .card {
+      background: var(--color-surface) !important;
+      border: 1px solid var(--color-border) !important;
+      border-radius: 12px !important;
+      box-shadow: var(--shadow-sm) !important;
+      color: var(--color-text-primary) !important;
+      backdrop-filter: none !important;
+    }
+
+    :host ::ng-deep [data-theme] app-card .card-header {
+      border-bottom: 1px solid var(--color-border) !important;
+      background: transparent !important;
+    }
+
+    .card-title {
+      color: var(--color-text-primary);
     }
 
     .cards-grid {
       display: grid;
       gap: 1.5rem;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
     }
 
     .info-grid {
@@ -577,7 +614,7 @@ import { Student } from '../../../../core/models/student.model';
         display: block;
         font-size: 0.75rem;
         font-weight: 600;
-        color: #64748b;
+        color: var(--color-text-secondary);
         text-transform: uppercase;
         letter-spacing: 0.05em;
         margin-bottom: 0.5rem;
@@ -585,7 +622,7 @@ import { Student } from '../../../../core/models/student.model';
 
       p {
         font-size: 1rem;
-        color: #1e293b;
+        color: var(--color-text-primary);
         margin: 0;
       }
     }
@@ -606,10 +643,14 @@ import { Student } from '../../../../core/models/student.model';
       align-items: center;
       gap: 1rem;
       padding: 1rem;
+      background: var(--color-surface-hover);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
       
       i {
         font-size: 2rem;
-        color: #64748b;
+        color: var(--color-primary);
       }
       
       .document-info {
@@ -619,17 +660,18 @@ import { Student } from '../../../../core/models/student.model';
           margin: 0 0 0.25rem;
           font-size: 0.875rem;
           font-weight: 600;
+          color: var(--color-text-primary);
         }
         
         p {
           margin: 0;
           font-size: 0.75rem;
-          color: #64748b;
+          color: var(--color-text-secondary);
         }
         
         small {
           font-size: 0.75rem;
-          color: #94a3b8;
+          color: var(--color-text-secondary);
         }
       }
     }
@@ -637,11 +679,14 @@ import { Student } from '../../../../core/models/student.model';
     .empty-state {
       text-align: center;
       padding: 3rem 2rem;
-      color: #64748b;
+      color: var(--color-text-secondary);
+      background: var(--color-surface-hover);
+      border: 1px dashed var(--color-border);
+      border-radius: 12px;
       
       i {
         font-size: 3rem;
-        color: #cbd5e1;
+        color: var(--color-primary);
         margin-bottom: 1rem;
       }
       
@@ -657,7 +702,7 @@ import { Student } from '../../../../core/models/student.model';
         padding: 1rem 0;
         
         &:not(:last-child) {
-          border-bottom: 1px solid #e2e8f0;
+          border-bottom: 1px solid var(--color-border);
         }
       }
       
@@ -665,7 +710,7 @@ import { Student } from '../../../../core/models/student.model';
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        background: #3b82f6;
+        background: var(--color-primary);
         margin-top: 0.25rem;
         flex-shrink: 0;
       }
@@ -675,13 +720,13 @@ import { Student } from '../../../../core/models/student.model';
         
         .timeline-title {
           font-weight: 600;
-          color: #1e293b;
+          color: var(--color-text-primary);
           margin: 0 0 0.25rem;
         }
         
         .timeline-date {
           font-size: 0.875rem;
-          color: #64748b;
+          color: var(--color-text-secondary);
           margin: 0;
         }
       }
@@ -697,7 +742,7 @@ export class StudentDetailComponent implements OnInit {
   student = signal<Student | null>(null);
   loading = signal(false);
   error = signal<string | null>(null);
-  activeTab = signal<'overview' | 'guardians' | 'medical' | 'documents' | 'history'>('overview');
+  activeTab = signal<'guardians' | 'medical' | 'documents' | 'history'>('guardians');
 
   constructor(
     private route: ActivatedRoute,

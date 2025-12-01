@@ -42,7 +42,6 @@
     }
 
     // Core surfaces
-    .card,
     .hero-card,
     .panel,
     .data-table,
@@ -73,6 +72,19 @@
         &:hover {
             transform: translateY(-2px);
             box-shadow: -4px -4px 10px rgba(255, 255, 255, 0.05), 6px 6px 16px rgba(0, 0, 0, 0.5);
+        }
+    }
+
+    /* Cards should use theme surfaces, not glass */
+    .card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        color: var(--color-text-primary);
+        box-shadow: var(--shadow-sm);
+        backdrop-filter: none;
+
+        .card-header {
+            border-bottom: 1px solid var(--color-border);
         }
     }
 
