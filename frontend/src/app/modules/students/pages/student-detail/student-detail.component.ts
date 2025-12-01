@@ -52,11 +52,13 @@ import { Student } from '../../../../core/models/student.model';
               </div>
               <div class="student-info">
                 <div class="student-name-row">
-                  <h1>{{ student()!.fullName }}</h1>
-                  <span class="badge" [class.badge-success]="student()!.status === 'active'" 
-                        [class.badge-secondary]="student()!.status !== 'active'">
-                    {{ student()!.status }}
-                  </span>
+                  <div class="name-and-status">
+                    <h1>{{ student()!.fullName }}</h1>
+                    <span class="badge" [class.badge-success]="student()!.status === 'active'" 
+                          [class.badge-secondary]="student()!.status !== 'active'">
+                      {{ student()!.status }}
+                    </span>
+                  </div>
                 </div>
                 <div class="meta-info">
                   <span class="meta-item">
@@ -91,8 +93,21 @@ import { Student } from '../../../../core/models/student.model';
                       <i class="icon-gift"></i>
                       Date of birth
                     </div>
-                    <div class="meta-value">
-                      {{ formatDate(student()!.dateOfBirth) }}
+                    <div class="meta-value editable">
+                      @if (editingField() === 'dateOfBirth') {
+                        <div class="inline-edit">
+                          <input type="date" [value]="tempDob()" (input)="onDobInput($event)" />
+                          <div class="inline-actions">
+                            <button type="button" class="inline-btn" (click)="saveField('dateOfBirth')">Save</button>
+                            <button type="button" class="inline-btn ghost" (click)="cancelEdit()">Cancel</button>
+                          </div>
+                        </div>
+                      } @else {
+                        <span>{{ formatDate(student()!.dateOfBirth) }}</span>
+                        <button type="button" class="chip-edit" (click)="startEdit('dateOfBirth')" aria-label="Edit date of birth">
+                          ✏️
+                        </button>
+                      }
                     </div>
                   </span>
                   @if (student()!.email) {
@@ -101,8 +116,21 @@ import { Student } from '../../../../core/models/student.model';
                         <i class="icon-mail"></i>
                         Email
                       </div>
-                      <div class="meta-value">
-                        {{ student()!.email }}
+                      <div class="meta-value editable">
+                        @if (editingField() === 'email') {
+                          <div class="inline-edit">
+                            <input type="email" [value]="tempEmail()" (input)="onEmailInput($event)" />
+                            <div class="inline-actions">
+                              <button type="button" class="inline-btn" (click)="saveField('email')">Save</button>
+                              <button type="button" class="inline-btn ghost" (click)="cancelEdit()">Cancel</button>
+                            </div>
+                          </div>
+                        } @else {
+                          <span>{{ student()!.email }}</span>
+                          <button type="button" class="chip-edit" (click)="startEdit('email')" aria-label="Edit email">
+                            ✏️
+                          </button>
+                        }
                       </div>
                     </span>
                   }
@@ -112,8 +140,21 @@ import { Student } from '../../../../core/models/student.model';
                         <i class="icon-phone"></i>
                         Phone
                       </div>
-                      <div class="meta-value">
-                        {{ student()!.phone }}
+                      <div class="meta-value editable">
+                        @if (editingField() === 'phone') {
+                          <div class="inline-edit">
+                            <input type="text" [value]="tempPhone()" (input)="onPhoneInput($event)" />
+                            <div class="inline-actions">
+                              <button type="button" class="inline-btn" (click)="saveField('phone')">Save</button>
+                              <button type="button" class="inline-btn ghost" (click)="cancelEdit()">Cancel</button>
+                            </div>
+                          </div>
+                        } @else {
+                          <span>{{ student()!.phone }}</span>
+                          <button type="button" class="chip-edit" (click)="startEdit('phone')" aria-label="Edit phone">
+                            ✏️
+                          </button>
+                        }
                       </div>
                     </span>
                   }
@@ -134,10 +175,29 @@ import { Student } from '../../../../core/models/student.model';
                         <i class="icon-map-pin"></i>
                         Address
                       </div>
-                      <div class="meta-value">
-                        {{ student()!.address!.street }}<br>
-                        {{ student()!.address!.city }}, {{ student()!.address!.state }} {{ student()!.address!.postalCode }}<br>
-                        {{ student()!.address!.country }}
+                      <div class="meta-value editable">
+                        @if (editingField() === 'address') {
+                          <div class="inline-edit address-grid">
+                            <input type="text" placeholder="Street" [value]="tempAddress().street" (input)="onAddressInput('street', $event)" />
+                            <input type="text" placeholder="City" [value]="tempAddress().city" (input)="onAddressInput('city', $event)" />
+                            <input type="text" placeholder="State" [value]="tempAddress().state" (input)="onAddressInput('state', $event)" />
+                            <input type="text" placeholder="Postal" [value]="tempAddress().postalCode" (input)="onAddressInput('postalCode', $event)" />
+                            <input type="text" placeholder="Country" [value]="tempAddress().country" (input)="onAddressInput('country', $event)" />
+                            <div class="inline-actions">
+                              <button type="button" class="inline-btn" (click)="saveField('address')">Save</button>
+                              <button type="button" class="inline-btn ghost" (click)="cancelEdit()">Cancel</button>
+                            </div>
+                          </div>
+                        } @else {
+                          <span>
+                            {{ student()!.address!.street }}<br>
+                            {{ student()!.address!.city }}, {{ student()!.address!.state }} {{ student()!.address!.postalCode }}<br>
+                            {{ student()!.address!.country }}
+                          </span>
+                          <button type="button" class="chip-edit" (click)="startEdit('address')" aria-label="Edit address">
+                            ✏️
+                          </button>
+                        }
                       </div>
                     </span>
                   }
@@ -146,11 +206,17 @@ import { Student } from '../../../../core/models/student.model';
             </div>
           </div>
           <div class="header-actions">
-            <app-button variant="secondary" (click)="editStudent()">
-              <i class="icon-edit"></i> Edit
+            <app-button class="action-btn" variant="secondary" (click)="editStudent()">
+              <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25Zm14.71-9.04a1 1 0 0 0 0-1.41l-2.51-2.51a1 1 0 0 0-1.41 0l-1.83 1.83 3.92 3.92 1.83-1.83Z"/>
+              </svg>
+              Edit
             </app-button>
-            <app-button variant="danger" (click)="deleteStudent()">
-              <i class="icon-trash"></i> Delete
+            <app-button class="action-btn" variant="danger" (click)="deleteStudent()">
+              <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 3h6a1 1 0 0 1 1 1v1h4v2H4V5h4V4a1 1 0 0 1 1-1Zm-1 7h2v8H8v-8Zm6 0h2v8h-2v-8Z"/>
+              </svg>
+              Delete
             </app-button>
           </div>
         </div>
@@ -166,13 +232,21 @@ import { Student } from '../../../../core/models/student.model';
                     (click)="activeTab.set('medical')">
               Medical Info
             </button>
+            <button class="tab-button" [class.active]="activeTab() === 'academic'" 
+                    (click)="activeTab.set('academic')">
+              Academic
+            </button>
+            <button class="tab-button" [class.active]="activeTab() === 'fees'" 
+                    (click)="activeTab.set('fees')">
+              Fees
+            </button>
             <button class="tab-button" [class.active]="activeTab() === 'documents'" 
                     (click)="activeTab.set('documents')">
               Documents
             </button>
-            <button class="tab-button" [class.active]="activeTab() === 'history'" 
-                    (click)="activeTab.set('history')">
-              History
+            <button class="tab-button" [class.active]="activeTab() === 'notes'" 
+                    (click)="activeTab.set('notes')">
+              Notes
             </button>
           </div>
 
@@ -194,25 +268,25 @@ import { Student } from '../../../../core/models/student.model';
                         }
                       </div>
                       <div class="card-body">
-                        <div class="info-grid">
-                          <div class="info-item">
-                            <label>Relationship</label>
-                            <p>{{ guardian.relationship }}</p>
+                        <div class="guardian-meta">
+                          <div class="meta-chip">
+                            <span class="meta-label">Relationship</span>
+                            <span class="meta-value">{{ guardian.relationship }}</span>
                           </div>
-                          <div class="info-item">
-                            <label>Phone</label>
-                            <p>{{ guardian.phone }}</p>
+                          <div class="meta-chip">
+                            <span class="meta-label">Phone</span>
+                            <span class="meta-value">{{ guardian.phone }}</span>
                           </div>
                           @if (guardian.email) {
-                            <div class="info-item">
-                              <label>Email</label>
-                              <p>{{ guardian.email }}</p>
+                            <div class="meta-chip">
+                              <span class="meta-label">Email</span>
+                              <span class="meta-value">{{ guardian.email }}</span>
                             </div>
                           }
                           @if (guardian.occupation) {
-                            <div class="info-item">
-                              <label>Occupation</label>
-                              <p>{{ guardian.occupation }}</p>
+                            <div class="meta-chip">
+                              <span class="meta-label">Occupation</span>
+                              <span class="meta-value">{{ guardian.occupation }}</span>
                             </div>
                           }
                         </div>
@@ -315,23 +389,66 @@ import { Student } from '../../../../core/models/student.model';
               </div>
             }
 
-            <!-- History Tab -->
-            @if (activeTab() === 'history') {
+            <!-- Academic Tab -->
+            @if (activeTab() === 'academic') {
               <div class="tab-pane">
                 <app-card>
                   <div class="card-header">
-                    <h3 class="card-title">Activity History</h3>
+                    <h3 class="card-title">Academic Info</h3>
                   </div>
                   <div class="card-body">
-                    <div class="timeline">
-                      <div class="timeline-item">
-                        <div class="timeline-marker"></div>
-                        <div class="timeline-content">
-                          <p class="timeline-title">Student Enrolled</p>
-                          <p class="timeline-date">{{ formatDate(student()!.createdAt) }}</p>
-                        </div>
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <label>Academic Year</label>
+                        <p>{{ student()!.enrollment.academicYear }}</p>
                       </div>
+                      <div class="info-item">
+                        <label>Class</label>
+                        <p>{{ student()!.enrollment.class }}{{ student()!.enrollment.section ? '-' + student()!.enrollment.section : '' }}</p>
+                      </div>
+                      @if (student()!.enrollment.rollNumber) {
+                        <div class="info-item">
+                          <label>Roll Number</label>
+                          <p>{{ student()!.enrollment.rollNumber }}</p>
+                        </div>
+                      }
                     </div>
+                  </div>
+                </app-card>
+              </div>
+            }
+
+            <!-- Fees Tab -->
+            @if (activeTab() === 'fees') {
+              <div class="tab-pane">
+                <app-card>
+                  <div class="card-header">
+                    <h3 class="card-title">Fees</h3>
+                  </div>
+                  <div class="card-body">
+                    <div class="empty-state">
+                      <p>No fee records available.</p>
+                    </div>
+                  </div>
+                </app-card>
+              </div>
+            }
+
+            <!-- Notes Tab -->
+            @if (activeTab() === 'notes') {
+              <div class="tab-pane">
+                <app-card>
+                  <div class="card-header">
+                    <h3 class="card-title">Notes</h3>
+                  </div>
+                  <div class="card-body">
+                    @if (student()!.notes) {
+                      <p>{{ student()!.notes }}</p>
+                    } @else {
+                      <div class="empty-state">
+                        <p>No notes added.</p>
+                      </div>
+                    }
                   </div>
                 </app-card>
               </div>
@@ -457,6 +574,13 @@ import { Student } from '../../../../core/models/student.model';
       }
     }
 
+    .name-and-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
     .meta-info {
       display: flex;
       gap: 0.75rem;
@@ -498,6 +622,56 @@ import { Student } from '../../../../core/models/student.model';
       line-height: 1.35;
     }
 
+    .editable .chip-edit {
+      margin-left: 0.5rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .inline-edit {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .inline-edit input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+    }
+
+    .inline-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .inline-btn {
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      background: var(--color-primary, var(--color-surface-hover));
+      color: var(--color-text-primary);
+      cursor: pointer;
+    }
+
+    .inline-btn.ghost {
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+    }
+
+    .address-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.4rem 0.6rem;
+    }
+
     .badge {
       padding: 0.25rem 0.75rem;
       border-radius: 9999px;
@@ -530,6 +704,37 @@ import { Student } from '../../../../core/models/student.model';
     .header-actions {
       display: flex;
       gap: 0.75rem;
+    }
+
+    .action-icon {
+      width: 1rem;
+      height: 1rem;
+      fill: currentColor;
+      margin-right: 0.35rem;
+      flex-shrink: 0;
+    }
+
+    /* Theme-aware action buttons */
+    :host ::ng-deep .action-btn button {
+      background: var(--color-surface-hover);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    :host ::ng-deep .action-btn button:hover {
+      background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface-hover));
+      border-color: color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
+    }
+
+    :host ::ng-deep .action-btn[variant="danger"] button {
+      background: color-mix(in srgb, var(--color-danger, #e11d48) 16%, var(--color-surface-hover));
+      color: var(--color-text-primary);
+      border-color: color-mix(in srgb, var(--color-danger, #e11d48) 30%, var(--color-border));
+    }
+
+    :host ::ng-deep .action-btn[variant="danger"] button:hover {
+      background: color-mix(in srgb, var(--color-danger, #e11d48) 28%, var(--color-surface-hover));
     }
 
     .tabs-container {
@@ -629,7 +834,41 @@ import { Student } from '../../../../core/models/student.model';
 
     .guardians-section {
       display: grid;
-      gap: 1.5rem;
+      gap: 1.25rem;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    }
+
+    .guardian-meta {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      min-width: 150px;
+      padding: 0.45rem 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      background: var(--color-surface-hover);
+      box-shadow: var(--shadow-xs, var(--shadow-sm));
+    }
+
+    .meta-chip .meta-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-text-secondary);
+      font-weight: 600;
+    }
+
+    .meta-chip .meta-value {
+      font-size: 0.95rem;
+      color: var(--color-text-primary);
+      font-weight: 600;
+      line-height: 1.3;
     }
 
     .documents-grid {
@@ -742,7 +981,18 @@ export class StudentDetailComponent implements OnInit {
   student = signal<Student | null>(null);
   loading = signal(false);
   error = signal<string | null>(null);
-  activeTab = signal<'guardians' | 'medical' | 'documents' | 'history'>('guardians');
+  activeTab = signal<'guardians' | 'medical' | 'academic' | 'fees' | 'documents' | 'notes'>('guardians');
+  editingField = signal<'dateOfBirth' | 'email' | 'phone' | 'address' | null>(null);
+  tempEmail = signal<string>('');
+  tempPhone = signal<string>('');
+  tempDob = signal<string>('');
+  tempAddress = signal({
+    street: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: ''
+  });
 
   constructor(
     private route: ActivatedRoute,
@@ -778,6 +1028,61 @@ export class StudentDetailComponent implements OnInit {
     });
   }
 
+  startEdit(field: 'dateOfBirth' | 'email' | 'phone' | 'address'): void {
+    const s = this.student();
+    if (!s) return;
+
+    if (field === 'email') this.tempEmail.set(s.email || '');
+    if (field === 'phone') this.tempPhone.set(s.phone || '');
+    if (field === 'dateOfBirth') this.tempDob.set(this.toInputDate(s.dateOfBirth));
+    if (field === 'address') {
+      this.tempAddress.set({
+        street: s.address?.street || '',
+        city: s.address?.city || '',
+        state: s.address?.state || '',
+        postalCode: s.address?.postalCode || '',
+        country: s.address?.country || ''
+      });
+    }
+
+    this.editingField.set(field);
+  }
+
+  cancelEdit(): void {
+    this.editingField.set(null);
+  }
+
+  saveField(field: 'dateOfBirth' | 'email' | 'phone' | 'address'): void {
+    const id = this.studentId();
+    if (!id) return;
+
+    const payload: any = {};
+    if (field === 'email') payload.email = this.tempEmail().trim();
+    if (field === 'phone') payload.phone = this.tempPhone().trim();
+    if (field === 'dateOfBirth') payload.dateOfBirth = this.tempDob();
+    if (field === 'address') payload.address = this.tempAddress();
+
+    this.loading.set(true);
+    this.studentService.updateStudent(id, payload).subscribe({
+      next: (updated) => {
+        this.student.set(updated);
+        this.editingField.set(null);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error updating student field:', err);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  toInputDate(date: Date | string | undefined): string {
+    if (!date) return '';
+    const d = new Date(date);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toISOString().slice(0, 10);
+  }
+
   editStudent(): void {
     const id = this.studentId();
     if (id) {
@@ -807,6 +1112,32 @@ export class StudentDetailComponent implements OnInit {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
+    });
+  }
+
+  onDobInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.tempDob.set(value);
+  }
+
+  onEmailInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.tempEmail.set(value);
+  }
+
+  onPhoneInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.tempPhone.set(value);
+  }
+
+  onAddressInput(
+    field: 'street' | 'city' | 'state' | 'postalCode' | 'country',
+    event: Event
+  ): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.tempAddress.set({
+      ...this.tempAddress(),
+      [field]: value
     });
   }
 }

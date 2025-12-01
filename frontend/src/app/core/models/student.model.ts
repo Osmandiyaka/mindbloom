@@ -164,6 +164,7 @@ export interface UpdateStudentDto {
     middleName?: string;
     email?: string;
     phone?: string;
+    dateOfBirth?: string | Date;
     address?: Address;
     nationality?: string;
     religion?: string;
