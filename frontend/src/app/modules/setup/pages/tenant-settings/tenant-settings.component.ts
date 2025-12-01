@@ -155,7 +155,7 @@ import { RoleListComponent } from '../roles/role-list.component';
         </div>
 
         <div *ngSwitchCase="'users'" class="panel users-panel">
-          <div class="panel-header spaced padded">
+          <div class="panel-header spaced padded users-header">
             <div class="stacked">
               <h2>Tenant Users</h2>
               <p class="subtitle">Create and manage tenant users with roles.</p>
@@ -366,7 +366,7 @@ import { RoleListComponent } from '../roles/role-list.component';
     </div>
   `,
     styles: [`
-    .tenant-settings { max-width: 1200px; margin: 0 auto; padding: 0.75rem 1.25rem 1.25rem; background: var(--content-background, var(--color-background)); color: var(--color-text-primary); }
+    .tenant-settings { max-width: 1200px; margin: 0 auto; padding: 0.75rem 1.25rem 1.25rem; background: var(--color-surface); color: var(--color-text-primary); border: 1px solid var(--color-border); border-radius: 12px; box-shadow: var(--shadow-md); }
     .tenant-settings.compact { padding-top: 0.5rem; }
     .page-header { margin-bottom: 0; }
     .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-tertiary); font-size: 12px; margin: 0 0 4px 0; }
@@ -402,12 +402,15 @@ import { RoleListComponent } from '../roles/role-list.component';
     .alert.success { background: rgba(var(--color-success-rgb,16,185,129),0.08); color: var(--color-success); }
     .panel { display: flex; flex-direction: column; gap: 0.75rem; }
     .invitations-panel { max-width: 1100px; gap: 0.25rem; }
+    .panel.users-panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 0.75rem; box-shadow: var(--shadow-sm); }
+    .billing-panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 0.75rem; box-shadow: var(--shadow-sm); }
     .plugins-panel { max-width: 1100px; gap: 0.35rem; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
     .panel-header.stacked { flex-direction: column; align-items: stretch; }
     .panel-header.slim { margin-bottom: 0.25rem; padding: 0 0.75rem; }
     .panel-header.spaced { padding: 0 0.75rem; }
     .panel-header.padded { padding: 0 0.75rem; }
+    .panel-header.users-header { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 0.9rem 1rem; box-shadow: var(--shadow-sm); }
     .invite-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 1rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 0.75rem; }
     .invite-card.flat { box-shadow: none; border-radius: 12px; border-color: var(--color-border); }
     .invite-row { display: grid; grid-template-columns: 1.2fr auto auto; gap: 0.5rem; align-items: center; }
@@ -418,12 +421,15 @@ import { RoleListComponent } from '../roles/role-list.component';
     .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; }
     .selected-roles .chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(16,185,129,0.25); font-weight: 700; }
     .selected-roles .chip svg { width: 14px; height: 14px; }
-    .table { width: 100%; border-collapse: collapse; }
-    .table th, .table td { padding: 0.65rem; border-bottom: 1px solid var(--color-border); text-align: left; }
-    .table th { color: var(--color-text-tertiary); font-weight: 600; font-size: 0.9rem; }
+    .table { width: 100%; border-collapse: collapse; background: var(--color-surface); color: var(--color-text-primary); }
+    .table th, .table td { padding: 0.65rem; border-bottom: 1px solid var(--color-border); text-align: left; color: var(--color-text-primary); background: var(--color-surface); }
+    .table th { color: var(--color-text-secondary); font-weight: 600; font-size: 0.9rem; background: var(--color-surface-hover); }
+    .table tr:nth-child(even) td { background: var(--color-surface-hover); }
+    .table tr:hover td { background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface)); }
     .table.invites th, .table.invites td { padding: 0.45rem 0.65rem; line-height: 1.2; vertical-align: middle; }
     .table.invites td.email-cell { display: flex; align-items: center; gap: 0.4rem; }
     .table.invites td.email-cell svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .table input[type="checkbox"] { accent-color: var(--color-primary); }
     .user-form { display: flex; flex-direction: column; gap: 0.9rem; padding: 0.5rem 0.75rem 1rem; background: var(--color-surface); border-radius: 12px; border: 1px solid var(--color-border); }
     .user-form .field { display: flex; flex-direction: column; gap: 0.35rem; }
     .user-form label { font-weight: 700; color: var(--color-text-secondary); font-size: 0.9rem; }
@@ -445,9 +451,10 @@ import { RoleListComponent } from '../roles/role-list.component';
     .actions .btn { padding: 0.4rem 0.7rem; }
     .btn.small { padding: 0.4rem 0.8rem; font-size: 0.875rem; }
     .btn.danger { color: var(--color-error); }
+    .table td.actions { background: var(--color-surface); }
     .plans { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 1rem; }
     .plans.padded { padding: 0.5rem; }
-    .plan-card { border: 1px solid var(--color-border); border-radius: 14px; padding: 1rem; background: var(--color-surface); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 0.75rem; }
+    .plan-card { border: 1px solid var(--color-border); border-radius: 14px; padding: 1rem; background: var(--color-surface); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 0.75rem; color: var(--color-text-primary); }
     .plan-card.active { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb,102,126,234),0.2); }
     .plan-head { display: flex; justify-content: space-between; align-items: center; }
     .plan-footer { margin-top: auto; display: flex; justify-content: flex-end; }
