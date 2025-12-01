@@ -6,6 +6,7 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
 import { StudentService } from '../../../../core/services/student.service';
 import { Student } from '../../../../core/models/student.model';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-student-detail',
@@ -457,7 +458,10 @@ import { Student } from '../../../../core/models/student.model';
                   <ul class="note-list">
                     @for (note of notesList(); track $index) {
                       <li class="note-item">
-                        <div class="note-text">{{ note }}</div>
+                        <div class="note-text">
+                          <div class="note-body">{{ note.text }}</div>
+                          <div class="note-meta">by {{ note.author }} • {{ formatDate(note.createdAt) }}</div>
+                        </div>
                         <button type="button" class="note-delete" (click)="deleteNote($index)" aria-label="Delete note">
                           🗑️
                         </button>
@@ -989,8 +993,19 @@ import { Student } from '../../../../core/models/student.model';
       white-space: pre-wrap;
       margin-right: 0.75rem;
       flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
     }
 
+    .note-body {
+      color: var(--color-text-primary);
+    }
+
+    .note-meta {
+      font-size: 0.8rem;
+      color: var(--color-text-secondary);
+    }
     .note-delete {
       border: 1px solid var(--color-border);
       background: color-mix(in srgb, var(--color-danger, #e11d48) 12%, var(--color-surface));
@@ -1103,7 +1118,7 @@ import { Student } from '../../../../core/models/student.model';
 export class StudentDetailComponent implements OnInit {
   studentId = signal<string | null>(null);
   student = signal<Student | null>(null);
-  notesList = signal<string[]>([]);
+  notesList = signal<{ text: string; author: string; createdAt: string }[]>([]);
   newNote = signal<string>('');
   loading = signal(false);
   error = signal<string | null>(null);
@@ -1123,7 +1138,8 @@ export class StudentDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private studentService: StudentService
+    private studentService: StudentService,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -1144,7 +1160,7 @@ export class StudentDetailComponent implements OnInit {
     this.studentService.getStudent(id).subscribe({
       next: (student) => {
         this.student.set(student);
-        this.notesList.set(student.notes ? student.notes.split('\n').filter(n => n.trim().length) : []);
+        this.notesList.set(this.parseNotes(student.notes));
         this.loading.set(false);
       },
       error: (err) => {
@@ -1272,15 +1288,48 @@ export class StudentDetailComponent implements OnInit {
     this.newNote.set((event.target as HTMLTextAreaElement).value);
   }
 
+  private parseNotes(raw?: string): { text: string; author: string; createdAt: string }[] {
+    const currentName = this.authService.getCurrentUser()?.name || 'You';
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .filter((n) => n && typeof n.text === 'string')
+          .map((n) => ({
+            text: n.text,
+            author: n.author && n.author !== 'You' ? n.author : currentName,
+            createdAt: n.createdAt || new Date().toISOString()
+          }));
+      }
+      return [];
+    } catch {
+      return raw
+        .split('\n')
+        .filter((n) => n.trim().length)
+        .map((text) => ({
+          text,
+          author: currentName,
+          createdAt: new Date().toISOString()
+        }));
+    }
+  }
+
   addNote(): void {
     const id = this.studentId();
     if (!id) return;
     const note = this.newNote().trim();
     if (!note) return;
 
-    const updatedNotes = [...this.notesList(), note];
+    const author = this.authService.getCurrentUser()?.name || 'Unknown';
+    const entry = {
+      text: note,
+      author,
+      createdAt: new Date().toISOString()
+    };
+    const updatedNotes = [...this.notesList(), entry];
     this.loading.set(true);
-    this.studentService.updateStudent(id, { notes: updatedNotes.join('\n') }).subscribe({
+    this.studentService.updateStudent(id, { notes: JSON.stringify(updatedNotes) }).subscribe({
       next: (updated) => {
         this.student.set(updated);
         this.notesList.set(updatedNotes);
@@ -1299,7 +1348,7 @@ export class StudentDetailComponent implements OnInit {
     if (!id) return;
     const updatedNotes = this.notesList().filter((_, i) => i !== index);
     this.loading.set(true);
-    this.studentService.updateStudent(id, { notes: updatedNotes.join('\n') }).subscribe({
+    this.studentService.updateStudent(id, { notes: JSON.stringify(updatedNotes) }).subscribe({
       next: (updated) => {
         this.student.set(updated);
         this.notesList.set(updatedNotes);
