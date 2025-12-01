@@ -3,6 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SchoolSettings, SchoolSettingsService } from '../../../../core/services/school-settings.service';
 import { TenantService } from '../../../../core/services/tenant.service';
+import { TenantSettingsService } from '../../../../core/services/tenant-settings.service';
 
 @Component({
   selector: 'app-school-settings',
@@ -38,6 +39,9 @@ import { TenantService } from '../../../../core/services/tenant.service';
             <input [(ngModel)]="model.website" placeholder="https://..." />
           </label>
         </section>
+      </div>
+      <div class="section-actions" *ngIf="tab === 'profile'">
+        <button class="btn primary" (click)="saveProfile()" [disabled]="saving">Save Settings</button>
       </div>
 
       <div class="grid" *ngIf="tab === 'contact'">
@@ -80,6 +84,9 @@ import { TenantService } from '../../../../core/services/tenant.service';
           </div>
         </section>
       </div>
+      <div class="section-actions" *ngIf="tab === 'contact'">
+        <button class="btn primary" (click)="saveContact()" [disabled]="saving">Save Settings</button>
+      </div>
 
       <div class="grid" *ngIf="tab === 'academics'">
         <section class="card">
@@ -90,7 +97,7 @@ import { TenantService } from '../../../../core/services/tenant.service';
           <label>Locale
             <input [(ngModel)]="model.locale" placeholder="en-US" />
           </label>
-          <div class="split">
+          <div class="split equal">
             <label>Academic Year Start
               <input type="date" name="ayStart" [(ngModel)]="model.academicYear.start" />
             </label>
@@ -161,6 +168,9 @@ import { TenantService } from '../../../../core/services/tenant.service';
           </table>
         </section>
       </div>
+      <div class="section-actions" *ngIf="tab === 'academics'">
+        <button class="btn primary" (click)="saveAcademics()" [disabled]="saving">Save Settings</button>
+      </div>
 
       <div class="grid" *ngIf="tab === 'grading'">
         <section class="card">
@@ -177,9 +187,11 @@ import { TenantService } from '../../../../core/services/tenant.service';
           </label>
         </section>
       </div>
+      <div class="section-actions" *ngIf="tab === 'grading'">
+        <button class="btn primary" (click)="saveGrading()" [disabled]="saving">Save Settings</button>
+      </div>
 
-      <div class="footer-actions">
-        <button class="btn primary" (click)="save()" [disabled]="saving">Save Settings</button>
+      <div class="footer-actions" *ngIf="saveError || saved">
         <span class="muted" *ngIf="saved">Settings saved.</span>
         <span class="error" *ngIf="saveError">{{ saveError }}</span>
       </div>
@@ -262,7 +274,8 @@ import { TenantService } from '../../../../core/services/tenant.service';
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
       background: color-mix(in srgb, var(--color-surface-hover) 70%, var(--color-background) 30%);
     }
-    .split { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:0.5rem; }
+    .split { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:0.5rem; align-items:end; }
+    .split.equal label { width: 100%; }
     .list { display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap; }
     .chip { border:1px solid var(--color-border); border-radius:8px; padding:0.45rem 0.75rem; background: var(--color-surface-hover); cursor:pointer; }
     .chip.danger { border-color: rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); }
@@ -285,6 +298,7 @@ import { TenantService } from '../../../../core/services/tenant.service';
 })
 export class SchoolSettingsComponent implements OnInit {
   private tenantService = inject(TenantService);
+  private tenantSettingsService = inject(TenantSettingsService);
   model: SchoolSettings & {
     academicYear: { start: string; end: string };
     gradingScheme: { type: string; passThreshold: number };
@@ -337,17 +351,96 @@ export class SchoolSettingsComponent implements OnInit {
     });
   }
 
-  save() {
+  saveProfile() {
     this.saving = true;
     this.saved = false;
     this.saveError = '';
-    this.settingsService.save(this.model).subscribe(() => {
+    const payload: Partial<SchoolSettings> = this.cleanPayload({
+      schoolName: this.model.schoolName,
+      domain: this.model.domain,
+      website: this.model.website
+    });
+
+    this.settingsService.save(payload as SchoolSettings).subscribe(() => {
       this.saving = false;
       this.saved = true;
     }, (err) => {
       this.saving = false;
       this.saveError = err?.error?.message || 'Unable to save settings. Please try again.';
     });
+  }
+
+  saveContact() {
+    this.saving = true;
+    this.saved = false;
+    this.saveError = '';
+    const payload: Partial<SchoolSettings> = this.cleanPayload({
+      contactEmail: this.model.contactEmail,
+      contactPhone: this.model.contactPhone,
+      logoUrl: this.model.logoUrl,
+      addressLine1: this.model.addressLine1,
+      addressLine2: this.model.addressLine2,
+      city: this.model.city,
+      state: this.model.state,
+      postalCode: this.model.postalCode,
+      country: this.model.country
+    });
+    this.settingsService.save(payload as SchoolSettings).subscribe(() => {
+      this.saving = false;
+      this.saved = true;
+    }, (err) => {
+      this.saving = false;
+      this.saveError = err?.error?.message || 'Unable to save settings. Please try again.';
+    });
+  }
+
+  saveAcademics() {
+    this.saving = true;
+    this.saved = false;
+    this.saveError = '';
+    const payload: Partial<SchoolSettings> = this.cleanPayload({
+      timezone: this.model.timezone,
+      locale: this.model.locale,
+      academicYear: {
+        start: this.model.academicYear?.start,
+        end: this.model.academicYear?.end
+      },
+      departments: this.model.departments,
+      grades: this.model.grades,
+      subjects: this.model.subjects
+    });
+    this.settingsService.save(payload as SchoolSettings).subscribe(() => {
+      this.saving = false;
+      this.saved = true;
+    }, (err) => {
+      this.saving = false;
+      this.saveError = err?.error?.message || 'Unable to save settings. Please try again.';
+    });
+  }
+
+  saveGrading() {
+    this.saving = true;
+    this.saved = false;
+    this.saveError = '';
+    const payload: Partial<SchoolSettings> = this.cleanPayload({
+      gradingScheme: this.model.gradingScheme
+    });
+    this.settingsService.save(payload as SchoolSettings).subscribe(() => {
+      this.saving = false;
+      this.saved = true;
+    }, (err) => {
+      this.saving = false;
+      this.saveError = err?.error?.message || 'Unable to save settings. Please try again.';
+    });
+  }
+
+  private cleanPayload<T extends Record<string, any>>(obj: T): T {
+    const cleaned: Record<string, any> = {};
+    Object.entries(obj).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === '') return;
+      cleaned[key] = value;
+    });
+    return cleaned as T;
   }
 
   addDept() {
