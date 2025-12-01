@@ -440,7 +440,7 @@ import { Student } from '../../../../core/models/student.model';
             <!-- Notes Tab -->
             @if (activeTab() === 'notes') {
               <div class="tab-pane">
-                <app-card>
+                <app-card class="notes-card">
                   <div class="card-header">
                     <h3 class="card-title">Notes</h3>
                     <div class="note-actions">
@@ -963,6 +963,16 @@ import { Student } from '../../../../core/models/student.model';
       gap: 0.75rem;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       border-top: none;
+    }
+
+    /* Remove divider line for notes card */
+    .notes-card .card-header {
+      border-bottom: none;
+      padding-bottom: 0.5rem;
+    }
+
+    .notes-card .card-body {
+      padding-top: 0.5rem;
     }
 
     .note-item {
