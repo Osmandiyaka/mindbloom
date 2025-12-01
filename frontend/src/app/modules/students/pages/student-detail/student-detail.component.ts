@@ -289,13 +289,16 @@ import { Student } from '../../../../core/models/student.model';
                               <span class="meta-value">{{ guardian.occupation }}</span>
                             </div>
                           }
+                          @if (guardian.address) {
+                            <div class="meta-chip wide-chip">
+                              <span class="meta-label">Address</span>
+                              <span class="meta-value">
+                                {{ guardian.address.street }}<br>
+                                {{ guardian.address.city }}, {{ guardian.address.state }} {{ guardian.address.postalCode }}
+                              </span>
+                            </div>
+                          }
                         </div>
-                        @if (guardian.address) {
-                          <div class="mt-3">
-                            <label>Address</label>
-                            <p>{{ guardian.address.street }}, {{ guardian.address.city }}, {{ guardian.address.state }}</p>
-                          </div>
-                        }
                       </div>
                     </app-card>
                   }
@@ -838,6 +841,17 @@ import { Student } from '../../../../core/models/student.model';
       grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
     }
 
+    /* Guardians card header: lighter tone, no divider line */
+    .guardians-section app-card .card-header {
+      background: color-mix(in srgb, var(--color-surface) 85%, var(--color-primary) 10%);
+      border-bottom: none;
+      border-radius: 10px 10px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1rem;
+    }
+
     .guardian-meta {
       display: flex;
       gap: 0.75rem;
@@ -848,8 +862,8 @@ import { Student } from '../../../../core/models/student.model';
       display: inline-flex;
       flex-direction: column;
       gap: 0.2rem;
-      min-width: 150px;
-      padding: 0.45rem 0.75rem;
+      min-width: 140px;
+      padding: 0.35rem 0.65rem;
       border: 1px solid var(--color-border);
       border-radius: 10px;
       background: var(--color-surface-hover);
@@ -869,6 +883,10 @@ import { Student } from '../../../../core/models/student.model';
       color: var(--color-text-primary);
       font-weight: 600;
       line-height: 1.3;
+    }
+
+    .wide-chip {
+      min-width: 260px;
     }
 
     .documents-grid {
