@@ -441,7 +441,6 @@ import { Student } from '../../../../core/models/student.model';
             @if (activeTab() === 'notes') {
               <div class="tab-pane notes-plain">
                 <div class="notes-header">
-                  <h3 class="card-title">Notes</h3>
                   <div class="note-actions">
                     <textarea
                       rows="2"
@@ -965,12 +964,14 @@ import { Student } from '../../../../core/models/student.model';
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
+      margin-top: -0.25rem;
     }
 
     .notes-header {
       display: flex;
       flex-direction: column;
       gap: 0.65rem;
+      margin-bottom: 0.25rem;
     }
 
     .note-item {
