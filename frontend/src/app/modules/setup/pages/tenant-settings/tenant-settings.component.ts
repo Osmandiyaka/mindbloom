@@ -12,17 +12,18 @@ import { Role } from '../../../../core/models/role.model';
 import { UserService, User } from '../../../../core/services/user.service';
 import { RoleService } from '../../../../core/services/role.service';
 import { PermissionTreeSelectorComponent } from '../../../../shared/components/permission-tree-selector/permission-tree-selector.component';
+import { SchoolSettingsComponent } from '../school-settings/school-settings.component';
 import { RoleListComponent } from '../roles/role-list.component';
 
 @Component({
     selector: 'app-tenant-settings',
     standalone: true,
-    imports: [CommonModule, FormsModule, PluginLauncherComponent, RouterModule, RoleSelectorComponent, PermissionTreeSelectorComponent, RoleListComponent],
+    imports: [CommonModule, FormsModule, PluginLauncherComponent, RouterModule, RoleSelectorComponent, PermissionTreeSelectorComponent, RoleListComponent, SchoolSettingsComponent],
     template: `
     <div class="tenant-settings compact">
 
       <div class="tabs">
-        <button [class.active]="activeTab === 'branding'" (click)="activeTab = 'branding'">Branding & Locale</button>
+        <button [class.active]="activeTab === 'school'" (click)="activeTab = 'school'">School Settings</button>
         <button [class.active]="activeTab === 'invitations'" (click)="activeTab = 'invitations'">Invitations</button>
         <button [class.active]="activeTab === 'users'" (click)="openUsersTab()">Users</button>
         <button [class.active]="activeTab === 'roles'" (click)="activeTab = 'roles'">Roles & Permissions</button>
@@ -31,68 +32,8 @@ import { RoleListComponent } from '../roles/role-list.component';
       </div>
 
       <ng-container [ngSwitch]="activeTab">
-        <div *ngSwitchCase="'branding'">
-          <div class="grid">
-            <div class="card">
-              <div class="card-header">
-                <h2>Brand</h2>
-                <p>Logo and color palette reflected in the app chrome.</p>
-              </div>
-              <div class="card-body form-grid">
-                <label>
-                  <span>Logo URL</span>
-                  <input type="text" [(ngModel)]="draft.customization!.logo" placeholder="https://yourcdn/logo.png" />
-                </label>
-                <div class="color-row">
-                  <label><span>Primary Color</span><input type="color" [(ngModel)]="draft.customization!.primaryColor" /></label>
-                  <label><span>Secondary Color</span><input type="color" [(ngModel)]="draft.customization!.secondaryColor" /></label>
-                  <label><span>Accent Color</span><input type="color" [(ngModel)]="draft.customization!.accentColor" /></label>
-                </div>
-                <div class="logo-preview" *ngIf="draft.customization?.logo">
-                  <span>Preview</span>
-                  <img [src]="draft.customization!.logo" alt="Logo preview" />
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-header">
-                <h2>Locale & Time</h2>
-                <p>Defaults for dates, weeks, and currency across your tenant.</p>
-              </div>
-              <div class="card-body form-grid">
-                <label><span>Locale</span><input type="text" [(ngModel)]="draft.locale" placeholder="en-US" /></label>
-                <label><span>Timezone</span><input type="text" [(ngModel)]="draft.timezone" placeholder="America/New_York" /></label>
-                <label><span>Week Starts On</span>
-                  <select [(ngModel)]="draft.weekStartsOn">
-                    <option value="monday">Monday</option>
-                    <option value="sunday">Sunday</option>
-                  </select>
-                </label>
-                <label><span>Currency</span><input type="text" [(ngModel)]="draft.currency" placeholder="USD" /></label>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-header">
-                <h2>Academic Calendar</h2>
-                <p>Set start and end dates for reporting and scheduling.</p>
-              </div>
-              <div class="card-body form-grid">
-                <label><span>Academic Year Start</span><input type="date" [(ngModel)]="draft.academicYear!.start" /></label>
-                <label><span>Academic Year End</span><input type="date" [(ngModel)]="draft.academicYear!.end" /></label>
-              </div>
-            </div>
-          </div>
-          <div class="actions sticky-actions">
-            <div class="spacer"></div>
-            <div class="action-buttons">
-              <button class="btn ghost" (click)="reset()" [disabled]="loading()">Reset</button>
-              <button class="btn primary" (click)="save()" [disabled]="loading() || saving()">
-                {{ saving() ? 'Saving...' : 'Save Changes' }}
-              </button>
-            </div>
-          </div>
+        <div *ngSwitchCase="'school'" class="panel school-panel">
+          <app-school-settings />
         </div>
 
         <div *ngSwitchCase="'invitations'" class="panel invitations-panel">
@@ -401,6 +342,7 @@ import { RoleListComponent } from '../roles/role-list.component';
     .alert { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 10px; background: rgba(var(--color-error-rgb,239,68,68),0.08); color: var(--color-error); }
     .alert.success { background: rgba(var(--color-success-rgb,16,185,129),0.08); color: var(--color-success); }
     .panel { display: flex; flex-direction: column; gap: 0.75rem; }
+    .school-panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 0.5rem; box-shadow: var(--shadow-sm); }
     .invitations-panel { max-width: 1100px; gap: 0.25rem; }
     .panel.users-panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 0.75rem; box-shadow: var(--shadow-sm); }
     .billing-panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 0.75rem; box-shadow: var(--shadow-sm); }
@@ -482,7 +424,7 @@ export class TenantSettingsComponent implements OnInit {
     userSaving = signal(false);
     error = signal<string | null>(null);
     success = signal<string | null>(null);
-    activeTab: 'branding' | 'invitations' | 'users' | 'roles' | 'billing' | 'plugins' = 'branding';
+    activeTab: 'school' | 'invitations' | 'users' | 'roles' | 'billing' | 'plugins' = 'school';
 
     draft: Partial<Tenant> = {
         customization: {

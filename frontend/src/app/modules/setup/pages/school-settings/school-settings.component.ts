@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SchoolSettings, SchoolSettingsService } from '../../../../core/services/school-settings.service';
+import { TenantService } from '../../../../core/services/tenant.service';
 
 @Component({
   selector: 'app-school-settings',
@@ -15,27 +16,7 @@ import { SchoolSettings, SchoolSettingsService } from '../../../../core/services
           <h1>School Settings</h1>
           <p class="sub">Define school profile, academics, locale, and contact details.</p>
         </div>
-        <button class="btn primary" (click)="save()" [disabled]="saving">Save Settings</button>
       </header>
-
-      <section class="hero">
-        <div class="hero-icon">🏫</div>
-        <div class="hero-copy">
-          <h2>Make your school profile shine</h2>
-          <p>Keep academics, contact, and grading settings aligned for every campus.</p>
-          <div class="hero-meta">
-            <span>Profile</span>
-            <span>Academics</span>
-            <span>Departments</span>
-            <span>Grades</span>
-          </div>
-        </div>
-        <div class="hero-illustration">
-          <div class="bubble bubble-lg"></div>
-          <div class="bubble bubble-sm"></div>
-          <div class="bubble bubble-xs"></div>
-        </div>
-      </section>
 
       <div class="tabs">
         <button class="tab" [class.active]="tab === 'profile'" (click)="tab = 'profile'">Profile</button>
@@ -250,24 +231,13 @@ import { SchoolSettings, SchoolSettingsService } from '../../../../core/services
     </div>
   `,
   styles: [`
-    .page { padding:1.5rem; display:flex; flex-direction:column; gap:1.25rem; }
+    .page { padding:1.5rem; display:flex; flex-direction:column; gap:1.25rem; background: var(--color-surface); color: var(--color-text-primary); border: 1px solid var(--color-border); border-radius: 12px; box-shadow: var(--shadow-sm); }
     .page-header { display:flex; justify-content:space-between; align-items:flex-start; }
     .eyebrow { text-transform:uppercase; letter-spacing:0.08em; color: var(--color-text-tertiary); font-weight:700; margin:0 0 0.25rem; }
     h1 { margin:0 0 0.35rem; color: var(--color-text-primary); }
     .sub { margin:0; color: var(--color-text-secondary); }
     .btn { border-radius:10px; border:1px solid var(--color-border); padding:0.75rem 1.2rem; font-weight:600; cursor:pointer; background: var(--color-surface-hover); color: var(--color-text-primary); }
-    .btn.primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow: 0 8px 18px rgba(var(--color-primary-rgb,123,140,255),0.3); }
-    .hero { position:relative; overflow:hidden; border-radius:16px; border:1px solid var(--color-border); background: radial-gradient(circle at 20% 20%, rgba(var(--color-primary-rgb,122,184,255),0.25), transparent 40%), linear-gradient(135deg, rgba(var(--color-primary-rgb,122,184,255),0.12), rgba(168,129,255,0.12)); padding:1rem 1.25rem; display:flex; gap:1rem; align-items:center; }
-    .hero-icon { font-size:2.25rem; background: rgba(255,255,255,0.08); padding:0.75rem; border-radius:12px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); }
-    .hero-copy h2 { margin:0 0 0.25rem; color: var(--color-text-primary); }
-    .hero-copy p { margin:0 0 0.4rem; color: var(--color-text-secondary); }
-    .hero-meta { display:flex; flex-wrap:wrap; gap:0.35rem; }
-    .hero-meta span { background: rgba(255,255,255,0.08); padding:0.35rem 0.6rem; border-radius:999px; font-size:0.85rem; color: var(--color-text-primary); }
-    .hero-illustration { flex:1; display:flex; justify-content:flex-end; align-items:center; gap:0.5rem; opacity:0.9; }
-    .bubble { border-radius:50%; backdrop-filter: blur(8px); background: rgba(255,255,255,0.08); box-shadow: 0 8px 18px rgba(0,0,0,0.25); }
-    .bubble-lg { width:90px; height:90px; }
-    .bubble-sm { width:60px; height:60px; }
-    .bubble-xs { width:36px; height:36px; }
+    .btn.primary { background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary)); color: var(--color-background, #0f172a); border:none; box-shadow: var(--shadow-md, 0 8px 18px rgba(0,0,0,0.22)); }
     .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:1rem; }
     .tabs { display:flex; gap:0.5rem; margin-top:0.5rem; }
     .tab { padding:0.6rem 1rem; border-radius:10px; border:1px solid var(--color-border); background: var(--color-surface-hover); cursor:pointer; font-weight:600; color: var(--color-text-primary); }
@@ -276,7 +246,22 @@ import { SchoolSettings, SchoolSettingsService } from '../../../../core/services
     .card h3 { margin:0 0 0.35rem; color: var(--color-text-primary); }
     .card .icon { margin-right:0.35rem; }
     label { display:flex; flex-direction:column; gap:0.3rem; font-weight:600; color: var(--color-text-primary); }
-    input, select { border:1px solid var(--color-border); border-radius:8px; padding:0.65rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
+    input, select {
+      border:1px solid var(--color-border);
+      border-radius:8px;
+      padding:0.65rem;
+      background: var(--color-surface-hover);
+      color: var(--color-text-primary);
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.12));
+    }
+    input::placeholder, select::placeholder { color: var(--color-text-secondary); }
+    input:focus, select:focus {
+      outline:none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
+      background: color-mix(in srgb, var(--color-surface-hover) 70%, var(--color-background) 30%);
+    }
     .split { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:0.5rem; }
     .list { display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap; }
     .chip { border:1px solid var(--color-border); border-radius:8px; padding:0.45rem 0.75rem; background: var(--color-surface-hover); cursor:pointer; }
@@ -285,11 +270,12 @@ import { SchoolSettings, SchoolSettingsService } from '../../../../core/services
     .muted { color: var(--color-text-secondary); }
     .error { color: var(--color-error,#ef4444); font-weight:600; }
     .card-header { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.25rem; }
-    .table { width:100%; border-collapse:collapse; font-size:0.95rem; }
-    .table th, .table td { text-align:left; padding:0.55rem 0.6rem; border-bottom:1px solid var(--color-border); }
-    .table th { color: var(--color-text-secondary); font-weight:700; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.04em; }
-    .table tbody tr:hover td { background: var(--color-surface-hover); }
-    .empty { text-align:center; color: var(--color-text-secondary); padding:0.75rem 0; }
+    .table { width:100%; border-collapse:collapse; font-size:0.95rem; background: var(--color-surface); color: var(--color-text-primary); }
+    .table th, .table td { text-align:left; padding:0.55rem 0.6rem; border-bottom:1px solid var(--color-border); background: var(--color-surface); }
+    .table th { color: var(--color-text-secondary); font-weight:700; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.04em; background: var(--color-surface-hover); }
+    .table tbody tr:nth-child(even) td { background: var(--color-surface-hover); }
+    .table tbody tr:hover td { background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface)); }
+    .empty { text-align:center; color: var(--color-text-secondary); padding:0.75rem 0; background: var(--color-surface); }
     .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:50; }
     .modal { background: var(--color-surface); border-radius:14px; padding:1.25rem; width:min(480px, 90vw); border:1px solid var(--color-border); box-shadow: 0 20px 48px rgba(0,0,0,0.35); }
     .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
@@ -298,6 +284,7 @@ import { SchoolSettings, SchoolSettingsService } from '../../../../core/services
   `]
 })
 export class SchoolSettingsComponent implements OnInit {
+  private tenantService = inject(TenantService);
   model: SchoolSettings & {
     academicYear: { start: string; end: string };
     gradingScheme: { type: string; passThreshold: number };
@@ -325,10 +312,16 @@ export class SchoolSettingsComponent implements OnInit {
   constructor(private settingsService: SchoolSettingsService) { }
 
   ngOnInit(): void {
+    const tenant = this.tenantService.getCurrentTenantValue();
+    if (tenant?.name && !this.model.schoolName) {
+      this.model.schoolName = tenant.name;
+    }
+
     this.settingsService.getSettings().subscribe((data) => {
       this.model = {
         ...this.model,
         ...data,
+        schoolName: data.schoolName || this.model.schoolName,
         academicYear: {
           start: data.academicYear?.start || '',
           end: data.academicYear?.end || ''
