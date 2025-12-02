@@ -112,7 +112,14 @@ interface ReportItem {
             </div>
           </div>
           <div class="preview">
-            <p class="muted">Preview (mock):</p>
+            <div class="preview-header">
+              <p class="muted">Preview (mock)</p>
+              <div class="actions">
+                <button class="btn ghost" type="button" (click)="download('pdf')">Download PDF</button>
+                <button class="btn ghost" type="button" (click)="download('xlsx')">Download Excel</button>
+                <button class="btn ghost" type="button" (click)="print()">Print</button>
+              </div>
+            </div>
             <div class="preview-box">
               <p class="strong">{{ selected.name }}</p>
               <p class="muted">
@@ -157,6 +164,7 @@ interface ReportItem {
     .btn { border-radius:10px; padding:0.65rem 1.1rem; font-weight:600; border:1px solid var(--color-border); background: var(--color-surface-hover); color: var(--color-text-primary); cursor:pointer; }
     .btn.primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
     .preview { margin-top:0.5rem; }
+    .preview-header { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; }
     .preview-box { border:1px dashed var(--color-border); border-radius:10px; padding:0.75rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
     .preview-table { margin-top:0.5rem; border:1px solid var(--color-border); border-radius:8px; overflow:hidden; }
     .preview-table .row { display:grid; grid-template-columns: 1fr auto; padding:0.45rem 0.75rem; border-top:1px solid var(--color-border); }
@@ -238,5 +246,13 @@ export class ReportCenterComponent {
 
   isFavorite(r: ReportItem) {
     return this.favorites.has(r.id);
+  }
+
+  download(type: 'pdf' | 'xlsx') {
+    console.log(`Downloading ${this.selected?.name || 'report'} as ${type.toUpperCase()} (mock)`);
+  }
+
+  print() {
+    console.log(`Printing ${this.selected?.name || 'report'} (mock)`);
   }
 }
