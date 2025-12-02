@@ -123,16 +123,21 @@ interface InvoiceMock {
                     <span>{{ inv.number }} · {{ inv.desc }}</span>
                   <span><app-currency [amount]="inv.balance"></app-currency></span>
                     <span>
-                      <input type="number" min="0" [max]="inv.balance" [(ngModel)]="inv.apply" />
+                      <input type="number" min="0" [max]="inv.balance" [(ngModel)]="inv.apply" (ngModelChange)="onApplyChange()" />
                     </span>
                     <span>
-                      <input type="checkbox" [(ngModel)]="inv.selected" />
+                      <input type="checkbox" [(ngModel)]="inv.selected" (ngModelChange)="onApplyChange()" />
                     </span>
                   </div>
                 </div>
                 <div class="alloc-summary">
-                <span>Apply total: <app-currency [amount]="applyTotal" [strong]="true"></app-currency></span>
-                <span>Remaining: <app-currency [amount]="(payment.amount || 0) - applyTotal" [strong]="true"></app-currency></span>
+                  <div class="alloc-actions">
+                    <button class="chip" type="button" (click)="autoAllocate()">Auto-allocate oldest</button>
+                  </div>
+                  <div class="alloc-metrics">
+                    <span>Apply total: <app-currency [amount]="applyTotal" [strong]="true"></app-currency></span>
+                    <span [class.danger]="remaining < 0">Remaining: <app-currency [amount]="remaining" [strong]="true"></app-currency></span>
+                  </div>
                 </div>
               </div>
 
@@ -157,7 +162,7 @@ interface InvoiceMock {
                   <textarea rows="3" [(ngModel)]="payment.notes" name="notes" placeholder="Optional note"></textarea>
                 </label>
                 <div class="actions full">
-                  <button class="btn primary" type="submit">
+                  <button class="btn primary" type="submit" [disabled]="remaining < 0">
                     <span class="icon">💾</span>
                     Save
                   </button>
@@ -215,7 +220,9 @@ interface InvoiceMock {
     .alloc-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
     .alloc-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); }
     .alloc-row input[type="number"] { width:100%; border:1px solid var(--color-border); border-radius:8px; padding:0.35rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
-    .alloc-summary { display:flex; gap:1rem; font-weight:700; color: var(--color-text-primary); justify-content:flex-end; }
+    .alloc-summary { display:flex; flex-direction:column; gap:0.5rem; font-weight:700; color: var(--color-text-primary); }
+    .alloc-actions { display:flex; justify-content:flex-end; }
+    .alloc-metrics { display:flex; gap:1rem; justify-content:flex-end; flex-wrap:wrap; align-items:center; }
   `]
 })
 export class CollectionComponent {
@@ -265,12 +272,18 @@ export class CollectionComponent {
   }
 
   savePayment() {
-    // Mock save
+    // Mock save + reset allocations/payment
+    this.invoices = this.invoices.map(inv => ({ ...inv, apply: undefined, selected: false }));
+    this.payment = { amount: 0, mode: 'cash', date: new Date().toISOString().slice(0,10), reference: '', notes: '' };
     this.paymentOpen = false;
   }
 
   get applyTotal(): number {
     return this.invoices.reduce((sum, inv) => sum + (inv.selected ? Number(inv.apply || 0) : 0), 0);
+  }
+
+  get remaining(): number {
+    return (this.payment.amount || 0) - this.applyTotal;
   }
 
   get selectedStudent(): StudentFee | null {
@@ -282,6 +295,26 @@ export class CollectionComponent {
 
   onStudentSelected(sel: StudentOption | null) {
     this.selectedId = sel?.id || null;
+  }
+
+  autoAllocate() {
+    let remaining = (this.payment.amount || 0);
+    this.invoices = this.invoices.map(inv => {
+      if (remaining <= 0) return { ...inv, apply: 0, selected: false };
+      const apply = Math.min(remaining, inv.balance);
+      remaining -= apply;
+      return { ...inv, apply, selected: apply > 0 };
+    });
+    this.payment.amount = this.applyTotal;
+  }
+
+  onApplyChange() {
+    this.invoices = this.invoices.map(inv => {
+      const applyVal = Number(inv.apply || 0);
+      const selected = applyVal > 0 ? true : !!inv.selected;
+      return { ...inv, apply: applyVal, selected };
+    });
+    this.payment.amount = this.applyTotal;
   }
 
   initials(name: string) {
