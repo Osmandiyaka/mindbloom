@@ -191,6 +191,7 @@ export class AccountingService {
 
   createAccount(dto: Account) {
     const current = [...this.accounts()];
+    dto.active = dto.active ?? true;
     const parentCode = dto.parentCode;
     if (parentCode) {
       const attach = (nodes: AccountNode[]): boolean => {
@@ -208,6 +209,34 @@ export class AccountingService {
       current.push({ ...dto });
     }
     this.accounts.set(current);
+  }
+
+  updateAccount(dto: Account) {
+    const updateNode = (nodes: AccountNode[]): AccountNode[] =>
+      nodes.map(node => {
+        if (node.code === dto.code) {
+          return { ...node, ...dto };
+        }
+        if (node.children) {
+          return { ...node, children: updateNode(node.children) };
+        }
+        return node;
+      });
+    this.accounts.set(updateNode(this.accounts()));
+  }
+
+  toggleAccountActive(code: string) {
+    const toggleNode = (nodes: AccountNode[]): AccountNode[] =>
+      nodes.map(node => {
+        if (node.code === code) {
+          return { ...node, active: node.active === false ? true : false };
+        }
+        if (node.children) {
+          return { ...node, children: toggleNode(node.children) };
+        }
+        return node;
+      });
+    this.accounts.set(toggleNode(this.accounts()));
   }
 
   // Compatibility stubs for existing callers
