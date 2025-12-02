@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { StudentSelectorComponent, StudentOption } from '../../../../shared/components/student-selector/student-selector.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { AmountInputComponent } from '../../../../shared/components/amount-input/amount-input.component';
 
 interface StudentFee {
   student: string;
@@ -24,7 +26,7 @@ interface InvoiceMock {
 @Component({
   selector: 'app-fee-collection',
   standalone: true,
-  imports: [CommonModule, FormsModule, StudentSelectorComponent],
+  imports: [CommonModule, FormsModule, StudentSelectorComponent, CurrencyDisplayComponent, AmountInputComponent],
   template: `
     <div class="page">
       <header class="page-header">
@@ -65,8 +67,8 @@ interface InvoiceMock {
             <span>{{ s.grade }}</span>
             <span>{{ s.admissionNo }}</span>
             <span>{{ s.studentNo }}</span>
-            <span>{{ s.due | currency:'USD' }}</span>
-            <span [class.danger]="s.overdue > 0">{{ s.overdue | currency:'USD' }}</span>
+            <span><app-currency [amount]="s.due"></app-currency></span>
+            <span [class.danger]="s.overdue > 0"><app-currency [amount]="s.overdue"></app-currency></span>
             <span>{{ s.lastPayment }}</span>
             <span><button class="chip" (click)="openPayment(s)">Collect</button></span>
           </div>
@@ -103,11 +105,11 @@ interface InvoiceMock {
                 </div>
                 <div>
                   <p class="label">Due</p>
-                  <p class="value">{{ activeStudent?.due || 0 | currency:'USD' }}</p>
+                  <p class="value"><app-currency [amount]="activeStudent?.due || 0"></app-currency></p>
                 </div>
                 <div>
                   <p class="label">Overdue</p>
-                  <p class="value danger">{{ activeStudent?.overdue || 0 | currency:'USD' }}</p>
+                  <p class="value danger"><app-currency [amount]="activeStudent?.overdue || 0"></app-currency></p>
                 </div>
               </div>
 
@@ -119,7 +121,7 @@ interface InvoiceMock {
                   </div>
                   <div class="alloc-row" *ngFor="let inv of invoices">
                     <span>{{ inv.number }} · {{ inv.desc }}</span>
-                    <span>{{ inv.balance | currency:'USD' }}</span>
+                  <span><app-currency [amount]="inv.balance"></app-currency></span>
                     <span>
                       <input type="number" min="0" [max]="inv.balance" [(ngModel)]="inv.apply" />
                     </span>
@@ -129,14 +131,14 @@ interface InvoiceMock {
                   </div>
                 </div>
                 <div class="alloc-summary">
-                  <span>Apply total: {{ applyTotal | currency:'USD' }}</span>
-                  <span>Remaining: {{ (payment.amount || 0) - applyTotal | currency:'USD' }}</span>
+                <span>Apply total: <app-currency [amount]="applyTotal" [strong]="true"></app-currency></span>
+                <span>Remaining: <app-currency [amount]="(payment.amount || 0) - applyTotal" [strong]="true"></app-currency></span>
                 </div>
               </div>
 
               <form class="form-grid" (ngSubmit)="savePayment()">
                 <label>Amount
-                  <input type="number" min="0" [(ngModel)]="payment.amount" name="amount" required />
+                  <app-amount-input [(ngModel)]="payment.amount" name="amount" required></app-amount-input>
                 </label>
                 <label>Mode
                   <select [(ngModel)]="payment.mode" name="mode" required>

@@ -1,0 +1,137 @@
+import { CommonModule } from '@angular/common';
+import { Component, Input, forwardRef, computed, inject } from '@angular/core';
+import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { TenantService } from '../../../core/services/tenant.service';
+
+@Component({
+  selector: 'app-amount-input',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => AmountInputComponent),
+      multi: true,
+    },
+  ],
+  template: `
+    <label class="amount-wrapper">
+      <span class="icon">💵</span>
+      <input
+        type="number"
+        [attr.placeholder]="placeholder"
+        [disabled]="disabled"
+        [value]="_value ?? ''"
+        (input)="handleInput($event)"
+        (blur)="markTouched()"
+        step="0.01"
+      />
+      <span class="code">{{ currencyCode() }}</span>
+    </label>
+  `,
+  styles: [`
+    .amount-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      background: var(--color-surface);
+      border: 1.5px solid var(--color-primary, #4f8bff);
+      border-radius: 14px;
+      padding: 0.45rem 0.6rem;
+      color: var(--color-text-primary);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .amount-wrapper:focus-within {
+      border-color: var(--color-primary);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.12), 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
+    }
+    .icon {
+      font-size: 1.05rem;
+      color: var(--color-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+    }
+    input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--color-text-primary);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      padding: 0.2rem 0.25rem;
+      box-shadow: none;
+    }
+    input:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .code {
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+      font-weight: 600;
+      min-width: 3ch;
+    }
+  `]
+})
+export class AmountInputComponent implements ControlValueAccessor {
+  private tenant = inject(TenantService);
+
+  @Input() currency?: string;
+  @Input() locale?: string;
+  @Input() placeholder = '0.00';
+
+  disabled = false;
+  _value: number | null = null;
+
+  private onChange: (val: number | null) => void = () => {};
+  private onTouched: () => void = () => {};
+
+  symbol = computed(() => {
+    const tenant = this.tenant.currentTenant();
+    const code = this.currency || tenant?.currency || 'USD';
+    const loc = this.locale || tenant?.locale || 'en-US';
+    try {
+      return (new Intl.NumberFormat(loc, { style: 'currency', currency: code }))
+        .formatToParts(0)
+        .find(p => p.type === 'currency')?.value || '$';
+    } catch {
+      return '$';
+    }
+  });
+
+  currencyCode = computed(() => {
+    const tenant = this.tenant.currentTenant();
+    return (this.currency || tenant?.currency || 'USD').toUpperCase();
+  });
+
+  writeValue(value: number | null): void {
+    this._value = value;
+  }
+
+  registerOnChange(fn: any): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: any): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
+  }
+
+  handleInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const parsed = input.value === '' ? null : Number(input.value);
+    this._value = parsed === null || isNaN(parsed) ? null : parsed;
+    this.onChange(this._value);
+  }
+
+  markTouched(): void {
+    this.onTouched();
+  }
+}
