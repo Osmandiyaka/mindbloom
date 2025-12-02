@@ -24,7 +24,7 @@ interface StudentFee {
           <p class="sub">Search students, view outstanding balances, and record payments.</p>
         </div>
         <div class="actions">
-          <button class="btn primary">Record Payment</button>
+          <button class="btn primary" (click)="openPayment()">Record Payment</button>
         </div>
       </header>
 
@@ -49,13 +49,48 @@ interface StudentFee {
             <span>{{ s.due | currency:'USD' }}</span>
             <span [class.danger]="s.overdue > 0">{{ s.overdue | currency:'USD' }}</span>
             <span>{{ s.lastPayment }}</span>
-            <span><button class="chip">Collect</button></span>
+            <span><button class="chip" (click)="openPayment(s)">Collect</button></span>
           </div>
           <div class="table-row" *ngIf="!filtered.length">
             <span class="muted" style="grid-column:1/7">No students found.</span>
           </div>
         </div>
       </section>
+
+      @if (paymentOpen) {
+        <div class="modal-backdrop" (click)="closePayment()"></div>
+        <div class="modal">
+          <div class="modal-header">
+            <h3>Record Payment</h3>
+            <button class="chip" (click)="closePayment()">✕</button>
+          </div>
+          <div class="modal-body">
+            <p class="muted">Student: {{ activeStudent?.student || 'Select a student' }}</p>
+            <form class="form-grid" (ngSubmit)="savePayment()">
+              <label>Amount
+                <input type="number" min="0" [(ngModel)]="payment.amount" name="amount" required />
+              </label>
+              <label>Mode
+                <select [(ngModel)]="payment.mode" name="mode" required>
+                  <option value="cash">Cash</option>
+                  <option value="bank">Bank</option>
+                  <option value="mobile">Mobile</option>
+                </select>
+              </label>
+              <label>Date
+                <input type="date" [(ngModel)]="payment.date" name="date" required />
+              </label>
+              <label>Reference
+                <input [(ngModel)]="payment.reference" name="reference" placeholder="RCPT-001" />
+              </label>
+              <div class="actions">
+                <button class="btn primary" type="submit">Save</button>
+                <button class="btn ghost" type="button" (click)="closePayment()">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -79,6 +114,11 @@ interface StudentFee {
     .chip { border:1px solid var(--color-border); padding:0.35rem 0.75rem; border-radius:10px; background: var(--color-surface-hover); cursor:pointer; }
     .muted { color: var(--color-text-secondary); }
     .danger { color: var(--color-error,#ef4444); }
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:10; }
+    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; width: min(480px, 90vw); z-index:11; box-shadow: var(--shadow-lg, 0 20px 50px rgba(0,0,0,0.25)); }
+    .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; color: var(--color-text-primary); }
+    .modal-body { color: var(--color-text-primary); }
+    .form-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:0.75rem; }
   `]
 })
 export class CollectionComponent {
@@ -90,6 +130,9 @@ export class CollectionComponent {
     { student: 'Sara Danjuma', grade: 'Grade 7', admissionNo: 'ADM-1029', due: 1200, overdue: 300, lastPayment: 'Jan 05, 2025' }
   ];
   grades = ['Grade 5', 'Grade 6', 'Grade 7'];
+  paymentOpen = false;
+  activeStudent: StudentFee | null = null;
+  payment = { amount: 0, mode: 'cash', date: new Date().toISOString().slice(0,10), reference: '' };
 
   get filtered() {
     return this.students.filter(s => {
@@ -102,5 +145,19 @@ export class CollectionComponent {
   clear() {
     this.search = '';
     this.gradeFilter = '';
+  }
+
+  openPayment(student?: StudentFee) {
+    this.activeStudent = student || null;
+    this.paymentOpen = true;
+  }
+
+  closePayment() {
+    this.paymentOpen = false;
+  }
+
+  savePayment() {
+    // Mock save
+    this.paymentOpen = false;
   }
 }

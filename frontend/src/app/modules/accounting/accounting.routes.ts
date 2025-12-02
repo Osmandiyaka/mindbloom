@@ -28,5 +28,9 @@ export const ACCOUNTING_ROUTES: Routes = [
   {
     path: 'collection',
     loadComponent: () => import('./pages/collection/collection.component').then(m => m.CollectionComponent)
+  },
+  {
+    path: 'reports',
+    loadComponent: () => import('./pages/report-center/report-center.component').then(m => m.ReportCenterComponent)
   }
 ];

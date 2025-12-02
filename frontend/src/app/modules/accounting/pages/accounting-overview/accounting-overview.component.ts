@@ -86,10 +86,12 @@ import { AccountingService } from '../../../../core/services/accounting.service'
           </div>
           <ul class="links">
             <li><a routerLink="/accounting/fee-structures">Fee Structures</a></li>
+            <li><a routerLink="/accounting/collection">Fee Collection</a></li>
             <li><a routerLink="/accounting/journals">Manual Journal</a></li>
             <li><a routerLink="/accounting/accounts">Manage Accounts</a></li>
             <li><a routerLink="/accounting/trial-balance">Trial Balance</a></li>
             <li><a routerLink="/accounting/periods">Fiscal Periods</a></li>
+            <li><a routerLink="/accounting/reports">Report Center</a></li>
           </ul>
         </div>
       </section>
