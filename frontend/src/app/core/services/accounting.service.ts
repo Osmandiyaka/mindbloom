@@ -260,6 +260,20 @@ export class AccountingService {
     return of(entry);
   }
 
+  upsertFeeStructure(fs: FeeStructurePreview) {
+    const existing = this.feeStructures();
+    const idx = existing.findIndex(e => e.name === fs.name && e.grade === fs.grade && e.academicYear === fs.academicYear);
+    let next: FeeStructurePreview[];
+    if (idx >= 0) {
+      next = [...existing];
+      next[idx] = fs;
+    } else {
+      next = [fs, ...existing];
+    }
+    this.feeStructures.set(next);
+    return of(true);
+  }
+
   loadPeriods() {
     return of(this.periods());
   }
