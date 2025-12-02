@@ -34,7 +34,9 @@ import { AccountingService, FeeStructurePreview } from '../../../../core/service
               <input [(ngModel)]="form.name" placeholder="e.g., Junior High Standard" />
             </label>
             <label>Academic year
-              <input [(ngModel)]="form.academicYear" placeholder="2025" />
+              <select [(ngModel)]="form.academicYear">
+                <option *ngFor="let y of academicYears" [value]="y">{{ y }}</option>
+              </select>
             </label>
             <label>Grade
               <select [(ngModel)]="form.grade">
@@ -92,8 +94,8 @@ import { AccountingService, FeeStructurePreview } from '../../../../core/service
             </div>
           </div>
           <div class="actions">
-            <button class="btn ghost small" type="button">Preview Invoice</button>
-            <button class="btn ghost small" type="button">Assign to Grade</button>
+            <button class="btn ghost small" type="button" (click)="openPreview(form)">Preview Invoice</button>
+            <button class="btn ghost small" type="button" (click)="openAssign(form)">Assign to Grade</button>
           </div>
         </div>
       </section>
@@ -127,8 +129,8 @@ import { AccountingService, FeeStructurePreview } from '../../../../core/service
             </div>
           </div>
           <div class="actions">
-            <button class="btn ghost small">Preview Invoice</button>
-            <button class="btn ghost small">Assign to Grade</button>
+            <button class="btn ghost small" (click)="openPreview(fs)">Preview Invoice</button>
+            <button class="btn ghost small" (click)="openAssign(fs)">Assign to Grade</button>
           </div>
         </div>
 
@@ -137,6 +139,66 @@ import { AccountingService, FeeStructurePreview } from '../../../../core/service
           <button class="btn primary">Create Structure</button>
         </div>
       </section>
+
+      @if (previewing) {
+        <div class="modal-backdrop" (click)="closePreview()"></div>
+        <div class="modal">
+          <div class="modal-header">
+            <div>
+              <p class="eyebrow">{{ previewing.academicYear }} · {{ previewing.grade }}</p>
+              <h3 class="card-title">Invoice Preview · {{ previewing.name }}</h3>
+            </div>
+            <button class="chip ghost" (click)="closePreview()">✕</button>
+          </div>
+          <div class="preview-body">
+            <div class="row head">
+              <span>Item</span><span>Amount</span>
+            </div>
+            <div class="row" *ngFor="let comp of previewing.components">
+              <span>{{ comp.label }}</span>
+              <span class="amount">{{ comp.amount | currency:'USD' }}</span>
+            </div>
+            <div class="row total">
+              <span>Total</span>
+              <span class="amount">{{ previewing.total | currency:'USD' }}</span>
+            </div>
+            <p class="sub">Payment term: {{ previewing.paymentTerm | titlecase }}</p>
+          </div>
+          <div class="modal-actions">
+            <button class="btn primary" (click)="closePreview()">Close</button>
+          </div>
+        </div>
+      }
+
+      @if (assigning) {
+        <div class="modal-backdrop" (click)="closeAssign()"></div>
+        <div class="modal">
+          <div class="modal-header">
+            <div>
+              <p class="eyebrow">{{ assigning.academicYear }} · {{ assigning.grade }}</p>
+              <h3 class="card-title">Assign "{{ assigning.name }}"</h3>
+            </div>
+            <button class="chip ghost" (click)="closeAssign()">✕</button>
+          </div>
+          <div class="form-grid">
+            <label>Apply to grade
+              <select [(ngModel)]="assignGrade">
+                <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+              </select>
+            </label>
+            <label>Effective term
+              <select [(ngModel)]="assignTerm">
+                <option *ngFor="let t of terms" [value]="t">{{ t }}</option>
+              </select>
+            </label>
+          </div>
+          <p class="sub">Mock assignment for preview; backend wiring will replace this.</p>
+          <div class="modal-actions">
+            <button class="btn primary" (click)="confirmAssign()">Assign</button>
+            <button class="btn ghost" (click)="closeAssign()">Cancel</button>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -174,11 +236,22 @@ import { AccountingService, FeeStructurePreview } from '../../../../core/service
     .presets { flex:1; justify-content:flex-end; }
     .presets .label { color: var(--color-text-secondary); font-size:0.85rem; }
     .full-header { grid-column:1/-1; }
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:20; }
+    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width: min(640px, 92vw); background: var(--color-surface); border:1px solid var(--color-border); border-radius:14px; padding:1rem; box-shadow: var(--shadow-lg, 0 20px 50px rgba(0,0,0,0.25)); z-index:21; display:flex; flex-direction:column; gap:0.75rem; }
+    .modal-header { display:flex; justify-content:space-between; align-items:center; }
+    .preview-body { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:0.5rem; }
   `]
 })
 export class FeeStructuresComponent {
   grades = ['Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9'];
+  academicYears = ['2025', '2026', '2027'];
+  terms = ['Term 1 2025', 'Term 2 2025', 'Term 3 2025'];
   filter = '';
+  previewing: FeeStructurePreview | null = null;
+  assigning: FeeStructurePreview | null = null;
+  assignGrade = '';
+  assignTerm = '';
   form: FeeStructurePreview = {
     name: 'Primary Tuition',
     academicYear: '2025',
@@ -233,5 +306,28 @@ export class FeeStructuresComponent {
     const items = this.accounting.feeStructures();
     if (!this.filter) return items;
     return items.filter(fs => fs.grade === this.filter);
+  }
+
+  openPreview(fs: FeeStructurePreview) {
+    this.previewing = fs;
+  }
+
+  closePreview() {
+    this.previewing = null;
+  }
+
+  openAssign(fs: FeeStructurePreview) {
+    this.assigning = fs;
+    this.assignGrade = fs.grade;
+    this.assignTerm = '';
+  }
+
+  closeAssign() {
+    this.assigning = null;
+  }
+
+  confirmAssign() {
+    // Mock confirmation; backend wiring would follow
+    this.closeAssign();
   }
 }
