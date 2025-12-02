@@ -46,7 +46,12 @@ import { AccountingService, Account, AccountNode } from '../../../../core/servic
       <section class="card">
         <div class="card-header">
           <h3 class="card-title">Accounts</h3>
-          <span class="muted">Drag-and-drop concept shown; backend wiring to follow.</span>
+          <div class="header-tools">
+            <div class="toggles">
+              <button class="chip ghost" type="button" (click)="expandAll()">Expand all</button>
+              <button class="chip ghost" type="button" (click)="collapseAll()">Collapse all</button>
+            </div>
+          </div>
         </div>
         <div class="tree">
           <div *ngFor="let node of filteredAccounts" class="tree-node">
@@ -62,6 +67,7 @@ import { AccountingService, Account, AccountNode } from '../../../../core/servic
               <span class="pill">{{ node.type | titlecase }}</span>
               <span class="muted">{{ node.category || '—' }}</span>
               <span class="balance" [class.negative]="(node.balance||0) < 0">{{ node.balance || 0 | number:'1.0-0' }}</span>
+              <span class="pill status" [class.inactive]="node.active === false">{{ node.active === false ? 'Inactive' : 'Active' }}</span>
               <div class="row-actions">
                 <button class="chip ghost" (click)="startEdit(node)">Edit</button>
                 <button class="chip" (click)="toggleActive(node)">{{ node.active === false ? 'Activate' : 'Deactivate' }}</button>
@@ -77,6 +83,7 @@ import { AccountingService, Account, AccountNode } from '../../../../core/servic
                 <span class="pill">{{ child.type | titlecase }}</span>
                 <span class="muted">{{ child.category || '—' }}</span>
                 <span class="balance" [class.negative]="(child.balance||0) < 0">{{ child.balance || 0 | number:'1.0-0' }}</span>
+                <span class="pill status" [class.inactive]="child.active === false">{{ child.active === false ? 'Inactive' : 'Active' }}</span>
                 <div class="row-actions">
                   <button class="chip ghost" (click)="startEdit(child)">Edit</button>
                   <button class="chip" (click)="toggleActive(child)">{{ child.active === false ? 'Activate' : 'Deactivate' }}</button>
@@ -174,6 +181,8 @@ import { AccountingService, Account, AccountNode } from '../../../../core/servic
     .header-actions { display:flex; gap:0.75rem; align-items:flex-start; flex-wrap:wrap; justify-content:flex-end; }
     .filters { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; }
     .filters input, .filters select { border:1px solid var(--color-border); border-radius:8px; padding:0.55rem 0.75rem; background: var(--color-surface); color: var(--color-text-primary); min-width:220px; }
+    .toggles { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .header-tools { display:flex; gap:0.75rem; align-items:center; }
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-sm); }
     .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
     .form-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:0.75rem; }
@@ -189,7 +198,7 @@ import { AccountingService, Account, AccountNode } from '../../../../core/servic
     .summary-chip .value { font-weight:800; color: var(--color-text-primary); font-size:1.1rem; }
     .summary-chip .muted { color: var(--color-text-secondary); }
     .tree { display:flex; flex-direction:column; gap:0.35rem; }
-    .tree-row { display:grid; grid-template-columns: 1.8fr 0.8fr 1fr 0.8fr 0.9fr; gap:0.5rem; align-items:center; padding:0.55rem 0.65rem; border:1px solid var(--color-border); border-radius:10px; background: var(--color-surface-hover); }
+    .tree-row { display:grid; grid-template-columns: 1.8fr 0.8fr 1fr 0.8fr 0.9fr 1fr; gap:0.5rem; align-items:center; padding:0.55rem 0.65rem; border:1px solid var(--color-border); border-radius:10px; background: var(--color-surface-hover); }
     .tree-row.child { margin-left: 1.5rem; background: var(--color-surface); }
     .row-main { display:flex; gap:0.35rem; align-items:center; }
     .handle { color: var(--color-text-secondary); }
@@ -197,6 +206,8 @@ import { AccountingService, Account, AccountNode } from '../../../../core/servic
     .code { font-weight:700; color: var(--color-text-primary); }
     .name { color: var(--color-text-secondary); }
     .pill { padding:0.2rem 0.45rem; border-radius:10px; background: var(--color-surface); }
+    .pill.status { background: rgba(var(--color-primary-rgb,122,184,255),0.12); color: var(--color-text-primary); font-weight:700; }
+    .pill.status.inactive { background: rgba(var(--color-text-secondary-rgb,148,163,184),0.18); color: var(--color-text-secondary); }
     .balance { font-weight:600; color: var(--color-text-primary); text-align:right; }
     .negative { color: var(--color-error,#ef4444); }
     .muted { color: var(--color-text-secondary); }
@@ -262,6 +273,10 @@ export class AccountsComponent {
       });
     };
     addCodes(this.accounting.accounts());
+  }
+
+  collapseAll() {
+    this.expanded.clear();
   }
 
   clearFilters() {
