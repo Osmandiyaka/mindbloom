@@ -52,5 +52,9 @@ export const ACCOUNTING_ROUTES: Routes = [
   {
     path: 'reports',
     loadComponent: () => import('./pages/report-center/report-center.component').then(m => m.ReportCenterComponent)
+  },
+  {
+    path: 'payroll',
+    loadComponent: () => import('./pages/payroll/payroll.component').then(m => m.PayrollComponent)
   }
 ];

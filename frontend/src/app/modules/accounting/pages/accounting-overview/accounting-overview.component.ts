@@ -27,6 +27,7 @@ import { AccountingService } from '../../../../core/services/accounting.service'
             <li><a routerLink="/accounting/expenses"><span class="icon">🧾</span> Expense Entry</a></li>
             <li><a routerLink="/accounting/bill-queue"><span class="icon">📥</span> Bill Payment Queue</a></li>
             <li><a routerLink="/accounting/bank-recon"><span class="icon">🏦</span> Bank Reconciliation</a></li>
+            <li><a routerLink="/accounting/payroll"><span class="icon">💼</span> Payroll</a></li>
             <li><a routerLink="/accounting/accounts"><span class="icon">🗂️</span> Manage Accounts</a></li>
             <li><a routerLink="/accounting/trial-balance"><span class="icon">⚖️</span> Trial Balance</a></li>
             <li><a routerLink="/accounting/periods"><span class="icon">⏳</span> Fiscal Periods</a></li>

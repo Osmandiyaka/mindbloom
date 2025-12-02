@@ -58,10 +58,11 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-sm); }
     .filters label { display:flex; flex-direction:column; gap:0.25rem; font-weight:600; color: var(--color-text-primary); }
     input { border:1px solid var(--color-border); border-radius:8px; padding:0.5rem 0.6rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
-    .table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; }
+    .table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; background: var(--color-surface); }
     .table-head, .table-row { display:grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; padding:0.75rem 0.9rem; gap:0.5rem; align-items:center; }
     .table-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
-    .table-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); }
+    .table-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); background: var(--color-surface); }
+    .table-row:nth-child(even) { background: color-mix(in srgb, var(--color-surface-hover) 55%, var(--color-surface) 45%); }
     .strong { font-weight:700; color: var(--color-text-primary); }
     .danger { color: var(--color-error,#ef4444); }
     .totals { background: var(--color-surface-hover); }
