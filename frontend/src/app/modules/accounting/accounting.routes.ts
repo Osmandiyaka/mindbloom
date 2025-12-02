@@ -42,6 +42,10 @@ export const ACCOUNTING_ROUTES: Routes = [
     loadComponent: () => import('./pages/bill-queue/bill-queue.component').then(m => m.BillQueueComponent)
   },
   {
+    path: 'bank-recon',
+    loadComponent: () => import('./pages/bank-recon/bank-recon.component').then(m => m.BankReconComponent)
+  },
+  {
     path: 'reports',
     loadComponent: () => import('./pages/report-center/report-center.component').then(m => m.ReportCenterComponent)
   }
