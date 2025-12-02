@@ -34,9 +34,9 @@ import { TenantService } from '../../../core/services/tenant.service';
       align-items: center;
       gap: 0.4rem;
       background: color-mix(in srgb, var(--content-background-solid, var(--color-background, #f8f9fb)) 85%, var(--color-surface, #ffffff) 15%);
-      border: 1.5px solid color-mix(in srgb, var(--color-primary) 50%, var(--color-border) 50%);
+      border: 1.25px solid color-mix(in srgb, var(--color-primary) 50%, var(--color-border) 50%);
       border-radius: 14px;
-      padding: 0.35rem 0.5rem;
+      padding: 0.35rem 0.45rem;
       color: var(--color-text-primary);
       box-shadow: 0 6px 14px rgba(0,0,0,0.10);
       transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -51,7 +51,7 @@ import { TenantService } from '../../../core/services/tenant.service';
     .symbol {
       font-weight: 700;
       color: var(--color-primary);
-      min-width: 1.5ch;
+      min-width: 1.6ch;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -64,10 +64,16 @@ import { TenantService } from '../../../core/services/tenant.service';
       color: var(--color-text-primary);
       text-align: right;
       font-variant-numeric: tabular-nums;
-      padding: 0.2rem 0.25rem;
+      padding: 0.1rem 0.2rem;
       box-shadow: none;
       width: 100%;
       box-sizing: border-box;
+      -moz-appearance: textfield;
+    }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
     input:disabled {
       opacity: 0.6;
