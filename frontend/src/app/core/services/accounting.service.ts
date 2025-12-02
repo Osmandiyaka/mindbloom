@@ -52,6 +52,20 @@ export interface JournalEntryPreview {
   credit: number;
 }
 
+export interface FeeCandidate {
+  id: string;
+  name: string;
+  grade: string;
+  admissionNo: string;
+  structure?: string;
+  plan?: 'full' | 'termly' | 'monthly';
+  baseTotal: number;
+  discountPct?: number;
+  scholarship?: string;
+  customTotal?: number;
+  selected?: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AccountingService {
   accounts = signal<AccountNode[]>([]);
@@ -61,6 +75,7 @@ export class AccountingService {
   cashPosition = signal<{ cash: number; bank: number; ar: number; ap: number }>({ cash: 0, bank: 0, ar: 0, ap: 0 });
   feeStructures = signal<FeeStructurePreview[]>([]);
   journals = signal<JournalEntryPreview[]>([]);
+  feeCandidates = signal<FeeCandidate[]>([]);
 
   constructor() {
     this.loadMockData();
@@ -180,6 +195,13 @@ export class AccountingService {
       { entryNumber: 'JV-2025-0003', date: '2025-02-06', memo: 'Utility bill', ref: 'BILL-112', status: 'draft', debit: 1800, credit: 1800 }
     ];
 
+    const sampleCandidates: FeeCandidate[] = [
+      { id: 's1', name: 'Amaka Obi', grade: 'Grade 6', admissionNo: 'ADM-1023', structure: 'Primary Tuition', plan: 'termly', baseTotal: 2380, discountPct: 5 },
+      { id: 's2', name: 'Chidi Okeke', grade: 'Grade 5', admissionNo: 'ADM-1011', structure: 'Primary Tuition', plan: 'termly', baseTotal: 2380 },
+      { id: 's3', name: 'Sara Danjuma', grade: 'Grade 7', admissionNo: 'ADM-1029', structure: 'Junior High', plan: 'termly', baseTotal: 2570, scholarship: 'STEM 20%' },
+      { id: 's4', name: 'Tomi Bello', grade: 'Grade 8', admissionNo: 'ADM-1031', structure: 'Junior High', plan: 'termly', baseTotal: 2570 }
+    ];
+
     this.accounts.set(sampleAccounts);
     this.trialBalance.set(sampleTrial);
     this.periods.set(samplePeriods);
@@ -187,6 +209,7 @@ export class AccountingService {
     this.cashPosition.set({ cash: 15000, bank: 110000, ar: 42000, ap: 18000 });
     this.feeStructures.set(sampleFees);
     this.journals.set(sampleJournals);
+    this.feeCandidates.set(sampleCandidates);
   }
 
   createAccount(dto: Account) {
@@ -292,5 +315,21 @@ export class AccountingService {
   reopenPeriod(id: string) {
     this.periods.set(this.periods().map(p => p.id === id || p._id === id ? { ...p, status: 'open' } : p));
     return of(true);
+  }
+
+  assignFeePlan(candidateIds: string[], plan: 'full' | 'termly' | 'monthly', structureName?: string, discountPct?: number) {
+    const updated = this.feeCandidates().map(c => {
+      if (!candidateIds.includes(c.id)) return c;
+      const customTotal = this.calcDiscountedTotal(c.baseTotal, discountPct);
+      return { ...c, plan, structure: structureName || c.structure, discountPct, customTotal };
+    });
+    this.feeCandidates.set(updated);
+    return of(true);
+  }
+
+  calcDiscountedTotal(base: number, discountPct?: number): number {
+    if (!discountPct) return base;
+    const pct = Math.max(0, Math.min(discountPct, 100));
+    return +(base * (1 - pct / 100)).toFixed(2);
   }
 }
