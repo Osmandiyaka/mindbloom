@@ -253,7 +253,7 @@ interface InvoiceMock {
     .avatar { width:64px; height:64px; border-radius:14px; background: var(--color-surface); display:flex; align-items:center; justify-content:center; font-weight:700; color: var(--color-text-primary); background-size:cover; background-position:center; box-shadow: var(--shadow-sm); }
     .payer .label { margin:0; font-size:0.8rem; color: var(--color-text-secondary); text-transform:uppercase; letter-spacing:0.04em; }
     .payer .value { margin:0.15rem 0 0; font-weight:700; color: var(--color-text-primary); }
-    .allocations { display:flex; flex-direction:column; gap:0.45rem; margin-top:0.4rem; }
+    .allocations { display:flex; flex-direction:column; gap:0.65rem; margin-top:0.75rem; }
     .alloc-header { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; flex-wrap:wrap; }
     .section-title { margin:0; font-weight:700; color: var(--color-text-primary); }
     .alloc-table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; background: var(--color-surface); max-height:320px; overflow-y:auto; }
