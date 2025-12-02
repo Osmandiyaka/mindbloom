@@ -12,84 +12,11 @@ import { AccountingService } from '../../../../core/services/accounting.service'
       <nav class="breadcrumbs">
         <a routerLink="/accounting">Accounting</a>
       </nav>
-      <header class="page-header">
-        <div>
-          <p class="eyebrow">Accounting</p>
-          <h1>Finance Workspace</h1>
-          <p class="sub">Cash, fees, journals, and reporting—aligned to the academic year.</p>
-        </div>
-        <div class="actions">
-          <a routerLink="/accounting/journals" class="btn primary">Post Journal</a>
-          <a routerLink="/accounting/accounts" class="btn ghost">Chart of Accounts</a>
-          <a routerLink="/accounting/fee-structures" class="btn ghost">Fee Structures</a>
-          <a routerLink="/accounting/fee-reports" class="btn ghost">Fee Reports</a>
-          <a routerLink="/accounting/expenses" class="btn ghost">Expenses</a>
-          <a routerLink="/accounting/bill-queue" class="btn ghost">Bills Queue</a>
-          <a routerLink="/accounting/bank-recon" class="btn ghost">Bank Recon</a>
-        </div>
-      </header>
-
-      <section class="metrics">
-        <div class="metric-card" *ngFor="let m of accounting.metrics()">
-          <div class="metric-icon">{{ m.icon }}</div>
-          <div class="metric-body">
-            <p class="metric-label">{{ m.label }}</p>
-            <p class="metric-value">{{ m.value }}</p>
-            <p class="metric-trend">{{ m.trend }}</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="grid">
-        <div class="card wide">
-          <div class="card-header">
-            <h3>Cash Position</h3>
-            <span class="muted">As of today</span>
-          </div>
-          <div class="cash-grid">
-            <div class="cash-item">
-              <p class="label">Cash</p>
-              <p class="value">{{ accounting.cashPosition().cash | currency:'USD' }}</p>
-            </div>
-            <div class="cash-item">
-              <p class="label">Bank</p>
-              <p class="value">{{ accounting.cashPosition().bank | currency:'USD' }}</p>
-            </div>
-            <div class="cash-item">
-              <p class="label">A/R</p>
-              <p class="value">{{ accounting.cashPosition().ar | currency:'USD' }}</p>
-            </div>
-            <div class="cash-item">
-              <p class="label">A/P</p>
-              <p class="value">{{ accounting.cashPosition().ap | currency:'USD' }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h3>Trial Balance Snapshot</h3>
-            <a routerLink="/accounting/trial-balance" class="link">View full</a>
-          </div>
-          <div class="table">
-            <div class="table-head">
-              <span>Account</span><span>Debit</span><span>Credit</span><span>Balance</span>
-            </div>
-            <div class="table-row" *ngFor="let row of trialBalancePreview">
-              <span class="strong">{{ row.accountCode }} · {{ row.accountName }}</span>
-              <span>{{ row.debit | number:'1.2-2' }}</span>
-              <span>{{ row.credit | number:'1.2-2' }}</span>
-              <span [class.danger]="row.balance < 0">{{ row.balance | number:'1.2-2' }}</span>
-            </div>
-            <div class="table-row" *ngIf="!trialBalancePreview.length">
-              <span class="muted" style="grid-column:1/5">No posted journals yet</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
+      <div class="layout">
+        <aside class="sidebar">
+          <div class="sidebar-header">
             <h3>Quick Links</h3>
+            <p class="muted">Jump to key workflows</p>
           </div>
           <ul class="links">
             <li><a routerLink="/accounting/fee-structures">Fee Structures</a></li>
@@ -105,13 +32,95 @@ import { AccountingService } from '../../../../core/services/accounting.service'
             <li><a routerLink="/accounting/periods">Fiscal Periods</a></li>
             <li><a routerLink="/accounting/reports">Report Center</a></li>
           </ul>
+        </aside>
+        <div class="main">
+          <header class="page-header">
+            <div>
+              <h1>Finance Workspace</h1>
+              <p class="sub">Cash, fees, journals, and reporting—aligned to the academic year.</p>
+            </div>
+            <div class="actions">
+              <a routerLink="/accounting/journals" class="btn primary">Post Journal</a>
+              <a routerLink="/accounting/accounts" class="btn ghost">Chart of Accounts</a>
+              <a routerLink="/accounting/fee-structures" class="btn ghost">Fee Structures</a>
+              <a routerLink="/accounting/fee-reports" class="btn ghost">Fee Reports</a>
+              <a routerLink="/accounting/expenses" class="btn ghost">Expenses</a>
+              <a routerLink="/accounting/bill-queue" class="btn ghost">Bills Queue</a>
+              <a routerLink="/accounting/bank-recon" class="btn ghost">Bank Recon</a>
+            </div>
+          </header>
+
+          <section class="metrics">
+            <div class="metric-card" *ngFor="let m of accounting.metrics()">
+              <div class="metric-icon">{{ m.icon }}</div>
+              <div class="metric-body">
+                <p class="metric-label">{{ m.label }}</p>
+                <p class="metric-value">{{ m.value }}</p>
+                <p class="metric-trend">{{ m.trend }}</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="grid">
+            <div class="card wide">
+              <div class="card-header">
+                <h3>Cash Position</h3>
+                <span class="muted">As of today</span>
+              </div>
+              <div class="cash-grid">
+                <div class="cash-item">
+                  <p class="label">Cash</p>
+                  <p class="value">{{ accounting.cashPosition().cash | currency:'USD' }}</p>
+                </div>
+                <div class="cash-item">
+                  <p class="label">Bank</p>
+                  <p class="value">{{ accounting.cashPosition().bank | currency:'USD' }}</p>
+                </div>
+                <div class="cash-item">
+                  <p class="label">A/R</p>
+                  <p class="value">{{ accounting.cashPosition().ar | currency:'USD' }}</p>
+                </div>
+                <div class="cash-item">
+                  <p class="label">A/P</p>
+                  <p class="value">{{ accounting.cashPosition().ap | currency:'USD' }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3>Trial Balance Snapshot</h3>
+                <a routerLink="/accounting/trial-balance" class="link">View full</a>
+              </div>
+              <div class="table">
+                <div class="table-head">
+                  <span>Account</span><span>Debit</span><span>Credit</span><span>Balance</span>
+                </div>
+                <div class="table-row" *ngFor="let row of trialBalancePreview">
+                  <span class="strong">{{ row.accountCode }} · {{ row.accountName }}</span>
+                  <span>{{ row.debit | number:'1.2-2' }}</span>
+                  <span>{{ row.credit | number:'1.2-2' }}</span>
+                  <span [class.danger]="row.balance < 0">{{ row.balance | number:'1.2-2' }}</span>
+                </div>
+                <div class="table-row" *ngIf="!trialBalancePreview.length">
+                  <span class="muted" style="grid-column:1/5">No posted journals yet</span>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
     </div>
   `,
   styles: [`
     .page { padding:1.5rem; display:flex; flex-direction:column; gap:1rem; }
-    .page-header { display:flex; justify-content:space-between; align-items:flex-start; }
+    .layout { display:grid; grid-template-columns: 260px 1fr; gap:1rem; align-items:start; }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+    .sidebar { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-sm); position:sticky; top:1rem; }
+    .sidebar-header h3 { margin:0; color: var(--color-text-primary); }
+    .sidebar-header .muted { margin:0.1rem 0 0; }
+    .main { display:flex; flex-direction:column; gap:1rem; }
+    .page-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; }
     .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-tertiary); font-weight:700; margin:0 0 0.25rem; }
     h1 { margin:0 0 0.35rem; color: var(--color-text-primary); }
     .sub { margin:0; color: var(--color-text-secondary); }
