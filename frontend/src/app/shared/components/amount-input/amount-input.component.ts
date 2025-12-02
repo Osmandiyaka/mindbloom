@@ -16,7 +16,7 @@ import { TenantService } from '../../../core/services/tenant.service';
   ],
   template: `
     <label class="amount-wrapper">
-      <span class="icon">💵</span>
+      <span class="symbol">{{ symbol() }}</span>
       <input
         type="number"
         [attr.placeholder]="placeholder"
@@ -26,33 +26,35 @@ import { TenantService } from '../../../core/services/tenant.service';
         (blur)="markTouched()"
         step="0.01"
       />
-      <span class="code">{{ currencyCode() }}</span>
     </label>
   `,
   styles: [`
     .amount-wrapper {
       display: flex;
       align-items: center;
-      gap: 0.55rem;
-      background: var(--color-surface);
-      border: 1.5px solid var(--color-primary, #4f8bff);
+      gap: 0.4rem;
+      background: var(--color-surface-hover);
+      border: 1.5px solid color-mix(in srgb, var(--color-primary) 60%, var(--color-border) 40%);
       border-radius: 14px;
-      padding: 0.45rem 0.6rem;
+      padding: 0.35rem 0.5rem;
       color: var(--color-text-primary);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.10);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      width: 100%;
+      box-sizing: border-box;
     }
     .amount-wrapper:focus-within {
       border-color: var(--color-primary);
-      box-shadow: 0 8px 18px rgba(0,0,0,0.12), 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.14), 0 0 0 3px color-mix(in srgb, var(--color-primary) 24%, transparent);
+      background: color-mix(in srgb, var(--color-surface-hover) 88%, var(--color-primary) 12%);
     }
-    .icon {
-      font-size: 1.05rem;
+    .symbol {
+      font-weight: 700;
       color: var(--color-primary);
+      min-width: 1.5ch;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 1.5rem;
     }
     input {
       flex: 1;
@@ -64,16 +66,12 @@ import { TenantService } from '../../../core/services/tenant.service';
       font-variant-numeric: tabular-nums;
       padding: 0.2rem 0.25rem;
       box-shadow: none;
+      width: 100%;
+      box-sizing: border-box;
     }
     input:disabled {
       opacity: 0.6;
       cursor: not-allowed;
-    }
-    .code {
-      font-size: 0.9rem;
-      color: var(--color-text-secondary);
-      font-weight: 600;
-      min-width: 3ch;
     }
   `]
 })

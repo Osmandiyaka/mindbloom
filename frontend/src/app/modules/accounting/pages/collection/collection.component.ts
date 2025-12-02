@@ -121,9 +121,17 @@ interface InvoiceMock {
                   </div>
                   <div class="alloc-row" *ngFor="let inv of invoices">
                     <span>{{ inv.number }} · {{ inv.desc }}</span>
-                  <span><app-currency [amount]="inv.balance"></app-currency></span>
+                    <span><app-currency [amount]="inv.balance"></app-currency></span>
                     <span>
-                      <input type="number" min="0" [max]="inv.balance" [(ngModel)]="inv.apply" (ngModelChange)="onApplyChange()" />
+                      <input
+                        type="number"
+                        min="0"
+                        [max]="inv.balance"
+                        [(ngModel)]="inv.apply"
+                        (ngModelChange)="onApplyChange()"
+                        [disabled]="!inv.selected"
+                      />
+                      <small class="inline-error" *ngIf="inv.apply && inv.apply > inv.balance">Cannot exceed due</small>
                     </span>
                     <span>
                       <input type="checkbox" [(ngModel)]="inv.selected" (ngModelChange)="onApplyChange()" />
@@ -220,6 +228,7 @@ interface InvoiceMock {
     .alloc-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
     .alloc-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); }
     .alloc-row input[type="number"] { width:100%; border:1px solid var(--color-border); border-radius:8px; padding:0.35rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
+    .inline-error { display:block; color: var(--color-error,#ef4444); font-size:0.75rem; margin-top:0.2rem; }
     .alloc-summary { display:flex; flex-direction:column; gap:0.5rem; font-weight:700; color: var(--color-text-primary); }
     .alloc-actions { display:flex; justify-content:flex-end; }
     .alloc-metrics { display:flex; gap:1rem; justify-content:flex-end; flex-wrap:wrap; align-items:center; }
@@ -242,7 +251,7 @@ export class CollectionComponent {
   selectedId: string | null = null;
   paymentOpen = false;
   activeStudent: StudentFee | null = null;
-  payment = { amount: 0, mode: 'cash', date: new Date().toISOString().slice(0,10), reference: '', notes: '' };
+  payment = { amount: null as number | null, mode: 'cash', date: new Date().toISOString().slice(0,10), reference: '', notes: '' };
   invoices: InvoiceMock[] = [
     { number: 'INV-1001', desc: 'Term 1 Tuition', balance: 500 },
     { number: 'INV-1002', desc: 'Transport', balance: 180 },
@@ -283,7 +292,7 @@ export class CollectionComponent {
   }
 
   get remaining(): number {
-    return (this.payment.amount || 0) - this.applyTotal;
+    return Math.max(0, (this.payment.amount || 0) - this.applyTotal);
   }
 
   get selectedStudent(): StudentFee | null {
@@ -311,8 +320,9 @@ export class CollectionComponent {
   onApplyChange() {
     this.invoices = this.invoices.map(inv => {
       const applyVal = Number(inv.apply || 0);
-      const selected = applyVal > 0 ? true : !!inv.selected;
-      return { ...inv, apply: applyVal, selected };
+      const capped = Math.min(applyVal, inv.balance);
+      const selected = capped > 0 ? true : !!inv.selected;
+      return { ...inv, apply: capped, selected };
     });
     this.payment.amount = this.applyTotal;
   }
