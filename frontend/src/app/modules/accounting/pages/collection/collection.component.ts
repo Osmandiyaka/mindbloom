@@ -13,6 +13,14 @@ interface StudentFee {
   lastPayment: string;
 }
 
+interface InvoiceMock {
+  number: string;
+  desc: string;
+  balance: number;
+  apply?: number;
+  selected?: boolean;
+}
+
 @Component({
   selector: 'app-fee-collection',
   standalone: true,
@@ -77,58 +85,84 @@ interface StudentFee {
             </div>
             <button class="chip" (click)="closePayment()">✕</button>
           </div>
-          <div class="modal-body">
-            <div class="payer">
-              <div class="avatar-wrap">
-                <span class="avatar">
-                  <span>{{ initials(activeStudent?.student || 'S') }}</span>
-                </span>
+          <div class="modal-body grid-body">
+            <div class="col">
+              <div class="payer">
+                <div class="avatar-wrap">
+                  <span class="avatar">
+                    <span>{{ initials(activeStudent?.student || 'S') }}</span>
+                  </span>
+                </div>
+                <div>
+                  <p class="label">Student</p>
+                  <p class="value">{{ activeStudent?.student || 'Select a student' }}</p>
+                </div>
+                <div>
+                  <p class="label">Admission</p>
+                  <p class="value">{{ activeStudent?.admissionNo || '—' }}</p>
+                </div>
+                <div>
+                  <p class="label">Due</p>
+                  <p class="value">{{ activeStudent?.due || 0 | currency:'USD' }}</p>
+                </div>
+                <div>
+                  <p class="label">Overdue</p>
+                  <p class="value danger">{{ activeStudent?.overdue || 0 | currency:'USD' }}</p>
+                </div>
               </div>
-              <div>
-                <p class="label">Student</p>
-                <p class="value">{{ activeStudent?.student || 'Select a student' }}</p>
+
+              <form class="form-grid" (ngSubmit)="savePayment()">
+                <label>Amount
+                  <input type="number" min="0" [(ngModel)]="payment.amount" name="amount" required />
+                </label>
+                <label>Mode
+                  <select [(ngModel)]="payment.mode" name="mode" required>
+                    <option value="cash">Cash</option>
+                    <option value="bank">Bank</option>
+                    <option value="mobile">Mobile</option>
+                  </select>
+                </label>
+                <label>Date
+                  <input type="date" [(ngModel)]="payment.date" name="date" required />
+                </label>
+                <label>Reference
+                  <input [(ngModel)]="payment.reference" name="reference" placeholder="RCPT-001" />
+                </label>
+                <label class="full">Notes
+                  <textarea rows="3" [(ngModel)]="payment.notes" name="notes" placeholder="Optional note"></textarea>
+                </label>
+                <div class="actions full">
+                  <button class="btn primary" type="submit">
+                    <span class="icon">💾</span>
+                    Save
+                  </button>
+                  <button class="btn ghost" type="button" (click)="closePayment()">Cancel</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="col allocations" *ngIf="activeStudent">
+              <p class="label">Allocate to invoices</p>
+              <div class="alloc-table">
+                <div class="alloc-head">
+                  <span>Invoice</span><span>Due</span><span>Apply</span><span>Select</span>
+                </div>
+                <div class="alloc-row" *ngFor="let inv of invoices">
+                  <span>{{ inv.number }} · {{ inv.desc }}</span>
+                  <span>{{ inv.balance | currency:'USD' }}</span>
+                  <span>
+                    <input type="number" min="0" [max]="inv.balance" [(ngModel)]="inv.apply" />
+                  </span>
+                  <span>
+                    <input type="checkbox" [(ngModel)]="inv.selected" />
+                  </span>
+                </div>
               </div>
-              <div>
-                <p class="label">Admission</p>
-                <p class="value">{{ activeStudent?.admissionNo || '—' }}</p>
-              </div>
-              <div>
-                <p class="label">Due</p>
-                <p class="value">{{ activeStudent?.due || 0 | currency:'USD' }}</p>
-              </div>
-              <div>
-                <p class="label">Overdue</p>
-                <p class="value danger">{{ activeStudent?.overdue || 0 | currency:'USD' }}</p>
+              <div class="alloc-summary">
+                <span>Apply total: {{ applyTotal | currency:'USD' }}</span>
+                <span>Remaining: {{ (payment.amount || 0) - applyTotal | currency:'USD' }}</span>
               </div>
             </div>
-            <form class="form-grid" (ngSubmit)="savePayment()">
-              <label>Amount
-                <input type="number" min="0" [(ngModel)]="payment.amount" name="amount" required />
-              </label>
-              <label>Mode
-                <select [(ngModel)]="payment.mode" name="mode" required>
-                  <option value="cash">Cash</option>
-                  <option value="bank">Bank</option>
-                  <option value="mobile">Mobile</option>
-                </select>
-              </label>
-              <label>Date
-                <input type="date" [(ngModel)]="payment.date" name="date" required />
-              </label>
-              <label>Reference
-                <input [(ngModel)]="payment.reference" name="reference" placeholder="RCPT-001" />
-              </label>
-              <label class="full">Notes
-                <textarea rows="2" [(ngModel)]="payment.notes" name="notes" placeholder="Optional note"></textarea>
-              </label>
-              <div class="actions full">
-                <button class="btn primary" type="submit">
-                  <span class="icon">💾</span>
-                  Save
-                </button>
-                <button class="btn ghost" type="button" (click)="closePayment()">Cancel</button>
-              </div>
-            </form>
           </div>
         </div>
       }
@@ -162,9 +196,9 @@ interface StudentFee {
     .avatar.small { width:32px; height:32px; border-radius:10px; background: var(--color-surface-hover); display:flex; align-items:center; justify-content:center; font-weight:700; color: var(--color-text-primary); }
     .card-title { color: var(--color-text-primary); margin:0; }
     .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:10; }
-    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: var(--color-surface); border:1px solid var(--color-border); border-radius:16px; padding:1.25rem; width: min(520px, 90vw); z-index:11; box-shadow: var(--shadow-lg, 0 20px 50px rgba(0,0,0,0.25)); }
+    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: var(--color-surface); border:1px solid var(--color-border); border-radius:16px; padding:1.25rem; width: min(1100px, 95vw); max-height:90vh; z-index:11; box-shadow: var(--shadow-lg, 0 20px 50px rgba(0,0,0,0.25)); display:flex; flex-direction:column; }
     .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; color: var(--color-text-primary); }
-    .modal-body { color: var(--color-text-primary); display:flex; flex-direction:column; gap:0.75rem; }
+    .modal-body { color: var(--color-text-primary); display:grid; grid-template-columns: 1.05fr 0.95fr; gap:1rem; align-items:start; overflow:auto; padding-right:0.35rem; }
     .form-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:0.75rem; }
     .form-grid input, .form-grid select, .form-grid textarea { width:100%; border:1px solid var(--color-border); border-radius:8px; padding:0.6rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
     .form-grid .full { grid-column:1/-1; }
@@ -173,6 +207,13 @@ interface StudentFee {
     .avatar { width:64px; height:64px; border-radius:14px; background: var(--color-surface); display:flex; align-items:center; justify-content:center; font-weight:700; color: var(--color-text-primary); background-size:cover; background-position:center; box-shadow: var(--shadow-sm); }
     .payer .label { margin:0; font-size:0.8rem; color: var(--color-text-secondary); text-transform:uppercase; letter-spacing:0.04em; }
     .payer .value { margin:0.15rem 0 0; font-weight:700; color: var(--color-text-primary); }
+    .allocations { display:flex; flex-direction:column; gap:0.5rem; }
+    .alloc-table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; background: var(--color-surface); max-height:320px; overflow-y:auto; }
+    .alloc-head, .alloc-row { display:grid; grid-template-columns: 2fr 1fr 1fr 0.8fr; gap:0.4rem; padding:0.5rem 0.7rem; align-items:center; }
+    .alloc-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
+    .alloc-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); }
+    .alloc-row input[type="number"] { width:100%; border:1px solid var(--color-border); border-radius:8px; padding:0.35rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
+    .alloc-summary { display:flex; gap:1rem; font-weight:700; color: var(--color-text-primary); justify-content:flex-end; }
   `]
 })
 export class CollectionComponent {
@@ -193,6 +234,11 @@ export class CollectionComponent {
   paymentOpen = false;
   activeStudent: StudentFee | null = null;
   payment = { amount: 0, mode: 'cash', date: new Date().toISOString().slice(0,10), reference: '', notes: '' };
+  invoices: InvoiceMock[] = [
+    { number: 'INV-1001', desc: 'Term 1 Tuition', balance: 500 },
+    { number: 'INV-1002', desc: 'Transport', balance: 180 },
+    { number: 'INV-1003', desc: 'Meals', balance: 140 }
+  ];
 
   get filtered() {
     return this.students.filter(s => {
@@ -219,6 +265,10 @@ export class CollectionComponent {
   savePayment() {
     // Mock save
     this.paymentOpen = false;
+  }
+
+  get applyTotal(): number {
+    return this.invoices.reduce((sum, inv) => sum + (inv.selected ? Number(inv.apply || 0) : 0), 0);
   }
 
   get selectedStudent(): StudentFee | null {
