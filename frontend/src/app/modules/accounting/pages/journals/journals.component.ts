@@ -43,24 +43,33 @@ import { AccountingService, AccountNode } from '../../../../core/services/accoun
               <input type="number" step="0.01" min="0" [(ngModel)]="line.debit" name="debit-{{i}}" (input)="clearOpposite(i, 'debit')" />
               <input type="number" step="0.01" min="0" [(ngModel)]="line.credit" name="credit-{{i}}" (input)="clearOpposite(i, 'credit')" />
               <button class="chip danger" type="button" (click)="removeLine(i)">✕</button>
+              <div class="inline-error" *ngIf="lineError(line)">Enter either debit or credit (not both)</div>
             </div>
           </div>
 
           <div class="footer">
-            <button class="chip" type="button" (click)="addLine()">+ Add Line</button>
+            <div class="footer-actions">
+              <button class="chip" type="button" (click)="addLine()">+ Add Line</button>
+              <button class="chip ghost" type="button" (click)="copyLast()">Copy last line</button>
+              <button class="chip ghost" type="button" (click)="addBalancedPair()">Add balanced pair</button>
+            </div>
             <div class="totals">
               <span>Debit: {{ totalDebit | number:'1.2-2' }}</span>
               <span>Credit: {{ totalCredit | number:'1.2-2' }}</span>
-              <span [class.danger]="!balanced">Status: {{ balanced ? 'Balanced' : 'Out of balance' }}</span>
+              <span class="status-pill" [class.danger]="!balanced" [class.good]="balanced">
+                {{ balanced ? 'Balanced' : 'Out of balance' }}
+              </span>
             </div>
-            <button class="btn primary" type="submit" [disabled]="!balanced || !form.lines.length">Post Journal</button>
+            <button class="btn primary" type="submit" [disabled]="!canPost">Post Journal</button>
           </div>
+          <p class="hint" *ngIf="!balanced">Entries must balance before posting.</p>
+          <p class="hint" *ngIf="hasLineErrors()">Each line needs an account and only one side filled.</p>
         </form>
       </section>
 
       <section class="card">
         <div class="card-header">
-          <h3>Recent Journals</h3>
+          <h3 class="card-title">Recent Journals</h3>
           <span class="muted">Mock data for preview</span>
         </div>
         <div class="table">
@@ -96,8 +105,13 @@ import { AccountingService, AccountNode } from '../../../../core/services/accoun
     .chip { border:1px solid var(--color-border); padding:0.35rem 0.7rem; border-radius:10px; background: var(--color-surface-hover); cursor:pointer; }
     .chip.danger { border-color: rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); }
     .footer { display:flex; align-items:center; justify-content:space-between; gap:0.75rem; margin-top:0.75rem; flex-wrap:wrap; }
+    .footer-actions { display:flex; gap:0.5rem; flex-wrap:wrap; }
     .totals { display:flex; gap:0.75rem; color: var(--color-text-primary); font-weight:600; }
     .danger { color: var(--color-error,#ef4444); }
+    .status-pill { padding:0.25rem 0.6rem; border-radius:12px; background: rgba(var(--color-error-rgb,239,68,68),0.12); color: var(--color-error,#ef4444); font-weight:700; }
+    .status-pill.good { background: rgba(var(--color-success-rgb,34,197,94),0.15); color: var(--color-success,#22c55e); }
+    .hint { margin:0.25rem 0; color: var(--color-text-secondary); }
+    .inline-error { grid-column: 1 / -1; color: var(--color-error,#ef4444); font-size:0.85rem; }
     .btn { border-radius:10px; padding:0.65rem 1.1rem; font-weight:600; border:1px solid var(--color-border); background: var(--color-surface-hover); color: var(--color-text-primary); }
     .btn.primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
     .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color: var(--color-text-primary); }
@@ -150,7 +164,7 @@ export class JournalsComponent {
   }
 
   post() {
-    if (!this.balanced) return;
+    if (!this.canPost) return;
     const payload = {
       ...this.form,
       date: new Date(this.form.date),
@@ -184,5 +198,31 @@ export class JournalsComponent {
     };
     walk(this.accounting.accounts());
     return flat;
+  }
+
+  lineError(line: any) {
+    const hasDebit = Number(line.debit || 0) > 0;
+    const hasCredit = Number(line.credit || 0) > 0;
+    return hasDebit && hasCredit;
+  }
+
+  hasLineErrors() {
+    return this.form.lines.some((l: any) => this.lineError(l) || !l.accountCode);
+  }
+
+  get canPost() {
+    return this.balanced && this.form.lines.length > 0 && !this.hasLineErrors();
+  }
+
+  copyLast() {
+    const last = this.form.lines[this.form.lines.length - 1];
+    if (!last) return;
+    this.form.lines.push({ ...last });
+  }
+
+  addBalancedPair() {
+    // adds two lines, one debit and one credit of the same amount (default 0)
+    this.form.lines.push({ accountCode: '', debit: 0, credit: 0 });
+    this.form.lines.push({ accountCode: '', debit: 0, credit: 0 });
   }
 }
