@@ -25,7 +25,7 @@ interface ReportItem {
       <section class="grid">
         <div class="card list">
           <div class="card-header">
-            <h3>Catalog</h3>
+            <h3 class="card-title">Catalog</h3>
             <input type="search" [(ngModel)]="search" placeholder="Search reports" />
           </div>
           <div class="report-list">
@@ -42,7 +42,7 @@ interface ReportItem {
 
         <div class="card params" *ngIf="selected">
           <div class="card-header">
-            <h3>{{ selected.name }}</h3>
+            <h3 class="card-title">{{ selected.name }}</h3>
             <span class="muted">{{ selected.category }}</span>
           </div>
           <form class="form-grid">
@@ -80,7 +80,7 @@ interface ReportItem {
     .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap:1rem; }
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-sm); }
     .card-header { display:flex; justify-content:space-between; align-items:center; gap:0.75rem; color: var(--color-text-primary); }
-    .card-header input { border:1px solid var(--color-border); border-radius:8px; padding:0.6rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
+    .card-header input { border:1px solid var(--color-border); border-radius:8px; padding:0.6rem; background: var(--color-surface); color: var(--color-text-primary); }
     .report-list { display:flex; flex-direction:column; gap:0.5rem; margin-top:0.5rem; }
     .item { border:1px solid var(--color-border); border-radius:10px; padding:0.75rem; background: var(--color-surface-hover); cursor:pointer; }
     .item.active { border-color: var(--color-primary); box-shadow: 0 0 0 1px var(--color-primary); }

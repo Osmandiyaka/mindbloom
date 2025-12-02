@@ -26,6 +26,11 @@ import { AccountingService, Account, AccountNode } from '../../../../core/servic
               <option value="income">Income</option>
               <option value="expense">Expense</option>
             </select>
+            <select [(ngModel)]="statusFilter">
+              <option value="all">All statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
           </div>
           <button class="btn primary" type="button" (click)="openAdd()">
             <span class="icon">➕</span> Add Account
@@ -48,8 +53,8 @@ import { AccountingService, Account, AccountNode } from '../../../../core/servic
           <h3 class="card-title">Accounts</h3>
           <div class="header-tools">
             <div class="toggles">
-              <button class="chip ghost" type="button" (click)="expandAll()">Expand all</button>
-              <button class="chip ghost" type="button" (click)="collapseAll()">Collapse all</button>
+              <button class="chip ghost" type="button" (click)="expandAll()" title="Expand all account groups">Expand all</button>
+              <button class="chip ghost" type="button" (click)="collapseAll()" title="Collapse all account groups">Collapse all</button>
             </div>
           </div>
         </div>
@@ -180,7 +185,7 @@ import { AccountingService, Account, AccountNode } from '../../../../core/servic
     .sub { margin:0; color: var(--color-text-secondary); }
     .header-actions { display:flex; gap:0.75rem; align-items:flex-start; flex-wrap:wrap; justify-content:flex-end; }
     .filters { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; }
-    .filters input, .filters select { border:1px solid var(--color-border); border-radius:8px; padding:0.55rem 0.75rem; background: var(--color-surface); color: var(--color-text-primary); min-width:220px; }
+    .filters input, .filters select { border:1px solid var(--color-border); border-radius:8px; padding:0.55rem 0.75rem; background: var(--color-surface); color: var(--color-text-primary); min-width:180px; }
     .toggles { display:flex; gap:0.5rem; flex-wrap:wrap; }
     .header-tools { display:flex; gap:0.75rem; align-items:center; }
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-sm); }
@@ -227,6 +232,7 @@ export class AccountsComponent {
   editing = false;
   editForm: Account = { code: '', name: '', type: 'asset' };
   adding = false;
+  statusFilter: 'all' | 'active' | 'inactive' = 'all';
 
   constructor(public accounting: AccountingService) {}
 
@@ -315,7 +321,8 @@ export class AccountsComponent {
       const term = this.search.toLowerCase();
       const hit =
         (!this.typeFilter || node.type === this.typeFilter) &&
-        (!term || node.code.toLowerCase().includes(term) || node.name.toLowerCase().includes(term));
+        (!term || node.code.toLowerCase().includes(term) || node.name.toLowerCase().includes(term)) &&
+        (this.statusFilter === 'all' || (this.statusFilter === 'active' ? node.active !== false : node.active === false));
       const kids = node.children
         ?.map(child => matches(child))
         .filter((c): c is AccountNode => !!c);
@@ -335,11 +342,13 @@ export class AccountsComponent {
     const flatten = (arr: AccountNode[]) => arr.forEach(n => { nodes.push(n); if (n.children) flatten(n.children); });
     flatten(this.accounting.accounts());
     const byType = (type: string) => nodes.filter(n => n.type === type);
+    const sum = (arr: AccountNode[]) => arr.reduce((s, n) => s + (Number(n.balance) || 0), 0);
+    const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
     return [
-      { label: 'Assets', value: byType('asset').length.toString(), meta: 'accounts' },
-      { label: 'Liabilities', value: byType('liability').length.toString(), meta: 'accounts' },
-      { label: 'Income', value: byType('income').length.toString(), meta: 'accounts' },
-      { label: 'Expense', value: byType('expense').length.toString(), meta: 'accounts' },
+      { label: 'Assets', value: fmt(sum(byType('asset'))), meta: `${byType('asset').length} accounts` },
+      { label: 'Liabilities', value: fmt(sum(byType('liability'))), meta: `${byType('liability').length} accounts` },
+      { label: 'Income', value: fmt(sum(byType('income'))), meta: `${byType('income').length} accounts` },
+      { label: 'Expense', value: fmt(sum(byType('expense'))), meta: `${byType('expense').length} accounts` },
     ];
   }
 }
