@@ -9,6 +9,9 @@ import { AccountingService } from '../../../../core/services/accounting.service'
   imports: [CommonModule, RouterModule],
   template: `
     <div class="page">
+      <nav class="breadcrumbs">
+        <a routerLink="/accounting">Accounting</a>
+      </nav>
       <header class="page-header">
         <div>
           <p class="eyebrow">Accounting</p>
@@ -19,6 +22,8 @@ import { AccountingService } from '../../../../core/services/accounting.service'
           <a routerLink="/accounting/journals" class="btn primary">Post Journal</a>
           <a routerLink="/accounting/accounts" class="btn ghost">Chart of Accounts</a>
           <a routerLink="/accounting/fee-structures" class="btn ghost">Fee Structures</a>
+          <a routerLink="/accounting/expenses" class="btn ghost">Expenses</a>
+          <a routerLink="/accounting/bill-queue" class="btn ghost">Bills Queue</a>
         </div>
       </header>
 
@@ -89,6 +94,8 @@ import { AccountingService } from '../../../../core/services/accounting.service'
             <li><a routerLink="/accounting/fee-assignment">Fee Assignment</a></li>
             <li><a routerLink="/accounting/collection">Fee Collection</a></li>
             <li><a routerLink="/accounting/journals">Manual Journal</a></li>
+            <li><a routerLink="/accounting/expenses">Expense Entry</a></li>
+            <li><a routerLink="/accounting/bill-queue">Bill Payment Queue</a></li>
             <li><a routerLink="/accounting/accounts">Manage Accounts</a></li>
             <li><a routerLink="/accounting/trial-balance">Trial Balance</a></li>
             <li><a routerLink="/accounting/periods">Fiscal Periods</a></li>
@@ -133,6 +140,9 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .muted { color: var(--color-text-secondary); }
     .links { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.5rem; }
     .links a { color: var(--color-primary,#7ab8ff); text-decoration:none; }
+    .breadcrumbs { display:flex; align-items:center; gap:0.35rem; color: var(--color-text-secondary); font-size:0.9rem; margin-bottom:0.25rem; }
+    .breadcrumbs a { color: var(--color-primary); text-decoration:none; }
+    .breadcrumbs .sep { color: var(--color-text-secondary); }
   `]
 })
 export class AccountingOverviewComponent implements OnInit {

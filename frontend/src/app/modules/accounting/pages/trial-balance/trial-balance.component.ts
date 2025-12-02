@@ -1,14 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { AccountingService } from '../../../../core/services/accounting.service';
 
 @Component({
   selector: 'app-trial-balance',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="page">
+      <nav class="breadcrumbs">
+        <a routerLink="/accounting">Accounting</a>
+        <span class="sep">/</span>
+        <span>Trial Balance</span>
+      </nav>
       <header class="page-header">
         <div>
           <p class="eyebrow">Accounting</p>
@@ -59,6 +65,9 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .strong { font-weight:700; color: var(--color-text-primary); }
     .danger { color: var(--color-error,#ef4444); }
     .totals { background: var(--color-surface-hover); }
+    .breadcrumbs { display:flex; align-items:center; gap:0.35rem; color: var(--color-text-secondary); font-size:0.9rem; margin-bottom:0.25rem; }
+    .breadcrumbs a { color: var(--color-primary); text-decoration:none; }
+    .breadcrumbs .sep { color: var(--color-text-secondary); }
   `]
 })
 export class TrialBalanceComponent implements OnInit {

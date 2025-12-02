@@ -1,14 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { AccountingService, FeeStructurePreview } from '../../../../core/services/accounting.service';
 
 @Component({
   selector: 'app-fee-structures',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="page">
+      <nav class="breadcrumbs">
+        <a routerLink="/accounting">Accounting</a>
+        <span class="sep">/</span>
+        <span>Fee Structures</span>
+      </nav>
       <header class="page-header">
         <div>
           <p class="eyebrow">Accounting · Fees</p>
@@ -241,6 +247,9 @@ import { AccountingService, FeeStructurePreview } from '../../../../core/service
     .modal-header { display:flex; justify-content:space-between; align-items:center; }
     .preview-body { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; }
     .modal-actions { display:flex; justify-content:flex-end; gap:0.5rem; }
+    .breadcrumbs { display:flex; align-items:center; gap:0.35rem; color: var(--color-text-secondary); font-size:0.9rem; margin-bottom:0.25rem; }
+    .breadcrumbs a { color: var(--color-primary); text-decoration:none; }
+    .breadcrumbs .sep { color: var(--color-text-secondary); }
   `]
 })
 export class FeeStructuresComponent {

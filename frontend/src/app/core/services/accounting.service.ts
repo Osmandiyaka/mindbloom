@@ -66,6 +66,14 @@ export interface FeeCandidate {
   selected?: boolean;
 }
 
+export interface ExpenseEntry {
+  header: { date: string; vendor: string; reference?: string; memo?: string; status: 'draft' | 'pending' | 'approved' };
+  lines: { vendor?: string; description?: string; account?: string; amount?: number; tax?: number; attachment?: string }[];
+  subtotal: number;
+  taxTotal: number;
+  total: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AccountingService {
   accounts = signal<AccountNode[]>([]);
@@ -76,6 +84,7 @@ export class AccountingService {
   feeStructures = signal<FeeStructurePreview[]>([]);
   journals = signal<JournalEntryPreview[]>([]);
   feeCandidates = signal<FeeCandidate[]>([]);
+  expenses = signal<ExpenseEntry[]>([]);
 
   constructor() {
     this.loadMockData();
@@ -210,6 +219,7 @@ export class AccountingService {
     this.feeStructures.set(sampleFees);
     this.journals.set(sampleJournals);
     this.feeCandidates.set(sampleCandidates);
+    this.expenses.set([]);
   }
 
   createAccount(dto: Account) {
@@ -314,6 +324,11 @@ export class AccountingService {
 
   reopenPeriod(id: string) {
     this.periods.set(this.periods().map(p => p.id === id || p._id === id ? { ...p, status: 'open' } : p));
+    return of(true);
+  }
+
+  saveExpense(entry: ExpenseEntry) {
+    this.expenses.set([entry, ...this.expenses()]);
     return of(true);
   }
 

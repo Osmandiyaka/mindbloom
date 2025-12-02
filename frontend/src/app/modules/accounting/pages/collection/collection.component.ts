@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { StudentSelectorComponent, StudentOption } from '../../../../shared/components/student-selector/student-selector.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { AmountInputComponent } from '../../../../shared/components/amount-input/amount-input.component';
@@ -26,9 +27,14 @@ interface InvoiceMock {
 @Component({
   selector: 'app-fee-collection',
   standalone: true,
-  imports: [CommonModule, FormsModule, StudentSelectorComponent, CurrencyDisplayComponent, AmountInputComponent],
+  imports: [CommonModule, FormsModule, RouterModule, StudentSelectorComponent, CurrencyDisplayComponent, AmountInputComponent],
   template: `
     <div class="page">
+      <nav class="breadcrumbs">
+        <a routerLink="/accounting">Accounting</a>
+        <span class="sep">/</span>
+        <span>Fee Collection</span>
+      </nav>
       <header class="page-header">
         <div>
           <h1>Fee Collection Point</h1>
@@ -279,6 +285,9 @@ interface InvoiceMock {
     .history-row { display:grid; grid-template-columns: 1.2fr 1fr 1fr; padding:0.5rem 0.8rem; gap:0.5rem; color: var(--color-text-secondary); }
     .history-row:nth-child(odd) { background: var(--color-surface-hover); }
     .banner.success { background: color-mix(in srgb, var(--color-success,#16a34a) 18%, transparent); border:1px solid color-mix(in srgb, var(--color-success,#16a34a) 40%, transparent); color: var(--color-text-primary); padding:0.5rem 0.75rem; border-radius:10px; margin-bottom:0.5rem; }
+    .breadcrumbs { display:flex; align-items:center; gap:0.35rem; color: var(--color-text-secondary); font-size:0.9rem; margin-bottom:0.25rem; }
+    .breadcrumbs a { color: var(--color-primary); text-decoration:none; }
+    .breadcrumbs .sep { color: var(--color-text-secondary); }
   `]
 })
 export class CollectionComponent {

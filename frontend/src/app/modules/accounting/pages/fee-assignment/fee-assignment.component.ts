@@ -1,15 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { AccountingService, FeeCandidate, FeeStructurePreview } from '../../../../core/services/accounting.service';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 
 @Component({
   selector: 'app-fee-assignment',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyDisplayComponent],
+  imports: [CommonModule, FormsModule, RouterModule, CurrencyDisplayComponent],
   template: `
     <div class="page">
+      <nav class="breadcrumbs">
+        <a routerLink="/accounting">Accounting</a>
+        <span class="sep">/</span>
+        <span>Fee Assignment</span>
+      </nav>
       <header class="page-header">
         <div>
           <p class="eyebrow">Accounting · Fees</p>
@@ -192,6 +198,9 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
     .row.head { font-weight:700; background: var(--color-surface-hover); }
     .row.total { font-weight:700; background: var(--color-surface-hover); }
     .modal-actions { display:flex; justify-content:flex-end; gap:0.5rem; }
+    .breadcrumbs { display:flex; align-items:center; gap:0.35rem; color: var(--color-text-secondary); font-size:0.9rem; margin-bottom:0.25rem; }
+    .breadcrumbs a { color: var(--color-primary); text-decoration:none; }
+    .breadcrumbs .sep { color: var(--color-text-secondary); }
   `]
 })
 export class FeeAssignmentComponent {

@@ -1,14 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { AccountingService, Account, AccountNode } from '../../../../core/services/accounting.service';
 
 @Component({
   selector: 'app-accounts',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="page">
+      <nav class="breadcrumbs">
+        <a routerLink="/accounting">Accounting</a>
+        <span class="sep">/</span>
+        <span>Accounts</span>
+      </nav>
       <header class="page-header">
         <div>
           <p class="eyebrow">Accounting</p>
@@ -222,6 +228,9 @@ import { AccountingService, Account, AccountNode } from '../../../../core/servic
     .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:10; }
     .edit-modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: var(--color-surface); border:1px solid var(--color-border); border-radius:14px; padding:1rem; width:min(520px, 90vw); z-index:11; box-shadow: var(--shadow-lg); }
     .edit-modal .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
+    .breadcrumbs { display:flex; align-items:center; gap:0.35rem; color: var(--color-text-secondary); font-size:0.9rem; margin-bottom:0.25rem; }
+    .breadcrumbs a { color: var(--color-primary); text-decoration:none; }
+    .breadcrumbs .sep { color: var(--color-text-secondary); }
   `]
 })
 export class AccountsComponent {

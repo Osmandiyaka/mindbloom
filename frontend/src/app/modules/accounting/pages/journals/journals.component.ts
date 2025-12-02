@@ -1,14 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { AccountingService, AccountNode } from '../../../../core/services/accounting.service';
 
 @Component({
   selector: 'app-journals',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="page">
+      <nav class="breadcrumbs">
+        <a routerLink="/accounting">Accounting</a>
+        <span class="sep">/</span>
+        <span>Journals</span>
+      </nav>
       <header class="page-header">
         <div>
           <p class="eyebrow">Accounting</p>
@@ -123,6 +129,9 @@ import { AccountingService, AccountNode } from '../../../../core/services/accoun
     .pill { padding:0.2rem 0.45rem; border-radius:10px; background: var(--color-surface-hover); }
     .pill.draft { background: rgba(var(--color-warning-rgb,234,179,8),0.15); color: var(--color-warning,#eab308); }
     .muted { color: var(--color-text-secondary); }
+    .breadcrumbs { display:flex; align-items:center; gap:0.35rem; color: var(--color-text-secondary); font-size:0.9rem; margin-bottom:0.25rem; }
+    .breadcrumbs a { color: var(--color-primary); text-decoration:none; }
+    .breadcrumbs .sep { color: var(--color-text-secondary); }
   `]
 })
 export class JournalsComponent {
