@@ -121,12 +121,12 @@ interface PaymentModeRow {
                 <span class="avatar" [style.background-image]="d.photo ? 'url(' + d.photo + ')' : ''">
                   <span *ngIf="!d.photo">{{ initials(d.student) }}</span>
                 </span>
-                <span class="strong">{{ d.student }}</span>
-                <div class="def-meta">
-                  <span class="pill">{{ d.grade }}</span>
-                  <span class="danger">{{ d.due | currency:'USD' }}</span>
-                  <span class="muted">{{ d.days }} days overdue</span>
-                </div>
+                <span class="strong name">{{ d.student }}</span>
+              </div>
+              <div class="def-bottom">
+                <span class="pill">{{ d.grade }}</span>
+                <span class="danger">{{ d.due | currency:'USD' }}</span>
+                <span class="muted">{{ d.days }} days overdue</span>
               </div>
             </div>
             <div class="muted" *ngIf="!filteredDefaulters.length">No defaulters for filters.</div>
@@ -195,9 +195,9 @@ interface PaymentModeRow {
     .spark { display:flex; gap:4px; align-items:flex-end; height:48px; padding:6px; border:1px solid var(--color-border); border-radius:8px; background: var(--color-surface); }
     .spark-line { width:10px; border-radius:4px 4px 0 0; background: linear-gradient(135deg, var(--color-primary,#7ab8ff), var(--color-primary-light,#9fd0ff)); }
     .def-list { display:flex; flex-direction:column; gap:0.6rem; }
-    .def-card { border:1px solid var(--color-border); border-radius:10px; padding:0.7rem 0.9rem; background: var(--color-surface-hover); display:flex; align-items:center; gap:0.75rem; }
+    .def-card { border:1px solid var(--color-border); border-radius:10px; padding:0.7rem 0.9rem; background: var(--color-surface-hover); display:flex; flex-direction:column; gap:0.35rem; }
     .def-top { display:flex; align-items:center; gap:0.65rem; width:100%; }
-    .def-meta { margin-left:auto; display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+    .def-bottom { display:flex; gap:0.8rem; align-items:center; flex-wrap:wrap; justify-content:flex-start; }
     .pill { padding:0.2rem 0.6rem; border-radius:12px; border:1px solid var(--color-border); background: var(--color-surface); font-weight:600; color: var(--color-text-primary); }
     .avatar { width:42px; height:42px; border-radius:12px; background: var(--color-surface); background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; font-weight:700; color: var(--color-text-primary); box-shadow: var(--shadow-sm); }
     .modes .mode-list { display:flex; flex-direction:column; gap:0.6rem; }
