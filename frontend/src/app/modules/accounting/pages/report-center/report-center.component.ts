@@ -7,6 +7,7 @@ interface ReportItem {
   name: string;
   category: string;
   description: string;
+  id: string;
 }
 
 @Component({
@@ -41,6 +42,9 @@ interface ReportItem {
                 <p class="muted">{{ r.category }}</p>
               </div>
               <p class="muted desc">{{ r.description }}</p>
+              <button class="chip" type="button" (click)="toggleFavorite(r); $event.stopPropagation()">
+                {{ isFavorite(r) ? '★' : '☆' }} Favorite
+              </button>
             </div>
             <div class="muted" *ngIf="!filteredReports.length">No reports found.</div>
           </div>
@@ -83,6 +87,29 @@ interface ReportItem {
                 <button class="btn primary" type="button" (click)="preview()">Generate</button>
               </div>
             </form>
+            <div class="schedule">
+              <div class="schedule-header">
+                <p class="strong">Schedule (mock)</p>
+                <label class="inline">
+                  <input type="checkbox" [(ngModel)]="schedule.enabled" name="scheduleEnabled" /> Enable
+                </label>
+              </div>
+              <div class="schedule-grid" [class.disabled]="!schedule.enabled">
+                <label>Frequency
+                  <select [(ngModel)]="schedule.frequency" name="frequency" [disabled]="!schedule.enabled">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </label>
+                <label>Time
+                  <input type="time" [(ngModel)]="schedule.time" name="time" [disabled]="!schedule.enabled" />
+                </label>
+                <label class="full">Recipients
+                  <input type="text" [(ngModel)]="schedule.recipients" name="recipients" placeholder="comma-separated emails" [disabled]="!schedule.enabled" />
+                </label>
+              </div>
+            </div>
           </div>
           <div class="preview">
             <p class="muted">Preview (mock):</p>
@@ -118,6 +145,7 @@ interface ReportItem {
     .item { border:1px solid var(--color-border); border-radius:10px; padding:0.75rem; background: var(--color-surface-hover); cursor:pointer; }
     .item.active { border-color: var(--color-primary); box-shadow: 0 0 0 1px var(--color-primary); }
     .desc { margin:0.25rem 0 0; }
+    .chip { border:1px solid var(--color-border); padding:0.25rem 0.6rem; border-radius:999px; background: var(--color-surface); color: var(--color-text-primary); cursor:pointer; }
     .controls { display:flex; flex-direction:column; gap:0.75rem; }
     .chips { display:flex; gap:0.4rem; flex-wrap:wrap; }
     .chip { border:1px solid var(--color-border); padding:0.35rem 0.8rem; border-radius:999px; background: var(--color-surface-hover); color: var(--color-text-primary); cursor:pointer; }
@@ -134,6 +162,11 @@ interface ReportItem {
     .preview-table .row { display:grid; grid-template-columns: 1fr auto; padding:0.45rem 0.75rem; border-top:1px solid var(--color-border); }
     .preview-table .row.head { background: var(--color-surface); font-weight:700; }
     .preview-table .row:first-of-type { border-top:none; }
+    .schedule { border:1px solid var(--color-border); border-radius:10px; padding:0.75rem; background: var(--color-surface); display:flex; flex-direction:column; gap:0.5rem; }
+    .schedule-header { display:flex; justify-content:space-between; align-items:center; }
+    .schedule-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:0.6rem; }
+    .schedule-grid.disabled { opacity:0.6; }
+    .inline { display:flex; align-items:center; gap:0.4rem; color: var(--color-text-primary); }
     .strong { font-weight:700; color: var(--color-text-primary); margin:0; }
     .muted { color: var(--color-text-secondary); margin:0; }
     .breadcrumbs { display:flex; align-items:center; gap:0.35rem; color: var(--color-text-secondary); font-size:0.9rem; margin-bottom:0.25rem; }
@@ -143,11 +176,11 @@ interface ReportItem {
 })
 export class ReportCenterComponent {
   reports: ReportItem[] = [
-    { name: 'Trial Balance', category: 'General Ledger', description: 'Debits and credits as of a date' },
-    { name: 'Income Statement', category: 'General Ledger', description: 'Revenue and expenses for a period' },
-    { name: 'Balance Sheet', category: 'General Ledger', description: 'Assets, liabilities, and equity snapshot' },
-    { name: 'Fee Collection Summary', category: 'Fees', description: 'Collections by class and mode' },
-    { name: 'Student Statement', category: 'Fees', description: 'Individual student ledger' },
+    { id: 'tb', name: 'Trial Balance', category: 'General Ledger', description: 'Debits and credits as of a date' },
+    { id: 'pl', name: 'Income Statement', category: 'General Ledger', description: 'Revenue and expenses for a period' },
+    { id: 'bs', name: 'Balance Sheet', category: 'General Ledger', description: 'Assets, liabilities, and equity snapshot' },
+    { id: 'fees', name: 'Fee Collection Summary', category: 'Fees', description: 'Collections by class and mode' },
+    { id: 'stmt', name: 'Student Statement', category: 'Fees', description: 'Individual student ledger' },
   ];
   search = '';
   selected: ReportItem | null = null;
@@ -158,6 +191,8 @@ export class ReportCenterComponent {
     { label: 'Line 2', value: '$8,320.00' },
     { label: 'Line 3', value: '$4,180.00' },
   ];
+  favorites = new Set<string>();
+  schedule = { enabled: false, frequency: 'weekly', time: '08:00', recipients: '' };
 
   get filteredReports() {
     const term = this.search.toLowerCase();
@@ -191,5 +226,17 @@ export class ReportCenterComponent {
       this.params.start = new Date(y, 0, 1).toISOString().slice(0, 10);
     }
     this.params.end = today.toISOString().slice(0, 10);
+  }
+
+  toggleFavorite(r: ReportItem) {
+    if (this.isFavorite(r)) {
+      this.favorites.delete(r.id);
+    } else {
+      this.favorites.add(r.id);
+    }
+  }
+
+  isFavorite(r: ReportItem) {
+    return this.favorites.has(r.id);
   }
 }

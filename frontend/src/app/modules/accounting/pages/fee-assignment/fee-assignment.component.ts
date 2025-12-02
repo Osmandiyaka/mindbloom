@@ -24,6 +24,12 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
         </div>
         <div class="actions">
           <button class="btn ghost" (click)="reset()">Reset</button>
+          <select class="mini-select" [(ngModel)]="assignGrade">
+            <option value="">Select grade</option>
+            <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+          </select>
+          <button class="btn ghost" (click)="assignToGrade()">Assign to Grade</button>
+          <button class="btn ghost" (click)="openStructurePreview()">Preview Structure</button>
           <button class="btn primary" (click)="applyToSelected()">Apply to Selected</button>
         </div>
       </header>
@@ -155,6 +161,34 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
           </div>
         </div>
       }
+
+      @if (structurePreview) {
+        <div class="modal-backdrop" (click)="closeStructurePreview()"></div>
+        <div class="modal">
+          <div class="modal-header">
+            <div>
+              <p class="eyebrow">{{ structurePreview.academicYear }} · {{ structurePreview.grade }}</p>
+              <h3 class="card-title">Structure Preview · {{ structurePreview.name }}</h3>
+            </div>
+            <button class="chip ghost" (click)="closeStructurePreview()">✕</button>
+          </div>
+          <div class="preview-body">
+            <div class="row head"><span>Item</span><span>Amount</span></div>
+            <div class="row" *ngFor="let comp of structurePreview.components">
+              <span>{{ comp.label }}</span>
+              <span class="amount">{{ comp.amount | currency:'USD' }}</span>
+            </div>
+            <div class="row total">
+              <span>Total</span>
+              <span class="amount">{{ structurePreview.total | currency:'USD' }}</span>
+            </div>
+            <p class="sub">Default plan: {{ structurePreview.paymentTerm | titlecase }}</p>
+          </div>
+          <div class="modal-actions">
+            <button class="btn primary" (click)="closeStructurePreview()">Close</button>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -164,6 +198,7 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
     h1 { margin:0 0 0.35rem; color: var(--color-text-primary); }
     .sub { margin:0; color: var(--color-text-secondary); }
     .actions { display:flex; gap:0.5rem; }
+    .mini-select { padding:0.45rem 0.6rem; border-radius:8px; border:1px solid var(--color-border); background: var(--color-surface-hover); color: var(--color-text-primary); }
     .btn { border-radius:10px; padding:0.65rem 1.1rem; font-weight:600; border:1px solid var(--color-border); background: var(--color-surface-hover); color: var(--color-text-primary); }
     .btn.primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
     .btn.ghost { background: transparent; }
@@ -213,9 +248,11 @@ export class FeeAssignmentComponent {
   discount = 0;
   scholarship = '';
   selectAll = false;
+  assignGrade = '';
 
   previewing: FeeCandidate | null = null;
   previewStructure: FeeStructurePreview | null = null;
+  structurePreview: FeeStructurePreview | null = null;
 
   grades = ['Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9'];
 
@@ -260,6 +297,16 @@ export class FeeAssignmentComponent {
     this.accounting.assignFeePlan(ids, this.plan, this.selectedStructure, this.discount);
   }
 
+  assignToGrade() {
+    const grade = this.assignGrade || this.gradeFilter || this.grades[0];
+    if (!grade) return;
+    const targets = this.accounting.feeCandidates().filter(c => c.grade === grade).map(c => c.id);
+    if (!targets.length) return;
+    this.accounting.assignFeePlan(targets, this.plan, this.selectedStructure, this.discount);
+    // mark them selected for visibility
+    this.accounting.feeCandidates.set(this.accounting.feeCandidates().map(c => targets.includes(c.id) ? { ...c, selected: true } : c));
+  }
+
   displayTotal(c: FeeCandidate): number {
     if (c.customTotal != null) return c.customTotal;
     return this.accounting.calcDiscountedTotal(c.baseTotal, c.discountPct);
@@ -283,6 +330,14 @@ export class FeeAssignmentComponent {
   discountValue(c: FeeCandidate): number {
     if (!c.discountPct) return 0;
     return +(c.baseTotal * (c.discountPct / 100)).toFixed(2);
+  }
+
+  openStructurePreview() {
+    this.structurePreview = this.accounting.feeStructures().find(fs => fs.name === this.selectedStructure) || null;
+  }
+
+  closeStructurePreview() {
+    this.structurePreview = null;
   }
 
   initials(name: string) {
