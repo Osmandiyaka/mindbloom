@@ -80,7 +80,7 @@ import { AccountingService, AccountNode } from '../../../../core/services/accoun
         </div>
         <div class="table">
           <div class="table-head">
-            <span>No.</span><span>Date</span><span>Memo</span><span>Status</span><span>Debit</span><span>Credit</span>
+            <span>No.</span><span>Date</span><span>Memo</span><span>Status</span><span>Debit</span><span>Credit</span><span></span>
           </div>
           <div class="table-row" *ngFor="let j of accounting.journals()">
             <span class="strong">{{ j.entryNumber }}</span>
@@ -89,9 +89,42 @@ import { AccountingService, AccountNode } from '../../../../core/services/accoun
             <span><span class="pill" [class.draft]="j.status !== 'posted'">{{ j.status | titlecase }}</span></span>
             <span>{{ j.debit | number:'1.2-2' }}</span>
             <span>{{ j.credit | number:'1.2-2' }}</span>
+            <span><button class="chip ghost small" type="button" (click)="view(j)">View</button></span>
           </div>
         </div>
       </section>
+
+      @if (previewing) {
+        <div class="modal-backdrop" (click)="closePreview()"></div>
+        <div class="modal">
+          <div class="modal-header">
+            <div>
+              <p class="eyebrow">{{ previewing.date | date:'mediumDate' }} · {{ previewing.status | titlecase }}</p>
+              <h3 class="card-title">Journal {{ previewing.entryNumber }}</h3>
+              <p class="sub">Ref: {{ previewing.ref || '—' }} · {{ previewing.memo || 'No memo' }}</p>
+            </div>
+            <button class="chip ghost" (click)="closePreview()">✕</button>
+          </div>
+          <div class="table">
+            <div class="table-head">
+              <span>Account</span><span>Debit</span><span>Credit</span>
+            </div>
+            <div class="table-row" *ngFor="let l of mockLines">
+              <span class="strong">{{ l.account }}</span>
+              <span>{{ l.debit | number:'1.2-2' }}</span>
+              <span>{{ l.credit | number:'1.2-2' }}</span>
+            </div>
+            <div class="table-row totals">
+              <span class="strong">Totals</span>
+              <span class="strong">{{ previewing.debit | number:'1.2-2' }}</span>
+              <span class="strong">{{ previewing.credit | number:'1.2-2' }}</span>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn ghost" (click)="closePreview()">Close</button>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -122,7 +155,7 @@ import { AccountingService, AccountNode } from '../../../../core/services/accoun
     .btn.primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
     .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color: var(--color-text-primary); }
     .table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; background: var(--color-surface); }
-    .table-head, .table-row { display:grid; grid-template-columns: 1fr 1fr 2fr 1fr 1fr 1fr; padding:0.65rem 0.8rem; gap:0.5rem; align-items:center; }
+    .table-head, .table-row { display:grid; grid-template-columns: 1fr 1fr 2fr 1fr 1fr 1fr 0.9fr; padding:0.65rem 0.8rem; gap:0.5rem; align-items:center; }
     .table-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
     .table-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); }
     .strong { font-weight:700; color: var(--color-text-primary); }
@@ -132,6 +165,10 @@ import { AccountingService, AccountNode } from '../../../../core/services/accoun
     .breadcrumbs { display:flex; align-items:center; gap:0.35rem; color: var(--color-text-secondary); font-size:0.9rem; margin-bottom:0.25rem; }
     .breadcrumbs a { color: var(--color-primary); text-decoration:none; }
     .breadcrumbs .sep { color: var(--color-text-secondary); }
+    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: var(--color-surface); border:1px solid var(--color-border); border-radius:14px; padding:1rem; width:min(520px, 92vw); z-index:101; box-shadow: var(--shadow-lg); display:flex; flex-direction:column; gap:0.75rem; }
+    .modal-header { display:flex; justify-content:space-between; align-items:center; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:0.5rem; }
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:100; }
   `]
 })
 export class JournalsComponent {
@@ -146,6 +183,11 @@ export class JournalsComponent {
   };
 
   constructor(public accounting: AccountingService) {}
+  previewing: any = null;
+  mockLines = [
+    { account: '1010 · Cash on Hand', debit: 200, credit: 0 },
+    { account: '4010 · Tuition', debit: 0, credit: 200 }
+  ];
 
   get totalDebit() {
     return this.form.lines.reduce((sum: number, l: any) => sum + Number(l.debit || 0), 0);
@@ -233,5 +275,13 @@ export class JournalsComponent {
     // adds two lines, one debit and one credit of the same amount (default 0)
     this.form.lines.push({ accountCode: '', debit: 0, credit: 0 });
     this.form.lines.push({ accountCode: '', debit: 0, credit: 0 });
+  }
+
+  view(j: any) {
+    this.previewing = j;
+  }
+
+  closePreview() {
+    this.previewing = null;
   }
 }
