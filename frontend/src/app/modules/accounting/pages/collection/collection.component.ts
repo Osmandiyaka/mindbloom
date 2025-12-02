@@ -7,6 +7,7 @@ interface StudentFee {
   student: string;
   grade: string;
   admissionNo: string;
+  studentNo: string;
   due: number;
   overdue: number;
   lastPayment: string;
@@ -20,60 +21,49 @@ interface StudentFee {
     <div class="page">
       <header class="page-header">
         <div>
-          <p class="eyebrow">Fees</p>
           <h1>Fee Collection Point</h1>
           <p class="sub">Search students, view outstanding balances, and record payments.</p>
         </div>
-        <div class="actions">
-          <button class="btn primary" (click)="openPayment()">Record Payment</button>
-        </div>
       </header>
 
-      <section class="top-grid">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Select Student</h3>
-            <span class="muted">Use the picker below</span>
-          </div>
-          <app-student-selector
-            class="selector-full"
-            [students]="studentOptions"
-            [(selectedId)]="selectedId"
-            (selectedChange)="onStudentSelected($event)">
-          </app-student-selector>
+      <section class="card filters">
+        <div class="card-header">
+          <h3 class="card-title">Filter Roster</h3>
         </div>
-
-        <div class="card filters">
-          <div class="card-header">
-            <h3 class="card-title">Filter Roster</h3>
-          </div>
-          <div class="filter-fields">
-            <input type="search" [(ngModel)]="search" placeholder="Search by name or admission #" />
-            <select [(ngModel)]="gradeFilter">
-              <option value="">All grades</option>
-              <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
-            </select>
-            <button class="btn ghost" (click)="clear()">Reset</button>
-          </div>
+        <div class="filter-fields">
+          <input type="search" [(ngModel)]="search" placeholder="Search by name or admission #" />
+          <select [(ngModel)]="gradeFilter">
+            <option value="">All grades</option>
+            <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+          </select>
+          <button class="btn ghost" (click)="clear()">Reset</button>
         </div>
       </section>
 
       <section class="card">
         <div class="table">
           <div class="table-head">
-            <span>Student</span><span>Grade</span><span>Admission</span><span>Due</span><span>Overdue</span><span>Last Payment</span><span>Action</span>
+            <span>Student</span><span>Grade</span><span>Admission</span><span>Student #</span><span>Due</span><span>Overdue</span><span>Last Payment</span><span>Action</span>
           </div>
           <div class="table-row" *ngFor="let s of filtered">
-            <span class="strong">{{ s.student }}</span>
+            <div class="student-cell">
+              <span class="avatar small">
+                <span>{{ initials(s.student) }}</span>
+              </span>
+              <div>
+                <span class="strong">{{ s.student }}</span>
+              </div>
+            </div>
             <span>{{ s.grade }}</span>
             <span>{{ s.admissionNo }}</span>
+            <span>{{ s.studentNo }}</span>
             <span>{{ s.due | currency:'USD' }}</span>
             <span [class.danger]="s.overdue > 0">{{ s.overdue | currency:'USD' }}</span>
             <span>{{ s.lastPayment }}</span>
             <span><button class="chip" (click)="openPayment(s)">Collect</button></span>
           </div>
           <div class="table-row" *ngIf="!filtered.length">
-            <span class="muted" style="grid-column:1/7">No students found.</span>
+            <span class="muted" style="grid-column:1/8">No students found.</span>
           </div>
         </div>
       </section>
@@ -161,13 +151,15 @@ interface StudentFee {
     .filters input, .filters select { border:1px solid var(--color-border); border-radius:8px; padding:0.6rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
     .selector-full { width:100%; display:block; }
     .table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; background: var(--color-surface); }
-    .table-head, .table-row { display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr; padding:0.65rem 0.8rem; gap:0.5rem; align-items:center; }
+    .table-head, .table-row { display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; padding:0.65rem 0.8rem; gap:0.5rem; align-items:center; }
     .table-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
     .table-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); }
     .strong { font-weight:700; color: var(--color-text-primary); }
     .chip { border:1px solid var(--color-border); padding:0.35rem 0.75rem; border-radius:10px; background: var(--color-surface-hover); cursor:pointer; }
     .muted { color: var(--color-text-secondary); }
     .danger { color: var(--color-error,#ef4444); }
+    .student-cell { display:flex; gap:0.5rem; align-items:center; }
+    .avatar.small { width:32px; height:32px; border-radius:10px; background: var(--color-surface-hover); display:flex; align-items:center; justify-content:center; font-weight:700; color: var(--color-text-primary); }
     .card-title { color: var(--color-text-primary); margin:0; }
     .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:10; }
     .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: var(--color-surface); border:1px solid var(--color-border); border-radius:16px; padding:1.25rem; width: min(520px, 90vw); z-index:11; box-shadow: var(--shadow-lg, 0 20px 50px rgba(0,0,0,0.25)); }
@@ -187,9 +179,9 @@ export class CollectionComponent {
   search = '';
   gradeFilter = '';
   students: StudentFee[] = [
-    { student: 'Amaka Obi', grade: 'Grade 6', admissionNo: 'ADM-1023', due: 820, overdue: 120, lastPayment: 'Jan 15, 2025' },
-    { student: 'Chidi Okeke', grade: 'Grade 5', admissionNo: 'ADM-1011', due: 540, overdue: 0, lastPayment: 'Jan 20, 2025' },
-    { student: 'Sara Danjuma', grade: 'Grade 7', admissionNo: 'ADM-1029', due: 1200, overdue: 300, lastPayment: 'Jan 05, 2025' }
+    { student: 'Amaka Obi', grade: 'Grade 6', admissionNo: 'ADM-1023', studentNo: 'STU-2001', due: 820, overdue: 120, lastPayment: 'Jan 15, 2025' },
+    { student: 'Chidi Okeke', grade: 'Grade 5', admissionNo: 'ADM-1011', studentNo: 'STU-2002', due: 540, overdue: 0, lastPayment: 'Jan 20, 2025' },
+    { student: 'Sara Danjuma', grade: 'Grade 7', admissionNo: 'ADM-1029', studentNo: 'STU-2003', due: 1200, overdue: 300, lastPayment: 'Jan 05, 2025' }
   ];
   grades = ['Grade 5', 'Grade 6', 'Grade 7'];
   studentOptions: StudentOption[] = [
