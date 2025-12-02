@@ -19,18 +19,18 @@ import { AccountingService } from '../../../../core/services/accounting.service'
             <p class="muted">Jump to key workflows</p>
           </div>
           <ul class="links">
-            <li><a routerLink="/accounting/fee-structures">Fee Structures</a></li>
-            <li><a routerLink="/accounting/fee-assignment">Fee Assignment</a></li>
-            <li><a routerLink="/accounting/collection">Fee Collection</a></li>
-            <li><a routerLink="/accounting/fee-reports">Fee Reports Dashboard</a></li>
-            <li><a routerLink="/accounting/journals">Manual Journal</a></li>
-            <li><a routerLink="/accounting/expenses">Expense Entry</a></li>
-            <li><a routerLink="/accounting/bill-queue">Bill Payment Queue</a></li>
-            <li><a routerLink="/accounting/bank-recon">Bank Reconciliation</a></li>
-            <li><a routerLink="/accounting/accounts">Manage Accounts</a></li>
-            <li><a routerLink="/accounting/trial-balance">Trial Balance</a></li>
-            <li><a routerLink="/accounting/periods">Fiscal Periods</a></li>
-            <li><a routerLink="/accounting/reports">Report Center</a></li>
+            <li><a routerLink="/accounting/fee-structures"><span class="icon">📚</span> Fee Structures</a></li>
+            <li><a routerLink="/accounting/fee-assignment"><span class="icon">🧾</span> Fee Assignment</a></li>
+            <li><a routerLink="/accounting/collection"><span class="icon">💳</span> Fee Collection</a></li>
+            <li><a routerLink="/accounting/fee-reports"><span class="icon">📊</span> Fee Reports Dashboard</a></li>
+            <li><a routerLink="/accounting/journals"><span class="icon">📝</span> Manual Journal</a></li>
+            <li><a routerLink="/accounting/expenses"><span class="icon">🧾</span> Expense Entry</a></li>
+            <li><a routerLink="/accounting/bill-queue"><span class="icon">📥</span> Bill Payment Queue</a></li>
+            <li><a routerLink="/accounting/bank-recon"><span class="icon">🏦</span> Bank Reconciliation</a></li>
+            <li><a routerLink="/accounting/accounts"><span class="icon">🗂️</span> Manage Accounts</a></li>
+            <li><a routerLink="/accounting/trial-balance"><span class="icon">⚖️</span> Trial Balance</a></li>
+            <li><a routerLink="/accounting/periods"><span class="icon">⏳</span> Fiscal Periods</a></li>
+            <li><a routerLink="/accounting/reports"><span class="icon">📑</span> Report Center</a></li>
           </ul>
         </aside>
         <div class="main">
@@ -152,7 +152,8 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .danger { color: var(--color-error,#ef4444); }
     .muted { color: var(--color-text-secondary); }
     .links { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.5rem; }
-    .links a { color: var(--color-primary,#7ab8ff); text-decoration:none; }
+    .links a { color: var(--color-primary,#7ab8ff); text-decoration:none; display:flex; align-items:center; gap:0.5rem; }
+    .links .icon { width:20px; text-align:center; }
     .breadcrumbs { display:flex; align-items:center; gap:0.35rem; color: var(--color-text-secondary); font-size:0.9rem; margin-bottom:0.25rem; }
     .breadcrumbs a { color: var(--color-primary); text-decoration:none; }
     .breadcrumbs .sep { color: var(--color-text-secondary); }
