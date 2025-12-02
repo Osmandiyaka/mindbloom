@@ -114,15 +114,17 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap:1rem; }
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-sm); }
     .card.wide { grid-column: span 2; }
-    .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
+    .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color: var(--color-text-primary); }
+    .card-header h3 { color: var(--color-text-primary); margin:0; }
     .cash-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:0.75rem; }
     .cash-item { background: var(--color-surface-hover); border:1px solid var(--color-border); border-radius:10px; padding:0.75rem; }
     .cash-item .label { margin:0; color: var(--color-text-secondary); font-weight:600; }
     .cash-item .value { margin:0.15rem 0 0; color: var(--color-text-primary); font-weight:700; font-size:1.1rem; }
-    .table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; }
+    .table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; background: var(--color-surface); }
     .table-head, .table-row { display:grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; padding:0.75rem 0.9rem; gap:0.5rem; }
     .table-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
-    .table-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); }
+    .table-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); background: var(--color-surface); }
+    .table-row:nth-child(even) { background: color-mix(in srgb, var(--color-surface-hover) 60%, var(--color-surface) 40%); }
     .strong { font-weight:700; color: var(--color-text-primary); }
     .danger { color: var(--color-error,#ef4444); }
     .muted { color: var(--color-text-secondary); }
