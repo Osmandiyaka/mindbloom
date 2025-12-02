@@ -111,6 +111,29 @@ interface InvoiceMock {
                 </div>
               </div>
 
+              <div class="allocations" *ngIf="activeStudent">
+                <p class="label">Allocate to invoices</p>
+                <div class="alloc-table">
+                  <div class="alloc-head">
+                    <span>Invoice</span><span>Due</span><span>Apply</span><span>Select</span>
+                  </div>
+                  <div class="alloc-row" *ngFor="let inv of invoices">
+                    <span>{{ inv.number }} · {{ inv.desc }}</span>
+                    <span>{{ inv.balance | currency:'USD' }}</span>
+                    <span>
+                      <input type="number" min="0" [max]="inv.balance" [(ngModel)]="inv.apply" />
+                    </span>
+                    <span>
+                      <input type="checkbox" [(ngModel)]="inv.selected" />
+                    </span>
+                  </div>
+                </div>
+                <div class="alloc-summary">
+                  <span>Apply total: {{ applyTotal | currency:'USD' }}</span>
+                  <span>Remaining: {{ (payment.amount || 0) - applyTotal | currency:'USD' }}</span>
+                </div>
+              </div>
+
               <form class="form-grid" (ngSubmit)="savePayment()">
                 <label>Amount
                   <input type="number" min="0" [(ngModel)]="payment.amount" name="amount" required />
@@ -139,29 +162,6 @@ interface InvoiceMock {
                   <button class="btn ghost" type="button" (click)="closePayment()">Cancel</button>
                 </div>
               </form>
-            </div>
-
-            <div class="col allocations" *ngIf="activeStudent">
-              <p class="label">Allocate to invoices</p>
-              <div class="alloc-table">
-                <div class="alloc-head">
-                  <span>Invoice</span><span>Due</span><span>Apply</span><span>Select</span>
-                </div>
-                <div class="alloc-row" *ngFor="let inv of invoices">
-                  <span>{{ inv.number }} · {{ inv.desc }}</span>
-                  <span>{{ inv.balance | currency:'USD' }}</span>
-                  <span>
-                    <input type="number" min="0" [max]="inv.balance" [(ngModel)]="inv.apply" />
-                  </span>
-                  <span>
-                    <input type="checkbox" [(ngModel)]="inv.selected" />
-                  </span>
-                </div>
-              </div>
-              <div class="alloc-summary">
-                <span>Apply total: {{ applyTotal | currency:'USD' }}</span>
-                <span>Remaining: {{ (payment.amount || 0) - applyTotal | currency:'USD' }}</span>
-              </div>
             </div>
           </div>
         </div>
@@ -196,9 +196,9 @@ interface InvoiceMock {
     .avatar.small { width:32px; height:32px; border-radius:10px; background: var(--color-surface-hover); display:flex; align-items:center; justify-content:center; font-weight:700; color: var(--color-text-primary); }
     .card-title { color: var(--color-text-primary); margin:0; }
     .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:10; }
-    .payment-modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: var(--color-surface); border:1px solid var(--color-border); border-radius:16px; padding:1.25rem; width: min(1600px, 96vw); max-height:88vh; z-index:1100; box-shadow: var(--shadow-lg, 0 20px 50px rgba(0,0,0,0.25)); display:flex; flex-direction:column; }
+    .payment-modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: var(--color-surface); border:1px solid var(--color-border); border-radius:16px; padding:1.25rem; width: min(1100px, 95vw); max-height:88vh; z-index:1100; box-shadow: var(--shadow-lg, 0 20px 50px rgba(0,0,0,0.25)); display:flex; flex-direction:column; }
     .payment-modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; color: var(--color-text-primary); }
-    .payment-modal-body { color: var(--color-text-primary); display:grid; grid-template-columns: 1.1fr 0.9fr; gap:1.25rem; align-items:start; overflow:auto; padding-right:0.5rem; }
+    .payment-modal-body { color: var(--color-text-primary); display:grid; grid-template-columns: 1fr; gap:1.25rem; align-items:start; overflow:auto; padding-right:0.5rem; }
     .form-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:0.75rem; }
     .form-grid input, .form-grid select, .form-grid textarea { width:100%; border:1px solid var(--color-border); border-radius:8px; padding:0.6rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
     .form-grid .full { grid-column:1/-1; }
