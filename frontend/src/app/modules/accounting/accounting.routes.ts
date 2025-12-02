@@ -24,5 +24,9 @@ export const ACCOUNTING_ROUTES: Routes = [
   {
     path: 'fee-structures',
     loadComponent: () => import('./pages/fee-structures/fee-structures.component').then(m => m.FeeStructuresComponent)
+  },
+  {
+    path: 'collection',
+    loadComponent: () => import('./pages/collection/collection.component').then(m => m.CollectionComponent)
   }
 ];

@@ -40,22 +40,23 @@ import { AccountingService } from '../../../../core/services/accounting.service'
         <div class="card-header">
           <h3>Periods</h3>
         </div>
-        <div class="table">
-          <div class="table-head">
-            <span>Name</span><span>Start</span><span>End</span><span>Status</span><span>Action</span>
-          </div>
-          <div class="table-row" *ngFor="let p of accounting.periods()">
-            <span class="strong">{{ p.name }}</span>
-            <span>{{ p.start | date:'mediumDate' }}</span>
-            <span>{{ p.end | date:'mediumDate' }}</span>
-            <span><span class="pill" [class.locked]="p.status !== 'open'">{{ p.status | titlecase }}</span></span>
-            <span class="actions-cell">
+        <div class="period-grid">
+          <div class="period-card" *ngFor="let p of accounting.periods()">
+            <div class="period-head">
+              <div>
+                <p class="eyebrow small">{{ p.start | date:'MMM d' }} - {{ p.end | date:'MMM d, y' }}</p>
+                <h4>{{ p.name }}</h4>
+              </div>
+              <span class="pill" [class.locked]="p.status !== 'open'">{{ p.status | titlecase }}</span>
+            </div>
+            <p class="muted">Controls posting window for the term.</p>
+            <div class="actions-cell">
               <button class="chip" *ngIf="p.status === 'open'" (click)="close(p)">Close</button>
               <button class="chip" *ngIf="p.status !== 'open'" (click)="reopen(p)">Re-open</button>
-            </span>
+            </div>
           </div>
-          <div class="table-row" *ngIf="!accounting.periods().length">
-            <span class="muted" style="grid-column:1/5">No periods defined.</span>
+          <div class="empty" *ngIf="!accounting.periods().length">
+            <p>No periods defined.</p>
           </div>
         </div>
       </section>
@@ -74,17 +75,19 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .actions { display:flex; align-items:center; gap:0.75rem; grid-column:1/-1; }
     .btn { border-radius:10px; padding:0.65rem 1.1rem; font-weight:600; border:1px solid var(--color-border); background: var(--color-surface-hover); color: var(--color-text-primary); }
     .btn.primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
-    .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
-    .table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; margin-top:0.25rem; }
-    .table-head, .table-row { display:grid; grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr; gap:0.5rem; padding:0.75rem 0.9rem; align-items:center; }
-    .table-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
-    .table-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); }
-    .pill { padding:0.2rem 0.45rem; border-radius:10px; background: var(--color-surface-hover); }
+    .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color: var(--color-text-primary); }
+    .period-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:0.75rem; }
+    .period-card { border:1px solid var(--color-border); border-radius:12px; padding:0.9rem; background: var(--color-surface-hover); box-shadow: var(--shadow-sm); }
+    .period-head { display:flex; justify-content:space-between; align-items:center; }
+    .period-head h4 { margin:0; color: var(--color-text-primary); }
+    .eyebrow.small { font-size:0.75rem; }
+    .pill { padding:0.2rem 0.45rem; border-radius:10px; background: var(--color-surface); }
     .pill.locked { background: rgba(var(--color-error-rgb,239,68,68),0.15); color: var(--color-error,#ef4444); }
     .actions-cell { display:flex; gap:0.35rem; }
-    .chip { border:1px solid var(--color-border); padding:0.35rem 0.75rem; border-radius:10px; background: var(--color-surface-hover); cursor:pointer; }
+    .chip { border:1px solid var(--color-border); padding:0.35rem 0.75rem; border-radius:10px; background: var(--color-surface); cursor:pointer; }
     .muted { color: var(--color-text-secondary); }
     .strong { font-weight:700; color: var(--color-text-primary); }
+    .empty { color: var(--color-text-secondary); padding:1rem 0; }
   `]
 })
 export class PeriodsComponent {

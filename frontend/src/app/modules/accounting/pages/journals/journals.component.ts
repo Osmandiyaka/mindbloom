@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AccountingService } from '../../../../core/services/accounting.service';
+import { AccountingService, AccountNode } from '../../../../core/services/accounting.service';
 
 @Component({
   selector: 'app-journals',
@@ -38,7 +38,7 @@ import { AccountingService } from '../../../../core/services/accounting.service'
             <div class="line" *ngFor="let line of form.lines; let i = index">
               <select [(ngModel)]="line.accountCode" name="account-{{i}}" required>
                 <option value="" disabled>Select account</option>
-                <option *ngFor="let acc of accounting.accounts()" [value]="acc.code">{{ acc.code }} — {{ acc.name }}</option>
+                <option *ngFor="let acc of accountOptions" [value]="acc.code">{{ acc.code }} — {{ acc.name }}</option>
               </select>
               <input type="number" step="0.01" min="0" [(ngModel)]="line.debit" name="debit-{{i}}" (input)="clearOpposite(i, 'debit')" />
               <input type="number" step="0.01" min="0" [(ngModel)]="line.credit" name="credit-{{i}}" (input)="clearOpposite(i, 'credit')" />
@@ -56,6 +56,26 @@ import { AccountingService } from '../../../../core/services/accounting.service'
             <button class="btn primary" type="submit" [disabled]="!balanced || !form.lines.length">Post Journal</button>
           </div>
         </form>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h3>Recent Journals</h3>
+          <span class="muted">Mock data for preview</span>
+        </div>
+        <div class="table">
+          <div class="table-head">
+            <span>No.</span><span>Date</span><span>Memo</span><span>Status</span><span>Debit</span><span>Credit</span>
+          </div>
+          <div class="table-row" *ngFor="let j of accounting.journals()">
+            <span class="strong">{{ j.entryNumber }}</span>
+            <span>{{ j.date | date:'mediumDate' }}</span>
+            <span>{{ j.memo }}</span>
+            <span><span class="pill" [class.draft]="j.status !== 'posted'">{{ j.status | titlecase }}</span></span>
+            <span>{{ j.debit | number:'1.2-2' }}</span>
+            <span>{{ j.credit | number:'1.2-2' }}</span>
+          </div>
+        </div>
       </section>
     </div>
   `,
@@ -80,6 +100,15 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .danger { color: var(--color-error,#ef4444); }
     .btn { border-radius:10px; padding:0.65rem 1.1rem; font-weight:600; border:1px solid var(--color-border); background: var(--color-surface-hover); color: var(--color-text-primary); }
     .btn.primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
+    .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color: var(--color-text-primary); }
+    .table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; background: var(--color-surface); }
+    .table-head, .table-row { display:grid; grid-template-columns: 1fr 1fr 2fr 1fr 1fr 1fr; padding:0.65rem 0.8rem; gap:0.5rem; align-items:center; }
+    .table-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
+    .table-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); }
+    .strong { font-weight:700; color: var(--color-text-primary); }
+    .pill { padding:0.2rem 0.45rem; border-radius:10px; background: var(--color-surface-hover); }
+    .pill.draft { background: rgba(var(--color-warning-rgb,234,179,8),0.15); color: var(--color-warning,#eab308); }
+    .muted { color: var(--color-text-secondary); }
   `]
 })
 export class JournalsComponent {
@@ -143,5 +172,17 @@ export class JournalsComponent {
       };
       this.accounting.loadTrialBalance();
     });
+  }
+
+  get accountOptions() {
+    const flat: { code: string; name: string }[] = [];
+    const walk = (nodes: AccountNode[]) => {
+      nodes.forEach(n => {
+        flat.push({ code: n.code, name: n.name });
+        if (n.children) walk(n.children);
+      });
+    };
+    walk(this.accounting.accounts());
+    return flat;
   }
 }

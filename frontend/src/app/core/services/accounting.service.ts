@@ -42,6 +42,16 @@ export interface FeeStructurePreview {
   paymentTerm: 'full' | 'termly' | 'monthly';
 }
 
+export interface JournalEntryPreview {
+  entryNumber: string;
+  date: string;
+  memo: string;
+  ref?: string;
+  status: 'posted' | 'draft';
+  debit: number;
+  credit: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AccountingService {
   accounts = signal<AccountNode[]>([]);
@@ -50,6 +60,7 @@ export class AccountingService {
   metrics = signal<AccountingMetric[]>([]);
   cashPosition = signal<{ cash: number; bank: number; ar: number; ap: number }>({ cash: 0, bank: 0, ar: 0, ap: 0 });
   feeStructures = signal<FeeStructurePreview[]>([]);
+  journals = signal<JournalEntryPreview[]>([]);
 
   constructor() {
     this.loadMockData();
@@ -163,12 +174,19 @@ export class AccountingService {
       }
     ];
 
+    const sampleJournals: JournalEntryPreview[] = [
+      { entryNumber: 'JV-2025-0001', date: '2025-02-05', memo: 'Tuition collection - cash', ref: 'RCPT-102', status: 'posted', debit: 12000, credit: 12000 },
+      { entryNumber: 'JV-2025-0002', date: '2025-02-05', memo: 'Salaries January', ref: 'PAY-023', status: 'posted', debit: 32000, credit: 32000 },
+      { entryNumber: 'JV-2025-0003', date: '2025-02-06', memo: 'Utility bill', ref: 'BILL-112', status: 'draft', debit: 1800, credit: 1800 }
+    ];
+
     this.accounts.set(sampleAccounts);
     this.trialBalance.set(sampleTrial);
     this.periods.set(samplePeriods);
     this.metrics.set(sampleMetrics);
     this.cashPosition.set({ cash: 15000, bank: 110000, ar: 42000, ap: 18000 });
     this.feeStructures.set(sampleFees);
+    this.journals.set(sampleJournals);
   }
 
   createAccount(dto: Account) {
@@ -199,8 +217,18 @@ export class AccountingService {
   }
 
   postJournal(dto: any) {
-    // In mock mode, just return success
-    return of({ ok: true, dto });
+    const nextNumber = `JV-2025-${String(this.journals().length + 1).padStart(4, '0')}`;
+    const entry: JournalEntryPreview = {
+      entryNumber: nextNumber,
+      date: dto.date?.toISOString ? dto.date.toISOString().slice(0, 10) : dto.date || new Date().toISOString().slice(0, 10),
+      memo: dto.memo || 'Journal entry',
+      ref: dto.refNo,
+      status: 'posted',
+      debit: dto.lines?.reduce((s: number, l: any) => s + (l.debit || 0), 0) || 0,
+      credit: dto.lines?.reduce((s: number, l: any) => s + (l.credit || 0), 0) || 0
+    };
+    this.journals.set([entry, ...this.journals()]);
+    return of(entry);
   }
 
   loadPeriods() {
