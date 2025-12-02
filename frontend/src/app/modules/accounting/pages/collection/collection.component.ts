@@ -61,11 +61,31 @@ interface StudentFee {
         <div class="modal-backdrop" (click)="closePayment()"></div>
         <div class="modal">
           <div class="modal-header">
-            <h3>Record Payment</h3>
+            <div>
+              <p class="eyebrow">Payment</p>
+              <h3>Record Payment</h3>
+            </div>
             <button class="chip" (click)="closePayment()">✕</button>
           </div>
           <div class="modal-body">
-            <p class="muted">Student: {{ activeStudent?.student || 'Select a student' }}</p>
+            <div class="payer">
+              <div>
+                <p class="label">Student</p>
+                <p class="value">{{ activeStudent?.student || 'Select a student' }}</p>
+              </div>
+              <div>
+                <p class="label">Admission</p>
+                <p class="value">{{ activeStudent?.admissionNo || '—' }}</p>
+              </div>
+              <div>
+                <p class="label">Due</p>
+                <p class="value">{{ activeStudent?.due || 0 | currency:'USD' }}</p>
+              </div>
+              <div>
+                <p class="label">Overdue</p>
+                <p class="value danger">{{ activeStudent?.overdue || 0 | currency:'USD' }}</p>
+              </div>
+            </div>
             <form class="form-grid" (ngSubmit)="savePayment()">
               <label>Amount
                 <input type="number" min="0" [(ngModel)]="payment.amount" name="amount" required />
@@ -82,6 +102,9 @@ interface StudentFee {
               </label>
               <label>Reference
                 <input [(ngModel)]="payment.reference" name="reference" placeholder="RCPT-001" />
+              </label>
+              <label>Notes
+                <textarea rows="2" [(ngModel)]="payment.notes" name="notes" placeholder="Optional note"></textarea>
               </label>
               <div class="actions">
                 <button class="btn primary" type="submit">Save</button>
@@ -115,10 +138,14 @@ interface StudentFee {
     .muted { color: var(--color-text-secondary); }
     .danger { color: var(--color-error,#ef4444); }
     .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:10; }
-    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; width: min(480px, 90vw); z-index:11; box-shadow: var(--shadow-lg, 0 20px 50px rgba(0,0,0,0.25)); }
+    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: var(--color-surface); border:1px solid var(--color-border); border-radius:16px; padding:1.25rem; width: min(520px, 90vw); z-index:11; box-shadow: var(--shadow-lg, 0 20px 50px rgba(0,0,0,0.25)); }
     .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; color: var(--color-text-primary); }
-    .modal-body { color: var(--color-text-primary); }
+    .modal-body { color: var(--color-text-primary); display:flex; flex-direction:column; gap:0.75rem; }
     .form-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:0.75rem; }
+    .form-grid input, .form-grid select, .form-grid textarea { width:100%; border:1px solid var(--color-border); border-radius:8px; padding:0.6rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
+    .payer { display:grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap:0.5rem; background: var(--color-surface-hover); border:1px solid var(--color-border); border-radius:10px; padding:0.65rem 0.8rem; }
+    .payer .label { margin:0; font-size:0.8rem; color: var(--color-text-secondary); text-transform:uppercase; letter-spacing:0.04em; }
+    .payer .value { margin:0.15rem 0 0; font-weight:700; color: var(--color-text-primary); }
   `]
 })
 export class CollectionComponent {
@@ -132,7 +159,7 @@ export class CollectionComponent {
   grades = ['Grade 5', 'Grade 6', 'Grade 7'];
   paymentOpen = false;
   activeStudent: StudentFee | null = null;
-  payment = { amount: 0, mode: 'cash', date: new Date().toISOString().slice(0,10), reference: '' };
+  payment = { amount: 0, mode: 'cash', date: new Date().toISOString().slice(0,10), reference: '', notes: '' };
 
   get filtered() {
     return this.students.filter(s => {
