@@ -150,8 +150,13 @@ interface InvoiceMock {
                 <div class="alloc-summary">
                   <div class="alloc-metrics">
                     <span>Apply total: <app-currency [amount]="applyTotal" [strong]="true"></app-currency></span>
-                    <span [class.danger]="remaining < 0">Remaining: <app-currency [amount]="remaining" [strong]="true"></app-currency></span>
+                    <span [class.danger]="remaining < 0" [class.warn]="remaining > 0">
+                      Remaining: <app-currency [amount]="remaining" [strong]="true"></app-currency>
+                    </span>
                   </div>
+                  <p class="hint" *ngIf="remaining > 0 && payment.amount">
+                    Remaining amount will stay unapplied. Auto-allocate or adjust applies to balance it.
+                  </p>
                 </div>
               </div>
 
@@ -265,6 +270,8 @@ interface InvoiceMock {
     .alloc-summary { display:flex; flex-direction:column; gap:0.5rem; font-weight:700; color: var(--color-text-primary); }
     .alloc-actions { display:flex; justify-content:flex-end; }
     .alloc-metrics { display:flex; gap:1rem; justify-content:flex-end; flex-wrap:wrap; align-items:center; }
+    .hint { margin:0; font-weight:500; color: var(--color-text-secondary); }
+    .warn { color: var(--color-warning, #eab308); }
     .form-history { display:grid; grid-template-columns: 1fr 0.9fr; gap:1rem; align-items:start; }
     @media (max-width: 1024px) { .form-history { grid-template-columns: 1fr; } }
     .history { margin-top:0.25rem; border:1px solid var(--color-border); border-radius:10px; background: var(--color-surface); overflow:hidden; }
