@@ -87,6 +87,9 @@ interface InvoiceMock {
             </div>
             <button class="chip" (click)="closePayment()">✕</button>
           </div>
+          <div class="banner success" *ngIf="savedBanner">
+            Payment saved (mock)
+          </div>
           <div class="payment-modal-body grid-body">
             <div class="col">
               <div class="payer">
@@ -114,7 +117,13 @@ interface InvoiceMock {
               </div>
 
               <div class="allocations" *ngIf="activeStudent">
-                <p class="label">Allocate to invoices</p>
+                <div class="alloc-header">
+                  <p class="section-title">Allocate to invoices</p>
+                  <div class="alloc-actions">
+                    <button class="chip" type="button" (click)="autoAllocate()">Auto-allocate oldest</button>
+                    <button class="chip ghost" type="button" (click)="clearAllocations()">Clear</button>
+                  </div>
+                </div>
                 <div class="alloc-table">
                   <div class="alloc-head">
                     <span>Invoice</span><span>Due</span><span>Apply</span><span>Select</span>
@@ -139,9 +148,6 @@ interface InvoiceMock {
                   </div>
                 </div>
                 <div class="alloc-summary">
-                  <div class="alloc-actions">
-                    <button class="chip" type="button" (click)="autoAllocate()">Auto-allocate oldest</button>
-                  </div>
                   <div class="alloc-metrics">
                     <span>Apply total: <app-currency [amount]="applyTotal" [strong]="true"></app-currency></span>
                     <span [class.danger]="remaining < 0">Remaining: <app-currency [amount]="remaining" [strong]="true"></app-currency></span>
@@ -149,34 +155,57 @@ interface InvoiceMock {
                 </div>
               </div>
 
-              <form class="form-grid" (ngSubmit)="savePayment()">
-                <label>Amount
-                  <app-amount-input [(ngModel)]="payment.amount" name="amount" required></app-amount-input>
-                </label>
-                <label>Mode
-                  <select [(ngModel)]="payment.mode" name="mode" required>
-                    <option value="cash">Cash</option>
-                    <option value="bank">Bank</option>
-                    <option value="mobile">Mobile</option>
-                  </select>
-                </label>
-                <label>Date
-                  <input type="date" [(ngModel)]="payment.date" name="date" required />
-                </label>
-                <label>Reference
-                  <input [(ngModel)]="payment.reference" name="reference" placeholder="RCPT-001" />
-                </label>
-                <label class="full">Notes
-                  <textarea rows="3" [(ngModel)]="payment.notes" name="notes" placeholder="Optional note"></textarea>
-                </label>
-                <div class="actions full">
-                  <button class="btn primary" type="submit" [disabled]="remaining < 0">
-                    <span class="icon">💾</span>
-                    Save
-                  </button>
-                  <button class="btn ghost" type="button" (click)="closePayment()">Cancel</button>
+              <div class="form-history">
+                <form class="form-grid compact tight-row" (ngSubmit)="savePayment()">
+                  <label>Amount
+                    <app-amount-input [(ngModel)]="payment.amount" name="amount" required></app-amount-input>
+                  </label>
+                  <label>Mode
+                    <select [(ngModel)]="payment.mode" name="mode" required>
+                      <option value="cash">Cash</option>
+                      <option value="bank">Bank</option>
+                      <option value="mobile">Mobile</option>
+                    </select>
+                  </label>
+                  <label>Date
+                    <input type="date" [(ngModel)]="payment.date" name="date" required />
+                  </label>
+                  <label>Reference
+                    <input [(ngModel)]="payment.reference" name="reference" placeholder="RCPT-001" />
+                  </label>
+                  <label class="full">Notes
+                    <textarea rows="3" [(ngModel)]="payment.notes" name="notes" placeholder="Optional note"></textarea>
+                  </label>
+                  <div class="actions full">
+                    <button class="btn primary" type="submit" [disabled]="remaining < 0">
+                      <span class="icon">💾</span>
+                      Save
+                    </button>
+                    <button class="btn ghost" type="button" (click)="closePayment()">Cancel</button>
+                  </div>
+                </form>
+
+                <div class="history" *ngIf="activeStudentHistory.length; else noHistory">
+                  <div class="history-head">
+                    <span>Recent Payments</span>
+                  </div>
+                  <div class="history-row" *ngFor="let h of activeStudentHistory">
+                    <span>{{ h.date }}</span>
+                    <span>{{ h.mode }}</span>
+                    <span><app-currency [amount]="h.amount"></app-currency></span>
+                  </div>
                 </div>
-              </form>
+                <ng-template #noHistory>
+                  <div class="history muted-state">
+                    <div class="history-head">
+                      <span>Recent Payments</span>
+                    </div>
+                    <div class="history-row">
+                      <span class="muted">No payments yet</span>
+                    </div>
+                  </div>
+                </ng-template>
+              </div>
             </div>
           </div>
         </div>
@@ -214,7 +243,9 @@ interface InvoiceMock {
     .payment-modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: var(--color-surface); border:1px solid var(--color-border); border-radius:16px; padding:1.25rem; width: min(1100px, 95vw); max-height:88vh; z-index:1100; box-shadow: var(--shadow-lg, 0 20px 50px rgba(0,0,0,0.25)); display:flex; flex-direction:column; }
     .payment-modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; color: var(--color-text-primary); }
     .payment-modal-body { color: var(--color-text-primary); display:grid; grid-template-columns: 1fr; gap:1.25rem; align-items:start; overflow:auto; padding-right:0.5rem; }
-    .form-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:0.75rem; }
+    .form-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:0.65rem; }
+    .form-grid.compact { grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); }
+    .form-grid.tight-row { grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); }
     .form-grid input, .form-grid select, .form-grid textarea { width:100%; border:1px solid var(--color-border); border-radius:8px; padding:0.6rem; background: var(--color-surface); color: var(--color-text-primary); }
     .form-grid .full { grid-column:1/-1; }
     .payer { display:grid; grid-template-columns: 80px repeat(auto-fit,minmax(140px,1fr)); gap:0.5rem; background: var(--color-surface-hover); border:1px solid var(--color-border); border-radius:10px; padding:0.65rem 0.8rem; align-items:center; }
@@ -222,7 +253,9 @@ interface InvoiceMock {
     .avatar { width:64px; height:64px; border-radius:14px; background: var(--color-surface); display:flex; align-items:center; justify-content:center; font-weight:700; color: var(--color-text-primary); background-size:cover; background-position:center; box-shadow: var(--shadow-sm); }
     .payer .label { margin:0; font-size:0.8rem; color: var(--color-text-secondary); text-transform:uppercase; letter-spacing:0.04em; }
     .payer .value { margin:0.15rem 0 0; font-weight:700; color: var(--color-text-primary); }
-    .allocations { display:flex; flex-direction:column; gap:0.5rem; }
+    .allocations { display:flex; flex-direction:column; gap:0.45rem; margin-top:0.4rem; }
+    .alloc-header { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; flex-wrap:wrap; }
+    .section-title { margin:0; font-weight:700; color: var(--color-text-primary); }
     .alloc-table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; background: var(--color-surface); max-height:320px; overflow-y:auto; }
     .alloc-head, .alloc-row { display:grid; grid-template-columns: 2fr 1fr 1fr 0.8fr; gap:0.4rem; padding:0.5rem 0.7rem; align-items:center; }
     .alloc-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
@@ -232,6 +265,13 @@ interface InvoiceMock {
     .alloc-summary { display:flex; flex-direction:column; gap:0.5rem; font-weight:700; color: var(--color-text-primary); }
     .alloc-actions { display:flex; justify-content:flex-end; }
     .alloc-metrics { display:flex; gap:1rem; justify-content:flex-end; flex-wrap:wrap; align-items:center; }
+    .form-history { display:grid; grid-template-columns: 1fr 0.9fr; gap:1rem; align-items:start; }
+    @media (max-width: 1024px) { .form-history { grid-template-columns: 1fr; } }
+    .history { margin-top:0.25rem; border:1px solid var(--color-border); border-radius:10px; background: var(--color-surface); overflow:hidden; }
+    .history-head { padding:0.6rem 0.8rem; font-weight:700; color: var(--color-text-primary); border-bottom:1px solid var(--color-border); }
+    .history-row { display:grid; grid-template-columns: 1.2fr 1fr 1fr; padding:0.5rem 0.8rem; gap:0.5rem; color: var(--color-text-secondary); }
+    .history-row:nth-child(odd) { background: var(--color-surface-hover); }
+    .banner.success { background: color-mix(in srgb, var(--color-success,#16a34a) 18%, transparent); border:1px solid color-mix(in srgb, var(--color-success,#16a34a) 40%, transparent); color: var(--color-text-primary); padding:0.5rem 0.75rem; border-radius:10px; margin-bottom:0.5rem; }
   `]
 })
 export class CollectionComponent {
@@ -252,6 +292,12 @@ export class CollectionComponent {
   paymentOpen = false;
   activeStudent: StudentFee | null = null;
   payment = { amount: null as number | null, mode: 'cash', date: new Date().toISOString().slice(0,10), reference: '', notes: '' };
+  paymentHistory: Record<string, { date: string; mode: string; amount: number }[]> = {
+    'ADM-1023': [{ date: 'Jan 15, 2025', mode: 'Cash', amount: 200 }],
+    'ADM-1011': [{ date: 'Jan 20, 2025', mode: 'Bank', amount: 300 }],
+    'ADM-1029': [{ date: 'Jan 05, 2025', mode: 'Cash', amount: 500 }],
+  };
+  savedBanner = false;
   invoices: InvoiceMock[] = [
     { number: 'INV-1001', desc: 'Term 1 Tuition', balance: 500 },
     { number: 'INV-1002', desc: 'Transport', balance: 180 },
@@ -283,7 +329,16 @@ export class CollectionComponent {
   savePayment() {
     // Mock save + reset allocations/payment
     this.invoices = this.invoices.map(inv => ({ ...inv, apply: undefined, selected: false }));
-    this.payment = { amount: 0, mode: 'cash', date: new Date().toISOString().slice(0,10), reference: '', notes: '' };
+    if (this.activeStudent && this.payment.amount) {
+      const arr = this.paymentHistory[this.activeStudent.admissionNo] || [];
+      this.paymentHistory[this.activeStudent.admissionNo] = [
+        { date: new Date().toLocaleDateString(), mode: this.payment.mode, amount: this.payment.amount },
+        ...arr
+      ].slice(0, 5);
+    }
+    this.savedBanner = true;
+    setTimeout(() => this.savedBanner = false, 2500);
+    this.payment = { amount: null, mode: 'cash', date: new Date().toISOString().slice(0,10), reference: '', notes: '' };
     this.paymentOpen = false;
   }
 
@@ -302,6 +357,11 @@ export class CollectionComponent {
     return this.students.find(s => s.admissionNo === opt.admissionNo) || null;
   }
 
+  get activeStudentHistory() {
+    if (!this.activeStudent) return [];
+    return this.paymentHistory[this.activeStudent.admissionNo] || [];
+  }
+
   onStudentSelected(sel: StudentOption | null) {
     this.selectedId = sel?.id || null;
   }
@@ -315,6 +375,11 @@ export class CollectionComponent {
       return { ...inv, apply, selected: apply > 0 };
     });
     this.payment.amount = this.applyTotal;
+  }
+
+  clearAllocations() {
+    this.invoices = this.invoices.map(inv => ({ ...inv, apply: undefined, selected: false }));
+    this.payment.amount = null;
   }
 
   onApplyChange() {
