@@ -16,7 +16,7 @@ interface DefaulterRow {
   grade: string;
   due: number;
   days: number;
-  contact: string;
+  photo?: string | null;
 }
 
 interface PaymentModeRow {
@@ -38,7 +38,6 @@ interface PaymentModeRow {
       </nav>
       <header class="page-header">
         <div>
-          <p class="eyebrow">Fees</p>
           <h1>Fee Reports Dashboard</h1>
           <p class="sub">Class collections, defaulters, and payment mode mix (mocked).</p>
         </div>
@@ -108,29 +107,29 @@ interface PaymentModeRow {
         <div class="card">
           <div class="card-header">
             <h3>Defaulters</h3>
-            <span class="muted">Top overdue</span>
             <div class="header-actions">
               <div class="chip-row">
-                <button class="chip" [class.active]="filters.status==='overdue'" (click)="filters.status='overdue'">Overdue</button>
-                <button class="chip" [class.active]="filters.status==='all'" (click)="filters.status='all'">All</button>
+                <button class="chip wide" [class.active]="filters.status==='overdue'" (click)="filters.status='overdue'">Overdue</button>
+                <button class="chip wide" [class.active]="filters.status==='all'" (click)="filters.status='all'">All</button>
               </div>
               <button class="btn ghost" type="button" (click)="exportDefaulters()">Export</button>
             </div>
           </div>
-          <div class="table">
-            <div class="table-head">
-              <span>Student</span><span>Grade</span><span>Due</span><span>Days</span><span>Contact</span>
+          <div class="def-list">
+            <div class="def-card" *ngFor="let d of filteredDefaulters">
+              <div class="def-top">
+                <span class="avatar" [style.background-image]="d.photo ? 'url(' + d.photo + ')' : ''">
+                  <span *ngIf="!d.photo">{{ initials(d.student) }}</span>
+                </span>
+                <span class="strong">{{ d.student }}</span>
+                <div class="def-meta">
+                  <span class="pill">{{ d.grade }}</span>
+                  <span class="danger">{{ d.due | currency:'USD' }}</span>
+                  <span class="muted">{{ d.days }} days overdue</span>
+                </div>
+              </div>
             </div>
-            <div class="table-row" *ngFor="let d of filteredDefaulters">
-              <span class="strong">{{ d.student }}</span>
-              <span>{{ d.grade }}</span>
-              <span class="danger">{{ d.due | currency:'USD' }}</span>
-              <span>{{ d.days }} days</span>
-              <span>{{ d.contact }}</span>
-            </div>
-            <div class="table-row" *ngIf="!filteredDefaulters.length">
-              <span class="muted" style="grid-column:1/6">No defaulters for filters.</span>
-            </div>
+            <div class="muted" *ngIf="!filteredDefaulters.length">No defaulters for filters.</div>
           </div>
         </div>
 
@@ -167,14 +166,14 @@ interface PaymentModeRow {
     .breadcrumbs a { color: var(--color-primary); text-decoration:none; }
     .breadcrumbs .sep { color: var(--color-text-secondary); }
     .page-header { display:flex; justify-content:space-between; align-items:flex-start; }
-    .eyebrow { text-transform: uppercase; letter-spacing:0.08em; color: var(--color-text-tertiary); font-weight:700; margin:0 0 0.25rem; }
-    h1 { margin:0 0 0.35rem; color: var(--color-text-primary); }
+    h1 { margin:0 0 0.2rem; color: var(--color-text-primary); }
     .sub { margin:0; color: var(--color-text-secondary); }
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-sm); }
     .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color: var(--color-text-primary); }
     .card-header h3 { margin:0; color: var(--color-text-primary); }
     .header-actions { display:flex; gap:0.5rem; }
     .chip-row { display:flex; gap:0.35rem; flex-wrap:wrap; }
+    .chip.wide { padding:0.4rem 1rem; }
     .filters .row { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:0.75rem; align-items:end; }
     label { display:flex; flex-direction:column; gap:0.3rem; font-weight:600; color: var(--color-text-primary); }
     input, select { border:1px solid var(--color-border); border-radius:8px; padding:0.6rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
@@ -195,6 +194,12 @@ interface PaymentModeRow {
     .trend { margin-bottom:0.5rem; }
     .spark { display:flex; gap:4px; align-items:flex-end; height:48px; padding:6px; border:1px solid var(--color-border); border-radius:8px; background: var(--color-surface); }
     .spark-line { width:10px; border-radius:4px 4px 0 0; background: linear-gradient(135deg, var(--color-primary,#7ab8ff), var(--color-primary-light,#9fd0ff)); }
+    .def-list { display:flex; flex-direction:column; gap:0.6rem; }
+    .def-card { border:1px solid var(--color-border); border-radius:10px; padding:0.7rem 0.9rem; background: var(--color-surface-hover); display:flex; align-items:center; gap:0.75rem; }
+    .def-top { display:flex; align-items:center; gap:0.65rem; width:100%; }
+    .def-meta { margin-left:auto; display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+    .pill { padding:0.2rem 0.6rem; border-radius:12px; border:1px solid var(--color-border); background: var(--color-surface); font-weight:600; color: var(--color-text-primary); }
+    .avatar { width:42px; height:42px; border-radius:12px; background: var(--color-surface); background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; font-weight:700; color: var(--color-text-primary); box-shadow: var(--shadow-sm); }
     .modes .mode-list { display:flex; flex-direction:column; gap:0.6rem; }
     .mode { border:1px solid var(--color-border); border-radius:10px; padding:0.7rem 0.8rem; background: var(--color-surface-hover); }
     .mode-head { display:flex; justify-content:space-between; align-items:center; }
@@ -213,9 +218,9 @@ export class FeeReportsComponent {
   ];
 
   defaulters: DefaulterRow[] = [
-    { student: 'Amaka Obi', grade: 'Grade 6', due: 480, days: 18, contact: 'amaka@school.com' },
-    { student: 'Chidi Okeke', grade: 'Grade 5', due: 320, days: 12, contact: 'chidi@school.com' },
-    { student: 'Sara Danjuma', grade: 'Grade 7', due: 900, days: 25, contact: 'sara@school.com' },
+    { student: 'Amaka Obi', grade: 'Grade 6', due: 480, days: 18, photo: null },
+    { student: 'Chidi Okeke', grade: 'Grade 5', due: 320, days: 12, photo: null },
+    { student: 'Sara Danjuma', grade: 'Grade 7', due: 900, days: 25, photo: null },
   ];
 
   modes: PaymentModeRow[] = [
@@ -266,5 +271,9 @@ export class FeeReportsComponent {
 
   exportDefaulters() {
     console.log('Exporting defaulters (mock)');
+  }
+
+  initials(name: string) {
+    return name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
   }
 }
