@@ -22,6 +22,7 @@ import { AccountingService } from '../../../../core/services/accounting.service'
           <a routerLink="/accounting/journals" class="btn primary">Post Journal</a>
           <a routerLink="/accounting/accounts" class="btn ghost">Chart of Accounts</a>
           <a routerLink="/accounting/fee-structures" class="btn ghost">Fee Structures</a>
+          <a routerLink="/accounting/fee-reports" class="btn ghost">Fee Reports</a>
           <a routerLink="/accounting/expenses" class="btn ghost">Expenses</a>
           <a routerLink="/accounting/bill-queue" class="btn ghost">Bills Queue</a>
           <a routerLink="/accounting/bank-recon" class="btn ghost">Bank Recon</a>
@@ -94,6 +95,7 @@ import { AccountingService } from '../../../../core/services/accounting.service'
             <li><a routerLink="/accounting/fee-structures">Fee Structures</a></li>
             <li><a routerLink="/accounting/fee-assignment">Fee Assignment</a></li>
             <li><a routerLink="/accounting/collection">Fee Collection</a></li>
+            <li><a routerLink="/accounting/fee-reports">Fee Reports Dashboard</a></li>
             <li><a routerLink="/accounting/journals">Manual Journal</a></li>
             <li><a routerLink="/accounting/expenses">Expense Entry</a></li>
             <li><a routerLink="/accounting/bill-queue">Bill Payment Queue</a></li>
