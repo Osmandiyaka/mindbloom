@@ -15,16 +15,21 @@ import { AccountingService, Account, AccountNode } from '../../../../core/servic
           <h1>Chart of Accounts</h1>
           <p class="sub">Manage GL accounts, organized by type with quick search.</p>
         </div>
-        <div class="filters">
-          <input type="search" placeholder="Search code or name" [(ngModel)]="search" />
-          <select [(ngModel)]="typeFilter">
-            <option value="">All types</option>
-            <option value="asset">Assets</option>
-            <option value="liability">Liabilities</option>
-            <option value="equity">Equity</option>
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-          </select>
+        <div class="header-actions">
+          <div class="filters">
+            <input type="search" placeholder="Search code or name" [(ngModel)]="search" />
+            <select [(ngModel)]="typeFilter">
+              <option value="">All types</option>
+              <option value="asset">Assets</option>
+              <option value="liability">Liabilities</option>
+              <option value="equity">Equity</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+          <button class="btn primary" type="button" (click)="openAdd()">
+            <span class="icon">➕</span> Add Account
+          </button>
         </div>
       </header>
 
@@ -39,42 +44,8 @@ import { AccountingService, Account, AccountNode } from '../../../../core/servic
       </section>
 
       <section class="card">
-        <h3>Add Account</h3>
-        <form class="form-grid" (ngSubmit)="addAccount()">
-          <label>Code
-            <input [(ngModel)]="form.code" name="code" required />
-          </label>
-          <label>Name
-            <input [(ngModel)]="form.name" name="name" required />
-          </label>
-          <label>Type
-            <select [(ngModel)]="form.type" name="type" required>
-              <option value="asset">Asset</option>
-              <option value="liability">Liability</option>
-              <option value="equity">Equity</option>
-              <option value="income">Income</option>
-              <option value="expense">Expense</option>
-            </select>
-          </label>
-          <label>Category
-            <select [(ngModel)]="form.category" name="category">
-              <option value="">Select</option>
-              <option *ngFor="let cat of categoryOptions(form.type)" [value]="cat">{{ cat }}</option>
-            </select>
-          </label>
-          <label>Parent Code
-            <input [(ngModel)]="form.parentCode" name="parentCode" placeholder="Optional" />
-          </label>
-          <div class="actions">
-            <button class="btn primary" type="submit">Add</button>
-            <span class="muted">Use a consistent numbering scheme to group accounts.</span>
-          </div>
-        </form>
-      </section>
-
-      <section class="card">
         <div class="card-header">
-          <h3>Accounts</h3>
+          <h3 class="card-title">Accounts</h3>
           <span class="muted">Drag-and-drop concept shown; backend wiring to follow.</span>
         </div>
         <div class="tree">
@@ -154,6 +125,44 @@ import { AccountingService, Account, AccountNode } from '../../../../core/servic
           </div>
         </form>
       </div>
+
+      <div class="modal-backdrop" *ngIf="adding" (click)="closeAdd()"></div>
+      <div class="modal edit-modal" *ngIf="adding">
+        <div class="modal-header">
+          <h3>Add Account</h3>
+          <button class="chip" (click)="closeAdd()">✕</button>
+        </div>
+        <form class="form-grid" (ngSubmit)="addAccount()">
+          <label>Code
+            <input [(ngModel)]="form.code" name="code" required />
+          </label>
+          <label>Name
+            <input [(ngModel)]="form.name" name="name" required />
+          </label>
+          <label>Type
+            <select [(ngModel)]="form.type" name="type" required>
+              <option value="asset">Asset</option>
+              <option value="liability">Liability</option>
+              <option value="equity">Equity</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </label>
+          <label>Category
+            <select [(ngModel)]="form.category" name="category">
+              <option value="">Select</option>
+              <option *ngFor="let cat of categoryOptions(form.type)" [value]="cat">{{ cat }}</option>
+            </select>
+          </label>
+          <label>Parent Code
+            <input [(ngModel)]="form.parentCode" name="parentCode" placeholder="Optional" />
+          </label>
+          <div class="actions">
+            <button class="btn primary" type="submit">Add</button>
+            <button type="button" class="btn ghost" (click)="closeAdd()">Cancel</button>
+          </div>
+        </form>
+      </div>
     </div>
   `,
   styles: [`
@@ -162,6 +171,7 @@ import { AccountingService, Account, AccountNode } from '../../../../core/servic
     .eyebrow { text-transform: uppercase; letter-spacing:0.08em; color: var(--color-text-tertiary); font-weight:700; margin:0 0 0.25rem; }
     h1 { margin:0 0 0.35rem; color: var(--color-text-primary); }
     .sub { margin:0; color: var(--color-text-secondary); }
+    .header-actions { display:flex; gap:0.75rem; align-items:flex-start; flex-wrap:wrap; justify-content:flex-end; }
     .filters { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; }
     .filters input, .filters select { border:1px solid var(--color-border); border-radius:8px; padding:0.55rem 0.75rem; background: var(--color-surface); color: var(--color-text-primary); min-width:220px; }
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-sm); }
@@ -205,6 +215,7 @@ export class AccountsComponent {
   expanded = new Set<string>();
   editing = false;
   editForm: Account = { code: '', name: '', type: 'asset' };
+  adding = false;
 
   constructor(public accounting: AccountingService) {}
 
@@ -217,6 +228,7 @@ export class AccountsComponent {
     if (!this.form.code || !this.form.name) return;
     this.accounting.createAccount({ ...this.form });
     this.form = { code: '', name: '', type: 'asset' };
+    this.adding = false;
   }
 
   categoryOptions(type: string) {
@@ -269,6 +281,14 @@ export class AccountsComponent {
   saveEdit() {
     this.accounting.updateAccount({ ...this.editForm });
     this.editing = false;
+  }
+
+  openAdd() {
+    this.adding = true;
+  }
+
+  closeAdd() {
+    this.adding = false;
   }
 
   toggleActive(node: Account) {
