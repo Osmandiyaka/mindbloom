@@ -33,8 +33,8 @@ import { TenantService } from '../../../core/services/tenant.service';
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      background: var(--color-surface-hover);
-      border: 1.5px solid color-mix(in srgb, var(--color-primary) 60%, var(--color-border) 40%);
+      background: color-mix(in srgb, var(--content-background-solid, var(--color-background, #f8f9fb)) 85%, var(--color-surface, #ffffff) 15%);
+      border: 1.5px solid color-mix(in srgb, var(--color-primary) 50%, var(--color-border) 50%);
       border-radius: 14px;
       padding: 0.35rem 0.5rem;
       color: var(--color-text-primary);
@@ -46,7 +46,7 @@ import { TenantService } from '../../../core/services/tenant.service';
     .amount-wrapper:focus-within {
       border-color: var(--color-primary);
       box-shadow: 0 8px 18px rgba(0,0,0,0.14), 0 0 0 3px color-mix(in srgb, var(--color-primary) 24%, transparent);
-      background: color-mix(in srgb, var(--color-surface-hover) 88%, var(--color-primary) 12%);
+      background: color-mix(in srgb, var(--content-background-solid, var(--color-background, #f8f9fb)) 80%, var(--color-primary) 20%);
     }
     .symbol {
       font-weight: 700;

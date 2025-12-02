@@ -26,6 +26,76 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+// Global form element theming (for any plain input/select/textarea)
+input,
+select,
+textarea {
+    font-family: inherit;
+    background: color-mix(in srgb, var(--content-background-solid, var(--color-background, #f8f9fb)) 85%, var(--color-surface, #ffffff) 15%) !important;
+    color: var(--color-text-primary, $text-primary);
+    border: 1px solid color-mix(in srgb, var(--color-border, $border-default) 85%, transparent 15%) !important;
+    border-radius: 10px;
+    padding: 0.55rem 0.65rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--color-text-tertiary, $text-muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--color-primary, $accent-blue) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #667eea) 22%, transparent);
+    background: color-mix(in srgb, var(--content-background-solid, var(--color-background, #f8f9fb)) 80%, var(--color-surface, #ffffff) 20%) !important;
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+// Stronger theme enforcement inside app shells/cards/modals
+.card input,
+.card select,
+.card textarea,
+.modal input,
+.modal select,
+.modal textarea,
+.payment-modal input,
+.payment-modal select,
+.payment-modal textarea,
+.table input,
+.table select,
+.table textarea {
+    background: color-mix(in srgb, var(--color-background, #f8f9fb) 60%, var(--color-surface, #ffffff) 40%);
+    color: var(--color-text-primary, $text-primary);
+    border: 1px solid color-mix(in srgb, var(--color-border, $border-default) 80%, transparent 20%);
+    box-shadow: none;
+}
+
+.card input:focus,
+.card select:focus,
+.card textarea:focus,
+.modal input:focus,
+.modal select:focus,
+.modal textarea:focus,
+.payment-modal input:focus,
+.payment-modal select:focus,
+.payment-modal textarea:focus,
+.table input:focus,
+.table select:focus,
+.table textarea:focus {
+    background: color-mix(in srgb, var(--color-background, #f8f9fb) 70%, var(--color-surface, #ffffff) 30%);
+    border-color: var(--color-primary, $accent-blue);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #667eea) 22%, transparent);
+}
+
 // Theme-tinted canvas for content areas
 :root {
     /* solid fallbacks */

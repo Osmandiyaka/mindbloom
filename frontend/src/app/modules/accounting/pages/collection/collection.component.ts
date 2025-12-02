@@ -215,7 +215,7 @@ interface InvoiceMock {
     .payment-modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; color: var(--color-text-primary); }
     .payment-modal-body { color: var(--color-text-primary); display:grid; grid-template-columns: 1fr; gap:1.25rem; align-items:start; overflow:auto; padding-right:0.5rem; }
     .form-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:0.75rem; }
-    .form-grid input, .form-grid select, .form-grid textarea { width:100%; border:1px solid var(--color-border); border-radius:8px; padding:0.6rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
+    .form-grid input, .form-grid select, .form-grid textarea { width:100%; border:1px solid var(--color-border); border-radius:8px; padding:0.6rem; background: var(--color-surface); color: var(--color-text-primary); }
     .form-grid .full { grid-column:1/-1; }
     .payer { display:grid; grid-template-columns: 80px repeat(auto-fit,minmax(140px,1fr)); gap:0.5rem; background: var(--color-surface-hover); border:1px solid var(--color-border); border-radius:10px; padding:0.65rem 0.8rem; align-items:center; }
     .avatar-wrap { display:flex; justify-content:center; }
@@ -227,7 +227,7 @@ interface InvoiceMock {
     .alloc-head, .alloc-row { display:grid; grid-template-columns: 2fr 1fr 1fr 0.8fr; gap:0.4rem; padding:0.5rem 0.7rem; align-items:center; }
     .alloc-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
     .alloc-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); }
-    .alloc-row input[type="number"] { width:100%; border:1px solid var(--color-border); border-radius:8px; padding:0.35rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
+    .alloc-row input[type="number"] { width:100%; border:1px solid var(--color-border); border-radius:8px; padding:0.35rem; background: var(--color-surface); color: var(--color-text-primary); }
     .inline-error { display:block; color: var(--color-error,#ef4444); font-size:0.75rem; margin-top:0.2rem; }
     .alloc-summary { display:flex; flex-direction:column; gap:0.5rem; font-weight:700; color: var(--color-text-primary); }
     .alloc-actions { display:flex; justify-content:flex-end; }
