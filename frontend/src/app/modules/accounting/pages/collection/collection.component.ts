@@ -78,14 +78,14 @@ interface InvoiceMock {
 
       @if (paymentOpen) {
         <div class="modal-backdrop" (click)="closePayment()"></div>
-        <div class="modal">
-          <div class="modal-header">
+        <div class="payment-modal">
+          <div class="payment-modal-header">
             <div>
               <h3 class="card-title">Record Payment</h3>
             </div>
             <button class="chip" (click)="closePayment()">✕</button>
           </div>
-          <div class="modal-body grid-body">
+          <div class="payment-modal-body grid-body">
             <div class="col">
               <div class="payer">
                 <div class="avatar-wrap">
@@ -196,10 +196,10 @@ interface InvoiceMock {
     .avatar.small { width:32px; height:32px; border-radius:10px; background: var(--color-surface-hover); display:flex; align-items:center; justify-content:center; font-weight:700; color: var(--color-text-primary); }
     .card-title { color: var(--color-text-primary); margin:0; }
     .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:10; }
-    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: var(--color-surface); border:1px solid var(--color-border); border-radius:16px; padding:1.25rem; width: min(1100px, 95vw); max-height:90vh; z-index:11; box-shadow: var(--shadow-lg, 0 20px 50px rgba(0,0,0,0.25)); display:flex; flex-direction:column; }
-    .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; color: var(--color-text-primary); }
-    .modal-body { color: var(--color-text-primary); display:grid; grid-template-columns: 1.05fr 0.95fr; gap:1rem; align-items:start; overflow:auto; padding-right:0.35rem; }
-    .form-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:0.75rem; }
+    .payment-modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: var(--color-surface); border:1px solid var(--color-border); border-radius:16px; padding:1.25rem; width: min(1600px, 96vw); max-height:88vh; z-index:1100; box-shadow: var(--shadow-lg, 0 20px 50px rgba(0,0,0,0.25)); display:flex; flex-direction:column; }
+    .payment-modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; color: var(--color-text-primary); }
+    .payment-modal-body { color: var(--color-text-primary); display:grid; grid-template-columns: 1.1fr 0.9fr; gap:1.25rem; align-items:start; overflow:auto; padding-right:0.5rem; }
+    .form-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:0.75rem; }
     .form-grid input, .form-grid select, .form-grid textarea { width:100%; border:1px solid var(--color-border); border-radius:8px; padding:0.6rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
     .form-grid .full { grid-column:1/-1; }
     .payer { display:grid; grid-template-columns: 80px repeat(auto-fit,minmax(140px,1fr)); gap:0.5rem; background: var(--color-surface-hover); border:1px solid var(--color-border); border-radius:10px; padding:0.65rem 0.8rem; align-items:center; }
