@@ -20,5 +20,9 @@ export const ACCOUNTING_ROUTES: Routes = [
   {
     path: 'periods',
     loadComponent: () => import('./pages/periods/periods.component').then(m => m.PeriodsComponent)
+  },
+  {
+    path: 'fee-structures',
+    loadComponent: () => import('./pages/fee-structures/fee-structures.component').then(m => m.FeeStructuresComponent)
   }
 ];

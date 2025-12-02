@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AccountingService, Account } from '../../../../core/services/accounting.service';
+import { AccountingService, Account, AccountNode } from '../../../../core/services/accounting.service';
 
 @Component({
   selector: 'app-accounts',
@@ -13,7 +13,18 @@ import { AccountingService, Account } from '../../../../core/services/accounting
         <div>
           <p class="eyebrow">Accounting</p>
           <h1>Chart of Accounts</h1>
-          <p class="sub">Manage your GL accounts for posting journals.</p>
+          <p class="sub">Manage GL accounts, organized by type with quick search.</p>
+        </div>
+        <div class="filters">
+          <input type="search" placeholder="Search code or name" [(ngModel)]="search" />
+          <select [(ngModel)]="typeFilter">
+            <option value="">All types</option>
+            <option value="asset">Assets</option>
+            <option value="liability">Liabilities</option>
+            <option value="equity">Equity</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
         </div>
       </header>
 
@@ -48,19 +59,33 @@ import { AccountingService, Account } from '../../../../core/services/accounting
       <section class="card">
         <div class="card-header">
           <h3>Accounts</h3>
+          <span class="muted">Drag-and-drop concept shown; backend wiring to follow.</span>
         </div>
-        <div class="table">
-          <div class="table-head">
-            <span>Code</span><span>Name</span><span>Type</span><span>Parent</span>
+        <div class="tree">
+          <div *ngFor="let node of filteredAccounts" class="tree-node">
+            <div class="tree-row">
+              <div class="row-main">
+                <span class="code">{{ node.code }}</span>
+                <span class="name">{{ node.name }}</span>
+              </div>
+              <span class="pill">{{ node.type | titlecase }}</span>
+              <span class="muted">{{ node.category || '—' }}</span>
+              <span class="balance" [class.negative]="(node.balance||0) < 0">{{ node.balance || 0 | number:'1.0-0' }}</span>
+            </div>
+            <div class="tree-children" *ngIf="node.children?.length">
+              <div *ngFor="let child of node.children" class="tree-row child">
+                <div class="row-main">
+                  <span class="code">{{ child.code }}</span>
+                  <span class="name">{{ child.name }}</span>
+                </div>
+                <span class="pill">{{ child.type | titlecase }}</span>
+                <span class="muted">{{ child.category || '—' }}</span>
+                <span class="balance" [class.negative]="(child.balance||0) < 0">{{ child.balance || 0 | number:'1.0-0' }}</span>
+              </div>
+            </div>
           </div>
-          <div class="table-row" *ngFor="let acc of accounting.accounts()">
-            <span class="strong">{{ acc.code }}</span>
-            <span>{{ acc.name }}</span>
-            <span class="pill">{{ acc.type | titlecase }}</span>
-            <span>{{ acc.parentCode || '—' }}</span>
-          </div>
-          <div class="table-row" *ngIf="!accounting.accounts().length">
-            <span class="muted" style="grid-column:1/5">No accounts yet.</span>
+          <div class="empty" *ngIf="!filteredAccounts.length">
+            <p>No accounts match your filter.</p>
           </div>
         </div>
       </section>
@@ -72,6 +97,8 @@ import { AccountingService, Account } from '../../../../core/services/accounting
     .eyebrow { text-transform: uppercase; letter-spacing:0.08em; color: var(--color-text-tertiary); font-weight:700; margin:0 0 0.25rem; }
     h1 { margin:0 0 0.35rem; color: var(--color-text-primary); }
     .sub { margin:0; color: var(--color-text-secondary); }
+    .filters { display:flex; gap:0.5rem; align-items:center; }
+    .filters input, .filters select { border:1px solid var(--color-border); border-radius:8px; padding:0.55rem 0.75rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-sm); }
     .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
     .form-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:0.75rem; }
@@ -80,17 +107,23 @@ import { AccountingService, Account } from '../../../../core/services/accounting
     .actions { display:flex; align-items:center; gap:0.75rem; grid-column:1/-1; }
     .btn { border-radius:10px; padding:0.65rem 1.1rem; font-weight:600; border:1px solid var(--color-border); background: var(--color-surface-hover); color: var(--color-text-primary); }
     .btn.primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
-    .table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; margin-top:0.5rem; }
-    .table-head, .table-row { display:grid; grid-template-columns: 1fr 2fr 1fr 1fr; gap:0.5rem; padding:0.75rem 0.9rem; align-items:center; }
-    .table-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
-    .table-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); }
-    .strong { font-weight:700; color: var(--color-text-primary); }
-    .pill { padding:0.2rem 0.45rem; border-radius:10px; background: var(--color-surface-hover); }
+    .tree { display:flex; flex-direction:column; gap:0.25rem; }
+    .tree-row { display:grid; grid-template-columns: 1.6fr 0.8fr 1fr 0.8fr; gap:0.5rem; align-items:center; padding:0.55rem 0.65rem; border:1px solid var(--color-border); border-radius:10px; background: var(--color-surface-hover); }
+    .tree-row.child { margin-left: 1.5rem; background: var(--color-surface); }
+    .row-main { display:flex; gap:0.5rem; align-items:center; }
+    .code { font-weight:700; color: var(--color-text-primary); }
+    .name { color: var(--color-text-secondary); }
+    .pill { padding:0.2rem 0.45rem; border-radius:10px; background: var(--color-surface); }
+    .balance { font-weight:600; color: var(--color-text-primary); text-align:right; }
+    .negative { color: var(--color-error,#ef4444); }
     .muted { color: var(--color-text-secondary); }
+    .empty { text-align:center; padding:1rem; color: var(--color-text-secondary); }
   `]
 })
 export class AccountsComponent {
   form: Account = { code: '', name: '', type: 'asset' };
+  search = '';
+  typeFilter = '';
 
   constructor(public accounting: AccountingService) {}
 
@@ -98,5 +131,24 @@ export class AccountsComponent {
     if (!this.form.code || !this.form.name) return;
     this.accounting.createAccount({ ...this.form });
     this.form = { code: '', name: '', type: 'asset' };
+  }
+
+  get filteredAccounts(): AccountNode[] {
+    const matches = (node: AccountNode): AccountNode | null => {
+      const term = this.search.toLowerCase();
+      const hit =
+        (!this.typeFilter || node.type === this.typeFilter) &&
+        (!term || node.code.toLowerCase().includes(term) || node.name.toLowerCase().includes(term));
+      const kids = node.children
+        ?.map(child => matches(child))
+        .filter((c): c is AccountNode => !!c);
+      if (hit || (kids && kids.length)) {
+        return { ...node, children: kids };
+      }
+      return null;
+    };
+    return this.accounting.accounts()
+      .map(acc => matches(acc))
+      .filter((n): n is AccountNode => !!n);
   }
 }

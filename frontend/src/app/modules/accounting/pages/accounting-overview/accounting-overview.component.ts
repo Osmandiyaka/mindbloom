@@ -12,16 +12,53 @@ import { AccountingService } from '../../../../core/services/accounting.service'
       <header class="page-header">
         <div>
           <p class="eyebrow">Accounting</p>
-          <h1>General Ledger</h1>
-          <p class="sub">Chart of accounts, journals, and trial balance at a glance.</p>
+          <h1>Finance Workspace</h1>
+          <p class="sub">Cash, fees, journals, and reporting—aligned to the academic year.</p>
         </div>
         <div class="actions">
           <a routerLink="/accounting/journals" class="btn primary">Post Journal</a>
           <a routerLink="/accounting/accounts" class="btn ghost">Chart of Accounts</a>
+          <a routerLink="/accounting/fee-structures" class="btn ghost">Fee Structures</a>
         </div>
       </header>
 
+      <section class="metrics">
+        <div class="metric-card" *ngFor="let m of accounting.metrics()">
+          <div class="metric-icon">{{ m.icon }}</div>
+          <div class="metric-body">
+            <p class="metric-label">{{ m.label }}</p>
+            <p class="metric-value">{{ m.value }}</p>
+            <p class="metric-trend">{{ m.trend }}</p>
+          </div>
+        </div>
+      </section>
+
       <section class="grid">
+        <div class="card wide">
+          <div class="card-header">
+            <h3>Cash Position</h3>
+            <span class="muted">As of today</span>
+          </div>
+          <div class="cash-grid">
+            <div class="cash-item">
+              <p class="label">Cash</p>
+              <p class="value">{{ accounting.cashPosition().cash | currency:'USD' }}</p>
+            </div>
+            <div class="cash-item">
+              <p class="label">Bank</p>
+              <p class="value">{{ accounting.cashPosition().bank | currency:'USD' }}</p>
+            </div>
+            <div class="cash-item">
+              <p class="label">A/R</p>
+              <p class="value">{{ accounting.cashPosition().ar | currency:'USD' }}</p>
+            </div>
+            <div class="cash-item">
+              <p class="label">A/P</p>
+              <p class="value">{{ accounting.cashPosition().ap | currency:'USD' }}</p>
+            </div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="card-header">
             <h3>Trial Balance Snapshot</h3>
@@ -32,7 +69,7 @@ import { AccountingService } from '../../../../core/services/accounting.service'
               <span>Account</span><span>Debit</span><span>Credit</span><span>Balance</span>
             </div>
             <div class="table-row" *ngFor="let row of trialBalancePreview">
-              <span class="strong">{{ row.accountCode }}</span>
+              <span class="strong">{{ row.accountCode }} · {{ row.accountName }}</span>
               <span>{{ row.debit | number:'1.2-2' }}</span>
               <span>{{ row.credit | number:'1.2-2' }}</span>
               <span [class.danger]="row.balance < 0">{{ row.balance | number:'1.2-2' }}</span>
@@ -48,7 +85,7 @@ import { AccountingService } from '../../../../core/services/accounting.service'
             <h3>Quick Links</h3>
           </div>
           <ul class="links">
-            <li><a routerLink="/fees/invoices">Fees & Invoices</a></li>
+            <li><a routerLink="/accounting/fee-structures">Fee Structures</a></li>
             <li><a routerLink="/accounting/journals">Manual Journal</a></li>
             <li><a routerLink="/accounting/accounts">Manage Accounts</a></li>
             <li><a routerLink="/accounting/trial-balance">Trial Balance</a></li>
@@ -68,9 +105,20 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .btn { border-radius:10px; padding:0.65rem 1.1rem; font-weight:600; border:1px solid var(--color-border); background: var(--color-surface-hover); color: var(--color-text-primary); text-decoration:none; }
     .btn.primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
     .btn.ghost { background: transparent; }
+    .metrics { display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:0.75rem; }
+    .metric-card { display:flex; gap:0.75rem; padding:0.9rem 1rem; background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; box-shadow: var(--shadow-sm); align-items:center; }
+    .metric-icon { font-size:1.4rem; }
+    .metric-label { margin:0; font-weight:600; color: var(--color-text-secondary); }
+    .metric-value { margin:0; font-size:1.25rem; font-weight:700; color: var(--color-text-primary); }
+    .metric-trend { margin:0; color: var(--color-text-secondary); font-size:0.85rem; }
     .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap:1rem; }
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-sm); }
+    .card.wide { grid-column: span 2; }
     .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
+    .cash-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:0.75rem; }
+    .cash-item { background: var(--color-surface-hover); border:1px solid var(--color-border); border-radius:10px; padding:0.75rem; }
+    .cash-item .label { margin:0; color: var(--color-text-secondary); font-weight:600; }
+    .cash-item .value { margin:0.15rem 0 0; color: var(--color-text-primary); font-weight:700; font-size:1.1rem; }
     .table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; }
     .table-head, .table-row { display:grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; padding:0.75rem 0.9rem; gap:0.5rem; }
     .table-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }

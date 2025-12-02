@@ -1,64 +1,225 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
+import { of } from 'rxjs';
+
+export type AccountType = 'asset' | 'liability' | 'equity' | 'income' | 'expense';
 
 export interface Account {
   code: string;
   name: string;
-  type: 'asset' | 'liability' | 'equity' | 'income' | 'expense';
+  type: AccountType;
   parentCode?: string;
+  category?: string;
+  normalBalance?: 'debit' | 'credit';
+  balance?: number;
   active?: boolean;
+}
+
+export interface AccountNode extends Account {
+  children?: AccountNode[];
 }
 
 export interface TrialBalanceRow {
   accountCode: string;
+  accountName: string;
   debit: number;
   credit: number;
   balance: number;
 }
 
+export interface AccountingMetric {
+  label: string;
+  value: string;
+  trend?: string;
+  icon?: string;
+}
+
+export interface FeeStructurePreview {
+  name: string;
+  grade: string;
+  academicYear: string;
+  components: { label: string; amount: number }[];
+  total: number;
+  paymentTerm: 'full' | 'termly' | 'monthly';
+}
+
 @Injectable({ providedIn: 'root' })
 export class AccountingService {
-  accounts = signal<Account[]>([]);
+  accounts = signal<AccountNode[]>([]);
   trialBalance = signal<TrialBalanceRow[]>([]);
   periods = signal<any[]>([]);
+  metrics = signal<AccountingMetric[]>([]);
+  cashPosition = signal<{ cash: number; bank: number; ar: number; ap: number }>({ cash: 0, bank: 0, ar: 0, ap: 0 });
+  feeStructures = signal<FeeStructurePreview[]>([]);
 
-  constructor(private http: HttpClient) {
-    this.loadAccounts();
-    this.loadTrialBalance();
-    this.loadPeriods();
+  constructor() {
+    this.loadMockData();
   }
 
-  loadAccounts() {
-    this.http.get<Account[]>(`${environment.apiUrl}/accounting/accounts`).subscribe(list => this.accounts.set(list));
+  private loadMockData() {
+    const sampleAccounts: AccountNode[] = [
+      {
+        code: '1000',
+        name: 'Cash & Bank',
+        type: 'asset',
+        category: 'Current Asset',
+        normalBalance: 'debit',
+        balance: 125000,
+        children: [
+          { code: '1010', name: 'Cash on Hand', type: 'asset', balance: 15000 },
+          { code: '1020', name: 'Main Bank', type: 'asset', balance: 85000 },
+          { code: '1030', name: 'Tuition Collections Bank', type: 'asset', balance: 25000 }
+        ]
+      },
+      {
+        code: '1200',
+        name: 'Accounts Receivable',
+        type: 'asset',
+        category: 'Current Asset',
+        normalBalance: 'debit',
+        balance: 42000
+      },
+      {
+        code: '2000',
+        name: 'Accounts Payable',
+        type: 'liability',
+        category: 'Current Liability',
+        normalBalance: 'credit',
+        balance: -18000
+      },
+      {
+        code: '4000',
+        name: 'Fee Income',
+        type: 'income',
+        category: 'Income',
+        normalBalance: 'credit',
+        balance: -96000,
+        children: [
+          { code: '4010', name: 'Tuition', type: 'income', balance: -75000 },
+          { code: '4020', name: 'Transport Fees', type: 'income', balance: -12000 },
+          { code: '4030', name: 'Meal Fees', type: 'income', balance: -9000 }
+        ]
+      },
+      {
+        code: '5000',
+        name: 'Operating Expenses',
+        type: 'expense',
+        category: 'Expense',
+        normalBalance: 'debit',
+        balance: 54000,
+        children: [
+          { code: '5010', name: 'Salaries', type: 'expense', balance: 32000 },
+          { code: '5020', name: 'Utilities', type: 'expense', balance: 6200 },
+          { code: '5030', name: 'Supplies', type: 'expense', balance: 4800 },
+          { code: '5040', name: 'Maintenance', type: 'expense', balance: 5200 }
+        ]
+      }
+    ];
+
+    const sampleTrial: TrialBalanceRow[] = [
+      { accountCode: '1010', accountName: 'Cash on Hand', debit: 15000, credit: 0, balance: 15000 },
+      { accountCode: '1020', accountName: 'Main Bank', debit: 85000, credit: 0, balance: 85000 },
+      { accountCode: '1200', accountName: 'Accounts Receivable', debit: 42000, credit: 0, balance: 42000 },
+      { accountCode: '2000', accountName: 'Accounts Payable', debit: 0, credit: 18000, balance: -18000 },
+      { accountCode: '4010', accountName: 'Tuition', debit: 0, credit: 75000, balance: -75000 },
+      { accountCode: '5010', accountName: 'Salaries', debit: 32000, credit: 0, balance: 32000 }
+    ];
+
+    const samplePeriods = [
+      { id: 'p1', name: 'Term 1 2025', start: '2025-01-10', end: '2025-04-05', status: 'open' },
+      { id: 'p2', name: 'Term 2 2025', start: '2025-04-20', end: '2025-07-15', status: 'planned' }
+    ];
+
+    const sampleMetrics: AccountingMetric[] = [
+      { label: "Today's Collections", value: '$18,400', trend: '+8.5%', icon: '💰' },
+      { label: 'Overdue Invoices', value: '42', trend: '12 overdue', icon: '⏰' },
+      { label: 'Pending Payments', value: '$9,250', trend: '3 due this week', icon: '📥' },
+      { label: 'Cash Position', value: '$125,000', trend: 'incl. bank & cash', icon: '🏦' }
+    ];
+
+    const sampleFees: FeeStructurePreview[] = [
+      {
+        name: 'Primary Tuition',
+        grade: 'Grade 5',
+        academicYear: '2025',
+        components: [
+          { label: 'Tuition', amount: 1800 },
+          { label: 'Transport', amount: 320 },
+          { label: 'Meals', amount: 260 }
+        ],
+        total: 2380,
+        paymentTerm: 'termly'
+      },
+      {
+        name: 'Junior High',
+        grade: 'Grade 8',
+        academicYear: '2025',
+        components: [
+          { label: 'Tuition', amount: 2300 },
+          { label: 'Lab Fees', amount: 180 },
+          { label: 'Library', amount: 90 }
+        ],
+        total: 2570,
+        paymentTerm: 'termly'
+      }
+    ];
+
+    this.accounts.set(sampleAccounts);
+    this.trialBalance.set(sampleTrial);
+    this.periods.set(samplePeriods);
+    this.metrics.set(sampleMetrics);
+    this.cashPosition.set({ cash: 15000, bank: 110000, ar: 42000, ap: 18000 });
+    this.feeStructures.set(sampleFees);
   }
 
   createAccount(dto: Account) {
-    return this.http.post(`${environment.apiUrl}/accounting/accounts`, dto).subscribe(() => this.loadAccounts());
+    const current = [...this.accounts()];
+    const parentCode = dto.parentCode;
+    if (parentCode) {
+      const attach = (nodes: AccountNode[]): boolean => {
+        for (const node of nodes) {
+          if (node.code === parentCode) {
+            node.children = [...(node.children || []), { ...dto }];
+            return true;
+          }
+          if (node.children && attach(node.children)) return true;
+        }
+        return false;
+      };
+      attach(current);
+    } else {
+      current.push({ ...dto });
+    }
+    this.accounts.set(current);
   }
 
+  // Compatibility stubs for existing callers
   loadTrialBalance(asOf?: Date) {
-    const params: any = asOf ? { asOf: asOf.toISOString() } : {};
-    this.http.get<TrialBalanceRow[]>(`${environment.apiUrl}/accounting/trial-balance`, { params }).subscribe(rows => this.trialBalance.set(rows));
+    // Optionally adjust mock asOf filtering
+    return of(this.trialBalance());
   }
 
   postJournal(dto: any) {
-    return this.http.post(`${environment.apiUrl}/accounting/journals`, dto);
+    // In mock mode, just return success
+    return of({ ok: true, dto });
   }
 
   loadPeriods() {
-    this.http.get<any[]>(`${environment.apiUrl}/accounting/periods`).subscribe(list => this.periods.set(list));
+    return of(this.periods());
   }
 
   upsertPeriod(dto: { name: string; start: string; end: string }) {
-    return this.http.post(`${environment.apiUrl}/accounting/periods`, dto).subscribe(() => this.loadPeriods());
+    const periods = [...this.periods(), { ...dto, id: crypto.randomUUID(), status: 'planned' }];
+    this.periods.set(periods);
+    return of(true);
   }
 
   closePeriod(id: string) {
-    return this.http.post(`${environment.apiUrl}/accounting/periods/${id}/close?id=${id}`, {}).subscribe(() => this.loadPeriods());
+    this.periods.set(this.periods().map(p => p.id === id || p._id === id ? { ...p, status: 'closed' } : p));
+    return of(true);
   }
 
   reopenPeriod(id: string) {
-    return this.http.post(`${environment.apiUrl}/accounting/periods/${id}/reopen?id=${id}`, {}).subscribe(() => this.loadPeriods());
+    this.periods.set(this.periods().map(p => p.id === id || p._id === id ? { ...p, status: 'open' } : p));
+    return of(true);
   }
 }
