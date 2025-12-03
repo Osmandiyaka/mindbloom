@@ -77,12 +77,7 @@ export class SidebarComponent implements OnInit {
       title: 'Academic',
       items: [
         { label: 'Student Workspace', path: '/students', icon: 'dashboard' },
-        { label: 'Roster', path: '/students/roster', icon: 'students' },
-        { label: 'Admissions', path: '/students/admissions', icon: 'admissions' },
-        { label: 'Attendance', path: '/students/attendance', icon: 'attendance' },
-        { label: 'Academics', path: '/students/academics', icon: 'academics' },
-        { label: 'Conduct', path: '/students/conduct', icon: 'tasks' },
-        { label: 'Reports', path: '/students/reports', icon: 'reports' }
+        // Sub-links are available inside the Student Workspace quick links.
       ]
     },
     {
