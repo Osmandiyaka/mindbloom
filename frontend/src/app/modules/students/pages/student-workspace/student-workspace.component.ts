@@ -4,11 +4,12 @@ import { RouterModule } from '@angular/router';
 import { CardComponent } from '../../../../shared/components/card/card.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { IconRegistryService } from '../../../../shared/services/icon-registry.service';
+import { StudentsListComponent } from '../students-list/students-list.component';
 
 @Component({
   selector: 'app-student-workspace',
   standalone: true,
-  imports: [CommonModule, RouterModule, CardComponent, ButtonComponent],
+  imports: [CommonModule, RouterModule, CardComponent, ButtonComponent, StudentsListComponent],
   styleUrls: ['./student-workspace.component.scss'],
   template: `
     <div class="workspace">
@@ -101,6 +102,10 @@ import { IconRegistryService } from '../../../../shared/services/icon-registry.s
                 <li><span class="pill action">Action</span> Parent follow-up: conduct incident</li>
               </ul>
             </app-card>
+          </section>
+
+          <section class="roster-section">
+            <app-students-list></app-students-list>
           </section>
         </main>
       </div>
