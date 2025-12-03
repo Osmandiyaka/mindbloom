@@ -32,6 +32,7 @@ interface EmployeeRow {
           <p class="sub">Monthly run summary, employees, and status (mock UI).</p>
         </div>
         <div class="actions">
+          <button class="btn ghost" type="button" *ngIf="hasProcessed" (click)="downloadPayslips()">Download payslips</button>
           <select class="mini" [(ngModel)]="run.month">
             <option *ngFor="let m of months" [value]="m">{{ m }}</option>
           </select>
@@ -206,10 +207,12 @@ interface EmployeeRow {
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-sm); }
     .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color: var(--color-text-primary); }
     .card-header h3 { margin:0; color: var(--color-text-primary); }
-    .summary-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap:0.75rem; }
+    .summary-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap:0.75rem; }
+    @media (min-width: 900px) { .summary-grid { grid-template-columns: repeat(4, 1fr); } }
     .label { margin:0; color: var(--color-text-secondary); font-weight:600; font-size:0.9rem; }
     .value { margin:0.1rem 0 0; color: var(--color-text-primary); font-weight:700; font-size:1.1rem; }
-    .filters .filter-row { display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:0.75rem; align-items:end; }
+    .filters .filter-row { display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:0.6rem; align-items:end; }
+    @media (min-width: 900px) { .filters .filter-row { grid-template-columns: repeat(4, 1fr); } }
     label { display:flex; flex-direction:column; gap:0.3rem; font-weight:600; color: var(--color-text-primary); }
     input, select { border:1px solid var(--color-border); border-radius:8px; padding:0.6rem; background: var(--color-surface-hover); color: var(--color-text-primary); }
     .table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; background: var(--color-surface); }
@@ -246,10 +249,10 @@ export class PayrollComponent {
   gradeFilter = '';
   statusFilter = '';
   grades = ['A1', 'B1', 'C1', 'D1'];
-  months = ['January 2025', 'February 2025', 'March 2025', 'April 2025'];
+  months = ['Jan 2025', 'Feb 2025', 'Mar 2025', 'Apr 2025'];
 
   run = {
-    month: 'February 2025',
+    month: 'Feb 2025',
     count: 12,
     gross: 48200,
     net: 39600,
