@@ -11,8 +11,9 @@
 
 .columns {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 200px minmax(0, 1fr);
   gap: 1rem;
+  align-items: start;
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
@@ -27,6 +28,7 @@
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: 1rem;
+  width: 100%;
 
   .sidebar-header {
     margin-bottom: 0.35rem;
