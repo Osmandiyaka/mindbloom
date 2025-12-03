@@ -6,6 +6,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { TenantService } from '../../../core/services/tenant.service';
 import { ThemeSelectorComponent } from '../theme-selector/theme-selector.component';
 import { TooltipDirective } from '../../directives/tooltip.directive';
+import { IconRegistryService } from '../../services/icon-registry.service';
 
 @Component({
     selector: 'app-global-toolbar',
@@ -21,8 +22,13 @@ export class GlobalToolbarComponent {
     constructor(
         private authService: AuthService,
         private tenantService: TenantService,
-        private router: Router
+        private router: Router,
+        private icons: IconRegistryService
     ) { }
+
+    icon(name: string) {
+        return this.icons.icon(name);
+    }
 
     onSearch() {
         console.log('Search:', this.searchQuery);

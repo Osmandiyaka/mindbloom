@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { IconRegistryService } from '../../services/icon-registry.service';
 
 interface NavItem {
   label: string;
@@ -24,7 +25,7 @@ interface NavSection {
       <!-- Logo/Brand -->
       <div class="sidebar-header">
         <div class="sidebar-logo">
-          <span>🎓</span>
+          <span class="nav-icon" [innerHTML]="icon('dashboard')"></span>
           <span>MindBloom</span>
         </div>
       </div>
@@ -38,7 +39,7 @@ interface NavSection {
               [routerLink]="item.path"
               routerLinkActive="active"
               [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }">
-              <span class="nav-icon">{{ item.icon }}</span>
+              <span class="nav-icon" [innerHTML]="icon(item.icon)"></span>
               <span class="nav-text">{{ item.label }}</span>
               <span class="nav-badge" *ngIf="item.badge">{{ item.badge }}</span>
             </a>
@@ -69,16 +70,16 @@ export class SidebarComponent implements OnInit {
     {
       title: 'Main',
       items: [
-        { label: 'Dashboard', path: '/dashboard', icon: '📊' }
+        { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' }
       ]
     },
     {
       title: 'Academic',
       items: [
-        { label: 'Students', path: '/students', icon: '👨‍🎓' },
-        { label: 'Admissions', path: '/admissions', icon: '📝' },
-        { label: 'Academics', path: '/academics', icon: '📚' },
-        { label: 'Attendance', path: '/attendance', icon: '✓' }
+        { label: 'Students', path: '/students', icon: 'students' },
+        { label: 'Admissions', path: '/admissions', icon: 'admissions' },
+        { label: 'Academics', path: '/academics', icon: 'academics' },
+        { label: 'Attendance', path: '/attendance', icon: 'attendance' }
       ]
     },
     {
@@ -88,7 +89,7 @@ export class SidebarComponent implements OnInit {
         // { label: 'Invoices', path: '/fees/invoices', icon: '🧾' },
         // { label: 'Fee Plans', path: '/fees/plans', icon: '🗂️' },
         // { label: 'Bulk Invoice', path: '/fees/bulk-invoices', icon: '📥' },
-        { label: 'Accounting', path: '/accounting', icon: '📒' },
+        { label: 'Accounting', path: '/accounting', icon: 'accounting' },
         // { label: 'Finance', path: '/finance', icon: '📈' },
         // { label: 'Payroll', path: '/payroll', icon: '💵' }
       ]
@@ -96,27 +97,32 @@ export class SidebarComponent implements OnInit {
     {
       title: 'Staff & Resources',
       items: [
-        { label: 'HR', path: '/hr', icon: '👥' },
-        { label: 'Library', path: '/library', icon: '📖' },
-        { label: 'Hostel', path: '/hostel', icon: '🏠' },
-        { label: 'Transport', path: '/transport', icon: '🚌' }
+        { label: 'HR', path: '/hr', icon: 'hr' },
+        { label: 'Library', path: '/library', icon: 'library' },
+        { label: 'Hostel', path: '/hostel', icon: 'hostel' },
+        { label: 'Transport', path: '/transport', icon: 'transport' }
       ]
     },
     {
       title: 'System',
       items: [
-        { label: 'Tenant Settings', path: '/setup/tenant-settings', icon: '⚙️' },
-        { label: 'Marketplace', path: '/setup/marketplace', icon: '🛒' },
-        { label: 'Plugins', path: '/plugins', icon: '🔌' },
-        { label: 'Tasks', path: '/tasks', icon: '✅' }
+        { label: 'Tenant Settings', path: '/setup/tenant-settings', icon: 'settings' },
+        { label: 'Marketplace', path: '/setup/marketplace', icon: 'marketplace' },
+        { label: 'Plugins', path: '/plugins', icon: 'plugins' },
+        { label: 'Tasks', path: '/tasks', icon: 'tasks' }
       ]
     }
   ];
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private icons: IconRegistryService
   ) { }
+
+  icon(name: string) {
+    return this.icons.icon(name);
+  }
 
   ngOnInit(): void {
     this.authService.currentUser$.subscribe((user: any) => {
