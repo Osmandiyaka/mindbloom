@@ -76,8 +76,8 @@ export class SidebarComponent implements OnInit {
     {
       title: 'Academic',
       items: [
-        { label: 'Student Dashboard', path: '/students/dashboard', icon: 'dashboard' },
-        { label: 'Roster', path: '/students', icon: 'students' },
+        { label: 'Student Workspace', path: '/students', icon: 'dashboard' },
+        { label: 'Roster', path: '/students/roster', icon: 'students' },
         { label: 'Admissions', path: '/students/admissions', icon: 'admissions' },
         { label: 'Attendance', path: '/students/attendance', icon: 'attendance' },
         { label: 'Academics', path: '/students/academics', icon: 'academics' },
