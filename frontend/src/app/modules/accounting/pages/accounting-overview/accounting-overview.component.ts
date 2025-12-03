@@ -57,8 +57,8 @@ import { AccountingService } from '../../../../core/services/accounting.service'
           <section class="tile-band">
             <div class="tile" *ngFor="let t of tiles">
               <div class="tile-top">
+                <span class="tile-icon-bubble">{{ t.icon }}</span>
                 <span class="pill" [class.good]="t.status==='ready'" [class.warn]="t.status==='watch'">{{ t.statusLabel }}</span>
-                <span class="tile-icon">{{ t.icon }}</span>
               </div>
               <p class="tile-label">{{ t.label }}</p>
               <p class="tile-value">{{ t.value }}</p>
@@ -67,7 +67,7 @@ import { AccountingService } from '../../../../core/services/accounting.service'
           </section>
 
           <section class="analytics">
-            <div class="card">
+            <div class="card hoverable">
               <div class="card-header">
                 <div>
                   <h3>Collections mix</h3>
@@ -87,7 +87,7 @@ import { AccountingService } from '../../../../core/services/accounting.service'
               </div>
             </div>
 
-            <div class="card">
+            <div class="card hoverable">
               <div class="card-header">
                 <div>
                   <h3>Cashflow trend</h3>
@@ -120,7 +120,7 @@ import { AccountingService } from '../../../../core/services/accounting.service'
               </div>
             </div>
 
-            <div class="card">
+            <div class="card hoverable">
               <div class="card-header">
                 <h3>Trial Balance Snapshot</h3>
                 <a routerLink="/accounting/trial-balance" class="link">View full</a>
@@ -142,7 +142,7 @@ import { AccountingService } from '../../../../core/services/accounting.service'
             </div>
           </section>
 
-          <section class="tasks card">
+          <section class="tasks card hoverable">
             <div class="card-header">
               <h3>Workboard</h3>
               <div class="task-actions">
@@ -178,7 +178,7 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     </div>
   `,
   styles: [`
-    .page { padding:1.5rem; display:flex; flex-direction:column; gap:1rem; }
+    .page { padding:1.5rem; display:flex; flex-direction:column; gap:1rem; background: radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--color-primary,#7ab8ff) 10%, transparent), transparent), radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--color-warning,#eab308) 8%, transparent), transparent); }
     .layout { display:grid; grid-template-columns: 260px 1fr; gap:1rem; align-items:start; }
     @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
     .sidebar { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-sm); position:sticky; top:1rem; }
@@ -194,8 +194,10 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .btn.primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
     .btn.ghost { background: transparent; }
     .tile-band { display:grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap:0.75rem; }
-    .tile { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:0.85rem 1rem; box-shadow: var(--shadow-sm); display:flex; flex-direction:column; gap:0.35rem; }
-    .tile-top { display:flex; justify-content:space-between; align-items:center; }
+    .tile { background: linear-gradient(135deg, color-mix(in srgb, var(--color-surface) 80%, transparent), color-mix(in srgb, var(--color-surface-hover) 60%, transparent)); border:1px solid var(--color-border); border-radius:12px; padding:0.85rem 1rem; box-shadow: var(--shadow-sm); display:flex; flex-direction:column; gap:0.35rem; transition: transform 120ms ease, box-shadow 120ms ease; }
+    .tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-md, 0 12px 28px rgba(0,0,0,0.18)); }
+    .tile-top { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; }
+    .tile-icon-bubble { width:34px; height:34px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; background: color-mix(in srgb, var(--color-primary,#7ab8ff) 20%, transparent); box-shadow: inset 0 0 0 1px var(--color-border); }
     .tile-label { margin:0; color: var(--color-text-secondary); font-weight:600; }
     .tile-value { margin:0; font-size:1.35rem; font-weight:700; color: var(--color-text-primary); }
     .tile-sub { margin:0; color: var(--color-text-secondary); font-size:0.9rem; }
@@ -205,6 +207,8 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .pill.warn { background: color-mix(in srgb, var(--color-warning,#eab308) 15%, transparent); color: var(--color-warning,#eab308); border-color: color-mix(in srgb, var(--color-warning,#eab308) 35%, transparent); }
     .analytics { display:grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap:1rem; }
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-sm); }
+    .hoverable { transition: transform 120ms ease, box-shadow 120ms ease; }
+    .hoverable:hover { transform: translateY(-2px); box-shadow: var(--shadow-md, 0 12px 28px rgba(0,0,0,0.18)); }
     .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color: var(--color-text-primary); }
     .card-header h3 { color: var(--color-text-primary); margin:0; }
     .pie-wrap { display:flex; gap:1rem; align-items:center; }
@@ -214,7 +218,7 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .legend .label { color: var(--color-text-primary); font-weight:600; margin-left:0.35rem; }
     .legend .value { color: var(--color-text-secondary); margin-left:auto; }
     .trend { display:flex; gap:0.4rem; align-items:flex-end; height:120px; margin-bottom:0.5rem; }
-    .trend .bar { flex:1; background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary,#7ab8ff) 80%, transparent), transparent); border-radius:6px 6px 2px 2px; position:relative; display:flex; align-items:flex-end; justify-content:center; color: color-mix(in srgb, var(--color-primary,#7ab8ff) 80%, #0f172a 20%); font-size:0.65rem; padding-bottom:0.25rem; }
+    .trend .bar { flex:1; background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary,#7ab8ff) 80%, transparent), transparent); border-radius:6px 6px 2px 2px; position:relative; display:flex; align-items:flex-end; justify-content:center; color: color-mix(in srgb, var(--color-primary,#7ab8ff) 80%, #0f172a 20%); font-size:0.65rem; padding-bottom:0.25rem; box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--color-border) 40%, transparent); }
     .trend .bar.negative { background: linear-gradient(180deg, color-mix(in srgb, var(--color-error,#ef4444) 70%, transparent), transparent); color: var(--color-error,#ef4444); }
     .cash-summary { display:grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap:0.5rem; }
     .cash-summary .label { margin:0; color: var(--color-text-secondary); font-weight:600; }
@@ -239,7 +243,9 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .task-table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; }
     .task-head, .task-row { display:grid; grid-template-columns: 1.6fr 0.9fr 0.9fr 0.9fr 1fr; gap:0.5rem; padding:0.65rem 0.8rem; align-items:center; }
     .task-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
-    .task-row { border-top:1px solid var(--color-border); background: var(--color-surface); }
+    .task-row { border-top:1px solid var(--color-border); background: var(--color-surface); transition: background 120ms ease; }
+    .task-row:nth-child(even) { background: color-mix(in srgb, var(--color-surface-hover) 65%, var(--color-surface) 35%); }
+    .task-row:hover { background: color-mix(in srgb, var(--color-surface-hover) 85%, var(--color-surface) 15%); }
     .task-title { display:flex; flex-direction:column; gap:0.15rem; }
     .task-title .small { font-size:0.85rem; }
     .tags { display:flex; gap:0.3rem; flex-wrap:wrap; }
@@ -259,8 +265,7 @@ export class AccountingOverviewComponent implements OnInit {
     { label: 'Overdue invoices', value: '42', sub: '12 due this week', icon: '⏰', status: 'watch', statusLabel: 'Watch' },
     { label: 'Pending payments', value: '$9,250', sub: 'Bills to clear', icon: '📥', status: 'watch', statusLabel: 'Action' },
     { label: 'Period status', value: 'Term 1 · Open', sub: 'Close by Apr 05', icon: '📆', status: 'ready', statusLabel: 'Open' },
-    { label: 'Payroll', value: '$32,000', sub: 'Next run in 5 days', icon: '💼', status: 'ready', statusLabel: 'Scheduled' },
-    { label: 'A/R vs A/P', value: '$42k / $18k', sub: 'Net inflow $24k', icon: '📈', status: 'ready', statusLabel: 'Healthy' }
+    { label: 'Payroll', value: '$32,000', sub: 'Next run in 5 days', icon: '💼', status: 'ready', statusLabel: 'Scheduled' }
   ];
 
   collectionLegend = [
