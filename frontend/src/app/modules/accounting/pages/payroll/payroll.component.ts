@@ -33,6 +33,8 @@ interface EmployeeRow {
         </div>
         <div class="actions">
           <button class="btn ghost" type="button" *ngIf="hasProcessed" (click)="downloadPayslips()">Download payslips</button>
+          <button class="btn ghost" type="button" *ngIf="hasProcessed" (click)="downloadRegister('csv')">Register CSV</button>
+          <button class="btn ghost" type="button" *ngIf="hasProcessed" (click)="downloadRegister('pdf')">Register PDF</button>
           <select class="mini" [(ngModel)]="run.month">
             <option *ngFor="let m of months" [value]="m">{{ m }}</option>
           </select>
@@ -67,6 +69,10 @@ interface EmployeeRow {
             <div>
               <p class="label">Net Total</p>
               <p class="value">{{ run.net | currency:'USD' }}</p>
+            </div>
+            <div class="full">
+              <p class="label">Run memo</p>
+              <input type="text" [(ngModel)]="run.memo" placeholder="Optional note for this run" />
             </div>
           </div>
         </div>
@@ -211,6 +217,7 @@ interface EmployeeRow {
     @media (min-width: 900px) { .summary-grid { grid-template-columns: repeat(4, 1fr); } }
     .label { margin:0; color: var(--color-text-secondary); font-weight:600; font-size:0.9rem; }
     .value { margin:0.1rem 0 0; color: var(--color-text-primary); font-weight:700; font-size:1.1rem; }
+    .full { grid-column:1/-1; }
     .filters .filter-row { display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:0.6rem; align-items:end; }
     @media (min-width: 900px) { .filters .filter-row { grid-template-columns: repeat(4, 1fr); } }
     label { display:flex; flex-direction:column; gap:0.3rem; font-weight:600; color: var(--color-text-primary); }
@@ -257,7 +264,8 @@ export class PayrollComponent {
     gross: 48200,
     net: 39600,
     status: 'ready' as RunStatus,
-    locked: false
+    locked: false,
+    memo: ''
   };
   runHistory: { month: string; gross: number; net: number; status: RunStatus }[] = [
     { month: 'January 2025', gross: 48000, net: 39400, status: 'processed' },
@@ -333,5 +341,9 @@ export class PayrollComponent {
 
   downloadPayslips() {
     console.log('Downloading payslips (mock)');
+  }
+
+  downloadRegister(type: 'csv' | 'pdf') {
+    console.log(`Downloading payroll register as ${type.toUpperCase()} (mock)`);
   }
 }
