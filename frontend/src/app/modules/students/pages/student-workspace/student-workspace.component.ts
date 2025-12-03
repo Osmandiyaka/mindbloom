@@ -16,7 +16,6 @@ import { IconRegistryService } from '../../../../shared/services/icon-registry.s
         <aside class="sidebar">
           <div class="sidebar-header">
             <h3>Quick Links</h3>
-            <p class="muted">Jump to key workflows</p>
           </div>
           <ul class="links">
             <li><a routerLink="/students/roster"><span class="icon" [innerHTML]="icon('students')"></span> Roster</a></li>
@@ -109,7 +108,7 @@ import { IconRegistryService } from '../../../../shared/services/icon-registry.s
   `
 })
 export class StudentWorkspaceComponent {
-  constructor(private icons: IconRegistryService) {}
+  constructor(private icons: IconRegistryService) { }
 
   icon(name: string) {
     return this.icons.icon(name);
