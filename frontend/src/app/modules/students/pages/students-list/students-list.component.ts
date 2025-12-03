@@ -6,6 +6,7 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
 import { StudentService } from '../../../../core/services/student.service';
 import { Student, StudentStatus } from '../../../../core/models/student.model';
+import { IconRegistryService } from '../../../../shared/services/icon-registry.service';
 
 @Component({
   selector: 'app-students-list',
@@ -18,7 +19,6 @@ import { Student, StudentStatus } from '../../../../core/models/student.model';
         <div class="toolbar-left">
           <div>
             <h2>Students</h2>
-            <p class="muted">{{ students().length }} total</p>
           </div>
           <div class="search-input">
             <input
@@ -31,17 +31,21 @@ import { Student, StudentStatus } from '../../../../core/models/student.model';
         </div>
         <div class="toolbar-right">
           <div class="view-toggle" role="group" aria-label="View switch">
-            <button [class.active]="viewMode() === 'table'" (click)="setView('table')" title="Table view">▦</button>
-            <button [class.active]="viewMode() === 'grid'" (click)="setView('grid')" title="Grid view">▢</button>
+            <button [class.active]="viewMode() === 'table'" (click)="setView('table')" title="Table view">
+              <span class="icon" [innerHTML]="icon('inbox')"></span>
+            </button>
+            <button [class.active]="viewMode() === 'grid'" (click)="setView('grid')" title="Grid view">
+              <span class="icon" [innerHTML]="icon('dashboard')"></span>
+            </button>
           </div>
           <app-button variant="secondary" size="sm" (click)="exportStudents()">
-            ⬇️ Export
+            <span class="icon" [innerHTML]="icon('download')"></span> Export
           </app-button>
           <app-button variant="secondary" size="sm" (click)="importStudents()">
-            ⬆️ Import
+            <span class="icon" [innerHTML]="icon('upload')"></span> Import
           </app-button>
           <app-button variant="primary" size="sm" (click)="addNewStudent()">
-            👩‍🎓+ Add Student
+            <span class="icon" [innerHTML]="icon('student-add')"></span> Add Student
           </app-button>
         </div>
       </div>
@@ -101,8 +105,8 @@ import { Student, StudentStatus } from '../../../../core/models/student.model';
                     </td>
                     <td>
                       <div class="cell-actions">
-                        <button (click)="editStudent($event, student.id)" title="Edit">✏️</button>
-                        <button (click)="deleteStudent($event, student)" title="Delete">🗑️</button>
+                        <button (click)="editStudent($event, student.id)" title="Edit"><span class="icon" [innerHTML]="icon('edit')"></span></button>
+                        <button (click)="deleteStudent($event, student)" title="Delete"><span class="icon" [innerHTML]="icon('trash')"></span></button>
                       </div>
                     </td>
                   </tr>
@@ -149,7 +153,8 @@ export class StudentsListComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private studentService: StudentService
+    private studentService: StudentService,
+    private icons: IconRegistryService
   ) { }
 
   ngOnInit(): void {
@@ -241,5 +246,9 @@ export class StudentsListComponent implements OnInit {
 
   setView(mode: 'table' | 'grid') {
     this.viewMode.set(mode);
+  }
+
+  icon(name: string) {
+    return this.icons.icon(name);
   }
 }
