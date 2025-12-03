@@ -11,6 +11,8 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     <div class="page">
       <nav class="breadcrumbs">
         <a routerLink="/accounting">Accounting</a>
+        <span class="sep">/</span>
+        <span>Workspace</span>
       </nav>
       <div class="layout">
         <aside class="sidebar">
@@ -36,52 +38,82 @@ import { AccountingService } from '../../../../core/services/accounting.service'
         </aside>
         <div class="main">
           <header class="page-header">
-            <div>
-              <h1>Finance Workspace</h1>
-              <p class="sub">Cash, fees, journals, and reporting—aligned to the academic year.</p>
+            <div class="hero-copy">
+              <p class="eyebrow">Finance Workspace</p>
+              <h1>Control room for cash, fees, and reporting</h1>
+              <p class="sub">Stay ahead of collections, payables, and period-close tasks.</p>
             </div>
             <div class="actions">
-              <a routerLink="/accounting/journals" class="btn primary">Post Journal</a>
-              <a routerLink="/accounting/accounts" class="btn ghost">Chart of Accounts</a>
-              <a routerLink="/accounting/fee-structures" class="btn ghost">Fee Structures</a>
-              <a routerLink="/accounting/fee-reports" class="btn ghost">Fee Reports</a>
-              <a routerLink="/accounting/expenses" class="btn ghost">Expenses</a>
-              <a routerLink="/accounting/bill-queue" class="btn ghost">Bills Queue</a>
-              <a routerLink="/accounting/bank-recon" class="btn ghost">Bank Recon</a>
+              <a routerLink="/accounting/journals" class="btn primary"><span>📝</span> Post Journal</a>
+              <a routerLink="/accounting/accounts" class="btn ghost">🗂️ Chart of Accounts</a>
+              <a routerLink="/accounting/fee-structures" class="btn ghost">📚 Fee Structures</a>
+              <a routerLink="/accounting/fee-reports" class="btn ghost">📊 Fee Reports</a>
+              <a routerLink="/accounting/expenses" class="btn ghost">🧾 Expenses</a>
+              <a routerLink="/accounting/bill-queue" class="btn ghost">📥 Bills Queue</a>
+              <a routerLink="/accounting/bank-recon" class="btn ghost">🏦 Bank Recon</a>
             </div>
           </header>
 
-          <section class="metrics">
-            <div class="metric-card" *ngFor="let m of accounting.metrics()">
-              <div class="metric-icon">{{ m.icon }}</div>
-              <div class="metric-body">
-                <p class="metric-label">{{ m.label }}</p>
-                <p class="metric-value">{{ m.value }}</p>
-                <p class="metric-trend">{{ m.trend }}</p>
+          <section class="tile-band">
+            <div class="tile" *ngFor="let t of tiles">
+              <div class="tile-top">
+                <span class="pill" [class.good]="t.status==='ready'" [class.warn]="t.status==='watch'">{{ t.statusLabel }}</span>
+                <span class="tile-icon">{{ t.icon }}</span>
               </div>
+              <p class="tile-label">{{ t.label }}</p>
+              <p class="tile-value">{{ t.value }}</p>
+              <p class="tile-sub">{{ t.sub }}</p>
             </div>
           </section>
 
-          <section class="grid">
-            <div class="card wide">
+          <section class="analytics">
+            <div class="card">
               <div class="card-header">
-                <h3>Cash Position</h3>
-                <span class="muted">As of today</span>
+                <div>
+                  <h3>Collections mix</h3>
+                  <p class="muted">Today vs plan</p>
+                </div>
+                <a routerLink="/accounting/fee-reports" class="link">Open reports</a>
               </div>
-              <div class="cash-grid">
-                <div class="cash-item">
+              <div class="pie-wrap">
+                <div class="pie"></div>
+                <div class="legend">
+                  <div *ngFor="let l of collectionLegend">
+                    <span class="dot" [style.background]="l.color"></span>
+                    <span class="label">{{ l.label }}</span>
+                    <span class="value">{{ l.value }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3>Cashflow trend</h3>
+                  <p class="muted">Last 6 weeks</p>
+                </div>
+                <a routerLink="/accounting/bank-recon" class="link">Reconcile</a>
+              </div>
+              <div class="trend">
+                <div class="bar" *ngFor="let b of cashTrend" [style.height.%]="b" [class.negative]="b < 0">
+                  <span>{{ b >=0 ? '▲' : '▼' }}</span>
+                </div>
+              </div>
+              <div class="cash-summary">
+                <div>
                   <p class="label">Cash</p>
                   <p class="value">{{ accounting.cashPosition().cash | currency:'USD' }}</p>
                 </div>
-                <div class="cash-item">
+                <div>
                   <p class="label">Bank</p>
                   <p class="value">{{ accounting.cashPosition().bank | currency:'USD' }}</p>
                 </div>
-                <div class="cash-item">
+                <div>
                   <p class="label">A/R</p>
                   <p class="value">{{ accounting.cashPosition().ar | currency:'USD' }}</p>
                 </div>
-                <div class="cash-item">
+                <div>
                   <p class="label">A/P</p>
                   <p class="value">{{ accounting.cashPosition().ap | currency:'USD' }}</p>
                 </div>
@@ -93,7 +125,7 @@ import { AccountingService } from '../../../../core/services/accounting.service'
                 <h3>Trial Balance Snapshot</h3>
                 <a routerLink="/accounting/trial-balance" class="link">View full</a>
               </div>
-              <div class="table">
+              <div class="table compact">
                 <div class="table-head">
                   <span>Account</span><span>Debit</span><span>Credit</span><span>Balance</span>
                 </div>
@@ -109,6 +141,38 @@ import { AccountingService } from '../../../../core/services/accounting.service'
               </div>
             </div>
           </section>
+
+          <section class="tasks card">
+            <div class="card-header">
+              <h3>Workboard</h3>
+              <div class="task-actions">
+                <button class="chip">Group</button>
+                <button class="chip">Filter</button>
+                <button class="chip">Sort</button>
+              </div>
+            </div>
+            <div class="task-table">
+              <div class="task-head">
+                <span>Task</span>
+                <span>Status</span>
+                <span>Due</span>
+                <span>Area</span>
+                <span>Tags</span>
+              </div>
+              <div class="task-row" *ngFor="let t of workItems">
+                <div class="task-title">
+                  <p class="strong">{{ t.title }}</p>
+                  <p class="muted small">{{ t.owner }} · {{ t.assignee }}</p>
+                </div>
+                <span><span class="pill" [class.warn]="t.status==='Overdue'" [class.good]="t.status==='Open'">{{ t.status }}</span></span>
+                <span>{{ t.due }}</span>
+                <span>{{ t.area }}</span>
+                <span class="tags">
+                  <span class="tag" *ngFor="let tag of t.tags">{{ tag }}</span>
+                </span>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     </div>
@@ -121,30 +185,42 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .sidebar-header h3 { margin:0; color: var(--color-text-primary); }
     .sidebar-header .muted { margin:0.1rem 0 0; }
     .main { display:flex; flex-direction:column; gap:1rem; }
-    .page-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; }
-    .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-tertiary); font-weight:700; margin:0 0 0.25rem; }
-    h1 { margin:0 0 0.35rem; color: var(--color-text-primary); }
+    .page-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary,#7ab8ff) 18%, transparent), transparent); border:1px solid var(--color-border); border-radius:14px; padding:1rem; box-shadow: var(--shadow-sm); }
+    .hero-copy h1 { margin:0 0 0.35rem; color: var(--color-text-primary); }
+    .hero-copy .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-tertiary); font-weight:700; margin:0 0 0.15rem; }
     .sub { margin:0; color: var(--color-text-secondary); }
     .actions { display:flex; gap:0.5rem; }
-    .btn { border-radius:10px; padding:0.65rem 1.1rem; font-weight:600; border:1px solid var(--color-border); background: var(--color-surface-hover); color: var(--color-text-primary); text-decoration:none; }
+    .btn { border-radius:10px; padding:0.65rem 1.1rem; font-weight:600; border:1px solid var(--color-border); background: var(--color-surface-hover); color: var(--color-text-primary); text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem; }
     .btn.primary { background: linear-gradient(135deg, var(--color-primary-light,#9fd0ff), var(--color-primary,#7ab8ff)); color:#0f1320; border:none; box-shadow: 0 10px 24px rgba(var(--color-primary-rgb,123,140,255),0.3); }
     .btn.ghost { background: transparent; }
-    .metrics { display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:0.75rem; }
-    .metric-card { display:flex; gap:0.75rem; padding:0.9rem 1rem; background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; box-shadow: var(--shadow-sm); align-items:center; }
-    .metric-icon { font-size:1.4rem; }
-    .metric-label { margin:0; font-weight:600; color: var(--color-text-secondary); }
-    .metric-value { margin:0; font-size:1.25rem; font-weight:700; color: var(--color-text-primary); }
-    .metric-trend { margin:0; color: var(--color-text-secondary); font-size:0.85rem; }
-    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap:1rem; }
+    .tile-band { display:grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap:0.75rem; }
+    .tile { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:0.85rem 1rem; box-shadow: var(--shadow-sm); display:flex; flex-direction:column; gap:0.35rem; }
+    .tile-top { display:flex; justify-content:space-between; align-items:center; }
+    .tile-label { margin:0; color: var(--color-text-secondary); font-weight:600; }
+    .tile-value { margin:0; font-size:1.35rem; font-weight:700; color: var(--color-text-primary); }
+    .tile-sub { margin:0; color: var(--color-text-secondary); font-size:0.9rem; }
+    .tile-icon { font-size:1.2rem; }
+    .pill { padding:0.25rem 0.55rem; border-radius:999px; font-size:0.75rem; border:1px solid var(--color-border); color: var(--color-text-secondary); background: var(--color-surface-hover); }
+    .pill.good { background: color-mix(in srgb, var(--color-success,#16a34a) 15%, transparent); color: var(--color-success,#16a34a); border-color: color-mix(in srgb, var(--color-success,#16a34a) 35%, transparent); }
+    .pill.warn { background: color-mix(in srgb, var(--color-warning,#eab308) 15%, transparent); color: var(--color-warning,#eab308); border-color: color-mix(in srgb, var(--color-warning,#eab308) 35%, transparent); }
+    .analytics { display:grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap:1rem; }
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: var(--shadow-sm); }
-    .card.wide { grid-column: span 2; }
     .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color: var(--color-text-primary); }
     .card-header h3 { color: var(--color-text-primary); margin:0; }
-    .cash-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:0.75rem; }
-    .cash-item { background: var(--color-surface-hover); border:1px solid var(--color-border); border-radius:10px; padding:0.75rem; }
-    .cash-item .label { margin:0; color: var(--color-text-secondary); font-weight:600; }
-    .cash-item .value { margin:0.15rem 0 0; color: var(--color-text-primary); font-weight:700; font-size:1.1rem; }
+    .pie-wrap { display:flex; gap:1rem; align-items:center; }
+    .pie { width:140px; height:140px; border-radius:50%; background: conic-gradient(#7ab8ff 0 45%, #6ee7b7 45% 75%, #fbbf24 75% 100%); box-shadow: var(--shadow-sm); }
+    .legend { display:flex; flex-direction:column; gap:0.35rem; }
+    .legend .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+    .legend .label { color: var(--color-text-primary); font-weight:600; margin-left:0.35rem; }
+    .legend .value { color: var(--color-text-secondary); margin-left:auto; }
+    .trend { display:flex; gap:0.4rem; align-items:flex-end; height:120px; margin-bottom:0.5rem; }
+    .trend .bar { flex:1; background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary,#7ab8ff) 80%, transparent), transparent); border-radius:6px 6px 2px 2px; position:relative; display:flex; align-items:flex-end; justify-content:center; color: color-mix(in srgb, var(--color-primary,#7ab8ff) 80%, #0f172a 20%); font-size:0.65rem; padding-bottom:0.25rem; }
+    .trend .bar.negative { background: linear-gradient(180deg, color-mix(in srgb, var(--color-error,#ef4444) 70%, transparent), transparent); color: var(--color-error,#ef4444); }
+    .cash-summary { display:grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap:0.5rem; }
+    .cash-summary .label { margin:0; color: var(--color-text-secondary); font-weight:600; }
+    .cash-summary .value { margin:0.1rem 0 0; color: var(--color-text-primary); font-weight:700; }
     .table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; background: var(--color-surface); }
+    .table.compact .table-head, .table.compact .table-row { padding:0.55rem 0.75rem; }
     .table-head, .table-row { display:grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; padding:0.75rem 0.9rem; gap:0.5rem; }
     .table-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
     .table-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); background: var(--color-surface); }
@@ -158,6 +234,17 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .breadcrumbs { display:flex; align-items:center; gap:0.35rem; color: var(--color-text-secondary); font-size:0.9rem; margin-bottom:0.25rem; }
     .breadcrumbs a { color: var(--color-primary); text-decoration:none; }
     .breadcrumbs .sep { color: var(--color-text-secondary); }
+    .tasks .task-actions { display:flex; gap:0.4rem; }
+    .chip { padding:0.35rem 0.7rem; border-radius:10px; border:1px solid var(--color-border); background: var(--color-surface-hover); color: var(--color-text-primary); }
+    .task-table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; }
+    .task-head, .task-row { display:grid; grid-template-columns: 1.6fr 0.9fr 0.9fr 0.9fr 1fr; gap:0.5rem; padding:0.65rem 0.8rem; align-items:center; }
+    .task-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
+    .task-row { border-top:1px solid var(--color-border); background: var(--color-surface); }
+    .task-title { display:flex; flex-direction:column; gap:0.15rem; }
+    .task-title .small { font-size:0.85rem; }
+    .tags { display:flex; gap:0.3rem; flex-wrap:wrap; }
+    .tag { padding:0.15rem 0.5rem; border-radius:8px; background: color-mix(in srgb, var(--color-primary,#7ab8ff) 12%, transparent); color: var(--color-text-primary); border:1px solid var(--color-border); font-size:0.85rem; }
+    .link { color: var(--color-primary,#7ab8ff); text-decoration:none; font-weight:600; }
   `]
 })
 export class AccountingOverviewComponent implements OnInit {
@@ -166,6 +253,30 @@ export class AccountingOverviewComponent implements OnInit {
   }
 
   constructor(public accounting: AccountingService) {}
+
+  tiles = [
+    { label: 'Collections today', value: '$18,400', sub: '+8.5% vs plan', icon: '💳', status: 'ready', statusLabel: 'On track' },
+    { label: 'Overdue invoices', value: '42', sub: '12 due this week', icon: '⏰', status: 'watch', statusLabel: 'Watch' },
+    { label: 'Pending payments', value: '$9,250', sub: 'Bills to clear', icon: '📥', status: 'watch', statusLabel: 'Action' },
+    { label: 'Period status', value: 'Term 1 · Open', sub: 'Close by Apr 05', icon: '📆', status: 'ready', statusLabel: 'Open' },
+    { label: 'Payroll', value: '$32,000', sub: 'Next run in 5 days', icon: '💼', status: 'ready', statusLabel: 'Scheduled' },
+    { label: 'A/R vs A/P', value: '$42k / $18k', sub: 'Net inflow $24k', icon: '📈', status: 'ready', statusLabel: 'Healthy' }
+  ];
+
+  collectionLegend = [
+    { label: 'Tuition', value: '48%', color: '#7ab8ff' },
+    { label: 'Transport', value: '27%', color: '#6ee7b7' },
+    { label: 'Meals', value: '25%', color: '#fbbf24' }
+  ];
+
+  cashTrend = [30, 60, 45, -20, 50, 70, 40];
+
+  workItems = [
+    { title: 'Allocate last Friday receipts to invoices', owner: 'Treasury ·', assignee: 'Chidi', status: 'Open', due: 'Today', area: 'Collections', tags: ['Receipts', 'Invoices'] },
+    { title: 'Review salaries accrual JV', owner: 'Controller ·', assignee: 'Moyo', status: 'Overdue', due: 'Yesterday', area: 'Payroll', tags: ['JV', 'Payroll'] },
+    { title: 'Approve transport vendor bills', owner: 'AP ·', assignee: 'Amaka', status: 'Open', due: 'Feb 12', area: 'Payables', tags: ['Bills', 'Vendors'] },
+    { title: 'Publish fee report for PTA', owner: 'Finance ·', assignee: 'Sara', status: 'Open', due: 'Feb 15', area: 'Reporting', tags: ['Reporting', 'PTA'] }
+  ];
 
   ngOnInit(): void {
     this.accounting.loadTrialBalance();
