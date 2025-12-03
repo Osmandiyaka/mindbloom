@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AccountingService } from '../../../../core/services/accounting.service';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-accounting-overview',
@@ -21,19 +22,19 @@ import { AccountingService } from '../../../../core/services/accounting.service'
             <p class="muted">Jump to key workflows</p>
           </div>
           <ul class="links">
-            <li><a routerLink="/accounting/fee-structures"><span class="icon">📚</span> Fee Structures</a></li>
-            <li><a routerLink="/accounting/fee-assignment"><span class="icon">🧾</span> Fee Assignment</a></li>
-            <li><a routerLink="/accounting/collection"><span class="icon">💳</span> Fee Collection</a></li>
-            <li><a routerLink="/accounting/fee-reports"><span class="icon">📊</span> Fee Reports Dashboard</a></li>
-            <li><a routerLink="/accounting/journals"><span class="icon">📝</span> Manual Journal</a></li>
-            <li><a routerLink="/accounting/expenses"><span class="icon">🧾</span> Expense Entry</a></li>
-            <li><a routerLink="/accounting/bill-queue"><span class="icon">📥</span> Bill Payment Queue</a></li>
-            <li><a routerLink="/accounting/bank-recon"><span class="icon">🏦</span> Bank Reconciliation</a></li>
-            <li><a routerLink="/accounting/payroll"><span class="icon">💼</span> Payroll</a></li>
-            <li><a routerLink="/accounting/accounts"><span class="icon">🗂️</span> Manage Accounts</a></li>
-            <li><a routerLink="/accounting/trial-balance"><span class="icon">⚖️</span> Trial Balance</a></li>
-            <li><a routerLink="/accounting/periods"><span class="icon">⏳</span> Fiscal Periods</a></li>
-            <li><a routerLink="/accounting/reports"><span class="icon">📑</span> Report Center</a></li>
+            <li><a routerLink="/accounting/fee-structures"><span class="icon" [innerHTML]="icon('fees')"></span> Fee Structures</a></li>
+            <li><a routerLink="/accounting/fee-assignment"><span class="icon" [innerHTML]="icon('assignment')"></span> Fee Assignment</a></li>
+            <li><a routerLink="/accounting/collection"><span class="icon" [innerHTML]="icon('collection')"></span> Fee Collection</a></li>
+            <li><a routerLink="/accounting/fee-reports"><span class="icon" [innerHTML]="icon('reports')"></span> Fee Reports Dashboard</a></li>
+            <li><a routerLink="/accounting/journals"><span class="icon" [innerHTML]="icon('journal')"></span> Manual Journal</a></li>
+            <li><a routerLink="/accounting/expenses"><span class="icon" [innerHTML]="icon('expense')"></span> Expense Entry</a></li>
+            <li><a routerLink="/accounting/bill-queue"><span class="icon" [innerHTML]="icon('bill')"></span> Bill Payment Queue</a></li>
+            <li><a routerLink="/accounting/bank-recon"><span class="icon" [innerHTML]="icon('bank')"></span> Bank Reconciliation</a></li>
+            <li><a routerLink="/accounting/payroll"><span class="icon" [innerHTML]="icon('payroll')"></span> Payroll</a></li>
+            <li><a routerLink="/accounting/accounts"><span class="icon" [innerHTML]="icon('accounts')"></span> Manage Accounts</a></li>
+            <li><a routerLink="/accounting/trial-balance"><span class="icon" [innerHTML]="icon('trial')"></span> Trial Balance</a></li>
+            <li><a routerLink="/accounting/periods"><span class="icon" [innerHTML]="icon('period')"></span> Fiscal Periods</a></li>
+            <li><a routerLink="/accounting/reports"><span class="icon" [innerHTML]="icon('reports')"></span> Report Center</a></li>
           </ul>
         </aside>
         <div class="main">
@@ -44,20 +45,20 @@ import { AccountingService } from '../../../../core/services/accounting.service'
               <p class="sub">Stay ahead of collections, payables, and period-close tasks.</p>
             </div>
             <div class="actions">
-              <a routerLink="/accounting/journals" class="btn primary"><span>📝</span> Post Journal</a>
-              <a routerLink="/accounting/accounts" class="btn ghost">🗂️ Chart of Accounts</a>
-              <a routerLink="/accounting/fee-structures" class="btn ghost">📚 Fee Structures</a>
-              <a routerLink="/accounting/fee-reports" class="btn ghost">📊 Fee Reports</a>
-              <a routerLink="/accounting/expenses" class="btn ghost">🧾 Expenses</a>
-              <a routerLink="/accounting/bill-queue" class="btn ghost">📥 Bills Queue</a>
-              <a routerLink="/accounting/bank-recon" class="btn ghost">🏦 Bank Recon</a>
+              <a routerLink="/accounting/journals" class="btn primary"><span class="icon" [innerHTML]="icon('journal')"></span> Post Journal</a>
+              <a routerLink="/accounting/accounts" class="btn ghost"><span class="icon" [innerHTML]="icon('accounts')"></span> Chart of Accounts</a>
+              <a routerLink="/accounting/fee-structures" class="btn ghost"><span class="icon" [innerHTML]="icon('fees')"></span> Fee Structures</a>
+              <a routerLink="/accounting/fee-reports" class="btn ghost"><span class="icon" [innerHTML]="icon('reports')"></span> Fee Reports</a>
+              <a routerLink="/accounting/expenses" class="btn ghost"><span class="icon" [innerHTML]="icon('expense')"></span> Expenses</a>
+              <a routerLink="/accounting/bill-queue" class="btn ghost"><span class="icon" [innerHTML]="icon('bill')"></span> Bills Queue</a>
+              <a routerLink="/accounting/bank-recon" class="btn ghost"><span class="icon" [innerHTML]="icon('bank')"></span> Bank Recon</a>
             </div>
           </header>
 
           <section class="tile-band">
             <div class="tile" *ngFor="let t of tiles">
               <div class="tile-top">
-                <span class="tile-icon-bubble">{{ t.icon }}</span>
+                <span class="tile-icon-bubble" [innerHTML]="icon(t.icon)"></span>
                 <span class="pill" [class.good]="t.status==='ready'" [class.warn]="t.status==='watch'">{{ t.statusLabel }}</span>
               </div>
               <p class="tile-label">{{ t.label }}</p>
@@ -197,7 +198,8 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .tile { background: linear-gradient(135deg, color-mix(in srgb, var(--color-surface) 80%, transparent), color-mix(in srgb, var(--color-surface-hover) 60%, transparent)); border:1px solid var(--color-border); border-radius:12px; padding:0.85rem 1rem; box-shadow: var(--shadow-sm); display:flex; flex-direction:column; gap:0.35rem; transition: transform 120ms ease, box-shadow 120ms ease; }
     .tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-md, 0 12px 28px rgba(0,0,0,0.18)); }
     .tile-top { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; }
-    .tile-icon-bubble { width:34px; height:34px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; background: color-mix(in srgb, var(--color-primary,#7ab8ff) 20%, transparent); box-shadow: inset 0 0 0 1px var(--color-border); }
+    .tile-icon-bubble { width:34px; height:34px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; background: color-mix(in srgb, var(--color-primary,#7ab8ff) 20%, transparent); box-shadow: inset 0 0 0 1px var(--color-border); color: var(--color-text-primary); }
+    .tile-icon-bubble svg, .icon svg { width:18px; height:18px; stroke: currentColor; fill: none; }
     .tile-label { margin:0; color: var(--color-text-secondary); font-weight:600; }
     .tile-value { margin:0; font-size:1.35rem; font-weight:700; color: var(--color-text-primary); }
     .tile-sub { margin:0; color: var(--color-text-secondary); font-size:0.9rem; }
@@ -234,7 +236,7 @@ import { AccountingService } from '../../../../core/services/accounting.service'
     .muted { color: var(--color-text-secondary); }
     .links { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.5rem; }
     .links a { color: var(--color-primary,#7ab8ff); text-decoration:none; display:flex; align-items:center; gap:0.5rem; }
-    .links .icon { width:20px; text-align:center; }
+    .links .icon { width:20px; height:20px; text-align:center; display:inline-flex; align-items:center; justify-content:center; }
     .breadcrumbs { display:flex; align-items:center; gap:0.35rem; color: var(--color-text-secondary); font-size:0.9rem; margin-bottom:0.25rem; }
     .breadcrumbs a { color: var(--color-primary); text-decoration:none; }
     .breadcrumbs .sep { color: var(--color-text-secondary); }
@@ -258,14 +260,16 @@ export class AccountingOverviewComponent implements OnInit {
     return this.accounting.trialBalance().slice(0, 5);
   }
 
-  constructor(public accounting: AccountingService) {}
+  constructor(public accounting: AccountingService, private sanitizer: DomSanitizer) {
+    this.registerIcons();
+  }
 
   tiles = [
-    { label: 'Collections today', value: '$18,400', sub: '+8.5% vs plan', icon: '💳', status: 'ready', statusLabel: 'On track' },
-    { label: 'Overdue invoices', value: '42', sub: '12 due this week', icon: '⏰', status: 'watch', statusLabel: 'Watch' },
-    { label: 'Pending payments', value: '$9,250', sub: 'Bills to clear', icon: '📥', status: 'watch', statusLabel: 'Action' },
-    { label: 'Period status', value: 'Term 1 · Open', sub: 'Close by Apr 05', icon: '📆', status: 'ready', statusLabel: 'Open' },
-    { label: 'Payroll', value: '$32,000', sub: 'Next run in 5 days', icon: '💼', status: 'ready', statusLabel: 'Scheduled' }
+    { label: 'Collections today', value: '$18,400', sub: '+8.5% vs plan', icon: 'collection', status: 'ready', statusLabel: 'On track' },
+    { label: 'Overdue invoices', value: '42', sub: '12 due this week', icon: 'alarm', status: 'watch', statusLabel: 'Watch' },
+    { label: 'Pending payments', value: '$9,250', sub: 'Bills to clear', icon: 'inbox', status: 'watch', statusLabel: 'Action' },
+    { label: 'Period status', value: 'Term 1 · Open', sub: 'Close by Apr 05', icon: 'calendar', status: 'ready', statusLabel: 'Open' },
+    { label: 'Payroll', value: '$32,000', sub: 'Next run in 5 days', icon: 'briefcase', status: 'ready', statusLabel: 'Scheduled' }
   ];
 
   collectionLegend = [
@@ -285,5 +289,41 @@ export class AccountingOverviewComponent implements OnInit {
 
   ngOnInit(): void {
     this.accounting.loadTrialBalance();
+  }
+
+  icons = new Map<string, SafeHtml>();
+
+  icon(name: string): SafeHtml | undefined {
+    return this.icons.get(name) || this.icons.get('default');
+  }
+
+  private addIcon(name: string, paths: string[]) {
+    const body = paths.map(p => `<path d="${p}" />`).join('');
+    this.icons.set(
+      name,
+      this.sanitizer.bypassSecurityTrustHtml(
+        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`
+      )
+    );
+  }
+
+  private registerIcons() {
+    this.addIcon('journal', ['M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z', 'M7 9h10', 'M7 13h10', 'M7 17h6']);
+    this.addIcon('accounts', ['M3 7h7l2 2h9v9a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z']);
+    this.addIcon('fees', ['M4 5h12a2 2 0 0 1 2 2v12l-4-3-4 3V7a2 2 0 0 0-2-2H4z']);
+    this.addIcon('assignment', ['M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-3.33 0-6 1.34-6 3v1h12v-1c0-1.66-2.67-3-6-3z']);
+    this.addIcon('collection', ['M3 7h18v10H3z', 'M3 10h18']);
+    this.addIcon('reports', ['M5 19V9', 'M11 19V5', 'M17 19v-8']);
+    this.addIcon('expense', ['M6 3h12v18l-3-2-3 2-3-2-3 2z', 'M9 7h6', 'M9 11h6']);
+    this.addIcon('bill', ['M4 7h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z', 'M4 7l4.5 5h7L20 7']);
+    this.addIcon('bank', ['M12 5l9 4H3z', 'M3 9h18', 'M5 9v8', 'M9 9v8', 'M13 9v8', 'M17 9v8', 'M3 17h18']);
+    this.addIcon('payroll', ['M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z', 'M9 6h6a2 2 0 0 1 2 2v2H7V8a2 2 0 0 1 2-2z']);
+    this.addIcon('trial', ['M6 4l6-2 6 2', 'M6 4l-3 5h6l-3-5z', 'M18 4l-3 5h6l-3-5z', 'M6 9v9a3 3 0 0 0 6 0V9', 'M12 9v9a3 3 0 0 0 6 0V9']);
+    this.addIcon('period', ['M12 6a6 6 0 1 1-6 6 6 6 0 0 1 6-6zm0 2v4l3 1']);
+    this.addIcon('alarm', ['M12 7a5 5 0 1 1-5 5 5 5 0 0 1 5-5zm0 0V4', 'M5 5 3 7', 'M19 5l2 2']);
+    this.addIcon('inbox', ['M4 7h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z', 'M4 7l4 5h8l4-5']);
+    this.addIcon('calendar', ['M7 3v3', 'M17 3v3', 'M4 8h16', 'M5 5h14a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1z']);
+    this.addIcon('briefcase', ['M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z', 'M9 6h6a2 2 0 0 1 2 2v2H7V8a2 2 0 0 1 2-2z']);
+    this.addIcon('default', ['M12 3a9 9 0 1 1-9 9 9 9 0 0 1 9-9z']);
   }
 }
