@@ -29,7 +29,7 @@ interface EmployeeRow {
       <header class="page-header">
         <div>
           <h1>Payroll Dashboard</h1>
-          <p class="sub">Monthly run summary, employees, and status (mock UI).</p>
+          <p class="sub">Monthly run summary, employees, and status</p>
         </div>
         <div class="actions">
           <button class="btn ghost" type="button" *ngIf="hasProcessed" (click)="downloadPayslips()">Download payslips</button>
@@ -72,7 +72,7 @@ interface EmployeeRow {
             </div>
             <div class="full">
               <p class="label">Run memo</p>
-              <input type="text" [(ngModel)]="run.memo" placeholder="Optional note for this run" />
+              <input class="full-input" type="text" [(ngModel)]="run.memo" placeholder="Optional note for this run" />
             </div>
           </div>
         </div>
@@ -217,6 +217,7 @@ interface EmployeeRow {
     @media (min-width: 900px) { .summary-grid { grid-template-columns: repeat(4, 1fr); } }
     .label { margin:0; color: var(--color-text-secondary); font-weight:600; font-size:0.9rem; }
     .value { margin:0.1rem 0 0; color: var(--color-text-primary); font-weight:700; font-size:1.1rem; }
+    .summary-grid .full input { width:100%; }
     .full { grid-column:1/-1; }
     .filters .filter-row { display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:0.6rem; align-items:end; }
     @media (min-width: 900px) { .filters .filter-row { grid-template-columns: repeat(4, 1fr); } }
@@ -225,7 +226,9 @@ interface EmployeeRow {
     .table { border:1px solid var(--color-border); border-radius:10px; overflow:hidden; background: var(--color-surface); }
     .table-head, .table-row { display:grid; grid-template-columns: 0.6fr 1.6fr 1.2fr 1fr 1fr 1fr 1fr 0.8fr; padding:0.7rem 0.85rem; gap:0.5rem; align-items:center; }
     .table-head { background: var(--color-surface-hover); font-weight:700; color: var(--color-text-primary); }
-    .table-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); }
+    .table-row { border-top:1px solid var(--color-border); color: var(--color-text-secondary); background: var(--color-surface); transition: background 0.15s ease; }
+    .table-row:nth-child(even) { background: color-mix(in srgb, var(--color-surface-hover) 55%, var(--color-surface) 45%); }
+    .table-row:hover { background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface-hover) 90%); }
     .strong { font-weight:700; color: var(--color-text-primary); }
     .muted { color: var(--color-text-secondary); }
     .pill { padding:0.2rem 0.6rem; border-radius:12px; border:1px solid var(--color-border); background: var(--color-surface); font-weight:600; text-transform:capitalize; }
