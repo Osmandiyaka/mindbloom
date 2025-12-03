@@ -29,6 +29,10 @@ import { StudentsListComponent } from '../students-list/students-list.component'
         </aside>
 
         <main class="content">
+          <section class="roster-section">
+            <app-students-list></app-students-list>
+          </section>
+
           <header class="hero">
             <div>
               <p class="eyebrow">Student Workspace</p>
@@ -36,19 +40,6 @@ import { StudentsListComponent } from '../students-list/students-list.component'
               <p class="muted">
                 Central hub for roster, admissions, attendance, academics, conduct, and reports.
               </p>
-            </div>
-            <div class="hero-actions">
-              <a routerLink="/students/roster" class="link-cta primary">
-                <span class="icon" [innerHTML]="icon('students')"></span>
-                Open Roster
-              </a>
-              <a routerLink="/students/new" class="link-cta">
-                <span class="icon" [innerHTML]="icon('student-add')"></span>
-                Add Student
-              </a>
-              <a routerLink="/students/admissions" class="link-cta subtle">
-                Admissions pipeline
-              </a>
             </div>
           </header>
 
@@ -102,10 +93,6 @@ import { StudentsListComponent } from '../students-list/students-list.component'
                 <li><span class="pill action">Action</span> Parent follow-up: conduct incident</li>
               </ul>
             </app-card>
-          </section>
-
-          <section class="roster-section">
-            <app-students-list></app-students-list>
           </section>
         </main>
       </div>
