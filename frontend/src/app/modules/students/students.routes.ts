@@ -2,7 +2,35 @@ import { Routes } from '@angular/router';
 
 export const STUDENTS_ROUTES: Routes = [
     {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/student-dashboard/student-dashboard.component').then(m => m.StudentDashboardComponent)
+    },
+    {
+        path: 'admissions',
+        loadComponent: () => import('./pages/student-admissions/student-admissions.component').then(m => m.StudentAdmissionsComponent)
+    },
+    {
+        path: 'attendance',
+        loadComponent: () => import('./pages/student-attendance/student-attendance.component').then(m => m.StudentAttendanceComponent)
+    },
+    {
+        path: 'academics',
+        loadComponent: () => import('./pages/student-academics/student-academics.component').then(m => m.StudentAcademicsComponent)
+    },
+    {
+        path: 'conduct',
+        loadComponent: () => import('./pages/student-conduct/student-conduct.component').then(m => m.StudentConductComponent)
+    },
+    {
+        path: 'reports',
+        loadComponent: () => import('./pages/student-reports/student-reports.component').then(m => m.StudentReportsComponent)
+    },
+    {
         path: '',
+        loadComponent: () => import('./pages/students-list/students-list.component').then(m => m.StudentsListComponent)
+    },
+    {
+        path: 'roster',
         loadComponent: () => import('./pages/students-list/students-list.component').then(m => m.StudentsListComponent)
     },
     {
@@ -22,4 +50,3 @@ export const STUDENTS_ROUTES: Routes = [
         loadComponent: () => import('./pages/student-detail/student-detail.component').then(m => m.StudentDetailComponent)
     }
 ];
-

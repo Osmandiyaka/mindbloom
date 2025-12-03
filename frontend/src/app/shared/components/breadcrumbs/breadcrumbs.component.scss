@@ -1,0 +1,48 @@
+@import '../../../../styles/theme/index';
+
+.crumbs {
+  ol {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0;
+    margin: 0;
+    list-style: none;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .crumb a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    @include transition(color, 0.2s, ease);
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+
+  .current {
+    color: var(--color-text-primary);
+    font-weight: 700;
+  }
+
+  .separator {
+    color: var(--color-border);
+    font-weight: 500;
+  }
+
+  .icon {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    color: var(--color-text-secondary);
+
+    svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+    }
+  }
+}

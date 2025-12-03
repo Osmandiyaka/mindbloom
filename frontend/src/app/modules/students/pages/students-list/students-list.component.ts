@@ -1,20 +1,24 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { CardComponent } from '../../../../shared/components/card/card.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
 import { StudentService } from '../../../../core/services/student.service';
 import { Student, StudentStatus } from '../../../../core/models/student.model';
 import { IconRegistryService } from '../../../../shared/services/icon-registry.service';
+import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
 
 @Component({
   selector: 'app-students-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, CardComponent, ButtonComponent, BadgeComponent],
+  imports: [CommonModule, RouterModule, FormsModule, CardComponent, ButtonComponent, BadgeComponent, BreadcrumbsComponent],
   styleUrls: ['./students-list.component.scss'],
   template: `
     <div class="students-page">
+      <app-breadcrumbs [items]="crumbs"></app-breadcrumbs>
+
       <div class="toolbar">
         <div class="toolbar-left">
           <div>
@@ -150,6 +154,10 @@ export class StudentsListComponent implements OnInit {
   error = signal<string | null>(null);
   searchTerm = '';
   viewMode = signal<'table' | 'grid'>('table');
+  crumbs: Crumb[] = [
+    { label: 'Students', link: '/students' },
+    { label: 'Roster' }
+  ];
 
   constructor(
     private router: Router,
