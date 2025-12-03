@@ -84,13 +84,13 @@ export class SidebarComponent implements OnInit {
     {
       title: 'Financial',
       items: [
-        { label: 'Fees', path: '/fees', icon: '💰' },
-        { label: 'Invoices', path: '/fees/invoices', icon: '🧾' },
-        { label: 'Fee Plans', path: '/fees/plans', icon: '🗂️' },
-        { label: 'Bulk Invoice', path: '/fees/bulk-invoices', icon: '📥' },
+        // { label: 'Fees', path: '/fees', icon: '💰' },
+        // { label: 'Invoices', path: '/fees/invoices', icon: '🧾' },
+        // { label: 'Fee Plans', path: '/fees/plans', icon: '🗂️' },
+        // { label: 'Bulk Invoice', path: '/fees/bulk-invoices', icon: '📥' },
         { label: 'Accounting', path: '/accounting', icon: '📒' },
-        { label: 'Finance', path: '/finance', icon: '📈' },
-        { label: 'Payroll', path: '/payroll', icon: '💵' }
+        // { label: 'Finance', path: '/finance', icon: '📈' },
+        // { label: 'Payroll', path: '/payroll', icon: '💵' }
       ]
     },
     {

@@ -3,13 +3,15 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
+type RunStatus = 'ready' | 'pending' | 'processed';
+
 interface EmployeeRow {
   name: string;
   position: string;
   grade: string;
   gross: number;
   net: number;
-  status: 'ready' | 'pending' | 'processed';
+  status: RunStatus;
   selected?: boolean;
 }
 
@@ -95,6 +97,7 @@ interface EmployeeRow {
             </div>
           </div>
         </div>
+
       </section>
 
       <section class="card">
@@ -137,6 +140,9 @@ interface EmployeeRow {
           <span>Ready: {{ statusCount('ready') }}</span>
           <span>Pending: {{ statusCount('pending') }}</span>
           <span>Processed: {{ statusCount('processed') }}</span>
+          <span class="right" *ngIf="hasProcessed">
+            <button class="btn ghost small" type="button" (click)="downloadPayslips()">Download payslips</button>
+          </span>
         </div>
       </section>
 
@@ -231,7 +237,8 @@ interface EmployeeRow {
     .breakdown .row:first-of-type { border-top:none; }
     .breakdown .row.total { font-weight:700; background: var(--color-surface-hover); }
     .modal-actions { display:flex; justify-content:flex-end; gap:0.5rem; }
-    .summary-bar { display:flex; gap:1rem; flex-wrap:wrap; padding:0.65rem 0.85rem; background: var(--color-surface-hover); border:1px solid var(--color-border); border-radius:10px; margin-top:0.6rem; color: var(--color-text-primary); }
+    .summary-bar { display:flex; gap:1rem; flex-wrap:wrap; padding:0.65rem 0.85rem; background: var(--color-surface-hover); border:1px solid var(--color-border); border-radius:10px; margin-top:0.6rem; color: var(--color-text-primary); align-items:center; }
+    .summary-bar .right { margin-left:auto; }
   `]
 })
 export class PayrollComponent {
@@ -246,9 +253,14 @@ export class PayrollComponent {
     count: 12,
     gross: 48200,
     net: 39600,
-    status: 'ready' as 'ready' | 'pending' | 'processed',
+    status: 'ready' as RunStatus,
     locked: false
   };
+  runHistory: { month: string; gross: number; net: number; status: RunStatus }[] = [
+    { month: 'January 2025', gross: 48000, net: 39400, status: 'processed' },
+    { month: 'December 2024', gross: 47800, net: 39200, status: 'processed' },
+    { month: 'November 2024', gross: 47200, net: 38800, status: 'processed' },
+  ];
 
   employees: EmployeeRow[] = [
     { name: 'Adaeze N.', position: 'Teacher', grade: 'B1', gross: 4200, net: 3600, status: 'ready' },
@@ -310,5 +322,13 @@ export class PayrollComponent {
     if (!ids.length) return;
     this.employees = this.employees.map(e => ids.includes(e.name) ? { ...e, status: 'processed', selected: false } : e);
     this.selectAll = false;
+  }
+
+  get hasProcessed() {
+    return this.employees.some(e => e.status === 'processed');
+  }
+
+  downloadPayslips() {
+    console.log('Downloading payslips (mock)');
   }
 }
