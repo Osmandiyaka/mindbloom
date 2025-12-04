@@ -77,7 +77,7 @@
 
 .columns.main-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(0, 0.8fr);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 0.6fr);
   gap: 1rem;
   align-items: start;
 
@@ -223,6 +223,7 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   justify-content: flex-end;
+  align-items: stretch;
 }
 
 .tile {
@@ -231,6 +232,7 @@
   border-radius: 12px;
   padding: 0.9rem;
   box-shadow: var(--shadow-sm);
+  flex: 0 1 280px;
 
   .tile-top {
     display: flex;
@@ -297,15 +299,24 @@
   gap: 0.85rem;
 }
 
-.tasks-panel app-card {
-  max-width: 360px;
-}
-
 .roster-section {
   margin: 0;
 
   app-students-list {
     display: block;
+  }
+}
+
+.task-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+
+  .task-title {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-weight: 700;
   }
 }
 

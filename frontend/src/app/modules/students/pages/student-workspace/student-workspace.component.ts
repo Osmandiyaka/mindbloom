@@ -54,19 +54,14 @@ import { StudentsListComponent } from '../students-list/students-list.component'
               <p class="value">96%</p>
               <p class="muted small">4 sections below 90%</p>
             </article>
-          </section>
-
-          <section class="grid tasks-panel">
-            <app-card>
-              <div class="card-header">
-                <h3>My tasks</h3>
-              </div>
+            <article class="tile task-card">
+              <h3 class="task-title">My tasks</h3>
               <ul class="task-list">
                 <li><span class="pill open">Open</span> Verify Grade 6B attendance</li>
                 <li><span class="pill watch">Watch</span> Prepare term report cards</li>
                 <li><span class="pill action">Action</span> Parent follow-up: conduct incident</li>
               </ul>
-            </app-card>
+            </article>
           </section>
         </section>
       </div>
