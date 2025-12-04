@@ -13,36 +13,28 @@ import { StudentsListComponent } from '../students-list/students-list.component'
   styleUrls: ['./student-workspace.component.scss'],
   template: `
     <div class="workspace">
-      <div class="columns">
-        <aside class="sidebar">
-          <div class="sidebar-header">
-            <h3>Quick Links</h3>
-          </div>
-          <ul class="links">
-            <li><a routerLink="/students/roster"><span class="icon" [innerHTML]="icon('students')"></span> Roster</a></li>
-            <li><a routerLink="/students/admissions"><span class="icon" [innerHTML]="icon('admissions')"></span> Admissions</a></li>
-            <li><a routerLink="/students/attendance"><span class="icon" [innerHTML]="icon('attendance')"></span> Attendance</a></li>
-            <li><a routerLink="/students/academics"><span class="icon" [innerHTML]="icon('academics')"></span> Academics</a></li>
-            <li><a routerLink="/students/conduct"><span class="icon" [innerHTML]="icon('tasks')"></span> Conduct</a></li>
-            <li><a routerLink="/students/reports"><span class="icon" [innerHTML]="icon('reports')"></span> Reports</a></li>
-          </ul>
-        </aside>
+      <div class="topbar">
+        <nav class="breadcrumbs">
+          <a routerLink="/students">Students</a>
+          <span class="sep">/</span>
+          <span>Workspace</span>
+        </nav>
+        <ul class="quick-inline">
+          <li><a routerLink="/students/roster"><span class="icon" [innerHTML]="icon('students')"></span> Roster</a></li>
+          <li><a routerLink="/students/admissions"><span class="icon" [innerHTML]="icon('admissions')"></span> Admissions</a></li>
+          <li><a routerLink="/students/attendance"><span class="icon" [innerHTML]="icon('attendance')"></span> Attendance</a></li>
+          <li><a routerLink="/students/academics"><span class="icon" [innerHTML]="icon('academics')"></span> Academics</a></li>
+          <li><a routerLink="/students/conduct"><span class="icon" [innerHTML]="icon('tasks')"></span> Conduct</a></li>
+          <li><a routerLink="/students/reports"><span class="icon" [innerHTML]="icon('reports')"></span> Reports</a></li>
+        </ul>
+      </div>
 
-        <main class="content">
-          <section class="roster-section">
-            <app-students-list></app-students-list>
-          </section>
+      <div class="columns main-grid">
+        <section class="left-pane">
+          <app-students-list></app-students-list>
+        </section>
 
-          <header class="hero">
-            <div>
-              <p class="eyebrow">Student Workspace</p>
-              <h1>Students & Lifecycle</h1>
-              <p class="muted">
-                Central hub for roster, admissions, attendance, academics, conduct, and reports.
-              </p>
-            </div>
-          </header>
-
+        <section class="right-pane">
           <section class="tiles">
             <article class="tile">
               <div class="tile-top">
@@ -55,15 +47,6 @@ import { StudentsListComponent } from '../students-list/students-list.component'
             </article>
             <article class="tile">
               <div class="tile-top">
-                <div class="chip watch">Watch</div>
-                <span class="icon" [innerHTML]="icon('admissions')"></span>
-              </div>
-              <p class="label">Admissions in flight</p>
-              <p class="value">38</p>
-              <p class="muted small">Interviews & offers this term</p>
-            </article>
-            <article class="tile">
-              <div class="tile-top">
                 <div class="chip open">Today</div>
                 <span class="icon" [innerHTML]="icon('attendance')"></span>
               </div>
@@ -71,18 +54,9 @@ import { StudentsListComponent } from '../students-list/students-list.component'
               <p class="value">96%</p>
               <p class="muted small">4 sections below 90%</p>
             </article>
-            <article class="tile">
-              <div class="tile-top">
-                <div class="chip action">Action</div>
-                <span class="icon" [innerHTML]="icon('reports')"></span>
-              </div>
-              <p class="label">Academic alerts</p>
-              <p class="value">12</p>
-              <p class="muted small">Low-score follow-ups</p>
-            </article>
           </section>
 
-          <section class="grid">
+          <section class="grid tasks-panel">
             <app-card>
               <div class="card-header">
                 <h3>My tasks</h3>
@@ -94,7 +68,7 @@ import { StudentsListComponent } from '../students-list/students-list.component'
               </ul>
             </app-card>
           </section>
-        </main>
+        </section>
       </div>
     </div>
   `
