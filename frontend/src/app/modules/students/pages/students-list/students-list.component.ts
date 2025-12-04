@@ -10,11 +10,13 @@ import { Student, StudentStatus, Gender } from '../../../../core/models/student.
 import { IconRegistryService } from '../../../../shared/services/icon-registry.service';
 import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+import { StudentFormComponent } from '../../../setup/pages/students/student-form/student-form.component';
 
 @Component({
   selector: 'app-students-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, CardComponent, ButtonComponent, BadgeComponent, BreadcrumbsComponent, SearchInputComponent],
+  imports: [CommonModule, RouterModule, FormsModule, CardComponent, ButtonComponent, BadgeComponent, BreadcrumbsComponent, SearchInputComponent, ModalComponent, StudentFormComponent],
   styleUrls: ['./students-list.component.scss'],
   template: `
     <div class="students-page">
@@ -52,7 +54,7 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
           <app-button variant="secondary" size="sm" (click)="importStudents()">
             <span class="icon" [innerHTML]="icon('upload')"></span> Import
           </app-button>
-          <app-button variant="primary" size="sm" (click)="addNewStudent()">
+          <app-button variant="primary" size="sm" (click)="openModal()">
             <span class="icon" [innerHTML]="icon('student-add')"></span> Add Student
           </app-button>
           <button class="btn-ghost" title="Bulk actions placeholder" disabled>Bulk actions (coming soon)</button>
@@ -80,7 +82,7 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
         <div class="empty-state">
           <h3>No students found</h3>
           <p>Get started by adding your first student</p>
-          <app-button variant="primary" (click)="addNewStudent()">
+          <app-button variant="primary" (click)="openModal()">
             + Add New Student
           </app-button>
         </div>
@@ -156,6 +158,10 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
         </ng-container>
       }
     </div>
+
+    <app-modal [isOpen]="modalOpen()" (closed)="closeModal()" title="Add Student" size="xl">
+      <app-student-form (submitted)="onModalSubmit()" (cancelled)="closeModal()"></app-student-form>
+    </app-modal>
   `
 })
 export class StudentsListComponent implements OnInit {
@@ -178,6 +184,7 @@ export class StudentsListComponent implements OnInit {
   ];
   genders: Gender[] = [Gender.MALE, Gender.FEMALE, Gender.OTHER];
   selectedIds = signal<Set<string>>(new Set());
+  modalOpen = signal(false);
   crumbs: Crumb[] = [
     { label: 'Students', link: '/students' },
     { label: 'Roster' }
@@ -217,8 +224,17 @@ export class StudentsListComponent implements OnInit {
     this.applyFilters();
   }
 
-  addNewStudent(): void {
-    this.router.navigate(['/students/new']);
+  openModal(): void {
+    this.modalOpen.set(true);
+  }
+
+  closeModal(): void {
+    this.modalOpen.set(false);
+  }
+
+  onModalSubmit(): void {
+    this.closeModal();
+    this.loadStudents();
   }
 
   editStudent(event: Event, id: string): void {

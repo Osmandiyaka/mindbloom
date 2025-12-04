@@ -110,6 +110,15 @@
     border-radius: 8px;
 }
 
+app-modal ::ng-deep .modal {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+}
+
+app-modal ::ng-deep .modal-header h3 {
+    color: var(--color-text-primary);
+}
+
 .data-table {
     width: 100%;
     background: var(--color-surface);
