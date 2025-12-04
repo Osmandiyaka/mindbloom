@@ -132,6 +132,21 @@
         color: var(--soft-text-muted);
     }
 
+    /* Modals should respect standard surfaces, not glass */
+    .modal,
+    .modal-content,
+    .modal-dialog {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        color: var(--color-text-primary);
+        box-shadow: var(--shadow-md, 0 20px 50px rgba(0,0,0,0.35));
+        backdrop-filter: none;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid var(--color-border);
+    }
+
     // Form controls
     input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
     select,

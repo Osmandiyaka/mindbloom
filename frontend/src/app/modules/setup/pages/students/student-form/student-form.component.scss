@@ -159,6 +159,39 @@
     margin-top: 0.35rem;
 }
 
+// Explicit modal overrides to avoid soft-glass tint in dark mode
+:host-context([data-theme="dark"]) {
+    .modal,
+    .modal-content,
+    .modal-dialog,
+    .wizard-form,
+    .wizard-content,
+    .main-form-area,
+    .photo-upload-card,
+    .photo-upload-section,
+    .review-section,
+    .guardian-card,
+    .progress-steps {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        color: var(--color-text-primary);
+        box-shadow: var(--shadow-sm);
+        backdrop-filter: none;
+    }
+
+    .wizard-title,
+    .wizard-subtitle,
+    .step-title,
+    .step-status,
+    .progress-text {
+        color: var(--color-text-primary);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid var(--color-border);
+    }
+}
+
 // ========================================
 // RIGHT CONTENT AREA
 // ========================================
