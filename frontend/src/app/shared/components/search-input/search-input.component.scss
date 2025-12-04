@@ -1,0 +1,36 @@
+.search-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary,#7ab8ff) 12%, transparent), var(--color-surface));
+  box-shadow: var(--shadow-sm);
+  min-width: 220px;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-secondary);
+
+  svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+  }
+}
+
+input {
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  width: 100%;
+  outline: none;
+  font: inherit;
+
+  &::placeholder {
+    color: var(--color-text-secondary);
+  }
+}

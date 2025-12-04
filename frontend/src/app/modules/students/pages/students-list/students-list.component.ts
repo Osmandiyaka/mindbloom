@@ -6,14 +6,15 @@ import { CardComponent } from '../../../../shared/components/card/card.component
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
 import { StudentService } from '../../../../core/services/student.service';
-import { Student, StudentStatus } from '../../../../core/models/student.model';
+import { Student, StudentStatus, Gender } from '../../../../core/models/student.model';
 import { IconRegistryService } from '../../../../shared/services/icon-registry.service';
 import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
+import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
 
 @Component({
   selector: 'app-students-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, CardComponent, ButtonComponent, BadgeComponent, BreadcrumbsComponent],
+  imports: [CommonModule, RouterModule, FormsModule, CardComponent, ButtonComponent, BadgeComponent, BreadcrumbsComponent, SearchInputComponent],
   styleUrls: ['./students-list.component.scss'],
   template: `
     <div class="students-page">
@@ -21,17 +22,20 @@ import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/bread
 
       <div class="toolbar">
         <div class="toolbar-left">
-          <div>
-            <h2>Students</h2>
-          </div>
-          <div class="search-input">
-            <input
-              type="search"
-              class="form-control"
-              placeholder="Search"
-              (input)="onSearchChange($event)"
-            />
-          </div>
+          <div><h2>Students</h2></div>
+          <app-search-input placeholder="Search students..." (search)="onSearch($event)"></app-search-input>
+          <select [(ngModel)]="gradeFilter" (change)="applyFilters()">
+            <option value="">All grades</option>
+            <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+          </select>
+          <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+            <option value="">All status</option>
+            <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+          </select>
+          <select [(ngModel)]="genderFilter" (change)="applyFilters()">
+            <option value="">All genders</option>
+            <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
+          </select>
         </div>
         <div class="toolbar-right">
           <div class="view-toggle" role="group" aria-label="View switch">
@@ -51,6 +55,7 @@ import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/bread
           <app-button variant="primary" size="sm" (click)="addNewStudent()">
             <span class="icon" [innerHTML]="icon('student-add')"></span> Add Student
           </app-button>
+          <button class="btn-ghost" title="Bulk actions placeholder" disabled>Bulk actions (coming soon)</button>
         </div>
       </div>
 
@@ -71,7 +76,7 @@ import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/bread
       }
 
       <!-- Empty State -->
-      @if (!loading() && !error() && students().length === 0) {
+      @if (!loading() && !error() && filteredStudents().length === 0) {
         <div class="empty-state">
           <h3>No students found</h3>
           <p>Get started by adding your first student</p>
@@ -81,13 +86,14 @@ import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/bread
         </div>
       }
 
-      @if (!loading() && !error() && students().length > 0) {
+      @if (!loading() && !error() && filteredStudents().length > 0) {
         <ng-container [ngSwitch]="viewMode()">
           <div *ngSwitchCase="'table'" class="data-table">
             <div class="table-wrapper">
               <table>
                 <thead>
                   <tr>
+                    <th style="width:48px;"><input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll($event)"/></th>
                     <th class="sortable">Student ID</th>
                     <th class="sortable">Name</th>
                     <th>Class</th>
@@ -97,9 +103,13 @@ import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/bread
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let student of students()" class="row-clickable" [routerLink]="['/students', student.id]">
+                  <tr *ngFor="let student of filteredStudents()" class="row-clickable" [routerLink]="['/students', student.id]">
+                    <td><input type="checkbox" [checked]="isSelected(student.id)" (click)="toggleSelect($event, student.id)"/></td>
                     <td class="col-primary">{{ student.enrollment.admissionNumber }}</td>
-                    <td class="col-primary">{{ student.fullName }}</td>
+                    <td class="col-primary">
+                      <span class="avatar">{{ initials(student.fullName) }}</span>
+                      {{ student.fullName }}
+                    </td>
                     <td>{{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</td>
                     <td>{{ student.email || 'N/A' }}</td>
                     <td>
@@ -120,7 +130,7 @@ import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/bread
           </div>
 
           <div *ngSwitchCase="'grid'" class="card-grid">
-            <div class="student-card" *ngFor="let student of students()">
+            <div class="student-card" *ngFor="let student of filteredStudents()">
               <div class="card-header">
                 <div class="avatar">{{ student.fullName.charAt(0) }}</div>
                 <div>
@@ -137,9 +147,9 @@ import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/bread
               </div>
               <div class="divider"></div>
               <div class="card-actions">
-                <button (click)="viewStudent($event, student.id)">View</button>
-                <button (click)="editStudent($event, student.id)">Edit</button>
-                <button (click)="deleteStudent($event, student)">Delete</button>
+                <button (click)="viewStudent($event, student.id)"><span class="icon" [innerHTML]="icon('eye')"></span></button>
+                <button (click)="editStudent($event, student.id)"><span class="icon" [innerHTML]="icon('edit')"></span></button>
+                <button (click)="deleteStudent($event, student)"><span class="icon" [innerHTML]="icon('trash')"></span></button>
               </div>
             </div>
           </div>
@@ -149,11 +159,25 @@ import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/bread
   `
 })
 export class StudentsListComponent implements OnInit {
-  students = signal<Student[]>([]);
+  allStudents = signal<Student[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
   searchTerm = '';
   viewMode = signal<'table' | 'grid'>('table');
+  gradeFilter = '';
+  statusFilter: StudentStatus | '' = '';
+  genderFilter = '';
+  grades: string[] = ['Grade 5', 'Grade 6', 'Grade 7', 'Grade 8'];
+  statuses: StudentStatus[] = [
+    StudentStatus.ACTIVE,
+    StudentStatus.INACTIVE,
+    StudentStatus.SUSPENDED,
+    StudentStatus.GRADUATED,
+    StudentStatus.TRANSFERRED,
+    StudentStatus.WITHDRAWN
+  ];
+  genders: Gender[] = [Gender.MALE, Gender.FEMALE, Gender.OTHER];
+  selectedIds = signal<Set<string>>(new Set());
   crumbs: Crumb[] = [
     { label: 'Students', link: '/students' },
     { label: 'Roster' }
@@ -177,8 +201,7 @@ export class StudentsListComponent implements OnInit {
 
     this.studentService.getStudents(filters).subscribe({
       next: (students: Student[]) => {
-        console.log('Loaded students from API:', students);
-        this.students.set(students);
+        this.allStudents.set(students);
         this.loading.set(false);
       },
       error: (err: any) => {
@@ -189,15 +212,9 @@ export class StudentsListComponent implements OnInit {
     });
   }
 
-  onSearchChange(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    this.searchTerm = target.value;
-    // Debounce the search
-    setTimeout(() => {
-      if (this.searchTerm === target.value) {
-        this.loadStudents();
-      }
-    }, 300);
+  onSearch(term: string) {
+    this.searchTerm = term;
+    this.applyFilters();
   }
 
   addNewStudent(): void {
@@ -258,5 +275,53 @@ export class StudentsListComponent implements OnInit {
 
   icon(name: string) {
     return this.icons.icon(name);
+  }
+
+  applyFilters() {
+    // No-op; filters are applied via getter
+  }
+
+  filteredStudents(): Student[] {
+    const term = this.searchTerm.toLowerCase().trim();
+    return this.allStudents().filter(s => {
+      const matchesTerm =
+        !term ||
+        s.fullName.toLowerCase().includes(term) ||
+        s.enrollment.admissionNumber.toLowerCase().includes(term) ||
+        (s.email || '').toLowerCase().includes(term);
+      const matchesGrade = !this.gradeFilter || s.enrollment.class?.toLowerCase().startsWith(this.gradeFilter.toLowerCase());
+      const matchesStatus = !this.statusFilter || s.status === this.statusFilter;
+      const matchesGender = !this.genderFilter || (s as any).gender === this.genderFilter;
+      return matchesTerm && matchesGrade && matchesStatus && matchesGender;
+    });
+  }
+
+  initials(name: string) {
+    return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  }
+
+  toggleSelect(event: Event, id: string) {
+    event.stopPropagation();
+    const next = new Set(this.selectedIds());
+    if (next.has(id)) next.delete(id); else next.add(id);
+    this.selectedIds.set(next);
+  }
+
+  isSelected(id: string) {
+    return this.selectedIds().has(id);
+  }
+
+  toggleSelectAll(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      this.selectedIds.set(new Set(this.filteredStudents().map(s => s.id)));
+    } else {
+      this.selectedIds.set(new Set());
+    }
+  }
+
+  allSelected() {
+    const filtered = this.filteredStudents();
+    return filtered.length > 0 && filtered.every(s => this.selectedIds().has(s.id));
   }
 }
