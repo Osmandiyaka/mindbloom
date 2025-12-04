@@ -276,12 +276,20 @@ export class StudentFormComponent implements OnInit {
                 }
                 return true;
             case 2:
+                // Address section (part of personal form)
+                const addressGroup = this.personalInfoForm.get('address') as FormGroup;
+                if (addressGroup && addressGroup.invalid) {
+                    this.markFormGroupTouched(addressGroup);
+                    return false;
+                }
+                return true;
+            case 3:
                 if (this.enrollmentForm.invalid) {
                     this.markFormGroupTouched(this.enrollmentForm);
                     return false;
                 }
                 return true;
-            case 3:
+            case 4:
                 // Check if there are any guardians
                 if (this.guardians.length === 0) {
                     alert('Please add at least one guardian');
@@ -307,8 +315,8 @@ export class StudentFormComponent implements OnInit {
                     }
                 }
                 return true;
-            case 4:
-                return true; // Medical info is optional
+            case 5:
+                return true; // Medical info optional
             default:
                 return true;
         }

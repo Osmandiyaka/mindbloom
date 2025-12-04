@@ -61,7 +61,7 @@
 
     // Modal header
     .modal-header {
-        padding: $spacing-6;
+        padding: $spacing-5;
         border-bottom: $border-default;
         display: flex;
         align-items: center;
@@ -69,9 +69,9 @@
         gap: $spacing-4;
 
         .modal-title {
-            font-size: $font-size-xl;
+            font-size: calc(#{$font-size-xl} * 0.8);
             font-weight: $font-weight-semibold;
-            color: $text-primary;
+            color: var(--color-text-primary, $text-primary);
             margin: 0;
         }
 
@@ -93,7 +93,7 @@
 
     // Modal body
     .modal-body {
-        padding: $spacing-6;
+        padding: $spacing-5;
         overflow-y: auto;
         flex: 1;
         @include custom-scrollbar;
