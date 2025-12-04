@@ -29,6 +29,7 @@ import { RoleListComponent } from '../roles/role-list.component';
         <button [class.active]="activeTab === 'roles'" (click)="activeTab = 'roles'">Roles & Permissions</button>
         <button [class.active]="activeTab === 'billing'" (click)="activeTab = 'billing'">Billing & Subscription</button>
         <button [class.active]="activeTab === 'plugins'" (click)="activeTab = 'plugins'">Plugins</button>
+        <button [class.active]="activeTab === 'templates'" (click)="activeTab = 'templates'">ID Templates</button>
       </div>
 
       <ng-container [ngSwitch]="activeTab">
@@ -300,6 +301,93 @@ import { RoleListComponent } from '../roles/role-list.component';
             </div>
           </div>
         </div>
+
+        <div *ngSwitchCase="'templates'" class="panel templates-panel">
+          <div class="panel-header padded">
+            <div class="stacked">
+              <h2 class="themed-heading">ID Templates</h2>
+              <p class="subtitle">Configure how admission numbers and roll numbers are generated.</p>
+            </div>
+            <div class="actions">
+              <button class="btn primary" type="button">
+                <svg viewBox="0 0 24 24"><path d="m3.4 21 18.3-9L3.4 3v6.5l13.1 2-13.1 2V21Z" fill="currentColor"/></svg>
+                Save Templates
+              </button>
+            </div>
+          </div>
+
+          <div class="template-card">
+            <div class="template-grid">
+              <div class="template-section">
+                <div class="section-head">
+                  <span class="chip subtle">Admission</span>
+                  <span class="muted">e.g. ADM-2025-0042</span>
+                </div>
+                <div class="field-row">
+                  <label>Prefix</label>
+                  <input type="text" [(ngModel)]="templates.admissionPrefix" maxlength="10" />
+                </div>
+                <div class="field-row two-cols">
+                  <div>
+                    <label>Sequence length</label>
+                    <input type="number" min="2" max="6" [(ngModel)]="templates.admissionSeqLength" />
+                  </div>
+                  <div class="checkbox-row">
+                    <label>
+                      <input type="checkbox" [(ngModel)]="templates.includeYear" />
+                      Include academic year
+                    </label>
+                    <label>
+                      <input type="checkbox" [(ngModel)]="templates.resetPerYear" />
+                      Reset each year
+                    </label>
+                  </div>
+                </div>
+                <div class="preview">
+                  <span class="muted">Preview</span>
+                  <strong>{{ admissionPreview }}</strong>
+                </div>
+              </div>
+
+              <div class="template-section">
+                <div class="section-head">
+                  <span class="chip subtle">Roll</span>
+                  <span class="muted">e.g. 7B-15</span>
+                </div>
+                <div class="field-row two-cols">
+                  <div>
+                    <label>Prefix (optional)</label>
+                    <input type="text" [(ngModel)]="templates.rollPrefix" maxlength="10" />
+                  </div>
+                  <div>
+                    <label>Sequence length</label>
+                    <input type="number" min="1" max="4" [(ngModel)]="templates.rollSeqLength" />
+                  </div>
+                </div>
+                <div class="field-row two-cols">
+                  <div>
+                    <label>Sample class</label>
+                    <input type="text" [(ngModel)]="templates.sampleClass" />
+                  </div>
+                  <div>
+                    <label>Sample section</label>
+                    <input type="text" [(ngModel)]="templates.sampleSection" />
+                  </div>
+                </div>
+                <div class="checkbox-row">
+                  <label>
+                    <input type="checkbox" [(ngModel)]="templates.resetPerClass" />
+                    Reset per class/section
+                  </label>
+                </div>
+                <div class="preview">
+                  <span class="muted">Preview</span>
+                  <strong>{{ rollPreview }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </ng-container>
 
       <div class="alert" *ngIf="error()"><span>{{ error() }}</span></div>
@@ -408,6 +496,25 @@ import { RoleListComponent } from '../roles/role-list.component';
     .users-card .card-body { padding-top: 0.5rem; }
     .plugin-card { padding: 0.35rem 0.35rem 0.75rem; }
     .plugin-body { padding: 0.75rem 0.75rem 0.5rem; }
+    /* ID Templates */
+    .templates-panel { gap: 0.85rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 0.6rem; box-shadow: var(--shadow-sm); }
+    .templates-panel .panel-header { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 0.75rem 1rem; box-shadow: var(--shadow-sm); }
+    .template-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 1.1rem; box-shadow: var(--shadow-md); }
+    .template-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap: 1.1rem; }
+    .template-section { border: 1px solid var(--color-border); border-radius: 12px; padding: 1rem; background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); display: flex; flex-direction: column; gap: 0.85rem; box-shadow: var(--shadow-sm); }
+    .template-section .section-head { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+    .template-section .field-row { display: flex; flex-direction: column; gap: 0.4rem; }
+    .template-section .field-row.two-cols { flex-direction: row; gap: 0.85rem; }
+    .template-section .field-row.two-cols > div { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
+    .template-section label { color: var(--color-text-secondary); font-weight: 700; font-size: 0.92rem; }
+    .template-section input[type="text"], .template-section input[type="number"] { width: 100%; background: var(--color-background); border: 1px solid var(--color-border); color: var(--color-text-primary); border-radius: 10px; padding: 0.65rem 0.75rem; }
+    .template-section input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb,123,140,255),0.18); outline: none; }
+    .template-section .checkbox-row { display: flex; flex-direction: column; gap: 0.45rem; }
+    .template-section .checkbox-row label { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--color-text-secondary); }
+    .template-section .preview { border-top: 1px dashed var(--color-border); padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+    .template-section .preview strong { color: var(--color-primary); letter-spacing: 0.02em; }
+    .template-section .chip.subtle { background: rgba(var(--color-primary-rgb,123,140,255),0.12); color: var(--color-primary); padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(var(--color-primary-rgb,123,140,255),0.25); font-weight: 700; }
+    .themed-heading { color: var(--color-text-primary); }
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: grid; place-items: center; padding: 24px; z-index: 9999; }
     .modal.users-modal { width: min(520px, 92vw); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; box-shadow: 0 18px 48px rgba(0,0,0,0.35); display: flex; flex-direction: column; overflow: hidden; }
     .modal.users-modal .modal-header { padding: 14px 16px 8px; }
@@ -424,7 +531,19 @@ export class TenantSettingsComponent implements OnInit {
     userSaving = signal(false);
     error = signal<string | null>(null);
     success = signal<string | null>(null);
-    activeTab: 'school' | 'invitations' | 'users' | 'roles' | 'billing' | 'plugins' = 'school';
+    activeTab: 'school' | 'invitations' | 'users' | 'roles' | 'billing' | 'plugins' | 'templates' = 'school';
+
+    templates = {
+        admissionPrefix: 'ADM',
+        admissionSeqLength: 4,
+        includeYear: true,
+        resetPerYear: true,
+        rollPrefix: '',
+        rollSeqLength: 2,
+        sampleClass: '7',
+        sampleSection: 'B',
+        resetPerClass: true
+    };
 
     draft: Partial<Tenant> = {
         customization: {
@@ -533,6 +652,18 @@ export class TenantSettingsComponent implements OnInit {
                 this.saving.set(false);
             }
         });
+    }
+
+    get admissionPreview(): string {
+        const year = this.templates.includeYear ? new Date().getFullYear().toString() : '';
+        const seq = String(42).padStart(this.templates.admissionSeqLength, '0');
+        return [this.templates.admissionPrefix, year, seq].filter(Boolean).join('-');
+    }
+
+    get rollPreview(): string {
+        const seq = String(15).padStart(this.templates.rollSeqLength, '0');
+        const classSection = `${this.templates.sampleClass || '7'}${this.templates.sampleSection || ''}`;
+        return [this.templates.rollPrefix, `${classSection}-${seq}`].filter(Boolean).join('').replace('--', '-');
     }
 
     reset(): void {
