@@ -98,8 +98,7 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                 <thead>
                   <tr>
                     <th style="width:48px;"><input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll($event)"/></th>
-                    <th class="sortable">Student ID</th>
-                    <th class="sortable">Name</th>
+                    <th class="sortable">Student</th>
                     <th>Class</th>
                     <th>Email</th>
                     <th>Status</th>
@@ -109,10 +108,14 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                 <tbody>
                   <tr *ngFor="let student of filteredStudents()" class="row-clickable" [routerLink]="['/students', student.id]">
                     <td><input type="checkbox" [checked]="isSelected(student.id)" (click)="toggleSelect($event, student.id)"/></td>
-                    <td class="col-primary">{{ student.enrollment.admissionNumber }}</td>
-                    <td class="col-primary">
-                      <span class="avatar">{{ initials(student.fullName) }}</span>
-                      {{ student.fullName }}
+                    <td class="col-primary student-cell">
+                      <div class="student-meta">
+                        <span class="student-id">{{ student.enrollment.admissionNumber }}</span>
+                        <div class="student-name">
+                          <span class="avatar">{{ initials(student.fullName) }}</span>
+                          <span class="name">{{ student.fullName }}</span>
+                        </div>
+                      </div>
                     </td>
                     <td>{{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</td>
                     <td>{{ student.email || 'N/A' }}</td>
