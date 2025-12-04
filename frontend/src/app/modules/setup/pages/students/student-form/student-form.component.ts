@@ -32,6 +32,11 @@ export class StudentFormComponent implements OnInit {
     BloodGroup = BloodGroup;
     RelationshipType = RelationshipType;
 
+    // Dropdown data
+    academicYears: string[] = ['2024-2025', '2025-2026', '2026-2027'];
+    classes: string[] = ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'];
+    sections: string[] = ['A', 'B', 'C', 'D'];
+
     // Form groups
     personalInfoForm!: FormGroup;
     enrollmentForm!: FormGroup;
