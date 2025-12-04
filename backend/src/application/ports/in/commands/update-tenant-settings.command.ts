@@ -40,4 +40,15 @@ export interface TenantSettingsUpdate {
     metadata?: Record<string, any>;
     tags?: string[];
     trialEndsAt?: Date;
+    idTemplates?: {
+        admissionPrefix?: string;
+        admissionSeqLength?: number;
+        includeYear?: boolean;
+        resetPerYear?: boolean;
+        rollPrefix?: string;
+        rollSeqLength?: number;
+        sampleClass?: string;
+        sampleSection?: string;
+        resetPerClass?: boolean;
+    };
 }

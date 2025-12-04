@@ -82,6 +82,18 @@ export interface ResourceUsage {
     lastCalculated?: Date;
 }
 
+export interface IdTemplateSettings {
+    admissionPrefix?: string;
+    admissionSeqLength?: number;
+    includeYear?: boolean;
+    resetPerYear?: boolean;
+    rollPrefix?: string;
+    rollSeqLength?: number;
+    sampleClass?: string;
+    sampleSection?: string;
+    resetPerClass?: boolean;
+}
+
 export class Tenant {
     private static readonly FEATURE_MAP: Record<TenantPlan, string[]> = {
         [TenantPlan.TRIAL]: ['basic_features', 'student_management', 'attendance', 'grades'],
@@ -136,6 +148,7 @@ export class Tenant {
             reason?: string;
         }>,
         public readonly tags?: string[],
+        public readonly idTemplates?: IdTemplateSettings,
         public readonly createdAt?: Date,
         public readonly updatedAt?: Date,
     ) { }

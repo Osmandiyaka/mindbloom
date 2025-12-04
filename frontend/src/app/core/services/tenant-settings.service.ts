@@ -21,6 +21,17 @@ export interface TenantSettingsUpdate {
         end?: string | Date;
         name?: string;
     };
+    idTemplates?: {
+        admissionPrefix?: string;
+        admissionSeqLength?: number;
+        includeYear?: boolean;
+        resetPerYear?: boolean;
+        rollPrefix?: string;
+        rollSeqLength?: number;
+        sampleClass?: string;
+        sampleSection?: string;
+        resetPerClass?: boolean;
+    };
 }
 
 @Injectable({
@@ -43,6 +54,7 @@ export class TenantSettingsService {
             logo: payload.customization?.logo,
             academicYearStart: payload.academicYear?.start ? new Date(payload.academicYear.start) : undefined,
             academicYearEnd: payload.academicYear?.end ? new Date(payload.academicYear.end) : undefined,
+            idTemplates: payload.idTemplates,
         };
         delete body.customization;
         delete body.academicYear;

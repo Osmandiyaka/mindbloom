@@ -81,6 +81,7 @@ export class TenantController {
                 start: new Date(dto.academicYearStart),
                 end: new Date(dto.academicYearEnd),
             } : undefined,
+            idTemplates: dto.idTemplates,
             ...dto.extras,
         });
         return await this.updateTenantSettingsUseCase.execute(command);

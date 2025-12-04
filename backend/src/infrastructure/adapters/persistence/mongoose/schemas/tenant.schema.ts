@@ -268,6 +268,19 @@ export class TenantDocument extends Document {
     @Prop({ type: [String] })
     tags?: string[];
 
+    @Prop({ type: Object })
+    idTemplates?: {
+        admissionPrefix?: string;
+        admissionSeqLength?: number;
+        includeYear?: boolean;
+        resetPerYear?: boolean;
+        rollPrefix?: string;
+        rollSeqLength?: number;
+        sampleClass?: string;
+        sampleSection?: string;
+        resetPerClass?: boolean;
+    };
+
     createdAt: Date;
     updatedAt: Date;
 }

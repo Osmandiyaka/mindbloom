@@ -47,6 +47,10 @@ export class UpdateTenantSettingsUseCase {
                 ...(tenant.academicYear || {}),
                 ...(command.settings.academicYear || {}),
             },
+            idTemplates: {
+                ...(tenant as any).idTemplates || {},
+                ...(command.settings as any).idTemplates || {},
+            },
         } as any);
 
         return updated;

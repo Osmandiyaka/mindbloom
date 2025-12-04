@@ -91,6 +91,7 @@ export class MongooseTenantRepository implements ITenantRepository {
             doc.deletedAt,
             doc.statusHistory as any,
             doc.tags,
+            doc.idTemplates,
             doc.createdAt,
             doc.updatedAt,
         );
@@ -128,6 +129,7 @@ export class MongooseTenantRepository implements ITenantRepository {
             metadata: tenant.metadata,
             tags: tenant.tags,
             trialEndsAt: tenant.trialEndsAt,
+            idTemplates: tenant.idTemplates,
         };
     }
 }

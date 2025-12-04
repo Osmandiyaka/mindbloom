@@ -48,6 +48,17 @@ export interface Tenant {
     usage?: Record<string, any>;
     trialEndsAt?: string;
     metadata?: Record<string, any>;
+    idTemplates?: {
+        admissionPrefix?: string;
+        admissionSeqLength?: number;
+        includeYear?: boolean;
+        resetPerYear?: boolean;
+        rollPrefix?: string;
+        rollSeqLength?: number;
+        sampleClass?: string;
+        sampleSection?: string;
+        resetPerClass?: boolean;
+    };
 }
 
 @Injectable({

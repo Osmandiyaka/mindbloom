@@ -303,18 +303,18 @@ import { RoleListComponent } from '../roles/role-list.component';
         </div>
 
         <div *ngSwitchCase="'templates'" class="panel templates-panel">
-          <div class="panel-header padded">
-            <div class="stacked">
-              <h2 class="themed-heading">ID Templates</h2>
-              <p class="subtitle">Configure how admission numbers and roll numbers are generated.</p>
-            </div>
-            <div class="actions">
-              <button class="btn primary" type="button">
+            <div class="panel-header padded">
+              <div class="stacked">
+                <h2 class="themed-heading">ID Templates</h2>
+                <p class="subtitle">Configure how admission numbers and roll numbers are generated.</p>
+              </div>
+              <div class="actions">
+              <button class="btn primary" type="button" (click)="saveTemplates()" [disabled]="templatesSaving()">
                 <svg viewBox="0 0 24 24"><path d="m3.4 21 18.3-9L3.4 3v6.5l13.1 2-13.1 2V21Z" fill="currentColor"/></svg>
-                Save Templates
+                {{ templatesSaving() ? 'Saving...' : 'Save Templates' }}
               </button>
+              </div>
             </div>
-          </div>
 
           <div class="template-card">
             <div class="template-grid">
@@ -525,6 +525,7 @@ import { RoleListComponent } from '../roles/role-list.component';
 export class TenantSettingsComponent implements OnInit {
     loading = signal(false);
     saving = signal(false);
+    templatesSaving = signal(false);
     billingLoading = signal(false);
     inviteLoading = signal(false);
     usersLoading = signal(false);
@@ -616,6 +617,12 @@ export class TenantSettingsComponent implements OnInit {
                     customization: { ...this.draft.customization, ...(tenant.customization || {}) },
                     academicYear: tenant.academicYear || {},
                 };
+                if (tenant.idTemplates) {
+                    this.templates = {
+                        ...this.templates,
+                        ...tenant.idTemplates,
+                    };
+                }
                 this.loading.set(false);
             },
             error: (err) => {
@@ -651,6 +658,27 @@ export class TenantSettingsComponent implements OnInit {
                 this.error.set(err.error?.message || 'Failed to save settings');
                 this.saving.set(false);
             }
+        });
+    }
+
+    saveTemplates(): void {
+        this.templatesSaving.set(true);
+        this.error.set(null);
+        this.success.set(null);
+        this.tenantSettingsService.updateSettings({
+            idTemplates: { ...this.templates },
+        }).subscribe({
+            next: (tenant) => {
+                this.templatesSaving.set(false);
+                if (tenant.idTemplates) {
+                    this.templates = { ...this.templates, ...tenant.idTemplates };
+                }
+                this.success.set('Templates saved');
+            },
+            error: (err) => {
+                this.templatesSaving.set(false);
+                this.error.set(err.error?.message || 'Failed to save templates');
+            },
         });
     }
 
