@@ -451,11 +451,11 @@
         border: 1px solid var(--border-dark, var(--color-border, #383a4a));
         color: var(--color-text-primary);
         box-shadow: inset 1px 1px 3px rgba(0,0,0,0.35), inset -1px -1px 3px rgba(255,255,255,0.03);
-        &::placeholder { color: transparent; }
+        &::placeholder { color: var(--color-text-secondary); }
         &:focus {
             border-color: var(--color-primary);
             box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb, 123, 140, 255), 0.25), inset 1px 1px 2px rgba(0,0,0,0.4);
-            background: color-mix(in srgb, var(--surface-highlight, #2a2d3f) 95%, var(--color-primary, #7ab8ff) 5%);
+            background: var(--surface-highlight, var(--color-surface-hover, #2a2d3f));
         }
     }
 
@@ -731,10 +731,6 @@
 .btn-remove {
     background: var(--color-error);
     color: #0f1320;
-
-    &:hover {
-        background: #dc2626;
-    }
 }
 
 .upload-hint {
@@ -781,6 +777,35 @@ label {
     .required {
         color: #ef4444;
         margin-left: 0.25rem;
+    }
+}
+
+.tag-toggle {
+    display: inline-flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    button {
+        padding: 0.4rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-hover);
+        color: var(--color-text-primary);
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+
+        &:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        &.active {
+            background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+            border-color: var(--color-primary);
+            color: color-mix(in srgb, var(--color-primary) 80%, #0f172a 20%);
+            box-shadow: 0 4px 10px rgba(var(--color-primary-rgb, 123, 140, 255), 0.18);
+        }
     }
 }
 

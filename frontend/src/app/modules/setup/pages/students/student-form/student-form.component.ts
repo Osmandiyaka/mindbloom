@@ -222,9 +222,20 @@ export class StudentFormComponent implements OnInit {
     removeGuardian(index: number): void {
         if (this.guardians.length > 1) {
             this.guardians.removeAt(index);
-        } else {
-            alert('At least one guardian is required');
         }
+    }
+
+    copyStudentAddress(index: number): void {
+        const address = this.personalInfoForm.get('address')?.value;
+        if (!address) return;
+        const guardianAddress = this.guardians.at(index).get('address') as FormGroup;
+        guardianAddress.patchValue({
+            street: address.street || '',
+            city: address.city || '',
+            state: address.state || '',
+            postalCode: address.postalCode || '',
+            country: address.country || ''
+        });
     }
 
     setPrimaryGuardian(index: number): void {
@@ -292,14 +303,15 @@ export class StudentFormComponent implements OnInit {
             case 4:
                 // Check if there are any guardians
                 if (this.guardians.length === 0) {
-                    alert('Please add at least one guardian');
+                    this.error.set('Please add at least one guardian');
+                    this.markFormGroupTouched(this.guardiansForm);
                     return false;
                 }
 
                 // Validate guardian forms
                 if (this.guardiansForm.invalid) {
                     this.markFormGroupTouched(this.guardiansForm);
-                    alert('Please fill in all required guardian fields (Name, Relationship, Phone)');
+                    this.error.set('Please fill in required guardian fields (Name, Relationship, Phone)');
                     return false;
                 }
 
@@ -310,10 +322,11 @@ export class StudentFormComponent implements OnInit {
                     // Ensure at least one primary guardian when multiple exist
                     const hasPrimary = this.guardians.controls.some(g => g.get('isPrimary')?.value);
                     if (!hasPrimary) {
-                        alert('Please designate one guardian as primary');
+                        this.error.set('Please designate one guardian as primary');
                         return false;
                     }
                 }
+                this.error.set(null);
                 return true;
             case 5:
                 return true; // Medical info optional

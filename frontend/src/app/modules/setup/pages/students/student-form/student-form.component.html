@@ -356,79 +356,113 @@
                         <p class="form-description">Add at least one guardian or parent</p>
 
                         <div formArrayName="guardians">
-                            @for (guardian of guardians.controls; let i = $index; track i) {
-                            <div [formGroupName]="i" class="guardian-card">
-                                <div class="card-header">
-                                    <h3>Guardian {{ i + 1 }}</h3>
-                                    <div class="card-actions">
-                                        @if (!guardian.get('isPrimary')?.value && guardians.length > 1) {
-                                        <button type="button" class="btn-text" (click)="setPrimaryGuardian(i)">
-                                            Set as Primary
-                                        </button>
-                                        }
-                                        @if (guardian.get('isPrimary')?.value) {
-                                        <span class="primary-badge">Primary</span>
-                                        }
-                                        @if (guardians.length > 1) {
-                                        <button type="button" class="btn-icon-danger" (click)="removeGuardian(i)">
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2">
-                                                <path d="M18 6L6 18M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                        }
+                            <ng-container *ngFor="let guardian of guardians.controls; let i = index">
+                                <div [formGroupName]="i" class="guardian-card">
+                                    <div class="card-header">
+                                        <h3>Guardian {{ i + 1 }}</h3>
+                                        <div class="card-actions">
+                                            @if (!guardian.get('isPrimary')?.value && guardians.length > 1) {
+                                            <button type="button" class="btn-text" (click)="setPrimaryGuardian(i)">
+                                                Set as Primary
+                                            </button>
+                                            }
+                                            @if (guardian.get('isPrimary')?.value) {
+                                            <span class="primary-badge">Primary</span>
+                                            }
+                                            @if (guardians.length > 1) {
+                                            <button type="button" class="btn-icon-danger" (click)="removeGuardian(i)">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2">
+                                                    <path d="M18 6L6 18M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                            }
+                                            <button type="button" class="btn-text" (click)="copyStudentAddress(i)">
+                                                Copy Student Address
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-field full-width">
+                                            <label>Full Name <span class="required">*</span></label>
+                                            <input type="text" formControlName="name" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row three-cols">
+                                        <div class="form-field">
+                                            <label>Relationship <span class="required">*</span></label>
+                                            <select formControlName="relationship">
+                                                <option value="">Select relationship</option>
+                                                <option [value]="RelationshipType.FATHER">Father</option>
+                                                <option [value]="RelationshipType.MOTHER">Mother</option>
+                                                <option [value]="RelationshipType.GUARDIAN">Guardian</option>
+                                                <option [value]="RelationshipType.SIBLING">Sibling</option>
+                                                <option [value]="RelationshipType.GRANDPARENT">Grandparent</option>
+                                                <option [value]="RelationshipType.OTHER">Other</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-field">
+                                            <label>Phone <span class="required">*</span></label>
+                                            <input type="tel" formControlName="phone" placeholder="e.g. +234 801 234 5678" />
+                                        </div>
+
+                                        <div class="form-field">
+                                            <label>Email</label>
+                                            <input type="email" formControlName="email"
+                                                placeholder="guardian@email.com" />
+                                        </div>
+                                    </div>
+
+                                    <div formGroupName="address">
+                                        <div class="form-row">
+                                            <div class="form-field full-width">
+                                                <label>Street Address</label>
+                                                <input type="text" formControlName="street" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-row two-cols">
+                                            <div class="form-field">
+                                                <label>City</label>
+                                                <input type="text" formControlName="city" />
+                                            </div>
+                                            <div class="form-field">
+                                                <label>State/Province</label>
+                                                <input type="text" formControlName="state" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-row two-cols">
+                                            <div class="form-field">
+                                                <label>Postal Code</label>
+                                                <input type="text" formControlName="postalCode" />
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Country</label>
+                                                <input type="text" formControlName="country" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row two-cols">
+                                        <div class="form-field">
+                                            <label>Occupation</label>
+                                            <input type="text" formControlName="occupation" />
+                                        </div>
+                                        <div class="form-field tags-row">
+                                            <label>Status</label>
+                                            <div class="tag-toggle">
+                                                <button type="button" [class.active]="guardian.get('isPrimary')?.value" (click)="setPrimaryGuardian(i)">Primary</button>
+                                                <button type="button" [class.active]="guardian.get('isEmergencyContact')?.value" (click)="guardian.get('isEmergencyContact')?.setValue(!guardian.get('isEmergencyContact')?.value)">Emergency</button>
+                                            </div>
+                                            <small class="field-hint">Set primary or emergency contact</small>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <div class="form-row">
-                                    <div class="form-field full-width">
-                                        <label>Full Name <span class="required">*</span></label>
-                                        <input type="text" formControlName="name" />
-                                    </div>
-                                </div>
-
-                                <div class="form-row">
-                                    <div class="form-field">
-                                        <label>Relationship <span class="required">*</span></label>
-                                        <select formControlName="relationship">
-                                            <option value="">Select relationship</option>
-                                            <option [value]="RelationshipType.FATHER">Father</option>
-                                            <option [value]="RelationshipType.MOTHER">Mother</option>
-                                            <option [value]="RelationshipType.GUARDIAN">Guardian</option>
-                                            <option [value]="RelationshipType.SIBLING">Sibling</option>
-                                            <option [value]="RelationshipType.GRANDPARENT">Grandparent</option>
-                                            <option [value]="RelationshipType.OTHER">Other</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-field">
-                                        <label>Phone <span class="required">*</span></label>
-                                        <input type="tel" formControlName="phone" />
-                                    </div>
-                                </div>
-
-                                <div class="form-row">
-                                    <div class="form-field">
-                                        <label>Email</label>
-                                        <input type="email" formControlName="email"
-                                            />
-                                    </div>
-
-                                    <div class="form-field">
-                                        <label>Occupation</label>
-                                        <input type="text" formControlName="occupation"
-                                            />
-                                    </div>
-                                </div>
-
-                                <div class="form-field">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" formControlName="isEmergencyContact" />
-                                        <span>Emergency Contact</span>
-                                    </label>
-                                </div>
-                            </div>
-                            }
+                            </ng-container>
                         </div>
 
                         <button type="button" class="btn-add-guardian" (click)="addGuardian()">
