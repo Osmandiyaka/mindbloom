@@ -5,7 +5,7 @@
 .wizard-container {
     display: flex;
     min-height: 100vh;
-    background: radial-gradient(circle at 20% 20%, rgba(123, 140, 255, 0.08), transparent 35%), radial-gradient(circle at 80% 10%, rgba(16, 185, 129, 0.08), transparent 30%), var(--content-background);
+    background: radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--color-primary) 8%, transparent), transparent 35%), radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--color-success) 8%, transparent), transparent 30%), var(--content-background);
 }
 
 // ========================================
@@ -14,7 +14,7 @@
 
 .progress-steps {
     width: 240px;
-    background: var(--color-surface, rgba(16, 20, 32, 0.85));
+    background: var(--color-surface);
     backdrop-filter: blur(8px);
     padding: 2rem 1.4rem;
     display: flex;
@@ -30,7 +30,7 @@
     .wizard-title {
         font-size: 1.5rem;
         font-weight: 600;
-        color: white;
+        color: var(--color-text-primary);
         margin: 0 0 0.5rem 0;
     }
 
@@ -103,7 +103,7 @@
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: var(--color-surface-hover, #2a2d3f);
+    background: var(--color-surface-hover);
     color: var(--color-text-secondary);
     border: 2px solid var(--color-border, #334155);
     display: flex;
@@ -147,7 +147,7 @@
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%);
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-success) 100%);
     transition: width 0.3s ease;
     border-radius: 2px;
 }
@@ -229,21 +229,21 @@
 .photo-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #111827;
+    color: var(--color-text-primary);
     margin: 0 0 1rem 0;
 }
 
 .photo-preview-box {
     width: 100%;
     aspect-ratio: 1;
-    border: 2px dashed #d1d5db;
+    border: 2px dashed var(--color-border);
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 1rem;
     overflow: hidden;
-    background: #f9fafb;
+    background: var(--color-surface-hover);
 
     img {
         width: 100%;
@@ -256,7 +256,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #9ca3af;
+    color: var(--color-text-secondary);
 }
 
 .photo-button-group {
@@ -273,7 +273,7 @@
     border-radius: 8px;
     font-size: 0.875rem;
     font-weight: 500;
-    color: #374151;
+    color: var(--color-text-primary);
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
@@ -314,13 +314,13 @@
     gap: 0.5rem;
 
     &:hover {
-        background: rgba(var(--color-error-rgb, 239, 68, 68), 0.1);
+        background: color-mix(in srgb, var(--color-error) 12%, transparent);
     }
 }
 
 .photo-guideline {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: var(--color-text-secondary);
     margin: 1rem 0 0 0;
     line-height: 1.4;
 }
@@ -515,7 +515,7 @@
 .review-group {
     margin-bottom: 2rem;
     padding-bottom: 2rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--color-border);
 
     &:last-child {
         margin-bottom: 0;

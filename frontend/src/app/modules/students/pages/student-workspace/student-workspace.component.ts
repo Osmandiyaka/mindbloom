@@ -31,7 +31,7 @@ import { StudentsListComponent } from '../students-list/students-list.component'
 
       <div class="columns main-grid">
         <section class="left-pane">
-          <app-students-list></app-students-list>
+          <app-students-list [showBreadcrumbs]="false"></app-students-list>
         </section>
 
         <section class="right-pane">

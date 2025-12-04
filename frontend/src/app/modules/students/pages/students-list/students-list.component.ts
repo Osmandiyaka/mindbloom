@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -20,7 +20,9 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
   styleUrls: ['./students-list.component.scss'],
   template: `
     <div class="students-page">
-      <app-breadcrumbs [items]="crumbs"></app-breadcrumbs>
+      @if (showBreadcrumbs) {
+        <app-breadcrumbs [items]="crumbs"></app-breadcrumbs>
+      }
 
       <div class="toolbar">
         <div class="toolbar-left">
@@ -165,6 +167,7 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
   `
 })
 export class StudentsListComponent implements OnInit {
+  @Input() showBreadcrumbs = true;
   allStudents = signal<Student[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
