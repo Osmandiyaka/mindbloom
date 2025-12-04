@@ -4,7 +4,7 @@
 
 .wizard-container {
     display: flex;
-    min-height: 100vh;
+    min-height: auto;
     background: radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--color-primary) 8%, transparent), transparent 35%), radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--color-success) 8%, transparent), transparent 30%), var(--content-background);
     padding: 0.5rem;
 }
@@ -235,10 +235,10 @@
 .wizard-form {
     max-width: none;
     background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    padding: 1.25rem 1.4rem;
-    box-shadow: var(--shadow-md);
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    box-shadow: var(--shadow-sm);
 }
 
 // Force surfaces to use theme tokens (avoid glass) across modes
