@@ -4,6 +4,9 @@ import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } fr
 import { Router, ActivatedRoute } from '@angular/router';
 import { StudentService } from '../../../../../core/services/student.service';
 import { Student, Gender, BloodGroup, RelationshipType } from '../../../../../core/models/student.model';
+import { TenantService, Tenant } from '../../../../../core/services/tenant.service';
+import { TenantSettingsService } from '../../../../../core/services/tenant-settings.service';
+import { IconRegistryService } from '../../../../../shared/services/icon-registry.service';
 
 @Component({
     selector: 'app-student-form',
@@ -22,6 +25,7 @@ export class StudentFormComponent implements OnInit {
     error = signal<string | null>(null);
     photoPreview = signal<string | null>(null);
     photoFile: File | null = null;
+    templateSettings: Tenant['idTemplates'] | null = null;
 
     // Enums for templates
     Gender = Gender;
@@ -38,7 +42,10 @@ export class StudentFormComponent implements OnInit {
         private fb: FormBuilder,
         private studentService: StudentService,
         private router: Router,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        private tenantService: TenantService,
+        private tenantSettingsService: TenantSettingsService,
+        public iconRegistry: IconRegistryService,
     ) {
         this.initializeForms();
     }
@@ -53,6 +60,49 @@ export class StudentFormComponent implements OnInit {
             // Add one guardian by default
             this.addGuardian();
         }
+        // hydrate template settings from cached tenant or API
+        this.templateSettings = this.tenantService.getCurrentTenantValue()?.idTemplates || null;
+        if (!this.templateSettings) {
+            this.tenantSettingsService.getSettings().subscribe({
+                next: (tenant) => this.templateSettings = tenant.idTemplates || null,
+                error: () => { /* ignore */ }
+            });
+        }
+    }
+
+    private get currentTenant(): Tenant | null {
+        return this.tenantService.getCurrentTenantValue();
+    }
+
+    private nextSequence(length: number): string {
+        const max = Math.pow(10, length) - 1;
+        const min = Math.pow(10, length - 1);
+        const n = Math.floor(Math.random() * (max - min + 1)) + min;
+        return String(n).padStart(length, '0');
+    }
+
+    generateAdmissionNumber(): void {
+        const tmpl = this.templateSettings || this.currentTenant?.idTemplates;
+        if (!tmpl) return;
+        const parts: string[] = [];
+        if (tmpl.admissionPrefix) parts.push(tmpl.admissionPrefix);
+        if (tmpl.includeYear) parts.push(new Date().getFullYear().toString());
+        const seq = this.nextSequence(tmpl.admissionSeqLength || 4);
+        parts.push(seq);
+        this.enrollmentForm.get('enrollment.admissionNumber')?.setValue(parts.join('-'));
+    }
+
+    generateRollNumber(): void {
+        const tmpl = this.templateSettings || this.currentTenant?.idTemplates;
+        if (!tmpl) return;
+        const enrollmentGroup = this.enrollmentForm.get('enrollment') as FormGroup;
+        const cls = enrollmentGroup.get('class')?.value || tmpl.sampleClass || '';
+        const section = enrollmentGroup.get('section')?.value || tmpl.sampleSection || '';
+        const seq = this.nextSequence(tmpl.rollSeqLength || 2);
+        const prefix = tmpl.rollPrefix || '';
+        const classSection = `${cls}${section ? section : ''}`.trim();
+        const result = [prefix, classSection ? `${classSection}-${seq}` : seq].filter(Boolean).join('');
+        enrollmentGroup.get('rollNumber')?.setValue(result);
     }
 
     initializeForms(): void {

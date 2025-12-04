@@ -1007,6 +1007,26 @@ textarea {
     }
 }
 
+.input-with-action {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.input-with-action .btn.small {
+    padding: 0.45rem 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.input-with-action .icon {
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+}
+
 .checkbox-label {
     display: flex;
     align-items: center;

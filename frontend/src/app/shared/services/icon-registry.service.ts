@@ -61,6 +61,7 @@ export class IconRegistryService {
     this.addIcon('trash', ['M3 6h18', 'M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6', 'M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2']);
     this.addIcon('add', ['M12 5v14', 'M5 12h14']);
     this.addIcon('student-add', ['M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4z', 'M4 20v-1a5 5 0 0 1 5-5h6', 'M16 19v-4', 'M14 17h4']);
+    this.addIcon('sparkle', ['M12 2v4', 'M12 18v4', 'M4 12h4', 'M16 12h4', 'M5.6 5.6l2.8 2.8', 'M15.6 15.6l2.8 2.8', 'M5.6 18.4l2.8-2.8', 'M15.6 8.4l2.8-2.8', 'M9 12a3 3 0 1 1 6 0 3 3 0 0 1-6 0z']);
     this.addIcon('default', ['M12 3a9 9 0 1 1-9 9 9 9 0 0 1 9-9z']);
   }
 }
