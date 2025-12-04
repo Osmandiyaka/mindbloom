@@ -31,31 +31,35 @@ import { FormsModule } from '@angular/forms';
       </header>
 
       <section class="toolbar card">
-        <div class="toggle-group">
-          <button class="pill" [class.active]="viewMode==='daily'" (click)="setViewMode('daily')">Daily</button>
-          <button class="pill" [class.active]="viewMode==='period'" (click)="setViewMode('period')">By Period</button>
-        </div>
-        <div class="filters">
-          <label>
-            Grade
-            <select [(ngModel)]="selectedGrade">
-              <option value="">All</option>
-              <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
-            </select>
-          </label>
-          <label>
-            Class
-            <select [(ngModel)]="selectedClass">
-              <option value="">All</option>
-              <option *ngFor="let c of classes" [value]="c">{{ c }}</option>
-            </select>
-          </label>
-          <div class="status-chips">
-            <span class="chip" [class.active]="selectedStatus==='present'" (click)="setStatus('present')">Present</span>
-            <span class="chip" [class.active]="selectedStatus==='absent'" (click)="setStatus('absent')">Absent</span>
-            <span class="chip" [class.active]="selectedStatus==='late'" (click)="setStatus('late')">Late</span>
-            <span class="chip" [class.active]="selectedStatus==='excused'" (click)="setStatus('excused')">Excused</span>
-            <button class="chip ghost" (click)="resetFilters()">Clear</button>
+        <div class="controls">
+          <div class="toggle-group">
+            <button class="pill" [class.active]="viewMode==='daily'" (click)="setViewMode('daily')">Daily</button>
+            <button class="pill" [class.active]="viewMode==='period'" (click)="setViewMode('period')">By Period</button>
+          </div>
+          <div class="filters-group">
+            <div class="filters">
+              <label>
+                Grade
+                <select [(ngModel)]="selectedGrade">
+                  <option value="">All</option>
+                  <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+                </select>
+              </label>
+              <label>
+                Class
+                <select [(ngModel)]="selectedClass">
+                  <option value="">All</option>
+                  <option *ngFor="let c of classes" [value]="c">{{ c }}</option>
+                </select>
+              </label>
+            </div>
+            <div class="status-chips">
+              <span class="chip" [class.active]="selectedStatus==='present'" (click)="setStatus('present')">Present</span>
+              <span class="chip" [class.active]="selectedStatus==='absent'" (click)="setStatus('absent')">Absent</span>
+              <span class="chip" [class.active]="selectedStatus==='late'" (click)="setStatus('late')">Late</span>
+              <span class="chip" [class.active]="selectedStatus==='excused'" (click)="setStatus('excused')">Excused</span>
+              <button class="chip ghost" (click)="resetFilters()">Clear</button>
+            </div>
           </div>
         </div>
         <div class="summary-bar">
