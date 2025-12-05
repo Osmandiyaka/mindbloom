@@ -202,6 +202,9 @@ import { NgIf, NgFor } from '@angular/common';
         <div class="kpi accent">
           <span class="eyebrow">Posted entries</span>
           <p class="value">{{ metrics.posted }}%</p>
+          <span class="delta" [class.up]="metrics.postedDelta >= 0" [class.down]="metrics.postedDelta < 0">
+            {{ metrics.postedDelta >= 0 ? '▲' : '▼' }} {{ metrics.postedDelta | number:'1.0-1' }}% vs last term
+          </span>
           <small class="muted">Across selected scope</small>
           <div class="mini-spark">
             <span class="spark-bar h70"></span>
@@ -226,6 +229,9 @@ import { NgIf, NgFor } from '@angular/common';
         <div class="kpi">
           <span class="eyebrow">GPA avg</span>
           <p class="value">{{ metrics.gpaAvg }}</p>
+          <span class="delta" [class.up]="metrics.gpaDelta >= 0" [class.down]="metrics.gpaDelta < 0">
+            {{ metrics.gpaDelta >= 0 ? '▲' : '▼' }} {{ metrics.gpaDelta | number:'1.1-2' }}
+          </span>
           <small class="muted">Range {{ metrics.gpaMin }} - {{ metrics.gpaMax }}</small>
           <div class="mini-spark">
             <span class="spark-bar h60"></span>
@@ -235,40 +241,31 @@ import { NgIf, NgFor } from '@angular/common';
             <span class="spark-bar h72"></span>
           </div>
         </div>
-        <div class="kpi alarm pulse">
-          <span class="eyebrow">Alerts</span>
-          <p class="value">{{ metrics.alerts }}</p>
-          <small class="muted">Overdue items</small>
-          <div class="mini-spark">
-            <span class="spark-bar h62"></span>
-            <span class="spark-bar h65"></span>
-            <span class="spark-bar h60"></span>
-            <span class="spark-bar h67"></span>
-            <span class="spark-bar h64"></span>
-          </div>
-        </div>
         <div class="kpi alarm">
           <span class="eyebrow">Failing students</span>
           <p class="value">{{ metrics.failing }}</p>
           <small class="muted">Need intervention</small>
           <div class="mini-spark">
-            <span class="spark-bar h58"></span>
-            <span class="spark-bar h60"></span>
-            <span class="spark-bar h55"></span>
-            <span class="spark-bar h62"></span>
-            <span class="spark-bar h57"></span>
+            <span class="spark-bar h58 error"></span>
+            <span class="spark-bar h60 error"></span>
+            <span class="spark-bar h55 error"></span>
+            <span class="spark-bar h62 error"></span>
+            <span class="spark-bar h57 error"></span>
           </div>
         </div>
         <div class="kpi accent">
           <span class="eyebrow">Top performers</span>
           <p class="value">{{ metrics.topPerformers }}</p>
+          <span class="delta" [class.up]="metrics.topDelta >= 0" [class.down]="metrics.topDelta < 0">
+            {{ metrics.topDelta >= 0 ? '▲' : '▼' }} {{ metrics.topDelta | number:'1.0-0' }}
+          </span>
           <small class="muted">GPA &gt; 4.0</small>
           <div class="mini-spark">
-            <span class="spark-bar h70"></span>
-            <span class="spark-bar h72"></span>
-            <span class="spark-bar h75"></span>
-            <span class="spark-bar h78"></span>
-            <span class="spark-bar h80"></span>
+            <span class="spark-bar h70 success"></span>
+            <span class="spark-bar h72 success"></span>
+            <span class="spark-bar h75 success"></span>
+            <span class="spark-bar h78 success"></span>
+            <span class="spark-bar h80 success"></span>
           </div>
         </div>
       </section>
@@ -424,11 +421,13 @@ export class StudentAcademicsComponent {
     reportQueue: 6,
     gpaAvg: 3.4,
     gpaPrev: 3.2,
+    gpaDelta: 0.2,
     gpaMin: 2.8,
     gpaMax: 3.9,
-    alerts: 3,
     failing: 4,
-    topPerformers: 9
+    topPerformers: 9,
+    topDelta: 2,
+    postedDelta: 4.5
   };
 
   gradebookStatus = [
