@@ -5,11 +5,12 @@ import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/bread
 import { CardComponent } from '../../../../shared/components/card/card.component';
 import { IconRegistryService } from '../../../../shared/services/icon-registry.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-student-academics',
   standalone: true,
-  imports: [CommonModule, RouterModule, BreadcrumbsComponent, CardComponent, ButtonComponent],
+  imports: [CommonModule, RouterModule, FormsModule, BreadcrumbsComponent, CardComponent, ButtonComponent],
   styleUrls: ['./student-academics.component.scss'],
   template: `
     <div class="page">
@@ -29,6 +30,42 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
           </app-button>
         </div>
       </header>
+
+      <section class="scope-bar">
+        <div class="scope-filters">
+          <label>
+            Term
+            <select [(ngModel)]="selectedTerm">
+              <option *ngFor="let t of terms" [value]="t">{{ t }}</option>
+            </select>
+          </label>
+          <label>
+            Academic Year
+            <select [(ngModel)]="selectedYear">
+              <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+            </select>
+          </label>
+          <label>
+            Grade
+            <select [(ngModel)]="selectedGrade">
+              <option value="">All</option>
+              <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+            </select>
+          </label>
+          <label>
+            Class
+            <select [(ngModel)]="selectedClass">
+              <option value="">All</option>
+              <option *ngFor="let c of classes" [value]="c">{{ c }}</option>
+            </select>
+          </label>
+        </div>
+        <div class="quick-actions">
+          <app-button variant="secondary" size="sm">Import Grades</app-button>
+          <app-button variant="secondary" size="sm">Generate Report Cards</app-button>
+          <app-button variant="secondary" size="sm">Export CSV/PDF</app-button>
+        </div>
+      </section>
 
       <section class="grid">
         <app-card>
@@ -60,6 +97,16 @@ export class StudentAcademicsComponent {
     { label: 'Students', link: '/students' },
     { label: 'Academics' }
   ];
+
+  terms = ['Term 1', 'Term 2', 'Term 3'];
+  years = ['2024/2025', '2023/2024', '2022/2023'];
+  grades = ['Grade 5', 'Grade 6', 'Grade 7', 'Grade 8'];
+  classes = ['5A', '5B', '6A', '6B', '7A', '7B', '8A'];
+
+  selectedTerm = this.terms[0];
+  selectedYear = this.years[0];
+  selectedGrade = '';
+  selectedClass = '';
 
   constructor(private icons: IconRegistryService) {}
   icon(name: string) { return this.icons.icon(name); }
