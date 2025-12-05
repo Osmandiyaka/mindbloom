@@ -117,7 +117,18 @@ import { NgIf, NgFor } from '@angular/common';
 
       <header class="page-header">
         <div>
-          <p class="muted">Grade entry, report cards, and GPA summaries.</p>
+          <div class="role-line">
+            <span class="pill role" [class.accent]="isAdmin()" [class.info]="isTeacher()">{{ userRole | titlecase }} view</span>
+            <div class="role-switch">
+              <button class="chip ghost" type="button" [class.active]="isAdmin()" (click)="setRole('admin')">Admin</button>
+              <button class="chip ghost" type="button" [class.active]="isTeacher()" (click)="setRole('teacher')">Teacher</button>
+            </div>
+          </div>
+          <p class="muted" *ngIf="isAdmin()">School-wide grade entry, report cards, and GPA summaries.</p>
+          <p class="muted" *ngIf="isTeacher()">My classes: {{ teacherClasses.join(', ') }} · Tasks: {{ teacherTasks.length }}</p>
+          <ul class="muted small teacher-tasks" *ngIf="isTeacher()">
+            <li *ngFor="let t of teacherTasks">{{ t }}</li>
+          </ul>
         </div>
         <div class="actions">
           <app-button variant="secondary" size="sm">Download report</app-button>
@@ -393,6 +404,14 @@ export class StudentAcademicsComponent {
   assessmentTypes = ['Quiz', 'Test', 'Exam', 'Project', 'Assignment'];
   categories = ['Homework', 'Quiz', 'Exam', 'Project', 'Participation'];
 
+  userRole: 'admin' | 'teacher' = 'admin';
+  teacherClasses = ['6A', '6B', '7A'];
+  teacherTasks = [
+    'Post Algebra quiz for 6A/6B',
+    'Finalize Science lab scores for 7A',
+    'Prepare report card comments for 6B'
+  ];
+
   scopeOpen = true;
   selectedTerm = this.terms[0];
   selectedYear = this.years[0];
@@ -470,4 +489,10 @@ export class StudentAcademicsComponent {
   saveNewEntry() {
     this.newEntryOpen = false;
   }
+
+  setRole(role: 'admin' | 'teacher') {
+    this.userRole = role;
+  }
+  isAdmin() { return this.userRole === 'admin'; }
+  isTeacher() { return this.userRole === 'teacher'; }
 }

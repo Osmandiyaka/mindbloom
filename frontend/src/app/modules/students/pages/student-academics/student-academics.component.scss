@@ -4,10 +4,47 @@
 .page-header { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap; }
 .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-weight:700; color: var(--color-text-secondary); margin:0; }
 .muted { color: var(--color-text-secondary); margin: 0; }
+.teacher-tasks { margin: 0.25rem 0 0; padding-left: 1.1rem; }
 .actions { display:flex; gap:0.5rem; flex-wrap:wrap; }
 .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:0.75rem; }
 .list { margin:0.5rem 0 0; padding-left:1.1rem; color: var(--color-text-secondary); display:grid; gap:0.3rem; }
 .themed-heading { color: var(--color-text-primary); margin: 0; }
+
+.role-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  .role {
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+    background: color-mix(in srgb, var(--color-surface-hover) 90%, transparent);
+    color: var(--color-text-primary);
+    &.accent { box-shadow: 0 0 8px rgba(var(--color-primary-rgb),0.35); }
+    &.info { box-shadow: 0 0 8px rgba(var(--color-info-rgb),0.35); }
+  }
+
+  .role-switch {
+    display: inline-flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+
+    .chip {
+      padding: 0.3rem 0.6rem;
+      border-radius: 10px;
+      border: 1px solid var(--color-border);
+      background: color-mix(in srgb, var(--color-surface-hover) 85%, transparent);
+      color: var(--color-text-primary);
+      cursor: pointer;
+      &.active {
+        border-color: color-mix(in srgb, var(--color-primary) 60%, var(--color-border));
+        box-shadow: 0 0 10px rgba(var(--color-primary-rgb),0.3);
+      }
+    }
+  }
+}
 
 .list.gradebook-list,
 .list.report-list {
