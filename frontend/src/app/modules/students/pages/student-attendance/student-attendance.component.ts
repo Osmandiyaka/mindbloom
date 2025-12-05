@@ -80,11 +80,11 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
         <div class="card-header table-header">
           <h3 class="themed-heading">Roster</h3>
           <div class="header-filters">
-            <div class="toggle-group header-toggle">
-              <button class="pill" [class.active]="viewMode==='daily'" (click)="setViewMode('daily')">Daily</button>
-              <button class="pill" [class.active]="viewMode==='period'" (click)="setViewMode('period')">By Period</button>
-            </div>
             <div class="header-chips">
+              <div class="toggle-group header-toggle">
+                <button class="pill" [class.active]="viewMode==='daily'" (click)="setViewMode('daily')">Daily</button>
+                <button class="pill" [class.active]="viewMode==='period'" (click)="setViewMode('period')">By Period</button>
+              </div>
               <div class="filters">
                 <label>
                   Grade
