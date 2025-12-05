@@ -121,7 +121,7 @@ import { IconRegistryService } from '../../../../shared/services/icon-registry.s
               </div>
             </div>
 
-            <div class="card hoverable">
+            <div class="card hoverable span-2">
               <div class="card-header">
                 <h3>Trial Balance Snapshot</h3>
                 <a routerLink="/accounting/trial-balance" class="link">View full</a>
@@ -209,7 +209,10 @@ import { IconRegistryService } from '../../../../shared/services/icon-registry.s
     .pill { padding:0.25rem 0.55rem; border-radius:999px; font-size:0.75rem; border:1px solid var(--color-border); color: var(--color-text-secondary); background: var(--color-surface-hover); }
     .pill.good { background: color-mix(in srgb, var(--color-success,#16a34a) 15%, transparent); color: var(--color-success,#16a34a); border-color: color-mix(in srgb, var(--color-success,#16a34a) 35%, transparent); }
     .pill.warn { background: color-mix(in srgb, var(--color-warning,#eab308) 15%, transparent); color: var(--color-warning,#eab308); border-color: color-mix(in srgb, var(--color-warning,#eab308) 35%, transparent); }
-    .analytics { display:grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap:1.75rem; }
+    .analytics { display:grid; grid-template-columns: repeat(auto-fit,minmax(340px,1fr)); gap:1.75rem; align-items:start; }
+    .analytics .card:first-child { min-height: 340px; }
+    .span-2 { grid-column: span 2; }
+    @media (max-width: 900px) { .span-2 { grid-column: span 1; } }
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 5px rgba(var(--color-primary-rgb,123,140,255),0.2); }
     .hoverable { transition: transform 120ms ease, box-shadow 120ms ease; }
     .hoverable:hover { transform: translateY(-2px); box-shadow: 0 0 15px rgba(var(--color-primary-rgb,123,140,255),0.7), inset 0 0 10px rgba(var(--color-primary-rgb,123,140,255),0.1); }
@@ -271,7 +274,6 @@ export class AccountingOverviewComponent implements OnInit {
     { label: 'Collections today', value: '$18,400', sub: '+8.5% vs plan', icon: 'collection', status: 'ready', statusLabel: 'On track' },
     { label: 'Overdue invoices', value: '42', sub: '12 due this week', icon: 'alarm', status: 'watch', statusLabel: 'Watch' },
     { label: 'Pending payments', value: '$9,250', sub: 'Bills to clear', icon: 'inbox', status: 'watch', statusLabel: 'Action' },
-    { label: 'Period status', value: 'Term 1 · Open', sub: 'Close by Apr 05', icon: 'calendar', status: 'ready', statusLabel: 'Open' },
     { label: 'Payroll', value: '$32,000', sub: 'Next run in 5 days', icon: 'briefcase', status: 'ready', statusLabel: 'Scheduled' }
   ];
 
