@@ -143,6 +143,36 @@ export class ThemeService {
                 lg: '0 10px 15px rgba(0, 0, 0, 0.6), 0 4px 6px rgba(0, 0, 0, 0.9)'
             }
         },
+        // NEW: Slate Dark (Modern, Premium, High-Contrast UX)
+        {
+            id: 'slate-dark',
+            name: 'Slate Dark (Premium)',
+            mode: 'dark',
+            colors: {
+                primary: '#06B6D4', // Cyan
+                primaryDark: '#0E7490',
+                primaryLight: '#22D3EE',
+                secondary: '#94A3B8', // Slate Gray
+                accent: '#3B82F6', // Blue Accent
+                background: '#1E293B', // Deep Slate Background
+                surface: '#334155', // Lighter Slate Surface
+                surfaceHover: '#475569',
+                textPrimary: '#F8FAFC', // Pure White Text
+                textSecondary: '#CBD5E1',
+                textTertiary: '#94A3B8',
+                border: '#475569',
+                borderLight: '#64748B',
+                success: '#4ADE80',
+                warning: '#FBBF24',
+                error: '#F87171',
+                info: '#3B82F6'
+            },
+            shadows: {
+                sm: '0 1px 3px rgba(0, 0, 0, 0.5)',
+                md: '0 4px 6px rgba(0, 0, 0, 0.6)',
+                lg: '0 10px 15px rgba(0, 0, 0, 0.7)'
+            }
+        },
         {
             id: 'default-light',
             name: 'Default Light',
@@ -318,6 +348,26 @@ export class ThemeService {
         }
     }
 
+    /**
+     * @returns An array of theme options structured for a selection UI.
+     */
+    getThemesForUI(): { light: ThemeDefinition[], dark: ThemeDefinition[] } {
+        const light = this.themes.filter(t => t.mode === 'light');
+        const dark = this.themes.filter(t => t.mode === 'dark');
+        return { light, dark };
+    }
+
+    /**
+     * @returns An array of available mode options for a selection UI.
+     */
+    getThemeModeOptions(): { id: ThemeMode, name: string }[] {
+        return [
+            { id: 'light', name: 'Light' },
+            { id: 'dark', name: 'Dark' },
+            { id: 'auto', name: 'System Default' },
+        ];
+    }
+
     getThemesByMode(mode: 'light' | 'dark'): ThemeDefinition[] {
         return this.themes.filter(t => t.mode === mode);
     }
@@ -325,6 +375,17 @@ export class ThemeService {
     private applyAutoTheme(): void {
         const prefersDark = this.mediaQuery.matches;
         const mode = prefersDark ? 'dark' : 'light';
+
+        // 1. Try to maintain the user's last manually selected theme for the current mode
+        const lastThemeId = localStorage.getItem(this.STORAGE_KEY);
+        const lastTheme = this.themes.find(t => t.id === lastThemeId && t.mode === mode);
+
+        if (lastTheme) {
+            this.currentTheme.set(lastTheme);
+            return;
+        }
+
+        // 2. Fallback to the default theme for that mode
         const matchingTheme = this.themes.find(t => t.mode === mode && t.id.includes('default'));
         if (matchingTheme) {
             this.currentTheme.set(matchingTheme);
