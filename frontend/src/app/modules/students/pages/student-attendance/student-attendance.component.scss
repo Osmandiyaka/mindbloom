@@ -302,6 +302,22 @@
   flex-direction: column;
   gap: 1rem;
   color: var(--color-text-primary);
+
+  .summary-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--color-surface) 90%, rgba(255,255,255,0.02));
+    font-weight: 700;
+    span { color: var(--color-text-primary); }
+    .present { color: $status-present; }
+    .absent { color: $status-absent; }
+    .late { color: $status-late; }
+    .excused { color: $status-excused; }
+  }
 }
 
 .mark-grid {
@@ -339,6 +355,35 @@
   gap: 0.35rem;
 
   .label { margin: 0; color: var(--color-text-secondary); font-weight: 600; }
+
+  .helper {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+  }
+
+  .status-chips.prominent .chip {
+    font-weight: 700;
+    box-shadow: var(--shadow-sm);
+    gap: 0.35rem;
+
+    &.active {
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: var(--shadow-md);
+    }
+  }
+
+  .chip-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-flex;
+    background: var(--color-text-secondary);
+  }
+  .chip-dot.present { background: $status-present; box-shadow: 0 0 6px $status-present; }
+  .chip-dot.absent { background: $status-absent; box-shadow: 0 0 6px $status-absent; }
+  .chip-dot.late { background: $status-late; box-shadow: 0 0 6px $status-late; }
+  .chip-dot.excused { background: $status-excused; box-shadow: 0 0 6px $status-excused; }
 }
 
 .mark-table {
@@ -366,8 +411,14 @@
 .mark-row {
   border-top: 1px solid var(--color-border);
   color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-surface) 92%, rgba(255,255,255,0.02));
+  position: relative;
 
-  &.alt { background: var(--color-surface-hover); }
+  &.alt { background: color-mix(in srgb, var(--color-surface) 88%, rgba(255,255,255,0.02)); }
+
+  &.bulk-flash {
+    animation: flashRow 0.18s ease;
+  }
 }
 
 .row-status select,
@@ -394,6 +445,7 @@
 
 .mark-meta.card {
   align-self: flex-start;
+  padding-bottom: 0.5rem;
 }
 
 .section-heading {
@@ -405,10 +457,58 @@
   .eyebrow.small { font-size: 0.75rem; color: var(--color-text-secondary); }
 }
 
+.hero-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface-hover));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+}
+
+.pill-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 70%, transparent), var(--color-surface));
+  box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.3);
+  display: inline-flex;
+}
+
+.control-block {
+  background: color-mix(in srgb, var(--color-surface-hover) 80%, rgba(255,255,255,0.02));
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 0.35rem;
+
+  select, input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 0.25rem 0.35rem;
+    color: var(--color-text-primary);
+  }
+}
+
+.status-select.present { background: color-mix(in srgb, $status-present 15%, transparent); }
+.status-select.absent { background: color-mix(in srgb, $status-absent 15%, transparent); }
+.status-select.late { background: color-mix(in srgb, $status-late 15%, transparent); }
+.status-select.excused { background: color-mix(in srgb, $status-excused 15%, transparent); }
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
+
+  .primary-glow {
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.25), var(--shadow-md);
+  }
+}
+
+@keyframes flashRow {
+  from { background: color-mix(in srgb, var(--color-primary) 18%, var(--color-surface)); }
+  to { background: color-mix(in srgb, var(--color-surface) 92%, rgba(255,255,255,0.02)); }
 }
 .table-card {
   padding: 0.75rem 1rem 1rem;

@@ -152,8 +152,13 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
           <div class="mark-grid">
             <div class="mark-meta card">
               <div class="section-heading">
-                <span class="eyebrow small">Session</span>
-                <h4>Class & time</h4>
+                <div class="hero-line">
+                  <span class="pill-icon"></span>
+                  <div>
+                    <span class="eyebrow small">Session</span>
+                    <h4>Class & time</h4>
+                  </div>
+                </div>
               </div>
               <div class="mark-filters">
                 <div class="field">
@@ -181,13 +186,23 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
                   <span class="eyebrow small">Bulk</span>
                   <h4>Set status for all</h4>
                 </div>
-                <div class="status-chips">
-                  <span class="chip" [class.active]="bulkStatus==='present'" (click)="setBulkStatus('present')">Present</span>
-                  <span class="chip" [class.active]="bulkStatus==='absent'" (click)="setBulkStatus('absent')">Absent</span>
-                  <span class="chip" [class.active]="bulkStatus==='late'" (click)="setBulkStatus('late')">Late</span>
-                  <span class="chip" [class.active]="bulkStatus==='excused'" (click)="setBulkStatus('excused')">Excused</span>
+                <div class="status-chips prominent">
+                  <span class="chip" [class.active]="bulkStatus==='present'" (click)="setBulkStatus('present')">
+                    <span class="chip-dot present"></span> Present
+                  </span>
+                  <span class="chip" [class.active]="bulkStatus==='absent'" (click)="setBulkStatus('absent')">
+                    <span class="chip-dot absent"></span> Absent
+                  </span>
+                  <span class="chip" [class.active]="bulkStatus==='late'" (click)="setBulkStatus('late')">
+                    <span class="chip-dot late"></span> Late
+                  </span>
+                  <span class="chip" [class.active]="bulkStatus==='excused'" (click)="setBulkStatus('excused')">
+                    <span class="chip-dot excused"></span> Excused
+                  </span>
                   <button class="chip ghost" type="button" (click)="clearBulk()">Clear</button>
                 </div>
+                <p class="helper">Applies instantly to all students in the list.</p>
+                <p class="helper" *ngIf="bulkStatus">Bulk: {{ bulkStatus | titlecase }} ({{ markRoster.length }})</p>
               </div>
             </div>
 
@@ -197,7 +212,7 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
                 <span>Status</span>
                 <span>Note</span>
               </div>
-              <div class="mark-row" *ngFor="let rec of markRoster; let i = index" [class.alt]="i % 2 === 1">
+              <div class="mark-row" *ngFor="let rec of markRoster; let i = index" [class.alt]="i % 2 === 1" [class.bulk-flash]="rowFlash">
                 <div class="student-cell">
                   <div class="avatar small">{{ initials(rec.student) }}</div>
                   <div>
@@ -205,24 +220,31 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
                     <p class="muted small">{{ rec.class }}</p>
                   </div>
                 </div>
-                <div class="row-status">
-                  <select [(ngModel)]="rec.status">
+                <div class="row-status control-block">
+                  <select [(ngModel)]="rec.status" [ngClass]="['status-select', rec.status]">
                     <option value="present">Present</option>
                     <option value="absent">Absent</option>
                     <option value="late">Late</option>
                     <option value="excused">Excused</option>
                   </select>
                 </div>
-                <div class="row-note">
+                <div class="row-note control-block">
                   <input type="text" [(ngModel)]="rec.note" placeholder="Optional note" />
                 </div>
               </div>
             </div>
           </div>
+          <div class="summary-strip">
+            <span>{{ markRoster.length }} students</span>
+            <span class="present">Present: {{ markSummary.present }}</span>
+            <span class="late">Late: {{ markSummary.late }}</span>
+            <span class="excused">Excused: {{ markSummary.excused }}</span>
+            <span class="absent">Absent: {{ markSummary.absent }}</span>
+          </div>
         </div>
         <div footer class="modal-actions">
           <app-button variant="ghost" size="sm" (click)="closeMarkModal()">Cancel</app-button>
-          <app-button variant="primary" size="sm" (click)="saveMarkedAttendance()">Save</app-button>
+          <app-button variant="primary" size="md" class="primary-glow" (click)="saveMarkedAttendance()">Save</app-button>
         </div>
       </app-modal>
     </div>
@@ -267,6 +289,8 @@ export class StudentAttendanceComponent {
     { student: 'Tunde Cole', grade: 'Grade 6', class: '6A', status: 'present', time: '08:03', note: '' }
   ];
 
+  rowFlash = false;
+
   constructor(private icons: IconRegistryService) {}
 
   icon(name: string) {
@@ -299,6 +323,7 @@ export class StudentAttendanceComponent {
   setBulkStatus(status: 'present' | 'absent' | 'late' | 'excused') {
     this.bulkStatus = status;
     this.markRoster = this.markRoster.map(r => ({ ...r, status }));
+    this.flashRows();
   }
 
   clearBulk() {
@@ -321,5 +346,23 @@ export class StudentAttendanceComponent {
 
   initials(name: string) {
     return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  }
+
+  get markSummary() {
+    return this.markRoster.reduce(
+      (acc, curr) => {
+        acc[curr.status] = (acc[curr.status] || 0) + 1;
+        return acc;
+      },
+      { present: 0, absent: 0, late: 0, excused: 0 } as any
+    );
+  }
+
+  private flashRows() {
+    this.rowFlash = false;
+    requestAnimationFrame(() => {
+      this.rowFlash = true;
+      setTimeout(() => (this.rowFlash = false), 180);
+    });
   }
 }
