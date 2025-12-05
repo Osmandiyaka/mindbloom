@@ -74,9 +74,24 @@
   gap: 0.15rem;
   min-height: 96px;
 
-  .eyebrow { letter-spacing: 0.08em; }
-  .value { margin: 0; font-size: 1.8rem; font-weight: 800; color: var(--color-text-primary); text-shadow: 0 0 6px rgba(255,255,255,0.08); font-family: 'Roboto Mono', monospace; }
-  small { font-size: 0.85rem; }
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 800;
+    color: var(--color-text-secondary);
+  }
+  .value {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--color-text-primary);
+    text-shadow: 0 0 6px rgba(255,255,255,0.08);
+    font-family: 'Roboto Mono', monospace;
+  }
+  small {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+  }
 
   &:hover {
     box-shadow: 0 0 15px rgba(var(--color-primary-rgb),0.7), inset 0 0 10px rgba(var(--color-primary-rgb),0.1);

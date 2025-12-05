@@ -85,12 +85,76 @@ import { FormsModule } from '@angular/forms';
           <span class="eyebrow">GPA avg</span>
           <p class="value">{{ metrics.gpaAvg }}</p>
           <small class="muted">Range {{ metrics.gpaMin }} - {{ metrics.gpaMax }}</small>
+          <div class="mini-spark">
+            <span class="spark-bar h60"></span>
+            <span class="spark-bar h70"></span>
+            <span class="spark-bar h65"></span>
+            <span class="spark-bar h75"></span>
+            <span class="spark-bar h72"></span>
+          </div>
         </div>
         <div class="kpi alarm pulse">
           <span class="eyebrow">Alerts</span>
           <p class="value">{{ metrics.alerts }}</p>
           <small class="muted">Overdue items</small>
         </div>
+        <div class="kpi alarm">
+          <span class="eyebrow">Failing students</span>
+          <p class="value">{{ metrics.failing }}</p>
+          <small class="muted">Need intervention</small>
+        </div>
+        <div class="kpi accent">
+          <span class="eyebrow">Top performers</span>
+          <p class="value">{{ metrics.topPerformers }}</p>
+          <small class="muted">GPA &gt; 4.0</small>
+        </div>
+      </section>
+
+      <section class="analytics-grid">
+        <app-card class="dist-card">
+          <div class="card-header">
+            <h3 class="themed-heading">GPA Distribution</h3>
+            <p class="muted small">Current scope</p>
+          </div>
+          <div class="bars">
+            <div class="bar"><span>0-1</span></div>
+            <div class="bar"><span>1-2</span></div>
+            <div class="bar mid"><span>2-3</span></div>
+            <div class="bar high"><span>3-3.5</span></div>
+            <div class="bar top"><span>3.5-4.0</span></div>
+          </div>
+        </app-card>
+
+        <app-card class="trend-card">
+          <div class="card-header">
+            <h3 class="themed-heading">Performance over time</h3>
+            <p class="muted small">Term vs previous</p>
+          </div>
+          <div class="line-graph" aria-hidden="true">
+            <svg viewBox="0 0 260 120" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="gpaFill" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="var(--color-primary-light)" stop-opacity="0.35" />
+                  <stop offset="100%" stop-color="var(--color-surface)" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <path class="line-current" d="M0 80 L40 70 L80 68 L120 60 L160 62 L200 58 L240 54" />
+              <path class="fill-current" d="M0 120 L0 80 L40 70 L80 68 L120 60 L160 62 L200 58 L240 54 L240 120 Z" />
+              <path class="line-prev" d="M0 90 L40 82 L80 80 L120 74 L160 76 L200 72 L240 70" />
+              <circle class="line-point" cx="240" cy="54" r="4" />
+            </svg>
+          </div>
+          <div class="compare-row">
+            <div>
+              <p class="eyebrow">Current term</p>
+              <p class="value small">{{ metrics.gpaAvg }}</p>
+            </div>
+            <div>
+              <p class="eyebrow">Previous term</p>
+              <p class="value small">{{ metrics.gpaPrev }}</p>
+            </div>
+          </div>
+        </app-card>
       </section>
 
       <section class="grid">
@@ -114,18 +178,15 @@ import { FormsModule } from '@angular/forms';
 
         <app-card>
           <div class="card-header">
-            <h3 class="themed-heading">Report card queue</h3>
+            <h3 class="themed-heading">Interventions & alerts</h3>
           </div>
           <ul class="list report-list">
-            <li *ngFor="let item of reportQueue">
+            <li *ngFor="let item of interventions">
               <div>
-                <p class="strong">{{ item.term }}</p>
-                <p class="muted small">{{ item.scope }}</p>
+                <p class="strong">{{ item.title }}</p>
+                <p class="muted small">{{ item.detail }}</p>
               </div>
-              <div class="queue-actions">
-                <span class="status-pill" [ngClass]="item.state">{{ item.stateLabel }}</span>
-                <app-button variant="secondary" size="sm">Preview</app-button>
-              </div>
+              <span class="status-pill" [ngClass]="item.state">{{ item.stateLabel }}</span>
             </li>
           </ul>
         </app-card>
@@ -154,9 +215,12 @@ export class StudentAcademicsComponent {
     posted: 78,
     reportQueue: 6,
     gpaAvg: 3.4,
+    gpaPrev: 3.2,
     gpaMin: 2.8,
     gpaMax: 3.9,
-    alerts: 3
+    alerts: 3,
+    failing: 4,
+    topPerformers: 9
   };
 
   gradebookStatus = [
@@ -165,9 +229,10 @@ export class StudentAcademicsComponent {
     { subject: 'English · Grade 5', meta: 'Draft entries · Essay', state: 'draft', stateLabel: 'Draft', icon: 'edit' }
   ];
 
-  reportQueue = [
-    { term: 'Term 1 · Proofing', scope: 'Grades 5-8', state: 'proofing', stateLabel: 'Proofing' },
-    { term: 'Term 2 · Templates ready', scope: 'Grades 5-8', state: 'ready', stateLabel: 'Ready' }
+  interventions = [
+    { title: 'Students below GPA threshold', detail: '6 students under 2.0 GPA', state: 'due', stateLabel: 'Action' },
+    { title: 'Missing assignments', detail: '4 classes with overdue work', state: 'progress', stateLabel: 'In review' },
+    { title: 'Attendance risk', detail: '3 students near absence limit', state: 'ready', stateLabel: 'Noted' }
   ];
 
   constructor(private icons: IconRegistryService) {}
