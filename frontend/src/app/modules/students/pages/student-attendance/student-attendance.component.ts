@@ -31,6 +31,51 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
         </div>
       </header>
 
+      <section class="stat-hero">
+        <div class="stat-chip present">
+          <div class="chip-head">
+            <span class="dot present"></span>
+            <span class="label">Present</span>
+          </div>
+          <p class="stat-value">{{ summary.present }}%</p>
+          <div class="sparkline">
+            <span class="bar h70"></span>
+            <span class="bar h85"></span>
+            <span class="bar h90"></span>
+            <span class="bar h80"></span>
+            <span class="bar h95"></span>
+          </div>
+        </div>
+        <div class="stat-chip absent">
+          <div class="chip-head">
+            <span class="dot absent"></span>
+            <span class="label">Absent</span>
+          </div>
+          <p class="stat-value">{{ summary.absentToday }}</p>
+          <div class="sparkline">
+            <span class="bar h30"></span>
+            <span class="bar h40"></span>
+            <span class="bar h25"></span>
+            <span class="bar h35"></span>
+            <span class="bar h20"></span>
+          </div>
+        </div>
+        <div class="stat-chip alerts">
+          <div class="chip-head">
+            <span class="dot alerts"></span>
+            <span class="label">Alerts</span>
+          </div>
+          <p class="stat-value">{{ summary.alerts }}</p>
+          <div class="sparkline">
+            <span class="bar h20"></span>
+            <span class="bar h15"></span>
+            <span class="bar h25"></span>
+            <span class="bar h18"></span>
+            <span class="bar h22"></span>
+          </div>
+        </div>
+      </section>
+
       <section class="toolbar card">
         <div class="controls">
           <div class="toggle-group">
@@ -61,20 +106,6 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
               <span class="chip" [class.active]="selectedStatus==='excused'" (click)="setStatus('excused')">Excused</span>
               <button class="chip ghost" (click)="resetFilters()">Clear</button>
             </div>
-          </div>
-        </div>
-        <div class="summary-bar">
-          <div>
-            <p class="label">Present</p>
-            <p class="value success">{{ summary.present }}%</p>
-          </div>
-          <div>
-            <p class="label">Absent today</p>
-            <p class="value">{{ summary.absentToday }}</p>
-          </div>
-          <div>
-            <p class="label">Alerts</p>
-            <p class="value warning">{{ summary.alerts }}</p>
           </div>
         </div>
       </section>

@@ -1,0 +1,50 @@
+// Reusable tokens and utility mixins for attendance / status UI
+
+$status-present: var(--color-success);
+$status-absent: var(--color-error);
+$status-late: var(--color-warning);
+$status-excused: var(--color-info);
+
+$pill-radius: 999px;
+$elevated-shadow: var(--shadow-sm);
+$hero-shadow: var(--shadow-md, 0 12px 30px rgba(0,0,0,0.35));
+
+@mixin status-pill($color) {
+  padding: 0.3rem 0.8rem;
+  border-radius: $pill-radius;
+  border: 1px solid color-mix(in srgb, $color 70%, transparent);
+  background: color-mix(in srgb, $color 12%, var(--color-surface));
+  color: $color;
+  box-shadow: 0 0 12px color-mix(in srgb, $color 25%, transparent);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+@mixin chip {
+  padding: 0.4rem 0.85rem;
+  border-radius: $pill-radius;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-hover);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+@mixin card-elevated {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: $elevated-shadow;
+}
+
+@keyframes pulse-halo {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 35%, transparent); }
+  70% { box-shadow: 0 0 0 16px color-mix(in srgb, var(--color-primary) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 0%, transparent); }
+}
+
+@keyframes row-flash {
+  0% { background: color-mix(in srgb, var(--color-primary) 15%, transparent); }
+  100% { background: transparent; }
+}
+
