@@ -6,11 +6,12 @@ import { CardComponent } from '../../../../shared/components/card/card.component
 import { IconRegistryService } from '../../../../shared/services/icon-registry.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { FormsModule } from '@angular/forms';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-student-attendance',
   standalone: true,
-  imports: [CommonModule, RouterModule, BreadcrumbsComponent, CardComponent, ButtonComponent, FormsModule],
+  imports: [CommonModule, RouterModule, BreadcrumbsComponent, CardComponent, ButtonComponent, FormsModule, ModalComponent],
   styleUrls: ['./student-attendance.component.scss'],
   template: `
     <div class="page">
@@ -23,7 +24,7 @@ import { FormsModule } from '@angular/forms';
         </div>
         <div class="actions">
           <app-button variant="secondary" size="sm">Download report</app-button>
-          <app-button variant="primary" size="sm">
+          <app-button variant="primary" size="sm" (click)="openMarkModal()">
             <span class="icon" [innerHTML]="icon('attendance')"></span>
             Mark Attendance
           </app-button>
@@ -111,6 +112,91 @@ import { FormsModule } from '@angular/forms';
           </div>
         </div>
       </app-card>
+
+      <app-modal
+        [isOpen]="markModalOpen"
+        title="Mark Attendance"
+        size="xl"
+        [showFooter]="true"
+        (closed)="closeMarkModal()"
+      >
+        <div class="mark-modal">
+          <div class="mark-grid">
+            <div class="mark-meta card">
+              <div class="section-heading">
+                <span class="eyebrow small">Session</span>
+                <h4>Class & time</h4>
+              </div>
+              <div class="mark-filters">
+                <div class="field">
+                  <label>Grade/Class</label>
+                  <select [(ngModel)]="markSelection.class">
+                    <option value="">Select class</option>
+                    <option *ngFor="let c of classes" [value]="c">{{ c }}</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Date</label>
+                  <input type="date" [(ngModel)]="markSelection.date" />
+                </div>
+                <div class="field">
+                  <label>Period</label>
+                  <select [(ngModel)]="markSelection.period">
+                    <option value="">Full day</option>
+                    <option *ngFor="let p of periods" [value]="p">{{ p }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="bulk-status">
+                <div class="section-heading">
+                  <span class="eyebrow small">Bulk</span>
+                  <h4>Set status for all</h4>
+                </div>
+                <div class="status-chips">
+                  <span class="chip" [class.active]="bulkStatus==='present'" (click)="setBulkStatus('present')">Present</span>
+                  <span class="chip" [class.active]="bulkStatus==='absent'" (click)="setBulkStatus('absent')">Absent</span>
+                  <span class="chip" [class.active]="bulkStatus==='late'" (click)="setBulkStatus('late')">Late</span>
+                  <span class="chip" [class.active]="bulkStatus==='excused'" (click)="setBulkStatus('excused')">Excused</span>
+                  <button class="chip ghost" type="button" (click)="clearBulk()">Clear</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mark-table card">
+              <div class="mark-head">
+                <span>Student</span>
+                <span>Status</span>
+                <span>Note</span>
+              </div>
+              <div class="mark-row" *ngFor="let rec of markRoster; let i = index" [class.alt]="i % 2 === 1">
+                <div class="student-cell">
+                  <div class="avatar small">{{ initials(rec.student) }}</div>
+                  <div>
+                    <p class="strong">{{ rec.student }}</p>
+                    <p class="muted small">{{ rec.class }}</p>
+                  </div>
+                </div>
+                <div class="row-status">
+                  <select [(ngModel)]="rec.status">
+                    <option value="present">Present</option>
+                    <option value="absent">Absent</option>
+                    <option value="late">Late</option>
+                    <option value="excused">Excused</option>
+                  </select>
+                </div>
+                <div class="row-note">
+                  <input type="text" [(ngModel)]="rec.note" placeholder="Optional note" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div footer class="modal-actions">
+          <app-button variant="ghost" size="sm" (click)="closeMarkModal()">Cancel</app-button>
+          <app-button variant="primary" size="sm" (click)="saveMarkedAttendance()">Save</app-button>
+        </div>
+      </app-modal>
     </div>
   `
 })
@@ -126,6 +212,19 @@ export class StudentAttendanceComponent {
   selectedGrade = '';
   selectedClass = '';
   selectedStatus: 'present' | 'absent' | 'late' | 'excused' | '' = '';
+
+  markModalOpen = false;
+  markSelection = { class: '', date: new Date().toISOString().slice(0, 10), period: '' };
+  bulkStatus: 'present' | 'absent' | 'late' | 'excused' | '' = '';
+  periods = ['Period 1', 'Period 2', 'Period 3', 'Period 4', 'After-school'];
+
+  markRoster = [
+    { student: 'Amaka Obi', class: '6B', status: 'present', note: '' },
+    { student: 'Chidi Okeke', class: '5A', status: 'present', note: '' },
+    { student: 'Sara Danjuma', class: '7A', status: 'present', note: '' },
+    { student: 'Lola Ade', class: '8A', status: 'present', note: '' },
+    { student: 'Tunde Cole', class: '6A', status: 'present', note: '' }
+  ];
 
   summary = {
     present: 96,
@@ -159,6 +258,29 @@ export class StudentAttendanceComponent {
     this.selectedStatus = '';
     this.selectedClass = '';
     this.selectedGrade = '';
+  }
+
+  openMarkModal() {
+    this.markModalOpen = true;
+  }
+
+  closeMarkModal() {
+    this.markModalOpen = false;
+    this.bulkStatus = '';
+  }
+
+  setBulkStatus(status: 'present' | 'absent' | 'late' | 'excused') {
+    this.bulkStatus = status;
+    this.markRoster = this.markRoster.map(r => ({ ...r, status }));
+  }
+
+  clearBulk() {
+    this.bulkStatus = '';
+  }
+
+  saveMarkedAttendance() {
+    // mock save; in real impl send to API
+    this.closeMarkModal();
   }
 
   get filteredRecords() {

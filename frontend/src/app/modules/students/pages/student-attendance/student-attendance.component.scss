@@ -152,6 +152,119 @@
   .warning { color: var(--color-warning); }
 }
 
+.mark-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  color: var(--color-text-primary);
+}
+
+.mark-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 0.75rem;
+}
+
+.mark-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.65rem;
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+
+    select, input {
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 0.5rem 0.65rem;
+      background: var(--color-surface-hover);
+      color: var(--color-text-primary);
+      height: 38px;
+    }
+  }
+}
+
+.bulk-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  .label { margin: 0; color: var(--color-text-secondary); font-weight: 600; }
+}
+
+.mark-table {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.mark-head, .mark-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr;
+  gap: 0.5rem;
+  padding: 0.65rem 0.8rem;
+  align-items: center;
+}
+
+.mark-head {
+  background: var(--color-surface-hover);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.mark-row {
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+
+  &.alt { background: var(--color-surface-hover); }
+}
+
+.row-status select,
+.row-note input {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.mark-meta.card,
+.mark-table.card {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.mark-meta.card {
+  align-self: flex-start;
+}
+
+.section-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+
+  h4 { margin: 0; color: var(--color-text-primary); }
+  .eyebrow.small { font-size: 0.75rem; color: var(--color-text-secondary); }
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
 .table-card {
   padding: 0.75rem 1rem 1rem;
   background: var(--color-surface);
