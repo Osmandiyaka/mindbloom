@@ -18,8 +18,6 @@ import { FormsModule } from '@angular/forms';
 
       <header class="page-header">
         <div>
-          <p class="eyebrow">Students</p>
-          <h1>Academics</h1>
           <p class="muted">Grade entry, report cards, and GPA summaries.</p>
         </div>
         <div class="actions">
@@ -67,25 +65,68 @@ import { FormsModule } from '@angular/forms';
         </div>
       </section>
 
+      <section class="kpi-band">
+        <div class="kpi info">
+          <span class="eyebrow">Pending grade entries</span>
+          <p class="value">{{ metrics.pending }}</p>
+          <small class="muted">Awaiting posting</small>
+        </div>
+        <div class="kpi accent">
+          <span class="eyebrow">Posted entries</span>
+          <p class="value">{{ metrics.posted }}%</p>
+          <small class="muted">Across selected scope</small>
+        </div>
+        <div class="kpi">
+          <span class="eyebrow">Report cards in queue</span>
+          <p class="value">{{ metrics.reportQueue }}</p>
+          <small class="muted">Proofing/ready</small>
+        </div>
+        <div class="kpi">
+          <span class="eyebrow">GPA avg</span>
+          <p class="value">{{ metrics.gpaAvg }}</p>
+          <small class="muted">Range {{ metrics.gpaMin }} - {{ metrics.gpaMax }}</small>
+        </div>
+        <div class="kpi alarm pulse">
+          <span class="eyebrow">Alerts</span>
+          <p class="value">{{ metrics.alerts }}</p>
+          <small class="muted">Overdue items</small>
+        </div>
+      </section>
+
       <section class="grid">
         <app-card>
           <div class="card-header">
-            <h3>Gradebook status</h3>
+            <h3 class="themed-heading">Gradebook status</h3>
           </div>
-          <ul class="list">
-            <li>Math (Grade 6) — due Friday</li>
-            <li>Science (Grade 7) — 40% posted</li>
-            <li>English (Grade 5) — draft entries</li>
+          <ul class="list gradebook-list">
+            <li *ngFor="let item of gradebookStatus">
+              <div class="title-line">
+                <span class="icon" [innerHTML]="icon(item.icon)"></span>
+                <div>
+                  <p class="strong">{{ item.subject }}</p>
+                  <p class="muted small">{{ item.meta }}</p>
+                </div>
+              </div>
+              <span class="status-pill" [ngClass]="item.state">{{ item.stateLabel }}</span>
+            </li>
           </ul>
         </app-card>
 
         <app-card>
           <div class="card-header">
-            <h3>Report card queue</h3>
+            <h3 class="themed-heading">Report card queue</h3>
           </div>
-          <ul class="list">
-            <li>Term 1 — proofing</li>
-            <li>Term 2 — templates ready</li>
+          <ul class="list report-list">
+            <li *ngFor="let item of reportQueue">
+              <div>
+                <p class="strong">{{ item.term }}</p>
+                <p class="muted small">{{ item.scope }}</p>
+              </div>
+              <div class="queue-actions">
+                <span class="status-pill" [ngClass]="item.state">{{ item.stateLabel }}</span>
+                <app-button variant="secondary" size="sm">Preview</app-button>
+              </div>
+            </li>
           </ul>
         </app-card>
       </section>
@@ -107,6 +148,27 @@ export class StudentAcademicsComponent {
   selectedYear = this.years[0];
   selectedGrade = '';
   selectedClass = '';
+
+  metrics = {
+    pending: 14,
+    posted: 78,
+    reportQueue: 6,
+    gpaAvg: 3.4,
+    gpaMin: 2.8,
+    gpaMax: 3.9,
+    alerts: 3
+  };
+
+  gradebookStatus = [
+    { subject: 'Mathematics · Grade 6', meta: 'Due Friday · Quiz 3', state: 'due', stateLabel: 'Due', icon: 'book' },
+    { subject: 'Science · Grade 7', meta: '40% posted · Lab report', state: 'progress', stateLabel: 'Posting', icon: 'science' },
+    { subject: 'English · Grade 5', meta: 'Draft entries · Essay', state: 'draft', stateLabel: 'Draft', icon: 'edit' }
+  ];
+
+  reportQueue = [
+    { term: 'Term 1 · Proofing', scope: 'Grades 5-8', state: 'proofing', stateLabel: 'Proofing' },
+    { term: 'Term 2 · Templates ready', scope: 'Grades 5-8', state: 'ready', stateLabel: 'Ready' }
+  ];
 
   constructor(private icons: IconRegistryService) {}
   icon(name: string) { return this.icons.icon(name); }

@@ -2,7 +2,7 @@
 @import '../../../../../styles/theme/components/attendance-primitives';
 
 .page {
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -28,6 +28,18 @@
   flex-wrap: wrap;
   position: relative;
   z-index: 1;
+
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    color: var(--color-text-primary);
+  }
+
+  .muted {
+    font-size: 0.95rem;
+  }
 }
 
 .eyebrow {
@@ -597,6 +609,14 @@
   gap: 0.6rem;
   padding: 0.35rem 0;
   flex-wrap: wrap;
+
+  h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-primary);
+  }
 }
 
 .filter-rail {
@@ -630,6 +650,7 @@
   color: var(--color-text-primary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  font-size: 0.9rem;
 }
 
 .table-row {
@@ -670,7 +691,7 @@
   }
 
   .strong, .name {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-weight: 800;
     color: var(--color-text-primary);
     letter-spacing: 0.01em;
@@ -720,6 +741,10 @@
   align-items: center;
   gap: 0.4rem;
   .small { margin: 0; }
+
+  .badge {
+    font-size: 0.9rem;
+  }
 }
 
 .header-filters .filters label {
