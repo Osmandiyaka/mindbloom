@@ -181,9 +181,11 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
                 </div>
               </div>
 
-              <div class="bulk-status">
+            </div>
+
+            <div class="mark-table card">
+              <div class="bulk-inline">
                 <div class="section-heading">
-                  <span class="eyebrow small">Apply Status to All</span>
                   <h4>Bulk Attendance Actions</h4>
                 </div>
                 <div class="status-chips prominent">
@@ -204,9 +206,6 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
                 <p class="helper">Applies instantly to all students in the list.</p>
                 <p class="helper" *ngIf="bulkStatus">Bulk: {{ bulkStatus | titlecase }} ({{ markRoster.length }})</p>
               </div>
-            </div>
-
-            <div class="mark-table card">
               <div class="mark-head">
                 <span>Student</span>
                 <span>Status</span>
