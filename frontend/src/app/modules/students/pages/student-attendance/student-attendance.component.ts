@@ -60,18 +60,19 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
             <span class="bar h20"></span>
           </div>
         </div>
-        <div class="stat-chip alerts">
-          <div class="chip-head">
-            <span class="dot alerts"></span>
-            <span class="label">Alerts</span>
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="themed-heading">Trend</h3>
+            <p class="muted">Last 7 days</p>
           </div>
-          <p class="stat-value">{{ summary.alerts }}</p>
-          <div class="sparkline">
-            <span class="bar h20"></span>
-            <span class="bar h15"></span>
-            <span class="bar h25"></span>
-            <span class="bar h18"></span>
-            <span class="bar h22"></span>
+          <div class="chart-bars" aria-hidden="true">
+            <div class="bar" style="height: 78%"><span>Mon</span></div>
+            <div class="bar" style="height: 82%"><span>Tue</span></div>
+            <div class="bar" style="height: 76%"><span>Wed</span></div>
+            <div class="bar" style="height: 88%"><span>Thu</span></div>
+            <div class="bar" style="height: 91%"><span>Fri</span></div>
+            <div class="bar" style="height: 73%"><span>Mon</span></div>
+            <div class="bar" style="height: 85%"><span>Tue</span></div>
           </div>
         </div>
       </section>
@@ -255,8 +256,7 @@ export class StudentAttendanceComponent {
 
   summary = {
     present: 96,
-    absentToday: 8,
-    alerts: 3
+    absentToday: 8
   };
 
   records = [
