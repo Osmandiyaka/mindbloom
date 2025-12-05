@@ -647,7 +647,7 @@
   display: grid;
   grid-template-columns: 2.3fr 1.6fr 1fr 1.6fr;
   gap: 0.5rem;
-  padding: 0.65rem 0.8rem;
+  padding: 0.55rem 0.75rem;
   align-items: center;
 }
 
@@ -661,14 +661,21 @@
   border-top: 1px solid var(--color-border);
   color: var(--color-text-primary);
   transition: transform 120ms ease, box-shadow 120ms ease;
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--color-border) 35%, transparent);
 
   &.alt { background: var(--color-surface-hover); }
   &.empty { text-align: center; }
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-sm), inset 0 -1px 0 color-mix(in srgb, var(--color-border) 35%, transparent);
     .badge { filter: drop-shadow(0 0 6px currentColor); }
+  }
+
+  &:focus-within {
+    outline: 1px solid color-mix(in srgb, var(--color-primary) 70%, transparent);
+    outline-offset: -4px;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--color-border) 35%, transparent);
   }
 }
 
@@ -703,11 +710,12 @@
   font-weight: 700;
   font-size: 0.85rem;
   border: 1px solid transparent;
+  box-shadow: 0 0 8px rgba(var(--color-primary-rgb,123,140,255),0.25);
 
-  &.present { @include status-pill($status-present); }
-  &.absent { @include status-pill($status-absent); }
-  &.late { @include status-pill($status-late); }
-  &.excused { @include status-pill($status-excused); }
+  &.present { @include status-pill($status-present); background: color-mix(in srgb, $status-present 35%, transparent); box-shadow: 0 0 10px color-mix(in srgb, $status-present 40%, transparent); }
+  &.absent { @include status-pill($status-absent); background: color-mix(in srgb, $status-absent 35%, transparent); box-shadow: 0 0 10px color-mix(in srgb, $status-absent 40%, transparent); }
+  &.late { @include status-pill($status-late); background: color-mix(in srgb, $status-late 35%, transparent); box-shadow: 0 0 10px color-mix(in srgb, $status-late 40%, transparent); }
+  &.excused { @include status-pill($status-excused); background: color-mix(in srgb, $status-excused 35%, transparent); box-shadow: 0 0 10px color-mix(in srgb, $status-excused 40%, transparent); }
 }
 
 .header-filters {
