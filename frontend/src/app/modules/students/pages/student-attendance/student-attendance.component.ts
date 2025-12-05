@@ -122,10 +122,9 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
           </div>
           <div class="table-row" *ngFor="let record of filteredRecords; let i = index" [class.alt]="i % 2 === 1">
             <div class="student-cell">
-              <div class="avatar">{{ initials(record.student) }}</div>
+              <div class="avatar photo" aria-hidden="true"></div>
               <div>
-                <p class="strong">{{ record.student }}</p>
-                <p class="muted small">{{ record.grade }}</p>
+                <p class="strong name">{{ record.student }}</p>
               </div>
             </div>
             <span>{{ record.class }}</span>
