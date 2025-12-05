@@ -408,7 +408,7 @@
 
 .mark-head, .mark-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 2fr;
+  grid-template-columns: 2.2fr 1fr 1.8fr;
   gap: 0.5rem;
   padding: 0.65rem 0.8rem;
   align-items: center;
@@ -431,6 +431,10 @@
 
   &.bulk-flash {
     animation: flashRow 0.18s ease;
+  }
+
+  &.changed {
+    filter: drop-shadow(0 0 6px rgba(var(--color-primary-rgb), 0.35));
   }
 }
 
@@ -505,20 +509,90 @@
     border-radius: 8px;
     background: var(--color-surface-hover);
     color: var(--color-text-secondary);
-    padding: 0.35rem 0.45rem;
+    padding: 0.45rem 0.6rem;
+    min-height: 44px;
     font-weight: 700;
     transition: all 0.15s ease;
 
     &.active {
-      color: var(--color-primary);
+      color: #0f1320;
       border-color: color-mix(in srgb, var(--color-primary) 70%, var(--color-border));
       box-shadow: var(--shadow-sm);
+      background: color-mix(in srgb, var(--color-primary) 65%, var(--color-surface-hover));
     }
   }
 }
 
 .row-note.control-block {
   padding: 0.45rem 0.5rem;
+}
+
+.note-inline {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  flex-wrap: wrap;
+
+  .note-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.4rem 0.55rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface-hover);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+  }
+
+  input {
+    flex: 1;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.35rem 0.45rem;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    min-width: 180px;
+  }
+}
+
+.bulk-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.5rem 0.6rem 0.35rem;
+  border-bottom: 1px solid var(--color-border);
+
+  .section-heading { gap: 0.1rem; }
+}
+
+.note-inline {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  flex-wrap: wrap;
+
+  .note-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.4rem 0.55rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface-hover);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+  }
+
+  input {
+    flex: 1;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.35rem 0.45rem;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    min-width: 180px;
+  }
 }
 
 .status-select.present { background: color-mix(in srgb, $status-present 15%, transparent); }

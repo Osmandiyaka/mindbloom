@@ -71,6 +71,7 @@ export class ThemeService {
                 lg: '8px 8px 16px rgba(0,0,0,0.2), -8px -8px 16px rgba(255,255,255,0.5)'
             }
         },
+        // Original Retro Dark (Brown and Gradient focused)
         {
             id: 'retro-dark',
             name: 'Retro Dark',
@@ -98,6 +99,48 @@ export class ThemeService {
                 sm: '2px 2px 4px rgba(0,0,0,0.5), -2px -2px 4px rgba(244,236,229,0.1)',
                 md: '4px 4px 8px rgba(0,0,0,0.5), -4px -4px 8px rgba(244,236,229,0.08)',
                 lg: '8px 8px 16px rgba(0,0,0,0.5), -8px -8px 16px rgba(244,236,229,0.06)'
+            }
+        },
+        // Charcoal Dark (Clean, Wow-level, Modern Dark Mode)
+        {
+            id: 'charcoal-dark',
+            name: 'Charcoal Dark',
+            mode: 'dark',
+            colors: {
+                // Primary color kept but brighter for contrast on dark background
+                primary: '#FFC72C', // Bright Amber/Gold
+                primaryDark: '#D4A01A',
+                primaryLight: '#FFD75E',
+
+                // Secondary shifted from brown to a muted, cooler tone
+                secondary: '#B76E79',
+                accent: '#5EB5D7',
+
+                // Background and Surfaces are now deep, neutral charcoal/slate grays
+                background: '#1A1C20', // Deep Charcoal (Uniform, no distracting gradient)
+                surface: '#25282E', // Lighter Charcoal for clean elevation and content blocks
+                surfaceHover: '#333740',
+
+                // Text colors adjusted for better readability and less glare
+                textPrimary: '#F4F5F7', // Clean near-white
+                textSecondary: '#AAB0BD', // Desaturated gray
+                textTertiary: '#7C8290',
+
+                // Borders are now subtle lines of slightly lighter gray
+                border: '#3F444E',
+                borderLight: '#535967',
+
+                // Status colors are strong for instant feedback (crucial for attendance module)
+                success: '#5FB075', // Clean, strong green
+                warning: '#F0A500', // Strong orange/yellow
+                error: '#E55353', // Clear, unambiguous red
+                info: '#5EB5D7'
+            },
+            shadows: {
+                // Using standard, subtle dark mode shadows for clear layering
+                sm: '0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.7)',
+                md: '0 4px 6px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.8)',
+                lg: '0 10px 15px rgba(0, 0, 0, 0.6), 0 4px 6px rgba(0, 0, 0, 0.9)'
             }
         },
         {

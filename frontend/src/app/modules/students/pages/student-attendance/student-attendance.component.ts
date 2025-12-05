@@ -211,7 +211,13 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
                 <span>Status</span>
                 <span>Note</span>
               </div>
-              <div class="mark-row" *ngFor="let rec of markRoster; let i = index" [class.alt]="i % 2 === 1" [class.bulk-flash]="rowFlash">
+              <div
+                class="mark-row"
+                *ngFor="let rec of markRoster; let i = index"
+                [class.alt]="i % 2 === 1"
+                [class.bulk-flash]="rowFlash"
+                [class.changed]="rec.changed"
+              >
                 <div class="student-cell">
                   <div>
                     <p class="strong name">{{ rec.student }}</p>
@@ -226,8 +232,14 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
                     <button type="button" [class.active]="rec.status==='excused'" (click)="setRowStatus(rec,'excused')">Excused</button>
                   </div>
                 </div>
-                <div class="row-note control-block" *ngIf="rec.status !== 'present'">
-                  <input type="text" [(ngModel)]="rec.note" placeholder="Add note" />
+                <div class="row-note control-block" *ngIf="rec.status === 'absent' || rec.status === 'excused'">
+                  <div class="note-inline">
+                    <button type="button" class="note-btn" (click)="toggleNote(rec)">
+                      <span class="icon" [innerHTML]="icon('edit')"></span>
+                      Add note
+                    </button>
+                    <input *ngIf="rec.showNote" type="text" [(ngModel)]="rec.note" placeholder="Add note" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -267,11 +279,11 @@ export class StudentAttendanceComponent {
   periods = ['Period 1', 'Period 2', 'Period 3', 'Period 4', 'After-school'];
 
   markRoster = [
-    { student: 'Amaka Obi', class: '6B', status: 'present', note: '' },
-    { student: 'Chidi Okeke', class: '5A', status: 'present', note: '' },
-    { student: 'Sara Danjuma', class: '7A', status: 'present', note: '' },
-    { student: 'Lola Ade', class: '8A', status: 'present', note: '' },
-    { student: 'Tunde Cole', class: '6A', status: 'present', note: '' }
+    { student: 'Amaka Obi', class: '6B', status: 'present', note: '', showNote: false, changed: false },
+    { student: 'Chidi Okeke', class: '5A', status: 'present', note: '', showNote: false, changed: false },
+    { student: 'Sara Danjuma', class: '7A', status: 'present', note: '', showNote: false, changed: false },
+    { student: 'Lola Ade', class: '8A', status: 'present', note: '', showNote: false, changed: false },
+    { student: 'Tunde Cole', class: '6A', status: 'present', note: '', showNote: false, changed: false }
   ];
 
   summary = {
@@ -351,6 +363,15 @@ export class StudentAttendanceComponent {
     if (status === 'present') {
       rec.note = '';
     }
+    if (status !== 'absent' && status !== 'excused') {
+      rec.showNote = false;
+    }
+    rec.changed = true;
+    setTimeout(() => (rec.changed = false), 220);
+  }
+
+  toggleNote(rec: any) {
+    rec.showNote = !rec.showNote;
   }
 
   get markSummary() {
