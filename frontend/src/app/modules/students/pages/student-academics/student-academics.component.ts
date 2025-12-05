@@ -6,13 +6,112 @@ import { CardComponent } from '../../../../shared/components/card/card.component
 import { IconRegistryService } from '../../../../shared/services/icon-registry.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { FormsModule } from '@angular/forms';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+import { NgIf, NgFor } from '@angular/common';
 
 @Component({
   selector: 'app-student-academics',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, BreadcrumbsComponent, CardComponent, ButtonComponent],
+  imports: [CommonModule, RouterModule, FormsModule, BreadcrumbsComponent, CardComponent, ButtonComponent, ModalComponent, NgIf, NgFor],
   styleUrls: ['./student-academics.component.scss'],
   template: `
+    <app-modal
+      [isOpen]="newEntryOpen"
+      title="New Grade Entry"
+      size="lg"
+      [showFooter]="true"
+      (closed)="closeNewEntry()"
+    >
+      <div class="grade-modal">
+        <div class="modal-grid">
+          <div class="panel">
+            <p class="eyebrow">Assessment info</p>
+            <div class="field-grid">
+              <label>
+                Subject / course
+                <input type="text" [(ngModel)]="gradeEntry.subject" placeholder="e.g., Mathematics - Algebra II" />
+              </label>
+              <label>
+                Term
+                <select [(ngModel)]="gradeEntry.term">
+                  <option *ngFor="let t of terms" [value]="t">{{ t }}</option>
+                </select>
+              </label>
+              <label>
+                Grade
+                <select [(ngModel)]="gradeEntry.grade">
+                <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+                </select>
+              </label>
+              <label>
+                Class / Section
+                <select [(ngModel)]="gradeEntry.classSection">
+                  <option *ngFor="let c of classes" [value]="c">{{ c }}</option>
+                </select>
+              </label>
+              <label>
+                Assessment type
+                <select [(ngModel)]="gradeEntry.type">
+                  <option *ngFor="let t of assessmentTypes" [value]="t">{{ t }}</option>
+                </select>
+              </label>
+              <label>
+                Due / Date
+                <input type="date" [(ngModel)]="gradeEntry.dueDate" />
+              </label>
+            </div>
+            <label>
+              Description
+              <textarea rows="2" [(ngModel)]="gradeEntry.description" placeholder="Short description or instructions"></textarea>
+            </label>
+          </div>
+
+          <div class="panel">
+            <p class="eyebrow">Scoring & weighting</p>
+            <div class="field-grid small">
+              <label>
+                Max score
+                <input type="number" min="0" [(ngModel)]="gradeEntry.maxScore" placeholder="100" />
+              </label>
+              <label>
+                Weight (%)
+                <input type="number" min="0" max="100" [(ngModel)]="gradeEntry.weight" placeholder="20" />
+              </label>
+              <label>
+                Category
+                <select [(ngModel)]="gradeEntry.category">
+                  <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+                </select>
+              </label>
+              <label>
+                Lock after posting
+                <select [(ngModel)]="gradeEntry.locking">
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </label>
+            </div>
+            <div class="quick-toggles">
+              <span class="pill">Auto-calc letter grade</span>
+              <span class="pill">Publish to portal</span>
+              <span class="pill">Allow late submissions</span>
+            </div>
+            <div class="summary">
+              <p class="strong">Preview</p>
+              <p class="muted small">Max {{ gradeEntry.maxScore || '—' }} · Weight {{ gradeEntry.weight || '—' }}% · {{ gradeEntry.type || 'Assessment' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div footer class="modal-footer-bar">
+        <app-button variant="ghost" size="sm" (click)="closeNewEntry()">Cancel</app-button>
+        <app-button variant="primary" size="sm" (click)="saveNewEntry()">
+          <span class="icon" [innerHTML]="icon('save')"></span>
+          Save grade entry
+        </app-button>
+      </div>
+    </app-modal>
+
     <div class="page">
       <app-breadcrumbs [items]="crumbs"></app-breadcrumbs>
 
@@ -22,14 +121,25 @@ import { FormsModule } from '@angular/forms';
         </div>
         <div class="actions">
           <app-button variant="secondary" size="sm">Download report</app-button>
-          <app-button variant="primary" size="sm">
+          <app-button variant="primary" size="sm" (click)="openNewEntry()">
             <span class="icon" [innerHTML]="icon('academics')"></span>
             New Grade Entry
           </app-button>
         </div>
       </header>
 
-      <section class="scope-bar">
+      <section class="scope-bar" [class.collapsed]="!scopeOpen">
+        <div class="scope-head">
+          <div class="pill active-pill">
+            Active: {{ activeFilters }}
+          </div>
+          <div class="scope-actions">
+            <button class="chip ghost" type="button" (click)="resetFilters()">Reset</button>
+            <button class="chip ghost mobile-toggle" type="button" (click)="scopeOpen = !scopeOpen">
+              {{ scopeOpen ? 'Hide' : 'Show' }} filters
+            </button>
+          </div>
+        </div>
         <div class="scope-filters">
           <label>
             Term
@@ -280,7 +390,10 @@ export class StudentAcademicsComponent {
   years = ['2024/2025', '2023/2024', '2022/2023'];
   grades = ['Grade 5', 'Grade 6', 'Grade 7', 'Grade 8'];
   classes = ['5A', '5B', '6A', '6B', '7A', '7B', '8A'];
+  assessmentTypes = ['Quiz', 'Test', 'Exam', 'Project', 'Assignment'];
+  categories = ['Homework', 'Quiz', 'Exam', 'Project', 'Participation'];
 
+  scopeOpen = true;
   selectedTerm = this.terms[0];
   selectedYear = this.years[0];
   selectedGrade = '';
@@ -311,6 +424,50 @@ export class StudentAcademicsComponent {
     { title: 'Attendance risk', detail: '3 students near absence limit', state: 'ready', stateLabel: 'Noted' }
   ];
 
+  newEntryOpen = false;
+  gradeEntry = {
+    subject: '',
+    term: this.terms[0],
+    grade: this.grades[0],
+    classSection: this.classes[0],
+    type: this.assessmentTypes[0],
+    dueDate: '',
+    maxScore: 100,
+    weight: 20,
+    category: this.categories[0],
+    locking: 'no',
+    description: ''
+  };
+
   constructor(private icons: IconRegistryService) {}
   icon(name: string) { return this.icons.icon(name); }
+
+  get activeFilters(): string {
+    const parts = [
+      this.selectedTerm,
+      this.selectedYear,
+      this.selectedGrade ? `Grade ${this.selectedGrade.replace('Grade ', '')}` : 'All grades',
+      this.selectedClass ? `Class ${this.selectedClass}` : 'All classes'
+    ];
+    return parts.join(' · ');
+  }
+
+  resetFilters() {
+    this.selectedTerm = this.terms[0];
+    this.selectedYear = this.years[0];
+    this.selectedGrade = '';
+    this.selectedClass = '';
+  }
+
+  openNewEntry() {
+    this.newEntryOpen = true;
+  }
+
+  closeNewEntry() {
+    this.newEntryOpen = false;
+  }
+
+  saveNewEntry() {
+    this.newEntryOpen = false;
+  }
 }
