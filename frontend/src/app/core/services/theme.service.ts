@@ -71,7 +71,7 @@ export class ThemeService {
                 lg: '8px 8px 16px rgba(0,0,0,0.2), -8px -8px 16px rgba(255,255,255,0.5)'
             }
         },
-        // Original Retro Dark (Brown and Gradient focused)
+        // Retro Dark (Brown and Gradient focused) - FINAL REFINEMENT
         {
             id: 'retro-dark',
             name: 'Retro Dark',
@@ -81,24 +81,24 @@ export class ThemeService {
                 primaryDark: '#BF9532',
                 primaryLight: '#F5DF68',
                 secondary: '#CD8223',
-                accent: '#5EB5D7',
+                accent: '#70C6E1', // Enhanced: Brighter, more saturated accent for pop
                 background: 'linear-gradient(to bottom right, #1C120C 0%, #6B4E2F 50%, #1C120C 100%)',
-                surface: '#443123',
-                surfaceHover: '#564539',
-                textPrimary: '#F4ECE5',
-                textSecondary: '#D0C5B9',
+                surface: '#4F3A29', // Refined: Slightly lighter surface for better separation
+                surfaceHover: '#634D3B', // Refined: More distinct hover state
+                textPrimary: '#FFFFFF', // Enhanced: Pure white for maximum clarity and contrast
+                textSecondary: '#E0D5C9', // Enhanced: Lighter secondary text for readability
                 textTertiary: '#AB9F95',
-                border: '#645B52',
+                border: '#7A6F65',
                 borderLight: '#8C6D5E',
-                success: '#99A796',
-                warning: '#B79388',
-                error: '#A67267',
+                success: '#70AD47',
+                warning: '#F39C12',
+                error: '#E74C3C',
                 info: '#5EB5D7'
             },
             shadows: {
-                sm: '2px 2px 4px rgba(0,0,0,0.5), -2px -2px 4px rgba(244,236,229,0.1)',
-                md: '4px 4px 8px rgba(0,0,0,0.5), -4px -4px 8px rgba(244,236,229,0.08)',
-                lg: '8px 8px 16px rgba(0,0,0,0.5), -8px -8px 16px rgba(244,236,229,0.06)'
+                sm: '5px 5px 10px rgba(0, 0, 0, 0.7), -3px -3px 6px rgba(255, 255, 255, 0.08)',
+                md: '10px 10px 20px rgba(0, 0, 0, 0.7), -6px -6px 12px rgba(255, 255, 255, 0.07)',
+                lg: '15px 15px 30px rgba(0, 0, 0, 0.7), -9px -9px 18px rgba(255, 255, 255, 0.06)'
             }
         },
         // Charcoal Dark (Clean, Wow-level, Modern Dark Mode)
