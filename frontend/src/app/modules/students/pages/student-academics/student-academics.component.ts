@@ -22,6 +22,16 @@ import { NgIf, NgFor } from '@angular/common';
       [showFooter]="true"
       (closed)="closeNewEntry()"
     >
+      <div class="modal-ribbon">
+        <span class="icon" [innerHTML]="icon('academics')"></span>
+        <div>
+          <p class="eyebrow">Context</p>
+          <p class="muted small">{{ gradeEntry.term }} · {{ gradeEntry.grade }} · {{ gradeEntry.classSection }}</p>
+        </div>
+        <div class="steps">
+          <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+      </div>
       <div class="grade-modal">
         <div class="modal-grid">
           <div class="panel">
@@ -116,7 +126,7 @@ import { NgIf, NgFor } from '@angular/common';
       <app-breadcrumbs [items]="crumbs"></app-breadcrumbs>
 
       <header class="page-header">
-        <div>
+        <div class="header-left">
           <div class="role-line">
             <span class="pill role" [class.accent]="isAdmin()" [class.info]="isTeacher()">{{ userRole | titlecase }} view</span>
             <div class="role-switch">
@@ -130,14 +140,20 @@ import { NgIf, NgFor } from '@angular/common';
             <li *ngFor="let t of teacherTasks">{{ t }}</li>
           </ul>
         </div>
-        <div class="actions">
-          <app-button variant="secondary" size="sm">Download report</app-button>
-          <app-button variant="primary" size="sm" (click)="openNewEntry()">
-            <span class="icon" [innerHTML]="icon('academics')"></span>
-            New Grade Entry
-          </app-button>
+        <div class="context-strip">
+          <span class="icon" [innerHTML]="icon('scope')"></span>
+          <span>You’re viewing: {{ selectedTerm }} · {{ selectedYear }} · {{ selectedGrade || 'All grades' }} ({{ userRole | titlecase }})</span>
         </div>
       </header>
+
+      <div class="action-rail">
+        <app-button variant="secondary" size="sm">Download report</app-button>
+        <app-button variant="secondary" size="sm">Export CSV/PDF</app-button>
+        <app-button variant="primary" size="sm" (click)="openNewEntry()">
+          <span class="icon" [innerHTML]="icon('academics')"></span>
+          New Grade Entry
+        </app-button>
+      </div>
 
       <section class="scope-bar" [class.collapsed]="!scopeOpen">
         <div class="scope-head">
@@ -337,6 +353,7 @@ import { NgIf, NgFor } from '@angular/common';
               <path class="line-prev" d="M0 90 L40 82 L80 80 L120 74 L160 76 L200 72 L240 70" />
               <circle class="line-point" cx="240" cy="54" r="4" />
             </svg>
+            <div class="tip">Now {{ metrics.gpaAvg }}</div>
           </div>
           <div class="compare-row">
             <div>
@@ -380,7 +397,11 @@ import { NgIf, NgFor } from '@angular/common';
                 <p class="strong">{{ item.title }}</p>
                 <p class="muted small">{{ item.detail }}</p>
               </div>
-              <span class="status-pill" [ngClass]="item.state">{{ item.stateLabel }}</span>
+              <div class="intervene-actions">
+                <span class="priority-pill" [ngClass]="item.priority">{{ item.priorityLabel }}</span>
+                <span class="status-pill" [ngClass]="item.state">{{ item.stateLabel }}</span>
+                <app-button variant="ghost" size="sm">Resolve</app-button>
+              </div>
             </li>
           </ul>
         </app-card>
@@ -437,9 +458,9 @@ export class StudentAcademicsComponent {
   ];
 
   interventions = [
-    { title: 'Students below GPA threshold', detail: '6 students under 2.0 GPA', state: 'due', stateLabel: 'Action' },
-    { title: 'Missing assignments', detail: '4 classes with overdue work', state: 'progress', stateLabel: 'In review' },
-    { title: 'Attendance risk', detail: '3 students near absence limit', state: 'ready', stateLabel: 'Noted' }
+    { title: 'Students below GPA threshold', detail: '6 students under 2.0 GPA', state: 'due', stateLabel: 'Action', priority: 'high', priorityLabel: 'High' },
+    { title: 'Missing assignments', detail: '4 classes with overdue work', state: 'progress', stateLabel: 'In review', priority: 'medium', priorityLabel: 'Med' },
+    { title: 'Attendance risk', detail: '3 students near absence limit', state: 'ready', stateLabel: 'Noted', priority: 'low', priorityLabel: 'Low' }
   ];
 
   newEntryOpen = false;
