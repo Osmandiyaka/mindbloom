@@ -141,25 +141,29 @@
 
 .dist-card {
   .bars {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0.6rem;
     margin-top: 0.75rem;
 
-    .bar {
-      position: relative;
-      height: 110px;
+    svg {
+      width: 100%;
+      height: 160px;
       border-radius: 12px;
-      background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary-light) 55%, transparent) 0%, var(--color-surface) 100%);
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 6px rgba(var(--color-primary-rgb),0.25);
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      padding-bottom: 0.35rem;
-      span { font-size: 0.85rem; color: var(--color-text-secondary); }
-      &.mid { background: linear-gradient(180deg, color-mix(in srgb, var(--color-info) 60%, transparent) 0%, var(--color-surface) 100%); }
-      &.high { background: linear-gradient(180deg, color-mix(in srgb, var(--color-success) 65%, transparent) 0%, var(--color-surface) 100%); }
-      &.top { background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 70%, transparent) 0%, var(--color-surface) 100%); box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 8px rgba(var(--color-primary-rgb),0.35); }
+      background: color-mix(in srgb, var(--color-surface-hover) 80%, transparent);
+      border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 6px rgba(var(--color-primary-rgb),0.2);
+    }
+
+    .grid line {
+      stroke: color-mix(in srgb, var(--color-border) 50%, transparent);
+      stroke-dasharray: 4 4;
+    }
+
+    .bars-fill rect {
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.35));
+    }
+
+    .labels text {
+      font-weight: 700;
+      letter-spacing: 0.04em;
     }
   }
 }
@@ -207,11 +211,21 @@
     width: 6px;
     border-radius: 6px;
     background: linear-gradient(180deg, var(--color-primary-light), color-mix(in srgb, var(--color-primary) 30%, transparent));
+    &.h55 { height: 21px; }
+    &.h58 { height: 23px; }
     &.h60 { height: 24px; }
+    &.h61 { height: 25px; }
+    &.h62 { height: 26px; }
+    &.h64 { height: 27px; }
     &.h65 { height: 26px; }
+    &.h67 { height: 28px; }
+    &.h68 { height: 29px; }
     &.h70 { height: 30px; }
     &.h72 { height: 31px; }
+    &.h74 { height: 32px; }
     &.h75 { height: 34px; }
+    &.h78 { height: 36px; }
+    &.h80 { height: 38px; }
   }
 }
 

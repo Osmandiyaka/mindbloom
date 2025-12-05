@@ -70,16 +70,37 @@ import { FormsModule } from '@angular/forms';
           <span class="eyebrow">Pending grade entries</span>
           <p class="value">{{ metrics.pending }}</p>
           <small class="muted">Awaiting posting</small>
+          <div class="mini-spark">
+            <span class="spark-bar h65"></span>
+            <span class="spark-bar h60"></span>
+            <span class="spark-bar h72"></span>
+            <span class="spark-bar h68"></span>
+            <span class="spark-bar h64"></span>
+          </div>
         </div>
         <div class="kpi accent">
           <span class="eyebrow">Posted entries</span>
           <p class="value">{{ metrics.posted }}%</p>
           <small class="muted">Across selected scope</small>
+          <div class="mini-spark">
+            <span class="spark-bar h70"></span>
+            <span class="spark-bar h72"></span>
+            <span class="spark-bar h75"></span>
+            <span class="spark-bar h72"></span>
+            <span class="spark-bar h74"></span>
+          </div>
         </div>
         <div class="kpi">
           <span class="eyebrow">Report cards in queue</span>
           <p class="value">{{ metrics.reportQueue }}</p>
           <small class="muted">Proofing/ready</small>
+          <div class="mini-spark">
+            <span class="spark-bar h60"></span>
+            <span class="spark-bar h62"></span>
+            <span class="spark-bar h58"></span>
+            <span class="spark-bar h61"></span>
+            <span class="spark-bar h59"></span>
+          </div>
         </div>
         <div class="kpi">
           <span class="eyebrow">GPA avg</span>
@@ -97,16 +118,37 @@ import { FormsModule } from '@angular/forms';
           <span class="eyebrow">Alerts</span>
           <p class="value">{{ metrics.alerts }}</p>
           <small class="muted">Overdue items</small>
+          <div class="mini-spark">
+            <span class="spark-bar h62"></span>
+            <span class="spark-bar h65"></span>
+            <span class="spark-bar h60"></span>
+            <span class="spark-bar h67"></span>
+            <span class="spark-bar h64"></span>
+          </div>
         </div>
         <div class="kpi alarm">
           <span class="eyebrow">Failing students</span>
           <p class="value">{{ metrics.failing }}</p>
           <small class="muted">Need intervention</small>
+          <div class="mini-spark">
+            <span class="spark-bar h58"></span>
+            <span class="spark-bar h60"></span>
+            <span class="spark-bar h55"></span>
+            <span class="spark-bar h62"></span>
+            <span class="spark-bar h57"></span>
+          </div>
         </div>
         <div class="kpi accent">
           <span class="eyebrow">Top performers</span>
           <p class="value">{{ metrics.topPerformers }}</p>
           <small class="muted">GPA &gt; 4.0</small>
+          <div class="mini-spark">
+            <span class="spark-bar h70"></span>
+            <span class="spark-bar h72"></span>
+            <span class="spark-bar h75"></span>
+            <span class="spark-bar h78"></span>
+            <span class="spark-bar h80"></span>
+          </div>
         </div>
       </section>
 
@@ -117,11 +159,45 @@ import { FormsModule } from '@angular/forms';
             <p class="muted small">Current scope</p>
           </div>
           <div class="bars">
-            <div class="bar"><span>0-1</span></div>
-            <div class="bar"><span>1-2</span></div>
-            <div class="bar mid"><span>2-3</span></div>
-            <div class="bar high"><span>3-3.5</span></div>
-            <div class="bar top"><span>3.5-4.0</span></div>
+            <svg viewBox="0 0 260 140" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+              <defs>
+                <linearGradient id="barLow" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0%" stop-color="var(--color-surface)" />
+                  <stop offset="100%" stop-color="color-mix(in srgb, var(--color-primary-light) 60%, transparent)" />
+                </linearGradient>
+                <linearGradient id="barMid" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0%" stop-color="var(--color-surface)" />
+                  <stop offset="100%" stop-color="color-mix(in srgb, var(--color-info) 70%, transparent)" />
+                </linearGradient>
+                <linearGradient id="barHigh" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0%" stop-color="var(--color-surface)" />
+                  <stop offset="100%" stop-color="color-mix(in srgb, var(--color-success) 75%, transparent)" />
+                </linearGradient>
+                <linearGradient id="barTop" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0%" stop-color="var(--color-surface)" />
+                  <stop offset="100%" stop-color="color-mix(in srgb, var(--color-primary) 80%, transparent)" />
+                </linearGradient>
+              </defs>
+              <g class="grid">
+                <line x1="0" y1="120" x2="260" y2="120" />
+                <line x1="0" y1="90" x2="260" y2="90" />
+                <line x1="0" y1="60" x2="260" y2="60" />
+              </g>
+              <g class="bars-fill">
+                <rect x="10"  y="70" width="40" height="50" rx="8" fill="url(#barLow)" />
+                <rect x="60"  y="55" width="40" height="65" rx="8" fill="url(#barLow)" />
+                <rect x="110" y="40" width="40" height="80" rx="8" fill="url(#barMid)" />
+                <rect x="160" y="25" width="40" height="95" rx="8" fill="url(#barHigh)" />
+                <rect x="210" y="15" width="40" height="105" rx="8" fill="url(#barTop)" />
+              </g>
+              <g class="labels" font-size="12" fill="var(--color-text-secondary)">
+                <text x="30"  y="135" text-anchor="middle">0-1</text>
+                <text x="80"  y="135" text-anchor="middle">1-2</text>
+                <text x="130" y="135" text-anchor="middle">2-3</text>
+                <text x="180" y="135" text-anchor="middle">3-3.5</text>
+                <text x="230" y="135" text-anchor="middle">3.5-4.0</text>
+              </g>
+            </svg>
           </div>
         </app-card>
 
