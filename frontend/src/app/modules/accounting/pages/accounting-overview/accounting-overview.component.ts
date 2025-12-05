@@ -88,7 +88,7 @@ import { IconRegistryService } from '../../../../shared/services/icon-registry.s
               </div>
             </div>
 
-            <div class="card hoverable">
+            <div class="card hoverable span-2">
               <div class="card-header">
                 <div>
                   <h3>Cashflow trend</h3>
@@ -121,7 +121,7 @@ import { IconRegistryService } from '../../../../shared/services/icon-registry.s
               </div>
             </div>
 
-            <div class="card hoverable span-2">
+            <div class="card hoverable full-span">
               <div class="card-header">
                 <h3>Trial Balance Snapshot</h3>
                 <a routerLink="/accounting/trial-balance" class="link">View full</a>
@@ -188,7 +188,7 @@ import { IconRegistryService } from '../../../../shared/services/icon-registry.s
     .main { display:flex; flex-direction:column; gap:1.75rem; }
     .page-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary,#7ab8ff) 18%, transparent), transparent); border:1px solid var(--color-border); border-radius:14px; padding:1rem; box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 5px rgba(var(--color-primary-rgb,123,140,255),0.2); transition: box-shadow 120ms ease, transform 120ms ease; }
     .page-header:hover { box-shadow: 0 0 15px rgba(var(--color-primary-rgb,123,140,255),0.7), inset 0 0 10px rgba(var(--color-primary-rgb,123,140,255),0.1); transform: translateY(-1px); }
-    .hero-copy h1 { margin:0 0 0.35rem; color: var(--color-text-primary); }
+    .hero-copy h1 { margin:0 0 0.35rem; color: var(--color-text-primary); text-shadow: 0 0 8px rgba(255,255,255,0.08); }
     .hero-copy .eyebrow { text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-tertiary); font-weight:700; margin:0 0 0.15rem; }
     .sub { margin:0; color: var(--color-text-secondary); }
     .actions { display:flex; gap:0.5rem; }
@@ -203,32 +203,33 @@ import { IconRegistryService } from '../../../../shared/services/icon-registry.s
     .tile-icon-bubble { width:34px; height:34px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; background: transparent; box-shadow: 0 0 8px rgba(var(--color-primary-rgb,123,140,255),0.5); color: var(--color-primary,#7ab8ff); border:1px solid color-mix(in srgb, var(--color-primary,#7ab8ff) 60%, var(--color-border)); }
     .tile-icon-bubble svg, .icon svg { width:18px; height:18px; stroke: currentColor; fill: none; }
     .tile-label { margin:0; color: var(--color-text-secondary); font-weight:600; text-transform:uppercase; letter-spacing:0.08em; font-size:0.85rem; }
-    .tile-value { margin:0; font-size:1.35rem; font-weight:700; color: var(--color-text-primary); font-family:'Roboto Mono', monospace; }
+    .tile-value { margin:0; font-size:1.35rem; font-weight:700; color: var(--color-text-primary); font-family:'Roboto Mono', monospace; text-shadow: 0 0 8px rgba(255,255,255,0.08); }
     .tile-sub { margin:0; color: var(--color-text-secondary); font-size:0.9rem; }
     .tile-icon { font-size:1.2rem; }
     .pill { padding:0.25rem 0.55rem; border-radius:999px; font-size:0.75rem; border:1px solid var(--color-border); color: var(--color-text-secondary); background: var(--color-surface-hover); }
     .pill.good { background: color-mix(in srgb, var(--color-success,#16a34a) 15%, transparent); color: var(--color-success,#16a34a); border-color: color-mix(in srgb, var(--color-success,#16a34a) 35%, transparent); }
     .pill.warn { background: color-mix(in srgb, var(--color-warning,#eab308) 15%, transparent); color: var(--color-warning,#eab308); border-color: color-mix(in srgb, var(--color-warning,#eab308) 35%, transparent); }
-    .analytics { display:grid; grid-template-columns: repeat(auto-fit,minmax(340px,1fr)); gap:1.75rem; align-items:start; }
-    .analytics .card:first-child { min-height: 340px; }
+    .analytics { display:grid; grid-template-columns: repeat(3, minmax(280px,1fr)); gap:1.75rem; align-items:start; }
+    .analytics .card:first-child { min-height: 340px; grid-column: span 1; }
     .span-2 { grid-column: span 2; }
-    @media (max-width: 900px) { .span-2 { grid-column: span 1; } }
+    .full-span { grid-column: 1 / -1; }
+    @media (max-width: 1024px) { .analytics { grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); } .span-2, .full-span { grid-column: span 1; } }
     .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1rem; box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 5px rgba(var(--color-primary-rgb,123,140,255),0.2); }
     .hoverable { transition: transform 120ms ease, box-shadow 120ms ease; }
     .hoverable:hover { transform: translateY(-2px); box-shadow: 0 0 15px rgba(var(--color-primary-rgb,123,140,255),0.7), inset 0 0 10px rgba(var(--color-primary-rgb,123,140,255),0.1); }
     .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color: var(--color-text-primary); }
-    .card-header h3 { color: var(--color-text-primary); margin:0; }
+    .card-header h3 { color: var(--color-text-primary); margin:0; text-transform:uppercase; letter-spacing:0.08em; }
     .pie-wrap { display:flex; gap:1rem; align-items:center; }
     .pie { width:140px; height:140px; border-radius:50%; background: conic-gradient(#7ab8ff 0 45%, #6ee7b7 45% 75%, #fbbf24 75% 100%); box-shadow: var(--shadow-sm); }
     .legend { display:flex; flex-direction:column; gap:0.35rem; }
     .legend .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
     .legend .label { color: var(--color-text-primary); font-weight:600; margin-left:0.35rem; }
     .legend .value { color: var(--color-text-secondary); margin-left:auto; }
-    .trend { display:flex; gap:0.4rem; align-items:flex-end; height:120px; margin-bottom:0.5rem; }
-    .trend .bar { flex:1; background: linear-gradient(180deg, color-mix(in srgb, #0a1b2f 50%, transparent), color-mix(in srgb, var(--color-primary,#7ab8ff) 85%, transparent)); border-radius:6px 6px 2px 2px; position:relative; display:flex; align-items:flex-end; justify-content:center; color: color-mix(in srgb, var(--color-primary,#7ab8ff) 80%, #0f172a 20%); font-size:0.65rem; padding-bottom:0.25rem; box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--color-border) 40%, transparent); }
+    .trend { display:flex; gap:0.4rem; align-items:flex-end; height:120px; margin-bottom:0.5rem; border-bottom:1px dashed color-mix(in srgb, var(--color-border) 70%, transparent); padding-bottom:0.35rem; }
+    .trend .bar { flex:1; background: linear-gradient(to top, var(--color-primary-light,#9fd0ff), color-mix(in srgb, #0a1b2f 70%, transparent)); border-radius:6px 6px 2px 2px; position:relative; display:flex; align-items:flex-end; justify-content:center; color: color-mix(in srgb, var(--color-primary,#7ab8ff) 80%, #0f172a 20%); font-size:0.65rem; padding-bottom:0.25rem; box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--color-border) 40%, transparent); }
     .trend .bar span { opacity:0; transition: opacity 120ms ease; position:absolute; top:-26px; padding:0.2rem 0.5rem; border-radius:6px; background: color-mix(in srgb, var(--color-primary,#7ab8ff) 70%, #0f172a 30%); box-shadow: 0 0 8px rgba(var(--color-primary-rgb,123,140,255),0.4); color:#0f172a; }
     .trend .bar:hover span { opacity:1; }
-    .trend .bar.negative { background: linear-gradient(180deg, #2b0b0f, color-mix(in srgb, var(--color-error,#ef4444) 85%, transparent)); color: var(--color-error,#ef4444); box-shadow: 0 0 10px rgba(239,68,68,0.35); }
+    .trend .bar.negative { background: linear-gradient(to top, var(--color-error,#ef4444), #880000); color: var(--color-error,#ef4444); box-shadow: 0 0 8px rgba(255,85,85,0.8); }
     .cash-summary { display:grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap:0.5rem; }
     .cash-summary .label { margin:0; color: var(--color-text-secondary); font-weight:700; text-transform:uppercase; letter-spacing:0.08em; font-size:0.8rem; }
     .cash-summary .value { margin:0.1rem 0 0; color: var(--color-text-primary); font-weight:700; font-family:'Roboto Mono', monospace; }
