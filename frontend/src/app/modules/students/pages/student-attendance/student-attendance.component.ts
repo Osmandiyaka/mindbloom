@@ -31,62 +31,92 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
         </div>
       </header>
 
-      <section class="stat-hero">
-        <div class="stat-chip present">
-          <div class="chip-head">
-            <span class="dot present"></span>
-            <span class="label">Present</span>
-          </div>
-          <p class="stat-value">{{ summary.present }}%</p>
-          <div class="sparkline">
-            <span class="bar h70"></span>
-            <span class="bar h85"></span>
-            <span class="bar h90"></span>
-            <span class="bar h80"></span>
-            <span class="bar h95"></span>
-          </div>
+      <section class="kpi-band">
+        <div class="kpi present">
+          <span class="eyebrow">Present</span>
+          <p class="value">{{ summary.present }}%</p>
+          <small class="muted">Target 95%</small>
         </div>
-        <div class="stat-chip absent">
-          <div class="chip-head">
-            <span class="dot absent"></span>
-            <span class="label">Absent</span>
-          </div>
-          <p class="stat-value">{{ summary.absentToday }}</p>
-          <div class="sparkline">
-            <span class="bar h30"></span>
-            <span class="bar h40"></span>
-            <span class="bar h25"></span>
-            <span class="bar h35"></span>
-            <span class="bar h20"></span>
-          </div>
+        <div class="kpi alarm">
+          <span class="eyebrow">Absent</span>
+          <p class="value">{{ summary.absentToday }}</p>
+          <small class="muted">Today</small>
         </div>
-        <div class="chart-card">
+        <div class="kpi warning">
+          <span class="eyebrow">Late</span>
+          <p class="value">{{ summary.late }}</p>
+          <small class="muted">Today</small>
+        </div>
+        <div class="kpi info">
+          <span class="eyebrow">Excused</span>
+          <p class="value">{{ summary.excused }}</p>
+          <small class="muted">Approved</small>
+        </div>
+        <div class="kpi accent">
+          <span class="eyebrow">On-time score</span>
+          <p class="value">{{ summary.onTimeScore }}%</p>
+          <small class="muted">7-day avg</small>
+        </div>
+      </section>
+
+      <section class="analytics-grid">
+        <div class="line-card">
           <div class="chart-header">
-            <h3 class="themed-heading">Trend</h3>
-            <p class="muted">Last 7 days</p>
+            <div>
+              <p class="eyebrow">Trend</p>
+              <h3 class="themed-heading">Attendance last 30 days</h3>
+            </div>
+            <span class="muted small">Live</span>
           </div>
-          <div class="chart-bars" aria-hidden="true">
-            <div class="bar" style="height: 78%"><span>Mon</span></div>
-            <div class="bar" style="height: 82%"><span>Tue</span></div>
-            <div class="bar" style="height: 76%"><span>Wed</span></div>
-            <div class="bar" style="height: 88%"><span>Thu</span></div>
-            <div class="bar" style="height: 91%"><span>Fri</span></div>
-            <div class="bar" style="height: 73%"><span>Mon</span></div>
-            <div class="bar" style="height: 85%"><span>Tue</span></div>
+          <div class="line-graph" aria-hidden="true">
+            <svg viewBox="0 0 300 120" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="trendFill" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="var(--color-primary-light)" stop-opacity="0.35" />
+                  <stop offset="100%" stop-color="var(--color-surface)" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <path class="trend-line" d="M0 80 L40 72 L80 78 L120 60 L160 64 L200 52 L240 58 L280 50" />
+              <path class="trend-fill" d="M0 120 L0 80 L40 72 L80 78 L120 60 L160 64 L200 52 L240 58 L280 50 L280 120 Z" />
+              <circle class="trend-point" cx="280" cy="50" r="5" />
+            </svg>
+          </div>
+        </div>
+        <div class="action-card">
+          <div class="action-top">
+            <h4 class="themed-heading">Quick Actions</h4>
+            <p class="muted">Today vs 7-day avg</p>
+            <div class="compare">
+              <div>
+                <span class="eyebrow">Today</span>
+                <p class="value">{{ summary.present }}%</p>
+              </div>
+              <div>
+                <span class="eyebrow">7-day</span>
+                <p class="value">{{ summary.onTimeScore }}%</p>
+              </div>
+            </div>
+          </div>
+          <app-button variant="primary" size="md" class="primary-glow" (click)="openMarkModal()">
+            <span class="icon" [innerHTML]="icon('attendance')"></span>
+            Mark attendance
+          </app-button>
+          <div class="quick-links">
+            <button class="ghost-link">Download daily report</button>
+            <button class="ghost-link">Notify absentees</button>
           </div>
         </div>
       </section>
 
       <app-card class="table-card">
-        <div class="card-header table-header">
+        <div class="table-header">
           <h3 class="themed-heading">Roster</h3>
-        <div class="header-filters">
-          <div class="header-chips">
+          <div class="filter-rail">
             <div class="toggle-group header-toggle">
               <button class="pill" [class.active]="viewMode==='daily'" (click)="setViewMode('daily')">Daily</button>
               <button class="pill" [class.active]="viewMode==='period'" (click)="setViewMode('period')">By Period</button>
             </div>
-            <div class="filters">
+            <div class="filters compact">
               <label>
                 Grade
                 <select [(ngModel)]="selectedGrade">
@@ -110,7 +140,6 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
               <button class="chip ghost" (click)="resetFilters()">Clear</button>
             </div>
           </div>
-        </div>
         </div>
         <div class="table">
           <div class="table-head">
@@ -286,7 +315,10 @@ export class StudentAttendanceComponent {
 
   summary = {
     present: 96,
-    absentToday: 8
+    absentToday: 8,
+    late: 3,
+    excused: 2,
+    onTimeScore: 92
   };
 
   records = [
