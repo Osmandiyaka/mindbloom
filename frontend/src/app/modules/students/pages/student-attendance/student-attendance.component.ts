@@ -80,42 +80,41 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
       <app-card class="table-card">
         <div class="card-header table-header">
           <h3 class="themed-heading">Roster</h3>
-          <div class="header-filters">
-            <div class="header-chips">
-              <div class="toggle-group header-toggle">
-                <button class="pill" [class.active]="viewMode==='daily'" (click)="setViewMode('daily')">Daily</button>
-                <button class="pill" [class.active]="viewMode==='period'" (click)="setViewMode('period')">By Period</button>
-              </div>
-              <div class="filters">
-                <label>
-                  Grade
-                  <select [(ngModel)]="selectedGrade">
-                    <option value="">All</option>
-                    <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
-                  </select>
-                </label>
-                <label>
-                  Class
-                  <select [(ngModel)]="selectedClass">
-                    <option value="">All</option>
-                    <option *ngFor="let c of classes" [value]="c">{{ c }}</option>
-                  </select>
-                </label>
-              </div>
-              <div class="status-chips compact">
-                <span class="chip" [class.active]="selectedStatus==='present'" (click)="setStatus('present')">Present</span>
-                <span class="chip" [class.active]="selectedStatus==='absent'" (click)="setStatus('absent')">Absent</span>
-                <span class="chip" [class.active]="selectedStatus==='late'" (click)="setStatus('late')">Late</span>
-                <span class="chip" [class.active]="selectedStatus==='excused'" (click)="setStatus('excused')">Excused</span>
-                <button class="chip ghost" (click)="resetFilters()">Clear</button>
-              </div>
+        <div class="header-filters">
+          <div class="header-chips">
+            <div class="toggle-group header-toggle">
+              <button class="pill" [class.active]="viewMode==='daily'" (click)="setViewMode('daily')">Daily</button>
+              <button class="pill" [class.active]="viewMode==='period'" (click)="setViewMode('period')">By Period</button>
+            </div>
+            <div class="filters">
+              <label>
+                Grade
+                <select [(ngModel)]="selectedGrade">
+                  <option value="">All</option>
+                  <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+                </select>
+              </label>
+              <label>
+                Class
+                <select [(ngModel)]="selectedClass">
+                  <option value="">All</option>
+                  <option *ngFor="let c of classes" [value]="c">{{ c }}</option>
+                </select>
+              </label>
+            </div>
+            <div class="status-chips compact">
+              <span class="chip" [class.active]="selectedStatus==='present'" (click)="setStatus('present')">Present</span>
+              <span class="chip" [class.active]="selectedStatus==='absent'" (click)="setStatus('absent')">Absent</span>
+              <span class="chip" [class.active]="selectedStatus==='late'" (click)="setStatus('late')">Late</span>
+              <span class="chip" [class.active]="selectedStatus==='excused'" (click)="setStatus('excused')">Excused</span>
+              <button class="chip ghost" (click)="resetFilters()">Clear</button>
             </div>
           </div>
+        </div>
         </div>
         <div class="table">
           <div class="table-head">
             <span>Student</span>
-            <span>Class</span>
             <span>Status</span>
             <span>{{ viewMode==='daily' ? 'Time' : 'Period' }}</span>
             <span>Note</span>
@@ -127,15 +126,15 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
                 <p class="strong name">{{ record.student }}</p>
               </div>
             </div>
-            <span>{{ record.class }}</span>
-            <span>
+            <span class="status-cell">
               <span class="badge" [ngClass]="record.status">{{ record.status | titlecase }}</span>
+              <span class="muted small">{{ record.class }}</span>
             </span>
             <span>{{ record.time }}</span>
             <span class="muted small">{{ record.note || '—' }}</span>
           </div>
           <div class="table-row empty" *ngIf="!filteredRecords.length">
-            <span class="muted" style="grid-column: 1/6">No records match the filters.</span>
+            <span class="muted" style="grid-column: 1/5">No records match the filters.</span>
           </div>
         </div>
       </app-card>
