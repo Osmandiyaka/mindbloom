@@ -366,6 +366,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0;
+  flex-wrap: wrap;
 }
 
 .table {
@@ -437,4 +440,34 @@
   &.absent { @include status-pill($status-absent); }
   &.late { @include status-pill($status-late); }
   &.excused { @include status-pill($status-excused); }
+}
+
+.header-filters {
+  display: flex;
+  flex-direction: row;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.header-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.status-chips.compact .chip {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.header-filters .filters label {
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.header-toggle {
+  gap: 0.35rem;
 }

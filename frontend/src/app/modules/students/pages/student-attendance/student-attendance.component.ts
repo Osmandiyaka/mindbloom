@@ -76,44 +76,40 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
         </div>
       </section>
 
-      <section class="toolbar card">
-        <div class="controls">
-          <div class="toggle-group">
-            <button class="pill" [class.active]="viewMode==='daily'" (click)="setViewMode('daily')">Daily</button>
-            <button class="pill" [class.active]="viewMode==='period'" (click)="setViewMode('period')">By Period</button>
-          </div>
-          <div class="filters-group">
-            <div class="filters">
-              <label>
-                Grade
-                <select [(ngModel)]="selectedGrade">
-                  <option value="">All</option>
-                  <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
-                </select>
-              </label>
-              <label>
-                Class
-                <select [(ngModel)]="selectedClass">
-                  <option value="">All</option>
-                  <option *ngFor="let c of classes" [value]="c">{{ c }}</option>
-                </select>
-              </label>
-            </div>
-            <div class="status-chips">
-              <span class="chip" [class.active]="selectedStatus==='present'" (click)="setStatus('present')">Present</span>
-              <span class="chip" [class.active]="selectedStatus==='absent'" (click)="setStatus('absent')">Absent</span>
-              <span class="chip" [class.active]="selectedStatus==='late'" (click)="setStatus('late')">Late</span>
-              <span class="chip" [class.active]="selectedStatus==='excused'" (click)="setStatus('excused')">Excused</span>
-              <button class="chip ghost" (click)="resetFilters()">Clear</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <app-card class="table-card">
         <div class="card-header table-header">
           <h3 class="themed-heading">Roster</h3>
-          <p class="muted small">Filtered: {{ filteredRecords.length }} students</p>
+          <div class="header-filters">
+            <div class="toggle-group header-toggle">
+              <button class="pill" [class.active]="viewMode==='daily'" (click)="setViewMode('daily')">Daily</button>
+              <button class="pill" [class.active]="viewMode==='period'" (click)="setViewMode('period')">By Period</button>
+            </div>
+            <div class="header-chips">
+              <div class="filters">
+                <label>
+                  Grade
+                  <select [(ngModel)]="selectedGrade">
+                    <option value="">All</option>
+                    <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+                  </select>
+                </label>
+                <label>
+                  Class
+                  <select [(ngModel)]="selectedClass">
+                    <option value="">All</option>
+                    <option *ngFor="let c of classes" [value]="c">{{ c }}</option>
+                  </select>
+                </label>
+              </div>
+              <div class="status-chips compact">
+                <span class="chip" [class.active]="selectedStatus==='present'" (click)="setStatus('present')">Present</span>
+                <span class="chip" [class.active]="selectedStatus==='absent'" (click)="setStatus('absent')">Absent</span>
+                <span class="chip" [class.active]="selectedStatus==='late'" (click)="setStatus('late')">Late</span>
+                <span class="chip" [class.active]="selectedStatus==='excused'" (click)="setStatus('excused')">Excused</span>
+                <button class="chip ghost" (click)="resetFilters()">Clear</button>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="table">
           <div class="table-head">
