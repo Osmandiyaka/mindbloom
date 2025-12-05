@@ -183,11 +183,11 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
 
               <div class="bulk-status">
                 <div class="section-heading">
-                  <span class="eyebrow small">Bulk</span>
-                  <h4>Set status for all</h4>
+                  <span class="eyebrow small">Apply Status to All</span>
+                  <h4>Bulk Attendance Actions</h4>
                 </div>
                 <div class="status-chips prominent">
-                  <span class="chip" [class.active]="bulkStatus==='present'" (click)="setBulkStatus('present')">
+                  <span class="chip primary" [class.active]="bulkStatus==='present'" (click)="setBulkStatus('present')">
                     <span class="chip-dot present"></span> Present
                   </span>
                   <span class="chip" [class.active]="bulkStatus==='absent'" (click)="setBulkStatus('absent')">
@@ -214,22 +214,21 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
               </div>
               <div class="mark-row" *ngFor="let rec of markRoster; let i = index" [class.alt]="i % 2 === 1" [class.bulk-flash]="rowFlash">
                 <div class="student-cell">
-                  <div class="avatar small">{{ initials(rec.student) }}</div>
                   <div>
-                    <p class="strong">{{ rec.student }}</p>
+                    <p class="strong name">{{ rec.student }}</p>
                     <p class="muted small">{{ rec.class }}</p>
                   </div>
                 </div>
                 <div class="row-status control-block">
-                  <select [(ngModel)]="rec.status" [ngClass]="['status-select', rec.status]">
-                    <option value="present">Present</option>
-                    <option value="absent">Absent</option>
-                    <option value="late">Late</option>
-                    <option value="excused">Excused</option>
-                  </select>
+                  <div class="segmented">
+                    <button type="button" [class.active]="rec.status==='present'" (click)="setRowStatus(rec,'present')">Present</button>
+                    <button type="button" [class.active]="rec.status==='absent'" (click)="setRowStatus(rec,'absent')">Absent</button>
+                    <button type="button" [class.active]="rec.status==='late'" (click)="setRowStatus(rec,'late')">Late</button>
+                    <button type="button" [class.active]="rec.status==='excused'" (click)="setRowStatus(rec,'excused')">Excused</button>
+                  </div>
                 </div>
-                <div class="row-note control-block">
-                  <input type="text" [(ngModel)]="rec.note" placeholder="Optional note" />
+                <div class="row-note control-block" *ngIf="rec.status !== 'present'">
+                  <input type="text" [(ngModel)]="rec.note" placeholder="Add note" />
                 </div>
               </div>
             </div>
@@ -346,6 +345,13 @@ export class StudentAttendanceComponent {
 
   initials(name: string) {
     return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  }
+
+  setRowStatus(rec: any, status: 'present' | 'absent' | 'late' | 'excused') {
+    rec.status = status;
+    if (status === 'present') {
+      rec.note = '';
+    }
   }
 
   get markSummary() {

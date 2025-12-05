@@ -371,6 +371,12 @@
       transform: translateY(-1px) scale(1.02);
       box-shadow: var(--shadow-md);
     }
+
+    &.primary {
+      border-color: color-mix(in srgb, var(--color-primary) 70%, var(--color-border));
+      background: color-mix(in srgb, var(--color-primary) 18%, var(--color-surface));
+      color: var(--color-primary);
+    }
   }
 
   .chip-dot {
@@ -392,6 +398,8 @@
   overflow: hidden;
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
 }
 
 .mark-head, .mark-row {
@@ -413,22 +421,13 @@
   color: var(--color-text-primary);
   background: color-mix(in srgb, var(--color-surface) 92%, rgba(255,255,255,0.02));
   position: relative;
+  padding-block: 0.55rem;
 
   &.alt { background: color-mix(in srgb, var(--color-surface) 88%, rgba(255,255,255,0.02)); }
 
   &.bulk-flash {
     animation: flashRow 0.18s ease;
   }
-}
-
-.row-status select,
-.row-note input {
-  width: 100%;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 0.45rem 0.55rem;
-  background: var(--color-surface-hover);
-  color: var(--color-text-primary);
 }
 
 .mark-meta.card,
@@ -489,6 +488,32 @@
     padding: 0.25rem 0.35rem;
     color: var(--color-text-primary);
   }
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.25rem;
+
+  button {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface-hover);
+    color: var(--color-text-secondary);
+    padding: 0.35rem 0.45rem;
+    font-weight: 700;
+    transition: all 0.15s ease;
+
+    &.active {
+      color: var(--color-primary);
+      border-color: color-mix(in srgb, var(--color-primary) 70%, var(--color-border));
+      box-shadow: var(--shadow-sm);
+    }
+  }
+}
+
+.row-note.control-block {
+  padding: 0.45rem 0.5rem;
 }
 
 .status-select.present { background: color-mix(in srgb, $status-present 15%, transparent); }
@@ -569,23 +594,14 @@
 
 .student-cell {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.6rem;
 
-  .avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: var(--color-surface-hover);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    color: var(--color-text-primary);
+  .name {
+    font-size: 1.05rem;
+    font-weight: 800;
   }
-
-  .strong { margin: 0; }
-  .small { font-size: 0.875rem; }
+  .small { font-size: 0.85rem; color: var(--color-text-secondary); }
 }
 
 .badge {
