@@ -43,10 +43,24 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
         </div>
         <div class="toolbar-right">
           <div class="view-toggle" role="group" aria-label="View switch">
-            <button [class.active]="viewMode() === 'table'" (click)="setView('table')" title="Table view">
+            <button
+              type="button"
+              [class.active]="viewMode() === 'table'"
+              (click)="setView('table')"
+              title="Table view"
+              aria-label="Switch to table view"
+              [attr.aria-pressed]="viewMode() === 'table'"
+            >
               <span class="icon" [innerHTML]="icon('inbox')"></span>
             </button>
-            <button [class.active]="viewMode() === 'grid'" (click)="setView('grid')" title="Grid view">
+            <button
+              type="button"
+              [class.active]="viewMode() === 'grid'"
+              (click)="setView('grid')"
+              title="Grid view"
+              aria-label="Switch to grid view"
+              [attr.aria-pressed]="viewMode() === 'grid'"
+            >
               <span class="icon" [innerHTML]="icon('dashboard')"></span>
             </button>
           </div>
@@ -136,29 +150,72 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
             </div>
           </div>
 
-          <div *ngSwitchCase="'grid'" class="card-grid">
-            <div class="student-card" *ngFor="let student of filteredStudents()">
-              <div class="card-header">
-                <div class="avatar">{{ student.fullName.charAt(0) }}</div>
-                <div>
-                  <div class="name">{{ student.fullName }}</div>
-                  <div class="muted small email">{{ student.email || 'N/A' }}</div>
+          <div *ngSwitchCase="'grid'" class="card-grid" role="list" aria-label="Student grid view">
+            <!-- Before: flat cards with tiny avatars and unlabelled icons -->
+            <!-- After: hierarchical hero cards with focus rings, labelled actions, and responsive spacing -->
+            <article
+              class="student-card"
+              *ngFor="let student of filteredStudents()"
+              role="listitem"
+              tabindex="0"
+              (click)="viewStudent($event, student.id)"
+              (keyup.enter)="viewStudent($event, student.id)"
+              (keyup.space)="viewStudent($event, student.id)"
+              [attr.aria-label]="'Open profile for ' + student.fullName"
+              [attr.aria-describedby]="'student-'+student.id"
+            >
+              <div class="card-hero">
+                <div class="hero-main">
+                  <div class="avatar-wrap" aria-hidden="true">
+                    <span class="avatar">{{ initials(student.fullName) }}</span>
+                  </div>
+                  <div class="hero-text">
+                    <h3 id="{{ 'student-' + student.id }}">{{ student.fullName }}</h3>
+                    <p class="muted small email">
+                      <span class="icon tiny" [innerHTML]="icon('mail')"></span>
+                      <span class="email-text">{{ student.email || 'Email not provided' }}</span>
+                    </p>
+                    <p class="muted small classline">
+                      <span class="icon tiny" [innerHTML]="icon('students')"></span>
+                      <span class="class-text">Class: {{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</span>
+                    </p>
+                  </div>
                 </div>
-                <app-badge [variant]="student.status === 'active' ? 'success' : 'neutral'" size="sm">
-                  {{ student.status }}
-                </app-badge>
               </div>
-              <div class="card-meta">
-                <span>Adm: {{ student.enrollment.admissionNumber }}</span>
-                <span>Class: {{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</span>
+
+              <div class="meta-grid">
+                <div class="meta-pill">
+                  <span class="icon tiny" [innerHTML]="icon('students')"></span>
+                  <div>
+                    <p class="eyebrow xxs">Admission</p>
+                    <p class="strong mono">{{ student.enrollment.admissionNumber }}</p>
+                  </div>
+                </div>
+                <div class="meta-pill">
+                  <span class="icon tiny" [innerHTML]="icon('phone')"></span>
+                  <div>
+                    <p class="eyebrow xxs">Contact</p>
+                    <p class="strong mono">{{ student.phone || 'Not provided' }}</p>
+                  </div>
+                </div>
               </div>
+
               <div class="divider"></div>
-              <div class="card-actions">
-                <button (click)="viewStudent($event, student.id)"><span class="icon" [innerHTML]="icon('eye')"></span></button>
-                <button (click)="editStudent($event, student.id)"><span class="icon" [innerHTML]="icon('edit')"></span></button>
-                <button (click)="deleteStudent($event, student)"><span class="icon" [innerHTML]="icon('trash')"></span></button>
+              <div class="card-actions" role="group" [attr.aria-label]="'Actions for ' + student.fullName">
+                <button type="button" [attr.aria-label]="'View ' + student.fullName" (click)="viewStudent($event, student.id)">
+                  <span class="icon" [innerHTML]="icon('eye')"></span>
+                  <span class="sr-only">View</span>
+                </button>
+                <button type="button" [attr.aria-label]="'Edit ' + student.fullName" (click)="editStudent($event, student.id)">
+                  <span class="icon" [innerHTML]="icon('edit')"></span>
+                  <span class="sr-only">Edit</span>
+                </button>
+                <button type="button" [attr.aria-label]="'Delete ' + student.fullName" (click)="deleteStudent($event, student)">
+                  <span class="icon" [innerHTML]="icon('trash')"></span>
+                  <span class="sr-only">Delete</span>
+                </button>
               </div>
-            </div>
+            </article>
           </div>
         </ng-container>
       }
