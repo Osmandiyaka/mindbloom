@@ -6,7 +6,7 @@ import { CardComponent } from '../../../../shared/components/card/card.component
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
 import { StudentService } from '../../../../core/services/student.service';
-import { Student, StudentStatus, Gender } from '../../../../core/models/student.model';
+import { Student } from '../../../../core/models/student.model';
 import { IconRegistryService } from '../../../../shared/services/icon-registry.service';
 import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
@@ -26,19 +26,10 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
 
       <div class="toolbar">
         <div class="toolbar-left">
-          <div><h2>Students</h2></div>
           <app-search-input class="search-inline" placeholder="Search students..." (search)="onSearch($event)"></app-search-input>
           <select [(ngModel)]="gradeFilter" (change)="applyFilters()">
             <option value="">All grades</option>
             <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
-          </select>
-          <select [(ngModel)]="statusFilter" (change)="applyFilters()">
-            <option value="">All status</option>
-            <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
-          </select>
-          <select [(ngModel)]="genderFilter" (change)="applyFilters()">
-            <option value="">All genders</option>
-            <option *ngFor="let g of genders" [value]="g">{{ g }}</option>
           </select>
         </div>
         <div class="toolbar-right">
@@ -123,7 +114,6 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                     <th class="sortable">Student</th>
                     <th>Class</th>
                     <th>Email</th>
-                    <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -141,11 +131,6 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                     </td>
                     <td>{{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</td>
                     <td>{{ student.email || 'N/A' }}</td>
-                    <td>
-                      <app-badge [variant]="student.status === 'active' ? 'success' : 'neutral'" size="sm">
-                        {{ student.status }}
-                      </app-badge>
-                    </td>
                     <td>
                       <div class="cell-actions">
                         <button (click)="editStudent($event, student.id)" title="Edit"><span class="icon" [innerHTML]="icon('edit')"></span></button>
@@ -250,22 +235,10 @@ export class StudentsListComponent implements OnInit {
   searchTerm = '';
   viewMode = signal<'table' | 'grid'>('table');
   gradeFilter = '';
-  statusFilter: StudentStatus | '' = '';
-  genderFilter = '';
   grades: string[] = ['Grade 5', 'Grade 6', 'Grade 7', 'Grade 8'];
-  statuses: StudentStatus[] = [
-    StudentStatus.ACTIVE,
-    StudentStatus.INACTIVE,
-    StudentStatus.SUSPENDED,
-    StudentStatus.GRADUATED,
-    StudentStatus.TRANSFERRED,
-    StudentStatus.WITHDRAWN
-  ];
-  genders: Gender[] = [Gender.MALE, Gender.FEMALE, Gender.OTHER];
   selectedIds = signal<Set<string>>(new Set());
   modalOpen = signal(false);
   crumbs: Crumb[] = [
-    { label: 'Students', link: '/students' },
     { label: 'Roster' }
   ];
 
@@ -385,9 +358,7 @@ export class StudentsListComponent implements OnInit {
         s.enrollment.admissionNumber.toLowerCase().includes(term) ||
         (s.email || '').toLowerCase().includes(term);
       const matchesGrade = !this.gradeFilter || s.enrollment.class?.toLowerCase().startsWith(this.gradeFilter.toLowerCase());
-      const matchesStatus = !this.statusFilter || s.status === this.statusFilter;
-      const matchesGender = !this.genderFilter || (s as any).gender === this.genderFilter;
-      return matchesTerm && matchesGrade && matchesStatus && matchesGender;
+      return matchesTerm && matchesGrade;
     });
   }
 

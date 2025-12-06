@@ -37,7 +37,7 @@
 
 .toolbar {
     display: grid;
-    grid-template-columns: 1.5fr auto;
+    grid-template-columns: minmax(320px, 2fr) auto;
     gap: 0.75rem;
     align-items: start;
     background: linear-gradient(160deg, color-mix(in srgb, var(--mb-surface) 88%, #0f172a 12%), var(--mb-surface-strong));
@@ -53,8 +53,8 @@
 
 .toolbar-left {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    align-items: start;
+    grid-template-columns: minmax(260px, 2fr) minmax(150px, 1fr);
+    align-items: center;
     gap: 0.65rem;
 }
 
@@ -66,6 +66,7 @@
 
 .search-inline {
     width: 100%;
+    max-width: 520px;
 }
 
 .toolbar-left .muted {
@@ -735,6 +736,10 @@ app-modal ::ng-deep .modal-header h3 {
 
   .toolbar-right {
     justify-content: flex-start;
+  }
+
+  .toolbar-left {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
 
   .data-table table {
