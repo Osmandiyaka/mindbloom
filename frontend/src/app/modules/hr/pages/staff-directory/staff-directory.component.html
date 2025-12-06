@@ -1,0 +1,113 @@
+<div class="hr-directory">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Human Resources</p>
+      <h1>Staff Directory</h1>
+      <p class="muted">Search, filter, and manage staff profiles.</p>
+    </div>
+    <div class="header-actions">
+      <app-button variant="secondary" size="sm" (click)="exportSelected()">Export</app-button>
+      <app-button variant="primary" size="sm" (click)="openAdd()">Add Staff</app-button>
+    </div>
+  </header>
+
+  <app-card class="filters-card">
+    <div class="filters-header">
+      <div>
+        <p class="eyebrow small">Filters</p>
+        <p class="muted small">Narrow the directory by department, role, or status.</p>
+      </div>
+      <div class="filter-chips" *ngIf="hasActiveFilters">
+        <span class="chip" *ngIf="filters.departmentCode">Dept: {{ filters.departmentCode }}</span>
+        <span class="chip" *ngIf="filters.designationCode">Role: {{ filters.designationCode }}</span>
+        <span class="chip" *ngIf="filters.status">Status: {{ filters.status }}</span>
+        <span class="chip" *ngIf="filters.search">Search: “{{ filters.search }}”</span>
+        <button type="button" class="link" (click)="clearFilters()" [disabled]="loading">Clear all</button>
+      </div>
+    </div>
+    <div class="filter-row">
+      <label>
+        Department
+        <select [(ngModel)]="filters.departmentCode" (change)="reload()" [disabled]="loading">
+          <option value="">All</option>
+          <option *ngFor="let d of hr.departments()" [value]="d.code">{{ d.name }}</option>
+        </select>
+      </label>
+      <label>
+        Role
+        <select [(ngModel)]="filters.designationCode" (change)="reload()" [disabled]="loading">
+          <option value="">All</option>
+          <option *ngFor="let d of hr.designations()" [value]="d.code">{{ d.name }}</option>
+        </select>
+      </label>
+      <label>
+        Status
+        <select [(ngModel)]="filters.status" (change)="reload()" [disabled]="loading">
+          <option value="">All</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="terminated">Terminated</option>
+        </select>
+      </label>
+    </div>
+  </app-card>
+
+  <div class="table-meta">
+    <span class="muted small">Showing {{ staffList.length }} of {{ hr.staff().length || 0 }} staff</span>
+  </div>
+
+  <ng-container *ngIf="!loading; else directoryLoading">
+    <app-data-table
+      [columns]="columns"
+      [data]="staffList"
+      [pageSizeOptions]="[10, 25, 50]"
+      [pageSize]="pageSize"
+      [searchableKeys]="['fullName','firstName','lastName','email','employeeId']"
+      searchPlaceholder="Search staff..."
+      (searchChange)="onSearch($event)"
+    >
+      <ng-template #rowTemplate let-staff>
+        <tr class="row-clickable" (click)="viewProfile(staff)">
+          <td><input type="checkbox" [checked]="selectedIds.has(staff.id || staff._id || '')" (click)="toggleSelect($event, staff.id || staff._id || '')" /></td>
+          <td class="name-cell">
+            <span class="avatar">{{ initials(staff) }}</span>
+            <div>
+              <p class="strong">{{ staff.fullName || (staff.firstName + ' ' + staff.lastName) }}</p>
+              <p class="muted small">ID {{ staff.employeeId || '—' }}</p>
+            </div>
+          </td>
+          <td>{{ staff.departmentCode || '—' }}</td>
+          <td>{{ staff.designationCode || '—' }}</td>
+          <td><span class="hr-badge">{{ staff.status || 'active' }}</span></td>
+          <td>
+            <div class="cell-actions">
+              <button type="button" (click)="viewProfile(staff)" title="Open profile">
+                <span class="icon">➔</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <p class="strong">No staff found</p>
+          <p class="muted small">Try adjusting filters or search terms.</p>
+          <div class="empty-actions">
+            <app-button variant="secondary" size="sm" (click)="reload()">Retry</app-button>
+            <button type="button" class="link" *ngIf="hasActiveFilters" (click)="clearFilters()">Clear filters</button>
+          </div>
+        </div>
+      </ng-template>
+    </app-data-table>
+  </ng-container>
+
+  <ng-template #directoryLoading>
+    <app-card class="table-skeleton">
+      <div class="skeleton-row header"></div>
+      <div class="skeleton-row" *ngFor="let i of [1,2,3,4,5]"></div>
+    </app-card>
+  </ng-template>
+
+  <div class="alert" *ngIf="error">{{ error }}</div>
+</div>

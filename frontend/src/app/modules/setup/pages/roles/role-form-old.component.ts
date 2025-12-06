@@ -504,7 +504,9 @@ export class RoleFormComponent implements OnInit {
         return this.availableResources()
             .filter(r => Object.values(r.actions).some(v => v))
             .map(r => ({
+                id: r.resource,
                 resource: r.resource,
+                displayName: r.resource,
                 actions: Object.entries(r.actions)
                     .filter(([_, enabled]) => enabled)
                     .map(([action]) => action as PermissionAction),

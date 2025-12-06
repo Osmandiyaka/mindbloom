@@ -1,0 +1,57 @@
+:root {
+  --hr-surface: color-mix(in srgb, var(--color-surface, #ffffff) 90%, var(--color-background, #f7f9fc) 10%);
+  --hr-surface-strong: color-mix(in srgb, var(--color-surface, #ffffff) 80%, var(--color-background, #f7f9fc) 20%);
+  --hr-accent: var(--color-primary, #667eea);
+  --hr-accent-soft: color-mix(in srgb, var(--hr-accent) 65%, transparent);
+  --hr-border: color-mix(in srgb, var(--color-border, #d8dee9) 80%, transparent);
+  --hr-text-strong: var(--color-text-primary, #0f172a);
+  --hr-text-muted: var(--color-text-secondary, #6b7280);
+}
+
+[data-theme="dark"] {
+  --hr-surface: color-mix(in srgb, var(--color-surface, #0f172a) 85%, #111827 15%);
+  --hr-surface-strong: color-mix(in srgb, var(--color-surface, #0f172a) 75%, #0b1020 25%);
+  --hr-border: color-mix(in srgb, var(--color-border, #334155) 80%, transparent);
+  --hr-text-strong: var(--color-text-primary, #f8fafc);
+  --hr-text-muted: color-mix(in srgb, var(--color-text-secondary, #cbd5e1) 85%, #ffffff 15%);
+}
+
+.hr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--hr-border);
+  background: color-mix(in srgb, var(--hr-surface) 80%, var(--hr-accent-soft) 20%);
+  color: var(--hr-text-strong);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.hr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--hr-border);
+  background: color-mix(in srgb, var(--hr-surface) 85%, transparent);
+  color: var(--hr-text-strong);
+  font-weight: 700;
+}
+
+.hr-card {
+  background: var(--hr-surface);
+  border: 1px solid var(--hr-border);
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+}
+
+.hr-calendar-shell {
+  background: var(--hr-surface-strong);
+  border: 1px solid var(--hr-border);
+  border-radius: 14px;
+  padding: 0.75rem;
+}

@@ -10,6 +10,11 @@ export interface Staff {
   email?: string; phone?: string; departmentCode?: string; designationCode?: string;
   status?: 'active' | 'inactive' | 'terminated';
   employeeId?: string;
+  joinDate?: string;
+  contractType?: string;
+  salary?: { amount?: number; currency?: string; frequency?: string };
+  address?: { street?: string; city?: string; state?: string; postalCode?: string; country?: string };
+  emergencyContacts?: { name?: string; phone?: string; relationship?: string }[];
 }
 export interface LeaveType { id?: string; _id?: string; name: string; code: string; daysPerYear: number; carryForward?: boolean; active?: boolean; }
 export interface LeaveRequest { id?: string; _id?: string; staffId: string; leaveTypeCode: string; startDate: string; endDate: string; status?: string; days?: number; }

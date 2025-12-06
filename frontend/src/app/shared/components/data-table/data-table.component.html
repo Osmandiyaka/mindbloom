@@ -1,0 +1,91 @@
+<div class="data-table-shell">
+  <div class="table-toolbar">
+    <div class="toolbar-left">
+      <app-search-input
+        *ngIf="enableSearch"
+        class="search-box"
+        [placeholder]="searchPlaceholder"
+        (search)="onSearch($event)">
+      </app-search-input>
+      <ng-content select="[table-filters]"></ng-content>
+    </div>
+    <div class="toolbar-right">
+      <div class="rows-control">
+        <label for="pageSize">Rows</label>
+        <select id="pageSize" [ngModel]="pageSize" (ngModelChange)="onPageSizeChange($event)">
+          <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+        </select>
+      </div>
+      <div class="export-controls">
+        <button type="button" (click)="openPrint()" title="Print table">
+          <span class="icon">🖨</span>
+          Print
+        </button>
+        <button type="button" (click)="exportToPdf()" title="Export to PDF">
+          <span class="icon">⬇️</span>
+          PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-frame">
+    <table>
+      <thead>
+        <tr>
+          <th *ngFor="let col of columns"
+              [style.width]="col.width || null"
+              [class.sortable]="col.sortable"
+              (click)="onSort(col)">
+            <div class="th-content">
+              <span>{{ col.label }}</span>
+              <span class="sort-indicator" *ngIf="col.sortable">
+                <span [class.active]="sortKey === col.key && sortDirection === 'asc'">▲</span>
+                <span [class.active]="sortKey === col.key && sortDirection === 'desc'">▼</span>
+              </span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngIf="pagedData.length; else empty">
+          <ng-container *ngFor="let row of pagedData">
+            <ng-container *ngIf="rowTemplate; else defaultRow"
+                          [ngTemplateOutlet]="rowTemplate"
+                          [ngTemplateOutletContext]="{$implicit: row}"></ng-container>
+            <ng-template #defaultRow>
+              <tr (click)="onRowClick(row)">
+                <td *ngFor="let col of columns" [class.align-right]="col.align === 'right'" [class.align-center]="col.align === 'center'">
+                  {{ resolve(row, col.key) }}
+                </td>
+              </tr>
+            </ng-template>
+          </ng-container>
+        </ng-container>
+        <ng-template #empty>
+          <tr>
+            <td [attr.colspan]="columns.length">
+              <ng-container *ngIf="emptyState; else defaultEmpty"
+                            [ngTemplateOutlet]="emptyState"></ng-container>
+              <ng-template #defaultEmpty>
+                <div class="empty-state">No records found.</div>
+              </ng-template>
+            </td>
+          </tr>
+        </ng-template>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-footer">
+    <div class="page-info">
+      <span>{{ pageIndex * pageSize + 1 }}-{{ (pageIndex + 1) * pageSize | minValue: totalItems }}</span>
+      <span class="muted">of {{ totalItems }}</span>
+    </div>
+    <div class="pagination">
+      <button type="button" (click)="prevPage()" [disabled]="pageIndex === 0">Prev</button>
+      <span class="muted">Page {{ pageIndex + 1 }} / {{ totalPages }}</span>
+      <button type="button" (click)="nextPage()" [disabled]="pageIndex >= totalPages - 1">Next</button>
+    </div>
+  </div>
+</div>

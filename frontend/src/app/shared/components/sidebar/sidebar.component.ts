@@ -233,6 +233,16 @@ export class SidebarComponent implements OnInit {
       ]
     },
     {
+      title: 'Human Resources',
+      items: [
+        { label: 'Directory', path: '/hr/directory', icon: 'hr' },
+        { label: 'Profiles', path: '/hr/profiles', icon: 'dashboard' },
+        { label: 'Leave', path: '/hr/leave', icon: 'calendar' },
+        { label: 'Attendance', path: '/hr/attendance', icon: 'tasks' },
+        { label: 'Settings', path: '/hr/settings', icon: 'settings' }
+      ]
+    },
+    {
       title: 'System',
       items: [
         { label: 'Tenant Settings', path: '/setup/tenant-settings', icon: 'settings' },

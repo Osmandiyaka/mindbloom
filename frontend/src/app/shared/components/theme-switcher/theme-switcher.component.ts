@@ -1,6 +1,6 @@
-import { Component, computed } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ThemeService, Theme } from '../../../core/services/theme.service';
+import { ThemeService, ThemeMode } from '../../../core/services/theme.service';
 
 @Component({
     selector: 'app-theme-switcher',
@@ -121,11 +121,20 @@ import { ThemeService, Theme } from '../../../core/services/theme.service';
 })
 export class ThemeSwitcherComponent {
     currentTheme = this.themeService.currentTheme;
-    effectiveTheme = this.themeService.effectiveTheme;
+    currentMode = this.themeService.currentMode;
 
     constructor(private themeService: ThemeService) { }
 
-    setTheme(theme: Theme): void {
-        this.themeService.setTheme(theme);
+    effectiveTheme() {
+        const theme = this.currentTheme();
+        return theme.mode;
+    }
+
+    setTheme(theme: ThemeMode | string): void {
+        if (theme === 'light' || theme === 'dark' || theme === 'auto') {
+            this.themeService.setMode(theme as ThemeMode);
+        } else {
+            this.themeService.setMode('auto');
+        }
     }
 }
