@@ -1,11 +1,48 @@
+:host {
+  display: block;
+  /* Prefer table-specific tokens, then HR tokens if present, then global theme. */
+  --dt-surface: var(--table-surface,
+    var(--hr-surface,
+    var(--mb-surface,
+    var(--color-surface, #f7f9fc))));
+  --dt-surface-strong: var(--table-surface-strong,
+    var(--hr-surface-strong,
+    var(--mb-surface-strong,
+    color-mix(in srgb, var(--dt-surface) 90%, #000 10%))));
+  --dt-surface-soft: var(--table-surface-soft, color-mix(in srgb, var(--dt-surface) 90%, transparent));
+  --dt-border: var(--table-border,
+    var(--hr-border,
+    var(--mb-border,
+    var(--color-border, #d9dee7))));
+  --dt-text: var(--table-text,
+    var(--hr-text-strong,
+    var(--mb-text-primary,
+    var(--color-text-primary, #111827))));
+  --dt-muted: var(--table-text-muted,
+    var(--hr-text-muted,
+    var(--mb-text-muted,
+    var(--color-text-secondary, #6b7280))));
+  --dt-accent: var(--table-accent,
+    var(--hr-accent,
+    var(--color-primary, #2563eb)));
+  --dt-header: var(--table-header,
+    color-mix(in srgb, var(--dt-surface-strong) 92%, transparent));
+  --dt-row: var(--table-row,
+    color-mix(in srgb, var(--dt-surface) 96%, transparent));
+  --dt-row-alt: var(--table-row-alt,
+    color-mix(in srgb, var(--dt-surface) 90%, var(--dt-border) 10%));
+  --dt-hover: var(--table-row-hover,
+    color-mix(in srgb, var(--dt-accent) 8%, var(--dt-surface)));
+}
+
 .data-table-shell {
   display: grid;
   gap: 0.75rem;
-  background: color-mix(in srgb, var(--content-background-solid, #f8f9fb) 82%, var(--color-surface, #0f172a) 18%);
-  border: 1px solid color-mix(in srgb, var(--color-border, #334155) 65%, transparent);
+  background: var(--dt-surface-soft);
+  border: 1px solid var(--dt-border);
   border-radius: 16px;
   padding: 0.75rem 0.9rem 0.9rem;
-  box-shadow: 0 14px 32px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.04);
+  box-shadow: 0 14px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
 .table-toolbar {
@@ -36,26 +73,69 @@
 
 .search-box { min-width: min(320px, 100%); }
 
+.density-toggle button,
+.columns-toggle > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 10px;
+  border: 1px solid var(--dt-border);
+  background: color-mix(in srgb, var(--dt-surface) 90%, transparent);
+  color: var(--dt-text);
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  .muted { color: var(--dt-muted); }
+}
+
+.columns-toggle {
+  position: relative;
+
+  .columns-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    min-width: 180px;
+    padding: 0.5rem;
+    background: var(--dt-surface);
+    border: 1px solid var(--dt-border);
+    border-radius: 10px;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.14);
+    display: grid;
+    gap: 0.35rem;
+
+    label {
+      display: inline-flex;
+      gap: 0.45rem;
+      align-items: center;
+      color: var(--dt-text);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+  }
+}
+
 .rows-control {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   padding: 0.2rem 0.4rem;
-  background: color-mix(in srgb, var(--color-surface-hover) 80%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  background: color-mix(in srgb, var(--dt-surface) 85%, transparent);
+  border: 1px solid var(--dt-border);
   border-radius: 12px;
 
   label {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.75rem;
-    color: var(--color-text-secondary);
+    color: var(--dt-muted);
   }
 
   select {
-    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
-    background: var(--color-surface);
-    color: var(--color-text-primary);
+    border: 1px solid var(--dt-border);
+    background: var(--dt-surface);
+    color: var(--dt-text);
     border-radius: 10px;
     padding: 0.25rem 0.5rem;
   }
@@ -71,15 +151,15 @@
     gap: 0.35rem;
     padding: 0.45rem 0.6rem;
     border-radius: 12px;
-    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
-    background: color-mix(in srgb, var(--color-surface-hover) 85%, transparent);
-    color: var(--color-text-primary);
+    border: 1px solid var(--dt-border);
+    background: color-mix(in srgb, var(--dt-surface) 90%, transparent);
+    color: var(--dt-text);
     cursor: pointer;
     transition: all 0.15s ease;
 
     &:hover {
-      background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface-hover));
-      border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
+      background: color-mix(in srgb, var(--dt-accent) 10%, var(--dt-surface));
+      border-color: color-mix(in srgb, var(--dt-accent) 35%, var(--dt-border));
       transform: translateY(-1px);
     }
 
@@ -90,8 +170,8 @@
 .table-frame {
   overflow: hidden;
   border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--color-border) 75%, transparent);
-  background: color-mix(in srgb, var(--color-surface) 65%, var(--content-background-solid, #f8f9fb) 35%);
+  border: 1px solid var(--dt-border);
+  background: color-mix(in srgb, var(--dt-surface) 95%, transparent);
 }
 
 table {
@@ -99,18 +179,22 @@ table {
   border-collapse: collapse;
   font-size: 0.95rem;
   letter-spacing: 0.01em;
+
+  &.dense {
+    font-size: 0.9rem;
+  }
 }
 
 thead tr {
-  background: color-mix(in srgb, var(--color-surface-hover) 85%, var(--color-surface));
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  background: var(--dt-header);
+  border-bottom: 1px solid var(--dt-border);
 }
 
 th {
   padding: 0.85rem 0.9rem;
   text-align: left;
   font-weight: 700;
-  color: color-mix(in srgb, var(--color-text-primary) 90%, #ffffff 10%);
+  color: var(--dt-text);
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -131,32 +215,36 @@ th {
     flex-direction: column;
     gap: 2px;
     font-size: 0.65rem;
-    color: var(--color-text-secondary);
+    color: var(--dt-muted);
 
-    span.active { color: var(--color-primary); }
+    span.active { color: var(--dt-accent); }
   }
 }
 
 tbody tr {
-  background: color-mix(in srgb, var(--color-surface) 55%, var(--content-background-solid, #f8f9fb) 45%);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  background: var(--dt-row);
+  border-bottom: 1px solid var(--dt-border);
   transition: all 0.18s ease;
 
   &:nth-child(even) {
-    background: color-mix(in srgb, var(--color-surface-hover) 55%, var(--color-surface) 45%);
+    background: var(--dt-row-alt);
   }
 
   &:hover {
-    background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface-hover));
+    background: var(--dt-hover);
     transform: translateY(-1px);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.14);
   }
 }
 
 td {
   padding: 0.85rem 0.9rem;
-  color: var(--color-text-primary);
+  color: var(--dt-text);
   white-space: nowrap;
+
+  .dense & {
+    padding: 0.6rem 0.7rem;
+  }
 
   &.align-right { text-align: right; }
   &.align-center { text-align: center; }
@@ -165,7 +253,7 @@ td {
 .empty-state {
   padding: 1rem;
   text-align: center;
-  color: var(--color-text-secondary);
+  color: var(--dt-muted);
 }
 
 .table-footer {
@@ -182,7 +270,7 @@ td {
     align-items: center;
     font-weight: 700;
 
-    .muted { color: var(--color-text-secondary); font-weight: 500; }
+    .muted { color: var(--dt-muted); font-weight: 500; }
   }
 
   .pagination {
@@ -194,9 +282,9 @@ td {
     button {
       padding: 0.35rem 0.65rem;
       border-radius: 10px;
-      border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
-      background: color-mix(in srgb, var(--color-surface-hover) 85%, transparent);
-      color: var(--color-text-primary);
+      border: 1px solid var(--dt-border);
+      background: color-mix(in srgb, var(--dt-surface) 90%, transparent);
+      color: var(--dt-text);
       cursor: pointer;
       transition: all 0.15s ease;
 
@@ -206,36 +294,12 @@ td {
       }
 
       &:hover:not(:disabled) {
-        background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface-hover));
-        border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
+        background: color-mix(in srgb, var(--dt-accent) 10%, var(--dt-surface));
+        border-color: color-mix(in srgb, var(--dt-accent) 35%, var(--dt-border));
       }
     }
 
-    .muted { color: var(--color-text-secondary); }
-  }
-}
-
-[data-theme="dark"] {
-  .data-table-shell {
-    background: color-mix(in srgb, var(--color-surface, #111827) 82%, var(--content-background-solid, #0f172a) 18%);
-    border-color: color-mix(in srgb, var(--color-border, #334155) 78%, transparent);
-  }
-
-  .table-frame {
-    background: color-mix(in srgb, var(--color-surface) 78%, var(--content-background-solid, #0f172a) 22%);
-    border-color: color-mix(in srgb, var(--color-border) 80%, transparent);
-  }
-
-  thead tr {
-    background: color-mix(in srgb, var(--color-surface-hover) 80%, var(--color-surface));
-  }
-
-  tbody tr {
-    background: color-mix(in srgb, var(--color-surface) 82%, rgba(255,255,255,0.02));
-
-    &:nth-child(even) {
-      background: color-mix(in srgb, var(--color-surface-hover) 55%, var(--color-surface) 45%);
-    }
+    .muted { color: var(--dt-muted); }
   }
 }
 

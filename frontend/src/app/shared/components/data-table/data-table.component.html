@@ -10,6 +10,24 @@
       <ng-content select="[table-filters]"></ng-content>
     </div>
     <div class="toolbar-right">
+      <div class="density-toggle" title="Toggle density">
+        <button type="button" (click)="toggleDensity()">
+          <span class="icon">⇅</span>
+          <span class="muted">{{ dense ? 'Compact' : 'Comfortable' }}</span>
+        </button>
+      </div>
+      <div class="columns-toggle" *ngIf="columns?.length">
+        <button type="button" (click)="columnMenuOpen = !columnMenuOpen">
+          <span class="icon">☰</span>
+          Columns
+        </button>
+        <div class="columns-menu" *ngIf="columnMenuOpen">
+          <label *ngFor="let col of columns">
+            <input type="checkbox" [checked]="!hiddenColumns.has(col.key)" (change)="toggleColumn(col.key)" />
+            {{ col.label }}
+          </label>
+        </div>
+      </div>
       <div class="rows-control">
         <label for="pageSize">Rows</label>
         <select id="pageSize" [ngModel]="pageSize" (ngModelChange)="onPageSizeChange($event)">
@@ -30,10 +48,10 @@
   </div>
 
   <div class="table-frame">
-    <table>
+    <table [class.dense]="dense">
       <thead>
         <tr>
-          <th *ngFor="let col of columns"
+          <th *ngFor="let col of visibleColumns"
               [style.width]="col.width || null"
               [class.sortable]="col.sortable"
               (click)="onSort(col)">
@@ -55,7 +73,7 @@
                           [ngTemplateOutletContext]="{$implicit: row}"></ng-container>
             <ng-template #defaultRow>
               <tr (click)="onRowClick(row)">
-                <td *ngFor="let col of columns" [class.align-right]="col.align === 'right'" [class.align-center]="col.align === 'center'">
+                <td *ngFor="let col of visibleColumns" [class.align-right]="col.align === 'right'" [class.align-center]="col.align === 'center'">
                   {{ resolve(row, col.key) }}
                 </td>
               </tr>
@@ -64,7 +82,7 @@
         </ng-container>
         <ng-template #empty>
           <tr>
-            <td [attr.colspan]="columns.length">
+            <td [attr.colspan]="visibleColumns.length || columns.length">
               <ng-container *ngIf="emptyState; else defaultEmpty"
                             [ngTemplateOutlet]="emptyState"></ng-container>
               <ng-template #defaultEmpty>

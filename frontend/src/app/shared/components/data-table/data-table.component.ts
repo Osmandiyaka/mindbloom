@@ -29,11 +29,15 @@ export class DataTableComponent<T = any> {
   @Input() searchPlaceholder = 'Search...';
   @Input() searchableKeys: string[] = [];
   @Input() title = '';
+  @Input() enableNativeExport = true;
+  @Input() defaultDensity: 'comfortable' | 'compact' = 'comfortable';
 
   @Output() sortChange = new EventEmitter<{ key: string; direction: 'asc' | 'desc' }>();
   @Output() pageChange = new EventEmitter<{ pageIndex: number; pageSize: number }>();
   @Output() searchChange = new EventEmitter<string>();
   @Output() rowClick = new EventEmitter<T>();
+  @Output() printRequest = new EventEmitter<void>();
+  @Output() exportRequest = new EventEmitter<void>();
 
   @ContentChild('rowTemplate') rowTemplate?: TemplateRef<any>;
   @ContentChild('emptyState') emptyState?: TemplateRef<any>;
@@ -42,6 +46,9 @@ export class DataTableComponent<T = any> {
   sortKey: string | null = null;
   sortDirection: 'asc' | 'desc' = 'asc';
   pageIndex = 0;
+  dense = false;
+  columnMenuOpen = false;
+  hiddenColumns = new Set<string>();
   printCss = `
     * { box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
     table { width: 100%; border-collapse: collapse; }
@@ -55,6 +62,10 @@ export class DataTableComponent<T = any> {
 
   get totalPages() {
     return Math.max(1, Math.ceil(this.totalItems / this.pageSize));
+  }
+
+  get visibleColumns(): TableColumn[] {
+    return this.columns.filter(c => !this.hiddenColumns.has(c.key));
   }
 
   get pagedData(): T[] {
@@ -101,6 +112,8 @@ export class DataTableComponent<T = any> {
   }
 
   openPrint() {
+    this.printRequest.emit();
+    if (!this.enableNativeExport) return;
     const html = this.buildExportTable();
     const printWindow = window.open('', '_blank', 'width=1200,height=800');
     if (!printWindow) return;
@@ -111,6 +124,8 @@ export class DataTableComponent<T = any> {
   }
 
   exportToPdf() {
+    this.exportRequest.emit();
+    if (!this.enableNativeExport) return;
     this.openPrint();
   }
 
@@ -134,6 +149,20 @@ export class DataTableComponent<T = any> {
 
   onRowClick(row: T) {
     this.rowClick.emit(row);
+  }
+
+  toggleDensity() {
+    this.dense = !this.dense;
+  }
+
+  toggleColumn(key: string) {
+    const next = new Set(this.hiddenColumns);
+    if (next.has(key)) {
+      next.delete(key);
+    } else {
+      next.add(key);
+    }
+    this.hiddenColumns = next;
   }
 
   private applySearch(list: T[]): T[] {

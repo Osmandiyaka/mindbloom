@@ -58,6 +58,7 @@
 
   <ng-container *ngIf="!loading; else directoryLoading">
     <app-data-table
+      class="hr-table"
       [columns]="columns"
       [data]="staffList"
       [pageSizeOptions]="[10, 25, 50]"
