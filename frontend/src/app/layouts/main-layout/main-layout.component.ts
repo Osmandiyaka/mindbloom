@@ -29,33 +29,63 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
     </div>
   `,
   styles: [`
+    :host {
+      --toolbar-height: 56px;
+      display: block;
+      height: 100%;
+    }
+
     .app-layout {
       display: grid;
-      grid-template-columns: var(--sidebar-width, 260px) 1fr;
-      min-height: 100vh;
+      grid-template-columns: var(--sidebar-width, 260px) minmax(0, 1fr);
+      height: 100vh;
+      max-height: 100vh;
+      overflow: hidden;
       background: var(--content-background, var(--color-background, #12141b));
       transition: grid-template-columns 0.25s ease;
     }
 
     .content-wrapper {
+      position: relative;
       flex: 1;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
+      height: 100vh;
+      min-height: 0;
+      min-width: 0;
+      overflow: hidden;
     }
 
     .main-content {
       flex: 1;
-      padding: 1.5rem;
-      padding-top: calc(56px + 1.5rem);
+      min-height: 0;
+      min-width: 0;
       overflow-y: auto;
+      padding: 1.5rem;
+      padding-top: 1.25rem;
       background: var(--content-background, var(--color-background, #12141b));
       background-color: var(--content-background, var(--color-background, #12141b));
+      scrollbar-gutter: stable both-edges;
+
+      @media (max-width: 1024px) {
+        padding: 1.25rem;
+        padding-top: 1rem;
+      }
 
       @media (max-width: 768px) {
         padding: 1rem;
-        padding-top: calc(56px + 1rem);
+        padding-top: 0.85rem;
       }
+    }
+
+    @media (max-width: 1024px) {
+      .app-layout {
+        grid-template-columns: minmax(72px, var(--sidebar-width, 260px)) minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      :host { --toolbar-height: 52px; }
     }
   `]
 })

@@ -64,7 +64,9 @@ interface NavSection {
   styles: [`
     :host { display: block; height: 100%; }
     .sidebar {
-      height: 100%;
+      position: sticky;
+      top: 0;
+      height: 100vh;
       width: var(--sidebar-width, 260px);
       box-sizing: border-box;
       padding: 1rem 1rem 1.25rem;
@@ -101,6 +103,9 @@ interface NavSection {
       display: grid;
       gap: 0.6rem;
       overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+      padding-right: 0.2rem;
     }
     .nav-section {
       display: grid;
