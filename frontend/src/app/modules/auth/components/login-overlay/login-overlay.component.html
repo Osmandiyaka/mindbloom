@@ -138,8 +138,19 @@
                             d="M4.66675 7.33333V4.66667C4.66675 3.78261 5.01794 2.93477 5.64306 2.30964C6.26818 1.68452 7.11603 1.33333 8.00008 1.33333C8.88414 1.33333 9.73198 1.68452 10.3571 2.30964C10.9822 2.93477 11.3334 3.78261 11.3334 4.66667V7.33333"
                             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
-                    <input type="password" class="form-input" [value]="password()"
+                    <input [type]="showPassword() ? 'text' : 'password'" class="form-input" [value]="password()"
                         (input)="password.set($any($event.target).value)" required />
+                    <button type="button" class="input-toggle" (click)="togglePassword()" aria-label="Toggle password visibility">
+                        <svg *ngIf="!showPassword()" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M1.333 8c1.4-2.8 3.733-4.333 6.667-4.333S13.267 5.2 14.667 8c-1.4 2.8-3.733 4.333-6.667 4.333S2.733 10.8 1.333 8Z" stroke="currentColor" stroke-width="1.2"/>
+                            <circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.2"/>
+                        </svg>
+                        <svg *ngIf="showPassword()" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M2 2l12 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                            <path d="M3.2 4.1C1.9 5.2 1.067 6.6 1.333 8c1.4 2.8 3.733 4.333 6.667 4.333 1.06 0 2.04-.2 2.94-.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                            <path d="M6.233 6.233A2.333 2.333 0 0 1 9.8 9.8" stroke="currentColor" stroke-width="1.2"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
 

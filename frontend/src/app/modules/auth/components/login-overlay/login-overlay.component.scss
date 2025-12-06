@@ -129,6 +129,9 @@
         border-color: var(--color-primary, #1ea7ff);
         box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary, #1ea7ff) 20%, transparent);
         .input-icon { color: var(--color-primary, #1ea7ff); }
+        @supports (backdrop-filter: blur(4px)) {
+            backdrop-filter: blur(5px);
+        }
     }
 }
 
@@ -193,6 +196,21 @@
     box-shadow: 0 0 0 40px var(--login-input-bg) inset !important;
     background-color: var(--login-input-bg) !important;
     -webkit-text-fill-color: var(--color-text-primary, #1f2937) !important;
+}
+
+.input-toggle {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--color-text-secondary, #6b7280);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+
+    &:hover { color: var(--color-text-primary, #1f2937); }
 }
 
 /* Override global input styles inside the login card */
@@ -268,6 +286,11 @@
     display: flex;
     gap: 8px;
     align-items: center;
+    transition: border-color 0.2s ease;
+
+    &:hover .input-wrapper {
+        border-color: color-mix(in srgb, var(--color-primary, #1ea7ff) 25%, var(--color-border, #e0e0e0));
+    }
 
     .input-wrapper {
         flex: 1;
@@ -289,7 +312,7 @@
     padding: 0 14px;
     background: color-mix(in srgb, var(--color-surface, #f8fafc) 90%, transparent);
     border: 1.5px solid color-mix(in srgb, var(--color-border, #e5e7eb) 80%, transparent);
-    border-radius: 8px;
+    border-radius: 999px;
     font-size: 13px;
     font-weight: 600;
     color: var(--color-text-secondary, #6B7280);
@@ -428,6 +451,8 @@
         border-color: var(--color-primary, #1ea7ff);
         background: color-mix(in srgb, var(--color-primary, #1ea7ff) 8%, var(--color-surface, #f8fafc));
         box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+        transform: translateY(-1px);
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
 }
 

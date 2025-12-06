@@ -16,6 +16,7 @@ import { TenantRegistrationComponent } from '../tenant-registration/tenant-regis
 export class LoginOverlayComponent {
     username = signal('');
     password = signal('');
+    showPassword = signal(false);
     rememberMe = signal(false);
     isLoading = signal(false);
     errorMessage = signal('');
@@ -115,6 +116,10 @@ export class LoginOverlayComponent {
         // Tenant is already set by the service, just show success message
         this.isEditingTenant.set(false);
         this.tenantEditValue.set('');
+    }
+
+    togglePassword() {
+        this.showPassword.update(v => !v);
     }
 
     onSubmit(): void {
