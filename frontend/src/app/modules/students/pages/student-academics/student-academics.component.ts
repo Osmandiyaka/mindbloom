@@ -150,9 +150,9 @@ import { NgIf, NgFor } from '@angular/common';
           </ul>
         </div>
         <div class="header-actions">
-          <app-button variant="secondary" size="sm">Download report</app-button>
-          <app-button variant="secondary" size="sm">Export CSV/PDF</app-button>
-          <app-button variant="primary" size="sm" (click)="openNewEntry()">
+          <app-button variant="secondary" size="sm" aria-label="Download academic report">Download report</app-button>
+          <app-button variant="secondary" size="sm" aria-label="Export academic data to CSV or PDF">Export CSV/PDF</app-button>
+          <app-button variant="primary" size="sm" aria-label="Create a new grade entry" (click)="openNewEntry()">
             <span class="icon" [innerHTML]="icon('academics')"></span>
             New Grade Entry
           </app-button>
