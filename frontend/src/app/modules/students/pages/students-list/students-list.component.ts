@@ -9,74 +9,20 @@ import { StudentService } from '../../../../core/services/student.service';
 import { Student } from '../../../../core/models/student.model';
 import { IconRegistryService } from '../../../../shared/services/icon-registry.service';
 import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
-import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { StudentFormComponent } from '../../../setup/pages/students/student-form/student-form.component';
+import { DataTableComponent, TableColumn } from '../../../../shared/components/data-table/data-table.component';
 
 @Component({
   selector: 'app-students-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, CardComponent, ButtonComponent, BadgeComponent, BreadcrumbsComponent, SearchInputComponent, ModalComponent, StudentFormComponent],
+  imports: [CommonModule, RouterModule, FormsModule, CardComponent, ButtonComponent, BadgeComponent, BreadcrumbsComponent, DataTableComponent, ModalComponent, StudentFormComponent],
   styleUrls: ['./students-list.component.scss'],
   template: `
     <div class="students-page">
       @if (showBreadcrumbs) {
         <app-breadcrumbs [items]="crumbs"></app-breadcrumbs>
       }
-
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <app-search-input class="search-inline" placeholder="Search students..." (search)="onSearch($event)"></app-search-input>
-          <select [(ngModel)]="gradeFilter" (change)="applyFilters()">
-            <option value="">All grades</option>
-            <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
-          </select>
-        </div>
-        <div class="toolbar-right">
-          <div class="view-toggle" role="group" aria-label="View switch">
-            <button
-              type="button"
-              [class.active]="viewMode() === 'table'"
-              (click)="setView('table')"
-              title="Table view"
-              aria-label="Switch to table view"
-              [attr.aria-pressed]="viewMode() === 'table'"
-            >
-              <span class="icon" [innerHTML]="icon('inbox')"></span>
-            </button>
-            <button
-              type="button"
-              [class.active]="viewMode() === 'grid'"
-              (click)="setView('grid')"
-              title="Grid view"
-              aria-label="Switch to grid view"
-              [attr.aria-pressed]="viewMode() === 'grid'"
-            >
-              <span class="icon" [innerHTML]="icon('dashboard')"></span>
-            </button>
-          </div>
-          <div class="actions-menu" [class.open]="actionsOpen">
-            <app-button variant="secondary" size="sm" (click)="toggleActions()" aria-label="Open actions menu">
-              <span class="icon" [innerHTML]="icon('ellipsis')"></span>
-              Actions
-              <span class="chevron">▾</span>
-            </app-button>
-            <div class="menu" *ngIf="actionsOpen">
-              <button type="button" (click)="exportAndClose()">
-                <span class="icon" [innerHTML]="icon('download')"></span>
-                Export
-              </button>
-              <button type="button" (click)="importAndClose()">
-                <span class="icon" [innerHTML]="icon('upload')"></span>
-                Import
-              </button>
-            </div>
-          </div>
-          <app-button variant="primary" size="sm" (click)="openModal()">
-            <span class="icon" [innerHTML]="icon('student-add')"></span> Add Student
-          </app-button>
-        </div>
-      </div>
 
       <!-- Loading State -->
       @if (loading()) {
@@ -114,123 +60,76 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
       }
 
       @if (!loading() && !error() && filteredStudents().length > 0) {
-        <ng-container [ngSwitch]="viewMode()">
-          <div *ngSwitchCase="'table'" class="data-table">
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th style="width:48px;"><input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll($event)"/></th>
-                    <th class="sortable">Student</th>
-                    <th>Class</th>
-                    <th>Email</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let student of filteredStudents()" class="row-clickable" [routerLink]="['/students', student.id]">
-                    <td><input type="checkbox" [checked]="isSelected(student.id)" (click)="toggleSelect($event, student.id)"/></td>
-                    <td class="col-primary student-cell">
-                      <div class="student-meta">
-                        <div class="avatar-wrap" aria-hidden="true">
-                          <span class="avatar">{{ initials(student.fullName) }}</span>
-                        </div>
-                        <div class="student-name-block">
-                          <span class="name">{{ student.fullName }}</span>
-                          <span class="student-id">ID · {{ student.enrollment.admissionNumber }}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td>{{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</td>
-                    <td>{{ student.email || 'N/A' }}</td>
-                    <td>
-                      <div class="cell-actions">
-                        <button (click)="editStudent($event, student.id)" title="Edit"><span class="icon" [innerHTML]="icon('edit')"></span></button>
-                        <button (click)="deleteStudent($event, student)" title="Delete"><span class="icon" [innerHTML]="icon('trash')"></span></button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+        <app-data-table
+          [columns]="columns"
+          [data]="filteredStudents()"
+          [pageSizeOptions]="[10, 25, 50]"
+          [pageSize]="pageSize"
+          [searchableKeys]="['fullName', 'enrollment.admissionNumber', 'email']"
+          searchPlaceholder="Search students..."
+          (searchChange)="onSearch($event)"
+          (rowClick)="viewStudent(null, $event.id)"
+          (pageChange)="onPage($event)"
+          (sortChange)="onSort($event)"
+        >
+          <ng-container table-filters>
+            <select [(ngModel)]="gradeFilter" (change)="applyFilters()">
+              <option value="">All grades</option>
+              <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+            </select>
+            <div class="actions-menu" [class.open]="actionsOpen">
+              <app-button variant="secondary" size="sm" (click)="toggleActions()" aria-label="Open actions menu">
+                <span class="icon" [innerHTML]="icon('ellipsis')"></span>
+                Actions
+                <span class="chevron">▾</span>
+              </app-button>
+              <div class="menu" *ngIf="actionsOpen">
+                <button type="button" (click)="exportAndClose()">
+                  <span class="icon" [innerHTML]="icon('download')"></span>
+                  Export
+                </button>
+                <button type="button" (click)="importAndClose()">
+                  <span class="icon" [innerHTML]="icon('upload')"></span>
+                  Import
+                </button>
+              </div>
             </div>
-          </div>
+            <app-button variant="primary" size="sm" (click)="openModal()">
+              <span class="icon" [innerHTML]="icon('student-add')"></span> Add Student
+            </app-button>
+          </ng-container>
 
-          <div *ngSwitchCase="'grid'" class="card-grid" role="list" aria-label="Student grid view">
-            <!-- Before: flat cards with tiny avatars and unlabelled icons -->
-            <!-- After: hierarchical hero cards with focus rings, labelled actions, and responsive spacing -->
-            <article
-              class="student-card"
-              *ngFor="let student of filteredStudents()"
-              role="listitem"
-              tabindex="0"
-              (click)="viewStudent($event, student.id)"
-              (keyup.enter)="viewStudent($event, student.id)"
-              (keyup.space)="viewStudent($event, student.id)"
-              [attr.aria-label]="'Open profile for ' + student.fullName"
-              [attr.aria-describedby]="'student-'+student.id"
-            >
-              <div class="card-hero">
-                <div class="hero-main">
+          <ng-template #rowTemplate let-student>
+            <tr class="row-clickable" [routerLink]="['/students', student.id]">
+              <td>
+                <input type="checkbox" [checked]="isSelected(student.id)" (click)="toggleSelect($event, student.id)"/>
+              </td>
+              <td class="col-primary student-cell">
+                <div class="student-meta">
                   <div class="avatar-wrap" aria-hidden="true">
                     <span class="avatar">{{ initials(student.fullName) }}</span>
                   </div>
-                  <div class="hero-text">
-                    <div class="name-line">
-                      <h3 id="{{ 'student-' + student.id }}">{{ student.fullName }}</h3>
-                    </div>
-                    <div class="sub-line">
-                      <span class="grade-pill">
-                        <span class="icon tiny" [innerHTML]="icon('students')"></span>
-                        Class {{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}
-                      </span>
-                      <span class="status-pill" [ngClass]="student.status">{{ student.status }}</span>
-                    </div>
+                  <div class="student-name-block">
+                    <span class="name">{{ student.fullName }}</span>
+                    <span class="student-id">ID · {{ student.enrollment.admissionNumber }}</span>
                   </div>
                 </div>
-              </div>
+              </td>
+              <td>{{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</td>
+              <td>{{ student.email || 'N/A' }}</td>
+              <td>
+                <div class="cell-actions">
+                  <button (click)="editStudent($event, student.id)" title="Edit"><span class="icon" [innerHTML]="icon('edit')"></span></button>
+                  <button (click)="deleteStudent($event, student)" title="Delete"><span class="icon" [innerHTML]="icon('trash')"></span></button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
 
-              <div class="meta-grid simple">
-                <div class="meta-line">
-                  <span class="icon tiny" [innerHTML]="icon('mail')"></span>
-                  <div>
-                    <p class="eyebrow xxs">Email</p>
-                    <p class="value">{{ student.email || 'Email not provided' }}</p>
-                  </div>
-                </div>
-                <div class="meta-line">
-                  <span class="icon tiny" [innerHTML]="icon('students')"></span>
-                  <div>
-                    <p class="eyebrow xxs">Admission</p>
-                    <p class="value">{{ student.enrollment.admissionNumber }}</p>
-                  </div>
-                </div>
-                <div class="meta-line">
-                  <span class="icon tiny" [innerHTML]="icon('phone')"></span>
-                  <div>
-                    <p class="eyebrow xxs">Contact</p>
-                    <p class="value">{{ student.phone || 'Not provided' }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="divider"></div>
-              <div class="card-actions" role="group" [attr.aria-label]="'Actions for ' + student.fullName">
-                <button type="button" [attr.aria-label]="'View ' + student.fullName" (click)="viewStudent($event, student.id)">
-                  <span class="icon" [innerHTML]="icon('eye')"></span>
-                  <span class="sr-only">View</span>
-                </button>
-                <button type="button" [attr.aria-label]="'Edit ' + student.fullName" (click)="editStudent($event, student.id)">
-                  <span class="icon" [innerHTML]="icon('edit')"></span>
-                  <span class="sr-only">Edit</span>
-                </button>
-                <button type="button" [attr.aria-label]="'Delete ' + student.fullName" (click)="deleteStudent($event, student)">
-                  <span class="icon" [innerHTML]="icon('trash')"></span>
-                  <span class="sr-only">Delete</span>
-                </button>
-              </div>
-            </article>
-          </div>
-        </ng-container>
+          <ng-template #emptyState>
+            <div class="empty-state">No students found.</div>
+          </ng-template>
+        </app-data-table>
       }
     </div>
 
@@ -245,9 +144,16 @@ export class StudentsListComponent implements OnInit {
   loading = signal(false);
   error = signal<string | null>(null);
   searchTerm = '';
-  viewMode = signal<'table' | 'grid'>('table');
   gradeFilter = '';
   actionsOpen = false;
+  pageSize = 10;
+  columns: TableColumn[] = [
+    { key: 'select', label: '', width: '52px' },
+    { key: 'student', label: 'Student', sortable: true },
+    { key: 'class', label: 'Class', sortable: true },
+    { key: 'email', label: 'Email', sortable: true },
+    { key: 'actions', label: 'Actions', width: '120px' }
+  ];
   grades: string[] = ['Grade 5', 'Grade 6', 'Grade 7', 'Grade 8'];
   selectedIds = signal<Set<string>>(new Set());
   modalOpen = signal(false);
@@ -355,13 +261,9 @@ export class StudentsListComponent implements OnInit {
     this.exportStudents();
   }
 
-  viewStudent(event: Event, id: string): void {
-    event.stopPropagation();
+  viewStudent(event: Event | null, id: string): void {
+    if (event) { event.stopPropagation(); }
     this.router.navigate(['/students', id]);
-  }
-
-  setView(mode: 'table' | 'grid') {
-    this.viewMode.set(mode);
   }
 
   toggleActions() {
@@ -374,6 +276,14 @@ export class StudentsListComponent implements OnInit {
 
   applyFilters() {
     // No-op; filters are applied via getter
+  }
+
+  onPage(evt: { pageIndex: number; pageSize: number }) {
+    this.pageSize = evt.pageSize;
+  }
+
+  onSort(evt: { key: string; direction: 'asc' | 'desc' }) {
+    // Client-side sort handled by table; reserved for server-side integration.
   }
 
   filteredStudents(): Student[] {
