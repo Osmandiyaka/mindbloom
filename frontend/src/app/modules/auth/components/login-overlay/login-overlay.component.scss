@@ -3,7 +3,7 @@
 :host {
     position: fixed;
     inset: 0;
-    --login-input-bg: var(--color-surface, #f8fafc);
+    --login-input-bg: var(--color-surface, #ffffff);
     background: radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--color-primary, #7ab8ff) 10%, transparent) 0%, transparent 32%), radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--color-info, #38bdf8) 12%, transparent) 0%, transparent 38%), color-mix(in srgb, var(--color-background, #0f172a) 75%, var(--color-surface, #111827) 25%);
     backdrop-filter: blur(4px);
     display: flex;
@@ -26,7 +26,7 @@
     background: var(--color-surface, #f8fafc);
     border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.24), 0 0 0 1px color-mix(in srgb, var(--color-border, #334155) 30%, transparent);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18), 0 0 0 1px color-mix(in srgb, var(--color-border, #e0e0e0) 60%, transparent);
     animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -83,7 +83,7 @@
     padding: 48px 56px;
     display: flex;
     flex-direction: column;
-    background: color-mix(in srgb, var(--color-surface, #f8fafc) 92%, transparent);
+    background: var(--color-surface, #ffffff);
 }
 
 .welcome-title {
@@ -118,7 +118,7 @@
     position: relative;
     display: flex;
     align-items: center;
-    border: 1px solid color-mix(in srgb, var(--color-border, #d1d5db) 80%, transparent);
+    border: 1px solid var(--color-border, #e0e0e0);
     border-radius: 10px;
     padding: 2px 2px 2px 0;
     transition: all 0.2s ease;
@@ -127,7 +127,7 @@
 
     &:focus-within {
         border-color: var(--color-primary, #1ea7ff);
-        box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary, #1ea7ff) 50%, transparent), 0 8px 20px rgba(0,0,0,0.06);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary, #1ea7ff) 20%, transparent);
         .input-icon { color: var(--color-primary, #1ea7ff); }
     }
 }
@@ -185,7 +185,7 @@
 
 .login-card .input-wrapper {
     background: var(--login-input-bg) !important;
-    border-color: var(--color-border, #d1d5db) !important;
+    border-color: var(--color-border, #e0e0e0) !important;
 }
 
 .login-card input.form-input:-webkit-autofill,
@@ -437,7 +437,7 @@
     min-width: 140px;
     height: 46px;
     padding: 0 24px;
-    background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary, #42a5f5) 90%, transparent), color-mix(in srgb, var(--color-primary, #1e88e5) 90%, transparent));
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary, #42a5f5) 95%, transparent), color-mix(in srgb, var(--color-primary, #1e88e5) 95%, transparent));
     border: none;
     border-radius: 12px;
     font-size: 15px;
