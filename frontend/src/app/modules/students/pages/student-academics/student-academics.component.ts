@@ -18,20 +18,10 @@ import { NgIf, NgFor } from '@angular/common';
     <app-modal
       [isOpen]="newEntryOpen"
       title="New Grade Entry"
-      size="lg"
+      size="xl"
       [showFooter]="true"
       (closed)="closeNewEntry()"
     >
-      <div class="modal-ribbon">
-        <span class="icon" [innerHTML]="icon('academics')"></span>
-        <div>
-          <p class="eyebrow">Context</p>
-          <p class="muted small">{{ gradeEntry.term }} · {{ gradeEntry.grade }} · {{ gradeEntry.classSection }}</p>
-        </div>
-        <div class="steps">
-          <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
-        </div>
-      </div>
       <div class="grade-modal">
         <div class="modal-grid">
           <div class="panel">
@@ -39,7 +29,9 @@ import { NgIf, NgFor } from '@angular/common';
             <div class="field-grid">
               <label>
                 Subject / course
-                <input type="text" [(ngModel)]="gradeEntry.subject" placeholder="e.g., Mathematics - Algebra II" />
+                <select [(ngModel)]="gradeEntry.subject">
+                  <option *ngFor="let s of subjects" [value]="s">{{ s }}</option>
+                </select>
               </label>
               <label>
                 Term
@@ -101,10 +93,25 @@ import { NgIf, NgFor } from '@angular/common';
                 </select>
               </label>
             </div>
-            <div class="quick-toggles">
-              <span class="pill">Auto-calc letter grade</span>
-              <span class="pill">Publish to portal</span>
-              <span class="pill">Allow late submissions</span>
+            <div class="toggle-card">
+              <p class="muted small">Post settings</p>
+              <div class="quick-toggles">
+                <button type="button" class="toggle-chip" title="Automatically derive letter grades based on scale" [class.active]="gradeEntry.autoCalc" (click)="gradeEntry.autoCalc = !gradeEntry.autoCalc">
+                <span class="icon tiny" [innerHTML]="icon('spark')"></span>
+                <span class="label">Auto-calc letter grade</span>
+                <span class="mark" [innerHTML]="icon('check')"></span>
+              </button>
+                <button type="button" class="toggle-chip" title="Make grades visible to students/parents when posted" [class.active]="gradeEntry.publish" (click)="gradeEntry.publish = !gradeEntry.publish">
+                <span class="icon tiny" [innerHTML]="icon('publish')"></span>
+                <span class="label">Publish to portal</span>
+                <span class="mark" [innerHTML]="icon('check')"></span>
+              </button>
+                <button type="button" class="toggle-chip" title="Accept late submissions and mark accordingly" [class.active]="gradeEntry.allowLate" (click)="gradeEntry.allowLate = !gradeEntry.allowLate">
+                <span class="icon tiny" [innerHTML]="icon('clock')"></span>
+                <span class="label">Allow late submissions</span>
+                <span class="mark" [innerHTML]="icon('check')"></span>
+              </button>
+              </div>
             </div>
             <div class="summary">
               <p class="strong">Preview</p>
@@ -419,6 +426,7 @@ export class StudentAcademicsComponent {
   years = ['2024/2025', '2023/2024', '2022/2023'];
   grades = ['Grade 5', 'Grade 6', 'Grade 7', 'Grade 8'];
   classes = ['5A', '5B', '6A', '6B', '7A', '7B', '8A'];
+  subjects = ['Mathematics', 'Science', 'English', 'History', 'Geography', 'Computer Science'];
   assessmentTypes = ['Quiz', 'Test', 'Exam', 'Project', 'Assignment'];
   categories = ['Homework', 'Quiz', 'Exam', 'Project', 'Participation'];
 
@@ -465,7 +473,7 @@ export class StudentAcademicsComponent {
 
   newEntryOpen = false;
   gradeEntry = {
-    subject: '',
+    subject: this.subjects[0],
     term: this.terms[0],
     grade: this.grades[0],
     classSection: this.classes[0],
@@ -475,7 +483,10 @@ export class StudentAcademicsComponent {
     weight: 20,
     category: this.categories[0],
     locking: 'no',
-    description: ''
+    description: '',
+    autoCalc: true,
+    publish: false,
+    allowLate: false
   };
 
   constructor(private icons: IconRegistryService) {}

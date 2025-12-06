@@ -57,6 +57,10 @@ export class IconRegistryService {
     this.addIcon('logout', ['M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4', 'M16 17l5-5-5-5', 'M21 12H9']);
     this.addIcon('download', ['M12 3v12', 'm7 7-7 7-7-7', 'M5 21h14']);
     this.addIcon('upload', ['M12 21V9', 'm7 8-7-7-7 7', 'M5 3h14']);
+    this.addIcon('publish', ['M4 15h16', 'M12 21V7', 'm7 10-7-7-7 7', 'M5 7h14']);
+    this.addIcon('spark', ['M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z']);
+    this.addIcon('clock', ['M12 6a6 6 0 1 1-6 6 6 6 0 0 1 6-6z', 'M12 9v4l2.5 1.5']);
+    this.addIcon('check', ['m5 13 4 4L19 7']);
     this.addIcon('edit', ['M4 13.5V20a1 1 0 0 0 1 1h5.5', 'm17.1 7.1-7.5 7.5L9 13l7.5-7.5z', 'm14.9 4.9 2.2 2.2']);
     this.addIcon('trash', ['M3 6h18', 'M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6', 'M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2']);
     this.addIcon('add', ['M12 5v14', 'M5 12h14']);
