@@ -55,16 +55,26 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
               <span class="icon" [innerHTML]="icon('dashboard')"></span>
             </button>
           </div>
-          <app-button variant="secondary" size="sm" (click)="exportStudents()">
-            <span class="icon" [innerHTML]="icon('download')"></span> Export
-          </app-button>
-          <app-button variant="secondary" size="sm" (click)="importStudents()">
-            <span class="icon" [innerHTML]="icon('upload')"></span> Import
-          </app-button>
+          <div class="actions-menu" [class.open]="actionsOpen">
+            <app-button variant="secondary" size="sm" (click)="toggleActions()" aria-label="Open actions menu">
+              <span class="icon" [innerHTML]="icon('ellipsis')"></span>
+              Actions
+              <span class="chevron">▾</span>
+            </app-button>
+            <div class="menu" *ngIf="actionsOpen">
+              <button type="button" (click)="exportAndClose()">
+                <span class="icon" [innerHTML]="icon('download')"></span>
+                Export
+              </button>
+              <button type="button" (click)="importAndClose()">
+                <span class="icon" [innerHTML]="icon('upload')"></span>
+                Import
+              </button>
+            </div>
+          </div>
           <app-button variant="primary" size="sm" (click)="openModal()">
             <span class="icon" [innerHTML]="icon('student-add')"></span> Add Student
           </app-button>
-          <button class="btn-ghost" title="Bulk actions placeholder" disabled>Bulk actions (coming soon)</button>
         </div>
       </div>
 
@@ -235,6 +245,7 @@ export class StudentsListComponent implements OnInit {
   searchTerm = '';
   viewMode = signal<'table' | 'grid'>('table');
   gradeFilter = '';
+  actionsOpen = false;
   grades: string[] = ['Grade 5', 'Grade 6', 'Grade 7', 'Grade 8'];
   selectedIds = signal<Set<string>>(new Set());
   modalOpen = signal(false);
@@ -313,6 +324,11 @@ export class StudentsListComponent implements OnInit {
     this.router.navigate(['/students/import']);
   }
 
+  importAndClose(): void {
+    this.actionsOpen = false;
+    this.importStudents();
+  }
+
   exportStudents(): void {
     const filters = this.searchTerm ? { search: this.searchTerm } : {};
 
@@ -332,6 +348,11 @@ export class StudentsListComponent implements OnInit {
     });
   }
 
+  exportAndClose(): void {
+    this.actionsOpen = false;
+    this.exportStudents();
+  }
+
   viewStudent(event: Event, id: string): void {
     event.stopPropagation();
     this.router.navigate(['/students', id]);
@@ -339,6 +360,10 @@ export class StudentsListComponent implements OnInit {
 
   setView(mode: 'table' | 'grid') {
     this.viewMode.set(mode);
+  }
+
+  toggleActions() {
+    this.actionsOpen = !this.actionsOpen;
   }
 
   icon(name: string) {
