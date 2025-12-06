@@ -23,8 +23,15 @@ import { NgIf, NgFor } from '@angular/common';
       (closed)="closeNewEntry()"
     >
       <div class="grade-modal">
+        <div class="modal-titleline">
+          <span class="icon" [innerHTML]="icon('academics')"></span>
+          <div>
+            <p class="eyebrow small">New Grade Entry</p>
+            <h3>Configure assessment</h3>
+          </div>
+        </div>
         <div class="modal-grid">
-          <div class="panel">
+          <div class="panel neon">
             <p class="eyebrow">Assessment info</p>
             <div class="field-grid">
               <label>
@@ -68,7 +75,7 @@ import { NgIf, NgFor } from '@angular/common';
             </label>
           </div>
 
-          <div class="panel">
+          <div class="panel neon">
             <p class="eyebrow">Scoring & weighting</p>
             <div class="field-grid small">
               <label>
@@ -114,8 +121,10 @@ import { NgIf, NgFor } from '@angular/common';
               </div>
             </div>
             <div class="summary">
-              <p class="strong">Preview</p>
-              <p class="muted small">Max {{ gradeEntry.maxScore || '—' }} · Weight {{ gradeEntry.weight || '—' }}% · {{ gradeEntry.type || 'Assessment' }}</p>
+              <div class="preview-tile">
+                <p class="muted xs">Preview</p>
+                <p class="strong mono">Max {{ gradeEntry.maxScore || '—' }} · Weight {{ gradeEntry.weight || '—' }}% · {{ gradeEntry.type || 'Assessment' }}</p>
+              </div>
             </div>
           </div>
         </div>
