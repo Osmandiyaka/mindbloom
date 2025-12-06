@@ -79,9 +79,17 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
 
       <!-- Loading State -->
       @if (loading()) {
-        <div class="loading-state">
+        <div class="loading-state" role="status" aria-live="polite">
           <div class="spinner"></div>
           <p>Loading students...</p>
+          <div class="skeleton-stack">
+            <div class="skeleton-row" *ngFor="let _ of [1,2,3,4,5]">
+              <span class="skeleton-avatar"></span>
+              <span class="skeleton-line short"></span>
+              <span class="skeleton-line"></span>
+              <span class="skeleton-pill"></span>
+            </div>
+          </div>
         </div>
       }
 
