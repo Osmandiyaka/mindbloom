@@ -7,11 +7,12 @@ import { TenantService } from '../../../core/services/tenant.service';
 import { ThemeSelectorComponent } from '../theme-selector/theme-selector.component';
 import { TooltipDirective } from '../../directives/tooltip.directive';
 import { IconRegistryService } from '../../services/icon-registry.service';
+import { SearchInputComponent } from '../search-input/search-input.component';
 
 @Component({
     selector: 'app-global-toolbar',
     standalone: true,
-    imports: [CommonModule, FormsModule, ThemeSelectorComponent, TooltipDirective],
+    imports: [CommonModule, FormsModule, ThemeSelectorComponent, TooltipDirective, SearchInputComponent],
     templateUrl: './global-toolbar.component.html',
     styleUrl: './global-toolbar.component.scss'
 })
@@ -32,7 +33,10 @@ export class GlobalToolbarComponent {
         return this.icons.icon(name);
     }
 
-    onSearch() {
+    onSearch(term?: string) {
+        if (typeof term === 'string') {
+            this.searchQuery = term;
+        }
         console.log('Search:', this.searchQuery);
         // Implement global search functionality
     }

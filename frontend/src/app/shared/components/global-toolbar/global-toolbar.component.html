@@ -60,11 +60,11 @@
         </div>
 
         <!-- Global Search Bar -->
-        <div class="search-container">
-            <span class="search-icon" [innerHTML]="icon('search')"></span>
-            <input type="text" class="search-input" placeholder="Search..." [(ngModel)]="searchQuery"
-                (keyup.enter)="onSearch()" />
-        </div>
+        <app-search-input
+          class="search-container"
+          placeholder="Search..."
+          (search)="onSearch($event)">
+        </app-search-input>
     </div>
 
     <div class="toolbar-right">

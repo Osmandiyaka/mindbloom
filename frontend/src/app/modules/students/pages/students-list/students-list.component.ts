@@ -27,7 +27,7 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
       <div class="toolbar">
         <div class="toolbar-left">
           <div><h2>Students</h2></div>
-          <app-search-input placeholder="Search students..." (search)="onSearch($event)"></app-search-input>
+          <app-search-input class="search-inline" placeholder="Search students..." (search)="onSearch($event)"></app-search-input>
           <select [(ngModel)]="gradeFilter" (change)="applyFilters()">
             <option value="">All grades</option>
             <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
