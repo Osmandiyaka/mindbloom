@@ -143,22 +143,11 @@ import { NgIf, NgFor } from '@angular/common';
 
       <header class="page-header">
         <div class="header-left">
-          <div class="role-line">
-            <span class="pill role" [class.accent]="isAdmin()" [class.info]="isTeacher()">{{ userRole | titlecase }} view</span>
-            <div class="role-switch">
-              <button class="chip ghost" type="button" [class.active]="isAdmin()" (click)="setRole('admin')">Admin</button>
-              <button class="chip ghost" type="button" [class.active]="isTeacher()" (click)="setRole('teacher')">Teacher</button>
-            </div>
-          </div>
           <p class="muted" *ngIf="isAdmin()">School-wide grade entry, report cards, and GPA summaries.</p>
           <p class="muted" *ngIf="isTeacher()">My classes: {{ teacherClasses.join(', ') }} · Tasks: {{ teacherTasks.length }}</p>
           <ul class="muted small teacher-tasks" *ngIf="isTeacher()">
             <li *ngFor="let t of teacherTasks">{{ t }}</li>
           </ul>
-        </div>
-        <div class="context-strip">
-          <span class="icon" [innerHTML]="icon('scope')"></span>
-          <span>You’re viewing: {{ selectedTerm }} · {{ selectedYear }} · {{ selectedGrade || 'All grades' }} ({{ userRole | titlecase }})</span>
         </div>
       </header>
 
@@ -173,9 +162,6 @@ import { NgIf, NgFor } from '@angular/common';
 
       <section class="scope-bar" [class.collapsed]="!scopeOpen">
         <div class="scope-head">
-          <div class="pill active-pill">
-            Active: {{ activeFilters }}
-          </div>
           <div class="scope-actions">
             <button class="chip ghost" type="button" (click)="resetFilters()">Reset</button>
             <button class="chip ghost mobile-toggle" type="button" (click)="scopeOpen = !scopeOpen">
