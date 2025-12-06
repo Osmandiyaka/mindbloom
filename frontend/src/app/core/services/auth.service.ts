@@ -92,4 +92,13 @@ export class AuthService {
         const userStr = localStorage.getItem('user');
         return userStr ? JSON.parse(userStr) : null;
     }
+
+    /* Forgot / Reset Password */
+    requestPasswordReset(identifier: string) {
+        return this.http.post(`${this.API_URL}/auth/forgot-password`, { identifier });
+    }
+
+    resetPassword(token: string, password: string) {
+        return this.http.post(`${this.API_URL}/auth/reset-password`, { token, password });
+    }
 }

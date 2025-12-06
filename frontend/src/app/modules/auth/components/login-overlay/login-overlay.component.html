@@ -158,6 +158,9 @@
             @if (errorMessage()) {
             <div class="error-message">{{ errorMessage() }}</div>
             }
+            @if (resetSuccess()) {
+            <div class="success-message">Password reset successfully. Please sign in.</div>
+            }
 
             <!-- Remember Me -->
             <div class="form-group remember-group">
@@ -178,6 +181,10 @@
             <button type="submit" class="signin-btn" [disabled]="isLoading()">
                 {{ isLoading() ? 'Signing in...' : 'Sign in' }}
             </button>
+
+            <div class="aux-links">
+                <button type="button" class="link-btn" (click)="goToForgot()">Forgot password?</button>
+            </div>
         </form>
     </div>
 </div>

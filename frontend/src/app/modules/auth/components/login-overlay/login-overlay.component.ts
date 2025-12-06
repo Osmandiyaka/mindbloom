@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TenantService } from '../../../../core/services/tenant.service';
 import { TenantRegistrationComponent } from '../tenant-registration/tenant-registration.component';
@@ -20,6 +20,7 @@ export class LoginOverlayComponent {
     rememberMe = signal(false);
     isLoading = signal(false);
     errorMessage = signal('');
+    resetSuccess = signal(false);
 
     // Tenant editing state
     isEditingTenant = signal(false);
@@ -33,8 +34,13 @@ export class LoginOverlayComponent {
     constructor(
         private authService: AuthService,
         private tenantService: TenantService,
-        private router: Router
-    ) { }
+        private router: Router,
+        private route: ActivatedRoute
+    ) {
+        this.route.queryParamMap.subscribe(params => {
+            this.resetSuccess.set(params.get('reset') === 'success');
+        });
+    }
 
     get currentTenant(): string {
         const tenant = this.tenantService.getCurrentTenantValue();
@@ -120,6 +126,10 @@ export class LoginOverlayComponent {
 
     togglePassword() {
         this.showPassword.update(v => !v);
+    }
+
+    goToForgot() {
+        this.router.navigate(['/auth/forgot']);
     }
 
     onSubmit(): void {

@@ -456,6 +456,19 @@
     }
 }
 
+.aux-links {
+    margin-top: 8px;
+    .link-btn {
+        background: none;
+        border: none;
+        padding: 0;
+        color: var(--color-primary, #1ea7ff);
+        cursor: pointer;
+        font-weight: 700;
+        transition: color 0.2s ease;
+    }
+}
+
 // SIGN IN BUTTON
 .signin-btn {
     align-self: flex-start;
@@ -495,6 +508,16 @@
     border: 1px solid color-mix(in srgb, var(--color-error, #ef4444) 30%, var(--color-border, #fecaca));
     border-radius: 8px;
     color: color-mix(in srgb, var(--color-error, #ef4444) 70%, #8b1b1b);
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+.success-message {
+    padding: 10px 14px;
+    background: color-mix(in srgb, var(--color-success, #22c55e) 10%, var(--color-surface, #fff));
+    border: 1px solid color-mix(in srgb, var(--color-success, #22c55e) 30%, var(--color-border, #bbf7d0));
+    border-radius: 8px;
+    color: color-mix(in srgb, var(--color-success, #22c55e) 70%, #14532d);
     font-size: 13px;
     margin-bottom: 16px;
 }

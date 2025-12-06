@@ -3,6 +3,14 @@ import { MainLayoutComponent } from './layouts/main-layout/main-layout.component
 
 export const routes: Routes = [
     {
+        path: 'auth/forgot',
+        loadComponent: () => import('./modules/auth/pages/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+    },
+    {
+        path: 'auth/reset/:token',
+        loadComponent: () => import('./modules/auth/pages/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+    },
+    {
         path: '',
         component: MainLayoutComponent,
         children: [
