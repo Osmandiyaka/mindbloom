@@ -21,11 +21,12 @@
     border-radius: 16px;
   }
 }
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap; }
+.page-header { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
 .header-left { display:flex; flex-direction:column; gap:0.35rem; }
 .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-weight:700; color: var(--color-text-secondary); margin:0; }
 .muted { color: var(--color-text-secondary); margin: 0; }
 .teacher-tasks { margin: 0.25rem 0 0; padding-left: 1.1rem; }
+.header-actions { display:flex; gap:0.45rem; flex-wrap:wrap; align-items:center; margin-left:auto; }
 .actions { display:flex; gap:0.5rem; flex-wrap:wrap; }
 .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:0.75rem; }
 .list { margin:0.5rem 0 0; padding-left:1.1rem; color: var(--color-text-secondary); display:grid; gap:0.3rem; }
@@ -408,9 +409,9 @@
     flex-wrap: wrap;
 
     label {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
       color: var(--color-text-secondary);
       font-weight: 700;
       text-transform: uppercase;
@@ -421,7 +422,7 @@
         color: var(--color-text-primary);
         border-radius: 10px;
         border: 1px solid var(--color-border);
-        padding: 0.5rem 0.75rem;
+        padding: 0.45rem 0.65rem;
         min-width: 140px;
         transition: box-shadow 0.2s ease, outline 0.2s ease;
 

@@ -149,29 +149,27 @@ import { NgIf, NgFor } from '@angular/common';
             <li *ngFor="let t of teacherTasks">{{ t }}</li>
           </ul>
         </div>
+        <div class="header-actions">
+          <app-button variant="secondary" size="sm">Download report</app-button>
+          <app-button variant="secondary" size="sm">Export CSV/PDF</app-button>
+          <app-button variant="primary" size="sm" (click)="openNewEntry()">
+            <span class="icon" [innerHTML]="icon('academics')"></span>
+            New Grade Entry
+          </app-button>
+        </div>
       </header>
-
-      <div class="action-rail">
-        <app-button variant="secondary" size="sm">Download report</app-button>
-        <app-button variant="secondary" size="sm">Export CSV/PDF</app-button>
-        <app-button variant="primary" size="sm" (click)="openNewEntry()">
-          <span class="icon" [innerHTML]="icon('academics')"></span>
-          New Grade Entry
-        </app-button>
-      </div>
 
       <section class="scope-bar" [class.collapsed]="!scopeOpen">
         <div class="scope-head">
           <div class="scope-actions">
-            <button class="chip ghost" type="button" (click)="resetFilters()">Reset</button>
             <button class="chip ghost mobile-toggle" type="button" (click)="scopeOpen = !scopeOpen">
               {{ scopeOpen ? 'Hide' : 'Show' }} filters
             </button>
           </div>
         </div>
-        <div class="scope-filters">
-          <label>
-            Term
+      <div class="scope-filters">
+        <label>
+          Term
             <select [(ngModel)]="selectedTerm">
               <option *ngFor="let t of terms" [value]="t">{{ t }}</option>
             </select>
@@ -196,11 +194,6 @@ import { NgIf, NgFor } from '@angular/common';
               <option *ngFor="let c of classes" [value]="c">{{ c }}</option>
             </select>
           </label>
-        </div>
-        <div class="quick-actions">
-          <app-button variant="secondary" size="sm">Import Grades</app-button>
-          <app-button variant="secondary" size="sm">Generate Report Cards</app-button>
-          <app-button variant="secondary" size="sm">Export CSV/PDF</app-button>
         </div>
       </section>
 
