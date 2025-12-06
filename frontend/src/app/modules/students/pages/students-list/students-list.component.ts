@@ -132,10 +132,12 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                     <td><input type="checkbox" [checked]="isSelected(student.id)" (click)="toggleSelect($event, student.id)"/></td>
                     <td class="col-primary student-cell">
                       <div class="student-meta">
-                        <span class="student-id">{{ student.enrollment.admissionNumber }}</span>
-                        <div class="student-name">
+                        <div class="avatar-wrap" aria-hidden="true">
                           <span class="avatar">{{ initials(student.fullName) }}</span>
+                        </div>
+                        <div class="student-name-block">
                           <span class="name">{{ student.fullName }}</span>
+                          <span class="student-id">ID · {{ student.enrollment.admissionNumber }}</span>
                         </div>
                       </div>
                     </td>
