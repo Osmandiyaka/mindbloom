@@ -1,5 +1,15 @@
 <div class="global-toolbar">
     <div class="toolbar-left">
+        <!-- Sidebar Toggle -->
+        <button
+            class="toolbar-btn toggle-btn"
+            (click)="onToggleSidebar()"
+            [appTooltip]="collapsed ? 'Expand navigation' : 'Collapse navigation'"
+            tooltipPosition="bottom"
+            [attr.aria-pressed]="collapsed">
+            <span class="chevron">{{ collapsed ? '›' : '‹' }}</span>
+        </button>
+
         <!-- Dashboard Button -->
         <button class="toolbar-btn" (click)="onDashboardClick()" [appTooltip]="'Dashboard'" tooltipPosition="bottom">
             <span class="icon" [innerHTML]="icon('dashboard')"></span>

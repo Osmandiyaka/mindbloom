@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -16,6 +16,8 @@ import { IconRegistryService } from '../../services/icon-registry.service';
     styleUrl: './global-toolbar.component.scss'
 })
 export class GlobalToolbarComponent {
+    @Input() collapsed = false;
+    @Output() sidebarToggle = new EventEmitter<void>();
     searchQuery: string = '';
     tenantName = computed(() => this.tenantService.currentTenant()?.name || 'School');
 
@@ -65,5 +67,9 @@ export class GlobalToolbarComponent {
 
     onLogout() {
         this.authService.logout();
+    }
+
+    onToggleSidebar() {
+        this.sidebarToggle.emit();
     }
 }
