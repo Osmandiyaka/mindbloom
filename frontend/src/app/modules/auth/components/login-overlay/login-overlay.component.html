@@ -152,6 +152,9 @@
                         </svg>
                     </button>
                 </div>
+                <div class="aux-links">
+                    <button type="button" class="link-btn" (click)="goToForgot()">Forgot password</button>
+                </div>
             </div>
 
             <!-- Error Message -->
@@ -181,10 +184,6 @@
             <button type="submit" class="signin-btn" [disabled]="isLoading()">
                 {{ isLoading() ? 'Signing in...' : 'Sign in' }}
             </button>
-
-            <div class="aux-links">
-                <button type="button" class="link-btn" (click)="goToForgot()">Forgot password?</button>
-            </div>
         </form>
     </div>
 </div>
