@@ -61,6 +61,7 @@ export class IconRegistryService {
     this.addIcon('spark', ['M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z']);
     this.addIcon('clock', ['M12 6a6 6 0 1 1-6 6 6 6 0 0 1 6-6z', 'M12 9v4l2.5 1.5']);
     this.addIcon('check', ['m5 13 4 4L19 7']);
+    this.addIcon('save', ['M5 3h10l4 4v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z', 'M5 9h14', 'M9 3v6', 'M12 17a2 2 0 1 0 2-2 2 2 0 0 0-2 2z']);
     this.addIcon('edit', ['M4 13.5V20a1 1 0 0 0 1 1h5.5', 'm17.1 7.1-7.5 7.5L9 13l7.5-7.5z', 'm14.9 4.9 2.2 2.2']);
     this.addIcon('trash', ['M3 6h18', 'M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6', 'M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2']);
     this.addIcon('add', ['M12 5v14', 'M5 12h14']);

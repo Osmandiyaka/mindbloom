@@ -331,7 +331,7 @@ export class StudentAttendanceComponent {
 
   rowFlash = false;
 
-  constructor(private icons: IconRegistryService) {}
+  constructor(private icons: IconRegistryService) { }
 
   icon(name: string) {
     return this.icons.icon(name);
