@@ -1,9 +1,9 @@
 .global-toolbar {
-    position: fixed;
+    position: sticky;
     top: 0;
-    left: var(--toolbar-offset, 260px);
+    left: 0;
     right: 0;
-    width: calc(100% - var(--toolbar-offset, 260px));
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;

@@ -65,7 +65,7 @@ interface NavSection {
     :host { display: block; height: 100%; }
     .sidebar {
       height: 100%;
-      width: 100%;
+      width: var(--sidebar-width, 260px);
       box-sizing: border-box;
       padding: 1rem 1rem 1.25rem;
       background: var(--color-surface, #0f172a);
