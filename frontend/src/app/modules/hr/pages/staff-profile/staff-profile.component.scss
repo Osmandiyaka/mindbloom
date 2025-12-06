@@ -6,6 +6,18 @@
   padding: 1rem 0;
 }
 
+.toast {
+  padding: 0.6rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-border, #d9dee7) 70%, transparent);
+  background: color-mix(in srgb, var(--color-surface, #f7f9fc) 85%, transparent);
+  color: var(--color-text-primary);
+  font-weight: 700;
+
+  &.success { border-color: color-mix(in srgb, var(--color-success, #22c55e) 50%, var(--color-border)); }
+  &.error { border-color: color-mix(in srgb, var(--color-error, #ef4444) 50%, var(--color-border)); }
+}
+
 .page-header {
   display: flex;
   align-items: center;
@@ -116,8 +128,18 @@
       padding: 0.55rem 0.65rem;
       background: color-mix(in srgb, var(--hr-surface-strong) 85%, transparent);
       color: var(--hr-text-strong);
+
+      &.invalid {
+        border-color: var(--color-error, #ef4444);
+      }
     }
   }
+}
+
+.error {
+  color: var(--color-error, #ef4444);
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .docs-head {
@@ -175,12 +197,58 @@
   }
 }
 
+.progress {
+  width: 140px;
+  height: 6px;
+  background: color-mix(in srgb, var(--color-surface, #fff) 70%, transparent);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 0.35rem;
+
+  .bar {
+    height: 100%;
+    background: var(--color-primary, #2563eb);
+    transition: width 0.2s ease;
+  }
+}
+
 .skeleton-card {
   height: 360px;
   border-radius: 16px;
   background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.12), rgba(255,255,255,0.06));
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
+
+  .skeleton-line {
+    height: 12px;
+    margin: 0.5rem 1rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--color-surface, #f7f9fc) 60%, transparent);
+
+    &.wide { width: 70%; height: 16px; }
+  }
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.6rem;
+}
+
+.summary-pill {
+  padding: 0.6rem 0.7rem;
+  border-radius: 12px;
+  border: 1px solid var(--hr-border);
+  background: color-mix(in srgb, var(--hr-surface-strong) 85%, transparent);
+
+  .label { margin: 0; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.78rem; color: var(--hr-text-muted); }
+  .value { margin: 0.1rem 0 0; font-weight: 800; color: var(--hr-text-strong); }
+  .small { margin: 0.1rem 0 0; }
+}
+
+.empty {
+  color: var(--hr-text-muted);
+  font-weight: 600;
 }
 
 @keyframes shimmer {

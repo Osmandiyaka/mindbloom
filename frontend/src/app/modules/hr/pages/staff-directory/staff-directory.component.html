@@ -56,6 +56,8 @@
     <span class="muted small">Showing {{ staffList.length }} of {{ hr.staff().length || 0 }} staff</span>
   </div>
 
+  <div class="toast" *ngIf="toast">{{ toast }}</div>
+
   <ng-container *ngIf="!loading; else directoryLoading">
     <app-data-table
       class="hr-table"
@@ -66,6 +68,8 @@
       [searchableKeys]="['fullName','firstName','lastName','email','employeeId']"
       searchPlaceholder="Search staff..."
       (searchChange)="onSearch($event)"
+      (printRequest)="notify('Preparing print view…')"
+      (exportRequest)="notify('Preparing export…')"
     >
       <ng-template #rowTemplate let-staff>
         <tr class="row-clickable" (click)="viewProfile(staff)">

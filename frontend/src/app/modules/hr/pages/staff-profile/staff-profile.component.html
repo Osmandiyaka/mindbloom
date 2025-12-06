@@ -11,6 +11,10 @@
     </div>
   </header>
 
+  <div class="toast" *ngIf="toast() as t" [class.success]="t.type === 'success'" [class.error]="t.type === 'error'">
+    {{ t.message }}
+  </div>
+
   <div class="content-grid" *ngIf="!loading(); else loadingState">
     <app-card class="summary-card">
       <div class="summary-top">
@@ -45,12 +49,15 @@
         <form [formGroup]="personalForm" class="form-grid">
           <label>First Name
             <input formControlName="firstName" />
+            <span class="error" *ngIf="controlInvalid(personalForm, 'firstName')">First name is required.</span>
           </label>
           <label>Last Name
             <input formControlName="lastName" />
+            <span class="error" *ngIf="controlInvalid(personalForm, 'lastName')">Last name is required.</span>
           </label>
           <label>Email
             <input type="email" formControlName="email" />
+            <span class="error" *ngIf="controlInvalid(personalForm, 'email')">Enter a valid email.</span>
           </label>
           <label>Phone
             <input formControlName="phone" />
@@ -90,6 +97,7 @@
         <form *ngIf="canViewComp" [formGroup]="compensationForm" class="form-grid narrow">
           <label>Amount
             <input type="number" min="0" step="0.01" formControlName="amount" />
+            <span class="error" *ngIf="controlInvalid(compensationForm, 'amount')">Amount must be zero or more.</span>
           </label>
           <label>Currency
             <input formControlName="currency" />
@@ -121,6 +129,9 @@
             <div>
               <p class="strong">{{ doc.name }}</p>
               <p class="muted small">{{ doc.size }} · {{ doc.type }}</p>
+              <div class="progress" *ngIf="doc.status === 'uploading'">
+                <div class="bar" [style.width.%]="doc.progress || 0"></div>
+              </div>
             </div>
             <div class="doc-actions">
               <span class="pill" [class.muted]="doc.status !== 'complete'">{{ doc.status }}</span>
@@ -133,16 +144,43 @@
       </section>
 
       <section class="tab-panel" *ngIf="activeTab() === 'leave'">
-        <div class="muted">Leave summary view coming soon.</div>
+        <div class="muted" *ngIf="loading()">Loading leave summary…</div>
+        <div class="empty" *ngIf="!loading() && !(staff()?.leaveSummary)">No leave summary available.</div>
+        <div class="summary-grid" *ngIf="!loading() && staff()?.leaveSummary">
+          <div class="summary-pill" *ngFor="let item of staff()?.leaveSummary">
+            <p class="label">{{ item.name }}</p>
+            <p class="value">{{ item.remaining }} days left</p>
+            <p class="muted small">Used {{ item.used }} of {{ item.total }}</p>
+          </div>
+        </div>
       </section>
 
       <section class="tab-panel" *ngIf="activeTab() === 'attendance'">
-        <div class="muted">Attendance summary view coming soon.</div>
+        <div class="muted" *ngIf="loading()">Loading attendance…</div>
+        <div class="empty" *ngIf="!loading() && !(staff()?.attendanceSummary)">No attendance summary available.</div>
+        <div class="summary-grid" *ngIf="!loading() && staff()?.attendanceSummary">
+          <div class="summary-pill">
+            <p class="label">On-time %</p>
+            <p class="value">{{ staff()?.attendanceSummary?.onTime || 0 }}%</p>
+          </div>
+          <div class="summary-pill">
+            <p class="label">Late</p>
+            <p class="value">{{ staff()?.attendanceSummary?.late || 0 }} days</p>
+          </div>
+          <div class="summary-pill">
+            <p class="label">Absent</p>
+            <p class="value">{{ staff()?.attendanceSummary?.absent || 0 }} days</p>
+          </div>
+        </div>
       </section>
     </app-card>
   </div>
 
   <ng-template #loadingState>
-    <div class="skeleton-card"></div>
+    <div class="skeleton-card">
+      <div class="skeleton-line wide"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line"></div>
+    </div>
   </ng-template>
 </div>

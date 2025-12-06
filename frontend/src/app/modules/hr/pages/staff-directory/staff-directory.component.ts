@@ -20,6 +20,7 @@ export class StaffDirectoryComponent implements OnInit {
   error: string | null = null;
   selectedIds = new Set<string>();
   pageSize = 10;
+  toast: string | null = null;
 
   columns: TableColumn[] = [
     { key: 'select', label: '', width: '48px' },
@@ -116,5 +117,10 @@ export class StaffDirectoryComponent implements OnInit {
 
   openAdd() {
     alert('Add staff form coming soon.');
+  }
+
+  notify(message: string) {
+    this.toast = message;
+    setTimeout(() => this.toast = null, 1500);
   }
 }

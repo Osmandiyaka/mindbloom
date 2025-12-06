@@ -20,6 +20,7 @@
 
 .filters-card {
   background: var(--hr-surface-strong);
+  border: 1px solid var(--hr-border);
 }
 
 .filters-header {
@@ -85,6 +86,17 @@
   padding: 0 0.2rem;
 }
 
+.toast {
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--hr-surface-strong) 85%, transparent);
+  border: 1px solid var(--hr-border);
+  color: var(--hr-text-strong);
+  font-weight: 700;
+  width: fit-content;
+}
+
 .name-cell {
   display: inline-flex;
   align-items: center;
@@ -98,8 +110,8 @@
   display: grid;
   place-items: center;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--hr-accent), color-mix(in srgb, var(--hr-accent) 65%, #ffffff));
-  color: #0f1320;
+  background: linear-gradient(135deg, var(--hr-accent), color-mix(in srgb, var(--hr-accent) 60%, var(--hr-surface)));
+  color: var(--hr-text-strong);
 }
 
 .cell-actions {
@@ -181,4 +193,8 @@
   --table-text: var(--hr-text-strong);
   --table-text-muted: var(--hr-text-muted);
   --table-accent: var(--hr-accent);
+  --table-header: color-mix(in srgb, var(--hr-surface-strong) 92%, transparent);
+  --table-row: color-mix(in srgb, var(--hr-surface) 92%, transparent);
+  --table-row-alt: color-mix(in srgb, var(--hr-surface) 85%, var(--hr-border) 15%);
+  --table-row-hover: color-mix(in srgb, var(--hr-accent) 10%, var(--hr-surface));
 }

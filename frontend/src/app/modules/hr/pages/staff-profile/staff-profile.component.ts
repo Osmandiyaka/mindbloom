@@ -3,10 +3,14 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HrService, Staff } from '../../../../core/services/hr.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { CardComponent } from '../../../../shared/components/card/card.component';
 
-interface StaffDoc { id: string; name: string; type: string; size: string; status: 'complete' | 'uploading'; }
+interface StaffDoc { id: string; name: string; type: string; size: string; status: 'complete' | 'uploading'; progress?: number; }
+type TabKey = 'overview' | 'employment' | 'comp' | 'docs' | 'leave' | 'attendance';
+type ToastType = 'success' | 'error' | 'info';
+interface Toast { type: ToastType; message: string; }
 
 @Component({
   selector: 'app-staff-profile',
@@ -19,13 +23,14 @@ export class StaffProfileComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   staff = signal<Staff | null>(null);
-  activeTab = signal<'overview' | 'employment' | 'comp' | 'docs' | 'leave' | 'attendance'>('overview');
+  activeTab = signal<TabKey>('overview');
   canViewComp = true; // TODO: gate by permissions/role
   saving = signal(false);
   docs = signal<StaffDoc[]>([
     { id: '1', name: 'Employment Contract.pdf', type: 'application/pdf', size: '240 KB', status: 'complete' },
     { id: '2', name: 'ID Scan.jpg', type: 'image/jpeg', size: '520 KB', status: 'complete' }
   ]);
+  toast = signal<Toast | null>(null);
 
   personalForm!: FormGroup;
   employmentForm!: FormGroup;
@@ -35,11 +40,15 @@ export class StaffProfileComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private hr: HrService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private auth: AuthService
   ) {}
 
   ngOnInit(): void {
     this.initForms();
+    const user = this.auth.getCurrentUser();
+    const roleName = user?.role?.name || user?.role;
+    this.canViewComp = roleName === 'HR' || roleName === 'Admin';
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.error.set('No staff ID provided');
@@ -108,7 +117,7 @@ export class StaffProfileComponent implements OnInit {
     });
   }
 
-  setTab(tab: 'overview' | 'employment' | 'comp' | 'docs' | 'leave' | 'attendance') {
+  setTab(tab: TabKey) {
     this.activeTab.set(tab);
   }
 
@@ -120,9 +129,11 @@ export class StaffProfileComponent implements OnInit {
       return;
     }
     this.saving.set(true);
+    this.toast.set({ type: 'info', message: 'Saving changes…' });
     setTimeout(() => {
       this.saving.set(false);
-      alert('Profile saved (demo).');
+      this.toast.set({ type: 'success', message: 'Profile updated.' });
+      setTimeout(() => this.toast.set(null), 2000);
     }, 600);
   }
 
@@ -135,18 +146,26 @@ export class StaffProfileComponent implements OnInit {
         name: file.name,
         type: file.type,
         size: `${Math.round(file.size / 1024)} KB`,
-        status: 'uploading'
+        status: 'uploading',
+        progress: 5
       };
       this.docs.update(list => [...list, temp]);
-      setTimeout(() => {
-        this.docs.update(list => list.map(d => d.id === temp.id ? { ...d, status: 'complete' } : d));
-      }, 1200);
+      const tick = setInterval(() => {
+        this.docs.update(list => list.map(d => {
+          if (d.id !== temp.id) return d;
+          const next = Math.min(100, (d.progress || 0) + 25);
+          return { ...d, progress: next, status: next >= 100 ? 'complete' : 'uploading' };
+        }));
+      }, 250);
+      setTimeout(() => clearInterval(tick), 1200);
     });
     input.value = '';
   }
 
   deleteDoc(id: string) {
     this.docs.update(list => list.filter(d => d.id !== id));
+    this.toast.set({ type: 'success', message: 'Document removed.' });
+    setTimeout(() => this.toast.set(null), 1500);
   }
 
   viewDoc(doc: StaffDoc) {
@@ -155,5 +174,14 @@ export class StaffProfileComponent implements OnInit {
 
   backToDirectory() {
     this.router.navigate(['/hr/directory']);
+  }
+
+  controlInvalid(form: FormGroup, control: string) {
+    const ctrl = form.get(control);
+    return !!ctrl && ctrl.invalid && (ctrl.dirty || ctrl.touched);
+  }
+
+  maskIfNoPermission(value: any) {
+    return this.canViewComp ? value : '••••';
   }
 }

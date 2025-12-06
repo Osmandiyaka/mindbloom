@@ -15,9 +15,21 @@ export interface Staff {
   salary?: { amount?: number; currency?: string; frequency?: string };
   address?: { street?: string; city?: string; state?: string; postalCode?: string; country?: string };
   emergencyContacts?: { name?: string; phone?: string; relationship?: string }[];
+  leaveSummary?: { name: string; remaining: number; used: number; total: number }[];
+  attendanceSummary?: { onTime?: number; late?: number; absent?: number };
 }
 export interface LeaveType { id?: string; _id?: string; name: string; code: string; daysPerYear: number; carryForward?: boolean; active?: boolean; }
-export interface LeaveRequest { id?: string; _id?: string; staffId: string; leaveTypeCode: string; startDate: string; endDate: string; status?: string; days?: number; }
+export interface LeaveRequest {
+  id?: string; _id?: string;
+  staffId: string;
+  leaveTypeCode: string;
+  startDate: string;
+  endDate: string;
+  status?: string;
+  days?: number;
+  approverName?: string;
+  approverComment?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class HrService {

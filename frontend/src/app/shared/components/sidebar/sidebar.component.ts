@@ -212,6 +212,13 @@ export class SidebarComponent implements OnInit {
       ]
     },
     {
+      title: 'HR',
+      items: [
+        { label: 'Directory', path: '/hr/directory', icon: 'people' },
+        { label: 'Leave', path: '/hr/leave', icon: 'calendar' }
+      ]
+    },
+    {
       title: 'Financial',
       items: [
         // { label: 'Fees', path: '/fees', icon: '💰' },
