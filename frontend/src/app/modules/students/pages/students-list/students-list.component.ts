@@ -170,28 +170,33 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                     <span class="avatar">{{ initials(student.fullName) }}</span>
                   </div>
                   <div class="hero-text">
-                    <h3 id="{{ 'student-' + student.id }}">{{ student.fullName }}</h3>
-                    <p class="muted small email">
-                      <span class="icon tiny" [innerHTML]="icon('mail')"></span>
-                      <span class="email-text">{{ student.email || 'Email not provided' }}</span>
-                    </p>
-                    <p class="muted small classline">
+                    <div class="name-line">
+                      <h3 id="{{ 'student-' + student.id }}">{{ student.fullName }}</h3>
+                    </div>
+                    <p class="muted small grade-line">
                       <span class="icon tiny" [innerHTML]="icon('students')"></span>
-                      <span class="class-text">Class: {{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</span>
+                      <span class="grade-text">Class {{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</span>
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div class="meta-grid">
-                <div class="meta-pill">
+              <div class="meta-grid simple">
+                <div class="meta-line">
+                  <span class="icon tiny" [innerHTML]="icon('mail')"></span>
+                  <div>
+                    <p class="eyebrow xxs">Email</p>
+                    <p class="strong mono">{{ student.email || 'Email not provided' }}</p>
+                  </div>
+                </div>
+                <div class="meta-line">
                   <span class="icon tiny" [innerHTML]="icon('students')"></span>
                   <div>
                     <p class="eyebrow xxs">Admission</p>
                     <p class="strong mono">{{ student.enrollment.admissionNumber }}</p>
                   </div>
                 </div>
-                <div class="meta-pill">
+                <div class="meta-line">
                   <span class="icon tiny" [innerHTML]="icon('phone')"></span>
                   <div>
                     <p class="eyebrow xxs">Contact</p>
