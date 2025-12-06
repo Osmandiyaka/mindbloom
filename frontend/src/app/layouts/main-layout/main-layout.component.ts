@@ -30,7 +30,7 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
   `,
   styles: [`
     :host {
-      --toolbar-height: 56px;
+      --toolbar-height: clamp(52px, 6vw, 68px);
       display: block;
       height: 100%;
     }
@@ -43,6 +43,17 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       overflow: hidden;
       background: var(--content-background, var(--color-background, #12141b));
       transition: grid-template-columns 0.25s ease;
+    }
+
+    @supports (height: 100dvh) {
+      .app-layout {
+        height: 100dvh;
+        max-height: 100dvh;
+      }
+
+      .content-wrapper {
+        height: 100dvh;
+      }
     }
 
     .content-wrapper {
@@ -61,11 +72,13 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       min-height: 0;
       min-width: 0;
       overflow-y: auto;
-      padding: 1.5rem;
-      padding-top: 1.25rem;
+      padding: clamp(1rem, 2vw, 1.5rem);
+      padding-top: clamp(0.85rem, 1.5vw, 1.25rem);
+      width: 100%;
       background: var(--content-background, var(--color-background, #12141b));
       background-color: var(--content-background, var(--color-background, #12141b));
       scrollbar-gutter: stable both-edges;
+      overscroll-behavior: contain;
 
       @media (max-width: 1024px) {
         padding: 1.25rem;
@@ -82,10 +95,14 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       .app-layout {
         grid-template-columns: minmax(72px, var(--sidebar-width, 260px)) minmax(0, 1fr);
       }
+
+      :host {
+        --toolbar-height: clamp(68px, 9vw, 96px);
+      }
     }
 
     @media (max-width: 768px) {
-      :host { --toolbar-height: 52px; }
+      :host { --toolbar-height: clamp(88px, 18vw, 132px); }
     }
   `]
 })
