@@ -24,8 +24,7 @@ import { RoleListComponent } from '../roles/role-list.component';
 
       <div class="tabs">
         <button [class.active]="activeTab === 'school'" (click)="activeTab = 'school'">School Settings</button>
-        <button [class.active]="activeTab === 'invitations'" (click)="activeTab = 'invitations'">Invitations</button>
-        <button [class.active]="activeTab === 'users'" (click)="openUsersTab()">Users</button>
+        <button [class.active]="activeTab === 'invitations'" (click)="activeTab = 'invitations'">Invitations & Users</button>
         <button [class.active]="activeTab === 'roles'" (click)="activeTab = 'roles'">Roles & Permissions</button>
         <button [class.active]="activeTab === 'billing'" (click)="activeTab = 'billing'">Billing & Subscription</button>
         <button [class.active]="activeTab === 'plugins'" (click)="activeTab = 'plugins'">Plugins</button>
@@ -40,8 +39,8 @@ import { RoleListComponent } from '../roles/role-list.component';
         <div *ngSwitchCase="'invitations'" class="panel invitations-panel">
           <div class="panel-header stacked slim">
             <div>
-              <h2>User Invitations</h2>
-              <p class="subtitle">Invite staff or partners with roles. Invitations auto-expire in 7 days by default.</p>
+              <h2>User Invitations & Directory</h2>
+              <p class="subtitle">Invite staff or partners with roles, manage existing users, and keep access up to date.</p>
             </div>
           </div>
           <div class="card invites-card tight">
@@ -96,9 +95,6 @@ import { RoleListComponent } from '../roles/role-list.component';
               <p *ngIf="!invitations().length" class="muted empty-state">No invitations yet.</p>
             </div>
           </div>
-        </div>
-
-        <div *ngSwitchCase="'users'" class="panel users-panel">
           <div class="panel-header spaced padded users-header">
             <div class="stacked">
               <h2>Tenant Users</h2>
@@ -550,7 +546,7 @@ export class TenantSettingsComponent implements OnInit {
     userSaving = signal(false);
     error = signal<string | null>(null);
     success = signal<string | null>(null);
-    activeTab: 'school' | 'invitations' | 'users' | 'roles' | 'billing' | 'plugins' | 'templates' = 'school';
+    activeTab: 'school' | 'invitations' | 'roles' | 'billing' | 'plugins' | 'templates' = 'school';
 
     templates = {
         admissionPrefix: 'ADM',
@@ -613,12 +609,8 @@ export class TenantSettingsComponent implements OnInit {
     ngOnInit(): void {
         this.load();
         this.loadInvitations();
-        this.loadSubscription();
-    }
-
-    openUsersTab(): void {
-        this.activeTab = 'users';
         this.loadUsers();
+        this.loadSubscription();
         if (!this.roles().length) {
             this.roleService.getRoles().subscribe();
         }
