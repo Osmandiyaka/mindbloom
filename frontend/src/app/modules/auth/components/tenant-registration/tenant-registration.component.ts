@@ -2,6 +2,7 @@ import { Component, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TenantService, Tenant, TenantPlan } from '../../../../core/services/tenant.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
     selector: 'app-tenant-registration',
@@ -11,6 +12,7 @@ import { TenantService, Tenant, TenantPlan } from '../../../../core/services/ten
     styleUrls: ['./tenant-registration.component.scss']
 })
 export class TenantRegistrationComponent {
+    currentStep = signal(1);
     schoolName = signal('');
     schoolCode = signal('');
     contactPerson = signal('');
@@ -21,9 +23,13 @@ export class TenantRegistrationComponent {
     adminPasswordConfirm = signal('');
     phone = signal('');
     selectedPlan = signal<TenantPlan>('trial');
+    acceptTerms = signal(false);
+    codeStatus = signal<'idle' | 'checking' | 'available' | 'taken' | 'error'>('idle');
+    codeStatusMessage = signal('');
     
     isRegistering = signal(false);
     errorMessage = signal('');
+    private codeCheckTimer: any = null;
     
     // Output event when registration is cancelled or completed
     cancelled = output<void>();
@@ -36,47 +42,10 @@ export class TenantRegistrationComponent {
     }
 
     onSubmit(): void {
-        // Validate form
-        if (!this.schoolName().trim()) {
-            this.errorMessage.set('Please enter school name');
-            return;
-        }
-
-        if (!this.schoolCode().trim()) {
-            this.errorMessage.set('Please enter school code');
-            return;
-        }
-
-        if (!this.email().trim()) {
-            this.errorMessage.set('Please enter email address');
-            return;
-        }
-
-        if (!this.adminName().trim()) {
-            this.errorMessage.set('Please enter admin full name');
-            return;
-        }
-
-        if (!this.adminEmail().trim()) {
-            this.errorMessage.set('Please enter admin email address');
-            return;
-        }
-
         const password = this.adminPassword().trim();
-        if (password.length < 8) {
-            this.errorMessage.set('Admin password must be at least 8 characters');
-            return;
-        }
 
-        if (password !== this.adminPasswordConfirm().trim()) {
-            this.errorMessage.set('Admin passwords do not match');
-            return;
-        }
-
-        // Validate school code format (alphanumeric, no spaces)
-        const codeRegex = /^[a-z0-9-]+$/;
-        if (!codeRegex.test(this.schoolCode())) {
-            this.errorMessage.set('School code must be lowercase letters, numbers, and hyphens only');
+        if (!this.acceptTerms()) {
+            this.errorMessage.set('Please accept the terms to continue');
             return;
         }
 
@@ -90,7 +59,7 @@ export class TenantRegistrationComponent {
             contactEmail: this.email(),
             adminName: this.adminName(),
             adminEmail: this.adminEmail(),
-            adminPassword: this.adminPassword(),
+            adminPassword: password,
             plan: this.selectedPlan(),
         };
 
@@ -114,4 +83,71 @@ export class TenantRegistrationComponent {
     selectPlan(plan: TenantPlan): void {
         this.selectedPlan.set(plan);
     }
+
+    // Step navigation with validation
+    nextStep(): void {
+        this.errorMessage.set('');
+        const step = this.currentStep();
+        if (step === 1) {
+            if (!this.schoolName().trim()) return this.errorMessage.set('Please enter school name');
+            if (!this.schoolCode().trim()) return this.errorMessage.set('Please enter school code');
+            const codeRegex = /^[a-z0-9-]+$/;
+            if (!codeRegex.test(this.schoolCode())) return this.errorMessage.set('Use lowercase letters, numbers, and hyphens only');
+            if (this.codeStatus() === 'taken') return this.errorMessage.set('School code is already in use');
+            if (!this.email().trim()) return this.errorMessage.set('Please enter contact email');
+        }
+        if (step === 2) {
+            if (!this.adminName().trim()) return this.errorMessage.set('Please enter admin full name');
+            if (!this.adminEmail().trim()) return this.errorMessage.set('Please enter admin email');
+            const pwd = this.adminPassword().trim();
+            if (pwd.length < 8) return this.errorMessage.set('Admin password must be at least 8 characters');
+            if (pwd !== this.adminPasswordConfirm().trim()) return this.errorMessage.set('Admin passwords do not match');
+        }
+        if (this.currentStep() < 3) {
+            this.currentStep.set(this.currentStep() + 1);
+        }
+    }
+
+    prevStep(): void {
+        this.errorMessage.set('');
+        if (this.currentStep() > 1) {
+            this.currentStep.set(this.currentStep() - 1);
+        }
+    }
+
+    onSchoolCodeInput(value: string): void {
+        const normalized = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+        this.schoolCode.set(normalized);
+        this.codeStatus.set('idle');
+        this.codeStatusMessage.set('');
+
+        if (!normalized) return;
+
+        this.codeStatus.set('checking');
+        if (this.codeCheckTimer) {
+            clearTimeout(this.codeCheckTimer);
+        }
+        this.codeCheckTimer = setTimeout(() => {
+            this.tenantService.getTenantBySubdomain(normalized).subscribe({
+                next: () => {
+                    this.codeStatus.set('taken');
+                    this.codeStatusMessage.set('Code is already taken');
+                },
+                error: (err: HttpErrorResponse) => {
+                    if (err.status === 404) {
+                        this.codeStatus.set('available');
+                        this.codeStatusMessage.set('Code is available');
+                    } else {
+                        this.codeStatus.set('error');
+                        this.codeStatusMessage.set('Could not verify code');
+                    }
+                }
+            });
+        }, 350);
+    }
+
+    // Password strength helpers
+    meetsLength(): boolean { return this.adminPassword().trim().length >= 8; }
+    meetsUpper(): boolean { return /[A-Z]/.test(this.adminPassword()); }
+    meetsNumberOrSymbol(): boolean { return /[0-9]|[^A-Za-z0-9]/.test(this.adminPassword()); }
 }

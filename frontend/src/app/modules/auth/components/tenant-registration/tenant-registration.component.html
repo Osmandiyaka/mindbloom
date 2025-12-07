@@ -40,7 +40,13 @@
     <!-- Right Registration Panel -->
     <div class="registration-panel">
         <div class="header">
-            <h2 class="title">Register Your School</h2>
+            <div>
+                <p class="step-label">Step {{ currentStep() }} of 3</p>
+                <div class="progress-indicator">
+                    <div class="progress-fill" [style.width.%]="(currentStep() / 3) * 100"></div>
+                </div>
+                <h2 class="title">Register Your School</h2>
+            </div>
             <button type="button" class="close-btn" (click)="onCancel()" title="Cancel">
                 <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
                     <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -49,87 +55,156 @@
             </button>
         </div>
 
-        <form (ngSubmit)="onSubmit()" class="registration-form">
-            <!-- School Name -->
-            <div class="form-group">
-                <label class="form-label">School Name *</label>
-                <input type="text" class="form-input" placeholder="e.g., Greenfield High School"
-                    [value]="schoolName()" (input)="schoolName.set($any($event.target).value)" required />
-            </div>
-
-            <!-- School Code -->
-            <div class="form-group">
-                <label class="form-label">School Code *</label>
-                <input type="text" class="form-input" placeholder="e.g., greenfield (lowercase, no spaces)"
-                    [value]="schoolCode()" (input)="schoolCode.set($any($event.target).value.toLowerCase())"
-                    required />
-                <p class="form-help">This will be your unique identifier. Use lowercase letters, numbers, and hyphens
-                    only.</p>
-            </div>
-
-            <!-- Email -->
-            <div class="form-group">
-                <label class="form-label">Primary Contact Email *</label>
-                <input type="email" class="form-input" placeholder="admin@yourschool.edu" [value]="email()"
-                    (input)="email.set($any($event.target).value)" required />
-            </div>
-
-            <!-- Tenant Admin -->
-            <div class="form-group">
-                <label class="form-label">Admin Full Name *</label>
-                <input type="text" class="form-input" placeholder="Jane Doe"
-                    [value]="adminName()" (input)="adminName.set($any($event.target).value)" required />
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Admin Email *</label>
-                <input type="email" class="form-input" placeholder="admin@yourschool.edu"
-                    [value]="adminEmail()" (input)="adminEmail.set($any($event.target).value)" required />
-            </div>
-
-            <div class="form-group two-column">
-                <div>
-                    <label class="form-label">Admin Password *</label>
-                    <input type="password" class="form-input" placeholder="Minimum 8 characters"
-                        [value]="adminPassword()" (input)="adminPassword.set($any($event.target).value)" required />
+        <div class="registration-form">
+            <!-- Step 1 -->
+            @if (currentStep() === 1) {
+            <div class="step-card">
+                <h3 class="step-title">School Identity</h3>
+                <div class="form-group">
+                    <label class="form-label">School Name *</label>
+                    <input type="text" class="form-input" placeholder="e.g., Greenfield High School"
+                        [value]="schoolName()" (input)="schoolName.set($any($event.target).value)" required />
                 </div>
-                <div>
-                    <label class="form-label">Confirm Password *</label>
-                    <input type="password" class="form-input" placeholder="Re-enter password"
-                        [value]="adminPasswordConfirm()" (input)="adminPasswordConfirm.set($any($event.target).value)" required />
+
+                <div class="form-group">
+                    <label class="form-label with-inline">
+                        <span>School Code *</span>
+                        <span class="code-status" [class.success]="codeStatus() === 'available'"
+                            [class.error]="codeStatus() === 'taken' || codeStatus() === 'error'">
+                            @if (codeStatus() === 'checking') { Checking... }
+                            @if (codeStatus() === 'available') { Available }
+                            @if (codeStatus() === 'taken') { Unavailable }
+                            @if (codeStatus() === 'error') { Could not verify }
+                        </span>
+                    </label>
+                    <div class="input-with-status">
+                        <input type="text" class="form-input" placeholder="e.g., greenfield (lowercase, no spaces)"
+                            [value]="schoolCode()" (input)="onSchoolCodeInput($any($event.target).value)"
+                            required />
+                        <span class="status-dot" [class.available]="codeStatus() === 'available'"
+                            [class.taken]="codeStatus() === 'taken'"
+                            [class.checking]="codeStatus() === 'checking'"></span>
+                    </div>
+                    <p class="form-help">This will be your unique identifier. Use lowercase letters, numbers, and hyphens
+                        only.</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Primary Contact Email *</label>
+                    <input type="email" class="form-input" placeholder="admin@yourschool.edu" [value]="email()"
+                        (input)="email.set($any($event.target).value)" required />
                 </div>
             </div>
+            }
 
-            <!-- Plan Selection -->
-            <div class="form-group">
-                <label class="form-label">Select Plan</label>
-                <div class="plan-cards">
-                    <div class="plan-card" [class.selected]="selectedPlan() === 'free'"
-                        (click)="selectPlan('free')">
-                        <div class="plan-name">Free</div>
-                        <div class="plan-price">$0/month</div>
-                        <div class="plan-features">Basic features</div>
+            <!-- Step 2 -->
+            @if (currentStep() === 2) {
+            <div class="step-card">
+                <h3 class="step-title">Admin Credentials</h3>
+                <div class="form-group">
+                    <label class="form-label">Admin Full Name *</label>
+                    <input type="text" class="form-input" placeholder="Jane Doe"
+                        [value]="adminName()" (input)="adminName.set($any($event.target).value)" required />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Admin Email *</label>
+                    <input type="email" class="form-input" placeholder="admin@yourschool.edu"
+                        [value]="adminEmail()" (input)="adminEmail.set($any($event.target).value)" required />
+                </div>
+
+                <div class="form-group two-column">
+                    <div>
+                        <label class="form-label">Admin Password *</label>
+                        <input type="password" class="form-input" placeholder="Minimum 8 characters"
+                            [value]="adminPassword()" (input)="adminPassword.set($any($event.target).value)" required />
                     </div>
-                    <div class="plan-card" [class.selected]="selectedPlan() === 'basic'"
-                        (click)="selectPlan('basic')">
-                        <div class="plan-name">Basic</div>
-                        <div class="plan-price">$49/month</div>
-                        <div class="plan-features">Student & Attendance</div>
-                    </div>
-                    <div class="plan-card" [class.selected]="selectedPlan() === 'premium'"
-                        (click)="selectPlan('premium')">
-                        <div class="plan-name">Premium</div>
-                        <div class="plan-price">$99/month</div>
-                        <div class="plan-features">Finance & Library</div>
-                    </div>
-                    <div class="plan-card" [class.selected]="selectedPlan() === 'enterprise'"
-                        (click)="selectPlan('enterprise')">
-                        <div class="plan-name">Enterprise</div>
-                        <div class="plan-price">Custom</div>
-                        <div class="plan-features">All features</div>
+                    <div>
+                        <label class="form-label">Confirm Password *</label>
+                        <input type="password" class="form-input" placeholder="Re-enter password"
+                            [value]="adminPasswordConfirm()" (input)="adminPasswordConfirm.set($any($event.target).value)" required />
                     </div>
                 </div>
+
+                <div class="password-strength">
+                    <div class="strength-chip" [class.pass]="meetsLength()">Min 8 chars</div>
+                    <div class="strength-chip" [class.pass]="meetsUpper()">Uppercase</div>
+                    <div class="strength-chip" [class.pass]="meetsNumberOrSymbol()">Number or symbol</div>
+                    <div class="strength-chip" [class.pass]="adminPassword() === adminPasswordConfirm() && adminPassword().length > 0">Match</div>
+                </div>
             </div>
+            }
+
+            <!-- Step 3 -->
+            @if (currentStep() === 3) {
+            <div class="step-card">
+                <h3 class="step-title">Plan & Confirmation</h3>
+                <div class="form-group">
+                    <label class="form-label">Select Plan</label>
+                    <div class="plan-cards">
+                        <div class="plan-card" [class.selected]="selectedPlan() === 'free'"
+                            (click)="selectPlan('free')">
+                            <div class="plan-header">
+                                <div class="plan-name">Free</div>
+                                <span class="badge subtle">Starter</span>
+                            </div>
+                            <div class="plan-price">$0/month</div>
+                            <ul class="plan-features">
+                                <li>Student management</li>
+                                <li>Basic attendance</li>
+                                <li>Email support</li>
+                            </ul>
+                        </div>
+                        <div class="plan-card" [class.selected]="selectedPlan() === 'basic'"
+                            (click)="selectPlan('basic')">
+                            <div class="plan-header">
+                                <div class="plan-name">Basic</div>
+                            </div>
+                            <div class="plan-price">$49/month</div>
+                            <ul class="plan-features">
+                                <li>Students & attendance</li>
+                                <li>Progress reports</li>
+                                <li>Core integrations</li>
+                            </ul>
+                        </div>
+                        <div class="plan-card popular" [class.selected]="selectedPlan() === 'premium'"
+                            (click)="selectPlan('premium')">
+                            <div class="plan-header">
+                                <div class="plan-name">Premium</div>
+                                <span class="badge">Most Popular</span>
+                            </div>
+                            <div class="plan-price">$99/month</div>
+                            <ul class="plan-features">
+                                <li>Finance + Library modules</li>
+                                <li>Advanced analytics</li>
+                                <li>Priority support</li>
+                            </ul>
+                        </div>
+                        <div class="plan-card" [class.selected]="selectedPlan() === 'enterprise'"
+                            (click)="selectPlan('enterprise')">
+                            <div class="plan-header">
+                                <div class="plan-name">Enterprise</div>
+                                <span class="badge subtle">Custom</span>
+                            </div>
+                            <div class="plan-price">Talk to us</div>
+                            <ul class="plan-features">
+                                <li>All features unlocked</li>
+                                <li>Custom SLAs</li>
+                                <li>Dedicated success manager</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="terms-row">
+                    <label class="chip-toggle">
+                        <input type="checkbox" [checked]="acceptTerms()" (change)="acceptTerms.set($any($event.target).checked)" />
+                        <span class="checkbox-visual"></span>
+                        <span class="chip-label">I agree to the Terms & Privacy</span>
+                    </label>
+                </div>
+            </div>
+            }
 
             <!-- Error Message -->
             @if (errorMessage()) {
@@ -142,10 +217,21 @@
                     [disabled]="isRegistering()">
                     Cancel
                 </button>
-                <button type="submit" class="register-btn" [disabled]="isRegistering()">
+                @if (currentStep() > 1) {
+                <button type="button" class="ghost-btn" (click)="prevStep()" [disabled]="isRegistering()">
+                    Back
+                </button>
+                }
+                @if (currentStep() < 3) {
+                <button type="button" class="register-btn" (click)="nextStep()" [disabled]="isRegistering()">
+                    Next
+                </button>
+                } @else {
+                <button type="button" class="register-btn" (click)="onSubmit()" [disabled]="isRegistering()">
                     {{ isRegistering() ? 'Registering...' : 'Register School' }}
                 </button>
+                }
             </div>
-        </form>
+        </div>
     </div>
 </div>
