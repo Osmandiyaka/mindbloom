@@ -46,14 +46,15 @@ import { RoleListComponent } from '../roles/role-list.component';
           </div>
           <div class="card invites-card tight">
             <div class="invite-row compact">
-              <div class="input-icon">
+              <div class="input-icon invite-input">
                 <svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v.51l8 5.33 8-5.33V6H4Zm0 3.36V18h16V9.36l-7.47 4.98a2 2 0 0 1-2.06 0L4 9.36Z" fill="currentColor"/></svg>
                 <input type="email" [(ngModel)]="inviteEmail" placeholder="user@school.com" />
               </div>
               <app-role-selector
+                class="invite-roles"
                 [selectedRoleIds]="selectedRoleIds()"
                 (selectionChange)="onRoleSelection($event)" />
-              <button class="btn primary" (click)="sendInvite()" [disabled]="inviteLoading()">
+              <button class="btn primary shadow-md invite-submit" (click)="sendInvite()" [disabled]="inviteLoading()">
                 <svg viewBox="0 0 24 24"><path d="m3.4 21 18.3-9L3.4 3v6.5l13.1 2-13.1 2V21Z" fill="currentColor"/></svg>
                 {{ inviteLoading() ? 'Sending...' : 'Send Invite' }}
               </button>
@@ -76,22 +77,23 @@ import { RoleListComponent } from '../roles/role-list.component';
                       {{ inv.email }}
                     </td>
                     <td><span class="pill neutral">{{ inv.roles.join(', ') || '—' }}</span></td>
-                    <td><span class="badge" [class.revoked]="inv.status === 'revoked'">{{ inv.status }}</span></td>
+                    <td>
+                      <span class="badge"
+                        [class.revoked]="inv.status === 'revoked'"
+                        [class.pending]="inv.status === 'pending'"
+                        [class.accepted]="inv.status === 'accepted'">
+                        {{ inv.status }}
+                      </span>
+                    </td>
                     <td>{{ inv.expiresAt | date:'mediumDate' }}</td>
                     <td class="actions">
-                      <button class="btn ghost small" (click)="resend(inv); $event.stopPropagation()">
-                        <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 8 8v-2.5l4 3.5-4 3.5V18a6 6 0 1 0-6-6H4Z" fill="currentColor"/></svg>
-                        Resend
-                      </button>
-                      <button class="btn ghost small danger" (click)="revoke(inv); $event.stopPropagation()">
-                        <svg viewBox="0 0 24 24"><path d="M6 6h12l-1 14H7L6 6Zm2-4h8l1 4H7l1-4Zm2 8h2v6h-2v-6Zm4 0h2v6h-2v-6Z" fill="currentColor"/></svg>
-                        Revoke
-                      </button>
+                      <button class="action-link" (click)="resend(inv); $event.stopPropagation()">Resend</button>
+                      <button class="action-link danger" (click)="revoke(inv); $event.stopPropagation()">Revoke</button>
                     </td>
                   </tr>
                 </tbody>
               </table>
-              <p *ngIf="!invitations().length" class="muted">No invitations yet.</p>
+              <p *ngIf="!invitations().length" class="muted empty-state">No invitations yet.</p>
             </div>
           </div>
         </div>
@@ -446,21 +448,26 @@ import { RoleListComponent } from '../roles/role-list.component';
     .panel-header.users-header { background: transparent; border: none; border-radius: 12px; padding: 0.9rem 0.25rem; box-shadow: none; }
     .invite-card { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border: none; border-radius: 16px; padding: 1rem; box-shadow: 0 12px 32px rgba(0,0,0,0.12); display: flex; flex-direction: column; gap: 0.75rem; }
     .invite-card.flat { box-shadow: none; border-radius: 12px; border-color: transparent; }
-    .invite-row { display: grid; grid-template-columns: 1.2fr auto auto; gap: 0.5rem; align-items: center; }
+    .invite-row { display: grid; grid-template-columns: 1.2fr auto auto; gap: 0.65rem; align-items: center; background: color-mix(in srgb, var(--color-surface-hover) 75%, transparent); padding: 0.6rem; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent); }
     .invite-row.compact { margin-bottom: 0.25rem; }
-    .input-icon { display: flex; align-items: center; gap: 10px; padding: 0.65rem 0.75rem; border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius: 12px; background: color-mix(in srgb, var(--color-background) 92%, var(--color-surface-hover) 8%); }
-    .input-icon svg { width: 18px; height: 18px; color: var(--color-text-tertiary); }
-    .input-icon input { border: none; outline: none; background: transparent; width: 100%; color: var(--color-text-primary); }
+    .input-icon { display: flex; align-items: center; gap: 10px; padding: 0.55rem 0.7rem; border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius: 12px; background: var(--color-surface); min-height: 48px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
+    .input-icon svg { width: 18px; height: 18px; color: var(--color-accent, #70c6e1); }
+    .input-icon input { border: none; outline: none; background: transparent; width: 100%; color: var(--color-text-primary); font-weight: 600; }
+    .invite-roles { min-width: 0; }
+    .invite-submit { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem 1rem; }
     .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; }
     .selected-roles .chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 6px 10px; border-radius: 999px; border: none; font-weight: 700; box-shadow: 0 10px 20px rgba(16,185,129,0.18); }
     .selected-roles .chip svg { width: 14px; height: 14px; }
+    .pill { display: inline-flex; align-items: center; padding: 0.25rem 0.6rem; border-radius: 999px; font-weight: 600; background: color-mix(in srgb, var(--color-surface-hover) 80%, transparent); color: var(--color-text-secondary); }
+    .pill.neutral { background: color-mix(in srgb, var(--color-surface) 75%, transparent); color: var(--color-text-primary); }
     .table { width: 100%; border-collapse: separate; border-spacing: 0 6px; background: transparent; color: var(--color-text-primary); }
-    .table th, .table td { padding: 0.75rem 0.85rem; text-align: left; color: var(--color-text-primary); background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); }
-    .table th { color: var(--color-text-secondary); font-weight: 700; font-size: 0.9rem; background: transparent; }
+    .table th, .table td { padding: 0.75rem 0.85rem; text-align: left; color: var(--color-text-primary); background: transparent; }
+    .table th { color: var(--color-text-secondary); font-weight: 600; font-size: 0.8rem; background: transparent; border-bottom: 2px solid var(--color-primary, #e8be14); }
     .table tr td:first-child, .table tr th:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
     .table tr td:last-child, .table tr th:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
     .table tr:hover td { box-shadow: 0 12px 24px rgba(0,0,0,0.08); }
     .table.invites th, .table.invites td { padding: 0.45rem 0.65rem; line-height: 1.2; vertical-align: middle; }
+    .table.invites th:last-child, .table.invites td:last-child { text-align: right; }
     .table.invites td.email-cell { display: flex; align-items: center; gap: 0.4rem; }
     .table.invites td.email-cell svg { width: 18px; height: 18px; flex-shrink: 0; }
     .table input[type="checkbox"] { accent-color: var(--color-primary); }
@@ -480,12 +487,19 @@ import { RoleListComponent } from '../roles/role-list.component';
     .inline-toggles .toggle input:checked::after { content: '✓'; color: #fff; font-weight: 700; font-size: 12px; line-height: 1; position: absolute; }
     .user-form .selected-roles { margin-top: 0.25rem; }
     .muted { color: var(--color-text-tertiary); }
-    .badge { padding: 0.25rem 0.65rem; border-radius: 999px; background: color-mix(in srgb, var(--color-surface-hover) 80%, transparent); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+    .badge { padding: 0.22rem 0.6rem; border-radius: 999px; background: color-mix(in srgb, var(--color-surface-hover) 80%, transparent); box-shadow: 0 6px 16px rgba(0,0,0,0.08); font-weight: 650; text-transform: capitalize; }
     .badge.revoked { background: rgba(var(--color-error-rgb,239,68,68),0.1); color: var(--color-error); }
+    .badge.pending { background: rgba(var(--color-warning-rgb,243,156,18),0.12); color: var(--color-warning, #f39c12); }
+    .badge.accepted { background: rgba(var(--color-success-rgb,112,173,71),0.12); color: var(--color-success, #70ad47); }
     .actions .btn { padding: 0.4rem 0.7rem; }
     .btn.small { padding: 0.4rem 0.8rem; font-size: 0.875rem; }
     .btn.danger { color: var(--color-error); }
-    .table td.actions { background: var(--color-surface); }
+    .shadow-md { box-shadow: var(--shadow-md, 10px 10px 20px rgba(0,0,0,0.7), -6px -6px 12px rgba(255,255,255,0.07)); }
+    .table td.actions { background: transparent; text-align: right; }
+    .action-link { background: transparent; border: none; color: var(--color-info, #5eb5d7); padding: 0; font-weight: 650; cursor: pointer; text-decoration: none; }
+    .action-link.danger { color: var(--color-error, #e74c3c); }
+    .action-link:hover { text-decoration: underline; }
+    .empty-state { text-align: center; margin: 0.6rem 0 0; color: var(--color-text-tertiary); }
     .plans { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 1rem; }
     .plans.padded { padding: 0.5rem; }
     .plan-card { border: none; border-radius: 16px; padding: 1.1rem; background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); box-shadow: 0 14px 32px rgba(0,0,0,0.14); display: flex; flex-direction: column; gap: 0.75rem; color: var(--color-text-primary); }
@@ -493,8 +507,8 @@ import { RoleListComponent } from '../roles/role-list.component';
     .plan-head { display: flex; justify-content: space-between; align-items: center; }
     .plan-footer { margin-top: auto; display: flex; justify-content: flex-end; }
     .price { margin: 0; font-weight: 700; }
-    .invites-card { width: 100%; margin-top: 0; }
-    .invites-card.tight { padding: 0.75rem 0.75rem 0.75rem; box-shadow: 0 12px 26px rgba(0,0,0,0.12); border-radius: 14px; }
+    .invites-card { width: 100%; margin-top: 0; background: var(--color-surface-hover, #634d3b); border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent); }
+    .invites-card.tight { padding: 0.85rem 0.85rem 0.85rem; box-shadow: 0 14px 28px rgba(0,0,0,0.16); border-radius: 14px; }
     .invites-card .card-body { display: block; padding: 0.25rem 0.5rem 0.5rem; }
     .invites-card .table { margin: 0; }
     .users-card .card-body { padding-top: 0.5rem; }

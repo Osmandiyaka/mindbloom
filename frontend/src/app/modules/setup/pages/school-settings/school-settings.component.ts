@@ -209,16 +209,6 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
               <input [(ngModel)]="model.locale" placeholder="en-US" />
             </div>
           </label>
-          <div class="year-group">
-            <div class="split equal tight">
-            <label>Academic Year Start
-              <input class="date-input" type="date" name="ayStart" [(ngModel)]="model.academicYear.start" />
-            </label>
-            <label>Academic Year End
-              <input class="date-input" type="date" name="ayEnd" [(ngModel)]="model.academicYear.end" />
-            </label>
-          </div>
-          </div>
         </section>
 
         <section class="card soft academic-card departments-card">
