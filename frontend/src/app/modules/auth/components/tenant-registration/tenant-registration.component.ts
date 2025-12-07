@@ -30,6 +30,7 @@ export class TenantRegistrationComponent {
     isRegistering = signal(false);
     errorMessage = signal('');
     private codeCheckTimer: any = null;
+    private codeSuggestionCounter = 0;
     
     // Output event when registration is cancelled or completed
     cancelled = output<void>();
@@ -113,6 +114,24 @@ export class TenantRegistrationComponent {
         if (this.currentStep() > 1) {
             this.currentStep.set(this.currentStep() - 1);
         }
+    }
+
+    generateSchoolCode(): void {
+        const name = this.schoolName().trim();
+        if (!name) return;
+
+        const baseSlug = name
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-+|-+$/g, '') || 'school';
+
+        this.codeSuggestionCounter += 1;
+        const randomChunk = Math.random().toString(36).substring(2, 5).padEnd(3, '0');
+        const suggestion = `${baseSlug}-${randomChunk}${this.codeSuggestionCounter}`;
+
+        this.onSchoolCodeInput(suggestion);
     }
 
     onSchoolCodeInput(value: string): void {

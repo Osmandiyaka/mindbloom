@@ -180,6 +180,50 @@ input:-webkit-autofill:focus {
     line-height: 1.4;
 }
 
+.code-input-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.generate-code-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--color-border, #1f2937);
+    background: var(--color-surface-hover, #111827);
+    color: var(--color-text-primary, #e5e7eb);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+        border-color: var(--color-primary, #10b981);
+        color: var(--color-primary, #10b981);
+        background: rgba(16, 185, 129, 0.12);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+}
+
+.generate-code-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+}
+
 .input-with-status { position: relative; }
 .status-dot {
     position: absolute;
@@ -435,4 +479,6 @@ input:-webkit-autofill:focus {
 @media (max-width: 640px) {
     .registration-panel { padding: 28px 20px; }
     .plan-cards { grid-template-columns: 1fr; }
+    .code-input-row { grid-template-columns: 1fr; }
+    .generate-code-btn { width: 100%; }
 }

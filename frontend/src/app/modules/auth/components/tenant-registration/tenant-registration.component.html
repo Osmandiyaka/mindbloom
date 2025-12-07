@@ -62,8 +62,8 @@
                 <h3 class="step-title">School Identity</h3>
                 <div class="form-group">
                     <label class="form-label">School Name *</label>
-                    <input type="text" class="form-input" placeholder="e.g., Greenfield High School"
-                        [value]="schoolName()" (input)="schoolName.set($any($event.target).value)" required />
+                    <input type="text" class="form-input" placeholder="" [value]="schoolName()"
+                        (input)="schoolName.set($any($event.target).value)" required />
                 </div>
 
                 <div class="form-group">
@@ -77,21 +77,34 @@
                             @if (codeStatus() === 'error') { Could not verify }
                         </span>
                     </label>
-                    <div class="input-with-status">
-                        <input type="text" class="form-input" placeholder="e.g., greenfield (lowercase, no spaces)"
-                            [value]="schoolCode()" (input)="onSchoolCodeInput($any($event.target).value)"
-                            required />
-                        <span class="status-dot" [class.available]="codeStatus() === 'available'"
-                            [class.taken]="codeStatus() === 'taken'"
-                            [class.checking]="codeStatus() === 'checking'"></span>
+                    <div class="code-input-row">
+                        <div class="input-with-status">
+                            <input type="text" class="form-input" placeholder="" [value]="schoolCode()"
+                                (input)="onSchoolCodeInput($any($event.target).value)" required />
+                            <span class="status-dot" [class.available]="codeStatus() === 'available'"
+                                [class.taken]="codeStatus() === 'taken'"
+                                [class.checking]="codeStatus() === 'checking'"></span>
+                        </div>
+                        <button type="button" class="generate-code-btn" (click)="generateSchoolCode()"
+                            [disabled]="!schoolName().trim()" [title]="schoolName().trim() ? 'Generate a code suggestion' : 'Enter a school name first'">
+                            <span class="generate-code-icon" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7.5 2.5 5.5 7h2.5L5.5 13.5 9 9.25H6.5L10.5 2.5H7.5Z" stroke="currentColor"
+                                        stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                            <span>Generate code</span>
+                        </button>
                     </div>
-                    <p class="form-help">This will be your unique identifier. Use lowercase letters, numbers, and hyphens
-                        only.</p>
+                    <p class="form-help">This will be your unique identifier. Use lowercase letters, numbers, and
+                        hyphens
+                        only. You can generate suggestions based on the school name.</p>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Primary Contact Email *</label>
-                    <input type="email" class="form-input" placeholder="admin@yourschool.edu" [value]="email()"
+                    <input type="email" class="form-input" placeholder="" [value]="email()"
                         (input)="email.set($any($event.target).value)" required />
                 </div>
             </div>
@@ -103,26 +116,26 @@
                 <h3 class="step-title">Admin Credentials</h3>
                 <div class="form-group">
                     <label class="form-label">Admin Full Name *</label>
-                    <input type="text" class="form-input" placeholder="Jane Doe"
-                        [value]="adminName()" (input)="adminName.set($any($event.target).value)" required />
+                    <input type="text" class="form-input" placeholder="" [value]="adminName()"
+                        (input)="adminName.set($any($event.target).value)" required />
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Admin Email *</label>
-                    <input type="email" class="form-input" placeholder="admin@yourschool.edu"
-                        [value]="adminEmail()" (input)="adminEmail.set($any($event.target).value)" required />
+                    <input type="email" class="form-input" placeholder="" [value]="adminEmail()"
+                        (input)="adminEmail.set($any($event.target).value)" required />
                 </div>
 
                 <div class="form-group two-column">
                     <div>
                         <label class="form-label">Admin Password *</label>
-                        <input type="password" class="form-input" placeholder="Minimum 8 characters"
-                            [value]="adminPassword()" (input)="adminPassword.set($any($event.target).value)" required />
+                        <input type="password" class="form-input" placeholder="" [value]="adminPassword()"
+                            (input)="adminPassword.set($any($event.target).value)" required />
                     </div>
                     <div>
                         <label class="form-label">Confirm Password *</label>
-                        <input type="password" class="form-input" placeholder="Re-enter password"
-                            [value]="adminPasswordConfirm()" (input)="adminPasswordConfirm.set($any($event.target).value)" required />
+                        <input type="password" class="form-input" placeholder="" [value]="adminPasswordConfirm()"
+                            (input)="adminPasswordConfirm.set($any($event.target).value)" required />
                     </div>
                 </div>
 
@@ -130,7 +143,9 @@
                     <div class="strength-chip" [class.pass]="meetsLength()">Min 8 chars</div>
                     <div class="strength-chip" [class.pass]="meetsUpper()">Uppercase</div>
                     <div class="strength-chip" [class.pass]="meetsNumberOrSymbol()">Number or symbol</div>
-                    <div class="strength-chip" [class.pass]="adminPassword() === adminPasswordConfirm() && adminPassword().length > 0">Match</div>
+                    <div class="strength-chip"
+                        [class.pass]="adminPassword() === adminPasswordConfirm() && adminPassword().length > 0">Match
+                    </div>
                 </div>
             </div>
             }
@@ -198,7 +213,8 @@
 
                 <div class="terms-row">
                     <label class="chip-toggle">
-                        <input type="checkbox" [checked]="acceptTerms()" (change)="acceptTerms.set($any($event.target).checked)" />
+                        <input type="checkbox" [checked]="acceptTerms()"
+                            (change)="acceptTerms.set($any($event.target).checked)" />
                         <span class="checkbox-visual"></span>
                         <span class="chip-label">I agree to the Terms & Privacy</span>
                     </label>
@@ -213,8 +229,7 @@
 
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <button type="button" class="cancel-action-btn" (click)="onCancel()"
-                    [disabled]="isRegistering()">
+                <button type="button" class="cancel-action-btn" (click)="onCancel()" [disabled]="isRegistering()">
                     Cancel
                 </button>
                 @if (currentStep() > 1) {
@@ -222,15 +237,15 @@
                     Back
                 </button>
                 }
-                @if (currentStep() < 3) {
-                <button type="button" class="register-btn" (click)="nextStep()" [disabled]="isRegistering()">
+                @if (currentStep() < 3) { <button type="button" class="register-btn" (click)="nextStep()"
+                    [disabled]="isRegistering()">
                     Next
-                </button>
-                } @else {
-                <button type="button" class="register-btn" (click)="onSubmit()" [disabled]="isRegistering()">
-                    {{ isRegistering() ? 'Registering...' : 'Register School' }}
-                </button>
-                }
+                    </button>
+                    } @else {
+                    <button type="button" class="register-btn" (click)="onSubmit()" [disabled]="isRegistering()">
+                        {{ isRegistering() ? 'Registering...' : 'Register School' }}
+                    </button>
+                    }
             </div>
         </div>
     </div>
