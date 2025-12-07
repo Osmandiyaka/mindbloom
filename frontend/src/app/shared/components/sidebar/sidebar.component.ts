@@ -79,15 +79,15 @@ interface NavSection {
       padding: 0.7rem 0.85rem 0.95rem;
       background: linear-gradient(
         180deg,
-        color-mix(in srgb, var(--color-surface, #ffffff) 94%, var(--color-background, #f7f9fc) 6%) 0%,
-        color-mix(in srgb, var(--color-surface, #111827) 88%, var(--color-background, #0b0f1a) 12%) 100%
+        color-mix(in srgb, var(--color-surface, #ffffff) 85%, var(--color-background, #f7f9fc) 15%) 0%,
+        color-mix(in srgb, var(--color-surface, #0f172a) 78%, var(--color-background, #111827) 22%) 100%
       );
       border-right: none;
       display: flex;
       flex-direction: column;
       gap: 0.8rem;
       transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: inset -2px 0 6px color-mix(in srgb, var(--color-border, rgba(0,0,0,0.35)) 65%, transparent);
+      box-shadow: inset -2px 0 6px color-mix(in srgb, var(--color-border, rgba(0,0,0,0.25)) 65%, transparent);
     }
     .sidebar.sidebar-collapsed {
       padding: 0.75rem 0.5rem;
@@ -136,7 +136,7 @@ interface NavSection {
       letter-spacing: -0.01em;
       text-transform: none;
       font-weight: 500;
-      color: var(--color-text-secondary, #a0a0a0);
+      color: var(--color-text-secondary, color-mix(in srgb, var(--color-text-secondary, #a0a0a0) 90%, #ffffff 10%));
       padding: 0 0.35rem 0.1rem 0.35rem;
       margin-top: 2.2rem;
       margin-bottom: 0.1rem;
@@ -172,10 +172,10 @@ interface NavSection {
       transition: opacity 0.2s ease;
       z-index: 0;
     }
-    .nav-item a:hover { background: color-mix(in srgb, var(--color-surface-hover, rgba(0,0,0,0.04)) 80%, transparent); transform: translateX(1px); }
+    .nav-item a:hover { background: color-mix(in srgb, var(--color-surface-hover, rgba(255,255,255,0.06)) 80%, transparent); transform: translateX(1px); }
     .nav-item a:hover::after { opacity: 1; }
     .nav-item a.active {
-      background: transparent;
+      background: color-mix(in srgb, var(--color-primary, #00c4cc) 10%, transparent);
       color: var(--color-primary, #00c4cc);
       font-weight: 600;
     }
@@ -201,7 +201,7 @@ interface NavSection {
       100% { transform: scaleY(1); opacity: 1; }
     }
     .sidebar.sidebar-collapsed .nav-item a { justify-content: center; }
-    .nav-icon { width: 20px; height: 20px; display: inline-flex; color: #e7e9ef; }
+    .nav-icon { width: 20px; height: 20px; display: inline-flex; color: color-mix(in srgb, var(--color-text-secondary, #cdd1d7) 90%, #ffffff 10%); }
     .nav-item a.active .nav-icon { color: var(--color-primary, #00c4cc); }
     .nav-text { transition: opacity 0.2s ease, transform 0.2s ease; font-weight: 600; letter-spacing: -0.2px; }
     .sidebar.sidebar-collapsed .nav-text {

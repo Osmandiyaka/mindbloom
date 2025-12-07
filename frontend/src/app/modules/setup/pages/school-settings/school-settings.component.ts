@@ -191,10 +191,10 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
           </label>
           <div class="split equal">
             <label>Academic Year Start
-              <input type="date" name="ayStart" [(ngModel)]="model.academicYear.start" />
+              <input class="date-input" type="date" name="ayStart" [(ngModel)]="model.academicYear.start" />
             </label>
             <label>Academic Year End
-              <input type="date" name="ayEnd" [(ngModel)]="model.academicYear.end" />
+              <input class="date-input" type="date" name="ayEnd" [(ngModel)]="model.academicYear.end" />
             </label>
           </div>
         </section>
@@ -381,7 +381,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .field.compact { max-width: 420px; }
     .field.full { grid-column: 1 / -1; }
     .label-row { display:flex; align-items:center; gap:0.5rem; }
-    label { display:inline-flex; align-items:center; gap:0.25rem; font-weight:600; color: var(--color-text-secondary); letter-spacing: 0.01em; font-size: 0.82rem; transition: color 0.18s ease; }
+    label { display:inline-flex; align-items:flex-start; gap:0.25rem; font-weight:600; color: var(--color-text-secondary); letter-spacing: 0.01em; font-size: 0.82rem; transition: color 0.18s ease; width: 100%; }
     .optional { font-size: 0.78rem; }
     .required { color: var(--color-primary, #00c4cc); font-weight: 700; }
     input, select {
@@ -409,12 +409,14 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .prefix-input input { border:none !important; box-shadow:none !important; background: transparent; padding:0.6rem 0.4rem; padding-left: 0.4rem !important; flex:1; font-size:0.95rem; font-weight:500; }
     .prefix-input input:focus { box-shadow:none; outline:none; padding-left: 0.4rem !important; }
     .prefix-input:focus-within { border-color: var(--color-primary, #00c4cc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #00c4cc) 28%, transparent); }
-    .split { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:0.5rem; align-items:end; }
-    .split.equal { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:0.75rem; align-items:center; }
+    .split { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:0.5rem; align-items:start; }
+    .split.equal { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:0.75rem; align-items:start; }
     .split.equal label { width: 100%; display:flex; flex-direction:column; gap:0.2rem; }
     .list { display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap; }
     .chip { border:1px solid color-mix(in srgb, var(--color-border) 50%, transparent); border-radius:10px; padding:0.45rem 0.75rem; background: color-mix(in srgb, var(--color-surface-hover) 80%, var(--color-surface) 20%); cursor:pointer; }
+    .chip.primary { background: #f6c344; color: #0b0b0f; border: none; border-radius: 999px; padding: 0.35rem 0.6rem; font-weight: 700; }
     .chip.danger { border-color: rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); }
+    .chip.ghost { background: transparent; border-color: transparent; color: var(--color-error,#ef4444); padding: 0.35rem 0.55rem; }
     .section-actions { display:flex; gap:0.75rem; align-items:center; position: sticky; bottom: 0; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-surface) 75%, var(--color-surface-hover) 25%)); padding-top: 1.25rem; margin-top: 2rem; }
     .footer-actions { display:flex; align-items:center; gap:0.75rem; }
     .muted { color: var(--color-text-secondary); }
@@ -422,11 +424,12 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .error { color: var(--color-error,#ef4444); font-weight:600; }
     .card-header { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.25rem; }
     .table { width:100%; border-collapse:separate; border-spacing:0 4px; font-size:0.95rem; background: transparent; color: var(--color-text-primary); }
-    .table th, .table td { text-align:left; padding:0.48rem 0.6rem; }
-    .table th { color: var(--color-text-secondary); font-weight:600; text-transform:capitalize; font-size:0.75rem; letter-spacing:0.02em; background: transparent; }
-    .table tbody tr td { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border-top: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent); }
-    .table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--color-surface) 86%, var(--color-surface-hover) 14%); }
-    .table tbody tr:hover td { background: color-mix(in srgb, var(--color-surface-hover, rgba(255,255,255,0.08)) 70%, var(--color-surface) 30%); }
+    .table thead tr { border-bottom: 2px solid #f6c344; }
+    .table th, .table td { text-align:left; padding:0.48rem 0.6rem; background: transparent; }
+    .table th { color: var(--color-text-secondary); font-weight:600; text-transform:capitalize; font-size:0.75rem; letter-spacing:0.02em; }
+    .table tbody tr td { background: color-mix(in srgb, #2c2c2c 88%, #1e1e1e 12%); border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .table tbody tr:nth-child(even) td { background: color-mix(in srgb, #262626 88%, #1b1b1b 12%); }
+    .table tbody tr:hover td { background: rgba(255,255,255,0.05); }
     .table tbody tr td:first-child, .table thead tr th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
     .table tbody tr td:last-child, .table thead tr th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
     .input-icon-row { position: relative; display:flex; align-items:center; min-height: 46px; }
@@ -436,6 +439,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .input-icon-row .prefix-input { min-height: 46px; }
     .input-icon-row input { padding-left: 2.3rem; }
     .input-icon-row.with-action input { padding-right: 3rem; }
+    .date-input { padding-left: 1rem !important; padding-right: 2.2rem; min-height: 46px; width: 100%; }
+    .date-input::-webkit-calendar-picker-indicator { filter: invert(0.75); opacity: 0.9; margin-right: 0.35rem; }
     .icon-btn { position:absolute; right: 0.5rem; background: transparent; border: none; color: var(--color-text-tertiary); cursor: pointer; font-size: 0.95rem; transition: color 0.15s ease, transform 0.15s ease; }
     .icon-btn:hover { color: var(--color-primary, #00c4cc); transform: translateY(-1px); }
     .help { margin: 2px 0 0; color: var(--color-text-tertiary); font-size: 0.78rem; line-height: 1.4; }
