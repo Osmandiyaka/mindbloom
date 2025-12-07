@@ -364,7 +364,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(0,0,0,0.24); }
     .btn.tiny { padding: 0.35rem 0.6rem; font-size: 0.85rem; box-shadow: none; }
     .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:0.85rem 1.2rem; padding-bottom: 0.25rem; }
-    .academics-grid { grid-template-columns: repeat(3, minmax(260px,1fr)); gap: 0.8rem 1rem; align-items: stretch; }
+    .academics-grid { grid-template-columns: repeat(3, minmax(260px,1fr)); column-gap: 1rem; row-gap: 0.65rem; align-items: stretch; }
     .academics-grid .subjects-card { grid-column: 2 / 4; }
     .academics-grid .grading-card { grid-column: 1 / 2; }
     .academics-grid .locale-card { grid-column: 1 / 2; }
@@ -382,8 +382,10 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .academic-card { background: var(--color-surface-hover, #634d3b); border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 14px 30px rgba(0,0,0,0.16); color: var(--color-text-primary, #ffffff); }
     .academic-card input,
     .academic-card select { background: var(--color-surface, #4f3a29); color: var(--color-text-primary, #ffffff); }
-    .academic-card label.narrow { max-width: 320px; width: 70%; }
-    .grading-stack { display: flex; flex-direction: column; gap: 0.35rem; max-width: 240px; }
+    .academic-card label.narrow { max-width: 280px; width: 72%; }
+    .academic-card .year-group label { max-width: 320px; width: 100%; }
+    .grading-card { align-self: start; }
+    .grading-stack { display: flex; flex-direction: column; gap: 0.25rem; max-width: 200px; width: 100%; }
     .grading-stack select,
     .grading-stack input { width: 100%; }
     .contact-card { background: var(--color-surface-hover, #634d3b); border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 12px 24px rgba(0,0,0,0.12); color: var(--color-text-primary, #ffffff); }
@@ -460,7 +462,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .tiny { font-size: 0.8rem; line-height: 1.3; }
     .error { color: var(--color-error,#ef4444); font-weight:600; }
     .card-header { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.25rem; }
-    .year-group { margin-top: 0.75rem; }
+    .year-group { margin-top: 0.6rem; }
+    .year-group .split.equal.tight { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0.6rem; }
     .table { width:100%; border-collapse:separate; border-spacing:0 4px; font-size:0.95rem; background: transparent; color: var(--color-text-primary); }
     .table thead tr { border-bottom: 2px solid var(--color-primary, #e8be14); background: transparent; }
     .table th, .table td { text-align:left; padding:0.48rem 0.6rem; background: transparent; }
