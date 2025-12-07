@@ -23,9 +23,12 @@ import { LibraryManagementModule } from '../../plugins/library-management/librar
 import { LibraryManagementPlugin } from '../../plugins/library-management/library.plugin';
 import { PluginContextFactory } from '../../core/plugins/plugin-context.factory';
 import { PluginManifestValidator } from '../../core/plugins/pluginManifest.validator';
+import { StorageManager } from '../../core/storage/storage.manager';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
     imports: [
+        ConfigModule,
         MongooseModule.forFeature([
             { name: 'Plugin', schema: PluginSchema },
             { name: 'InstalledPlugin', schema: InstalledPluginSchema },
@@ -57,6 +60,7 @@ import { PluginManifestValidator } from '../../core/plugins/pluginManifest.valid
         LibraryManagementPlugin,
         PluginContextFactory,
         PluginManifestValidator,
+        StorageManager,
     ],
     exports: [
         'PluginRepository',

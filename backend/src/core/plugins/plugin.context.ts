@@ -1,6 +1,8 @@
 import { Logger } from '@nestjs/common';
 import { EventBus } from './event-bus.service';
 import { InstalledPluginRepository } from '../../domain/ports/out/installed-plugin-repository.port';
+import { FileStoragePort } from '../../domain/ports/out/file-storage.port';
+import { StorageManager } from '../storage/storage.manager';
 
 /**
  * Plugin Context - Provides isolated, tenant-aware access to platform services
@@ -18,6 +20,7 @@ export class PluginContext {
         private readonly _pluginId: string,
         private readonly _eventBus: EventBus,
         private readonly _logger: Logger,
+        private readonly storageManager: StorageManager,
         private readonly installedRepo?: InstalledPluginRepository,
     ) { }
 
@@ -47,8 +50,8 @@ export class PluginContext {
      * Get storage adapter for plugin-specific file storage
      * Storage path: {env}-plugins-{pluginId}-{tenantId}/
      */
-    getStorageAdapter(): StorageAdapter {
-        return new StorageAdapter(`plugins/${this._pluginId}/${this._tenantId}`);
+    getStorageAdapter(): FileStoragePort {
+        return this.storageManager.scoped(`plugins/${this._pluginId}/${this._tenantId}`);
     }
 
     /**
@@ -171,49 +174,5 @@ export class DatabaseAdapter {
         const connection = mongoose.connection;
         const collection = connection.collection(this.getCollectionName(collectionName));
         await collection.deleteMany({ tenantId: this.tenantId, pluginId: this.pluginId, ...query });
-    }
-}
-
-/**
- * Storage Adapter - Provides file storage access for plugins
- */
-export class StorageAdapter {
-    constructor(private readonly basePath: string) { }
-
-    /**
-     * Upload a file
-     */
-    async upload(fileName: string, data: Buffer): Promise<string> {
-        const filePath = `${this.basePath}/${fileName}`;
-        // TODO: Implement S3/file upload
-        console.log(`Uploading file: ${filePath}`);
-        return filePath;
-    }
-
-    /**
-     * Download a file
-     */
-    async download(fileName: string): Promise<Buffer> {
-        const filePath = `${this.basePath}/${fileName}`;
-        // TODO: Implement S3/file download
-        console.log(`Downloading file: ${filePath}`);
-        return Buffer.from('');
-    }
-
-    /**
-     * Delete a file
-     */
-    async delete(fileName: string): Promise<void> {
-        const filePath = `${this.basePath}/${fileName}`;
-        // TODO: Implement S3/file delete
-        console.log(`Deleting file: ${filePath}`);
-    }
-
-    /**
-     * List files in plugin storage
-     */
-    async list(): Promise<string[]> {
-        // TODO: Implement S3/file list
-        return [];
     }
 }
