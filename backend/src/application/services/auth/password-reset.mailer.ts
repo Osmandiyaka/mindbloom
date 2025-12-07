@@ -34,13 +34,24 @@ export class PasswordResetMailer {
         `;
 
     const smtpUrl = this.configService.get<string>('SMTP_URL');
+    const smtpPort = Number(this.configService.get<string>('EMAIL_PORT') || 0);
+    const smtpUser = this.configService.get<string>('EMAIL_USER');
+    const smtpPass = this.configService.get<string>('EMAIL_PASS');
 
     if (smtpUrl) {
       try {
         // Lazy load to avoid build-time dependency in environments without SMTP configured
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const nodemailer = require('nodemailer');
-        const transporter = nodemailer.createTransport(smtpUrl);
+        const transporter = (smtpUser && smtpPass)
+          ? nodemailer.createTransport({
+            host: smtpUrl,
+            port: smtpPort || 587,
+            secure: (smtpPort || 587) === 465,
+            auth: { user: smtpUser, pass: smtpPass },
+          })
+          : nodemailer.createTransport(smtpUrl); // fallback to raw connection string if provided
+
         await transporter.sendMail({
           to,
           from: this.from,
