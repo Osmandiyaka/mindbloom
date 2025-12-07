@@ -440,15 +440,16 @@ import { RoleListComponent } from '../roles/role-list.component';
     .panel-header.spaced { padding: 0 0.35rem; }
     .panel-header.padded { padding: 0 0.35rem; }
     .panel-header.users-header { background: transparent; border: none; border-radius: 12px; padding: 0.9rem 0.25rem; box-shadow: none; }
-    .invite-card { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border: none; border-radius: 16px; padding: 1rem; box-shadow: 0 12px 32px rgba(0,0,0,0.12); display: flex; flex-direction: column; gap: 0.75rem; }
+    .invite-card { background: rgba(79,58,41,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 1rem; box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 0.75rem; backdrop-filter: blur(12px); border-top: 1px solid rgba(255,255,255,0.08); }
     .invite-card.flat { box-shadow: none; border-radius: 12px; border-color: transparent; }
-    .invite-row { display: grid; grid-template-columns: 1.2fr auto auto; gap: 0.65rem; align-items: stretch; background: color-mix(in srgb, var(--color-surface-hover) 75%, transparent); padding: 0.6rem; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent); }
+    .invite-row { display: grid; grid-template-columns: 1.2fr auto auto; gap: 0.65rem; align-items: stretch; background: rgba(0,0,0,0.2); padding: 0.6rem; border-radius: 14px; border: 1px solid rgba(232,190,20,0.12); }
     .invite-row.compact { margin-bottom: 0.25rem; }
     .input-icon { display: flex; align-items: center; gap: 10px; padding: 0.55rem 0.7rem; border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius: 12px; background: var(--color-surface); min-height: 48px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
     .input-icon svg { width: 18px; height: 18px; color: var(--color-accent, #70c6e1); }
-    .input-icon input { border: none; outline: none; background: transparent; width: 100%; color: var(--color-text-primary); font-weight: 600; }
+    .input-icon input { border: none; outline: none; background: transparent; width: 100%; color: var(--color-text-primary); font-weight: 600; font-size: 1rem; }
     .invite-roles { min-width: 0; display: flex; align-items: center; border: 1px solid color-mix(in srgb, var(--color-accent) 65%, transparent); border-radius: 12px; padding: 0.35rem 0.45rem; background: color-mix(in srgb, var(--color-surface) 85%, transparent); }
-    .invite-submit { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem 1rem; color: var(--color-surface, #0f0f12); }
+    .invite-submit { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem 1rem; color: var(--color-surface, #0f0f12); background: linear-gradient(135deg, #E8BE14 0%, #BF9532 100%); box-shadow: 0 4px 12px rgba(232,190,20,0.4); border: none; font-weight: 700; }
+    .invite-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(232,190,20,0.6); }
     .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; }
     .selected-roles .chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 6px 10px; border-radius: 999px; border: none; font-weight: 700; box-shadow: 0 10px 20px rgba(16,185,129,0.18); }
     .selected-roles .chip svg { width: 14px; height: 14px; }
@@ -456,10 +457,11 @@ import { RoleListComponent } from '../roles/role-list.component';
     .pill.neutral { background: color-mix(in srgb, var(--color-surface) 75%, transparent); color: var(--color-text-primary); }
     .table { width: 100%; border-collapse: separate; border-spacing: 0 6px; background: transparent; color: var(--color-text-primary); }
     .table th, .table td { padding: 0.68rem 0.75rem; text-align: left; color: var(--color-text-primary); background: transparent; }
-    .table th { color: var(--color-text-secondary); font-weight: 600; font-size: 0.78rem; background: transparent; border-bottom: 2px solid var(--color-primary, #e8be14); }
+    .table th { color: var(--color-text-secondary); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; background: transparent; border-bottom: 1px solid rgba(232,190,20,0.3); padding-bottom: 12px; }
     .table tr td:first-child, .table tr th:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
     .table tr td:last-child, .table tr th:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
-    .table tr:hover td { box-shadow: 0 12px 24px rgba(0,0,0,0.08); }
+    .table tbody tr { transition: background 0.2s ease, box-shadow 0.2s ease; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .table tbody tr:hover { background: rgba(255,255,255,0.03); box-shadow: inset 3px 0 0 #E8BE14; }
     .table.invites th, .table.invites td { padding: 0.45rem 0.65rem; line-height: 1.2; vertical-align: middle; }
     .table.invites th:last-child, .table.invites td:last-child { text-align: right; }
     .table.invites td.email-cell { display: flex; align-items: center; gap: 0.4rem; }
@@ -481,10 +483,11 @@ import { RoleListComponent } from '../roles/role-list.component';
     .inline-toggles .toggle input:checked::after { content: '✓'; color: #fff; font-weight: 700; font-size: 12px; line-height: 1; position: absolute; }
     .user-form .selected-roles { margin-top: 0.25rem; }
     .muted { color: var(--color-text-tertiary); }
-    .badge { padding: 0.18rem 0.58rem; border-radius: 999px; background: color-mix(in srgb, var(--color-surface-hover) 80%, transparent); box-shadow: 0 6px 16px rgba(0,0,0,0.08); font-weight: 650; text-transform: capitalize; }
-    .badge.revoked { background: rgba(var(--color-error-rgb,239,68,68),0.1); color: var(--color-error); }
-    .badge.pending { background: rgba(var(--color-warning-rgb,243,156,18),0.12); color: var(--color-warning, #f39c12); }
-    .badge.accepted { background: rgba(var(--color-success-rgb,112,173,71),0.12); color: var(--color-success, #70ad47); }
+    .badge { padding: 0; border-radius: 0; background: transparent; box-shadow: none; font-weight: 500; text-transform: capitalize; display: inline-flex; align-items: center; gap: 6px; }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; box-shadow: 0 0 8px currentColor; background: currentColor; }
+    .badge.revoked { color: var(--color-error); }
+    .badge.pending { color: var(--color-warning, #f39c12); }
+    .badge.accepted { color: var(--color-success, #70ad47); }
     .actions .btn { padding: 0.4rem 0.7rem; }
     .btn.small { padding: 0.4rem 0.8rem; font-size: 0.875rem; }
     .btn.danger { color: var(--color-error); }
