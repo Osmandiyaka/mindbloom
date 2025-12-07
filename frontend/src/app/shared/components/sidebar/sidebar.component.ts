@@ -214,6 +214,8 @@ export class SidebarComponent implements OnInit {
   tenantLogo: string | null = null;
   tenantName: string | null = null;
   private schoolLogo: string | null = null;
+  private tenantFavicon: string | null = null;
+  private schoolFavicon: string | null = null;
 
   navSections: NavSection[] = [
     {
@@ -296,20 +298,37 @@ export class SidebarComponent implements OnInit {
     });
     this.tenantService.currentTenant$.subscribe((tenant: Tenant | null) => {
       this.tenantLogo = tenant?.customization?.logo || tenant?.customization?.favicon || null;
+      this.tenantFavicon = tenant?.customization?.favicon || tenant?.customization?.logo || null;
       this.tenantName = tenant?.name || null;
       if (!this.tenantLogo) {
         this.tenantLogo = this.schoolLogo;
       }
+      if (this.tenantFavicon) {
+        this.setFavicon(this.tenantFavicon);
+      }
     });
     this.schoolSettingsService.getSettings().subscribe(settings => {
       this.schoolLogo = settings.logoUrl || settings.faviconUrl || null;
+      this.schoolFavicon = settings.faviconUrl || settings.logoUrl || null;
       if (!this.tenantLogo && this.schoolLogo) {
         this.tenantLogo = this.schoolLogo;
       }
       if (!this.tenantName && settings.schoolName) {
         this.tenantName = settings.schoolName;
       }
+      if (!this.tenantFavicon && this.schoolFavicon) {
+        this.setFavicon(this.schoolFavicon);
+      }
     });
+  }
+
+  private setFavicon(url: string) {
+    if (!url) return;
+    const link: HTMLLinkElement = document.querySelector("link[rel*='icon']") || document.createElement('link');
+    link.type = 'image/x-icon';
+    link.rel = 'shortcut icon';
+    link.href = url;
+    document.getElementsByTagName('head')[0].appendChild(link);
   }
 
   getUserInitials(): string {
