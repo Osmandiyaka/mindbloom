@@ -440,15 +440,19 @@ import { RoleListComponent } from '../roles/role-list.component';
     .panel-header.spaced { padding: 0 0.35rem; }
     .panel-header.padded { padding: 0 0.35rem; }
     .panel-header.users-header { background: transparent; border: none; border-radius: 12px; padding: 0.9rem 0.25rem; box-shadow: none; }
-    .invite-card { background: rgba(79,58,41,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 1rem; box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 0.75rem; backdrop-filter: blur(12px); border-top: 1px solid rgba(255,255,255,0.08); }
+    .invite-card { background: color-mix(in srgb, var(--color-surface) 65%, transparent); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1rem; box-shadow: 0 20px 40px rgba(0,0,0,0.22); display: flex; flex-direction: column; gap: 0.75rem; backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.1); }
     .invite-card.flat { box-shadow: none; border-radius: 12px; border-color: transparent; }
-    .invite-row { display: grid; grid-template-columns: 1.2fr auto auto; gap: 0.65rem; align-items: stretch; background: rgba(0,0,0,0.2); padding: 0.6rem; border-radius: 14px; border: 1px solid rgba(232,190,20,0.12); }
+    .invite-row { display: flex; align-items: center; gap: 0.4rem; background: rgba(0,0,0,0.24); padding: 0.5rem; border-radius: 14px; border: 1px solid rgba(232,190,20,0.12); }
     .invite-row.compact { margin-bottom: 0.25rem; }
-    .input-icon { display: flex; align-items: center; gap: 10px; padding: 0.55rem 0.7rem; border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius: 12px; background: var(--color-surface); min-height: 48px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
-    .input-icon svg { width: 18px; height: 18px; color: var(--color-accent, #70c6e1); }
-    .input-icon input { border: none; outline: none; background: transparent; width: 100%; color: var(--color-text-primary); font-weight: 600; font-size: 1rem; }
-    .invite-roles { min-width: 0; display: flex; align-items: center; border: 1px solid color-mix(in srgb, var(--color-accent) 65%, transparent); border-radius: 12px; padding: 0.35rem 0.45rem; background: color-mix(in srgb, var(--color-surface) 85%, transparent); }
-    .invite-submit { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem 1rem; color: var(--color-surface, #0f0f12); background: linear-gradient(135deg, #E8BE14 0%, #BF9532 100%); box-shadow: 0 4px 12px rgba(232,190,20,0.4); border: none; font-weight: 700; }
+    .invite-input { flex: 1; display: flex; align-items: center; gap: 10px; padding: 0.55rem 0.7rem; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; background: #3E2D20; min-height: 48px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.25); transition: all 0.2s ease; }
+    .invite-input:focus-within { border-color: #E8BE14; box-shadow: 0 0 0 1px #E8BE14, 0 0 8px rgba(232,190,20,0.2); }
+    .input-icon { display: flex; align-items: center; gap: 10px; width: 100%; }
+    .invite-input svg { width: 18px; height: 18px; color: var(--color-accent, #70c6e1); }
+    .invite-input input { border: none; outline: none; background: transparent; width: 100%; color: var(--color-text-primary); font-weight: 600; font-size: 1rem; }
+    .invite-roles { min-width: 180px; height: 48px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 0 12px; background: transparent; color: var(--color-text-secondary); transition: border-color 0.2s ease, background 0.2s ease; position: relative; }
+    .invite-roles::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--color-text-tertiary); font-size: 0.85rem; pointer-events: none; }
+    .invite-roles:hover, .invite-roles:focus-within { border-color: #E8BE14; background: rgba(255,255,255,0.02); }
+    .invite-submit { height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem 1rem; color: var(--color-surface, #0f0f12); background: linear-gradient(135deg, #E8BE14 0%, #BF9532 100%); box-shadow: 0 4px 12px rgba(232,190,20,0.4); border: none; font-weight: 700; letter-spacing: 0.5px; }
     .invite-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(232,190,20,0.6); }
     .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; }
     .selected-roles .chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 6px 10px; border-radius: 999px; border: none; font-weight: 700; box-shadow: 0 10px 20px rgba(16,185,129,0.18); }
