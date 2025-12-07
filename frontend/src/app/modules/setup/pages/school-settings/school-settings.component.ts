@@ -409,6 +409,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .status-badge.success { color: var(--color-success, #16a34a); }
     .profile-block { background: color-mix(in srgb, var(--color-surface) 85%, var(--color-surface-hover) 15%); border-radius: 14px; padding: 0.9rem; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 22px rgba(0,0,0,0.12); }
     .field-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 0.85rem 1.1rem; align-items: flex-start; }
+    .locale-card .field-grid { grid-template-columns: repeat(2, minmax(0,1fr)); column-gap: 0.25rem; row-gap: 0.25rem; max-width: 520px; }
+    .locale-card .field { gap: 0.2rem; }
     .field { display:flex; flex-direction:column; gap:0.35rem; }
     .field.compact { max-width: 420px; }
     .field.full { grid-column: 1 / -1; }
