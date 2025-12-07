@@ -97,6 +97,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
                   <label>Domain <span class="required">*</span></label>
                 </div>
                 <div class="input-icon-row with-action" [class.error-input]="domainStatus === 'invalid'">
+                <span class="input-icon" aria-hidden="true">🌐</span>
                   <input [(ngModel)]="model.domain" placeholder="myschool.edu" (ngModelChange)="onDomainChange($event)" />
                   <span class="status-icon success" *ngIf="domainStatus === 'valid'">✔</span>
                   <span class="status-icon error" *ngIf="domainStatus === 'invalid'">✕</span>
@@ -366,7 +367,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .status-badge { position:absolute; bottom:6px; right:6px; font-size: 0.7rem; padding: 4px 6px; border-radius: 8px; background: color-mix(in srgb, var(--color-surface-hover) 80%, var(--color-surface) 20%); box-shadow: 0 6px 12px rgba(0,0,0,0.18); }
     .status-badge.success { color: var(--color-success, #16a34a); }
     .profile-block { background: color-mix(in srgb, var(--color-surface) 85%, var(--color-surface-hover) 15%); border-radius: 14px; padding: 0.9rem; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 22px rgba(0,0,0,0.12); }
-    .field-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 0.85rem 1.1rem; }
+    .field-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 0.85rem 1.1rem; align-items: center; }
     .field { display:flex; flex-direction:column; gap:0.35rem; }
     .field.compact { max-width: 420px; }
     .field.full { grid-column: 1 / -1; }
@@ -383,6 +384,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
       font-size: 0.95rem;
       font-weight: 500;
+      min-height: 46px;
     }
     input::placeholder, select::placeholder { color: var(--color-text-secondary); }
     input:focus, select:focus {
@@ -392,7 +394,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
       background: color-mix(in srgb, var(--color-surface-hover) 70%, var(--color-background) 30%);
     }
     label:focus-within { color: var(--color-primary, #00c4cc); }
-    .prefix-input { display:flex; align-items:center; gap:0.35rem; width:100%; border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius:10px; padding-right: 0.35rem; background: color-mix(in srgb, var(--color-background) 92%, var(--color-surface-hover) 8%); padding-left: 1.9rem; transition: border-color 0.18s ease, box-shadow 0.18s ease; }
+    .prefix-input { display:flex; align-items:center; gap:0.35rem; width:100%; border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius:10px; padding-right: 0.35rem; background: color-mix(in srgb, var(--color-background) 92%, var(--color-surface-hover) 8%); padding-left: 1.9rem; transition: border-color 0.18s ease, box-shadow 0.18s ease; min-height: 46px; }
     .prefix-input .prefix { padding-left: 0.75rem; color: var(--color-text-tertiary); font-size: 0.9rem; }
     .prefix-input input { border:none !important; box-shadow:none !important; background: transparent; padding:0.6rem 0.4rem; padding-left: 0.4rem !important; flex:1; font-size:0.95rem; font-weight:500; }
     .prefix-input input:focus { box-shadow:none; outline:none; padding-left: 0.4rem !important; }
@@ -414,11 +416,13 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .table tbody tr td:first-child, .table thead tr th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
     .table tbody tr td:last-child, .table thead tr th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
     .table tbody tr:hover td { box-shadow: 0 10px 18px rgba(0,0,0,0.1); }
-    .input-icon-row { position: relative; display:flex; align-items:center; }
-    .input-icon { position:absolute; left: 0.65rem; color: var(--color-text-tertiary); transition: color 0.18s ease, transform 0.18s ease; pointer-events: none; }
-    .input-icon-row:focus-within .input-icon { color: var(--color-primary, #00c4cc); transform: translateX(1px); }
-    .input-icon-row input:focus { padding-left: 2.3rem; }
-    .input-icon-row.with-action input { padding-right: 2.5rem; }
+    .input-icon-row { position: relative; display:flex; align-items:center; min-height: 46px; }
+    .input-icon { position:absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); color: var(--color-text-tertiary); transition: color 0.18s ease, transform 0.18s ease; pointer-events: none; display: inline-flex; align-items: center; }
+    .input-icon-row:focus-within .input-icon { color: var(--color-primary, #00c4cc); transform: translate(1px, -50%); }
+    .input-icon-row input,
+    .input-icon-row .prefix-input { min-height: 46px; }
+    .input-icon-row input { padding-left: 2.3rem; }
+    .input-icon-row.with-action input { padding-right: 3rem; }
     .icon-btn { position:absolute; right: 0.5rem; background: transparent; border: none; color: var(--color-text-tertiary); cursor: pointer; font-size: 0.95rem; transition: color 0.15s ease, transform 0.15s ease; }
     .icon-btn:hover { color: var(--color-primary, #00c4cc); transform: translateY(-1px); }
     .help { margin: 2px 0 0; color: var(--color-text-tertiary); font-size: 0.78rem; line-height: 1.4; }
