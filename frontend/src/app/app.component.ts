@@ -1,20 +1,21 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { LoginOverlayComponent } from './modules/auth/components/login-overlay/login-overlay.component';
 import { AuthService } from './core/services/auth.service';
 import { TenantService } from './core/services/tenant.service';
 import { ThemeService } from './core/services/theme.service';
 import { environment } from '../environments/environment';
+import { filter } from 'rxjs';
 
 @Component({
     selector: 'app-root',
     standalone: true,
     imports: [RouterOutlet, LoginOverlayComponent],
     template: `
-        <div class="app-root" [class.dimmed]="authService.showLoginOverlay()">
+        <div class="app-root" [class.dimmed]="authService.showLoginOverlay() && !authRoute">
             <router-outlet />
         </div>
-        @if (authService.showLoginOverlay()) {
+        @if (authService.showLoginOverlay() && !authRoute) {
             <app-login-overlay />
         }
     `,
@@ -32,14 +33,19 @@ import { environment } from '../environments/environment';
 })
 export class AppComponent implements OnInit {
     title = 'MindBloom';
+    authRoute = false;
 
     constructor(
         public authService: AuthService,
         private tenantService: TenantService,
-        private themeService: ThemeService // Initialize theme service
+        private themeService: ThemeService, // Initialize theme service
+        private router: Router
     ) { }
 
     ngOnInit(): void {
+        this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {
+            this.authRoute = e.urlAfterRedirects?.startsWith('/auth');
+        });
         // For development: Set a default tenant if none exists
         if (!environment.production && !this.tenantService.getTenantId()) {
             const devTenant = {

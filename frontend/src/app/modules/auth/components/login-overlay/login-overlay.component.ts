@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TenantService } from '../../../../core/services/tenant.service';
 import { TenantRegistrationComponent } from '../tenant-registration/tenant-registration.component';
@@ -9,7 +9,7 @@ import { TenantRegistrationComponent } from '../tenant-registration/tenant-regis
 @Component({
     selector: 'app-login-overlay',
     standalone: true,
-    imports: [CommonModule, FormsModule, TenantRegistrationComponent],
+    imports: [CommonModule, FormsModule, RouterModule, TenantRegistrationComponent],
     templateUrl: './login-overlay.component.html',
     styleUrls: ['./login-overlay.component.scss']
 })
@@ -129,7 +129,7 @@ export class LoginOverlayComponent {
     }
 
     goToForgot() {
-        this.router.navigate(['/auth/forgot']);
+        this.router.navigateByUrl('/auth/forgot');
     }
 
     onSubmit(): void {

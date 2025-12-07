@@ -3,6 +3,10 @@ import { MainLayoutComponent } from './layouts/main-layout/main-layout.component
 
 export const routes: Routes = [
     {
+        path: 'login',
+        loadComponent: () => import('./modules/auth/components/login-overlay/login-overlay.component').then(m => m.LoginOverlayComponent)
+    },
+    {
         path: 'auth/forgot',
         loadComponent: () => import('./modules/auth/pages/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
     },
