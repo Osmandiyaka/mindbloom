@@ -354,7 +354,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .card { background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); border:none; border-radius:14px; padding:1.15rem; box-shadow: 0 12px 28px rgba(0,0,0,0.16); display:flex; flex-direction:column; gap:0.5rem; }
     .card.flat { background: transparent; box-shadow: none; padding: 0; }
     .card.soft { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 10px 22px rgba(0,0,0,0.12); }
-    .academic-card { border: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 14px 30px rgba(0,0,0,0.16); }
+    .academic-card { background: color-mix(in srgb, var(--color-surface) 82%, #1d1a17 18%); border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 14px 30px rgba(0,0,0,0.16); }
     .subjects-card { grid-column: 1 / -1; }
     .card h3 { margin:0 0 0.3rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-size:1.05rem; display: inline-flex; align-items: center; gap: 0.4rem; }
     .card .icon { margin-right:0.35rem; filter: grayscale(0); color: var(--color-primary, #00c4cc); }
@@ -410,8 +410,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .prefix-input input:focus { box-shadow:none; outline:none; padding-left: 0.4rem !important; }
     .prefix-input:focus-within { border-color: var(--color-primary, #00c4cc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #00c4cc) 28%, transparent); }
     .split { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:0.5rem; align-items:end; }
-    .split.equal { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:0.6rem; align-items:center; }
-    .split.equal label { width: 100%; display:flex; flex-direction:column; gap:0.25rem; }
+    .split.equal { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:0.75rem; align-items:center; }
+    .split.equal label { width: 100%; display:flex; flex-direction:column; gap:0.2rem; }
     .list { display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap; }
     .chip { border:1px solid color-mix(in srgb, var(--color-border) 50%, transparent); border-radius:10px; padding:0.45rem 0.75rem; background: color-mix(in srgb, var(--color-surface-hover) 80%, var(--color-surface) 20%); cursor:pointer; }
     .chip.danger { border-color: rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); }
@@ -422,9 +422,10 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .error { color: var(--color-error,#ef4444); font-weight:600; }
     .card-header { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.25rem; }
     .table { width:100%; border-collapse:separate; border-spacing:0 4px; font-size:0.95rem; background: transparent; color: var(--color-text-primary); }
-    .table th, .table td { text-align:left; padding:0.5rem 0.6rem; background: color-mix(in srgb, var(--color-surface) 92%, var(--color-surface-hover) 8%); }
-    .table th { color: var(--color-text-secondary); font-weight:600; text-transform:capitalize; font-size:0.8rem; letter-spacing:0.02em; }
-    .table tbody tr td { border-top: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); }
+    .table th, .table td { text-align:left; padding:0.48rem 0.6rem; }
+    .table th { color: var(--color-text-secondary); font-weight:600; text-transform:capitalize; font-size:0.75rem; letter-spacing:0.02em; background: transparent; }
+    .table tbody tr td { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border-top: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent); }
+    .table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--color-surface) 86%, var(--color-surface-hover) 14%); }
     .table tbody tr:hover td { background: color-mix(in srgb, var(--color-surface-hover, rgba(255,255,255,0.08)) 70%, var(--color-surface) 30%); }
     .table tbody tr td:first-child, .table thead tr th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
     .table tbody tr td:last-child, .table thead tr th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
