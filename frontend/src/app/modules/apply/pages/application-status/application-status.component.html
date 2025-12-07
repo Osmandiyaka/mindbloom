@@ -1,0 +1,144 @@
+<div class="status-page">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Application Status</h1>
+    <p class="subtitle">Track your application progress</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="status-card loading-card">
+    <div class="loader"></div>
+    <p>Loading application details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="status-card error-card">
+    <div class="error-icon">❌</div>
+    <h2>{{ error() }}</h2>
+    <button class="btn-primary" (click)="navigateToNewApplication()">
+      Start New Application
+    </button>
+  </div>
+
+  <!-- Success State -->
+  <div *ngIf="application() && !loading() && !error()" class="content-container">
+    
+    <!-- Application Overview Card -->
+    <div class="status-card overview-card">
+      <div class="card-header">
+        <div class="header-left">
+          <span class="app-number">{{ application()!.applicationNumber }}</span>
+          <span class="app-date">Applied on {{ formatDate(application()!.createdAt) }}</span>
+        </div>
+        <div class="status-badge" [ngClass]="getStatusColor(application()!.status)">
+          <span class="status-icon">{{ getStatusIcon(application()!.status) }}</span>
+          <span class="status-text">{{ getStatusLabel(application()!.status) }}</span>
+        </div>
+      </div>
+
+      <div class="applicant-info">
+        <h2>{{ application()!.firstName }} {{ application()!.lastName }}</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Grade Applying:</span>
+            <span class="value">{{ application()!.gradeApplying }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Academic Year:</span>
+            <span class="value">{{ application()!.academicYear }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Email:</span>
+            <span class="value">{{ application()!.email }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Phone:</span>
+            <span class="value">{{ application()!.phone }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Timeline -->
+    <div class="status-card timeline-card">
+      <h3>Application Timeline</h3>
+      <div class="timeline">
+        <div 
+          *ngFor="let history of application()!.statusHistory" 
+          class="timeline-item"
+        >
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <span class="timeline-status" [ngClass]="getStatusColor(history.status)">
+                {{ getStatusIcon(history.status) }} {{ getStatusLabel(history.status) }}
+              </span>
+              <span class="timeline-date">{{ formatDate(history.changedAt) }}</span>
+            </div>
+            <p *ngIf="history.comment" class="timeline-comment">{{ history.comment }}</p>
+            <p *ngIf="history.changedBy" class="timeline-user">by {{ history.changedBy }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Next Steps Card -->
+    <div class="status-card next-steps-card">
+      <h3>Next Steps</h3>
+      <ul class="steps-list">
+        <li *ngFor="let step of getNextSteps(application()!.status)">
+          <span class="step-icon">▸</span>
+          <span>{{ step }}</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Contact Info Card -->
+    <div class="status-card contact-card">
+      <h3>Need Help?</h3>
+      <p>If you have questions about your application, please contact our admissions office:</p>
+      <div class="contact-info">
+        <div class="contact-item">
+          <span class="contact-icon">📧</span>
+          <span>admissions@school.edu</span>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">📞</span>
+          <span>+234 800 000 0000</span>
+        </div>
+        <div class="contact-item">
+          <span class="contact-icon">🕐</span>
+          <span>Mon - Fri, 9:00 AM - 5:00 PM</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons (if applicable) -->
+    <div 
+      *ngIf="application()!.status === 'accepted'" 
+      class="action-buttons"
+    >
+      <button class="btn-primary btn-large">
+        Complete Enrollment
+      </button>
+    </div>
+
+    <div 
+      *ngIf="application()!.status === 'rejected' || application()!.status === 'withdrawn'" 
+      class="action-buttons"
+    >
+      <button class="btn-secondary btn-large" (click)="navigateToNewApplication()">
+        Submit New Application
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Help Section -->
+  <div class="help-section">
+    <p>
+      <strong>Pro tip:</strong> Bookmark this page or save your application number 
+      <strong>{{ applicationNumber }}</strong> to check status anytime.
+    </p>
+  </div>
+</div>
