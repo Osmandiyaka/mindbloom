@@ -1,12 +1,15 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { IUserRepository } from '../../../domain/ports/out/user-repository.port';
-import { USER_REPOSITORY } from '../../../domain/ports/out/repository.tokens';
+import { REFRESH_TOKEN_REPOSITORY, USER_REPOSITORY } from '../../../domain/ports/out/repository.tokens';
 import { MongooseUserRepository } from '../../../infrastructure/adapters/persistence/mongoose/user.repository';
 import { LoginCommand } from '../../ports/in/commands/login.command';
+import { IRefreshTokenRepository } from '../../../domain/ports/out/refresh-token-repository.port';
+import { TokenService } from './token.service';
 
 export interface LoginResult {
     access_token: string;
+    refreshToken: string;
+    refreshTokenExpiresAt: Date;
     user: {
         id: string;
         tenantId: string;
@@ -35,7 +38,9 @@ export class LoginUseCase {
     constructor(
         @Inject(USER_REPOSITORY)
         private readonly userRepository: IUserRepository & MongooseUserRepository,
-        private readonly jwtService: JwtService,
+        @Inject(REFRESH_TOKEN_REPOSITORY)
+        private readonly refreshTokenRepository: IRefreshTokenRepository,
+        private readonly tokenService: TokenService,
     ) { }
 
     async execute(command: LoginCommand): Promise<LoginResult> {
@@ -55,18 +60,14 @@ export class LoginUseCase {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        // Generate JWT token with tenant and role information
-        const payload = {
-            sub: user.id,
-            tenantId: user.tenantId,
-            email: user.email,
-            roleId: user.roleId,
-            roleName: user.role?.name || null
-        };
-        const access_token = this.jwtService.sign(payload);
+        const access_token = this.tokenService.createAccessToken(user);
+        const refresh = this.tokenService.createRefreshToken();
+        await this.refreshTokenRepository.create(user.id, refresh.tokenHash, refresh.expiresAt);
 
         return {
             access_token,
+            refreshToken: refresh.token,
+            refreshTokenExpiresAt: refresh.expiresAt,
             user: {
                 id: user.id,
                 tenantId: user.tenantId,

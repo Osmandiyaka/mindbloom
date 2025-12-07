@@ -1,10 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, of, catchError, map, finalize, shareReplay } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { TenantService, Tenant } from './tenant.service';
-import { Role, Permission } from '../models/role.model';
+import { TenantService } from './tenant.service';
+import { Role } from '../models/role.model';
 
 export interface User {
     id: string;
@@ -25,8 +25,9 @@ export interface AuthResponse {
 })
 export class AuthService {
     private readonly API_URL = environment.apiUrl;
-    private readonly TOKEN_KEY = 'access_token';
-    private readonly REFRESH_TOKEN_KEY = 'refresh_token';
+    private accessToken: string | null = null;
+    private refreshInFlight$?: Observable<string | null>;
+    private hasAttemptedRefresh = false;
 
     private currentUserSubject = new BehaviorSubject<User | null>(this.getUserFromStorage());
     public currentUser$ = this.currentUserSubject.asObservable();
@@ -38,59 +39,106 @@ export class AuthService {
         private http: HttpClient,
         private router: Router,
         private tenantService: TenantService
-    ) { }
+    ) {
+        this.tryRestoreSession();
+    }
 
     login(email: string, password: string): Observable<AuthResponse> {
-        return this.http.post<AuthResponse>(`${this.API_URL}/auth/login`, { email, password })
-            .pipe(
-                tap(response => this.handleAuthSuccess(response))
-            );
+        return this.http.post<AuthResponse>(`${this.API_URL}/auth/login`, { email, password }, { withCredentials: true })
+            .pipe(tap(response => this.handleAuthSuccess(response)));
     }
 
     logout(): void {
-        localStorage.removeItem(this.TOKEN_KEY);
-        localStorage.removeItem(this.REFRESH_TOKEN_KEY);
-        localStorage.removeItem('user');
-        this.currentUserSubject.next(null);
-        // Don't clear tenant - keep it persisted for next login
-        this.showLoginOverlay.set(true);
-        this.router.navigate(['/login']);
+        this.http.post(`${this.API_URL}/auth/logout`, {}, { withCredentials: true })
+            .pipe(catchError(() => of(null)))
+            .subscribe();
+        this.handleSessionEnd('logout');
     }
 
     isAuthenticated(): boolean {
-        return !!this.getToken();
+        return !!this.accessToken;
     }
 
     getToken(): string | null {
-        return localStorage.getItem(this.TOKEN_KEY);
+        return this.accessToken;
     }
 
     getCurrentUser(): User | null {
         return this.currentUserSubject.value;
     }
 
+    ensureAuthenticated(): Observable<boolean> {
+        if (this.isAuthenticated()) {
+            return of(true);
+        }
+        if (this.hasAttemptedRefresh) {
+            return of(false);
+        }
+        return this.refreshAccessToken().pipe(
+            map(token => !!token),
+            catchError(() => of(false))
+        );
+    }
+
+    handleSessionEnd(reason: 'logout' | 'expired' = 'logout'): void {
+        this.accessToken = null;
+        this.hasAttemptedRefresh = true;
+        this.refreshInFlight$ = undefined;
+        localStorage.removeItem('user');
+        this.currentUserSubject.next(null);
+        this.showLoginOverlay.set(true);
+
+        if (reason === 'expired') {
+            this.router.navigate(['/login'], { queryParams: { sessionExpired: 'true' } });
+        } else {
+            this.router.navigate(['/login']);
+        }
+    }
+
     private handleAuthSuccess(response: AuthResponse): void {
-        localStorage.setItem(this.TOKEN_KEY, response.access_token);
-        localStorage.setItem('user', JSON.stringify(response.user));
+        this.accessToken = response.access_token;
+        this.persistUser(response.user);
         this.currentUserSubject.next(response.user);
         this.showLoginOverlay.set(false);
 
-        // Fetch and set tenant information
         if (response.user.tenantId) {
             this.tenantService.getTenantById(response.user.tenantId).subscribe({
-                next: (tenant) => {
-                    this.tenantService.setTenant(tenant);
-                },
-                error: (error) => {
-                    console.error('Failed to load tenant information', error);
-                }
+                next: (tenant) => this.tenantService.setTenant(tenant),
+                error: (error) => console.error('Failed to load tenant information', error)
             });
         }
+    }
+
+    refreshAccessToken(): Observable<string | null> {
+        if (this.refreshInFlight$) {
+            return this.refreshInFlight$;
+        }
+
+        this.refreshInFlight$ = this.http.post<AuthResponse>(`${this.API_URL}/auth/refresh`, {}, { withCredentials: true })
+            .pipe(
+                tap((response) => this.handleAuthSuccess(response)),
+                map(response => response.access_token || null),
+                finalize(() => {
+                    this.refreshInFlight$ = undefined;
+                    this.hasAttemptedRefresh = true;
+                }),
+                shareReplay(1),
+            );
+
+        return this.refreshInFlight$;
+    }
+
+    private tryRestoreSession(): void {
+        this.refreshAccessToken().pipe(catchError(() => of(null))).subscribe();
     }
 
     private getUserFromStorage(): User | null {
         const userStr = localStorage.getItem('user');
         return userStr ? JSON.parse(userStr) : null;
+    }
+
+    private persistUser(user: User): void {
+        localStorage.setItem('user', JSON.stringify(user));
     }
 
     /* Forgot / Reset Password */
