@@ -36,8 +36,12 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
               </div>
             </div>
             <div class="branding-grid">
-              <div class="drop-zone" [class.hover]="logoHover" (dragover)="onDragOver($event, 'logo')" (dragleave)="onDragLeave('logo')" (drop)="onDrop($event, 'logo')">
+              <div class="drop-zone" [class.hover]="logoHover" [class.error]="brandingError === 'logo'" (dragover)="onDragOver($event, 'logo')" (dragleave)="onDragLeave('logo')" (drop)="onDrop($event, 'logo')">
                 <div class="logo-preview" [class.has-image]="logoPreview">
+                  <div class="progress-bar" *ngIf="logoProgress > 0 && logoProgress < 100">
+                    <div class="progress-fill" [style.width.%]="logoProgress"></div>
+                  </div>
+                  <div class="status-badge success" *ngIf="logoSuccess">✔ Updated</div>
                   <ng-container *ngIf="logoPreview; else logoInitials">
                     <img [src]="logoPreview" alt="Logo preview">
                   </ng-container>
@@ -53,8 +57,12 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
                 <button type="button" class="btn ghost tiny" (click)="logoInput.click()">Upload</button>
               </div>
 
-              <div class="drop-zone small" [class.hover]="faviconHover" (dragover)="onDragOver($event, 'favicon')" (dragleave)="onDragLeave('favicon')" (drop)="onDrop($event, 'favicon')">
+              <div class="drop-zone small" [class.hover]="faviconHover" [class.error]="brandingError === 'favicon'" (dragover)="onDragOver($event, 'favicon')" (dragleave)="onDragLeave('favicon')" (drop)="onDrop($event, 'favicon')">
                 <div class="favicon-preview" [class.has-image]="faviconPreview">
+                  <div class="progress-bar" *ngIf="faviconProgress > 0 && faviconProgress < 100">
+                    <div class="progress-fill" [style.width.%]="faviconProgress"></div>
+                  </div>
+                  <div class="status-badge success" *ngIf="faviconSuccess">✔</div>
                   <ng-container *ngIf="faviconPreview; else faviconFallback">
                     <img [src]="faviconPreview" alt="Favicon preview">
                   </ng-container>
@@ -76,7 +84,9 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
           <div class="profile-block">
             <div class="field-grid">
               <div class="field full">
-                <label>School Name</label>
+                <div class="label-row">
+                  <label>School Name <span class="required">*</span></label>
+                </div>
                 <div class="input-icon-row">
                   <span class="input-icon" aria-hidden="true">🏫</span>
                   <input [(ngModel)]="model.schoolName" required placeholder="School name" />
@@ -84,14 +94,13 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
               </div>
               <div class="field compact">
                 <div class="label-row">
-                  <label>Domain</label>
-                  <span class="optional muted">(Required)</span>
+                  <label>Domain <span class="required">*</span></label>
                 </div>
-                <div class="input-icon-row with-action">
-                  <span class="input-icon" aria-hidden="true">🌐</span>
-                  <input [(ngModel)]="model.domain" placeholder="myschool.edu" />
+                <div class="input-icon-row with-action" [class.error-input]="domainStatus === 'invalid'">
+                  <input [(ngModel)]="model.domain" placeholder="myschool.edu" (ngModelChange)="onDomainChange($event)" />
+                  <span class="status-icon success" *ngIf="domainStatus === 'valid'">✔</span>
+                  <span class="status-icon error" *ngIf="domainStatus === 'invalid'">✕</span>
                   <button type="button" class="icon-btn" (click)="copyValue(model.domain || '')" [disabled]="!model.domain">
-                    <span *ngIf="copiedKey !== 'domain'">📋</span>
                     <span *ngIf="copiedKey === 'domain'">✔</span>
                   </button>
                 </div>
@@ -339,18 +348,23 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .card.soft { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 10px 22px rgba(0,0,0,0.12); }
     .card h3 { margin:0 0 0.3rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-size:1.05rem; display: inline-flex; align-items: center; gap: 0.4rem; }
     .card .icon { margin-right:0.35rem; filter: grayscale(0); color: var(--color-primary, #00c4cc); }
-    .branding-card { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border-radius: 14px; padding: 0.9rem 1rem; box-shadow: 0 10px 24px rgba(0,0,0,0.14); margin-bottom: 0.4rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .branding-card { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border-radius: 14px; padding: 0.9rem 1rem; box-shadow: 0 10px 24px rgba(0,0,0,0.14); margin-bottom: 0.4rem; display: flex; flex-direction: column; gap: 0.75rem; transition: box-shadow 0.2s ease, border-color 0.2s ease; }
     .branding-header { display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; }
     .branding-title { margin: 0; font-size: 1.05rem; letter-spacing: -0.01em; }
     .branding-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 0.75rem; }
     .drop-zone { border: 1px dashed color-mix(in srgb, var(--color-border) 60%, transparent); border-radius: 12px; padding: 0.85rem; background: color-mix(in srgb, var(--color-surface) 92%, var(--color-surface-hover) 8%); display: flex; align-items: center; gap: 0.65rem; transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease; }
     .drop-zone.hover { border-color: var(--color-primary, #00c4cc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #00c4cc) 30%, transparent); transform: translateY(-1px); }
+    .drop-zone.error { border-color: var(--color-error, #ef4444); box-shadow: 0 0 0 3px rgba(var(--color-error-rgb,239,68,68),0.3); }
     .drop-zone.small { max-width: 240px; }
-    .logo-preview, .favicon-preview { width: 64px; height: 64px; border-radius: 14px; background: color-mix(in srgb, var(--color-surface-hover) 85%, var(--color-surface) 15%); display: grid; place-items: center; font-weight: 800; color: var(--color-text-primary); overflow: hidden; }
+    .logo-preview, .favicon-preview { position: relative; width: 64px; height: 64px; border-radius: 14px; background: color-mix(in srgb, var(--color-surface-hover) 85%, var(--color-surface) 15%); display: grid; place-items: center; font-weight: 800; color: var(--color-text-primary); overflow: hidden; }
     .logo-preview.has-image img, .favicon-preview.has-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .favicon-preview { width: 42px; height: 42px; border-radius: 10px; font-size: 0.9rem; }
     .drop-text { display:flex; flex-direction:column; gap:0.15rem; color: var(--color-text-secondary); flex:1; }
     .drop-text strong { color: var(--color-text-primary); }
+    .progress-bar { position:absolute; top:0; left:0; right:0; height: 6px; background: rgba(255,255,255,0.08); }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--color-primary, #00c4cc), color-mix(in srgb, var(--color-primary, #00c4cc) 70%, #fff)); }
+    .status-badge { position:absolute; bottom:6px; right:6px; font-size: 0.7rem; padding: 4px 6px; border-radius: 8px; background: color-mix(in srgb, var(--color-surface-hover) 80%, var(--color-surface) 20%); box-shadow: 0 6px 12px rgba(0,0,0,0.18); }
+    .status-badge.success { color: var(--color-success, #16a34a); }
     .profile-block { background: color-mix(in srgb, var(--color-surface) 85%, var(--color-surface-hover) 15%); border-radius: 14px; padding: 0.9rem; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 22px rgba(0,0,0,0.12); }
     .field-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 0.85rem 1.1rem; }
     .field { display:flex; flex-direction:column; gap:0.35rem; }
@@ -451,11 +465,18 @@ export class SchoolSettingsComponent implements OnInit {
   faviconPreview: string | null = null;
   logoHover = false;
   faviconHover = false;
+  brandingError: 'logo' | 'favicon' | null = null;
+  logoProgress = 0;
+  faviconProgress = 0;
+  logoSuccess = false;
+  faviconSuccess = false;
   copiedKey: 'domain' | null = null;
   websiteTail = '';
   get faviconInitial(): string {
     return (this.initials || 'M').slice(0, 1);
   }
+  domainStatus: 'idle' | 'validating' | 'valid' | 'invalid' = 'idle';
+  private domainCheckTimer: any = null;
 
   constructor(private settingsService: SchoolSettingsService) { }
 
@@ -613,6 +634,7 @@ export class SchoolSettingsComponent implements OnInit {
 
   onDragLeave(type: 'logo' | 'favicon') {
     if (type === 'logo') this.logoHover = false; else this.faviconHover = false;
+    if (this.brandingError === type) this.brandingError = null;
   }
 
   onDrop(event: DragEvent, type: 'logo' | 'favicon') {
@@ -641,16 +663,55 @@ export class SchoolSettingsComponent implements OnInit {
   }
 
   private readFile(file: File, type: 'logo' | 'favicon') {
+    if (!file.type.startsWith('image/')) {
+      this.brandingError = type;
+      setTimeout(() => { if (this.brandingError === type) this.brandingError = null; }, 1200);
+      return;
+    }
+    if (type === 'logo') { this.logoProgress = 5; this.logoSuccess = false; }
+    else { this.faviconProgress = 5; this.faviconSuccess = false; }
+
+    const progressInterval = setInterval(() => {
+      if (type === 'logo') {
+        this.logoProgress = Math.min(98, this.logoProgress + 12);
+      } else {
+        this.faviconProgress = Math.min(98, this.faviconProgress + 12);
+      }
+    }, 120);
+
     const reader = new FileReader();
     reader.onload = () => {
-      if (type === 'logo') this.logoPreview = reader.result as string;
-      else this.faviconPreview = reader.result as string;
+      clearInterval(progressInterval);
+      if (type === 'logo') {
+        this.logoPreview = reader.result as string;
+        this.logoProgress = 100;
+        this.logoSuccess = true;
+        setTimeout(() => { this.logoSuccess = false; this.logoProgress = 0; }, 1500);
+      } else {
+        this.faviconPreview = reader.result as string;
+        this.faviconProgress = 100;
+        this.faviconSuccess = true;
+        setTimeout(() => { this.faviconSuccess = false; this.faviconProgress = 0; }, 1500);
+      }
     };
     reader.readAsDataURL(file);
   }
 
   private stripUrlPrefix(url: string): string {
     return url.replace(/^https?:\/\/(www\.)?/, '');
+  }
+
+  onDomainChange(value: string) {
+    if (this.domainCheckTimer) clearTimeout(this.domainCheckTimer);
+    this.domainStatus = 'validating';
+    this.domainCheckTimer = setTimeout(() => {
+      const isValid = /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(value || '');
+      if (!isValid) {
+        this.domainStatus = 'invalid';
+        return;
+      }
+      this.domainStatus = 'valid';
+    }, 500);
   }
   removeSubject(idx: number) { this.model.subjects.splice(idx, 1); }
 
