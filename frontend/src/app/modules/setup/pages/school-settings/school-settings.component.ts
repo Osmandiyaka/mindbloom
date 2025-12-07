@@ -175,13 +175,19 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
       </div>
 
       <div class="grid" *ngIf="tab === 'academics'">
-        <section class="card">
+        <section class="card soft academic-card">
           <h3><span class="icon">🗓️</span> Locale & Academic Year</h3>
           <label>Timezone
-            <input [(ngModel)]="model.timezone" placeholder="America/New_York" />
+            <div class="input-icon-row">
+              <span class="input-icon" aria-hidden="true">🌍</span>
+              <input [(ngModel)]="model.timezone" placeholder="America/New_York" />
+            </div>
           </label>
           <label>Locale
-            <input [(ngModel)]="model.locale" placeholder="en-US" />
+            <div class="input-icon-row">
+              <span class="input-icon" aria-hidden="true">🗣️</span>
+              <input [(ngModel)]="model.locale" placeholder="en-US" />
+            </div>
           </label>
           <div class="split equal">
             <label>Academic Year Start
@@ -193,12 +199,12 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
           </div>
         </section>
 
-        <section class="card soft">
+        <section class="card soft academic-card">
           <div class="card-header">
             <h3>Departments</h3>
-            <button class="chip" type="button" (click)="openModal('dept')">+ Add</button>
+            <button class="chip primary" type="button" (click)="openModal('dept')">＋</button>
           </div>
-          <table class="table">
+          <table class="table airy">
             <thead>
               <tr><th>Name</th><th>Code</th><th></th></tr>
             </thead>
@@ -206,19 +212,19 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
               <tr *ngFor="let dept of model.departments; let idx = index">
                 <td>{{ dept.name }}</td>
                 <td>{{ dept.code }}</td>
-                <td><button class="chip danger" type="button" (click)="removeDept(idx)">Remove</button></td>
+                <td><button class="chip ghost" type="button" (click)="removeDept(idx)">Remove</button></td>
               </tr>
               <tr *ngIf="!model.departments.length"><td colspan="3" class="empty">No departments</td></tr>
             </tbody>
           </table>
         </section>
 
-        <section class="card soft">
+        <section class="card soft academic-card">
           <div class="card-header">
             <h3>Grades</h3>
-            <button class="chip" type="button" (click)="openModal('grade')">+ Add</button>
+            <button class="chip primary" type="button" (click)="openModal('grade')">＋</button>
           </div>
-          <table class="table">
+          <table class="table airy">
             <thead>
               <tr><th>Name</th><th>Code</th><th>Level</th><th></th></tr>
             </thead>
@@ -227,19 +233,19 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
                 <td>{{ grade.name }}</td>
                 <td>{{ grade.code }}</td>
                 <td>{{ grade.level }}</td>
-                <td><button class="chip danger" type="button" (click)="removeGrade(idx)">Remove</button></td>
+                <td><button class="chip ghost" type="button" (click)="removeGrade(idx)">Remove</button></td>
               </tr>
               <tr *ngIf="!model.grades.length"><td colspan="4" class="empty">No grades</td></tr>
             </tbody>
           </table>
         </section>
 
-        <section class="card soft">
+        <section class="card soft academic-card subjects-card">
           <div class="card-header">
             <h3>Subjects</h3>
-            <button class="chip" type="button" (click)="openModal('subject')">+ Add</button>
+            <button class="chip primary" type="button" (click)="openModal('subject')">＋</button>
           </div>
-          <table class="table">
+          <table class="table airy">
             <thead>
               <tr><th>Name</th><th>Code</th><th></th></tr>
             </thead>
@@ -247,7 +253,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
               <tr *ngFor="let subj of model.subjects; let idx = index">
                 <td>{{ subj.name }}</td>
                 <td>{{ subj.code }}</td>
-                <td><button class="chip danger" type="button" (click)="removeSubject(idx)">Remove</button></td>
+                <td><button class="chip ghost" type="button" (click)="removeSubject(idx)">Remove</button></td>
               </tr>
               <tr *ngIf="!model.subjects.length"><td colspan="3" class="empty">No subjects</td></tr>
             </tbody>
@@ -348,6 +354,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .card { background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); border:none; border-radius:14px; padding:1.15rem; box-shadow: 0 12px 28px rgba(0,0,0,0.16); display:flex; flex-direction:column; gap:0.5rem; }
     .card.flat { background: transparent; box-shadow: none; padding: 0; }
     .card.soft { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 10px 22px rgba(0,0,0,0.12); }
+    .academic-card { border: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 14px 30px rgba(0,0,0,0.16); }
+    .subjects-card { grid-column: 1 / -1; }
     .card h3 { margin:0 0 0.3rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-size:1.05rem; display: inline-flex; align-items: center; gap: 0.4rem; }
     .card .icon { margin-right:0.35rem; filter: grayscale(0); color: var(--color-primary, #00c4cc); }
     .branding-card { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border-radius: 14px; padding: 0.9rem 1rem; box-shadow: 0 10px 24px rgba(0,0,0,0.14); margin-bottom: 0.4rem; display: flex; flex-direction: column; gap: 0.75rem; transition: box-shadow 0.2s ease, border-color 0.2s ease; }
@@ -402,7 +410,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .prefix-input input:focus { box-shadow:none; outline:none; padding-left: 0.4rem !important; }
     .prefix-input:focus-within { border-color: var(--color-primary, #00c4cc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #00c4cc) 28%, transparent); }
     .split { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:0.5rem; align-items:end; }
-    .split.equal label { width: 100%; }
+    .split.equal { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:0.6rem; align-items:center; }
+    .split.equal label { width: 100%; display:flex; flex-direction:column; gap:0.25rem; }
     .list { display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap; }
     .chip { border:1px solid color-mix(in srgb, var(--color-border) 50%, transparent); border-radius:10px; padding:0.45rem 0.75rem; background: color-mix(in srgb, var(--color-surface-hover) 80%, var(--color-surface) 20%); cursor:pointer; }
     .chip.danger { border-color: rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); }
@@ -412,12 +421,13 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .tiny { font-size: 0.8rem; line-height: 1.3; }
     .error { color: var(--color-error,#ef4444); font-weight:600; }
     .card-header { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.25rem; }
-    .table { width:100%; border-collapse:separate; border-spacing:0 6px; font-size:0.95rem; background: transparent; color: var(--color-text-primary); }
-    .table th, .table td { text-align:left; padding:0.6rem 0.65rem; background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); }
-    .table th { color: var(--color-text-secondary); font-weight:700; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.04em; background: transparent; }
+    .table { width:100%; border-collapse:separate; border-spacing:0 4px; font-size:0.95rem; background: transparent; color: var(--color-text-primary); }
+    .table th, .table td { text-align:left; padding:0.5rem 0.6rem; background: color-mix(in srgb, var(--color-surface) 92%, var(--color-surface-hover) 8%); }
+    .table th { color: var(--color-text-secondary); font-weight:600; text-transform:capitalize; font-size:0.8rem; letter-spacing:0.02em; }
+    .table tbody tr td { border-top: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); }
+    .table tbody tr:hover td { background: color-mix(in srgb, var(--color-surface-hover, rgba(255,255,255,0.08)) 70%, var(--color-surface) 30%); }
     .table tbody tr td:first-child, .table thead tr th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
     .table tbody tr td:last-child, .table thead tr th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
-    .table tbody tr:hover td { box-shadow: 0 10px 18px rgba(0,0,0,0.1); }
     .input-icon-row { position: relative; display:flex; align-items:center; min-height: 46px; }
     .input-icon { position:absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); color: var(--color-text-tertiary); transition: color 0.18s ease, transform 0.18s ease; pointer-events: none; display: inline-flex; align-items: center; }
     .input-icon-row:focus-within .input-icon { color: var(--color-primary, #00c4cc); transform: translate(1px, -50%); }
