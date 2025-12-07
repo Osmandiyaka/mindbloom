@@ -6,8 +6,8 @@ import { IAdmissionRepository, ADMISSION_REPOSITORY } from '../../../domain/port
 import { IStudentRepository, STUDENT_REPOSITORY } from '../../../domain/ports/out/student-repository.port';
 import { Student, StudentProps, StudentStatus } from '../../../domain/student/entities/student.entity';
 import { TasksService } from '../../../modules/tasks/tasks.service';
-import { InvoicesService } from '../../../modules/accounting/invoices.service';
-import { FeePlansService } from '../../../modules/fees/fee-plans.service';
+import { InvoicesService } from '../../../modules/fees/invoices.service';
+import { FeePlansService } from '../../../modules/fees/plans.service';
 
 @Injectable()
 export class EnrollStudentFromApplicationUseCase {

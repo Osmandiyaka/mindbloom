@@ -17,7 +17,6 @@ import {
 import { AdmissionsController } from '../../presentation/controllers/admissions.controller';
 import { TasksModule } from '../tasks/tasks.module';
 import { FeesModule } from '../fees/fees.module';
-import { AccountingModule } from '../accounting/accounting.module';
 
 @Module({
     imports: [
@@ -27,8 +26,7 @@ import { AccountingModule } from '../accounting/accounting.module';
         ]),
         EventEmitterModule.forRoot(),
         TasksModule,
-        FeesModule,
-        AccountingModule, // For InvoicesService
+        FeesModule, // Changed from AccountingModule
     ],
     controllers: [AdmissionsController],
     providers: [
