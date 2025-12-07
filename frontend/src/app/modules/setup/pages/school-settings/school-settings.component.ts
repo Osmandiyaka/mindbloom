@@ -372,8 +372,9 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .field.compact { max-width: 420px; }
     .field.full { grid-column: 1 / -1; }
     .label-row { display:flex; align-items:center; gap:0.5rem; }
-    label { display:flex; flex-direction:column; gap:0.1rem; font-weight:600; color: var(--color-text-secondary); letter-spacing: 0.01em; font-size: 0.82rem; transition: color 0.18s ease; }
+    label { display:inline-flex; align-items:center; gap:0.25rem; font-weight:600; color: var(--color-text-secondary); letter-spacing: 0.01em; font-size: 0.82rem; transition: color 0.18s ease; }
     .optional { font-size: 0.78rem; }
+    .required { color: var(--color-primary, #00c4cc); font-weight: 700; }
     input, select {
       border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
       border-radius:10px;
