@@ -234,7 +234,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
               <tr *ngFor="let dept of model.departments; let idx = index">
                 <td>{{ dept.name }}</td>
                 <td>{{ dept.code }}</td>
-                <td><button class="chip ghost" type="button" (click)="removeDept(idx)">Remove</button></td>
+                <td><button class="link-danger" type="button" (click)="removeDept(idx)">Remove</button></td>
               </tr>
               <tr *ngIf="!model.departments.length"><td colspan="3" class="empty">No departments</td></tr>
             </tbody>
@@ -255,7 +255,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
                 <td>{{ grade.name }}</td>
                 <td>{{ grade.code }}</td>
                 <td>{{ grade.level }}</td>
-                <td><button class="chip ghost" type="button" (click)="removeGrade(idx)">Remove</button></td>
+                <td><button class="link-danger" type="button" (click)="removeGrade(idx)">Remove</button></td>
               </tr>
               <tr *ngIf="!model.grades.length"><td colspan="4" class="empty">No grades</td></tr>
             </tbody>
@@ -291,7 +291,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
               <tr *ngFor="let subj of model.subjects; let idx = index">
                 <td>{{ subj.name }}</td>
                 <td>{{ subj.code }}</td>
-                <td><button class="chip ghost" type="button" (click)="removeSubject(idx)">Remove</button></td>
+                <td><button class="link-danger" type="button" (click)="removeSubject(idx)">Remove</button></td>
               </tr>
               <tr *ngIf="!model.subjects.length"><td colspan="3" class="empty">No subjects</td></tr>
             </tbody>
@@ -466,7 +466,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .year-group .split.equal.tight { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0.6rem; }
     .table { width:100%; border-collapse:separate; border-spacing:0 4px; font-size:0.95rem; background: transparent; color: var(--color-text-primary); }
     .table thead tr { border-bottom: 2px solid var(--color-primary, #e8be14); background: transparent; }
-    .table th, .table td { text-align:left; padding:0.48rem 0.6rem; background: transparent; }
+    .table th, .table td { text-align:left; padding:0.42rem 0.55rem; background: transparent; }
     .table th { color: color-mix(in srgb, var(--color-text-secondary, #e0d5c9) 90%, #ffffff 10%); font-weight:600; text-transform:capitalize; font-size:0.75rem; letter-spacing:0.02em; }
     .table tbody tr td { background: color-mix(in srgb, var(--color-surface-hover, #634d3b) 90%, #000000 10%); border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--color-text-primary, #ffffff); vertical-align: middle; }
     .table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--color-surface-hover, #634d3b) 80%, #000000 20%); }
@@ -474,6 +474,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .table tbody tr td:first-child, .table thead tr th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
     .table tbody tr td:last-child, .table thead tr th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
     .table th:last-child, .table td:last-child { text-align: right; }
+    .link-danger { background: transparent; border: none; color: var(--color-error, #e74c3c); padding: 0; font-weight: 650; cursor: pointer; text-decoration: none; transition: color 0.15s ease, text-decoration-color 0.15s ease; }
+    .link-danger:hover { text-decoration: underline; }
     .input-icon-row { position: relative; display:flex; align-items:center; min-height: 46px; }
     .input-icon { position:absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); color: var(--color-text-tertiary); transition: color 0.18s ease, transform 0.18s ease; pointer-events: none; display: inline-flex; align-items: center; }
     .input-icon-row:focus-within .input-icon { color: var(--color-primary, #00c4cc); transform: translate(1px, -50%); }
