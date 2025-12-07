@@ -404,14 +404,15 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .field.full { grid-column: 1 / -1; }
     .label-row { display:flex; align-items:center; gap:0.5rem; }
     label { display:inline-flex; align-items:flex-start; gap:0.25rem; font-weight:600; color: var(--color-text-secondary); letter-spacing: 0.01em; font-size: 0.82rem; transition: color 0.18s ease; width: 100%; }
-    .contact-card label { flex-direction: column; gap: 0.3rem; align-items: flex-start; }
+    .contact-card label { flex-direction: column; gap: 0.22rem; align-items: flex-start; }
     .contact-card .input-icon-row { width: 100%; }
+    .contact-card .input-icon { color: var(--color-accent, var(--color-primary)); }
     .optional { font-size: 0.78rem; }
     .required { color: var(--color-primary, #00c4cc); font-weight: 700; }
     input, select {
       border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
       border-radius:10px;
-      padding:0.6rem 0.75rem 0.6rem 2.3rem;
+      padding:0.55rem 0.7rem 0.55rem 2.2rem;
       background: color-mix(in srgb, var(--color-background) 92%, var(--color-surface-hover) 8%);
       color: var(--color-text-primary);
       transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
