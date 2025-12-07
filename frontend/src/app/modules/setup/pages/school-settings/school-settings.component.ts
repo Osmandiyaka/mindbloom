@@ -23,7 +23,6 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
         <button class="tab" [class.active]="tab === 'profile'" (click)="tab = 'profile'">Profile</button>
         <button class="tab" [class.active]="tab === 'contact'" (click)="tab = 'contact'">Contact & Address</button>
         <button class="tab" [class.active]="tab === 'academics'" (click)="tab = 'academics'">Academics</button>
-        <button class="tab" [class.active]="tab === 'grading'" (click)="tab = 'grading'">Grading</button>
       </div>
 
       <div class="grid" *ngIf="tab === 'profile'">
@@ -280,13 +279,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
             </tbody>
           </table>
         </section>
-      </div>
-      <div class="section-actions" *ngIf="tab === 'academics'">
-        <button class="btn primary" (click)="saveAcademics()" [disabled]="saving">Save Academics</button>
-      </div>
 
-      <div class="grid" *ngIf="tab === 'grading'">
-        <section class="card flat">
+        <section class="card soft academic-card grading-card">
           <h3><span class="icon">📊</span> Grading Scheme</h3>
           <label>Type
             <select [(ngModel)]="model.gradingScheme.type">
@@ -300,8 +294,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
           </label>
         </section>
       </div>
-      <div class="section-actions" *ngIf="tab === 'grading'">
-        <button class="btn primary" (click)="saveGrading()" [disabled]="saving">Save Grading</button>
+      <div class="section-actions" *ngIf="tab === 'academics'">
+        <button class="btn primary" (click)="saveAcademics()" [disabled]="saving">Save Academics</button>
       </div>
 
       <div class="footer-actions" *ngIf="saveError || saved">
@@ -367,8 +361,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .btn.tiny { padding: 0.35rem 0.6rem; font-size: 0.85rem; box-shadow: none; }
     .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:0.85rem 1.2rem; padding-bottom: 0.25rem; }
     .tabs { display:flex; gap:0.4rem; margin-top:0.35rem; }
-    .tabs.segmented { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); background: color-mix(in srgb, var(--color-surface-hover) 85%, var(--color-surface) 15%); border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent); padding:0.35rem; border-radius: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); gap:0.2rem; overflow: hidden; }
-    .tabs.segmented::before { content: ''; position: absolute; top: 6px; bottom: 6px; width: calc(100% / 4 - 8px); left: calc((100% / 4) * var(--active-index, 0) + 4px); background: color-mix(in srgb, var(--color-surface) 85%, var(--color-primary, #00c4cc) 15%); border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: all 0.22s ease-out; }
+    .tabs.segmented { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); background: color-mix(in srgb, var(--color-surface-hover) 85%, var(--color-surface) 15%); border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent); padding:0.35rem; border-radius: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); gap:0.2rem; overflow: hidden; }
+    .tabs.segmented::before { content: ''; position: absolute; top: 6px; bottom: 6px; width: calc(100% / 3 - 8px); left: calc((100% / 3) * var(--active-index, 0) + 4px); background: color-mix(in srgb, var(--color-surface) 85%, var(--color-primary, #00c4cc) 15%); border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: all 0.22s ease-out; }
     .tab { padding:0.6rem 0.95rem; border-radius:10px; border:none; background: transparent; cursor:pointer; font-weight:650; color: var(--color-text-secondary); transition: color 0.2s ease; position: relative; z-index: 1; }
     .tab.active { color: var(--color-text-primary); font-weight:700; }
     .tab:hover:not(.active) { color: var(--color-text-primary); }
@@ -503,9 +497,9 @@ export class SchoolSettingsComponent implements OnInit {
   saving = false;
   saved = false;
   saveError = '';
-  tab: 'profile' | 'contact' | 'academics' | 'grading' = 'profile';
+  tab: 'profile' | 'contact' | 'academics' = 'profile';
   get activeTabIndex(): number {
-    const order: Array<typeof this.tab> = ['profile', 'contact', 'academics', 'grading'];
+    const order: Array<typeof this.tab> = ['profile', 'contact', 'academics'];
     return Math.max(0, order.indexOf(this.tab));
   }
 
@@ -632,22 +626,7 @@ export class SchoolSettingsComponent implements OnInit {
       },
       departments: this.model.departments,
       grades: this.model.grades,
-      subjects: this.model.subjects
-    });
-    this.settingsService.save(payload as SchoolSettings).subscribe(() => {
-      this.saving = false;
-      this.saved = true;
-    }, (err) => {
-      this.saving = false;
-      this.saveError = err?.error?.message || 'Unable to save settings. Please try again.';
-    });
-  }
-
-  saveGrading() {
-    this.saving = true;
-    this.saved = false;
-    this.saveError = '';
-    const payload: Partial<SchoolSettings> = this.cleanPayload({
+      subjects: this.model.subjects,
       gradingScheme: this.model.gradingScheme
     });
     this.settingsService.save(payload as SchoolSettings).subscribe(() => {
