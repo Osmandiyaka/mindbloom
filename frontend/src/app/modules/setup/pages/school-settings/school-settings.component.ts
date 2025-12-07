@@ -28,15 +28,38 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
       <div class="grid" *ngIf="tab === 'profile'">
         <section class="card flat">
           <h3><span class="icon">🎓</span> School Profile</h3>
-          <label>School Name
-            <input [(ngModel)]="model.schoolName" required placeholder="School name" />
-          </label>
-          <label>Domain
-            <input [(ngModel)]="model.domain" placeholder="myschool.edu" />
-          </label>
-          <label>Website
-            <input [(ngModel)]="model.website" placeholder="https://..." />
-          </label>
+          <div class="profile-block">
+            <div class="field-grid">
+              <div class="field compact">
+                <label>School Name</label>
+                <div class="input-icon-row">
+                  <span class="input-icon" aria-hidden="true">🏫</span>
+                  <input [(ngModel)]="model.schoolName" required placeholder="School name" />
+                </div>
+              </div>
+              <div class="field compact">
+                <div class="label-row">
+                  <label>Domain</label>
+                  <span class="optional muted">(Required)</span>
+                </div>
+                <div class="input-icon-row">
+                  <span class="input-icon" aria-hidden="true">🌐</span>
+                  <input [(ngModel)]="model.domain" placeholder="myschool.edu" />
+                </div>
+                <p class="help">Use your public domain (no protocol). This appears on emails and reports.</p>
+              </div>
+              <div class="field compact">
+                <div class="label-row">
+                  <label>Website</label>
+                  <span class="optional muted">(Optional)</span>
+                </div>
+                <div class="input-icon-row">
+                  <span class="input-icon" aria-hidden="true">🔗</span>
+                  <input [(ngModel)]="model.website" placeholder="https://..." />
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
       </div>
       <div class="section-actions" *ngIf="tab === 'profile'">
@@ -249,7 +272,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .sub { margin:0; color: var(--color-text-secondary); line-height:1.45; }
     .btn { border-radius:12px; border:1px solid color-mix(in srgb, var(--color-border) 50%, transparent); padding:0.7rem 1.15rem; font-weight:650; cursor:pointer; background: color-mix(in srgb, var(--color-surface) 85%, var(--color-surface-hover) 15%); color: var(--color-text-primary); transition: all 0.2s ease; box-shadow: 0 10px 22px rgba(0,0,0,0.18); }
     .btn.primary { background: linear-gradient(135deg, #f6c344, #f2a811); color: var(--color-surface, #0f0f12); border:none; box-shadow: 0 16px 34px rgba(242, 168, 17, 0.42); }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 14px 26px rgba(0,0,0,0.24); }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(0,0,0,0.24); }
     .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:0.85rem 1.2rem; padding-bottom: 0.25rem; }
     .tabs { display:flex; gap:0.4rem; margin-top:0.35rem; }
     .tabs.segmented { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); background: color-mix(in srgb, var(--color-surface-hover) 85%, var(--color-surface) 15%); border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent); padding:0.35rem; border-radius: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); gap:0.2rem; overflow: hidden; }
@@ -262,15 +285,23 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .card.soft { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 10px 22px rgba(0,0,0,0.12); }
     .card h3 { margin:0 0 0.3rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-size:1.05rem; display: inline-flex; align-items: center; gap: 0.4rem; }
     .card .icon { margin-right:0.35rem; filter: grayscale(0); color: var(--color-primary, #00c4cc); }
-    label { display:flex; flex-direction:column; gap:0.12rem; font-weight:600; color: var(--color-text-secondary); letter-spacing: 0.01em; transition: color 0.18s ease; }
+    .profile-block { background: color-mix(in srgb, var(--color-surface) 85%, var(--color-surface-hover) 15%); border-radius: 14px; padding: 0.9rem; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 22px rgba(0,0,0,0.12); }
+    .field-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 0.85rem 1.1rem; }
+    .field { display:flex; flex-direction:column; gap:0.35rem; }
+    .field.compact { max-width: 420px; }
+    .label-row { display:flex; align-items:center; gap:0.5rem; }
+    label { display:flex; flex-direction:column; gap:0.1rem; font-weight:600; color: var(--color-text-secondary); letter-spacing: 0.01em; font-size: 0.82rem; transition: color 0.18s ease; }
+    .optional { font-size: 0.78rem; }
     input, select {
       border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
       border-radius:10px;
-      padding:0.6rem 0.75rem;
+      padding:0.6rem 0.75rem 0.6rem 2.3rem;
       background: color-mix(in srgb, var(--color-background) 92%, var(--color-surface-hover) 8%);
       color: var(--color-text-primary);
       transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+      font-size: 0.95rem;
+      font-weight: 500;
     }
     input::placeholder, select::placeholder { color: var(--color-text-secondary); }
     input:focus, select:focus {
@@ -296,6 +327,12 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .table tbody tr td:first-child, .table thead tr th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
     .table tbody tr td:last-child, .table thead tr th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
     .table tbody tr:hover td { box-shadow: 0 10px 18px rgba(0,0,0,0.1); }
+    .input-icon-row { position: relative; display:flex; align-items:center; }
+    .input-icon { position:absolute; left: 0.65rem; color: var(--color-text-tertiary); transition: color 0.18s ease; pointer-events: none; }
+    .input-icon-row input:focus + .input-icon,
+    .input-icon-row:focus-within .input-icon { color: var(--color-primary, #00c4cc); }
+    .input-icon-row input:focus { padding-left: 2.3rem; }
+    .help { margin: 2px 0 0; color: var(--color-text-tertiary); font-size: 0.78rem; line-height: 1.4; }
     .empty { text-align:center; color: var(--color-text-secondary); padding:0.75rem 0; background: transparent; }
     .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:50; }
     .modal { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border-radius:14px; padding:1.25rem; width:min(480px, 90vw); border:none; box-shadow: 0 20px 48px rgba(0,0,0,0.35); }
