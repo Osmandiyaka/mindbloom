@@ -354,7 +354,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .card { background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); border:none; border-radius:14px; padding:1.15rem; box-shadow: 0 12px 28px rgba(0,0,0,0.16); display:flex; flex-direction:column; gap:0.5rem; }
     .card.flat { background: transparent; box-shadow: none; padding: 0; }
     .card.soft { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 10px 22px rgba(0,0,0,0.12); }
-    .academic-card { background: color-mix(in srgb, var(--color-surface) 82%, #1d1a17 18%); border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 14px 30px rgba(0,0,0,0.16); }
+    .academic-card { background: var(--color-surface-hover, #634d3b); border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 14px 30px rgba(0,0,0,0.16); color: var(--color-text-primary, #ffffff); }
     .subjects-card { grid-column: 1 / -1; }
     .card h3 { margin:0 0 0.3rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-size:1.05rem; display: inline-flex; align-items: center; gap: 0.4rem; }
     .card .icon { margin-right:0.35rem; filter: grayscale(0); color: var(--color-primary, #00c4cc); }
@@ -424,12 +424,12 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .error { color: var(--color-error,#ef4444); font-weight:600; }
     .card-header { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.25rem; }
     .table { width:100%; border-collapse:separate; border-spacing:0 4px; font-size:0.95rem; background: transparent; color: var(--color-text-primary); }
-    .table thead tr { border-bottom: 2px solid color-mix(in srgb, var(--color-primary, #f6c344) 85%, var(--color-text-primary, #ffffff) 15%); background: color-mix(in srgb, var(--color-surface, #1e1e1e) 88%, var(--color-background, #ffffff) 12%); }
+    .table thead tr { border-bottom: 2px solid var(--color-primary, #e8be14); background: transparent; }
     .table th, .table td { text-align:left; padding:0.48rem 0.6rem; background: transparent; }
-    .table th { color: color-mix(in srgb, var(--color-text-secondary, #a0a0a0) 85%, #ffffff 15%); font-weight:600; text-transform:capitalize; font-size:0.75rem; letter-spacing:0.02em; }
-    .table tbody tr td { background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); border-top: 1px solid color-mix(in srgb, var(--color-border, rgba(255,255,255,0.08)) 60%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--color-border, rgba(255,255,255,0.08)) 60%, transparent); }
-    .table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--color-surface) 80%, var(--color-surface-hover) 20%); }
-    .table tbody tr:hover td { background: color-mix(in srgb, var(--color-surface-hover, rgba(255,255,255,0.08)) 70%, var(--color-surface) 30%); }
+    .table th { color: color-mix(in srgb, var(--color-text-secondary, #e0d5c9) 90%, #ffffff 10%); font-weight:600; text-transform:capitalize; font-size:0.75rem; letter-spacing:0.02em; }
+    .table tbody tr td { background: color-mix(in srgb, var(--color-surface-hover, #634d3b) 90%, #000000 10%); border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--color-text-primary, #ffffff); }
+    .table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--color-surface-hover, #634d3b) 80%, #000000 20%); }
+    .table tbody tr:hover td { background: rgba(255,255,255,0.05); }
     .table tbody tr td:first-child, .table thead tr th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
     .table tbody tr td:last-child, .table thead tr th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
     .input-icon-row { position: relative; display:flex; align-items:center; min-height: 46px; }
