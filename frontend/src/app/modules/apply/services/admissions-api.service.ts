@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { TenantService } from '../../../core/services/tenant.service';
 
 export interface CreateApplicationDto {
     // Personal Information
@@ -100,20 +101,27 @@ export interface ApplicationFilters {
 })
 export class AdmissionsApiService {
     private http = inject(HttpClient);
+    private tenantService = inject(TenantService);
     private baseUrl = `${environment.apiUrl}/admissions`;
 
     /**
      * Create a new application (PUBLIC - No authentication required)
+     * Requires tenant ID from current tenant context
      */
     createApplication(dto: CreateApplicationDto): Observable<Application> {
-        return this.http.post<Application>(this.baseUrl, dto);
+        const tenantId = this.tenantService.getTenantId();
+        const params = new HttpParams().set('tenantId', tenantId || '');
+        return this.http.post<Application>(this.baseUrl, dto, { params });
     }
 
     /**
      * Get application by application number (PUBLIC)
+     * Requires tenant ID from current tenant context
      */
     getApplicationByNumber(applicationNumber: string): Observable<Application> {
-        return this.http.get<Application>(`${this.baseUrl}/public/${applicationNumber}`);
+        const tenantId = this.tenantService.getTenantId();
+        const params = new HttpParams().set('tenantId', tenantId || '');
+        return this.http.get<Application>(`${this.baseUrl}/public/${applicationNumber}`, { params });
     }
 
     /**

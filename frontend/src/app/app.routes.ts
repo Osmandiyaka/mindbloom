@@ -1,7 +1,20 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
+import { inject } from '@angular/core';
+import { TenantService } from './core/services/tenant.service';
 
 export const routes: Routes = [
+    // Host landing page (no subdomain)
+    {
+        path: 'host',
+        loadComponent: () => import('./pages/host-landing/host-landing.component').then(m => m.HostLandingComponent)
+    },
+    // Public routes (no sidebar/layout)
+    {
+        path: 'apply',
+        loadChildren: () => import('./modules/apply/apply.routes').then(m => m.APPLY_ROUTES)
+    },
+    // Protected routes (with sidebar/layout)
     {
         path: '',
         component: MainLayoutComponent,
@@ -22,10 +35,6 @@ export const routes: Routes = [
             {
                 path: 'admissions',
                 loadChildren: () => import('./modules/admissions/admissions.routes').then(m => m.ADMISSIONS_ROUTES)
-            },
-            {
-                path: 'apply',
-                loadChildren: () => import('./modules/apply/apply.routes').then(m => m.APPLY_ROUTES)
             },
             {
                 path: 'academics',

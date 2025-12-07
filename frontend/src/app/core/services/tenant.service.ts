@@ -149,8 +149,40 @@ export class TenantService {
         return featuresByPlan[tenant.plan]?.includes(feature) || false;
     }
 
-    private getTenantFromStorage(): Tenant | null {
+    getTenantFromStorage(): Tenant | null {
         const tenantStr = localStorage.getItem(this.STORAGE_KEY);
         return tenantStr ? JSON.parse(tenantStr) : null;
+    }
+
+    /**
+     * Extract subdomain from current URL
+     * Examples:
+     * - greenwood-academy.localhost:4200 → 'greenwood-academy'
+     * - oak-valley.mindbloom.com → 'oak-valley'
+     * - localhost:4200 → null
+     * - mindbloom.com → null
+     */
+    extractSubdomainFromUrl(): string | null {
+        const hostname = window.location.hostname;
+        const parts = hostname.split('.');
+        
+        // For localhost with subdomain: subdomain.localhost
+        if (hostname.includes('localhost')) {
+            return parts.length > 1 ? parts[0] : null;
+        }
+        
+        // For production: subdomain.domain.com (need at least 3 parts)
+        if (parts.length >= 3) {
+            return parts[0];
+        }
+        
+        return null;
+    }
+
+    /**
+     * Check if current URL is host domain (no subdomain)
+     */
+    isHostDomain(): boolean {
+        return this.extractSubdomainFromUrl() === null;
     }
 }

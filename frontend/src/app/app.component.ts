@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router } from '@angular/router';
 import { LoginOverlayComponent } from './modules/auth/components/login-overlay/login-overlay.component';
 import { AuthService } from './core/services/auth.service';
 import { TenantService } from './core/services/tenant.service';
@@ -36,22 +36,54 @@ export class AppComponent implements OnInit {
     constructor(
         public authService: AuthService,
         private tenantService: TenantService,
-        private themeService: ThemeService // Initialize theme service
+        private themeService: ThemeService,
+        private router: Router
     ) { }
 
     ngOnInit(): void {
-        // For development: Set a default tenant if none exists
-        if (!environment.production && !this.tenantService.getTenantId()) {
-            const devTenant = {
-                id: '674189e9f57b370bbc3efae9',
-                name: 'Development School',
-                subdomain: 'dev',
-                status: 'active' as const,
-                plan: 'enterprise' as const,
-                contactInfo: { email: 'admin@devschool.local' },
-            };
-            this.tenantService.setTenant(devTenant);
-            console.log('Development tenant initialized:', devTenant);
+        this.initializeTenant();
+    }
+
+    private initializeTenant(): void {
+        const subdomain = this.tenantService.extractSubdomainFromUrl();
+        
+        // If no subdomain (base domain), show host landing page
+        if (!subdomain) {
+            console.warn('No tenant subdomain detected - showing host landing page');
+            this.router.navigate(['/host']);
+            return;
         }
+
+        // Check if tenant already loaded in storage
+        const storedTenant = this.tenantService.getTenantFromStorage();
+        if (storedTenant && storedTenant.subdomain === subdomain) {
+            console.log('Using cached tenant:', storedTenant.name);
+            return;
+        }
+
+        // Fetch tenant from backend by subdomain
+        this.tenantService.getTenantBySubdomain(subdomain).subscribe({
+            next: (tenant) => {
+                this.tenantService.setTenant(tenant);
+                console.log('Tenant loaded:', tenant.name);
+            },
+            error: (err) => {
+                console.error('Failed to load tenant:', err);
+                
+                // Development fallback
+                if (!environment.production) {
+                    console.warn('Using development tenant fallback');
+                    const devTenant = {
+                        id: '674189e9f57b370bbc3efae9',
+                        name: 'Development School',
+                        subdomain: subdomain,
+                        status: 'active' as const,
+                        plan: 'enterprise' as const,
+                        contactInfo: { email: 'admin@devschool.local' },
+                    };
+                    this.tenantService.setTenant(devTenant);
+                }
+            }
+        });
     }
 }
