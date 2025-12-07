@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { IconRegistryService } from '../../services/icon-registry.service';
+import { TenantService, Tenant } from '../../../core/services/tenant.service';
 
 interface NavItem {
   label: string;
@@ -25,8 +26,13 @@ interface NavSection {
       <!-- Logo/Brand -->
       <div class="sidebar-header">
         <div class="sidebar-logo">
-          <span class="nav-icon" [innerHTML]="icon('dashboard')"></span>
-          <span>MindBloom</span>
+          <ng-container *ngIf="tenantLogo; else defaultLogo">
+            <img [src]="tenantLogo" alt="Tenant logo" class="logo-img" />
+          </ng-container>
+          <ng-template #defaultLogo>
+            <span class="nav-icon" [innerHTML]="icon('dashboard')"></span>
+          </ng-template>
+          <span>{{ tenantName || 'MindBloom' }}</span>
         </div>
       </div>
 
@@ -93,6 +99,14 @@ interface NavSection {
       color: var(--color-text-primary, #0f172a);
       letter-spacing: 0.01em;
       transition: opacity 0.2s ease;
+    }
+    .sidebar-logo .logo-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      object-fit: cover;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.22);
+      background: var(--color-surface-hover, #e5e7eb);
     }
     .sidebar.sidebar-collapsed .sidebar-logo span:last-child {
       opacity: 0;
@@ -196,6 +210,8 @@ interface NavSection {
 export class SidebarComponent implements OnInit {
   @Input() collapsed = false;
   currentUser: any;
+  tenantLogo: string | null = null;
+  tenantName: string | null = null;
 
   navSections: NavSection[] = [
     {
@@ -263,7 +279,8 @@ export class SidebarComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private icons: IconRegistryService
+    private icons: IconRegistryService,
+    private tenantService: TenantService
   ) { }
 
   icon(name: string) {
@@ -273,6 +290,10 @@ export class SidebarComponent implements OnInit {
   ngOnInit(): void {
     this.authService.currentUser$.subscribe((user: any) => {
       this.currentUser = user;
+    });
+    this.tenantService.currentTenant$.subscribe((tenant: Tenant | null) => {
+      this.tenantLogo = tenant?.customization?.logo || tenant?.customization?.favicon || null;
+      this.tenantName = tenant?.name || null;
     });
   }
 
