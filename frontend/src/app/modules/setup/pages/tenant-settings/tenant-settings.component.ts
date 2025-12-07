@@ -39,7 +39,6 @@ import { RoleListComponent } from '../roles/role-list.component';
         <div *ngSwitchCase="'invitations'" class="panel invitations-panel">
           <div class="panel-header stacked slim">
             <div>
-              <h2>User Invitations & Directory</h2>
               <p class="subtitle">Invite staff or partners with roles, manage existing users, and keep access up to date.</p>
             </div>
           </div>
@@ -97,13 +96,12 @@ import { RoleListComponent } from '../roles/role-list.component';
           </div>
           <div class="panel-header spaced padded users-header">
             <div class="stacked">
-              <h2>Tenant Users</h2>
               <p class="subtitle">Create and manage tenant users with roles.</p>
             </div>
-            <button class="btn primary" (click)="openUserModal()">
-              <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Zm7-3h-2v-2h-2V7h2V5h2v2h2v2h-2v2Z" fill="currentColor"/></svg>
-              Add User
-            </button>
+              <button class="btn primary" (click)="openUserModal()">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Zm7-3h-2v-2h-2V7h2V5h2v2h2v2h-2v2Z" fill="currentColor"/></svg>
+                Add User
+              </button>
           </div>
           <div class="card invites-card tight users-card">
             <div class="card-body toolbar">
@@ -111,7 +109,7 @@ import { RoleListComponent } from '../roles/role-list.component';
                 <span class="selected-count" *ngIf="selectedUserIds().size">{{ selectedUserIds().size }} selected</span>
               </div>
               <div class="actions">
-                <button class="btn ghost small" [disabled]="!selectedUserIds().size" (click)="bulkDelete()">
+                <button class="btn ghost small danger" [disabled]="!selectedUserIds().size" (click)="bulkDelete()">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 6h18" />
                     <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" />
@@ -143,7 +141,7 @@ import { RoleListComponent } from '../roles/role-list.component';
                     <td>{{ user.role?.name || '—' }}</td>
                     <td>{{ user.createdAt | date:'mediumDate' }}</td>
                     <td class="actions">
-                      <button class="btn ghost small" (click)="openUserModal(user)">Edit</button>
+                      <button class="action-link" (click)="openUserModal(user)">Edit</button>
                     </td>
                   </tr>
                 </tbody>
@@ -432,7 +430,7 @@ import { RoleListComponent } from '../roles/role-list.component';
     .alert.success { background: rgba(var(--color-success-rgb,16,185,129),0.08); color: var(--color-success); }
     .panel { display: flex; flex-direction: column; gap: 0.9rem; }
     .school-panel { background: transparent; border: none; border-radius: 16px; padding: 0; box-shadow: none; }
-    .invitations-panel { max-width: 1100px; gap: 0.5rem; }
+    .invitations-panel { max-width: 1100px; gap: 0.5rem; background: var(--color-surface); border-radius: 16px; padding: 0.5rem 0.65rem 0.8rem; }
     .panel.users-panel { background: transparent; border: none; border-radius: 16px; padding: 0; box-shadow: none; }
     .billing-panel { background: transparent; border: none; border-radius: 16px; padding: 0; box-shadow: none; }
     .plugins-panel { max-width: 1100px; gap: 0.5rem; }
@@ -444,21 +442,21 @@ import { RoleListComponent } from '../roles/role-list.component';
     .panel-header.users-header { background: transparent; border: none; border-radius: 12px; padding: 0.9rem 0.25rem; box-shadow: none; }
     .invite-card { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border: none; border-radius: 16px; padding: 1rem; box-shadow: 0 12px 32px rgba(0,0,0,0.12); display: flex; flex-direction: column; gap: 0.75rem; }
     .invite-card.flat { box-shadow: none; border-radius: 12px; border-color: transparent; }
-    .invite-row { display: grid; grid-template-columns: 1.2fr auto auto; gap: 0.65rem; align-items: center; background: color-mix(in srgb, var(--color-surface-hover) 75%, transparent); padding: 0.6rem; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent); }
+    .invite-row { display: grid; grid-template-columns: 1.2fr auto auto; gap: 0.65rem; align-items: stretch; background: color-mix(in srgb, var(--color-surface-hover) 75%, transparent); padding: 0.6rem; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent); }
     .invite-row.compact { margin-bottom: 0.25rem; }
     .input-icon { display: flex; align-items: center; gap: 10px; padding: 0.55rem 0.7rem; border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius: 12px; background: var(--color-surface); min-height: 48px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
     .input-icon svg { width: 18px; height: 18px; color: var(--color-accent, #70c6e1); }
     .input-icon input { border: none; outline: none; background: transparent; width: 100%; color: var(--color-text-primary); font-weight: 600; }
-    .invite-roles { min-width: 0; }
-    .invite-submit { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem 1rem; }
+    .invite-roles { min-width: 0; display: flex; align-items: center; border: 1px solid color-mix(in srgb, var(--color-accent) 65%, transparent); border-radius: 12px; padding: 0.35rem 0.45rem; background: color-mix(in srgb, var(--color-surface) 85%, transparent); }
+    .invite-submit { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem 1rem; color: var(--color-surface, #0f0f12); }
     .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; }
     .selected-roles .chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 6px 10px; border-radius: 999px; border: none; font-weight: 700; box-shadow: 0 10px 20px rgba(16,185,129,0.18); }
     .selected-roles .chip svg { width: 14px; height: 14px; }
     .pill { display: inline-flex; align-items: center; padding: 0.25rem 0.6rem; border-radius: 999px; font-weight: 600; background: color-mix(in srgb, var(--color-surface-hover) 80%, transparent); color: var(--color-text-secondary); }
     .pill.neutral { background: color-mix(in srgb, var(--color-surface) 75%, transparent); color: var(--color-text-primary); }
     .table { width: 100%; border-collapse: separate; border-spacing: 0 6px; background: transparent; color: var(--color-text-primary); }
-    .table th, .table td { padding: 0.75rem 0.85rem; text-align: left; color: var(--color-text-primary); background: transparent; }
-    .table th { color: var(--color-text-secondary); font-weight: 600; font-size: 0.8rem; background: transparent; border-bottom: 2px solid var(--color-primary, #e8be14); }
+    .table th, .table td { padding: 0.68rem 0.75rem; text-align: left; color: var(--color-text-primary); background: transparent; }
+    .table th { color: var(--color-text-secondary); font-weight: 600; font-size: 0.78rem; background: transparent; border-bottom: 2px solid var(--color-primary, #e8be14); }
     .table tr td:first-child, .table tr th:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
     .table tr td:last-child, .table tr th:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
     .table tr:hover td { box-shadow: 0 12px 24px rgba(0,0,0,0.08); }
@@ -483,7 +481,7 @@ import { RoleListComponent } from '../roles/role-list.component';
     .inline-toggles .toggle input:checked::after { content: '✓'; color: #fff; font-weight: 700; font-size: 12px; line-height: 1; position: absolute; }
     .user-form .selected-roles { margin-top: 0.25rem; }
     .muted { color: var(--color-text-tertiary); }
-    .badge { padding: 0.22rem 0.6rem; border-radius: 999px; background: color-mix(in srgb, var(--color-surface-hover) 80%, transparent); box-shadow: 0 6px 16px rgba(0,0,0,0.08); font-weight: 650; text-transform: capitalize; }
+    .badge { padding: 0.18rem 0.58rem; border-radius: 999px; background: color-mix(in srgb, var(--color-surface-hover) 80%, transparent); box-shadow: 0 6px 16px rgba(0,0,0,0.08); font-weight: 650; text-transform: capitalize; }
     .badge.revoked { background: rgba(var(--color-error-rgb,239,68,68),0.1); color: var(--color-error); }
     .badge.pending { background: rgba(var(--color-warning-rgb,243,156,18),0.12); color: var(--color-warning, #f39c12); }
     .badge.accepted { background: rgba(var(--color-success-rgb,112,173,71),0.12); color: var(--color-success, #70ad47); }
@@ -508,6 +506,7 @@ import { RoleListComponent } from '../roles/role-list.component';
     .invites-card .card-body { display: block; padding: 0.25rem 0.5rem 0.5rem; }
     .invites-card .table { margin: 0; }
     .users-card .card-body { padding-top: 0.5rem; }
+    .users-card .card-body.toolbar { background: color-mix(in srgb, var(--color-surface-hover) 60%, transparent); border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius: 12px; }
     .plugin-card { padding: 0.35rem 0.35rem 0.75rem; }
     .plugin-body { padding: 0.75rem 0.75rem 0.5rem; }
     /* ID Templates */
