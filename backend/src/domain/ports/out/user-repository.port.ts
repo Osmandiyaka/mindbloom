@@ -8,4 +8,7 @@ export interface IUserRepository {
     update(user: User): Promise<User>;
     validatePassword(email: string, password: string): Promise<boolean>;
     delete(id: string, tenantId: string): Promise<void>;
+    setResetToken(userId: string, tokenHash: string, expiresAt: Date): Promise<void>;
+    findByResetToken(tokenHash: string): Promise<User | null>;
+    updatePassword(userId: string, password: string): Promise<void>;
 }

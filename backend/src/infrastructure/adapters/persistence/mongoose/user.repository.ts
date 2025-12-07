@@ -99,6 +99,29 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
         return await bcrypt.compare(password, user.password);
     }
 
+    async setResetToken(userId: string, tokenHash: string, expiresAt: Date): Promise<void> {
+        await this.userModel.findByIdAndUpdate(userId, {
+            resetToken: tokenHash,
+            resetTokenExpires: expiresAt
+        }).exec();
+    }
+
+    async findByResetToken(tokenHash: string): Promise<User | null> {
+        const now = new Date();
+        const user = await this.userModel.findOne({ resetToken: tokenHash, resetTokenExpires: { $gt: now } }).exec();
+        return user ? this.toDomain(user) : null;
+    }
+
+    async updatePassword(userId: string, password: string): Promise<void> {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await this.userModel.findByIdAndUpdate(userId, {
+            password: hashedPassword,
+            resetToken: null,
+            resetTokenExpires: null,
+            updatedAt: new Date()
+        }).exec();
+    }
+
     private toDomain(doc: UserDocument): User {
         // Convert populated role document to Role entity
         let role: Role | null = null;

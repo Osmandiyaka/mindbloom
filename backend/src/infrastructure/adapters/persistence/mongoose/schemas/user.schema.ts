@@ -30,6 +30,12 @@ export class UserDocument extends Document {
     @Prop({ type: Boolean, default: false })
     mfaEnabled: boolean;
 
+    @Prop({ type: String, default: null })
+    resetToken?: string | null;
+
+    @Prop({ type: Date, default: null })
+    resetTokenExpires?: Date | null;
+
     createdAt: Date;
     updatedAt: Date;
 }
@@ -38,3 +44,4 @@ export const UserSchema = SchemaFactory.createForClass(UserDocument);
 
 // Add compound index for tenant-based queries
 UserSchema.index({ tenantId: 1, email: 1 }, { unique: true });
+UserSchema.index({ resetToken: 1, resetTokenExpires: 1 });
