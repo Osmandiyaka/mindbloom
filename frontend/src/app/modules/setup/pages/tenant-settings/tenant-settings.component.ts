@@ -449,9 +449,7 @@ import { RoleListComponent } from '../roles/role-list.component';
     .input-icon { display: flex; align-items: center; gap: 10px; width: 100%; }
     .invite-input svg { width: 18px; height: 18px; color: var(--color-accent, #70c6e1); }
     .invite-input input { border: none; outline: none; background: transparent; width: 100%; color: var(--color-text-primary); font-weight: 600; font-size: 1rem; }
-    .invite-roles { min-width: 180px; height: 48px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 0 12px; background: transparent; color: var(--color-text-secondary); transition: border-color 0.2s ease, background 0.2s ease; position: relative; }
-    .invite-roles::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--color-text-tertiary); font-size: 0.85rem; pointer-events: none; }
-    .invite-roles:hover, .invite-roles:focus-within { border-color: #E8BE14; background: rgba(255,255,255,0.02); }
+    .invite-roles { min-width: 190px; height: 48px; display: flex; align-items: stretch; border: none; border-radius: 12px; padding: 0; background: transparent; color: var(--color-text-secondary); transition: border-color 0.2s ease, background 0.2s ease; position: relative; }
     .invite-submit { height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem 1rem; color: var(--color-surface, #0f0f12); background: linear-gradient(135deg, #E8BE14 0%, #BF9532 100%); box-shadow: 0 4px 12px rgba(232,190,20,0.4); border: none; font-weight: 700; letter-spacing: 0.5px; }
     .invite-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(232,190,20,0.6); }
     .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -501,6 +499,46 @@ import { RoleListComponent } from '../roles/role-list.component';
     .action-link.danger { color: var(--color-error, #e74c3c); }
     .action-link:hover { text-decoration: underline; }
     .empty-state { text-align: center; margin: 0.6rem 0 0; color: var(--color-text-tertiary); }
+    /* Flatten role-selector button inside invite bar */
+    :host ::ng-deep app-role-selector.invite-roles .role-trigger {
+      position: relative;
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: none;
+      padding: 10px 12px;
+      min-width: 0;
+      color: var(--color-text-primary);
+      gap: 10px;
+    }
+    :host ::ng-deep app-role-selector.invite-roles .role-trigger::after {
+      content: '▾';
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-tertiary);
+      font-size: 0.85rem;
+      pointer-events: none;
+    }
+    :host ::ng-deep app-role-selector.invite-roles .role-trigger:hover,
+    :host ::ng-deep app-role-selector.invite-roles .role-trigger:focus-visible {
+      border-color: #E8BE14;
+      transform: translateY(0);
+      box-shadow: 0 0 0 1px rgba(232,190,20,0.18);
+    }
+    :host ::ng-deep app-role-selector.invite-roles .icon-chip {
+      background: rgba(255,255,255,0.06);
+      color: var(--color-accent, #70c6e1);
+      box-shadow: none;
+    }
+    :host ::ng-deep app-role-selector.invite-roles .pill {
+      background: rgba(232,190,20,0.16);
+      color: var(--color-primary);
+      box-shadow: none;
+    }
+    :host ::ng-deep app-role-selector.invite-roles .trigger-text span { font-size: 0.95rem; }
+    :host ::ng-deep app-role-selector.invite-roles .trigger-text small { color: var(--color-text-tertiary); }
     .plans { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 1rem; }
     .plans.padded { padding: 0.5rem; }
     .plan-card { border: none; border-radius: 16px; padding: 1.1rem; background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); box-shadow: 0 14px 32px rgba(0,0,0,0.14); display: flex; flex-direction: column; gap: 0.75rem; color: var(--color-text-primary); }

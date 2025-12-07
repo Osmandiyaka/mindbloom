@@ -12,6 +12,7 @@ import { RoleService } from '../../../core/services/role.service';
     styleUrls: ['./role-selector.component.scss'],
 })
 export class RoleSelectorComponent implements OnInit {
+    private static openInstance: RoleSelectorComponent | null = null;
     @Input() selectedRoleIds: string[] = [];
     @Output() selectionChange = new EventEmitter<Role[]>();
 
@@ -48,6 +49,11 @@ export class RoleSelectorComponent implements OnInit {
     }
 
     open(): void {
+        // Ensure only one role selector overlay is open at a time.
+        if (RoleSelectorComponent.openInstance && RoleSelectorComponent.openInstance !== this) {
+            RoleSelectorComponent.openInstance.close();
+        }
+        RoleSelectorComponent.openInstance = this;
         this.isOpen.set(true);
         if (!this.roles().length) {
             this.roleService.getRoles().subscribe();
@@ -56,6 +62,9 @@ export class RoleSelectorComponent implements OnInit {
 
     close(): void {
         this.isOpen.set(false);
+        if (RoleSelectorComponent.openInstance === this) {
+            RoleSelectorComponent.openInstance = null;
+        }
     }
 
     toggle(role: Role): void {
