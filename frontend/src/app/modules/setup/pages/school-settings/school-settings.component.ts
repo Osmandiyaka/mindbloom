@@ -194,8 +194,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
         <button class="btn primary" (click)="saveContact()" [disabled]="saving">Save Contact</button>
       </div>
 
-      <div class="grid" *ngIf="tab === 'academics'">
-        <section class="card soft academic-card">
+      <div class="grid academics-grid" *ngIf="tab === 'academics'">
+        <section class="card soft academic-card locale-card">
           <h3><span class="icon">🗓️</span> Locale & Academic Year</h3>
           <label>Timezone
             <div class="input-icon-row">
@@ -209,7 +209,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
               <input [(ngModel)]="model.locale" placeholder="en-US" />
             </div>
           </label>
-          <div class="split equal">
+          <div class="year-group">
+            <div class="split equal tight">
             <label>Academic Year Start
               <input class="date-input" type="date" name="ayStart" [(ngModel)]="model.academicYear.start" />
             </label>
@@ -217,9 +218,10 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
               <input class="date-input" type="date" name="ayEnd" [(ngModel)]="model.academicYear.end" />
             </label>
           </div>
+          </div>
         </section>
 
-        <section class="card soft academic-card">
+        <section class="card soft academic-card departments-card">
           <div class="card-header">
             <h3>Departments</h3>
             <button class="chip primary" type="button" (click)="openModal('dept')">＋</button>
@@ -239,7 +241,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
           </table>
         </section>
 
-        <section class="card soft academic-card">
+        <section class="card soft academic-card grades-card">
           <div class="card-header">
             <h3>Grades</h3>
             <button class="chip primary" type="button" (click)="openModal('grade')">＋</button>
@@ -260,6 +262,20 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
           </table>
         </section>
 
+        <section class="card soft academic-card grading-card">
+          <h3><span class="icon">📊</span> Grading Scheme</h3>
+          <label>Type
+            <select [(ngModel)]="model.gradingScheme.type">
+              <option>Percentage</option>
+              <option>Letter</option>
+              <option>GPA</option>
+            </select>
+          </label>
+          <label>Pass Threshold
+            <input type="number" [(ngModel)]="model.gradingScheme.passThreshold" min="0" max="100" />
+          </label>
+        </section>
+
         <section class="card soft academic-card subjects-card">
           <div class="card-header">
             <h3>Subjects</h3>
@@ -278,20 +294,6 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
               <tr *ngIf="!model.subjects.length"><td colspan="3" class="empty">No subjects</td></tr>
             </tbody>
           </table>
-        </section>
-
-        <section class="card soft academic-card grading-card">
-          <h3><span class="icon">📊</span> Grading Scheme</h3>
-          <label>Type
-            <select [(ngModel)]="model.gradingScheme.type">
-              <option>Percentage</option>
-              <option>Letter</option>
-              <option>GPA</option>
-            </select>
-          </label>
-          <label>Pass Threshold
-            <input type="number" [(ngModel)]="model.gradingScheme.passThreshold" min="0" max="100" />
-          </label>
         </section>
       </div>
       <div class="section-actions" *ngIf="tab === 'academics'">
@@ -360,6 +362,12 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(0,0,0,0.24); }
     .btn.tiny { padding: 0.35rem 0.6rem; font-size: 0.85rem; box-shadow: none; }
     .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:0.85rem 1.2rem; padding-bottom: 0.25rem; }
+    .academics-grid { grid-template-columns: repeat(3, minmax(260px,1fr)); gap: 0.8rem 1rem; align-items: stretch; }
+    .academics-grid .subjects-card { grid-column: 2 / 4; }
+    .academics-grid .grading-card { grid-column: 1 / 2; }
+    .academics-grid .locale-card { grid-column: 1 / 2; }
+    .academics-grid .departments-card { grid-column: 2 / 3; }
+    .academics-grid .grades-card { grid-column: 3 / 4; }
     .tabs { display:flex; gap:0.4rem; margin-top:0.35rem; }
     .tabs.segmented { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); background: color-mix(in srgb, var(--color-surface-hover) 85%, var(--color-surface) 15%); border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent); padding:0.35rem; border-radius: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); gap:0.2rem; overflow: hidden; }
     .tabs.segmented::before { content: ''; position: absolute; top: 6px; bottom: 6px; width: calc(100% / 3 - 8px); left: calc((100% / 3) * var(--active-index, 0) + 4px); background: color-mix(in srgb, var(--color-surface) 85%, var(--color-primary, #00c4cc) 15%); border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: all 0.22s ease-out; }
@@ -370,6 +378,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .card.flat { background: transparent; box-shadow: none; padding: 0; }
     .card.soft { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 10px 22px rgba(0,0,0,0.12); }
     .academic-card { background: var(--color-surface-hover, #634d3b); border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 14px 30px rgba(0,0,0,0.16); color: var(--color-text-primary, #ffffff); }
+    .academic-card input,
+    .academic-card select { background: var(--color-surface, #4f3a29); color: var(--color-text-primary, #ffffff); }
     .contact-card { background: var(--color-surface-hover, #634d3b); border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 12px 24px rgba(0,0,0,0.12); color: var(--color-text-primary, #ffffff); }
     .subjects-card { grid-column: 1 / -1; }
     .card h3 { margin:0 0 0.3rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-size:1.05rem; display: inline-flex; align-items: center; gap: 0.4rem; }
@@ -435,6 +445,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .list { display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap; }
     .chip { border:1px solid color-mix(in srgb, var(--color-border) 50%, transparent); border-radius:10px; padding:0.45rem 0.75rem; background: color-mix(in srgb, var(--color-surface-hover) 80%, var(--color-surface) 20%); cursor:pointer; }
     .chip.primary { background: #f6c344; color: #0b0b0f; border: none; border-radius: 999px; padding: 0.35rem 0.6rem; font-weight: 700; }
+    .card-header .chip.primary { border-radius: 999px; width: 32px; height: 32px; padding: 0; display: grid; place-items: center; }
     .chip.danger { border-color: rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); }
     .chip.ghost { background: transparent; border-color: transparent; color: var(--color-error,#ef4444); padding: 0.35rem 0.55rem; }
     .section-actions { display:flex; gap:0.75rem; align-items:center; position: sticky; bottom: 0; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-surface) 75%, var(--color-surface-hover) 25%)); padding-top: 1.25rem; margin-top: 2rem; }
@@ -443,11 +454,12 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .tiny { font-size: 0.8rem; line-height: 1.3; }
     .error { color: var(--color-error,#ef4444); font-weight:600; }
     .card-header { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.25rem; }
+    .year-group { margin-top: 0.75rem; }
     .table { width:100%; border-collapse:separate; border-spacing:0 4px; font-size:0.95rem; background: transparent; color: var(--color-text-primary); }
     .table thead tr { border-bottom: 2px solid var(--color-primary, #e8be14); background: transparent; }
     .table th, .table td { text-align:left; padding:0.48rem 0.6rem; background: transparent; }
     .table th { color: color-mix(in srgb, var(--color-text-secondary, #e0d5c9) 90%, #ffffff 10%); font-weight:600; text-transform:capitalize; font-size:0.75rem; letter-spacing:0.02em; }
-    .table tbody tr td { background: color-mix(in srgb, var(--color-surface-hover, #634d3b) 90%, #000000 10%); border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--color-text-primary, #ffffff); }
+    .table tbody tr td { background: color-mix(in srgb, var(--color-surface-hover, #634d3b) 90%, #000000 10%); border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--color-text-primary, #ffffff); vertical-align: middle; }
     .table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--color-surface-hover, #634d3b) 80%, #000000 20%); }
     .table tbody tr:hover td { background: rgba(255,255,255,0.05); }
     .table tbody tr td:first-child, .table thead tr th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
