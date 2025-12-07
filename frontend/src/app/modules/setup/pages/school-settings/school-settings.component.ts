@@ -126,7 +126,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
         </section>
       </div>
       <div class="section-actions" *ngIf="tab === 'profile'">
-        <button class="btn primary" (click)="saveProfile()" [disabled]="saving">Save Settings</button>
+        <button class="btn primary" (click)="saveProfile()" [disabled]="saving">Save Profile</button>
       </div>
 
       <div class="grid" *ngIf="tab === 'contact'">
@@ -170,7 +170,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
         </section>
       </div>
       <div class="section-actions" *ngIf="tab === 'contact'">
-        <button class="btn primary" (click)="saveContact()" [disabled]="saving">Save Settings</button>
+        <button class="btn primary" (click)="saveContact()" [disabled]="saving">Save Contact</button>
       </div>
 
       <div class="grid" *ngIf="tab === 'academics'">
@@ -254,7 +254,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
         </section>
       </div>
       <div class="section-actions" *ngIf="tab === 'academics'">
-        <button class="btn primary" (click)="saveAcademics()" [disabled]="saving">Save Settings</button>
+        <button class="btn primary" (click)="saveAcademics()" [disabled]="saving">Save Academics</button>
       </div>
 
       <div class="grid" *ngIf="tab === 'grading'">
@@ -273,7 +273,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
         </section>
       </div>
       <div class="section-actions" *ngIf="tab === 'grading'">
-        <button class="btn primary" (click)="saveGrading()" [disabled]="saving">Save Settings</button>
+        <button class="btn primary" (click)="saveGrading()" [disabled]="saving">Save Grading</button>
       </div>
 
       <div class="footer-actions" *ngIf="saveError || saved">
