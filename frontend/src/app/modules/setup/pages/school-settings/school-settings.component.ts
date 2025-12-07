@@ -123,6 +123,22 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
               </div>
             </div>
           </div>
+
+          <section class="card soft academic-card locale-card">
+            <h3><span class="icon">🗓️</span> Locale & Academic Year</h3>
+            <label class="narrow">Timezone
+              <div class="input-icon-row">
+                <span class="input-icon" aria-hidden="true">🌍</span>
+                <input [(ngModel)]="model.timezone" placeholder="America/New_York" />
+              </div>
+            </label>
+            <label class="narrow">Locale
+              <div class="input-icon-row">
+                <span class="input-icon" aria-hidden="true">🗣️</span>
+                <input [(ngModel)]="model.locale" placeholder="en-US" />
+              </div>
+            </label>
+          </section>
         </section>
       </div>
       <div class="section-actions" *ngIf="tab === 'profile'">
@@ -195,22 +211,6 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
       </div>
 
       <div class="grid academics-grid" *ngIf="tab === 'academics'">
-        <section class="card soft academic-card locale-card">
-          <h3><span class="icon">🗓️</span> Locale & Academic Year</h3>
-          <label class="narrow">Timezone
-            <div class="input-icon-row">
-              <span class="input-icon" aria-hidden="true">🌍</span>
-              <input [(ngModel)]="model.timezone" placeholder="America/New_York" />
-            </div>
-          </label>
-          <label class="narrow">Locale
-            <div class="input-icon-row">
-              <span class="input-icon" aria-hidden="true">🗣️</span>
-              <input [(ngModel)]="model.locale" placeholder="en-US" />
-            </div>
-          </label>
-        </section>
-
         <section class="card soft academic-card departments-card">
           <div class="card-header">
             <h3>Departments</h3>
