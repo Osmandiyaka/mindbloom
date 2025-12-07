@@ -124,21 +124,29 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
             </div>
           </div>
 
-          <section class="card soft academic-card locale-card">
-            <h3><span class="icon">🗓️</span> Locale & Academic Year</h3>
-            <label class="narrow">Timezone
+        <section class="card soft academic-card locale-card">
+          <h3><span class="icon">🗓️</span> Locale</h3>
+          <div class="field-grid">
+            <div class="field compact">
+              <div class="label-row">
+                <label>Timezone</label>
+              </div>
               <div class="input-icon-row">
                 <span class="input-icon" aria-hidden="true">🌍</span>
                 <input [(ngModel)]="model.timezone" placeholder="America/New_York" />
               </div>
-            </label>
-            <label class="narrow">Locale
+            </div>
+            <div class="field compact">
+              <div class="label-row">
+                <label>Locale</label>
+              </div>
               <div class="input-icon-row">
                 <span class="input-icon" aria-hidden="true">🗣️</span>
                 <input [(ngModel)]="model.locale" placeholder="en-US" />
               </div>
-            </label>
-          </section>
+            </div>
+          </div>
+        </section>
         </section>
       </div>
       <div class="section-actions" *ngIf="tab === 'profile'">
