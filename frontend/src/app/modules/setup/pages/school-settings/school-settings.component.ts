@@ -27,10 +27,55 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
 
       <div class="grid" *ngIf="tab === 'profile'">
         <section class="card flat">
+          <div class="branding-card">
+            <div class="branding-header">
+              <div>
+                <p class="eyebrow subtle">Branding</p>
+                <h3 class="branding-title">Identity</h3>
+                <p class="muted tiny">Upload your logo and favicon to personalize reports and emails.</p>
+              </div>
+            </div>
+            <div class="branding-grid">
+              <div class="drop-zone" [class.hover]="logoHover" (dragover)="onDragOver($event, 'logo')" (dragleave)="onDragLeave('logo')" (drop)="onDrop($event, 'logo')">
+                <div class="logo-preview" [class.has-image]="logoPreview">
+                  <ng-container *ngIf="logoPreview; else logoInitials">
+                    <img [src]="logoPreview" alt="Logo preview">
+                  </ng-container>
+                  <ng-template #logoInitials>
+                    <span>{{ initials }}</span>
+                  </ng-template>
+                </div>
+                <div class="drop-text">
+                  <strong>Logo</strong>
+                  <span>PNG/SVG, max 1MB</span>
+                </div>
+                <input type="file" accept="image/*" (change)="onFileSelect($event, 'logo')" hidden #logoInput>
+                <button type="button" class="btn ghost tiny" (click)="logoInput.click()">Upload</button>
+              </div>
+
+              <div class="drop-zone small" [class.hover]="faviconHover" (dragover)="onDragOver($event, 'favicon')" (dragleave)="onDragLeave('favicon')" (drop)="onDrop($event, 'favicon')">
+                <div class="favicon-preview" [class.has-image]="faviconPreview">
+                  <ng-container *ngIf="faviconPreview; else faviconFallback">
+                    <img [src]="faviconPreview" alt="Favicon preview">
+                  </ng-container>
+                  <ng-template #faviconFallback>
+                    <span>{{ faviconInitial }}</span>
+                  </ng-template>
+                </div>
+                <div class="drop-text">
+                  <strong>Favicon</strong>
+                  <span>32x32</span>
+                </div>
+                <input type="file" accept="image/*" (change)="onFileSelect($event, 'favicon')" hidden #faviconInput>
+                <button type="button" class="btn ghost tiny" (click)="faviconInput.click()">Upload</button>
+              </div>
+            </div>
+          </div>
+
           <h3><span class="icon">🎓</span> School Profile</h3>
           <div class="profile-block">
             <div class="field-grid">
-              <div class="field compact">
+              <div class="field full">
                 <label>School Name</label>
                 <div class="input-icon-row">
                   <span class="input-icon" aria-hidden="true">🏫</span>
@@ -42,11 +87,15 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
                   <label>Domain</label>
                   <span class="optional muted">(Required)</span>
                 </div>
-                <div class="input-icon-row">
+                <div class="input-icon-row with-action">
                   <span class="input-icon" aria-hidden="true">🌐</span>
                   <input [(ngModel)]="model.domain" placeholder="myschool.edu" />
+                  <button type="button" class="icon-btn" (click)="copyValue(model.domain || '')" [disabled]="!model.domain">
+                    <span *ngIf="copiedKey !== 'domain'">📋</span>
+                    <span *ngIf="copiedKey === 'domain'">✔</span>
+                  </button>
                 </div>
-                <p class="help">Use your public domain (no protocol). This appears on emails and reports.</p>
+                <p class="help small">Use your public domain (no protocol). This appears on emails and reports.</p>
               </div>
               <div class="field compact">
                 <div class="label-row">
@@ -55,8 +104,12 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
                 </div>
                 <div class="input-icon-row">
                   <span class="input-icon" aria-hidden="true">🔗</span>
-                  <input [(ngModel)]="model.website" placeholder="https://..." />
+                  <div class="prefix-input">
+                    <span class="prefix muted">https://www.</span>
+                    <input [(ngModel)]="websiteTail" placeholder="your-site.com" />
+                  </div>
                 </div>
+                <p class="help small">We’ll display this on external-facing documents.</p>
               </div>
             </div>
           </div>
@@ -273,6 +326,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .btn { border-radius:12px; border:1px solid color-mix(in srgb, var(--color-border) 50%, transparent); padding:0.7rem 1.15rem; font-weight:650; cursor:pointer; background: color-mix(in srgb, var(--color-surface) 85%, var(--color-surface-hover) 15%); color: var(--color-text-primary); transition: all 0.2s ease; box-shadow: 0 10px 22px rgba(0,0,0,0.18); }
     .btn.primary { background: linear-gradient(135deg, #f6c344, #f2a811); color: var(--color-surface, #0f0f12); border:none; box-shadow: 0 16px 34px rgba(242, 168, 17, 0.42); }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(0,0,0,0.24); }
+    .btn.tiny { padding: 0.35rem 0.6rem; font-size: 0.85rem; box-shadow: none; }
     .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:0.85rem 1.2rem; padding-bottom: 0.25rem; }
     .tabs { display:flex; gap:0.4rem; margin-top:0.35rem; }
     .tabs.segmented { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); background: color-mix(in srgb, var(--color-surface-hover) 85%, var(--color-surface) 15%); border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent); padding:0.35rem; border-radius: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); gap:0.2rem; overflow: hidden; }
@@ -285,10 +339,23 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .card.soft { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 10px 22px rgba(0,0,0,0.12); }
     .card h3 { margin:0 0 0.3rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-size:1.05rem; display: inline-flex; align-items: center; gap: 0.4rem; }
     .card .icon { margin-right:0.35rem; filter: grayscale(0); color: var(--color-primary, #00c4cc); }
+    .branding-card { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border-radius: 14px; padding: 0.9rem 1rem; box-shadow: 0 10px 24px rgba(0,0,0,0.14); margin-bottom: 0.4rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .branding-header { display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; }
+    .branding-title { margin: 0; font-size: 1.05rem; letter-spacing: -0.01em; }
+    .branding-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 0.75rem; }
+    .drop-zone { border: 1px dashed color-mix(in srgb, var(--color-border) 60%, transparent); border-radius: 12px; padding: 0.85rem; background: color-mix(in srgb, var(--color-surface) 92%, var(--color-surface-hover) 8%); display: flex; align-items: center; gap: 0.65rem; transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease; }
+    .drop-zone.hover { border-color: var(--color-primary, #00c4cc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #00c4cc) 30%, transparent); transform: translateY(-1px); }
+    .drop-zone.small { max-width: 240px; }
+    .logo-preview, .favicon-preview { width: 64px; height: 64px; border-radius: 14px; background: color-mix(in srgb, var(--color-surface-hover) 85%, var(--color-surface) 15%); display: grid; place-items: center; font-weight: 800; color: var(--color-text-primary); overflow: hidden; }
+    .logo-preview.has-image img, .favicon-preview.has-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .favicon-preview { width: 42px; height: 42px; border-radius: 10px; font-size: 0.9rem; }
+    .drop-text { display:flex; flex-direction:column; gap:0.15rem; color: var(--color-text-secondary); flex:1; }
+    .drop-text strong { color: var(--color-text-primary); }
     .profile-block { background: color-mix(in srgb, var(--color-surface) 85%, var(--color-surface-hover) 15%); border-radius: 14px; padding: 0.9rem; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 22px rgba(0,0,0,0.12); }
     .field-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 0.85rem 1.1rem; }
     .field { display:flex; flex-direction:column; gap:0.35rem; }
     .field.compact { max-width: 420px; }
+    .field.full { grid-column: 1 / -1; }
     .label-row { display:flex; align-items:center; gap:0.5rem; }
     label { display:flex; flex-direction:column; gap:0.1rem; font-weight:600; color: var(--color-text-secondary); letter-spacing: 0.01em; font-size: 0.82rem; transition: color 0.18s ease; }
     .optional { font-size: 0.78rem; }
@@ -311,6 +378,11 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
       background: color-mix(in srgb, var(--color-surface-hover) 70%, var(--color-background) 30%);
     }
     label:focus-within { color: var(--color-primary, #00c4cc); }
+    .prefix-input { display:flex; align-items:center; gap:0.35rem; width:100%; border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius:10px; padding-right: 0.35rem; background: color-mix(in srgb, var(--color-background) 92%, var(--color-surface-hover) 8%); padding-left: 1.9rem; transition: border-color 0.18s ease, box-shadow 0.18s ease; }
+    .prefix-input .prefix { padding-left: 0.75rem; color: var(--color-text-tertiary); font-size: 0.9rem; }
+    .prefix-input input { border:none !important; box-shadow:none !important; background: transparent; padding:0.6rem 0.4rem; padding-left: 0.4rem !important; flex:1; font-size:0.95rem; font-weight:500; }
+    .prefix-input input:focus { box-shadow:none; outline:none; padding-left: 0.4rem !important; }
+    .prefix-input:focus-within { border-color: var(--color-primary, #00c4cc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #00c4cc) 28%, transparent); }
     .split { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:0.5rem; align-items:end; }
     .split.equal label { width: 100%; }
     .list { display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap; }
@@ -319,6 +391,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .section-actions { display:flex; gap:0.75rem; align-items:center; position: sticky; bottom: 0; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-surface) 75%, var(--color-surface-hover) 25%)); padding-top: 1.25rem; margin-top: 2rem; }
     .footer-actions { display:flex; align-items:center; gap:0.75rem; }
     .muted { color: var(--color-text-secondary); }
+    .tiny { font-size: 0.8rem; line-height: 1.3; }
     .error { color: var(--color-error,#ef4444); font-weight:600; }
     .card-header { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.25rem; }
     .table { width:100%; border-collapse:separate; border-spacing:0 6px; font-size:0.95rem; background: transparent; color: var(--color-text-primary); }
@@ -328,11 +401,14 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .table tbody tr td:last-child, .table thead tr th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
     .table tbody tr:hover td { box-shadow: 0 10px 18px rgba(0,0,0,0.1); }
     .input-icon-row { position: relative; display:flex; align-items:center; }
-    .input-icon { position:absolute; left: 0.65rem; color: var(--color-text-tertiary); transition: color 0.18s ease; pointer-events: none; }
-    .input-icon-row input:focus + .input-icon,
-    .input-icon-row:focus-within .input-icon { color: var(--color-primary, #00c4cc); }
+    .input-icon { position:absolute; left: 0.65rem; color: var(--color-text-tertiary); transition: color 0.18s ease, transform 0.18s ease; pointer-events: none; }
+    .input-icon-row:focus-within .input-icon { color: var(--color-primary, #00c4cc); transform: translateX(1px); }
     .input-icon-row input:focus { padding-left: 2.3rem; }
+    .input-icon-row.with-action input { padding-right: 2.5rem; }
+    .icon-btn { position:absolute; right: 0.5rem; background: transparent; border: none; color: var(--color-text-tertiary); cursor: pointer; font-size: 0.95rem; transition: color 0.15s ease, transform 0.15s ease; }
+    .icon-btn:hover { color: var(--color-primary, #00c4cc); transform: translateY(-1px); }
     .help { margin: 2px 0 0; color: var(--color-text-tertiary); font-size: 0.78rem; line-height: 1.4; }
+    .help.small { font-size: 0.7rem; }
     .empty { text-align:center; color: var(--color-text-secondary); padding:0.75rem 0; background: transparent; }
     .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:50; }
     .modal { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border-radius:14px; padding:1.25rem; width:min(480px, 90vw); border:none; box-shadow: 0 20px 48px rgba(0,0,0,0.35); }
@@ -371,6 +447,15 @@ export class SchoolSettingsComponent implements OnInit {
   newGrade = { name: '', code: '', level: '' };
   newSubject = { name: '', code: '' };
   activeModal: 'dept' | 'grade' | 'subject' | null = null;
+  logoPreview: string | null = null;
+  faviconPreview: string | null = null;
+  logoHover = false;
+  faviconHover = false;
+  copiedKey: 'domain' | null = null;
+  websiteTail = '';
+  get faviconInitial(): string {
+    return (this.initials || 'M').slice(0, 1);
+  }
 
   constructor(private settingsService: SchoolSettingsService) { }
 
@@ -397,6 +482,10 @@ export class SchoolSettingsComponent implements OnInit {
         grades: (data.grades || []).map((g: any) => ({ name: g.name || '', code: g.code || '', level: g.level || '' })),
         subjects: (data.subjects || []).map((s: any) => ({ name: s.name || '', code: s.code || '' }))
       };
+
+      if (data.website) {
+        this.websiteTail = this.stripUrlPrefix(data.website);
+      }
     });
   }
 
@@ -407,7 +496,7 @@ export class SchoolSettingsComponent implements OnInit {
     const payload: Partial<SchoolSettings> = this.cleanPayload({
       schoolName: this.model.schoolName,
       domain: this.model.domain,
-      website: this.model.website
+      website: this.websiteTail ? `https://www.${this.websiteTail}` : this.model.website
     });
 
     this.settingsService.save(payload as SchoolSettings).subscribe(() => {
@@ -510,6 +599,58 @@ export class SchoolSettingsComponent implements OnInit {
     if (!this.newSubject.name) return;
     this.model.subjects.push({ ...this.newSubject });
     this.newSubject = { name: '', code: '' };
+  }
+
+  onFileSelect(event: any, type: 'logo' | 'favicon') {
+    const file = event.target.files?.[0];
+    if (file) this.readFile(file, type);
+  }
+
+  onDragOver(event: DragEvent, type: 'logo' | 'favicon') {
+    event.preventDefault();
+    if (type === 'logo') this.logoHover = true; else this.faviconHover = true;
+  }
+
+  onDragLeave(type: 'logo' | 'favicon') {
+    if (type === 'logo') this.logoHover = false; else this.faviconHover = false;
+  }
+
+  onDrop(event: DragEvent, type: 'logo' | 'favicon') {
+    event.preventDefault();
+    const file = event.dataTransfer?.files?.[0];
+    if (file) this.readFile(file, type);
+    this.onDragLeave(type);
+  }
+
+  copyValue(value: string) {
+    if (!value || !navigator?.clipboard) return;
+    navigator.clipboard.writeText(value).then(() => {
+      this.copiedKey = 'domain';
+      setTimeout(() => { this.copiedKey = null; }, 1200);
+    }).catch(() => { this.copiedKey = null; });
+  }
+
+  get initials(): string {
+    const name = this.model.schoolName || 'School';
+    return name
+      .split(' ')
+      .filter(Boolean)
+      .map(p => p.charAt(0).toUpperCase())
+      .slice(0, 2)
+      .join('') || 'MB';
+  }
+
+  private readFile(file: File, type: 'logo' | 'favicon') {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (type === 'logo') this.logoPreview = reader.result as string;
+      else this.faviconPreview = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  private stripUrlPrefix(url: string): string {
+    return url.replace(/^https?:\/\/(www\.)?/, '');
   }
   removeSubject(idx: number) { this.model.subjects.splice(idx, 1); }
 
