@@ -1,0 +1,567 @@
+<div class="application-wizard">
+  <!-- Header -->
+  <div class="wizard-header">
+    <h1>Student Application Form</h1>
+    <p class="subtitle">Complete all steps to submit your application</p>
+  </div>
+
+  <!-- Progress Stepper -->
+  <div class="stepper">
+    <div 
+      *ngFor="let step of [1, 2, 3, 4, 5]" 
+      class="step"
+      [class.active]="currentStep() === step"
+      [class.completed]="isStepComplete(step)"
+      (click)="goToStep(step)"
+    >
+      <div class="step-circle">
+        <span *ngIf="!isStepComplete(step)">{{ step }}</span>
+        <span *ngIf="isStepComplete(step)" class="checkmark">✓</span>
+      </div>
+      <div class="step-label">
+        <ng-container [ngSwitch]="step">
+          <span *ngSwitchCase="1">Personal Info</span>
+          <span *ngSwitchCase="2">Guardian Info</span>
+          <span *ngSwitchCase="3">Academic Info</span>
+          <span *ngSwitchCase="4">Documents</span>
+          <span *ngSwitchCase="5">Review</span>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Content -->
+  <div class="wizard-content">
+    
+    <!-- Step 1: Personal Information -->
+    <form *ngIf="currentStep() === 1" [formGroup]="personalInfoForm" class="form-step">
+      <h2>Personal Information</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name <span class="required">*</span></label>
+          <input 
+            id="firstName" 
+            type="text" 
+            formControlName="firstName"
+            placeholder="Enter first name"
+          />
+          <div class="error" *ngIf="personalInfoForm.get('firstName')?.invalid && personalInfoForm.get('firstName')?.touched">
+            First name is required (minimum 2 characters)
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name <span class="required">*</span></label>
+          <input 
+            id="lastName" 
+            type="text" 
+            formControlName="lastName"
+            placeholder="Enter last name"
+          />
+          <div class="error" *ngIf="personalInfoForm.get('lastName')?.invalid && personalInfoForm.get('lastName')?.touched">
+            Last name is required (minimum 2 characters)
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="middleName">Middle Name</label>
+          <input 
+            id="middleName" 
+            type="text" 
+            formControlName="middleName"
+            placeholder="Enter middle name (optional)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="dateOfBirth">Date of Birth <span class="required">*</span></label>
+          <input 
+            id="dateOfBirth" 
+            type="date" 
+            formControlName="dateOfBirth"
+          />
+          <div class="error" *ngIf="personalInfoForm.get('dateOfBirth')?.invalid && personalInfoForm.get('dateOfBirth')?.touched">
+            Date of birth is required
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="gender">Gender <span class="required">*</span></label>
+          <select id="gender" formControlName="gender">
+            <option value="">Select gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+          <div class="error" *ngIf="personalInfoForm.get('gender')?.invalid && personalInfoForm.get('gender')?.touched">
+            Gender is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="bloodGroup">Blood Group</label>
+          <select id="bloodGroup" formControlName="bloodGroup">
+            <option value="">Select blood group</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nationality">Nationality</label>
+          <input 
+            id="nationality" 
+            type="text" 
+            formControlName="nationality"
+            placeholder="Enter nationality"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="religion">Religion</label>
+          <input 
+            id="religion" 
+            type="text" 
+            formControlName="religion"
+            placeholder="Enter religion"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email <span class="required">*</span></label>
+          <input 
+            id="email" 
+            type="email" 
+            formControlName="email"
+            placeholder="student@example.com"
+          />
+          <div class="error" *ngIf="personalInfoForm.get('email')?.invalid && personalInfoForm.get('email')?.touched">
+            Valid email is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone <span class="required">*</span></label>
+          <input 
+            id="phone" 
+            type="tel" 
+            formControlName="phone"
+            placeholder="+234 800 000 0000"
+          />
+          <div class="error" *ngIf="personalInfoForm.get('phone')?.invalid && personalInfoForm.get('phone')?.touched">
+            Valid phone number is required
+          </div>
+        </div>
+      </div>
+
+      <div formGroupName="address">
+        <h3>Address</h3>
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="street">Street Address</label>
+            <input 
+              id="street" 
+              type="text" 
+              formControlName="street"
+              placeholder="Enter street address"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="city">City</label>
+            <input id="city" type="text" formControlName="city" placeholder="Enter city" />
+          </div>
+
+          <div class="form-group">
+            <label for="state">State</label>
+            <input id="state" type="text" formControlName="state" placeholder="Enter state" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="country">Country</label>
+            <input id="country" type="text" formControlName="country" placeholder="Enter country" />
+          </div>
+
+          <div class="form-group">
+            <label for="postalCode">Postal Code</label>
+            <input id="postalCode" type="text" formControlName="postalCode" placeholder="Enter postal code" />
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Step 2: Guardian Information -->
+    <form *ngIf="currentStep() === 2" [formGroup]="guardianInfoForm" class="form-step">
+      <h2>Guardian Information</h2>
+      
+      <div formArrayName="guardians">
+        <div 
+          *ngFor="let guardian of guardians.controls; let i = index" 
+          [formGroupName]="i"
+          class="guardian-block"
+        >
+          <div class="guardian-header">
+            <h3>Guardian {{ i + 1 }}</h3>
+            <button 
+              *ngIf="guardians.length > 1" 
+              type="button" 
+              class="btn-icon btn-danger"
+              (click)="removeGuardian(i)"
+            >
+              Remove
+            </button>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label [for]="'guardianName' + i">Full Name <span class="required">*</span></label>
+              <input 
+                [id]="'guardianName' + i" 
+                type="text" 
+                formControlName="name"
+                placeholder="Enter guardian's full name"
+              />
+            </div>
+
+            <div class="form-group">
+              <label [for]="'relationship' + i">Relationship <span class="required">*</span></label>
+              <select [id]="'relationship' + i" formControlName="relationship">
+                <option value="">Select relationship</option>
+                <option value="Father">Father</option>
+                <option value="Mother">Mother</option>
+                <option value="Guardian">Guardian</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label [for]="'guardianPhone' + i">Phone <span class="required">*</span></label>
+              <input 
+                [id]="'guardianPhone' + i" 
+                type="tel" 
+                formControlName="phone"
+                placeholder="+234 800 000 0000"
+              />
+            </div>
+
+            <div class="form-group">
+              <label [for]="'guardianEmail' + i">Email</label>
+              <input 
+                [id]="'guardianEmail' + i" 
+                type="email" 
+                formControlName="email"
+                placeholder="guardian@example.com"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label [for]="'occupation' + i">Occupation</label>
+              <input 
+                [id]="'occupation' + i" 
+                type="text" 
+                formControlName="occupation"
+                placeholder="Enter occupation"
+              />
+            </div>
+
+            <div class="form-group">
+              <label [for]="'guardianAddress' + i">Address</label>
+              <input 
+                [id]="'guardianAddress' + i" 
+                type="text" 
+                formControlName="address"
+                placeholder="Enter address"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group checkbox-group">
+              <label>
+                <input type="checkbox" formControlName="isPrimaryContact" />
+                Primary Contact
+              </label>
+            </div>
+
+            <div class="form-group checkbox-group">
+              <label>
+                <input type="checkbox" formControlName="isEmergencyContact" />
+                Emergency Contact
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="btn-secondary" (click)="addGuardian()">
+        + Add Another Guardian
+      </button>
+    </form>
+
+    <!-- Step 3: Academic Information -->
+    <form *ngIf="currentStep() === 3" [formGroup]="academicInfoForm" class="form-step">
+      <h2>Academic Information</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="gradeApplying">Grade Applying For <span class="required">*</span></label>
+          <select id="gradeApplying" formControlName="gradeApplying">
+            <option value="">Select grade</option>
+            <option value="Kindergarten">Kindergarten</option>
+            <option value="Grade 1">Grade 1</option>
+            <option value="Grade 2">Grade 2</option>
+            <option value="Grade 3">Grade 3</option>
+            <option value="Grade 4">Grade 4</option>
+            <option value="Grade 5">Grade 5</option>
+            <option value="Grade 6">Grade 6</option>
+            <option value="Grade 7">Grade 7</option>
+            <option value="Grade 8">Grade 8</option>
+            <option value="Grade 9">Grade 9</option>
+            <option value="Grade 10">Grade 10</option>
+            <option value="Grade 11">Grade 11</option>
+            <option value="Grade 12">Grade 12</option>
+          </select>
+          <div class="error" *ngIf="academicInfoForm.get('gradeApplying')?.invalid && academicInfoForm.get('gradeApplying')?.touched">
+            Grade is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="academicYear">Academic Year <span class="required">*</span></label>
+          <select id="academicYear" formControlName="academicYear">
+            <option value="">Select academic year</option>
+            <option value="2024/2025">2024/2025</option>
+            <option value="2025/2026">2025/2026</option>
+            <option value="2026/2027">2026/2027</option>
+          </select>
+          <div class="error" *ngIf="academicInfoForm.get('academicYear')?.invalid && academicInfoForm.get('academicYear')?.touched">
+            Academic year is required
+          </div>
+        </div>
+      </div>
+
+      <div formGroupName="previousSchool">
+        <h3>Previous School (if applicable)</h3>
+        
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="schoolName">School Name</label>
+            <input 
+              id="schoolName" 
+              type="text" 
+              formControlName="schoolName"
+              placeholder="Enter previous school name"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prevGrade">Previous Grade</label>
+            <input 
+              id="prevGrade" 
+              type="text" 
+              formControlName="grade"
+              placeholder="Enter previous grade"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="yearAttended">Year Attended</label>
+            <input 
+              id="yearAttended" 
+              type="text" 
+              formControlName="yearAttended"
+              placeholder="e.g., 2023/2024"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="notes">Additional Notes</label>
+        <textarea 
+          id="notes" 
+          formControlName="notes"
+          rows="4"
+          placeholder="Any additional information you'd like to share..."
+        ></textarea>
+      </div>
+    </form>
+
+    <!-- Step 4: Documents -->
+    <div *ngIf="currentStep() === 4" class="form-step">
+      <h2>Upload Documents</h2>
+      <p class="info-text">Upload supporting documents (optional but recommended)</p>
+
+      <div class="document-upload-section">
+        <div class="upload-item">
+          <label>Birth Certificate</label>
+          <input 
+            type="file" 
+            accept=".pdf,.jpg,.jpeg,.png"
+            (change)="onFileSelected($event, 'Birth Certificate')"
+          />
+        </div>
+
+        <div class="upload-item">
+          <label>Previous School Report Card</label>
+          <input 
+            type="file" 
+            accept=".pdf,.jpg,.jpeg,.png"
+            (change)="onFileSelected($event, 'Report Card')"
+          />
+        </div>
+
+        <div class="upload-item">
+          <label>Passport Photo</label>
+          <input 
+            type="file" 
+            accept=".jpg,.jpeg,.png"
+            (change)="onFileSelected($event, 'Passport Photo')"
+          />
+        </div>
+
+        <div class="upload-item">
+          <label>Medical Records (if any)</label>
+          <input 
+            type="file" 
+            accept=".pdf,.jpg,.jpeg,.png"
+            (change)="onFileSelected($event, 'Medical Records')"
+          />
+        </div>
+      </div>
+
+      <div *ngIf="documents.length > 0" class="uploaded-documents">
+        <h3>Uploaded Documents</h3>
+        <div *ngFor="let doc of documents.controls; let i = index" class="document-item">
+          <span>{{ doc.value.name }}</span>
+          <button type="button" class="btn-icon" (click)="removeDocument(i)">Remove</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Review & Submit -->
+    <div *ngIf="currentStep() === 5" class="form-step review-step">
+      <h2>Review Your Application</h2>
+      <p class="info-text">Please review all information before submitting</p>
+
+      <div class="review-section">
+        <div class="review-header">
+          <h3>Personal Information</h3>
+          <button type="button" class="btn-link" (click)="goToStep(1)">Edit</button>
+        </div>
+        <div class="review-content">
+          <p><strong>Name:</strong> {{ getReviewData().personal.firstName }} {{ getReviewData().personal.middleName }} {{ getReviewData().personal.lastName }}</p>
+          <p><strong>Date of Birth:</strong> {{ getReviewData().personal.dateOfBirth | date }}</p>
+          <p><strong>Gender:</strong> {{ getReviewData().personal.gender }}</p>
+          <p><strong>Email:</strong> {{ getReviewData().personal.email }}</p>
+          <p><strong>Phone:</strong> {{ getReviewData().personal.phone }}</p>
+          <p *ngIf="getReviewData().personal.nationality"><strong>Nationality:</strong> {{ getReviewData().personal.nationality }}</p>
+          <p *ngIf="getReviewData().personal.bloodGroup"><strong>Blood Group:</strong> {{ getReviewData().personal.bloodGroup }}</p>
+        </div>
+      </div>
+
+      <div class="review-section">
+        <div class="review-header">
+          <h3>Guardian Information</h3>
+          <button type="button" class="btn-link" (click)="goToStep(2)">Edit</button>
+        </div>
+        <div class="review-content">
+          <div *ngFor="let guardian of getReviewData().guardians; let i = index" class="guardian-review">
+            <h4>Guardian {{ i + 1 }}</h4>
+            <p><strong>Name:</strong> {{ guardian.name }}</p>
+            <p><strong>Relationship:</strong> {{ guardian.relationship }}</p>
+            <p><strong>Phone:</strong> {{ guardian.phone }}</p>
+            <p *ngIf="guardian.email"><strong>Email:</strong> {{ guardian.email }}</p>
+            <p *ngIf="guardian.occupation"><strong>Occupation:</strong> {{ guardian.occupation }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-section">
+        <div class="review-header">
+          <h3>Academic Information</h3>
+          <button type="button" class="btn-link" (click)="goToStep(3)">Edit</button>
+        </div>
+        <div class="review-content">
+          <p><strong>Grade Applying:</strong> {{ getReviewData().academic.gradeApplying }}</p>
+          <p><strong>Academic Year:</strong> {{ getReviewData().academic.academicYear }}</p>
+          <p *ngIf="getReviewData().academic.previousSchool?.schoolName">
+            <strong>Previous School:</strong> {{ getReviewData().academic.previousSchool.schoolName }}
+          </p>
+        </div>
+      </div>
+
+      <div class="review-section" *ngIf="getReviewData().documents.length > 0">
+        <div class="review-header">
+          <h3>Documents</h3>
+          <button type="button" class="btn-link" (click)="goToStep(4)">Edit</button>
+        </div>
+        <div class="review-content">
+          <ul>
+            <li *ngFor="let doc of getReviewData().documents">{{ doc.name }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div *ngIf="submitError()" class="error-banner">
+        {{ submitError() }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Buttons -->
+  <div class="wizard-footer">
+    <button 
+      type="button" 
+      class="btn-secondary"
+      [disabled]="currentStep() === 1"
+      (click)="previousStep()"
+    >
+      Previous
+    </button>
+
+    <button 
+      *ngIf="currentStep() < totalSteps"
+      type="button" 
+      class="btn-primary"
+      (click)="nextStep()"
+    >
+      Next
+    </button>
+
+    <button 
+      *ngIf="currentStep() === totalSteps"
+      type="button" 
+      class="btn-primary"
+      [disabled]="isSubmitting()"
+      (click)="submitApplication()"
+    >
+      {{ isSubmitting() ? 'Submitting...' : 'Submit Application' }}
+    </button>
+  </div>
+</div>
