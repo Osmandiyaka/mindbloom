@@ -243,7 +243,7 @@
 
     .data-table table thead,
     .table thead {
-        background: color-mix(in srgb, var(--soft-surface) 88%, #ffffff 12%);
+        background: color-mix(in srgb, var(--color-surface, var(--soft-surface)) 88%, #ffffff 12%);
 
         th {
             color: var(--soft-text);

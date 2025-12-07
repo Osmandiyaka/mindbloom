@@ -424,12 +424,12 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .error { color: var(--color-error,#ef4444); font-weight:600; }
     .card-header { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.25rem; }
     .table { width:100%; border-collapse:separate; border-spacing:0 4px; font-size:0.95rem; background: transparent; color: var(--color-text-primary); }
-    .table thead tr { border-bottom: 2px solid #f6c344; }
+    .table thead tr { border-bottom: 2px solid color-mix(in srgb, var(--color-primary, #f6c344) 85%, var(--color-text-primary, #ffffff) 15%); background: color-mix(in srgb, var(--color-surface, #1e1e1e) 88%, var(--color-background, #ffffff) 12%); }
     .table th, .table td { text-align:left; padding:0.48rem 0.6rem; background: transparent; }
-    .table th { color: var(--color-text-secondary); font-weight:600; text-transform:capitalize; font-size:0.75rem; letter-spacing:0.02em; }
-    .table tbody tr td { background: color-mix(in srgb, #2c2c2c 88%, #1e1e1e 12%); border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .table tbody tr:nth-child(even) td { background: color-mix(in srgb, #262626 88%, #1b1b1b 12%); }
-    .table tbody tr:hover td { background: rgba(255,255,255,0.05); }
+    .table th { color: color-mix(in srgb, var(--color-text-secondary, #a0a0a0) 85%, #ffffff 15%); font-weight:600; text-transform:capitalize; font-size:0.75rem; letter-spacing:0.02em; }
+    .table tbody tr td { background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); border-top: 1px solid color-mix(in srgb, var(--color-border, rgba(255,255,255,0.08)) 60%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--color-border, rgba(255,255,255,0.08)) 60%, transparent); }
+    .table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--color-surface) 80%, var(--color-surface-hover) 20%); }
+    .table tbody tr:hover td { background: color-mix(in srgb, var(--color-surface-hover, rgba(255,255,255,0.08)) 70%, var(--color-surface) 30%); }
     .table tbody tr td:first-child, .table thead tr th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
     .table tbody tr td:last-child, .table thead tr th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
     .input-icon-row { position: relative; display:flex; align-items:center; min-height: 46px; }
