@@ -4,6 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { IconRegistryService } from '../../services/icon-registry.service';
 import { TenantService, Tenant } from '../../../core/services/tenant.service';
+import { SchoolSettingsService } from '../../../core/services/school-settings.service';
 
 interface NavItem {
   label: string;
@@ -212,6 +213,7 @@ export class SidebarComponent implements OnInit {
   currentUser: any;
   tenantLogo: string | null = null;
   tenantName: string | null = null;
+  private schoolLogo: string | null = null;
 
   navSections: NavSection[] = [
     {
@@ -280,7 +282,8 @@ export class SidebarComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private icons: IconRegistryService,
-    private tenantService: TenantService
+    private tenantService: TenantService,
+    private schoolSettingsService: SchoolSettingsService
   ) { }
 
   icon(name: string) {
@@ -294,6 +297,18 @@ export class SidebarComponent implements OnInit {
     this.tenantService.currentTenant$.subscribe((tenant: Tenant | null) => {
       this.tenantLogo = tenant?.customization?.logo || tenant?.customization?.favicon || null;
       this.tenantName = tenant?.name || null;
+      if (!this.tenantLogo) {
+        this.tenantLogo = this.schoolLogo;
+      }
+    });
+    this.schoolSettingsService.getSettings().subscribe(settings => {
+      this.schoolLogo = settings.logoUrl || settings.faviconUrl || null;
+      if (!this.tenantLogo && this.schoolLogo) {
+        this.tenantLogo = this.schoolLogo;
+      }
+      if (!this.tenantName && settings.schoolName) {
+        this.tenantName = settings.schoolName;
+      }
     });
   }
 
