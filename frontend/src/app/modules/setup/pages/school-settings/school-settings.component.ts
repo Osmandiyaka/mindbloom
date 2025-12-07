@@ -264,16 +264,18 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
 
         <section class="card soft academic-card grading-card">
           <h3><span class="icon">📊</span> Grading Scheme</h3>
-          <label>Type
-            <select [(ngModel)]="model.gradingScheme.type">
-              <option>Percentage</option>
-              <option>Letter</option>
-              <option>GPA</option>
-            </select>
-          </label>
-          <label>Pass Threshold
-            <input type="number" [(ngModel)]="model.gradingScheme.passThreshold" min="0" max="100" />
-          </label>
+          <div class="split equal tight">
+            <label>Type
+              <select [(ngModel)]="model.gradingScheme.type">
+                <option>Percentage</option>
+                <option>Letter</option>
+                <option>GPA</option>
+              </select>
+            </label>
+            <label>Pass Threshold
+              <input type="number" [(ngModel)]="model.gradingScheme.passThreshold" min="0" max="100" />
+            </label>
+          </div>
         </section>
 
         <section class="card soft academic-card subjects-card">
