@@ -8,6 +8,7 @@ import { CreateInvitationUseCase } from '../../application/services/invitation/c
 import { ListInvitationsUseCase } from '../../application/services/invitation/list-invitations.use-case';
 import { ResendInvitationUseCase } from '../../application/services/invitation/resend-invitation.use-case';
 import { RevokeInvitationUseCase } from '../../application/services/invitation/revoke-invitation.use-case';
+import { InvitationsSeeder } from './invitations.seeder';
 
 @Module({
     imports: [
@@ -22,6 +23,7 @@ import { RevokeInvitationUseCase } from '../../application/services/invitation/r
         ListInvitationsUseCase,
         ResendInvitationUseCase,
         RevokeInvitationUseCase,
+        InvitationsSeeder,
     ],
     exports: [
         INVITATION_REPOSITORY,
