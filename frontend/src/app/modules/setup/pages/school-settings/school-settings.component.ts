@@ -18,7 +18,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
         </div>
       </header>
 
-      <div class="tabs segmented">
+      <div class="tabs segmented" [style.--active-index]="activeTabIndex">
         <button class="tab" [class.active]="tab === 'profile'" (click)="tab = 'profile'">Profile</button>
         <button class="tab" [class.active]="tab === 'academics'" (click)="tab = 'academics'">Academics</button>
         <button class="tab" [class.active]="tab === 'contact'" (click)="tab = 'contact'">Contact & Address</button>
@@ -242,7 +242,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     </div>
   `,
   styles: [`
-    .page { padding:1.35rem; display:flex; flex-direction:column; gap:1.15rem; background: color-mix(in srgb, var(--color-surface, #0f172a) 88%, var(--color-background, #f7f9fc) 12%); color: var(--color-text-primary); border: none; border-radius: 16px; box-shadow: 0 18px 48px rgba(0,0,0,0.3); }
+    .page { padding:1.35rem; display:flex; flex-direction:column; gap:1.15rem; background: color-mix(in srgb, var(--color-surface, #0f172a) 88%, var(--color-background, #f7f9fc) 12%); color: var(--color-text-primary); border: none; border-radius: 16px; box-shadow: 0 18px 48px rgba(0,0,0,0.35), 0 0 15px rgba(30,136,229,0.2); }
     .page-header { display:flex; justify-content:space-between; align-items:flex-start; }
     .eyebrow { text-transform:uppercase; letter-spacing:0.08em; color: var(--color-text-tertiary); font-weight:700; margin:0 0 0.15rem; font-size: 0.8rem; }
     h1 { margin:0 0 0.25rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-weight:800; }
@@ -252,16 +252,17 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .btn:hover { transform: translateY(-1px); box-shadow: 0 14px 26px rgba(0,0,0,0.24); }
     .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:0.85rem 1.2rem; padding-bottom: 0.25rem; }
     .tabs { display:flex; gap:0.4rem; margin-top:0.35rem; }
-    .tabs.segmented { background: color-mix(in srgb, var(--color-surface-hover) 85%, var(--color-surface) 15%); border:1px solid color-mix(in srgb, var(--color-border) 50%, transparent); padding:0.35rem; border-radius: 14px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); gap:0.2rem; }
-    .tab { padding:0.6rem 0.95rem; border-radius:10px; border:none; background: transparent; cursor:pointer; font-weight:650; color: var(--color-text-secondary); transition: all 0.2s ease; position: relative; }
-    .tab.active { background: color-mix(in srgb, var(--color-primary) 18%, transparent); color: var(--color-text-primary); box-shadow: 0 12px 26px rgba(var(--color-primary-rgb,123,140,255),0.18); }
+    .tabs.segmented { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); background: color-mix(in srgb, var(--color-surface-hover) 85%, var(--color-surface) 15%); border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent); padding:0.35rem; border-radius: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); gap:0.2rem; overflow: hidden; }
+    .tabs.segmented::before { content: ''; position: absolute; top: 6px; bottom: 6px; width: calc(100% / 4 - 8px); left: calc((100% / 4) * var(--active-index, 0) + 4px); background: color-mix(in srgb, var(--color-surface) 85%, var(--color-primary, #00c4cc) 15%); border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: all 0.22s ease-out; }
+    .tab { padding:0.6rem 0.95rem; border-radius:10px; border:none; background: transparent; cursor:pointer; font-weight:650; color: var(--color-text-secondary); transition: color 0.2s ease; position: relative; z-index: 1; }
+    .tab.active { color: var(--color-text-primary); font-weight:700; }
     .tab:hover:not(.active) { color: var(--color-text-primary); }
-    .card { background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); border:none; border-radius:14px; padding:1.15rem; box-shadow: 0 12px 28px rgba(0,0,0,0.16); display:flex; flex-direction:column; gap:0.55rem; }
-    .card.flat { background: transparent; box-shadow: none; padding: 0.4rem 0 0.2rem; }
+    .card { background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); border:none; border-radius:14px; padding:1.15rem; box-shadow: 0 12px 28px rgba(0,0,0,0.16); display:flex; flex-direction:column; gap:0.5rem; }
+    .card.flat { background: transparent; box-shadow: none; padding: 0; }
     .card.soft { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 10px 22px rgba(0,0,0,0.12); }
-    .card h3 { margin:0 0 0.25rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-size:1.05rem; display: inline-flex; align-items: center; gap: 0.4rem; }
-    .card .icon { margin-right:0.35rem; filter: grayscale(0); color: var(--color-primary); }
-    label { display:flex; flex-direction:column; gap:0.18rem; font-weight:600; color: var(--color-text-secondary); letter-spacing: 0.01em; }
+    .card h3 { margin:0 0 0.3rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-size:1.05rem; display: inline-flex; align-items: center; gap: 0.4rem; }
+    .card .icon { margin-right:0.35rem; filter: grayscale(0); color: var(--color-primary, #00c4cc); }
+    label { display:flex; flex-direction:column; gap:0.12rem; font-weight:600; color: var(--color-text-secondary); letter-spacing: 0.01em; transition: color 0.18s ease; }
     input, select {
       border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
       border-radius:10px;
@@ -274,15 +275,17 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     input::placeholder, select::placeholder { color: var(--color-text-secondary); }
     input:focus, select:focus {
       outline:none;
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
+      border-color: var(--color-primary, #00c4cc);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #00c4cc) 28%, transparent);
       background: color-mix(in srgb, var(--color-surface-hover) 70%, var(--color-background) 30%);
     }
+    label:focus-within { color: var(--color-primary, #00c4cc); }
     .split { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:0.5rem; align-items:end; }
     .split.equal label { width: 100%; }
     .list { display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap; }
     .chip { border:1px solid color-mix(in srgb, var(--color-border) 50%, transparent); border-radius:10px; padding:0.45rem 0.75rem; background: color-mix(in srgb, var(--color-surface-hover) 80%, var(--color-surface) 20%); cursor:pointer; }
     .chip.danger { border-color: rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); }
+    .section-actions { display:flex; gap:0.75rem; align-items:center; position: sticky; bottom: 0; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-surface) 75%, var(--color-surface-hover) 25%)); padding-top: 1.25rem; margin-top: 2rem; }
     .footer-actions { display:flex; align-items:center; gap:0.75rem; }
     .muted { color: var(--color-text-secondary); }
     .error { color: var(--color-error,#ef4444); font-weight:600; }
@@ -322,6 +325,10 @@ export class SchoolSettingsComponent implements OnInit {
   saved = false;
   saveError = '';
   tab: 'profile' | 'academics' | 'contact' | 'grading' = 'profile';
+  get activeTabIndex(): number {
+    const order: Array<typeof this.tab> = ['profile', 'academics', 'contact', 'grading'];
+    return Math.max(0, order.indexOf(this.tab));
+  }
 
   newDept = { name: '', code: '' };
   newGrade = { name: '', code: '', level: '' };
