@@ -25,6 +25,7 @@ export interface AuthResponse {
 })
 export class AuthService {
     private readonly API_URL = environment.apiUrl;
+    private readonly TOKEN_KEY = 'access_token';
     private accessToken: string | null = null;
     private refreshInFlight$?: Observable<string | null>;
     private hasAttemptedRefresh = false;
@@ -40,6 +41,7 @@ export class AuthService {
         private router: Router,
         private tenantService: TenantService
     ) {
+        this.loadTokenFromStorage();
         this.tryRestoreSession();
     }
 
@@ -56,10 +58,16 @@ export class AuthService {
     }
 
     isAuthenticated(): boolean {
+        if (!this.accessToken) {
+            this.loadTokenFromStorage();
+        }
         return !!this.accessToken;
     }
 
     getToken(): string | null {
+        if (!this.accessToken) {
+            this.loadTokenFromStorage();
+        }
         return this.accessToken;
     }
 
@@ -85,6 +93,7 @@ export class AuthService {
         this.hasAttemptedRefresh = true;
         this.refreshInFlight$ = undefined;
         localStorage.removeItem('user');
+        localStorage.removeItem(this.TOKEN_KEY);
         this.currentUserSubject.next(null);
         this.showLoginOverlay.set(true);
 
@@ -97,6 +106,9 @@ export class AuthService {
 
     private handleAuthSuccess(response: AuthResponse): void {
         this.accessToken = response.access_token;
+        if (this.accessToken) {
+            localStorage.setItem(this.TOKEN_KEY, this.accessToken);
+        }
         this.persistUser(response.user);
         this.currentUserSubject.next(response.user);
         this.showLoginOverlay.set(false);
@@ -130,6 +142,13 @@ export class AuthService {
 
     private tryRestoreSession(): void {
         this.refreshAccessToken().pipe(catchError(() => of(null))).subscribe();
+    }
+
+    private loadTokenFromStorage() {
+        const persistedToken = localStorage.getItem(this.TOKEN_KEY);
+        if (persistedToken) {
+            this.accessToken = persistedToken;
+        }
     }
 
     private getUserFromStorage(): User | null {
