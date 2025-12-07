@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SchoolSettings, SchoolSettingsService } from '../../../../core/services/school-settings.service';
@@ -367,7 +368,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .status-badge { position:absolute; bottom:6px; right:6px; font-size: 0.7rem; padding: 4px 6px; border-radius: 8px; background: color-mix(in srgb, var(--color-surface-hover) 80%, var(--color-surface) 20%); box-shadow: 0 6px 12px rgba(0,0,0,0.18); }
     .status-badge.success { color: var(--color-success, #16a34a); }
     .profile-block { background: color-mix(in srgb, var(--color-surface) 85%, var(--color-surface-hover) 15%); border-radius: 14px; padding: 0.9rem; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 22px rgba(0,0,0,0.12); }
-    .field-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 0.85rem 1.1rem; align-items: center; }
+    .field-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 0.85rem 1.1rem; align-items: flex-start; }
     .field { display:flex; flex-direction:column; gap:0.35rem; }
     .field.compact { max-width: 420px; }
     .field.full { grid-column: 1 / -1; }
@@ -395,7 +396,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
       background: color-mix(in srgb, var(--color-surface-hover) 70%, var(--color-background) 30%);
     }
     label:focus-within { color: var(--color-primary, #00c4cc); }
-    .prefix-input { display:flex; align-items:center; gap:0.35rem; width:100%; border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius:10px; padding-right: 0.35rem; background: color-mix(in srgb, var(--color-background) 92%, var(--color-surface-hover) 8%); padding-left: 1.9rem; transition: border-color 0.18s ease, box-shadow 0.18s ease; min-height: 46px; }
+    .prefix-input { display:flex; align-items:center; gap:0.35rem; width:100%; border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius:10px; padding-right: 0.35rem; background: color-mix(in srgb, var(--color-background) 92%, var(--color-surface-hover) 8%); padding-left: 2.3rem; transition: border-color 0.18s ease, box-shadow 0.18s ease; min-height: 46px; }
     .prefix-input .prefix { padding-left: 0.75rem; color: var(--color-text-tertiary); font-size: 0.9rem; }
     .prefix-input input { border:none !important; box-shadow:none !important; background: transparent; padding:0.6rem 0.4rem; padding-left: 0.4rem !important; flex:1; font-size:0.95rem; font-weight:500; }
     .prefix-input input:focus { box-shadow:none; outline:none; padding-left: 0.4rem !important; }
@@ -447,6 +448,10 @@ export class SchoolSettingsComponent implements OnInit {
     subjects: { name?: string; code?: string }[];
   } = {
       schoolName: '',
+      domain: '',
+      website: '',
+      logoUrl: '',
+      faviconUrl: '',
       academicYear: { start: '', end: '' },
       gradingScheme: { type: 'Percentage', passThreshold: 40 },
       departments: [],
@@ -509,6 +514,15 @@ export class SchoolSettingsComponent implements OnInit {
         subjects: (data.subjects || []).map((s: any) => ({ name: s.name || '', code: s.code || '' }))
       };
 
+      if (data.logoUrl) {
+        this.model.logoUrl = data.logoUrl;
+        this.logoPreview = data.logoUrl;
+      }
+      if (data.faviconUrl) {
+        this.model.faviconUrl = data.faviconUrl;
+        this.faviconPreview = data.faviconUrl;
+      }
+
       if (data.website) {
         this.websiteTail = this.stripUrlPrefix(data.website);
       }
@@ -519,10 +533,14 @@ export class SchoolSettingsComponent implements OnInit {
     this.saving = true;
     this.saved = false;
     this.saveError = '';
+    const website = this.websiteTail ? `https://www.${this.websiteTail}` : this.model.website;
+    this.model.website = website || this.model.website;
     const payload: Partial<SchoolSettings> = this.cleanPayload({
       schoolName: this.model.schoolName,
       domain: this.model.domain,
-      website: this.websiteTail ? `https://www.${this.websiteTail}` : this.model.website
+      website,
+      logoUrl: this.model.logoUrl,
+      faviconUrl: this.model.faviconUrl
     });
 
     this.settingsService.save(payload as SchoolSettings).subscribe(() => {
@@ -542,6 +560,7 @@ export class SchoolSettingsComponent implements OnInit {
       contactEmail: this.model.contactEmail,
       contactPhone: this.model.contactPhone,
       logoUrl: this.model.logoUrl,
+      faviconUrl: this.model.faviconUrl,
       addressLine1: this.model.addressLine1,
       addressLine2: this.model.addressLine2,
       city: this.model.city,
@@ -675,31 +694,54 @@ export class SchoolSettingsComponent implements OnInit {
     }
     if (type === 'logo') { this.logoProgress = 5; this.logoSuccess = false; }
     else { this.faviconProgress = 5; this.faviconSuccess = false; }
-
-    const progressInterval = setInterval(() => {
-      if (type === 'logo') {
-        this.logoProgress = Math.min(98, this.logoProgress + 12);
-      } else {
-        this.faviconProgress = Math.min(98, this.faviconProgress + 12);
-      }
-    }, 120);
+    this.brandingError = null;
 
     const reader = new FileReader();
     reader.onload = () => {
-      clearInterval(progressInterval);
       if (type === 'logo') {
         this.logoPreview = reader.result as string;
-        this.logoProgress = 100;
-        this.logoSuccess = true;
-        setTimeout(() => { this.logoSuccess = false; this.logoProgress = 0; }, 1500);
       } else {
         this.faviconPreview = reader.result as string;
-        this.faviconProgress = 100;
-        this.faviconSuccess = true;
-        setTimeout(() => { this.faviconSuccess = false; this.faviconProgress = 0; }, 1500);
       }
     };
     reader.readAsDataURL(file);
+
+    this.settingsService.uploadAsset(type, file).subscribe({
+      next: (event) => {
+        if (event.type === HttpEventType.UploadProgress) {
+          const total = event.total || file.size || 1;
+          const progress = Math.round((event.loaded / total) * 100);
+          if (type === 'logo') this.logoProgress = progress;
+          else this.faviconProgress = progress;
+        } else if (event.type === HttpEventType.Response) {
+          const url = event.body?.url || event.body?.key || null;
+          if (type === 'logo') {
+            this.model.logoUrl = url || this.model.logoUrl;
+            if (url) this.logoPreview = url;
+            this.logoProgress = 100;
+            this.logoSuccess = true;
+            setTimeout(() => { this.logoSuccess = false; this.logoProgress = 0; }, 1200);
+          } else {
+            this.model.faviconUrl = url || this.model.faviconUrl;
+            if (url) this.faviconPreview = url;
+            this.faviconProgress = 100;
+            this.faviconSuccess = true;
+            setTimeout(() => { this.faviconSuccess = false; this.faviconProgress = 0; }, 1200);
+          }
+        }
+      },
+      error: () => {
+        this.brandingError = type;
+        if (type === 'logo') {
+          this.logoProgress = 0;
+          this.logoSuccess = false;
+        } else {
+          this.faviconProgress = 0;
+          this.faviconSuccess = false;
+        }
+        setTimeout(() => { if (this.brandingError === type) this.brandingError = null; }, 1500);
+      }
+    });
   }
 
   private stripUrlPrefix(url: string): string {

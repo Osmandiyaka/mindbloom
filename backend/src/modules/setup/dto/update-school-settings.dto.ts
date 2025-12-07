@@ -101,6 +101,10 @@ export class UpdateSchoolSettingsDto {
     logoUrl?: string;
 
     @IsOptional()
+    @IsString()
+    faviconUrl?: string;
+
+    @IsOptional()
     @ValidateNested()
     @Type(() => GradingSchemeDto)
     gradingScheme?: GradingSchemeDto;

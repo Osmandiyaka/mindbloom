@@ -21,6 +21,7 @@ export const SchoolSettingsSchema = new Schema(
         contactPhone: { type: String },
         website: { type: String },
         logoUrl: { type: String },
+        faviconUrl: { type: String },
         gradingScheme: {
             type: { type: String, default: 'Percentage' },
             passThreshold: { type: Number, default: 40 },

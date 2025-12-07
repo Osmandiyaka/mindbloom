@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpEvent } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
@@ -19,6 +19,7 @@ export interface SchoolSettings {
     contactPhone?: string;
     website?: string;
     logoUrl?: string;
+    faviconUrl?: string;
     gradingScheme?: { type?: string; passThreshold?: number };
     departments?: { name?: string; code?: string }[];
     grades?: { name?: string; code?: string; level?: string }[];
@@ -36,5 +37,19 @@ export class SchoolSettingsService {
 
     save(settings: SchoolSettings) {
         return this.http.put(this.base, settings);
+    }
+
+    uploadAsset(type: 'logo' | 'favicon', file: File) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<{ url?: string; key?: string }>(
+            `${this.base}/upload`,
+            formData,
+            {
+                params: { type },
+                reportProgress: true,
+                observe: 'events'
+            }
+        ) as unknown as Observable<HttpEvent<{ url?: string; key?: string }>>;
     }
 }
