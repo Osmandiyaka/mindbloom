@@ -76,13 +76,18 @@ interface NavSection {
       height: 100vh;
       width: var(--sidebar-width, 260px);
       box-sizing: border-box;
-      padding: 1rem 1rem 1.25rem;
-      background: var(--color-surface, #0f172a);
-      border-right: 1px solid var(--color-border, #e1e7ef);
+      padding: 0.7rem 0.85rem 0.95rem;
+      background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--color-surface, #ffffff) 94%, var(--color-background, #f7f9fc) 6%) 0%,
+        color-mix(in srgb, var(--color-surface, #111827) 88%, var(--color-background, #0b0f1a) 12%) 100%
+      );
+      border-right: none;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      transition: width 0.25s ease, padding 0.25s ease;
+      gap: 0.8rem;
+      transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: inset -2px 0 6px color-mix(in srgb, var(--color-border, rgba(0,0,0,0.35)) 65%, transparent);
     }
     .sidebar.sidebar-collapsed {
       padding: 0.75rem 0.5rem;
@@ -95,10 +100,10 @@ interface NavSection {
     .sidebar-logo {
       display: inline-flex;
       align-items: center;
-      gap: 0.6rem;
-      font-weight: 800;
-      color: var(--color-text-primary, #0f172a);
-      letter-spacing: 0.01em;
+      gap: 0.7rem;
+      font-weight: 700;
+      color: var(--color-text-primary, #1f2937);
+      letter-spacing: -0.02em;
       transition: opacity 0.2s ease;
     }
     .sidebar-logo .logo-img {
@@ -106,8 +111,8 @@ interface NavSection {
       height: 32px;
       border-radius: 9px;
       object-fit: cover;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.22);
-      background: var(--color-surface-hover, #e5e7eb);
+      box-shadow: 0 8px 16px color-mix(in srgb, rgba(0,0,0,0.22) 80%, var(--color-surface, #ffffff) 20%);
+      background: color-mix(in srgb, var(--color-surface-hover, #e5e7eb) 90%, transparent);
     }
     .sidebar.sidebar-collapsed .sidebar-logo span:last-child {
       opacity: 0;
@@ -116,7 +121,7 @@ interface NavSection {
     }
     .sidebar-nav {
       display: grid;
-      gap: 0.6rem;
+      gap: 1.2rem;
       overflow-y: auto;
       flex: 1;
       min-height: 0;
@@ -124,16 +129,20 @@ interface NavSection {
     }
     .nav-section {
       display: grid;
-      gap: 0.35rem;
+      gap: 0.3rem;
     }
     .nav-section-title {
-      font-size: 0.75rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--color-text-secondary, #6b7280);
-      padding: 0 0.35rem;
+      font-size: 0.82rem;
+      letter-spacing: -0.01em;
+      text-transform: none;
+      font-weight: 500;
+      color: var(--color-text-secondary, #a0a0a0);
+      padding: 0 0.35rem 0.1rem 0.35rem;
+      margin-top: 2.2rem;
+      margin-bottom: 0.1rem;
       transition: opacity 0.2s ease;
     }
+    .nav-section:first-of-type .nav-section-title { margin-top: 0.4rem; }
     .sidebar.sidebar-collapsed .nav-section-title {
       opacity: 0;
       height: 0;
@@ -142,21 +151,59 @@ interface NavSection {
     .nav-item a {
       display: inline-flex;
       align-items: center;
-      gap: 0.6rem;
-      padding: 0.55rem 0.65rem;
-      border-radius: 12px;
-      color: var(--color-text-primary, #111827);
+      gap: 0.58rem;
+      padding: 0.45rem 0.8rem;
+      border-radius: 16px;
+      color: var(--color-text-primary, #f5f7fb);
       text-decoration: none;
-      transition: background 0.2s ease, color 0.2s ease;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: -0.2px;
+      font-weight: 600;
     }
-    .nav-item a:hover { background: var(--color-surface-hover, rgba(0,0,0,0.04)); }
+    .nav-item a::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--color-primary, #00c4cc) 12%, transparent);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 0;
+    }
+    .nav-item a:hover { background: color-mix(in srgb, var(--color-surface-hover, rgba(0,0,0,0.04)) 80%, transparent); transform: translateX(1px); }
+    .nav-item a:hover::after { opacity: 1; }
     .nav-item a.active {
-      background: color-mix(in srgb, var(--color-primary, #7ab8ff) 18%, var(--color-surface, #fff));
-      color: var(--color-primary, #0f172a);
+      background: transparent;
+      color: var(--color-primary, #00c4cc);
+      font-weight: 600;
+    }
+    .nav-item a.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--color-primary, #00c4cc);
+      border-radius: 0 8px 8px 0;
+      box-shadow: 0 0 8px rgba(0, 196, 204, 0.5);
+      transform-origin: left center;
+      animation: accent-pop 0.2s ease-out;
+    }
+    .nav-item a.active::after {
+      opacity: 1;
+      background: color-mix(in srgb, var(--color-primary, #00c4cc) 18%, transparent);
+    }
+    @keyframes accent-pop {
+      0% { transform: scaleY(0.4); opacity: 0.6; }
+      100% { transform: scaleY(1); opacity: 1; }
     }
     .sidebar.sidebar-collapsed .nav-item a { justify-content: center; }
-    .nav-icon { width: 20px; height: 20px; display: inline-flex; }
-    .nav-text { transition: opacity 0.2s ease, transform 0.2s ease; }
+    .nav-icon { width: 20px; height: 20px; display: inline-flex; color: #e7e9ef; }
+    .nav-item a.active .nav-icon { color: var(--color-primary, #00c4cc); }
+    .nav-text { transition: opacity 0.2s ease, transform 0.2s ease; font-weight: 600; letter-spacing: -0.2px; }
     .sidebar.sidebar-collapsed .nav-text {
       opacity: 0;
       transform: translateX(-6px);
@@ -165,8 +212,8 @@ interface NavSection {
     }
     .nav-badge {
       margin-left: auto;
-      background: color-mix(in srgb, var(--color-info, #38bdf8) 15%, var(--color-surface, #fff));
-      color: var(--color-text-primary, #111827);
+      background: color-mix(in srgb, var(--color-primary, #00c4cc) 15%, var(--color-surface, #fff));
+      color: var(--color-text-primary, #1f2937);
       padding: 0.1rem 0.45rem;
       border-radius: 999px;
       font-size: 0.75rem;
@@ -174,8 +221,9 @@ interface NavSection {
     }
     .sidebar-footer {
       margin-top: auto;
-      padding-top: 0.5rem;
-      border-top: 1px solid var(--color-border, #e1e7ef);
+      padding-top: 0.3rem;
+      border-top: none;
+      background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--color-surface-hover, #e5e7eb) 12%, transparent) 100%);
     }
     .user-profile {
       display: inline-flex;
@@ -187,16 +235,17 @@ interface NavSection {
       cursor: pointer;
       transition: background 0.2s ease;
     }
-    .user-profile:hover { background: var(--color-surface-hover, rgba(0,0,0,0.05)); }
+    .user-profile:hover { background: color-mix(in srgb, var(--color-surface-hover, #e5e7eb) 14%, transparent); }
     .user-avatar {
       width: 36px;
       height: 36px;
       border-radius: 50%;
       display: grid;
       place-items: center;
-      background: color-mix(in srgb, var(--color-primary, #7ab8ff) 20%, var(--color-surface, #fff));
-      color: #0f172a;
+      background: var(--color-primary, #00c4cc);
+      color: #0b0b0f;
       font-weight: 800;
+      box-shadow: 0 10px 18px rgba(0,0,0,0.22);
     }
     .user-info { transition: opacity 0.2s ease, width 0.2s ease; }
     .sidebar.sidebar-collapsed .user-info {
@@ -204,8 +253,8 @@ interface NavSection {
       width: 0;
       overflow: hidden;
     }
-    .user-name { font-weight: 700; color: var(--color-text-primary, #111827); }
-    .user-role { font-size: 0.85rem; color: var(--color-text-secondary, #6b7280); }
+    .user-name { font-weight: 700; color: var(--color-text-primary, #e5e7eb); }
+    .user-role { font-size: 0.85rem; color: var(--color-text-secondary, #a1a1aa); }
   `]
 })
 export class SidebarComponent implements OnInit {

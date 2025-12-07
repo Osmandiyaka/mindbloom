@@ -329,7 +329,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     </div>
   `,
   styles: [`
-    .page { padding:1.35rem; display:flex; flex-direction:column; gap:1.15rem; background: color-mix(in srgb, var(--color-surface, #0f172a) 88%, var(--color-background, #f7f9fc) 12%); color: var(--color-text-primary); border: none; border-radius: 16px; box-shadow: 0 18px 48px rgba(0,0,0,0.35), 0 0 15px rgba(30,136,229,0.2); }
+    .page { padding:1.35rem; display:flex; flex-direction:column; gap:1.15rem; background: color-mix(in srgb, var(--color-surface, #0f172a) 88%, var(--color-background, #f7f9fc) 12%); color: var(--color-text-primary); border: none; border-radius: 16px; }
     .page-header { display:flex; justify-content:space-between; align-items:flex-start; }
     .eyebrow { text-transform:uppercase; letter-spacing:0.08em; color: var(--color-text-tertiary); font-weight:700; margin:0 0 0.15rem; font-size: 0.8rem; }
     h1 { margin:0 0 0.25rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-weight:800; }
