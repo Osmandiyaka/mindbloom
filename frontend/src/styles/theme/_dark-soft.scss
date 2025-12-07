@@ -234,40 +234,40 @@
         }
     }
 
-    // Tables
-    table,
-    .table {
-        background: var(--soft-surface);
-        color: var(--soft-text);
+// Tables
+table,
+.table {
+    background: var(--color-surface, var(--soft-surface));
+    color: var(--color-text-primary, var(--soft-text));
+}
+
+.data-table table thead,
+.table thead {
+    background: color-mix(in srgb, var(--color-surface) 88%, #ffffff 12%);
+
+    th {
+        color: var(--color-text-primary, var(--soft-text));
+        border-bottom: 1px solid var(--color-border, var(--soft-border));
+    }
+}
+
+.data-table table tbody tr,
+.table tbody tr {
+    background: var(--color-surface, var(--soft-surface));
+    border-bottom: 1px solid var(--color-border, var(--soft-border));
+
+    &:nth-child(even) {
+        background: color-mix(in srgb, var(--color-surface, var(--soft-surface)) 94%, #ffffff 6%);
     }
 
-    .data-table table thead,
-    .table thead {
-        background: color-mix(in srgb, var(--color-surface, var(--soft-surface)) 88%, #ffffff 12%);
-
-        th {
-            color: var(--soft-text);
-            border-bottom: 1px solid var(--soft-border);
-        }
+    &:hover {
+        background: color-mix(in srgb, var(--color-surface, var(--soft-surface)) 80%, var(--color-primary, #8ab4f8) 20%);
+        box-shadow: inset 0 0 0 1px rgba(var(--color-primary-rgb, 138, 180, 248), 0.35);
     }
+}
 
-    .data-table table tbody tr,
-    .table tbody tr {
-        background: var(--soft-surface);
-        border-bottom: 1px solid var(--soft-border);
-
-        &:nth-child(even) {
-            background: color-mix(in srgb, var(--soft-surface) 94%, #ffffff 6%);
-        }
-
-        &:hover {
-            background: color-mix(in srgb, var(--soft-surface) 80%, var(--color-primary, #8ab4f8) 20%);
-            box-shadow: inset 0 0 0 1px rgba(var(--color-primary-rgb, 138, 180, 248), 0.35);
-        }
-    }
-
-    .table-footer {
-        background: var(--soft-surface);
+.table-footer {
+    background: var(--color-surface, var(--soft-surface));
         border-top: 1px solid var(--soft-border);
     }
 

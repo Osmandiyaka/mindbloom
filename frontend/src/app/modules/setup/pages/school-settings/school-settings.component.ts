@@ -21,8 +21,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
 
       <div class="tabs segmented" [style.--active-index]="activeTabIndex">
         <button class="tab" [class.active]="tab === 'profile'" (click)="tab = 'profile'">Profile</button>
-        <button class="tab" [class.active]="tab === 'academics'" (click)="tab = 'academics'">Academics</button>
         <button class="tab" [class.active]="tab === 'contact'" (click)="tab = 'contact'">Contact & Address</button>
+        <button class="tab" [class.active]="tab === 'academics'" (click)="tab = 'academics'">Academics</button>
         <button class="tab" [class.active]="tab === 'grading'" (click)="tab = 'grading'">Grading</button>
       </div>
 
@@ -131,41 +131,62 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
       </div>
 
       <div class="grid" *ngIf="tab === 'contact'">
-        <section class="card flat">
-          <h3><span class="icon">☎️</span> Contact</h3>
+        <section class="card soft contact-card">
+          <h3><span class="icon" style="color: var(--color-primary, #e8be14);">☎️</span> Contact</h3>
           <label>Contact Email
-            <input type="email" [(ngModel)]="model.contactEmail" placeholder="contact@school.edu" />
+            <div class="input-icon-row">
+              <span class="input-icon" aria-hidden="true">✉️</span>
+              <input type="email" [(ngModel)]="model.contactEmail" placeholder="contact@school.edu" />
+            </div>
           </label>
           <label>Contact Phone
-            <input [(ngModel)]="model.contactPhone" placeholder="+1 555-123-4567" />
-          </label>
-          <label>Logo URL
-            <input [(ngModel)]="model.logoUrl" placeholder="https://cdn/logo.png" />
+            <div class="input-icon-row">
+              <span class="input-icon" aria-hidden="true">📞</span>
+              <input [(ngModel)]="model.contactPhone" placeholder="+1 555-123-4567" />
+            </div>
           </label>
         </section>
 
-        <section class="card flat">
-          <h3><span class="icon">📍</span> Address</h3>
+        <section class="card soft contact-card">
+          <h3><span class="icon" style="color: var(--color-primary, #e8be14);">📍</span> Address</h3>
           <label>Address Line 1
-            <input [(ngModel)]="model.addressLine1" placeholder="123 Main St" />
+            <div class="input-icon-row">
+              <span class="input-icon" aria-hidden="true">🏠</span>
+              <input [(ngModel)]="model.addressLine1" placeholder="123 Main St" />
+            </div>
           </label>
           <label>Address Line 2
-            <input [(ngModel)]="model.addressLine2" placeholder="Suite 100" />
+            <div class="input-icon-row">
+              <span class="input-icon" aria-hidden="true">🏠</span>
+              <input [(ngModel)]="model.addressLine2" placeholder="Suite 100" />
+            </div>
           </label>
-          <div class="split">
+          <div class="split equal tight">
             <label>City
-              <input [(ngModel)]="model.city" />
+              <div class="input-icon-row">
+                <span class="input-icon" aria-hidden="true">🏙️</span>
+                <input [(ngModel)]="model.city" placeholder="City" />
+              </div>
             </label>
             <label>State/Province
-              <input [(ngModel)]="model.state" />
+              <div class="input-icon-row">
+                <span class="input-icon" aria-hidden="true">🌎</span>
+                <input [(ngModel)]="model.state" placeholder="State/Province" />
+              </div>
             </label>
           </div>
-          <div class="split">
+          <div class="split equal tight">
             <label>Postal Code
-              <input [(ngModel)]="model.postalCode" />
+              <div class="input-icon-row">
+                <span class="input-icon" aria-hidden="true">🏷️</span>
+                <input [(ngModel)]="model.postalCode" placeholder="Zip/Postal" />
+              </div>
             </label>
             <label>Country
-              <input [(ngModel)]="model.country" />
+              <div class="input-icon-row">
+                <span class="input-icon" aria-hidden="true">🗺️</span>
+                <input [(ngModel)]="model.country" placeholder="Country" />
+              </div>
             </label>
           </div>
         </section>
@@ -355,6 +376,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .card.flat { background: transparent; box-shadow: none; padding: 0; }
     .card.soft { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 10px 22px rgba(0,0,0,0.12); }
     .academic-card { background: var(--color-surface-hover, #634d3b); border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 14px 30px rgba(0,0,0,0.16); color: var(--color-text-primary, #ffffff); }
+    .contact-card { background: var(--color-surface-hover, #634d3b); border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 12px 24px rgba(0,0,0,0.12); color: var(--color-text-primary, #ffffff); }
     .subjects-card { grid-column: 1 / -1; }
     .card h3 { margin:0 0 0.3rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-size:1.05rem; display: inline-flex; align-items: center; gap: 0.4rem; }
     .card .icon { margin-right:0.35rem; filter: grayscale(0); color: var(--color-primary, #00c4cc); }
@@ -382,6 +404,8 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .field.full { grid-column: 1 / -1; }
     .label-row { display:flex; align-items:center; gap:0.5rem; }
     label { display:inline-flex; align-items:flex-start; gap:0.25rem; font-weight:600; color: var(--color-text-secondary); letter-spacing: 0.01em; font-size: 0.82rem; transition: color 0.18s ease; width: 100%; }
+    .contact-card label { flex-direction: column; gap: 0.3rem; align-items: flex-start; }
+    .contact-card .input-icon-row { width: 100%; }
     .optional { font-size: 0.78rem; }
     .required { color: var(--color-primary, #00c4cc); font-weight: 700; }
     input, select {
@@ -411,6 +435,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .prefix-input:focus-within { border-color: var(--color-primary, #00c4cc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #00c4cc) 28%, transparent); }
     .split { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:0.5rem; align-items:start; }
     .split.equal { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:0.75rem; align-items:start; }
+    .split.equal.tight { gap: 0.6rem; }
     .split.equal label { width: 100%; display:flex; flex-direction:column; gap:0.2rem; }
     .list { display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap; }
     .chip { border:1px solid color-mix(in srgb, var(--color-border) 50%, transparent); border-radius:10px; padding:0.45rem 0.75rem; background: color-mix(in srgb, var(--color-surface-hover) 80%, var(--color-surface) 20%); cursor:pointer; }
@@ -477,9 +502,9 @@ export class SchoolSettingsComponent implements OnInit {
   saving = false;
   saved = false;
   saveError = '';
-  tab: 'profile' | 'academics' | 'contact' | 'grading' = 'profile';
+  tab: 'profile' | 'contact' | 'academics' | 'grading' = 'profile';
   get activeTabIndex(): number {
-    const order: Array<typeof this.tab> = ['profile', 'academics', 'contact', 'grading'];
+    const order: Array<typeof this.tab> = ['profile', 'contact', 'academics', 'grading'];
     return Math.max(0, order.indexOf(this.tab));
   }
 
