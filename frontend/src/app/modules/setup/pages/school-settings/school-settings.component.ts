@@ -13,13 +13,12 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     <div class="page">
       <header class="page-header">
         <div>
-          <p class="eyebrow">Setup</p>
           <h1>School Settings</h1>
           <p class="sub">Define school profile, academics, locale, and contact details.</p>
         </div>
       </header>
 
-      <div class="tabs">
+      <div class="tabs segmented">
         <button class="tab" [class.active]="tab === 'profile'" (click)="tab = 'profile'">Profile</button>
         <button class="tab" [class.active]="tab === 'academics'" (click)="tab = 'academics'">Academics</button>
         <button class="tab" [class.active]="tab === 'contact'" (click)="tab = 'contact'">Contact & Address</button>
@@ -27,7 +26,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
       </div>
 
       <div class="grid" *ngIf="tab === 'profile'">
-        <section class="card">
+        <section class="card flat">
           <h3><span class="icon">🎓</span> School Profile</h3>
           <label>School Name
             <input [(ngModel)]="model.schoolName" required placeholder="School name" />
@@ -45,7 +44,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
       </div>
 
       <div class="grid" *ngIf="tab === 'contact'">
-        <section class="card">
+        <section class="card flat">
           <h3><span class="icon">☎️</span> Contact</h3>
           <label>Contact Email
             <input type="email" [(ngModel)]="model.contactEmail" placeholder="contact@school.edu" />
@@ -58,7 +57,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
           </label>
         </section>
 
-        <section class="card">
+        <section class="card flat">
           <h3><span class="icon">📍</span> Address</h3>
           <label>Address Line 1
             <input [(ngModel)]="model.addressLine1" placeholder="123 Main St" />
@@ -107,7 +106,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
           </div>
         </section>
 
-        <section class="card">
+        <section class="card soft">
           <div class="card-header">
             <h3>Departments</h3>
             <button class="chip" type="button" (click)="openModal('dept')">+ Add</button>
@@ -127,7 +126,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
           </table>
         </section>
 
-        <section class="card">
+        <section class="card soft">
           <div class="card-header">
             <h3>Grades</h3>
             <button class="chip" type="button" (click)="openModal('grade')">+ Add</button>
@@ -148,7 +147,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
           </table>
         </section>
 
-        <section class="card">
+        <section class="card soft">
           <div class="card-header">
             <h3>Subjects</h3>
             <button class="chip" type="button" (click)="openModal('subject')">+ Add</button>
@@ -173,7 +172,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
       </div>
 
       <div class="grid" *ngIf="tab === 'grading'">
-        <section class="card">
+        <section class="card flat">
           <h3><span class="icon">📊</span> Grading Scheme</h3>
           <label>Type
             <select [(ngModel)]="model.gradingScheme.type">
@@ -243,29 +242,34 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     </div>
   `,
   styles: [`
-    .page { padding:1.5rem; display:flex; flex-direction:column; gap:1.25rem; background: var(--color-surface); color: var(--color-text-primary); border: 1px solid var(--color-border); border-radius: 12px; box-shadow: var(--shadow-sm); }
+    .page { padding:1.35rem; display:flex; flex-direction:column; gap:1.15rem; background: color-mix(in srgb, var(--color-surface, #0f172a) 88%, var(--color-background, #f7f9fc) 12%); color: var(--color-text-primary); border: none; border-radius: 16px; box-shadow: 0 18px 48px rgba(0,0,0,0.3); }
     .page-header { display:flex; justify-content:space-between; align-items:flex-start; }
-    .eyebrow { text-transform:uppercase; letter-spacing:0.08em; color: var(--color-text-tertiary); font-weight:700; margin:0 0 0.25rem; }
-    h1 { margin:0 0 0.35rem; color: var(--color-text-primary); }
-    .sub { margin:0; color: var(--color-text-secondary); }
-    .btn { border-radius:10px; border:1px solid var(--color-border); padding:0.75rem 1.2rem; font-weight:600; cursor:pointer; background: var(--color-surface-hover); color: var(--color-text-primary); }
-    .btn.primary { background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary)); color: var(--color-background, #0f172a); border:none; box-shadow: var(--shadow-md, 0 8px 18px rgba(0,0,0,0.22)); }
-    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:1rem; }
-    .tabs { display:flex; gap:0.5rem; margin-top:0.5rem; }
-    .tab { padding:0.6rem 1rem; border-radius:10px; border:1px solid var(--color-border); background: var(--color-surface-hover); cursor:pointer; font-weight:600; color: var(--color-text-primary); }
-    .tab.active { border-color: var(--color-primary); box-shadow: 0 6px 14px rgba(var(--color-primary-rgb,123,140,255),0.2); }
-    .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius:12px; padding:1.25rem; box-shadow: var(--shadow-sm); display:flex; flex-direction:column; gap:0.65rem; }
-    .card h3 { margin:0 0 0.35rem; color: var(--color-text-primary); }
-    .card .icon { margin-right:0.35rem; }
-    label { display:flex; flex-direction:column; gap:0.3rem; font-weight:600; color: var(--color-text-primary); }
+    .eyebrow { text-transform:uppercase; letter-spacing:0.08em; color: var(--color-text-tertiary); font-weight:700; margin:0 0 0.15rem; font-size: 0.8rem; }
+    h1 { margin:0 0 0.25rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-weight:800; }
+    .sub { margin:0; color: var(--color-text-secondary); line-height:1.45; }
+    .btn { border-radius:12px; border:1px solid color-mix(in srgb, var(--color-border) 50%, transparent); padding:0.7rem 1.15rem; font-weight:650; cursor:pointer; background: color-mix(in srgb, var(--color-surface) 85%, var(--color-surface-hover) 15%); color: var(--color-text-primary); transition: all 0.2s ease; box-shadow: 0 10px 22px rgba(0,0,0,0.18); }
+    .btn.primary { background: linear-gradient(135deg, #f6c344, #f2a811); color: var(--color-surface, #0f0f12); border:none; box-shadow: 0 16px 34px rgba(242, 168, 17, 0.42); }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 14px 26px rgba(0,0,0,0.24); }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:0.85rem 1.2rem; padding-bottom: 0.25rem; }
+    .tabs { display:flex; gap:0.4rem; margin-top:0.35rem; }
+    .tabs.segmented { background: color-mix(in srgb, var(--color-surface-hover) 85%, var(--color-surface) 15%); border:1px solid color-mix(in srgb, var(--color-border) 50%, transparent); padding:0.35rem; border-radius: 14px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); gap:0.2rem; }
+    .tab { padding:0.6rem 0.95rem; border-radius:10px; border:none; background: transparent; cursor:pointer; font-weight:650; color: var(--color-text-secondary); transition: all 0.2s ease; position: relative; }
+    .tab.active { background: color-mix(in srgb, var(--color-primary) 18%, transparent); color: var(--color-text-primary); box-shadow: 0 12px 26px rgba(var(--color-primary-rgb,123,140,255),0.18); }
+    .tab:hover:not(.active) { color: var(--color-text-primary); }
+    .card { background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); border:none; border-radius:14px; padding:1.15rem; box-shadow: 0 12px 28px rgba(0,0,0,0.16); display:flex; flex-direction:column; gap:0.55rem; }
+    .card.flat { background: transparent; box-shadow: none; padding: 0.4rem 0 0.2rem; }
+    .card.soft { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 10px 22px rgba(0,0,0,0.12); }
+    .card h3 { margin:0 0 0.25rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-size:1.05rem; display: inline-flex; align-items: center; gap: 0.4rem; }
+    .card .icon { margin-right:0.35rem; filter: grayscale(0); color: var(--color-primary); }
+    label { display:flex; flex-direction:column; gap:0.18rem; font-weight:600; color: var(--color-text-secondary); letter-spacing: 0.01em; }
     input, select {
-      border:1px solid var(--color-border);
-      border-radius:8px;
-      padding:0.65rem;
-      background: var(--color-surface-hover);
+      border:1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+      border-radius:10px;
+      padding:0.6rem 0.75rem;
+      background: color-mix(in srgb, var(--color-background) 92%, var(--color-surface-hover) 8%);
       color: var(--color-text-primary);
       transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-      box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.12));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
     }
     input::placeholder, select::placeholder { color: var(--color-text-secondary); }
     input:focus, select:focus {
@@ -277,22 +281,23 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .split { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:0.5rem; align-items:end; }
     .split.equal label { width: 100%; }
     .list { display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap; }
-    .chip { border:1px solid var(--color-border); border-radius:8px; padding:0.45rem 0.75rem; background: var(--color-surface-hover); cursor:pointer; }
+    .chip { border:1px solid color-mix(in srgb, var(--color-border) 50%, transparent); border-radius:10px; padding:0.45rem 0.75rem; background: color-mix(in srgb, var(--color-surface-hover) 80%, var(--color-surface) 20%); cursor:pointer; }
     .chip.danger { border-color: rgba(var(--color-error-rgb,239,68,68),0.3); color: var(--color-error,#ef4444); }
     .footer-actions { display:flex; align-items:center; gap:0.75rem; }
     .muted { color: var(--color-text-secondary); }
     .error { color: var(--color-error,#ef4444); font-weight:600; }
     .card-header { display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.25rem; }
-    .table { width:100%; border-collapse:collapse; font-size:0.95rem; background: var(--color-surface); color: var(--color-text-primary); }
-    .table th, .table td { text-align:left; padding:0.55rem 0.6rem; border-bottom:1px solid var(--color-border); background: var(--color-surface); }
-    .table th { color: var(--color-text-secondary); font-weight:700; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.04em; background: var(--color-surface-hover); }
-    .table tbody tr:nth-child(even) td { background: var(--color-surface-hover); }
-    .table tbody tr:hover td { background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface)); }
-    .empty { text-align:center; color: var(--color-text-secondary); padding:0.75rem 0; background: var(--color-surface); }
+    .table { width:100%; border-collapse:separate; border-spacing:0 6px; font-size:0.95rem; background: transparent; color: var(--color-text-primary); }
+    .table th, .table td { text-align:left; padding:0.6rem 0.65rem; background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); }
+    .table th { color: var(--color-text-secondary); font-weight:700; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.04em; background: transparent; }
+    .table tbody tr td:first-child, .table thead tr th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+    .table tbody tr td:last-child, .table thead tr th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+    .table tbody tr:hover td { box-shadow: 0 10px 18px rgba(0,0,0,0.1); }
+    .empty { text-align:center; color: var(--color-text-secondary); padding:0.75rem 0; background: transparent; }
     .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:50; }
-    .modal { background: var(--color-surface); border-radius:14px; padding:1.25rem; width:min(480px, 90vw); border:1px solid var(--color-border); box-shadow: 0 20px 48px rgba(0,0,0,0.35); }
+    .modal { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border-radius:14px; padding:1.25rem; width:min(480px, 90vw); border:none; box-shadow: 0 20px 48px rgba(0,0,0,0.35); }
     .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
-    .form-stack { display:flex; flex-direction:column; gap:0.65rem; }
+    .form-stack { display:flex; flex-direction:column; gap:0.55rem; }
     .modal-actions { display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1rem; }
   `]
 })
