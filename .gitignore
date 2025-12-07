@@ -57,3 +57,6 @@ backend/dist/
 # Temp files
 *.tmp
 .cache/
+
+# Personal learning progress (not committed)
+MY_LEARNING_PROGRESS.md
