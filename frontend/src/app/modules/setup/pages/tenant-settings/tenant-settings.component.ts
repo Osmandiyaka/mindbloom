@@ -216,6 +216,7 @@ import { RoleListComponent } from '../roles/role-list.component';
                 <div class="field">
                   <label>Roles</label>
                   <app-role-selector
+                    class="user-role-selector"
                     [selectedRoleIds]="userRoleIds()"
                     (selectionChange)="setUserRoles($event)" />
                   <div class="selected-roles" *ngIf="userRoles().length">
@@ -225,10 +226,19 @@ import { RoleListComponent } from '../roles/role-list.component';
                     </span>
                   </div>
                 </div>
+                <div class="section-divider"></div>
                 <div class="field inline-toggles">
                   <label>Security</label>
-                  <label class="toggle"><input type="checkbox" [(ngModel)]="userForm.forcePasswordReset" /> <span>Force password reset on first login</span></label>
-                  <label class="toggle"><input type="checkbox" [(ngModel)]="userForm.mfaEnabled" /> <span>Require MFA</span></label>
+                  <label class="toggle switch">
+                    <input type="checkbox" [(ngModel)]="userForm.forcePasswordReset" />
+                    <span class="track"><span class="thumb"></span></span>
+                    <span>Force password reset on first login</span>
+                  </label>
+                  <label class="toggle switch">
+                    <input type="checkbox" [(ngModel)]="userForm.mfaEnabled" />
+                    <span class="track"><span class="thumb"></span></span>
+                    <span>Require MFA</span>
+                  </label>
                 </div>
               </div>
               <footer class="modal-footer">
@@ -562,21 +572,34 @@ import { RoleListComponent } from '../roles/role-list.component';
     .mini-btn.danger { color: var(--color-error); border-color: rgba(239,68,68,0.3); }
     .user-identity { display: inline-flex; align-items: center; gap: 8px; }
     .actions-spacer { flex: 1; }
-    .user-form { display: flex; flex-direction: column; gap: 0.9rem; padding: 0.5rem 0.75rem 1rem; background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border-radius: 14px; border: none; box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
-    .user-form .field { display: flex; flex-direction: column; gap: 0.35rem; }
-    .user-form label { font-weight: 700; color: var(--color-text-secondary); font-size: 0.9rem; letter-spacing: 0.01em; }
-    .user-form input, .user-form select { width: 100%; padding: 0.65rem 0.75rem; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent); background: color-mix(in srgb, var(--color-background) 92%, var(--color-surface-hover) 8%); color: var(--color-text-primary); transition: all 0.18s ease; }
-    .user-form input:focus, .user-form select:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb,123,140,255),0.18); background: var(--color-surface); }
+    .user-form { display: flex; flex-direction: column; gap: 0.9rem; padding: 0.75rem 0.9rem 1rem; background: #3E2D20; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); box-shadow: inset 0 2px 4px rgba(0,0,0,0.35), 0 12px 32px rgba(0,0,0,0.16); }
+    .user-form .field { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.25rem 0.35rem; background: rgba(255,255,255,0.02); border-radius: 10px; }
+    .user-form label { font-weight: 800; color: var(--color-text-primary); font-size: 0.92rem; letter-spacing: 0.01em; }
+    .user-form input, .user-form select { width: 100%; padding: 0.65rem 0.75rem; border-radius: 10px; border: none; background: #3E2D20; color: var(--color-text-primary); transition: all 0.18s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+    .user-form input:focus, .user-form select:focus { outline: none; border: 1px solid rgba(232,190,20,0.6); box-shadow: inset 0 2px 4px rgba(0,0,0,0.35), 0 0 0 2px rgba(232,190,20,0.25); background: #463426; }
     .password-row { display: flex; gap: 0.5rem; align-items: center; }
     .password-row input { flex: 1; }
     .password-row .btn { padding: 0.55rem 0.9rem; }
-    .hint { margin: 0; color: var(--color-text-tertiary); font-size: 0.85rem; }
+    .password-row .btn.ghost { border: 1px solid rgba(112,198,225,0.6); color: #70C6E1; }
+    .password-row .btn.ghost:active { box-shadow: 0 0 0 3px rgba(34,197,94,0.25); }
+    .hint { margin: 0; color: #AB9F95; font-size: 0.82rem; }
     .inline-toggles { gap: 0.35rem !important; }
-    .inline-toggles .toggle { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 600; color: var(--color-text-secondary); padding: 0.35rem 0.5rem; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface); }
-    .inline-toggles .toggle input { appearance: none; width: 18px; height: 18px; border: 2px solid var(--color-border); border-radius: 6px; background: var(--color-background); transition: all 0.15s ease; display: inline-flex; align-items: center; justify-content: center; position: relative; }
-    .inline-toggles .toggle input:checked { border-color: var(--color-primary); background: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb,123,140,255),0.15); }
-    .inline-toggles .toggle input:checked::after { content: '✓'; color: #fff; font-weight: 700; font-size: 12px; line-height: 1; position: absolute; }
+    .inline-toggles .toggle { display: inline-flex; align-items: center; gap: 0.55rem; font-weight: 700; color: var(--color-text-primary); padding: 0.35rem 0.5rem; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+    .inline-toggles .toggle input { appearance: none; width: 0; height: 0; opacity: 0; position: absolute; }
+    .inline-toggles .toggle .track { width: 38px; height: 20px; border-radius: 999px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); display: inline-flex; align-items: center; padding: 2px; transition: all 0.2s ease; }
+    .inline-toggles .toggle .thumb { width: 16px; height: 16px; border-radius: 999px; background: rgba(255,255,255,0.7); transition: transform 0.2s ease, background 0.2s ease; }
+    .inline-toggles .toggle input:checked + .track { background: rgba(232,190,20,0.25); border-color: rgba(232,190,20,0.6); }
+    .inline-toggles .toggle input:checked + .track .thumb { transform: translateX(16px); background: #E8BE14; }
     .user-form .selected-roles { margin-top: 0.25rem; }
+    .user-form .chip { background: rgba(232,190,20,0.14); color: #E8BE14; border: 1px solid rgba(232,190,20,0.35); box-shadow: none; }
+    .user-form .chip.system { background: rgba(112,198,225,0.14); color: #70C6E1; border-color: rgba(112,198,225,0.35); }
+    :host ::ng-deep app-role-selector.user-role-selector .role-trigger {
+      background: #3E2D20;
+      border: 1px solid rgba(232,190,20,0.3);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+      color: var(--color-text-primary);
+    }
+    .section-divider { height: 1px; width: 100%; background: linear-gradient(90deg, rgba(232,190,20,0.45), rgba(232,190,20,0)); border: none; margin: 0.25rem 0 0.35rem; }
     .muted { color: var(--color-text-tertiary); }
     .success { color: var(--color-success, #22c55e); }
     .badge { padding: 0; border-radius: 0; background: transparent; box-shadow: none; font-weight: 500; text-transform: capitalize; display: inline-flex; align-items: center; gap: 6px; }
@@ -701,7 +724,9 @@ import { RoleListComponent } from '../roles/role-list.component';
     }
     .modal.users-modal { width: min(520px, 92vw); background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border: none; border-radius: 16px; box-shadow: 0 20px 52px rgba(0,0,0,0.32); display: flex; flex-direction: column; overflow: hidden; }
     .modal.users-modal .modal-header { padding: 14px 16px 8px; }
-    .modal.users-modal .modal-body { padding: 12px 16px 8px; }
+    .modal.users-modal .modal-header .eyebrow { color: #70C6E1; }
+    .modal.users-modal .modal-header h2 { color: #fff; font-size: 1.45rem; }
+    .modal.users-modal .modal-body { padding: 14px 16px 12px; background: #634D3B; }
     .modal.users-modal .modal-footer { padding: 12px 16px 16px; }
   `]
 })
