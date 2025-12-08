@@ -227,11 +227,11 @@ import { RoleListComponent } from '../roles/role-list.component';
                       {{ r.name }}
                     </span>
                   </div>
-                </div>
-                <div class="section-divider"></div>
-                <div class="field inline-toggles">
-                  <label>Security</label>
-                  <label class="toggle switch">
+              </div>
+              <div class="section-divider"></div>
+              <div class="field inline-toggles">
+                <label>Security</label>
+                <label class="toggle switch">
                     <input type="checkbox" [(ngModel)]="userForm.forcePasswordReset" />
                     <span class="track"><span class="thumb"></span></span>
                     <span>Force password reset on first login</span>
@@ -244,8 +244,8 @@ import { RoleListComponent } from '../roles/role-list.component';
                 </div>
               </div>
               <footer class="modal-footer">
-                <button class="ghost" (click)="closeUserModal()">Cancel</button>
                 <button class="btn primary" (click)="saveUser()" [disabled]="userSaving() || !isValidEmail(userForm.email)">
+                  <svg viewBox="0 0 24 24"><path d="m9 16-3.5-3.5L7 12l2 2 8-8 1.5 1.5L9 16Z" fill="currentColor"/></svg>
                   {{ userSaving() ? 'Saving...' : 'Save User' }}
                 </button>
               </footer>
@@ -725,10 +725,11 @@ import { RoleListComponent } from '../roles/role-list.component';
       z-index: 2147483648 !important;
     }
     .modal.users-modal { width: min(520px, 92vw); background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border: none; border-radius: 16px; box-shadow: 0 20px 52px rgba(0,0,0,0.32); display: flex; flex-direction: column; overflow: hidden; }
-    .modal.users-modal .modal-header { padding: 14px 16px 8px; }
+    .modal.users-modal .modal-header { padding: 14px 16px 8px; position: relative; }
     .modal.users-modal .modal-header .title-row { display: flex; align-items: center; gap: 10px; }
     .modal.users-modal .modal-header .title-icon { width: 22px; height: 22px; color: #E8BE14; }
     .modal.users-modal .modal-header h2 { color: #fff; font-size: 1.45rem; margin: 0; }
+    .modal.users-modal .icon-btn { position: absolute; top: 12px; right: 12px; }
     .modal.users-modal .modal-body { padding: 14px 16px 12px; background: #634D3B; }
     .modal.users-modal .modal-footer { padding: 12px 16px 16px; }
     .modal.users-modal .modal-footer .ghost { border: 1px solid rgba(232,190,20,0.35); color: #E8BE14; }
