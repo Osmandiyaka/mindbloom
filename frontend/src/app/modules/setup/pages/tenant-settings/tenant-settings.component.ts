@@ -44,10 +44,7 @@ import { RoleListComponent } from '../roles/role-list.component';
           </div>
           <div class="card invites-card tight">
             <div class="invite-row compact">
-              <div class="input-icon invite-input">
-                <svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v.51l8 5.33 8-5.33V6H4Zm0 3.36V18h16V9.36l-7.47 4.98a2 2 0 0 1-2.06 0L4 9.36Z" fill="currentColor"/></svg>
-                <input type="email" [(ngModel)]="inviteEmail" placeholder="user@school.com" />
-              </div>
+              <input class="invite-input" type="email" [(ngModel)]="inviteEmail" placeholder="user@school.com" />
               <app-role-selector
                 class="invite-roles"
                 [selectedRoleIds]="selectedRoleIds()"
@@ -442,13 +439,24 @@ import { RoleListComponent } from '../roles/role-list.component';
     .panel-header.users-header { background: transparent; border: none; border-radius: 12px; padding: 0.9rem 0.25rem; box-shadow: none; }
     .invite-card { background: color-mix(in srgb, var(--color-surface) 65%, transparent); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1rem; box-shadow: 0 20px 40px rgba(0,0,0,0.22); display: flex; flex-direction: column; gap: 0.75rem; backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.1); }
     .invite-card.flat { box-shadow: none; border-radius: 12px; border-color: transparent; }
-    .invite-row { display: flex; align-items: center; gap: 0.4rem; background: rgba(0,0,0,0.24); padding: 0.5rem; border-radius: 14px; border: 1px solid rgba(232,190,20,0.12); }
+    .invite-row { display: flex; align-items: center; gap: 0.4rem; background: rgba(0,0,0,0.24); padding: 0.5rem; border-radius: 14px; border: none; box-shadow: none; }
     .invite-row.compact { margin-bottom: 0.25rem; }
-    .invite-input { flex: 1; display: flex; align-items: center; gap: 10px; padding: 0.55rem 0.7rem; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; background: #3E2D20; min-height: 48px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.25); transition: all 0.2s ease; }
-    .invite-input:focus-within { border-color: #E8BE14; box-shadow: 0 0 0 1px #E8BE14, 0 0 8px rgba(232,190,20,0.2); }
-    .input-icon { display: flex; align-items: center; gap: 10px; width: 100%; }
-    .invite-input svg { width: 18px; height: 18px; color: var(--color-accent, #70c6e1); }
-    .invite-input input { border: none; outline: none; background: transparent; width: 100%; color: var(--color-text-primary); font-weight: 600; font-size: 1rem; }
+    .invite-input {
+      flex: 1;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      background: #3E2D20 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2370c6e1'%3E%3Cpath d='M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v.51l8 5.33 8-5.33V6H4Zm0 3.36V18h16V9.36l-7.47 4.98a2 2 0 0 1-2.06 0L4 9.36Z'/%3E%3C/svg%3E") 12px center / 18px 18px no-repeat;
+      min-height: 48px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.25);
+      transition: all 0.2s ease;
+      padding: 0.55rem 0.7rem 0.55rem 2.55rem;
+      color: var(--color-text-primary);
+      font-weight: 600;
+      font-size: 1rem;
+      outline: none;
+      width: 100%;
+    }
+    .invite-input:focus { border-color: #E8BE14; box-shadow: 0 0 0 1px #E8BE14, 0 0 8px rgba(232,190,20,0.2); background-color: #3E2D20; }
     .invite-roles { min-width: 190px; height: 48px; display: flex; align-items: stretch; border: none; border-radius: 12px; padding: 0; background: transparent; color: var(--color-text-secondary); transition: border-color 0.2s ease, background 0.2s ease; position: relative; }
     .invite-submit { height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem 1rem; color: var(--color-surface, #0f0f12); background: linear-gradient(135deg, #E8BE14 0%, #BF9532 100%); box-shadow: 0 4px 12px rgba(232,190,20,0.4); border: none; font-weight: 700; letter-spacing: 0.5px; }
     .invite-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(232,190,20,0.6); }
@@ -503,9 +511,10 @@ import { RoleListComponent } from '../roles/role-list.component';
     :host ::ng-deep app-role-selector.invite-roles .role-trigger {
       position: relative;
       width: 100%;
-      background: transparent;
+      background: rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.18);
-      box-shadow: none;
+      box-shadow: none !important;
+      outline: none;
       padding: 10px 12px;
       min-width: 0;
       color: var(--color-text-primary);
