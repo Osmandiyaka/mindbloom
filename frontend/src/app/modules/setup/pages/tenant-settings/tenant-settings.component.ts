@@ -183,8 +183,10 @@ import { RoleListComponent } from '../roles/role-list.component';
           <div class="overlay" *ngIf="showUserModal()">
             <div class="modal users-modal">
               <header class="modal-header">
-                <div>
-                  <p class="eyebrow">User</p>
+                <div class="title-row">
+                  <svg class="title-icon" viewBox="0 0 24 24">
+                    <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-3 0-6 1.34-6 4v2h12v-2c0-2.66-3-4-6-4Z" fill="currentColor"/>
+                  </svg>
                   <h2>{{ editingUser() ? 'Edit User' : 'Add User' }}</h2>
                 </div>
                 <button class="icon-btn" (click)="closeUserModal()" aria-label="Close">
@@ -724,10 +726,13 @@ import { RoleListComponent } from '../roles/role-list.component';
     }
     .modal.users-modal { width: min(520px, 92vw); background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border: none; border-radius: 16px; box-shadow: 0 20px 52px rgba(0,0,0,0.32); display: flex; flex-direction: column; overflow: hidden; }
     .modal.users-modal .modal-header { padding: 14px 16px 8px; }
-    .modal.users-modal .modal-header .eyebrow { color: #70C6E1; }
-    .modal.users-modal .modal-header h2 { color: #fff; font-size: 1.45rem; }
+    .modal.users-modal .modal-header .title-row { display: flex; align-items: center; gap: 10px; }
+    .modal.users-modal .modal-header .title-icon { width: 22px; height: 22px; color: #E8BE14; }
+    .modal.users-modal .modal-header h2 { color: #fff; font-size: 1.45rem; margin: 0; }
     .modal.users-modal .modal-body { padding: 14px 16px 12px; background: #634D3B; }
     .modal.users-modal .modal-footer { padding: 12px 16px 16px; }
+    .modal.users-modal .modal-footer .ghost { border: 1px solid rgba(232,190,20,0.35); color: #E8BE14; }
+    .modal.users-modal .modal-footer .ghost:hover { background: rgba(232,190,20,0.08); }
   `]
 })
 export class TenantSettingsComponent implements OnInit {
