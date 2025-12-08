@@ -32,7 +32,7 @@
     </header>
 
     <div class="toolbar">
-      <app-search-input class="search-field" placeholder="Search roles" (search)="search.set($event)"></app-search-input>
+      <app-search-input class="search-field" placeholder="Search roles" (search)="onSearch($event)"></app-search-input>
       <span class="selected-indicator">
         <svg viewBox="0 0 24 24">
           <path d="M9.5 17 5 12.5l1.5-1.5L9.5 14l8-8 1.5 1.5-9.5 9.5Z" fill="currentColor" />
@@ -52,7 +52,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let role of filteredRoles()">
+          <tr *ngFor="let role of pagedRoles()">
             <td>
               <label class="checkbox">
                 <input type="checkbox" [checked]="isSelected(role.id)" (change)="toggle(role)" />
@@ -92,6 +92,12 @@
         </tbody>
       </table>
       <p *ngIf="!filteredRoles().length" class="empty">No roles match your search.</p>
+    </div>
+
+    <div class="pagination" *ngIf="filteredRoles().length">
+      <button class="ghost" (click)="prevPage()" [disabled]="page() === 1">Prev</button>
+      <span>Page {{ page() }} of {{ totalPages() }}</span>
+      <button class="ghost" (click)="nextPage()" [disabled]="page() === totalPages()">Next</button>
     </div>
 
     <footer class="modal-footer">

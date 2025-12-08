@@ -20,6 +20,8 @@ export class RoleSelectorComponent implements OnInit {
     isOpen = signal(false);
     search = signal('');
     selected = signal<Set<string>>(new Set());
+    page = signal(1);
+    readonly pageSize = 6;
 
     roles = this.roleService.roles;
     loading = this.roleService.loading;
@@ -34,6 +36,13 @@ export class RoleSelectorComponent implements OnInit {
                 (role.isSystemRole ? 'system' : 'custom').includes(term)
             );
         });
+    });
+
+    totalPages = computed(() => Math.max(1, Math.ceil(this.filteredRoles().length / this.pageSize)));
+
+    pagedRoles = computed(() => {
+        const start = (this.page() - 1) * this.pageSize;
+        return this.filteredRoles().slice(start, start + this.pageSize);
     });
 
     selectedCount = computed(() => this.selected().size);
@@ -86,5 +95,22 @@ export class RoleSelectorComponent implements OnInit {
         const selectedRoles = this.roles().filter((r) => this.selected().has(r.id));
         this.selectionChange.emit(selectedRoles);
         this.close();
+    }
+
+    onSearch(term: string): void {
+        this.search.set(term);
+        this.page.set(1);
+    }
+
+    nextPage(): void {
+        if (this.page() < this.totalPages()) {
+            this.page.set(this.page() + 1);
+        }
+    }
+
+    prevPage(): void {
+        if (this.page() > 1) {
+            this.page.set(this.page() - 1);
+        }
     }
 }

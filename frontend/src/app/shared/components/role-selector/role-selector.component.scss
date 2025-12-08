@@ -84,7 +84,7 @@
 }
 
 .role-selector-overlay .modal {
-    width: min(1400px, 96vw);
+    width: min(96vw, 1920px);
     max-height: 90vh;
     background: rgba(79, 58, 41, 0.92);
     border-radius: 18px;
@@ -197,6 +197,8 @@
 .table-wrapper table {
     border-collapse: separate;
     border-spacing: 0 6px;
+    width: 100%;
+    margin: 0 auto;
 }
 
 .table-wrapper table th,
@@ -423,6 +425,36 @@ th {
 .empty {
     padding: 1rem 1.5rem;
     color: var(--color-text-tertiary, #9ca3af);
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    padding: 10px 18px 4px;
+    color: var(--color-text-secondary, #E0D5C9);
+
+    button {
+        border: 1px solid var(--color-border, #7A6F65);
+        background: rgba(79, 58, 41, 0.6);
+        color: var(--color-text-secondary, #E0D5C9);
+        border-radius: 10px;
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        &:not(:disabled):hover {
+            border-color: #E8BE14;
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(232, 190, 20, 0.2);
+        }
+    }
 }
 
 @media (max-width: 720px) {
