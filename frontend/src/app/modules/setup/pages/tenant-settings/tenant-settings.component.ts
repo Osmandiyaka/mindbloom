@@ -43,10 +43,14 @@ import { RoleListComponent } from '../roles/role-list.component';
             </div>
           </div>
           <div class="card invites-card tight">
-            <div class="invite-row compact">
+            <div class="invite-row capsule">
+              <span class="capsule-icon">
+                <svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v.51l8 5.33 8-5.33V6H4Zm0 3.36V18h16V9.36l-7.47 4.98a2 2 0 0 1-2.06 0L4 9.36Z" fill="currentColor"/></svg>
+              </span>
               <input class="invite-input" type="email" [(ngModel)]="inviteEmail" placeholder="user@school.com" />
+              <span class="capsule-divider"></span>
               <app-role-selector
-                class="invite-roles"
+                class="invite-roles inline"
                 [selectedRoleIds]="selectedRoleIds()"
                 (selectionChange)="onRoleSelection($event)" />
               <button class="btn primary shadow-md invite-submit" (click)="sendInvite()" [disabled]="inviteLoading()">
@@ -441,32 +445,41 @@ import { RoleListComponent } from '../roles/role-list.component';
     .invite-card.flat { box-shadow: none; border-radius: 12px; border-color: transparent; }
     .invite-row { display: flex; align-items: center; gap: 0.4rem; background: rgba(0,0,0,0.24); padding: 0.5rem; border-radius: 14px; border: none; box-shadow: none; }
     .invite-row.compact { margin-bottom: 0.25rem; }
+    .invite-row.capsule {
+      gap: 0.4rem;
+      background: rgba(0,0,0,0.18);
+      border-radius: 999px;
+      padding: 0.35rem 0.5rem;
+      border: 1px solid rgba(255,255,255,0.08);
+      align-items: center;
+    }
+    .capsule-icon { display: inline-flex; align-items: center; justify-content: center; padding: 0 0.35rem; color: var(--color-accent, #70c6e1); }
+    .capsule-icon svg { width: 18px; height: 18px; display: block; }
+    .capsule-divider { width: 1px; height: 26px; background: rgba(255,255,255,0.1); margin: 0 0.35rem; }
     .invite-input {
       flex: 1;
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 12px;
-      background-color: #3E2D20;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2370c6e1'%3E%3Cpath d='M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v.51l8 5.33 8-5.33V6H4Zm0 3.36V18h16V9.36l-7.47 4.98a2 2 0 0 1-2.06 0L4 9.36Z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: 12px center;
-      background-size: 18px 18px;
-      min-height: 48px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--color-surface) 80%, transparent);
+      min-height: 42px;
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.25);
-      transition: all 0.2s ease;
-      padding: 0.55rem 0.7rem 0.55rem 2.55rem;
+      padding: 0.4rem 0.9rem 0.4rem 2.8rem;
       color: var(--color-text-primary);
       font-weight: 600;
       font-size: 1rem;
       outline: none;
       width: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2370C6E1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z'/%3E%3Cpath d='m22 6-10 7L2 6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-size: 18px 18px;
+      background-position: 14px center;
     }
     .invite-input:focus {
-      border-color: #E8BE14;
-      box-shadow: 0 0 0 1px #E8BE14, 0 0 8px rgba(232,190,20,0.2);
-      background-color: #3E2D20;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 1px rgba(var(--color-primary-rgb,232,190,20),0.3), 0 0 10px rgba(var(--color-primary-rgb,232,190,20),0.2);
     }
-    .invite-roles { min-width: 190px; height: 48px; display: flex; align-items: stretch; border: none; border-radius: 12px; padding: 0; background: transparent; color: var(--color-text-secondary); transition: border-color 0.2s ease, background 0.2s ease; position: relative; }
-    .invite-submit { height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem 1rem; color: var(--color-surface, #0f0f12); background: linear-gradient(135deg, #E8BE14 0%, #BF9532 100%); box-shadow: 0 4px 12px rgba(232,190,20,0.4); border: none; font-weight: 700; letter-spacing: 0.5px; }
+    .invite-roles { min-width: 190px; height: 42px; display: flex; align-items: center; border: none; border-radius: 12px; padding: 0; background: transparent; color: var(--color-text-secondary); position: relative; }
+    .invite-submit { height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem 1rem; color: var(--color-surface, #0f0f12); background: linear-gradient(135deg, #E8BE14 0%, #BF9532 100%); box-shadow: 0 4px 12px rgba(232,190,20,0.4); border: none; font-weight: 700; letter-spacing: 0.5px; border-radius: 999px; margin-left: 0.5rem; }
     .invite-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(232,190,20,0.6); }
     .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; }
     .selected-roles .chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 6px 10px; border-radius: 999px; border: none; font-weight: 700; box-shadow: 0 10px 20px rgba(16,185,129,0.18); }
@@ -523,7 +536,7 @@ import { RoleListComponent } from '../roles/role-list.component';
       border: 1px solid rgba(255,255,255,0.18);
       box-shadow: none !important;
       outline: none;
-      padding: 10px 12px;
+      padding: 8px 12px;
       min-width: 0;
       color: var(--color-text-primary);
       gap: 10px;
@@ -563,8 +576,16 @@ import { RoleListComponent } from '../roles/role-list.component';
     .plan-head { display: flex; justify-content: space-between; align-items: center; }
     .plan-footer { margin-top: auto; display: flex; justify-content: flex-end; }
     .price { margin: 0; font-weight: 700; }
-    .invites-card { width: 100%; margin-top: 0; background: var(--color-surface-hover, #634d3b); border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent); }
-    .invites-card.tight { padding: 0.85rem 0.85rem 0.85rem; box-shadow: 0 14px 28px rgba(0,0,0,0.16); border-radius: 14px; }
+    .invites-card {
+      width: 100%;
+      margin-top: 0;
+      background: linear-gradient(145deg, rgba(99, 77, 59, 0.3), rgba(79, 58, 41, 0.3));
+      border: 1px solid rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      border-radius: 18px;
+    }
+    .invites-card.tight { padding: 0.85rem 0.85rem 0.85rem; }
     .invites-card .card-body { display: block; padding: 0.25rem 0.5rem 0.5rem; }
     .invites-card .table { margin: 0; }
     .users-card .card-body { padding-top: 0.5rem; }
