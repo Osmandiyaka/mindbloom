@@ -569,6 +569,17 @@ import { RoleListComponent } from '../roles/role-list.component';
     }
     :host ::ng-deep app-role-selector.invite-roles .trigger-text span { font-size: 0.95rem; }
     :host ::ng-deep app-role-selector.invite-roles .trigger-text small { color: var(--color-text-tertiary); }
+    /* Ensure role selector overlay is above all UI */
+    :host ::ng-deep app-role-selector .overlay {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 2147483647 !important;
+      pointer-events: all !important;
+    }
+    :host ::ng-deep app-role-selector .modal {
+      z-index: 2147483648 !important;
+      position: relative;
+    }
     .plans { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 1rem; }
     .plans.padded { padding: 0.5rem; }
     .plan-card { border: none; border-radius: 16px; padding: 1.1rem; background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); box-shadow: 0 14px 32px rgba(0,0,0,0.14); display: flex; flex-direction: column; gap: 0.75rem; color: var(--color-text-primary); }
@@ -584,6 +595,7 @@ import { RoleListComponent } from '../roles/role-list.component';
       backdrop-filter: blur(12px);
       box-shadow: 0 20px 40px rgba(0,0,0,0.2);
       border-radius: 18px;
+      overflow: visible;
     }
     .invites-card.tight { padding: 0.85rem 0.85rem 0.85rem; }
     .invites-card .card-body { display: block; padding: 0.25rem 0.5rem 0.5rem; }
