@@ -117,15 +117,6 @@ import { RoleListComponent } from '../roles/role-list.component';
               <p *ngIf="!invitations().length" class="muted empty-state">No invitations yet.</p>
             </div>
           </div>
-          <div class="panel-header spaced padded users-header">
-            <div class="stacked">
-              <p class="subtitle">Create and manage tenant users with roles.</p>
-            </div>
-              <button class="btn primary" (click)="openUserModal()">
-                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Zm7-3h-2v-2h-2V7h2V5h2v2h2v2h-2v2Z" fill="currentColor"/></svg>
-                Add User
-              </button>
-          </div>
           <div class="card invites-card tight users-card">
             <div class="card-body toolbar">
               <div class="left">
@@ -148,6 +139,11 @@ import { RoleListComponent } from '../roles/role-list.component';
                     <path d="m9 12 2 2 4-4" />
                   </svg>
                   Assign Permissions
+                </button>
+                <span class="actions-spacer"></span>
+                <button class="btn primary" (click)="openUserModal()">
+                  <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Zm7-3h-2v-2h-2V7h2V5h2v2h2v2h-2v2Z" fill="currentColor"/></svg>
+                  Add User
                 </button>
               </div>
             </div>
@@ -443,7 +439,7 @@ import { RoleListComponent } from '../roles/role-list.component';
     .tabs button:hover { color: var(--color-text-primary); transform: translateY(-1px); }
     .tabs button.active { color: var(--color-primary); }
     .tabs button.active::after { background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark)); transform: scaleX(1); }
-    .actions { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .actions { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
     .actions.sticky-actions { justify-content: flex-end; margin-top: 0.75rem; padding-right: 0.25rem; }
     .actions.sticky-actions .action-buttons { display: flex; gap: 0.75rem; }
     .actions.sticky-actions .spacer { flex: 1; }
@@ -565,6 +561,7 @@ import { RoleListComponent } from '../roles/role-list.component';
     .mini-btn.ghost { background: transparent; }
     .mini-btn.danger { color: var(--color-error); border-color: rgba(239,68,68,0.3); }
     .user-identity { display: inline-flex; align-items: center; gap: 8px; }
+    .actions-spacer { flex: 1; }
     .user-form { display: flex; flex-direction: column; gap: 0.9rem; padding: 0.5rem 0.75rem 1rem; background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border-radius: 14px; border: none; box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
     .user-form .field { display: flex; flex-direction: column; gap: 0.35rem; }
     .user-form label { font-weight: 700; color: var(--color-text-secondary); font-size: 0.9rem; letter-spacing: 0.01em; }
