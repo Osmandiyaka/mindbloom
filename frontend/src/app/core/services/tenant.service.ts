@@ -131,7 +131,7 @@ export class TenantService {
 
     getTenantId(): string | null {
         const tenant = this.getCurrentTenantValue();
-        return tenant?.id || null;
+        return tenant?.id || environment.tenantId || null;
     }
 
     canAccessFeature(feature: string): boolean {

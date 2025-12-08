@@ -23,20 +23,21 @@ export interface Invitation {
 export class InvitationService {
     private http = inject(HttpClient);
     private baseUrl = `${environment.apiUrl}/invitations`;
+    private httpOptions = { withCredentials: true };
 
     list(): Observable<Invitation[]> {
-        return this.http.get<Invitation[]>(this.baseUrl);
+        return this.http.get<Invitation[]>(this.baseUrl, this.httpOptions);
     }
 
     create(email: string, roles: string[], expiresAt?: string): Observable<Invitation> {
-        return this.http.post<Invitation>(this.baseUrl, { email, roles, expiresAt });
+        return this.http.post<Invitation>(this.baseUrl, { email, roles, expiresAt }, this.httpOptions);
     }
 
     resend(id: string): Observable<Invitation> {
-        return this.http.post<Invitation>(`${this.baseUrl}/${id}/resend`, {});
+        return this.http.post<Invitation>(`${this.baseUrl}/${id}/resend`, {}, this.httpOptions);
     }
 
     revoke(id: string): Observable<Invitation> {
-        return this.http.delete<Invitation>(`${this.baseUrl}/${id}`);
+        return this.http.delete<Invitation>(`${this.baseUrl}/${id}`, this.httpOptions);
     }
 }
