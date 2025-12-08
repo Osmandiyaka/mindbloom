@@ -245,7 +245,7 @@ import { RoleListComponent } from '../roles/role-list.component';
               </div>
               <footer class="modal-footer">
                 <button class="ghost" (click)="closeUserModal()">Cancel</button>
-                <button class="primary" (click)="saveUser()" [disabled]="userSaving() || !isValidEmail(userForm.email)">
+                <button class="btn primary" (click)="saveUser()" [disabled]="userSaving() || !isValidEmail(userForm.email)">
                   {{ userSaving() ? 'Saving...' : 'Save User' }}
                 </button>
               </footer>
