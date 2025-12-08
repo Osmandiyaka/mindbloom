@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { SearchInputComponent } from '../search-input/search-input.component';
 import { Role } from '../../../core/models/role.model';
 import { RoleService } from '../../../core/services/role.service';
 
 @Component({
     selector: 'app-role-selector',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, SearchInputComponent],
     templateUrl: './role-selector.component.html',
     styleUrls: ['./role-selector.component.scss'],
 })
