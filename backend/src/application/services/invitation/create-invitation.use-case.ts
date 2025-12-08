@@ -3,12 +3,14 @@ import { Invitation } from '../../../domain/invitation/entities/invitation.entit
 import { INVITATION_REPOSITORY, InvitationRepository } from '../../../domain/ports/out/invitation-repository.port';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateInvitationCommand } from '../../ports/in/commands/create-invitation.command';
+import { InvitationMailer } from './invitation.mailer';
 
 @Injectable()
 export class CreateInvitationUseCase {
     constructor(
         @Inject(INVITATION_REPOSITORY)
         private readonly invitationRepository: InvitationRepository,
+        private readonly invitationMailer: InvitationMailer,
     ) { }
 
     async execute(command: CreateInvitationCommand): Promise<Invitation> {
@@ -24,6 +26,8 @@ export class CreateInvitationUseCase {
         });
 
         const saved = await this.invitationRepository.create(invitation);
-        return saved.markSent();
+        await this.invitationMailer.sendInvitation(saved.email, saved.token, saved.roles, saved.expiresAt);
+        const sent = saved.markSent();
+        return this.invitationRepository.save(sent);
     }
 }
