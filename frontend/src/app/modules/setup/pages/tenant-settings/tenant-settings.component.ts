@@ -584,7 +584,7 @@ import { RoleListComponent } from '../roles/role-list.component';
     .badge.revoked { color: var(--color-error); }
     .badge.pending { color: var(--color-warning, #f39c12); }
     .badge.accepted { color: var(--color-success, #70ad47); }
-    .actions .btn { padding: 0.4rem 0.7rem; }
+    .actions .btn { padding: 0.4rem 0.7rem; box-shadow: 0 8px 20px rgba(0,0,0,0.18); }
     .btn.small { padding: 0.4rem 0.8rem; font-size: 0.875rem; }
     .btn.danger { color: var(--color-error); }
     .shadow-md { box-shadow: var(--shadow-md, 10px 10px 20px rgba(0,0,0,0.7), -6px -6px 12px rgba(255,255,255,0.07)); }
