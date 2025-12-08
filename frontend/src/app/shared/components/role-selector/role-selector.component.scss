@@ -64,7 +64,7 @@
     font-size: 12px;
 }
 
-.overlay {
+.role-selector-overlay {
     position: fixed !important;
     top: 0 !important;
     right: 0 !important;
@@ -78,11 +78,11 @@
     place-items: center;
     padding: 24px;
     z-index: 2147483647 !important; /* stay above any app chrome */
-    pointer-events: all;
+    pointer-events: all !important;
     transform: none !important;
 }
 
-.modal {
+.role-selector-overlay .modal {
     width: min(940px, 96vw);
     max-height: 90vh;
     background: rgba(79, 58, 41, 0.92);
@@ -93,6 +93,7 @@
     flex-direction: column;
     overflow: hidden;
     z-index: 2147483648 !important;
+    position: relative;
 }
 
 .modal-header {
@@ -198,7 +199,8 @@ table {
     border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
     text-align: left;
     padding: 10px 16px;
     border-bottom: 1px solid rgba(232, 190, 20, 0.4);
@@ -325,13 +327,13 @@ tr:hover {
     place-items: center;
 }
 
-.checkbox input:checked + span {
+.checkbox input:checked+span {
     border-color: #E8BE14;
     background: #E8BE14;
     box-shadow: 0 0 0 3px rgba(232, 190, 20, 0.2);
 }
 
-.checkbox input:checked + span::after {
+.checkbox input:checked+span::after {
     content: '';
     width: 10px;
     height: 10px;

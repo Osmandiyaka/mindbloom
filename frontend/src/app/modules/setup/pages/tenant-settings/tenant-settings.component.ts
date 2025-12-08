@@ -569,17 +569,6 @@ import { RoleListComponent } from '../roles/role-list.component';
     }
     :host ::ng-deep app-role-selector.invite-roles .trigger-text span { font-size: 0.95rem; }
     :host ::ng-deep app-role-selector.invite-roles .trigger-text small { color: var(--color-text-tertiary); }
-    /* Ensure role selector overlay is above tenant overlays and tables */
-    :host ::ng-deep app-role-selector .overlay {
-      position: fixed !important;
-      inset: 0 !important;
-      z-index: 2147483647 !important; /* above .tenant-settings .overlay (9999) */
-      pointer-events: all !important;
-    }
-    :host ::ng-deep app-role-selector .modal {
-      position: relative !important;
-      z-index: 2147483648 !important;
-    }
     .plans { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 1rem; }
     .plans.padded { padding: 0.5rem; }
     .plan-card { border: none; border-radius: 16px; padding: 1.1rem; background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); box-shadow: 0 14px 32px rgba(0,0,0,0.14); display: flex; flex-direction: column; gap: 0.75rem; color: var(--color-text-primary); }
@@ -596,10 +585,14 @@ import { RoleListComponent } from '../roles/role-list.component';
       box-shadow: 0 20px 40px rgba(0,0,0,0.2);
       border-radius: 18px;
       overflow: visible;
+      position: relative;
+      z-index: 20;
     }
     .invites-card.tight { padding: 0.85rem 0.85rem 0.85rem; }
     .invites-card .card-body { display: block; padding: 0.25rem 0.5rem 0.5rem; }
     .invites-card .table { margin: 0; }
+    .invite-row.capsule { position: relative; z-index: 30; }
+    .users-card { position: relative; z-index: 5; }
     .users-card .card-body { padding-top: 0.5rem; }
     .users-card .card-body.toolbar { background: color-mix(in srgb, var(--color-surface-hover) 60%, transparent); border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius: 12px; }
     .plugin-card { padding: 0.35rem 0.35rem 0.75rem; }
@@ -624,6 +617,23 @@ import { RoleListComponent } from '../roles/role-list.component';
     .template-section .chip.subtle { background: rgba(var(--color-primary-rgb,123,140,255),0.12); color: var(--color-primary); padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(var(--color-primary-rgb,123,140,255),0.25); font-weight: 700; }
     .themed-heading { color: var(--color-text-primary); letter-spacing: -0.01em; }
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: grid; place-items: center; padding: 24px; z-index: 9999; }
+    /* Ensure role selector modal sits above everything else on the page */
+    :host ::ng-deep app-role-selector .role-selector-overlay {
+      position: fixed !important;
+      top: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 2147483647 !important;
+      pointer-events: all !important;
+      transform: none !important;
+    }
+    :host ::ng-deep app-role-selector .modal {
+      position: relative !important;
+      z-index: 2147483648 !important;
+    }
     .modal.users-modal { width: min(520px, 92vw); background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border: none; border-radius: 16px; box-shadow: 0 20px 52px rgba(0,0,0,0.32); display: flex; flex-direction: column; overflow: hidden; }
     .modal.users-modal .modal-header { padding: 14px 16px 8px; }
     .modal.users-modal .modal-body { padding: 12px 16px 8px; }
