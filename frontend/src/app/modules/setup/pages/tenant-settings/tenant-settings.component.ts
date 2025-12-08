@@ -16,10 +16,10 @@ import { SchoolSettingsComponent } from '../school-settings/school-settings.comp
 import { RoleListComponent } from '../roles/role-list.component';
 
 @Component({
-    selector: 'app-tenant-settings',
-    standalone: true,
-    imports: [CommonModule, FormsModule, PluginLauncherComponent, RouterModule, RoleSelectorComponent, PermissionTreeSelectorComponent, RoleListComponent, SchoolSettingsComponent],
-    template: `
+  selector: 'app-tenant-settings',
+  standalone: true,
+  imports: [CommonModule, FormsModule, PluginLauncherComponent, RouterModule, RoleSelectorComponent, PermissionTreeSelectorComponent, RoleListComponent, SchoolSettingsComponent],
+  template: `
     <div class="tenant-settings compact">
 
       <div class="tabs">
@@ -391,7 +391,7 @@ import { RoleListComponent } from '../roles/role-list.component';
       <div class="alert success" *ngIf="success()"><span>{{ success() }}</span></div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .tenant-settings { max-width: 1220px; margin: 0 auto; padding: 1.25rem 1.5rem 1.5rem; background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); color: var(--color-text-primary); border: none; border-radius: 18px; box-shadow: 0 18px 48px rgba(0,0,0,0.28), 0 8px 24px rgba(0,0,0,0.18); }
     .tenant-settings.compact { padding-top: 0.75rem; }
     .page-header { margin-bottom: 0; }
@@ -569,16 +569,16 @@ import { RoleListComponent } from '../roles/role-list.component';
     }
     :host ::ng-deep app-role-selector.invite-roles .trigger-text span { font-size: 0.95rem; }
     :host ::ng-deep app-role-selector.invite-roles .trigger-text small { color: var(--color-text-tertiary); }
-    /* Ensure role selector overlay is above all UI */
+    /* Ensure role selector overlay is above tenant overlays and tables */
     :host ::ng-deep app-role-selector .overlay {
       position: fixed !important;
       inset: 0 !important;
-      z-index: 2147483647 !important;
+      z-index: 2147483647 !important; /* above .tenant-settings .overlay (9999) */
       pointer-events: all !important;
     }
     :host ::ng-deep app-role-selector .modal {
+      position: relative !important;
       z-index: 2147483648 !important;
-      position: relative;
     }
     .plans { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 1rem; }
     .plans.padded { padding: 0.5rem; }
@@ -631,434 +631,434 @@ import { RoleListComponent } from '../roles/role-list.component';
   `]
 })
 export class TenantSettingsComponent implements OnInit {
-    loading = signal(false);
-    saving = signal(false);
-    templatesSaving = signal(false);
-    billingLoading = signal(false);
-    inviteLoading = signal(false);
-    usersLoading = signal(false);
-    userSaving = signal(false);
-    error = signal<string | null>(null);
-    success = signal<string | null>(null);
-    activeTab: 'school' | 'invitations' | 'roles' | 'billing' | 'plugins' | 'templates' = 'school';
+  loading = signal(false);
+  saving = signal(false);
+  templatesSaving = signal(false);
+  billingLoading = signal(false);
+  inviteLoading = signal(false);
+  usersLoading = signal(false);
+  userSaving = signal(false);
+  error = signal<string | null>(null);
+  success = signal<string | null>(null);
+  activeTab: 'school' | 'invitations' | 'roles' | 'billing' | 'plugins' | 'templates' = 'school';
 
-    templates = {
-        admissionPrefix: 'ADM',
-        admissionSeqLength: 4,
-        includeYear: true,
-        resetPerYear: true,
-        rollPrefix: '',
-        rollSeqLength: 2,
-        sampleClass: '7',
-        sampleSection: 'B',
-        resetPerClass: true
-    };
+  templates = {
+    admissionPrefix: 'ADM',
+    admissionSeqLength: 4,
+    includeYear: true,
+    resetPerYear: true,
+    rollPrefix: '',
+    rollSeqLength: 2,
+    sampleClass: '7',
+    sampleSection: 'B',
+    resetPerClass: true
+  };
 
-    draft: Partial<Tenant> = {
-        customization: {
-            primaryColor: '#667eea',
-            secondaryColor: '#764ba2',
-            accentColor: '#1EA7FF',
-        },
-        locale: 'en',
-        timezone: 'UTC',
-        weekStartsOn: 'monday',
-        currency: 'USD',
-        academicYear: {},
-    };
+  draft: Partial<Tenant> = {
+    customization: {
+      primaryColor: '#667eea',
+      secondaryColor: '#764ba2',
+      accentColor: '#1EA7FF',
+    },
+    locale: 'en',
+    timezone: 'UTC',
+    weekStartsOn: 'monday',
+    currency: 'USD',
+    academicYear: {},
+  };
 
-    invitations = signal<Invitation[]>([]);
-    inviteEmail = '';
-    selectedRoles = signal<Role[]>([]);
-    selectedRoleIds = signal<string[]>([]);
+  invitations = signal<Invitation[]>([]);
+  inviteEmail = '';
+  selectedRoles = signal<Role[]>([]);
+  selectedRoleIds = signal<string[]>([]);
 
-    users = signal<User[]>([]);
-    roles = this.roleService.roles;
-    showUserModal = signal(false);
-    editingUser = signal<User | null>(null);
-    userRoles = signal<Role[]>([]);
-    userRoleIds = signal<string[]>([]);
-    userForm: { name: string; email: string; password: string; forcePasswordReset?: boolean; mfaEnabled?: boolean } = { name: '', email: '', password: '', forcePasswordReset: true, mfaEnabled: true };
-    selectedUserIds = signal<Set<string>>(new Set());
-    selectAllUsers = signal(false);
-    showPermissionModal = signal(false);
-    selectedPermissionIds = signal<string[]>([]);
+  users = signal<User[]>([]);
+  roles = this.roleService.roles;
+  showUserModal = signal(false);
+  editingUser = signal<User | null>(null);
+  userRoles = signal<Role[]>([]);
+  userRoleIds = signal<string[]>([]);
+  userForm: { name: string; email: string; password: string; forcePasswordReset?: boolean; mfaEnabled?: boolean } = { name: '', email: '', password: '', forcePasswordReset: true, mfaEnabled: true };
+  selectedUserIds = signal<Set<string>>(new Set());
+  selectAllUsers = signal(false);
+  showPermissionModal = signal(false);
+  selectedPermissionIds = signal<string[]>([]);
 
-    subscription = signal<Subscription | null>(null);
-    plans = [
-        { id: 'free' as SubscriptionPlan, label: 'Free', price: '$0', perks: ['Basic features', 'Community support'] },
-        { id: 'basic' as SubscriptionPlan, label: 'Basic', price: '$49', perks: ['Core modules', 'Email support'] },
-        { id: 'premium' as SubscriptionPlan, label: 'Premium', price: '$99', perks: ['Finance/HR/Library', 'Priority support'] },
-        { id: 'enterprise' as SubscriptionPlan, label: 'Enterprise', price: '$199', perks: ['All modules', 'Dedicated CSM'] },
-    ];
+  subscription = signal<Subscription | null>(null);
+  plans = [
+    { id: 'free' as SubscriptionPlan, label: 'Free', price: '$0', perks: ['Basic features', 'Community support'] },
+    { id: 'basic' as SubscriptionPlan, label: 'Basic', price: '$49', perks: ['Core modules', 'Email support'] },
+    { id: 'premium' as SubscriptionPlan, label: 'Premium', price: '$99', perks: ['Finance/HR/Library', 'Priority support'] },
+    { id: 'enterprise' as SubscriptionPlan, label: 'Enterprise', price: '$199', perks: ['All modules', 'Dedicated CSM'] },
+  ];
 
-    constructor(
-        private tenantSettingsService: TenantSettingsService,
-        private invitationService: InvitationService,
-        private subscriptionService: SubscriptionService,
-        private userService: UserService,
-        public roleService: RoleService,
-    ) { }
+  constructor(
+    private tenantSettingsService: TenantSettingsService,
+    private invitationService: InvitationService,
+    private subscriptionService: SubscriptionService,
+    private userService: UserService,
+    public roleService: RoleService,
+  ) { }
 
-    ngOnInit(): void {
-        this.load();
-        this.loadInvitations();
-        this.loadUsers();
-        this.loadSubscription();
-        if (!this.roles().length) {
-            this.roleService.getRoles().subscribe();
-        }
+  ngOnInit(): void {
+    this.load();
+    this.loadInvitations();
+    this.loadUsers();
+    this.loadSubscription();
+    if (!this.roles().length) {
+      this.roleService.getRoles().subscribe();
     }
+  }
 
-    load(): void {
-        this.loading.set(true);
-        this.error.set(null);
-        this.tenantSettingsService.getSettings().subscribe({
-            next: (tenant) => {
-                this.draft = {
-                    ...this.draft,
-                    ...tenant,
-                    customization: { ...this.draft.customization, ...(tenant.customization || {}) },
-                    academicYear: tenant.academicYear || {},
-                };
-                if (tenant.idTemplates) {
-                    this.templates = {
-                        ...this.templates,
-                        ...tenant.idTemplates,
-                    };
-                }
-                this.loading.set(false);
-            },
-            error: (err) => {
-                this.error.set(err.error?.message || 'Failed to load tenant settings');
-                this.loading.set(false);
-            }
-        });
-    }
-
-    save(): void {
-        this.saving.set(true);
-        this.error.set(null);
-        this.success.set(null);
-        this.tenantSettingsService.updateSettings({
-            customization: this.draft.customization,
-            locale: this.draft.locale,
-            timezone: this.draft.timezone,
-            weekStartsOn: this.draft.weekStartsOn as any,
-            currency: this.draft.currency,
-            academicYear: this.draft.academicYear as any,
-        }).subscribe({
-            next: (tenant) => {
-                this.success.set('Settings saved');
-                this.draft = {
-                    ...this.draft,
-                    ...tenant,
-                    customization: { ...this.draft.customization, ...(tenant.customization || {}) },
-                    academicYear: tenant.academicYear || {},
-                };
-                this.saving.set(false);
-            },
-            error: (err) => {
-                this.error.set(err.error?.message || 'Failed to save settings');
-                this.saving.set(false);
-            }
-        });
-    }
-
-    saveTemplates(): void {
-        this.templatesSaving.set(true);
-        this.error.set(null);
-        this.success.set(null);
-        this.tenantSettingsService.updateSettings({
-            idTemplates: { ...this.templates },
-        }).subscribe({
-            next: (tenant) => {
-                this.templatesSaving.set(false);
-                if (tenant.idTemplates) {
-                    this.templates = { ...this.templates, ...tenant.idTemplates };
-                }
-                this.success.set('Templates saved');
-            },
-            error: (err) => {
-                this.templatesSaving.set(false);
-                this.error.set(err.error?.message || 'Failed to save templates');
-            },
-        });
-    }
-
-    get admissionPreview(): string {
-        const year = this.templates.includeYear ? new Date().getFullYear().toString() : '';
-        const seq = String(42).padStart(this.templates.admissionSeqLength, '0');
-        return [this.templates.admissionPrefix, year, seq].filter(Boolean).join('-');
-    }
-
-    get rollPreview(): string {
-        const seq = String(15).padStart(this.templates.rollSeqLength, '0');
-        const classSection = `${this.templates.sampleClass || '7'}${this.templates.sampleSection || ''}`;
-        return [this.templates.rollPrefix, `${classSection}-${seq}`].filter(Boolean).join('').replace('--', '-');
-    }
-
-    reset(): void {
-        this.load();
-    }
-
-    // Invitations
-    loadInvitations(): void {
-        this.inviteLoading.set(true);
-        this.invitationService.list().subscribe({
-            next: (list) => {
-                this.invitations.set(list);
-                this.inviteLoading.set(false);
-            },
-            error: (err) => {
-                this.error.set(err.error?.message || 'Failed to load invitations');
-                this.inviteLoading.set(false);
-            }
-        });
-    }
-
-    onRoleSelection(roles: Role[]): void {
-        this.selectedRoles.set(roles);
-        this.selectedRoleIds.set(roles.map(r => r.id));
-    }
-
-    sendInvite(): void {
-        if (!this.inviteEmail) {
-            this.error.set('Please enter an email to invite');
-            return;
-        }
-        if (!this.selectedRoles().length) {
-            this.error.set('Select at least one role');
-            return;
-        }
-        this.inviteLoading.set(true);
-        const roles = this.selectedRoles().map(r => r.name);
-        this.invitationService.create(this.inviteEmail, roles).subscribe({
-            next: (inv) => {
-                this.invitations.set([inv, ...this.invitations()]);
-                this.inviteEmail = '';
-                this.selectedRoles.set([]);
-                this.selectedRoleIds.set([]);
-                this.inviteLoading.set(false);
-                this.success.set('Invitation sent');
-            },
-            error: (err) => {
-                this.error.set(err.error?.message || 'Failed to send invite');
-                this.inviteLoading.set(false);
-            }
-        });
-    }
-
-    resend(inv: Invitation): void {
-        this.invitationService.resend(inv.id).subscribe({
-            next: (updated) => {
-                this.invitations.set(this.invitations().map(i => i.id === updated.id ? updated : i));
-                this.success.set('Invitation resent');
-            },
-            error: (err) => this.error.set(err.error?.message || 'Failed to resend invite')
-        });
-    }
-
-    revoke(inv: Invitation): void {
-        this.invitationService.revoke(inv.id).subscribe({
-            next: (updated) => {
-                this.invitations.set(this.invitations().map(i => i.id === updated.id ? updated : i));
-                this.success.set('Invitation revoked');
-            },
-            error: (err) => this.error.set(err.error?.message || 'Failed to revoke invite')
-        });
-    }
-
-    // Subscription
-    loadSubscription(): void {
-        this.billingLoading.set(true);
-        this.subscriptionService.getCurrent().subscribe({
-            next: (sub) => {
-                this.subscription.set(sub);
-                this.billingLoading.set(false);
-            },
-            error: (err) => {
-                this.error.set(err.error?.message || 'Failed to load subscription');
-                this.billingLoading.set(false);
-            }
-        });
-    }
-
-    changePlan(plan: SubscriptionPlan): void {
-        const billingEmail = this.subscription()?.billingEmail || 'billing@tenant.local';
-        this.billingLoading.set(true);
-        this.subscriptionService.changePlan(plan, billingEmail).subscribe({
-            next: (sub) => {
-                this.subscription.set(sub);
-                this.billingLoading.set(false);
-                this.success.set('Plan updated');
-            },
-            error: (err) => {
-                this.error.set(err.error?.message || 'Failed to change plan');
-                this.billingLoading.set(false);
-            }
-        });
-    }
-
-    // Users
-    loadUsers(): void {
-        this.usersLoading.set(true);
-        this.userService.getUsers().subscribe({
-            next: (list) => {
-                this.users.set(list);
-                this.selectedUserIds.set(new Set());
-                this.selectAllUsers.set(false);
-                this.usersLoading.set(false);
-            },
-            error: (err) => {
-                this.error.set(err.error?.message || 'Failed to load users');
-                this.usersLoading.set(false);
-            }
-        });
-    }
-
-    openUserModal(user?: User): void {
-        if (user) {
-            this.editingUser.set(user);
-            this.userForm = { name: user.name, email: user.email, password: '', forcePasswordReset: user.forcePasswordReset || false, mfaEnabled: user.mfaEnabled || false };
-            const matchedRole = user.role ? this.roles().find(r => r.id === user.role!.id) : undefined;
-            const roleList = matchedRole ? [matchedRole] : [];
-            this.userRoles.set(roleList);
-            this.userRoleIds.set(roleList.map(r => r.id));
-        } else {
-            this.editingUser.set(null);
-            this.userForm = { name: '', email: '', password: '', forcePasswordReset: true, mfaEnabled: true };
-            this.userRoles.set([]);
-            this.userRoleIds.set([]);
-        }
-        if (!this.roles().length) {
-            this.roleService.getRoles().subscribe();
-        }
-        this.showUserModal.set(true);
-    }
-
-    setUserRoles(roles: Role[]): void {
-        this.userRoles.set(roles);
-        this.userRoleIds.set(roles.map(r => r.id));
-    }
-
-    generatePassword(): void {
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@#$%^&*';
-        let pwd = '';
-        for (let i = 0; i < 14; i++) {
-            pwd += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        this.userForm.password = pwd;
-    }
-
-    closeUserModal(): void {
-        this.showUserModal.set(false);
-    }
-
-    toggleUserSelection(user: User): void {
-        const next = new Set(this.selectedUserIds());
-        if (next.has(user.id)) {
-            next.delete(user.id);
-        } else {
-            next.add(user.id);
-        }
-        this.selectedUserIds.set(next);
-        this.selectAllUsers.set(next.size === this.users().length);
-    }
-
-    toggleSelectAll(event: any): void {
-        const checked = event.target.checked;
-        this.selectAllUsers.set(checked);
-        if (checked) {
-            this.selectedUserIds.set(new Set(this.users().map(u => u.id)));
-        } else {
-            this.selectedUserIds.set(new Set());
-        }
-    }
-
-    bulkDelete(): void {
-        if (!this.selectedUserIds().size) return;
-        if (!confirm(`Delete ${this.selectedUserIds().size} user(s)?`)) return;
-        const ids = Array.from(this.selectedUserIds());
-        ids.forEach((id) => {
-            this.userService.deleteUser(id).subscribe({
-                next: () => {
-                    this.users.set(this.users().filter(u => u.id !== id));
-                    const next = new Set(this.selectedUserIds());
-                    next.delete(id);
-                    this.selectedUserIds.set(next);
-                    this.selectAllUsers.set(false);
-                },
-                error: (err) => {
-                    this.error.set(err.error?.message || 'Failed to delete user');
-                }
-            });
-        });
-    }
-
-    openPermissionModal(): void {
-        if (!this.roleService.permissionTree().length) {
-            this.roleService.getPermissionTree().subscribe();
-        }
-        this.showPermissionModal.set(true);
-    }
-
-    closePermissionModal(): void {
-        this.showPermissionModal.set(false);
-        this.selectedPermissionIds.set([]);
-    }
-
-    assignPermissions(): void {
-        const permissionIds = this.selectedPermissionIds();
-        const ids = Array.from(this.selectedUserIds());
-        ids.forEach((id) => {
-            this.userService.addPermissionsToUser(id, permissionIds).subscribe({
-                next: () => { },
-                error: (err) => {
-                    this.error.set(err.error?.message || 'Failed to assign permissions');
-                }
-            });
-        });
-        this.success.set('Permissions assigned');
-        this.closePermissionModal();
-    }
-
-    saveUser(): void {
-        this.userSaving.set(true);
-        const selectedRoleId = this.userRoles().length ? this.userRoles()[0].id : undefined;
-        const payload = {
-            name: this.userForm.name,
-            email: this.userForm.email,
-            roleId: selectedRoleId,
-            forcePasswordReset: this.userForm.forcePasswordReset,
-            mfaEnabled: this.userForm.mfaEnabled,
+  load(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.tenantSettingsService.getSettings().subscribe({
+      next: (tenant) => {
+        this.draft = {
+          ...this.draft,
+          ...tenant,
+          customization: { ...this.draft.customization, ...(tenant.customization || {}) },
+          academicYear: tenant.academicYear || {},
         };
-        if (this.editingUser()) {
-            this.userService.updateUser(this.editingUser()!.id, payload).subscribe({
-                next: (user) => {
-                    this.users.set(this.users().map(u => u.id === user.id ? user : u));
-                    this.userSaving.set(false);
-                    this.success.set('User updated');
-                    this.closeUserModal();
-                },
-                error: (err) => {
-                    this.error.set(err.error?.message || 'Failed to update user');
-                    this.userSaving.set(false);
-                }
-            });
-        } else {
-            this.userService.createUser({ ...payload, password: this.userForm.password }).subscribe({
-                next: (user) => {
-                    this.users.set([user, ...this.users()]);
-                    this.userSaving.set(false);
-                    this.success.set('User created');
-                    this.closeUserModal();
-                },
-                error: (err) => {
-                    this.error.set(err.error?.message || 'Failed to create user');
-                    this.userSaving.set(false);
-                }
-            });
+        if (tenant.idTemplates) {
+          this.templates = {
+            ...this.templates,
+            ...tenant.idTemplates,
+          };
         }
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to load tenant settings');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  save(): void {
+    this.saving.set(true);
+    this.error.set(null);
+    this.success.set(null);
+    this.tenantSettingsService.updateSettings({
+      customization: this.draft.customization,
+      locale: this.draft.locale,
+      timezone: this.draft.timezone,
+      weekStartsOn: this.draft.weekStartsOn as any,
+      currency: this.draft.currency,
+      academicYear: this.draft.academicYear as any,
+    }).subscribe({
+      next: (tenant) => {
+        this.success.set('Settings saved');
+        this.draft = {
+          ...this.draft,
+          ...tenant,
+          customization: { ...this.draft.customization, ...(tenant.customization || {}) },
+          academicYear: tenant.academicYear || {},
+        };
+        this.saving.set(false);
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to save settings');
+        this.saving.set(false);
+      }
+    });
+  }
+
+  saveTemplates(): void {
+    this.templatesSaving.set(true);
+    this.error.set(null);
+    this.success.set(null);
+    this.tenantSettingsService.updateSettings({
+      idTemplates: { ...this.templates },
+    }).subscribe({
+      next: (tenant) => {
+        this.templatesSaving.set(false);
+        if (tenant.idTemplates) {
+          this.templates = { ...this.templates, ...tenant.idTemplates };
+        }
+        this.success.set('Templates saved');
+      },
+      error: (err) => {
+        this.templatesSaving.set(false);
+        this.error.set(err.error?.message || 'Failed to save templates');
+      },
+    });
+  }
+
+  get admissionPreview(): string {
+    const year = this.templates.includeYear ? new Date().getFullYear().toString() : '';
+    const seq = String(42).padStart(this.templates.admissionSeqLength, '0');
+    return [this.templates.admissionPrefix, year, seq].filter(Boolean).join('-');
+  }
+
+  get rollPreview(): string {
+    const seq = String(15).padStart(this.templates.rollSeqLength, '0');
+    const classSection = `${this.templates.sampleClass || '7'}${this.templates.sampleSection || ''}`;
+    return [this.templates.rollPrefix, `${classSection}-${seq}`].filter(Boolean).join('').replace('--', '-');
+  }
+
+  reset(): void {
+    this.load();
+  }
+
+  // Invitations
+  loadInvitations(): void {
+    this.inviteLoading.set(true);
+    this.invitationService.list().subscribe({
+      next: (list) => {
+        this.invitations.set(list);
+        this.inviteLoading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to load invitations');
+        this.inviteLoading.set(false);
+      }
+    });
+  }
+
+  onRoleSelection(roles: Role[]): void {
+    this.selectedRoles.set(roles);
+    this.selectedRoleIds.set(roles.map(r => r.id));
+  }
+
+  sendInvite(): void {
+    if (!this.inviteEmail) {
+      this.error.set('Please enter an email to invite');
+      return;
     }
+    if (!this.selectedRoles().length) {
+      this.error.set('Select at least one role');
+      return;
+    }
+    this.inviteLoading.set(true);
+    const roles = this.selectedRoles().map(r => r.name);
+    this.invitationService.create(this.inviteEmail, roles).subscribe({
+      next: (inv) => {
+        this.invitations.set([inv, ...this.invitations()]);
+        this.inviteEmail = '';
+        this.selectedRoles.set([]);
+        this.selectedRoleIds.set([]);
+        this.inviteLoading.set(false);
+        this.success.set('Invitation sent');
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to send invite');
+        this.inviteLoading.set(false);
+      }
+    });
+  }
+
+  resend(inv: Invitation): void {
+    this.invitationService.resend(inv.id).subscribe({
+      next: (updated) => {
+        this.invitations.set(this.invitations().map(i => i.id === updated.id ? updated : i));
+        this.success.set('Invitation resent');
+      },
+      error: (err) => this.error.set(err.error?.message || 'Failed to resend invite')
+    });
+  }
+
+  revoke(inv: Invitation): void {
+    this.invitationService.revoke(inv.id).subscribe({
+      next: (updated) => {
+        this.invitations.set(this.invitations().map(i => i.id === updated.id ? updated : i));
+        this.success.set('Invitation revoked');
+      },
+      error: (err) => this.error.set(err.error?.message || 'Failed to revoke invite')
+    });
+  }
+
+  // Subscription
+  loadSubscription(): void {
+    this.billingLoading.set(true);
+    this.subscriptionService.getCurrent().subscribe({
+      next: (sub) => {
+        this.subscription.set(sub);
+        this.billingLoading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to load subscription');
+        this.billingLoading.set(false);
+      }
+    });
+  }
+
+  changePlan(plan: SubscriptionPlan): void {
+    const billingEmail = this.subscription()?.billingEmail || 'billing@tenant.local';
+    this.billingLoading.set(true);
+    this.subscriptionService.changePlan(plan, billingEmail).subscribe({
+      next: (sub) => {
+        this.subscription.set(sub);
+        this.billingLoading.set(false);
+        this.success.set('Plan updated');
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to change plan');
+        this.billingLoading.set(false);
+      }
+    });
+  }
+
+  // Users
+  loadUsers(): void {
+    this.usersLoading.set(true);
+    this.userService.getUsers().subscribe({
+      next: (list) => {
+        this.users.set(list);
+        this.selectedUserIds.set(new Set());
+        this.selectAllUsers.set(false);
+        this.usersLoading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to load users');
+        this.usersLoading.set(false);
+      }
+    });
+  }
+
+  openUserModal(user?: User): void {
+    if (user) {
+      this.editingUser.set(user);
+      this.userForm = { name: user.name, email: user.email, password: '', forcePasswordReset: user.forcePasswordReset || false, mfaEnabled: user.mfaEnabled || false };
+      const matchedRole = user.role ? this.roles().find(r => r.id === user.role!.id) : undefined;
+      const roleList = matchedRole ? [matchedRole] : [];
+      this.userRoles.set(roleList);
+      this.userRoleIds.set(roleList.map(r => r.id));
+    } else {
+      this.editingUser.set(null);
+      this.userForm = { name: '', email: '', password: '', forcePasswordReset: true, mfaEnabled: true };
+      this.userRoles.set([]);
+      this.userRoleIds.set([]);
+    }
+    if (!this.roles().length) {
+      this.roleService.getRoles().subscribe();
+    }
+    this.showUserModal.set(true);
+  }
+
+  setUserRoles(roles: Role[]): void {
+    this.userRoles.set(roles);
+    this.userRoleIds.set(roles.map(r => r.id));
+  }
+
+  generatePassword(): void {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@#$%^&*';
+    let pwd = '';
+    for (let i = 0; i < 14; i++) {
+      pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    this.userForm.password = pwd;
+  }
+
+  closeUserModal(): void {
+    this.showUserModal.set(false);
+  }
+
+  toggleUserSelection(user: User): void {
+    const next = new Set(this.selectedUserIds());
+    if (next.has(user.id)) {
+      next.delete(user.id);
+    } else {
+      next.add(user.id);
+    }
+    this.selectedUserIds.set(next);
+    this.selectAllUsers.set(next.size === this.users().length);
+  }
+
+  toggleSelectAll(event: any): void {
+    const checked = event.target.checked;
+    this.selectAllUsers.set(checked);
+    if (checked) {
+      this.selectedUserIds.set(new Set(this.users().map(u => u.id)));
+    } else {
+      this.selectedUserIds.set(new Set());
+    }
+  }
+
+  bulkDelete(): void {
+    if (!this.selectedUserIds().size) return;
+    if (!confirm(`Delete ${this.selectedUserIds().size} user(s)?`)) return;
+    const ids = Array.from(this.selectedUserIds());
+    ids.forEach((id) => {
+      this.userService.deleteUser(id).subscribe({
+        next: () => {
+          this.users.set(this.users().filter(u => u.id !== id));
+          const next = new Set(this.selectedUserIds());
+          next.delete(id);
+          this.selectedUserIds.set(next);
+          this.selectAllUsers.set(false);
+        },
+        error: (err) => {
+          this.error.set(err.error?.message || 'Failed to delete user');
+        }
+      });
+    });
+  }
+
+  openPermissionModal(): void {
+    if (!this.roleService.permissionTree().length) {
+      this.roleService.getPermissionTree().subscribe();
+    }
+    this.showPermissionModal.set(true);
+  }
+
+  closePermissionModal(): void {
+    this.showPermissionModal.set(false);
+    this.selectedPermissionIds.set([]);
+  }
+
+  assignPermissions(): void {
+    const permissionIds = this.selectedPermissionIds();
+    const ids = Array.from(this.selectedUserIds());
+    ids.forEach((id) => {
+      this.userService.addPermissionsToUser(id, permissionIds).subscribe({
+        next: () => { },
+        error: (err) => {
+          this.error.set(err.error?.message || 'Failed to assign permissions');
+        }
+      });
+    });
+    this.success.set('Permissions assigned');
+    this.closePermissionModal();
+  }
+
+  saveUser(): void {
+    this.userSaving.set(true);
+    const selectedRoleId = this.userRoles().length ? this.userRoles()[0].id : undefined;
+    const payload = {
+      name: this.userForm.name,
+      email: this.userForm.email,
+      roleId: selectedRoleId,
+      forcePasswordReset: this.userForm.forcePasswordReset,
+      mfaEnabled: this.userForm.mfaEnabled,
+    };
+    if (this.editingUser()) {
+      this.userService.updateUser(this.editingUser()!.id, payload).subscribe({
+        next: (user) => {
+          this.users.set(this.users().map(u => u.id === user.id ? user : u));
+          this.userSaving.set(false);
+          this.success.set('User updated');
+          this.closeUserModal();
+        },
+        error: (err) => {
+          this.error.set(err.error?.message || 'Failed to update user');
+          this.userSaving.set(false);
+        }
+      });
+    } else {
+      this.userService.createUser({ ...payload, password: this.userForm.password }).subscribe({
+        next: (user) => {
+          this.users.set([user, ...this.users()]);
+          this.userSaving.set(false);
+          this.success.set('User created');
+          this.closeUserModal();
+        },
+        error: (err) => {
+          this.error.set(err.error?.message || 'Failed to create user');
+          this.userSaving.set(false);
+        }
+      });
+    }
+  }
 }
