@@ -84,7 +84,7 @@
 }
 
 .role-selector-overlay .modal {
-    width: min(940px, 96vw);
+    width: min(1400px, 96vw);
     max-height: 90vh;
     background: rgba(79, 58, 41, 0.92);
     border-radius: 18px;
@@ -109,6 +109,7 @@
     margin: 4px 0;
     font-size: 1.5rem;
     letter-spacing: -0.5px;
+    color: var(--color-text-primary, #ffffff);
 }
 
 .eyebrow {
@@ -168,6 +169,7 @@
 
 .search-field {
     flex: 1;
+    margin-top: 6px;
 }
 
 .selected-indicator {
@@ -199,7 +201,7 @@
 
 .table-wrapper table th,
 .table-wrapper table td {
-    border-bottom: none;
+    border: none;
 }
 
 .table-wrapper table tbody tr {
@@ -213,11 +215,7 @@
 }
 
 .table-wrapper table tbody tr td {
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.table-wrapper table tbody tr:hover td {
-    border-color: rgba(232, 190, 20, 0.3);
+    border: none;
 }
 
 .table-wrapper table tbody tr td:first-child {
@@ -240,7 +238,7 @@ th,
 td {
     text-align: left;
     padding: 10px 16px;
-    border-bottom: none;
+    border: none;
     color: var(--color-text-secondary, #E0D5C9);
 }
 
@@ -301,6 +299,7 @@ th {
     border: 1px solid var(--color-border, #7A6F65);
     background: rgba(79, 58, 41, 0.85);
     color: var(--color-text-secondary, #E0D5C9);
+    white-space: nowrap;
 }
 
 .chip.system {
@@ -331,6 +330,7 @@ th {
     color: var(--color-text-secondary, #E0D5C9);
     font-weight: 700;
     font-size: 12px;
+    white-space: nowrap;
 }
 
 .pill.neutral svg {
