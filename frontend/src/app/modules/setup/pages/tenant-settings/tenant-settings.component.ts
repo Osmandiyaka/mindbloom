@@ -189,8 +189,8 @@ import { RoleListComponent } from '../roles/role-list.component';
                   </svg>
                   <h2>{{ editingUser() ? 'Edit User' : 'Add User' }}</h2>
                 </div>
-                <button class="icon-btn" (click)="closeUserModal()" aria-label="Close">
-                  <svg viewBox="0 0 24 24"><path d="M6 6l12 12M6 18 18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <button class="icon-btn close-btn" (click)="closeUserModal()" aria-label="Close">
+                  Close
                 </button>
               </header>
               <div class="modal-body user-form">
@@ -729,7 +729,7 @@ import { RoleListComponent } from '../roles/role-list.component';
     .modal.users-modal .modal-header .title-row { display: flex; align-items: center; gap: 10px; }
     .modal.users-modal .modal-header .title-icon { width: 22px; height: 22px; color: #E8BE14; }
     .modal.users-modal .modal-header h2 { color: #fff; font-size: 1.45rem; margin: 0; }
-    .modal.users-modal .icon-btn { position: absolute; top: 12px; right: 12px; }
+    .modal.users-modal .icon-btn.close-btn { position: absolute; top: 12px; right: 12px; border: 1px solid rgba(232,190,20,0.35); background: rgba(0,0,0,0.25); color: #E8BE14; box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
     .modal.users-modal .modal-body { padding: 14px 16px 12px; background: #634D3B; }
     .modal.users-modal .modal-footer { padding: 12px 16px 16px; }
     .modal.users-modal .modal-footer .ghost { border: 1px solid rgba(232,190,20,0.35); color: #E8BE14; }
