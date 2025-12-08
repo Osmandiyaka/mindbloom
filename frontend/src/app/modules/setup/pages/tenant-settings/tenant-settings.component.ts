@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TenantSettingsService } from '../../../../core/services/tenant-settings.service';
-import { InvitationService, Invitation } from '../../../../core/services/invitation.service';
+import { InvitationService, Invitation, InvitationStatus } from '../../../../core/services/invitation.service';
 import { SubscriptionService, Subscription, SubscriptionPlan } from '../../../../core/services/subscription.service';
 import { PluginLauncherComponent } from '../../../plugins/pages/plugin-launcher/plugin-launcher.component';
 import { RouterModule } from '@angular/router';
@@ -53,7 +53,7 @@ import { RoleListComponent } from '../roles/role-list.component';
                 name="inviteEmail"
                 required
                 [(ngModel)]="inviteEmail"
-                placeholder="user@school.com" />
+                 />
               <span class="capsule-divider"></span>
               <app-role-selector
                 class="invite-roles inline"
@@ -78,22 +78,38 @@ import { RoleListComponent } from '../roles/role-list.component';
                 <tbody>
                   <tr *ngFor="let inv of invitations()">
                     <td class="email-cell">
-                      <svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v.51l8 5.33 8-5.33V6H4Zm0 3.36V18h16V9.36l-7.47 4.98a2 2 0 0 1-2.06 0L4 9.36Z" fill="currentColor"/></svg>
-                      {{ inv.email }}
+                      <span class="avatar" [style.background]="getAvatarColor(inv.email)">{{ getInitial(inv.email) }}</span>
+                      <div class="email-block">
+                        <span class="email mono">{{ inv.email }}</span>
+                        <span class="muted tiny">Token • {{ inv.token?.slice(-6) || '••••••' }}</span>
+                      </div>
                     </td>
-                    <td><span class="pill neutral">{{ inv.roles.join(', ') || '—' }}</span></td>
                     <td>
-                      <span class="badge"
-                        [class.revoked]="inv.status === 'revoked'"
-                        [class.pending]="inv.status === 'pending'"
-                        [class.accepted]="inv.status === 'accepted'">
-                        {{ inv.status }}
-                      </span>
+                      <div class="role-stack" *ngIf="inv.roles.length; else noRoles">
+                        <span *ngFor="let role of inv.roles" class="role-chip" [ngClass]="roleChipClass(role)">{{ role }}</span>
+                      </div>
+                      <ng-template #noRoles><span class="pill neutral">—</span></ng-template>
                     </td>
-                    <td>{{ inv.expiresAt | date:'mediumDate' }}</td>
+                    <td>
+                      <span [class]="statusClass(inv.status)">{{ statusLabel(inv.status) }}</span>
+                    </td>
+                    <td>
+                      <div class="expiry">
+                        <span>{{ inv.expiresAt | date:'mediumDate' }}</span>
+                        <div class="expiry-track">
+                          <span class="expiry-fill" [style.width.%]="expiryPercent(inv)"></span>
+                        </div>
+                      </div>
+                    </td>
                     <td class="actions">
-                      <button class="action-link" (click)="resend(inv); $event.stopPropagation()">Resend</button>
-                      <button class="action-link danger" (click)="revoke(inv); $event.stopPropagation()">Revoke</button>
+                      <button class="mini-btn ghost" (click)="resend(inv); $event.stopPropagation()" title="Resend Invite">
+                        <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14.9-3H21l-3 3-3-3h2.1A6 6 0 1 0 6 12h2l-3 3-3-3h2z" fill="currentColor"/></svg>
+                        Resend
+                      </button>
+                      <button class="mini-btn danger ghost" (click)="revoke(inv); $event.stopPropagation()" title="Revoke Invite">
+                        <svg viewBox="0 0 24 24"><path d="M6 6h12v2H6V6Zm2 4h8v2H8v-2Zm-2 4h12v2H6v-2Z" fill="currentColor"/></svg>
+                        Revoke
+                      </button>
                     </td>
                   </tr>
                 </tbody>
@@ -143,12 +159,23 @@ import { RoleListComponent } from '../roles/role-list.component';
                 <tbody>
                   <tr *ngFor="let user of users()">
                     <td><input type="checkbox" [checked]="selectedUserIds().has(user.id)" (change)="toggleUserSelection(user)" /></td>
-                    <td>{{ user.name }}</td>
-                    <td>{{ user.email }}</td>
+                    <td>
+                      <div class="user-identity">
+                        <span class="avatar solid" [style.background]="getAvatarColor(user.email || user.name)">{{ getInitial(user.name || user.email) }}</span>
+                        <div>
+                          <div>{{ user.name }}</div>
+                          <div class="muted tiny">ID {{ user.id?.slice(-6) }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="mono">{{ user.email }}</td>
                     <td>{{ user.role?.name || '—' }}</td>
                     <td>{{ user.createdAt | date:'mediumDate' }}</td>
                     <td class="actions">
-                      <button class="action-link" (click)="openUserModal(user)">Edit</button>
+                      <button class="mini-btn ghost" (click)="openUserModal(user)" title="Edit User">
+                        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm14.71-9.04a.996.996 0 0 0 0-1.41l-2.5-2.5a.996.996 0 1 0-1.41 1.41l2.5 2.5a.996.996 0 0 0 1.41 0Z" fill="currentColor"/></svg>
+                        Edit
+                      </button>
                     </td>
                   </tr>
                 </tbody>
@@ -463,6 +490,7 @@ import { RoleListComponent } from '../roles/role-list.component';
       padding: 0.35rem 0.5rem;
       border: 1px solid rgba(255,255,255,0.08);
       align-items: center;
+      box-shadow: none;
     }
     .capsule-icon { display: inline-flex; align-items: center; justify-content: center; padding: 0 0.35rem; color: var(--color-accent, #70c6e1); }
     .capsule-icon svg { width: 18px; height: 18px; display: block; }
@@ -495,6 +523,22 @@ import { RoleListComponent } from '../roles/role-list.component';
     .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; }
     .selected-roles .chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 6px 10px; border-radius: 999px; border: none; font-weight: 700; box-shadow: 0 10px 20px rgba(16,185,129,0.18); }
     .selected-roles .chip svg { width: 14px; height: 14px; }
+    .role-stack { display: flex; flex-wrap: wrap; gap: 6px; }
+    .role-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); }
+    .role-chip.admin { background: rgba(82,109,255,0.16); border-color: rgba(82,109,255,0.3); color: #a5b4ff; }
+    .role-chip.principal { background: rgba(232,190,20,0.16); border-color: rgba(232,190,20,0.4); color: #facc15; }
+    .role-chip.teacher { background: rgba(16,185,129,0.16); border-color: rgba(16,185,129,0.4); color: #34d399; }
+    .role-chip.manager { background: rgba(14,165,233,0.16); border-color: rgba(14,165,233,0.4); color: #38bdf8; }
+    .role-chip.neutral { color: var(--color-text-secondary); }
+    .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; font-weight: 700; text-transform: capitalize; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); }
+    .status-pill.pending { color: #f59e0b; border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.12); }
+    .status-pill.accepted { color: #22c55e; border-color: rgba(34,197,94,0.35); background: rgba(34,197,94,0.12); }
+    .status-pill.sent { color: #0ea5e9; border-color: rgba(14,165,233,0.35); background: rgba(14,165,233,0.12); }
+    .status-pill.revoked { color: var(--color-error); border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.12); }
+    .status-pill.expired { color: #a855f7; border-color: rgba(168,85,247,0.35); background: rgba(168,85,247,0.12); }
+    .expiry { display: flex; flex-direction: column; gap: 4px; }
+    .expiry-track { width: 100%; height: 6px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
+    .expiry-fill { display: block; height: 100%; background: linear-gradient(90deg, #22c55e, #e8be14); transition: width 0.4s ease; }
     .pill { display: inline-flex; align-items: center; padding: 0.25rem 0.6rem; border-radius: 999px; font-weight: 600; background: color-mix(in srgb, var(--color-surface-hover) 80%, transparent); color: var(--color-text-secondary); }
     .pill.neutral { background: color-mix(in srgb, var(--color-surface) 75%, transparent); color: var(--color-text-primary); }
     .table { width: 100%; border-collapse: separate; border-spacing: 0 6px; background: transparent; color: var(--color-text-primary); }
@@ -508,7 +552,19 @@ import { RoleListComponent } from '../roles/role-list.component';
     .table.invites th:last-child, .table.invites td:last-child { text-align: right; }
     .table.invites td.email-cell { display: flex; align-items: center; gap: 0.4rem; }
     .table.invites td.email-cell svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .avatar { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; color: #0f0f12; font-weight: 800; box-shadow: 0 10px 20px rgba(0,0,0,0.25); }
+    .avatar.solid { color: #0b1221; }
+    .email-block { display: flex; flex-direction: column; gap: 2px; }
+    .email-block .email { font-weight: 700; }
+    .mono { font-family: SFMono-Regular, Consolas, 'Liberation Mono', monospace; }
+    .tiny { font-size: 12px; }
     .table input[type="checkbox"] { accent-color: var(--color-primary); }
+    .mini-btn { display: inline-flex; align-items: center; gap: 6px; padding: 0.35rem 0.6rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: var(--color-text-primary); cursor: pointer; transition: transform 0.12s ease, box-shadow 0.2s ease; font-weight: 700; }
+    .mini-btn svg { width: 16px; height: 16px; }
+    .mini-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,0,0,0.18); }
+    .mini-btn.ghost { background: transparent; }
+    .mini-btn.danger { color: var(--color-error); border-color: rgba(239,68,68,0.3); }
+    .user-identity { display: inline-flex; align-items: center; gap: 8px; }
     .user-form { display: flex; flex-direction: column; gap: 0.9rem; padding: 0.5rem 0.75rem 1rem; background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border-radius: 14px; border: none; box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
     .user-form .field { display: flex; flex-direction: column; gap: 0.35rem; }
     .user-form label { font-weight: 700; color: var(--color-text-secondary); font-size: 0.9rem; letter-spacing: 0.01em; }
@@ -525,6 +581,7 @@ import { RoleListComponent } from '../roles/role-list.component';
     .inline-toggles .toggle input:checked::after { content: '✓'; color: #fff; font-weight: 700; font-size: 12px; line-height: 1; position: absolute; }
     .user-form .selected-roles { margin-top: 0.25rem; }
     .muted { color: var(--color-text-tertiary); }
+    .success { color: var(--color-success, #22c55e); }
     .badge { padding: 0; border-radius: 0; background: transparent; box-shadow: none; font-weight: 500; text-transform: capitalize; display: inline-flex; align-items: center; gap: 6px; }
     .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; box-shadow: 0 0 8px currentColor; background: currentColor; }
     .badge.revoked { color: var(--color-error); }
@@ -1088,6 +1145,52 @@ export class TenantSettingsComponent implements OnInit {
         }
       });
     }
+  }
+
+  getInitial(value?: string | null): string {
+    const cleaned = (value || '').trim();
+    return cleaned ? cleaned.charAt(0).toUpperCase() : '?';
+  }
+
+  getAvatarColor(seed?: string | null): string {
+    const palette = ['#8b5cf6', '#22c55e', '#0ea5e9', '#f59e0b', '#ec4899', '#14b8a6'];
+    if (!seed) return palette[0];
+    const code = seed.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+    return palette[code % palette.length];
+  }
+
+  roleChipClass(role: string): string {
+    const value = (role || '').toLowerCase();
+    if (value.includes('admin')) return 'admin';
+    if (value.includes('principal')) return 'principal';
+    if (value.includes('teacher')) return 'teacher';
+    if (value.includes('manager') || value.includes('head')) return 'manager';
+    return 'neutral';
+  }
+
+  statusLabel(status: InvitationStatus): string {
+    const labels: Record<InvitationStatus, string> = {
+      pending: 'Pending',
+      accepted: 'Accepted',
+      expired: 'Expired',
+      revoked: 'Revoked',
+      sent: 'Sent',
+    };
+    return labels[status] || status;
+  }
+
+  statusClass(status: InvitationStatus): string {
+    return `status-pill ${status}`;
+  }
+
+  expiryPercent(inv: Invitation): number {
+    const start = inv.createdAt ? new Date(inv.createdAt).getTime() : 0;
+    const end = inv.expiresAt ? new Date(inv.expiresAt).getTime() : 0;
+    if (!start || !end || end <= start) return 100;
+    const now = Date.now();
+    const span = end - start;
+    const elapsed = Math.min(Math.max(now - start, 0), span);
+    return Math.min(100, Math.round((elapsed / span) * 100));
   }
 
   isValidEmail(email: string): boolean {
