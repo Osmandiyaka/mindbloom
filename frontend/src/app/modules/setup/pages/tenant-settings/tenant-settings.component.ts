@@ -47,13 +47,19 @@ import { RoleListComponent } from '../roles/role-list.component';
               <span class="capsule-icon">
                 <svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v.51l8 5.33 8-5.33V6H4Zm0 3.36V18h16V9.36l-7.47 4.98a2 2 0 0 1-2.06 0L4 9.36Z" fill="currentColor"/></svg>
               </span>
-              <input class="invite-input" type="email" [(ngModel)]="inviteEmail" placeholder="user@school.com" />
+              <input
+                class="invite-input"
+                type="email"
+                name="inviteEmail"
+                required
+                [(ngModel)]="inviteEmail"
+                placeholder="user@school.com" />
               <span class="capsule-divider"></span>
               <app-role-selector
                 class="invite-roles inline"
                 [selectedRoleIds]="selectedRoleIds()"
                 (selectionChange)="onRoleSelection($event)" />
-              <button class="btn primary shadow-md invite-submit" (click)="sendInvite()" [disabled]="inviteLoading()">
+              <button class="btn primary shadow-md invite-submit" (click)="sendInvite()" [disabled]="inviteLoading() || !isValidEmail(inviteEmail)">
                 <svg viewBox="0 0 24 24"><path d="m3.4 21 18.3-9L3.4 3v6.5l13.1 2-13.1 2V21Z" fill="currentColor"/></svg>
                 {{ inviteLoading() ? 'Sending...' : 'Send Invite' }}
               </button>
@@ -169,7 +175,12 @@ import { RoleListComponent } from '../roles/role-list.component';
                 </div>
                 <div class="field">
                   <label>Email</label>
-                  <input type="email" [(ngModel)]="userForm.email" placeholder="user@school.com" />
+                  <input
+                    type="email"
+                    name="userEmail"
+                    required
+                    [(ngModel)]="userForm.email"
+                    placeholder="user@school.com" />
                 </div>
                 <div class="field password-field" *ngIf="!editingUser()">
                   <label>Password</label>
@@ -199,7 +210,7 @@ import { RoleListComponent } from '../roles/role-list.component';
               </div>
               <footer class="modal-footer">
                 <button class="ghost" (click)="closeUserModal()">Cancel</button>
-                <button class="primary" (click)="saveUser()" [disabled]="userSaving()">
+                <button class="primary" (click)="saveUser()" [disabled]="userSaving() || !isValidEmail(userForm.email)">
                   {{ userSaving() ? 'Saving...' : 'Save User' }}
                 </button>
               </footer>
@@ -833,8 +844,9 @@ export class TenantSettingsComponent implements OnInit {
   }
 
   sendInvite(): void {
-    if (!this.inviteEmail) {
-      this.error.set('Please enter an email to invite');
+    const trimmedEmail = this.inviteEmail.trim();
+    if (!this.isValidEmail(trimmedEmail)) {
+      this.error.set('Enter a valid email to invite');
       return;
     }
     if (!this.selectedRoles().length) {
@@ -843,7 +855,7 @@ export class TenantSettingsComponent implements OnInit {
     }
     this.inviteLoading.set(true);
     const roles = this.selectedRoles().map(r => r.name);
-    this.invitationService.create(this.inviteEmail, roles).subscribe({
+    this.invitationService.create(trimmedEmail, roles).subscribe({
       next: (inv) => {
         this.invitations.set([inv, ...this.invitations()]);
         this.inviteEmail = '';
@@ -1035,10 +1047,16 @@ export class TenantSettingsComponent implements OnInit {
 
   saveUser(): void {
     this.userSaving.set(true);
+    const trimmedEmail = this.userForm.email.trim();
+    if (!this.isValidEmail(trimmedEmail)) {
+      this.error.set('Enter a valid user email');
+      this.userSaving.set(false);
+      return;
+    }
     const selectedRoleId = this.userRoles().length ? this.userRoles()[0].id : undefined;
     const payload = {
       name: this.userForm.name,
-      email: this.userForm.email,
+      email: trimmedEmail,
       roleId: selectedRoleId,
       forcePasswordReset: this.userForm.forcePasswordReset,
       mfaEnabled: this.userForm.mfaEnabled,
@@ -1070,5 +1088,10 @@ export class TenantSettingsComponent implements OnInit {
         }
       });
     }
+  }
+
+  isValidEmail(email: string): boolean {
+    const value = (email || '').trim();
+    return !!value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
 }
