@@ -712,6 +712,7 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .plan-footer { margin-top: auto; display: flex; justify-content: flex-end; }
     .plan-card h3 { color: var(--color-primary); }
     .price { margin: 0; font-weight: 700; color: var(--color-text-primary); }
+    .billing-panel .card-header h3 { color: #fff; }
     .hero-card { background: linear-gradient(135deg, rgba(232,190,20,0.14), rgba(112,198,225,0.08)); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.1rem 1.2rem; box-shadow: 0 16px 36px rgba(0,0,0,0.24), 0 0 40px rgba(232,190,20,0.25), 0 8px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 0.5rem; }
     .hero-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
     .plan-name { font-size: 2rem; font-weight: 800; color: var(--color-primary); letter-spacing: -0.01em; }
