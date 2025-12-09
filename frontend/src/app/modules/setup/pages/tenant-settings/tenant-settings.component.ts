@@ -42,6 +42,68 @@ import { RoleListComponent } from '../roles/role-list.component';
               <p class="subtitle">Invite staff or partners with roles, manage existing users, and keep access up to date.</p>
             </div>
           </div>
+          <div class="card invites-card tight users-card">
+            <div class="card-body toolbar">
+              <div class="left">
+                <span class="selected-count" *ngIf="selectedUserIds().size">{{ selectedUserIds().size }} selected</span>
+              </div>
+              <div class="actions">
+                <button class="btn ghost small danger" [disabled]="!selectedUserIds().size" (click)="bulkDelete()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18" />
+                    <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" />
+                    <path d="M10 10v6" />
+                    <path d="M14 10v6" />
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                  </svg>
+                  Bulk Delete
+                </button>
+                <button class="btn primary small" [disabled]="!selectedUserIds().size" (click)="openPermissionModal()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                    <path d="m9 12 2 2 4-4" />
+                  </svg>
+                  Assign Permissions
+                </button>
+                <span class="actions-spacer"></span>
+                <button class="btn primary" (click)="openUserModal()">
+                  <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Zm7-3h-2v-2h-2V7h2V5h2v2h2v2h-2v2Z" fill="currentColor"/></svg>
+                  Add User
+                </button>
+              </div>
+            </div>
+            <div class="card-body tight-body">
+              <table class="table invites">
+                <thead>
+                  <tr><th style="width:48px;"><input type="checkbox" [checked]="selectAllUsers()" (change)="toggleSelectAll($event)" /></th><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let user of users()">
+                    <td><input type="checkbox" [checked]="selectedUserIds().has(user.id)" (change)="toggleUserSelection(user)" /></td>
+                    <td>
+                      <div class="user-identity">
+                        <span class="avatar solid" [style.background]="getAvatarColor(user.email || user.name)">{{ getInitial(user.name || user.email) }}</span>
+                        <div>
+                          <div>{{ user.name }}</div>
+                          <div class="muted tiny">ID {{ user.id?.slice(-6) }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="mono">{{ user.email }}</td>
+                    <td>{{ user.role?.name || '—' }}</td>
+                    <td>{{ user.createdAt | date:'mediumDate' }}</td>
+                    <td class="actions">
+                      <button class="mini-btn ghost" (click)="openUserModal(user)" title="Edit User">
+                        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm14.71-9.04a.996.996 0 0 0 0-1.41l-2.5-2.5a.996.996 0 1 0-1.41 1.41l2.5 2.5a.996.996 0 0 0 1.41 0Z" fill="currentColor"/></svg>
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <p *ngIf="!users().length" class="muted">No users yet.</p>
+            </div>
+          </div>
           <div class="card invites-card tight">
             <div class="invite-row capsule">
               <span class="capsule-icon">
@@ -115,68 +177,6 @@ import { RoleListComponent } from '../roles/role-list.component';
                 </tbody>
               </table>
               <p *ngIf="!invitations().length" class="muted empty-state">No invitations yet.</p>
-            </div>
-          </div>
-          <div class="card invites-card tight users-card">
-            <div class="card-body toolbar">
-              <div class="left">
-                <span class="selected-count" *ngIf="selectedUserIds().size">{{ selectedUserIds().size }} selected</span>
-              </div>
-              <div class="actions">
-                <button class="btn ghost small danger" [disabled]="!selectedUserIds().size" (click)="bulkDelete()">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 6h18" />
-                    <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" />
-                    <path d="M10 10v6" />
-                    <path d="M14 10v6" />
-                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                  </svg>
-                  Bulk Delete
-                </button>
-                <button class="btn primary small" [disabled]="!selectedUserIds().size" (click)="openPermissionModal()">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
-                    <path d="m9 12 2 2 4-4" />
-                  </svg>
-                  Assign Permissions
-                </button>
-                <span class="actions-spacer"></span>
-                <button class="btn primary" (click)="openUserModal()">
-                  <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Zm7-3h-2v-2h-2V7h2V5h2v2h2v2h-2v2Z" fill="currentColor"/></svg>
-                  Add User
-                </button>
-              </div>
-            </div>
-            <div class="card-body tight-body">
-              <table class="table invites">
-                <thead>
-                  <tr><th style="width:48px;"><input type="checkbox" [checked]="selectAllUsers()" (change)="toggleSelectAll($event)" /></th><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th></tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let user of users()">
-                    <td><input type="checkbox" [checked]="selectedUserIds().has(user.id)" (change)="toggleUserSelection(user)" /></td>
-                    <td>
-                      <div class="user-identity">
-                        <span class="avatar solid" [style.background]="getAvatarColor(user.email || user.name)">{{ getInitial(user.name || user.email) }}</span>
-                        <div>
-                          <div>{{ user.name }}</div>
-                          <div class="muted tiny">ID {{ user.id?.slice(-6) }}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td class="mono">{{ user.email }}</td>
-                    <td>{{ user.role?.name || '—' }}</td>
-                    <td>{{ user.createdAt | date:'mediumDate' }}</td>
-                    <td class="actions">
-                      <button class="mini-btn ghost" (click)="openUserModal(user)" title="Edit User">
-                        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Zm14.71-9.04a.996.996 0 0 0 0-1.41l-2.5-2.5a.996.996 0 1 0-1.41 1.41l2.5 2.5a.996.996 0 0 0 1.41 0Z" fill="currentColor"/></svg>
-                        Edit
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <p *ngIf="!users().length" class="muted">No users yet.</p>
             </div>
           </div>
 
