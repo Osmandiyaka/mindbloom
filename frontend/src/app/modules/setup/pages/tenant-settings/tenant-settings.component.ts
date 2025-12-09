@@ -277,12 +277,44 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
         </div>
 
         <div *ngSwitchCase="'billing'" class="panel billing-panel">
-          <div class="panel-header spaced">
-            <div class="stacked">
-              <h2>Subscription</h2>
-              <p class="subtitle">Current plan: {{ subscription()?.plan || 'free' }} • Status: {{ subscription()?.status }}</p>
+          <div class="card hero-card">
+            <div class="hero-head">
+              <div>
+                <p class="eyebrow">Current Plan</p>
+                <h2 class="plan-name">{{ currentPlan()?.label || (subscription()?.plan | titlecase) || 'Free' }}</h2>
+                <p class="subtitle">Status: {{ subscription()?.status || 'active' }}</p>
+              </div>
+              <div class="hero-price" *ngIf="currentPlan()">
+                <span class="currency">{{ priceParts(currentPlan()?.price || '$0').currency }}</span>
+                <span class="amount">{{ priceParts(currentPlan()?.price || '$0').major }}</span>
+                <span class="minor">{{ priceParts(currentPlan()?.price || '$0').minor }}</span>
+                <span class="per">/mo</span>
+              </div>
+            </div>
+            <div class="hero-grid" *ngIf="currentPlan()?.perks?.length">
+              <div class="perk" *ngFor="let perk of currentPlan()?.perks">
+                <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4" stroke="#E8BE14" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12a9 9 0 1 1-6-8.54" stroke="#E8BE14" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>{{ perk }}</span>
+              </div>
+            </div>
+            <div class="hero-actions">
+              <button class="btn primary">Upgrade Plan</button>
             </div>
           </div>
+
+          <div class="card glass usage-card">
+            <div class="usage-row" *ngFor="let u of usageBars">
+              <div class="usage-label">
+                <span>{{ u.label }}</span>
+                <span class="muted tiny">{{ u.used }} / {{ u.limit }} used</span>
+              </div>
+              <div class="progress">
+                <span class="fill" [style.width.%]="(u.used / u.limit) * 100" [class.warn]="(u.used / u.limit) >= 0.8"></span>
+              </div>
+            </div>
+            <p class="hint">Need more? <strong>Pro Tier</strong> unlocks higher limits and dedicated support.</p>
+          </div>
+
           <div class="plans padded">
             <div *ngFor="let plan of plans" class="plan-card" [class.active]="subscription()?.plan === plan.id">
               <div class="plan-head">
@@ -304,14 +336,19 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
               <h3>Invoices</h3>
             </div>
             <div class="card-body">
-              <table class="table">
-                <thead><tr><th>ID</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+              <table class="table invoices-table">
+                <thead><tr><th>ID</th><th>Amount</th><th>Status</th><th>Date</th><th class="actions">Download</th></tr></thead>
                 <tbody>
                   <tr *ngFor="let inv of subscription()?.invoices || []">
                     <td>{{ inv.id }}</td>
-                    <td>{{ inv.amount | currency:inv.currency }}</td>
-                    <td>{{ inv.status }}</td>
-                    <td>{{ inv.createdAt | date:'mediumDate' }}</td>
+                    <td class="align-right">{{ inv.amount | currency:inv.currency }}</td>
+                    <td class="mono">{{ inv.status }}</td>
+                    <td class="mono align-right">{{ inv.createdAt | date:'mediumDate' }}</td>
+                    <td class="actions">
+                      <button class="mini-btn ghost download-btn">
+                        <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4" stroke="#70C6E1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 15v4h16v-4" stroke="#70C6E1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -674,6 +711,29 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .plan-head { display: flex; justify-content: space-between; align-items: center; }
     .plan-footer { margin-top: auto; display: flex; justify-content: flex-end; }
     .price { margin: 0; font-weight: 700; }
+    .hero-card { background: linear-gradient(135deg, rgba(232,190,20,0.14), rgba(112,198,225,0.08)); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.1rem 1.2rem; box-shadow: 0 16px 36px rgba(0,0,0,0.24), 0 0 40px rgba(232,190,20,0.25), 0 8px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 0.5rem; }
+    .hero-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+    .hero-price { display: flex; align-items: baseline; gap: 0.15rem; }
+    .hero-price .currency { font-size: 1rem; color: var(--color-text-secondary); font-weight: 700; }
+    .hero-price .amount { font-size: 2.4rem; font-weight: 800; color: #E8BE14; line-height: 1; }
+    .hero-price .minor { font-size: 0.9rem; color: var(--color-text-secondary); font-weight: 700; }
+    .hero-price .per { color: var(--color-text-secondary); font-weight: 600; }
+    .hero-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 0.5rem; }
+    .perk { display: flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.55rem; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
+    .perk svg { width: 18px; height: 18px; }
+    .hero-actions { display: flex; justify-content: flex-end; }
+    .usage-card { margin-top: 0.85rem; padding: 0.85rem 1rem; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 12px 26px rgba(0,0,0,0.18); display: flex; flex-direction: column; gap: 0.65rem; }
+    .usage-row { display: flex; flex-direction: column; gap: 0.25rem; }
+    .usage-label { display: flex; justify-content: space-between; align-items: center; }
+    .progress { width: 100%; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.3); }
+    .progress .fill { display: block; height: 100%; background: linear-gradient(180deg, rgba(112,198,225,0.95), rgba(63,182,222,0.75)); box-shadow: inset 0 1px 2px rgba(255,255,255,0.2); transition: width 0.2s ease; }
+    .progress .fill.warn { background: linear-gradient(180deg, #f59e0b, #e76f51); animation: pulse-warn 0.8s ease; }
+    @keyframes pulse-warn { 0% { box-shadow: 0 0 0 0 rgba(231,111,81,0.35);} 70% { box-shadow: 0 0 0 8px rgba(231,111,81,0);} 100% { box-shadow: 0 0 0 0 rgba(231,111,81,0);} }
+    .invoices-table th:nth-child(2), .invoices-table td:nth-child(2),
+    .invoices-table th:nth-child(4), .invoices-table td:nth-child(4) { text-align: right; }
+    .align-right { text-align: right; }
+    .download-btn { transition: transform 0.12s ease, background 0.15s ease; }
+    .download-btn:hover { background: rgba(112,198,225,0.12); transform: translateY(1px); }
     .invites-card {
       width: 100%;
       margin-top: 0;
@@ -793,6 +853,11 @@ export class TenantSettingsComponent implements OnInit {
 
   users = signal<User[]>([]);
   roles = this.roleService.roles;
+  usageBars = [
+    { label: 'Users', used: 24, limit: 50 },
+    { label: 'Storage', used: 65, limit: 100 },
+    { label: 'Automations', used: 8, limit: 15 },
+  ];
   showUserModal = signal(false);
   editingUser = signal<User | null>(null);
   userRoles = signal<Role[]>([]);
@@ -1199,6 +1264,16 @@ export class TenantSettingsComponent implements OnInit {
     if (!seed) return palette[0];
     const code = seed.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
     return palette[code % palette.length];
+  }
+
+  currentPlan() {
+    return this.plans.find(p => p.id === this.subscription()?.plan);
+  }
+
+  priceParts(value: string): { currency: string; major: string; minor: string } {
+    const match = value.match(/([^0-9]*)(\d+)(\.\d+)?/);
+    if (!match) return { currency: '', major: value, minor: '' };
+    return { currency: match[1] || '', major: match[2] || '', minor: match[3] || '' };
   }
 
   roleChipClass(role: string): string {
