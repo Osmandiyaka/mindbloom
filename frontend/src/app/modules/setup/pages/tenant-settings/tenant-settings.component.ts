@@ -373,7 +373,6 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
         <div *ngSwitchCase="'plugins'" class="panel plugins-panel">
           <div class="panel-header padded">
             <div class="stacked">
-              <h2>Plugins</h2>
               <p class="subtitle">Manage installed extensions or browse the marketplace.</p>
             </div>
           </div>
@@ -592,7 +591,7 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .invitations-panel { max-width: 1100px; gap: 0.5rem; background: var(--color-surface); border-radius: 16px; padding: 0.5rem 0.65rem 0.8rem; }
     .panel.users-panel { background: transparent; border: none; border-radius: 16px; padding: 0; box-shadow: none; }
     .billing-panel { background: transparent; border: none; border-radius: 16px; padding: 0; box-shadow: none; }
-    .plugins-panel { max-width: 1100px; gap: 0.5rem; }
+    .plugins-panel { max-width: 1100px; gap: 0.5rem; background: radial-gradient(circle at 30% 20%, rgba(99,77,59,0.22), transparent 45%), radial-gradient(circle at 70% 40%, rgba(58,46,35,0.22), transparent 55%), color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); border-radius: 16px; padding: 0.25rem; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
     .plugin-filter-card { padding: 0.85rem 1rem; border-radius: 14px; background: color-mix(in srgb, var(--color-surface) 92%, var(--color-surface-hover) 8%); box-shadow: 0 14px 30px rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.08); }
     .filter-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; justify-content: space-between; }
     .plugin-search { min-width: 260px; flex: 1; }
@@ -600,20 +599,23 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .filter-chip { background: transparent; border: 1px solid rgba(232,190,20,0.4); color: var(--color-text-primary); padding: 6px 10px; border-radius: 999px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
     .filter-chip.active { background: rgba(232,190,20,0.2); border-color: rgba(232,190,20,0.7); box-shadow: 0 6px 14px rgba(232,190,20,0.25); }
     .plugin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
-    .plugin-card { padding: 1rem; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 12px 28px rgba(0,0,0,0.18); display: flex; flex-direction: column; gap: 0.6rem; transition: transform 0.15s ease, box-shadow 0.2s ease; }
-    .plugin-card:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(0,0,0,0.22); }
+    .plugin-card { padding: 1rem; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 12px 28px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 0.6rem; transition: transform 0.2s ease, box-shadow 0.25s ease; }
+    .plugin-card:hover { transform: translateY(-2px); box-shadow: 0 18px 36px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.1); }
     .plugin-card.glass { border-bottom: 2px solid rgba(232,190,20,0.45); }
     .plugin-card.error { border: 1px solid rgba(231,76,60,0.5); box-shadow: 0 12px 28px rgba(231,76,60,0.15); }
     .plugin-card.installed { border-bottom-color: rgba(34,197,94,0.6); }
     .plugin-top { display: grid; grid-template-columns: auto 1fr auto; gap: 0.65rem; align-items: start; }
-    .icon-wrap { width: 36px; height: 36px; border-radius: 12px; background: rgba(112,198,225,0.18); color: #70C6E1; display: grid; place-items: center; box-shadow: 0 0 0 2px rgba(112,198,225,0.2), 0 0 12px rgba(112,198,225,0.35); }
+    .icon-wrap { width: 36px; height: 36px; border-radius: 12px; background: rgba(112,198,225,0.18); color: #70C6E1; display: grid; place-items: center; box-shadow: 0 0 0 2px rgba(112,198,225,0.2), 0 0 12px rgba(112,198,225,0.35); transition: box-shadow 0.25s ease, filter 0.25s ease; }
     .icon-wrap svg { width: 20px; height: 20px; }
-    .title-block h3 { margin: 0; color: #fff; font-size: 1.05rem; letter-spacing: -0.01em; }
+    .plugin-card:hover .icon-wrap { box-shadow: 0 0 0 3px rgba(112,198,225,0.35), 0 0 18px rgba(112,198,225,0.55); filter: drop-shadow(0 0 6px rgba(112,198,225,0.6)); }
+    .plugin-card:hover .title-block h3 { color: #f7f5f2; text-shadow: 0 0 8px rgba(232,190,20,0.3); }
+    .title-block h3 { margin: 0; color: #fff; font-size: 1.05rem; letter-spacing: -0.01em; transition: color 0.2s ease, text-shadow 0.2s ease; }
     .title-block p { margin: 4px 0 0 0; }
     .meta { display: flex; gap: 0.5rem; flex-wrap: wrap; }
     .meta .tag { font-family: SFMono-Regular, Consolas, 'Liberation Mono', monospace; color: var(--color-text-tertiary); font-size: 0.82rem; padding: 4px 8px; border-radius: 8px; background: rgba(255,255,255,0.05); }
     .plugin-actions { display: flex; justify-content: flex-end; margin-top: auto; }
     .btn.cyan { border: 1px solid rgba(112,198,225,0.7); color: #70C6E1; background: transparent; }
+    .plugin-actions .btn:active { transform: translateY(1px); box-shadow: none; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0 0.35rem; }
     .panel-header.stacked { flex-direction: column; align-items: stretch; }
     .panel-header.slim { margin-bottom: 0.25rem; padding: 0 0.35rem; }
