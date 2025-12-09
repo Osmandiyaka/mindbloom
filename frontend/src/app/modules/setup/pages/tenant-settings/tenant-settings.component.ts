@@ -272,36 +272,8 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
           </div>
         </div>
 
-        <div *ngSwitchCase="'roles'" class="panel roles-panel roles-split">
-          <div class="card glass role-pane">
-            <div class="panel-header slim">
-              <div class="stacked">
-                <h2>Roles</h2>
-                <p class="subtitle">System and custom roles, styled for quick scanning.</p>
-              </div>
-              <div class="actions">
-                <button class="btn primary small" type="button">Create New Role</button>
-              </div>
-            </div>
-            <div class="card-body padded">
-              <app-role-list />
-            </div>
-          </div>
-          <div class="card glass permission-pane">
-            <div class="panel-header slim">
-              <div class="stacked">
-                <h2>Permissions</h2>
-                <p class="subtitle">Visualize and preview permission groups.</p>
-              </div>
-            </div>
-            <div class="card-body padded permission-body">
-              <app-permission-tree-selector
-                [permissions]="roleService.permissionTree()"
-                [selectedPermissionIds]="previewPermissionIds"
-                (selectionChange)="permissionPreviewChange($event)"
-              />
-            </div>
-          </div>
+        <div *ngSwitchCase="'roles'" class="panel roles-panel">
+          <app-role-list />
         </div>
 
         <div *ngSwitchCase="'billing'" class="panel billing-panel">
@@ -721,11 +693,6 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .users-card { position: relative; z-index: 5; box-shadow: 0 12px 28px rgba(0,0,0,0.22); }
     .users-card .card-body { padding-top: 0.35rem; }
     .users-card .card-body.toolbar { background: color-mix(in srgb, var(--color-surface-hover) 60%, transparent); border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius: 12px; padding: 0.55rem 0.75rem; }
-    /* Roles split layout */
-    .roles-split { display: grid; grid-template-columns: minmax(260px, 32%) 1fr; gap: 1rem; }
-    .glass { background: color-mix(in srgb, var(--color-surface) 65%, transparent); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; backdrop-filter: blur(10px); box-shadow: 0 16px 36px rgba(0,0,0,0.2); }
-    .role-pane .card-body, .permission-pane .card-body { padding: 0.75rem; }
-    .permission-body { max-height: 520px; overflow: auto; }
     @keyframes pulse-highlight {
       0% { transform: scale(0.98); box-shadow: 0 0 0 0 rgba(232,190,20,0.35); }
       60% { transform: scale(1.02); box-shadow: 0 0 0 6px rgba(232,190,20,0); }
@@ -836,7 +803,6 @@ export class TenantSettingsComponent implements OnInit {
   userSearch = signal('');
   showPermissionModal = signal(false);
   selectedPermissionIds = signal<string[]>([]);
-  previewPermissionIds: string[] = [];
 
   subscription = signal<Subscription | null>(null);
   plans = [
@@ -859,9 +825,6 @@ export class TenantSettingsComponent implements OnInit {
     this.loadInvitations();
     this.loadUsers();
     this.loadSubscription();
-    if (!this.roleService.permissionTree().length) {
-      this.roleService.getPermissionTree().subscribe();
-    }
     if (!this.roles().length) {
       this.roleService.getRoles().subscribe();
     }
@@ -1275,10 +1238,6 @@ export class TenantSettingsComponent implements OnInit {
   isValidEmail(email: string): boolean {
     const value = (email || '').trim();
     return !!value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-  }
-
-  permissionPreviewChange(ids: string[]): void {
-    this.previewPermissionIds = ids;
   }
 
   filteredUsers(): User[] {
