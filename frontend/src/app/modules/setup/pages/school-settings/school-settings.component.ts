@@ -26,7 +26,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
       </div>
 
       <div class="grid" *ngIf="tab === 'profile'">
-        <section class="card flat">
+        <section class="card soft hero-card">
           <div class="branding-card">
             <div class="branding-header">
               <div>
@@ -352,7 +352,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     </div>
   `,
   styles: [`
-    .page { padding:1.35rem; display:flex; flex-direction:column; gap:1.15rem; background: color-mix(in srgb, var(--color-surface, #0f172a) 88%, var(--color-background, #f7f9fc) 12%); color: var(--color-text-primary); border: none; border-radius: 16px; }
+    .page { padding:1.35rem; display:flex; flex-direction:column; gap:1.15rem; background: radial-gradient(circle at 30% 20%, rgba(99,77,59,0.14), transparent 42%), radial-gradient(circle at 70% 50%, rgba(58,46,35,0.16), transparent 55%), color-mix(in srgb, var(--color-surface, #0f172a) 88%, var(--color-background, #f7f9fc) 12%); color: var(--color-text-primary); border: none; border-radius: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); }
     .page-header { display:flex; justify-content:space-between; align-items:flex-start; }
     .eyebrow { text-transform:uppercase; letter-spacing:0.08em; color: var(--color-text-tertiary); font-weight:700; margin:0 0 0.15rem; font-size: 0.8rem; }
     h1 { margin:0 0 0.25rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-weight:800; }
@@ -360,6 +360,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .btn { border-radius:12px; border:1px solid color-mix(in srgb, var(--color-border) 50%, transparent); padding:0.7rem 1.15rem; font-weight:650; cursor:pointer; background: color-mix(in srgb, var(--color-surface) 85%, var(--color-surface-hover) 15%); color: var(--color-text-primary); transition: all 0.2s ease; box-shadow: 0 10px 22px rgba(0,0,0,0.18); }
     .btn.primary { background: linear-gradient(135deg, #f6c344, #f2a811); color: var(--color-surface, #0f0f12); border:none; box-shadow: 0 16px 34px rgba(242, 168, 17, 0.42); }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(0,0,0,0.24); }
+    .btn:active { transform: translateY(1px); box-shadow: 0 8px 12px rgba(0,0,0,0.16); }
     .btn.tiny { padding: 0.35rem 0.6rem; font-size: 0.85rem; box-shadow: none; }
     .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap:0.85rem 1.2rem; padding-bottom: 0.25rem; }
     .academics-grid { grid-template-columns: repeat(3, minmax(260px,1fr)); column-gap: 1rem; row-gap: 0.65rem; align-items: stretch; }
@@ -374,9 +375,10 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .tab { padding:0.6rem 0.95rem; border-radius:10px; border:none; background: transparent; cursor:pointer; font-weight:650; color: var(--color-text-secondary); transition: color 0.2s ease; position: relative; z-index: 1; }
     .tab.active { color: var(--color-text-primary); font-weight:700; }
     .tab:hover:not(.active) { color: var(--color-text-primary); }
-    .card { background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); border:none; border-radius:14px; padding:1.15rem; box-shadow: 0 12px 28px rgba(0,0,0,0.16); display:flex; flex-direction:column; gap:0.5rem; }
-    .card.flat { background: transparent; box-shadow: none; padding: 0; }
-    .card.soft { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 10px 22px rgba(0,0,0,0.12); }
+    .card { background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); border:1px solid rgba(255,255,255,0.06); border-radius:14px; padding:1.15rem; box-shadow: 0 12px 28px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.06); display:flex; flex-direction:column; gap:0.5rem; transition: box-shadow 0.2s ease, transform 0.18s ease; }
+    .card:hover { box-shadow: 0 16px 34px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08); transform: translateY(-1px); }
+    .card.flat { background: transparent; box-shadow: none; padding: 0; border: none; }
+    .card.soft { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 10px 22px rgba(0,0,0,0.12); border: 1px solid rgba(255,255,255,0.05); }
     .academic-card { background: var(--color-surface-hover, #634d3b); border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 14px 30px rgba(0,0,0,0.16); color: var(--color-text-primary, #ffffff); }
     .academic-card input,
     .academic-card select { background: var(--color-surface, #4f3a29); color: var(--color-text-primary, #ffffff); }
@@ -390,7 +392,9 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
     .subjects-card { grid-column: 1 / -1; }
     .card h3 { margin:0 0 0.3rem; color: var(--color-text-primary); letter-spacing:-0.01em; font-size:1.05rem; display: inline-flex; align-items: center; gap: 0.4rem; }
     .card .icon { margin-right:0.35rem; filter: grayscale(0); color: var(--color-primary, #00c4cc); }
-    .branding-card { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border-radius: 14px; padding: 0.9rem 1rem; box-shadow: 0 10px 24px rgba(0,0,0,0.14); margin-bottom: 0.4rem; display: flex; flex-direction: column; gap: 0.75rem; transition: box-shadow 0.2s ease, border-color 0.2s ease; }
+    .branding-card { background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); border-radius: 14px; padding: 0.9rem 1rem; box-shadow: 0 10px 24px rgba(0,0,0,0.14); margin-bottom: 0.4rem; display: flex; flex-direction: column; gap: 0.75rem; transition: box-shadow 0.2s ease, border-color 0.2s ease; border: 1px solid rgba(255,255,255,0.06); }
+    .hero-card { box-shadow: 0 16px 36px rgba(0,0,0,0.24), 0 0 32px rgba(232,190,20,0.18); position: relative; overflow: hidden; }
+    .hero-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(232,190,20,0.4), rgba(255,255,255,0.12)); pointer-events: none; }
     .branding-header { display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; }
     .branding-title { margin: 0; font-size: 1.05rem; letter-spacing: -0.01em; }
     .branding-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 0.75rem; }
