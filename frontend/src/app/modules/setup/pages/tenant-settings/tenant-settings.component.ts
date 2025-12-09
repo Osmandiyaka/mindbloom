@@ -14,11 +14,12 @@ import { RoleService } from '../../../../core/services/role.service';
 import { PermissionTreeSelectorComponent } from '../../../../shared/components/permission-tree-selector/permission-tree-selector.component';
 import { SchoolSettingsComponent } from '../school-settings/school-settings.component';
 import { RoleListComponent } from '../roles/role-list.component';
+import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
 
 @Component({
   selector: 'app-tenant-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, PluginLauncherComponent, RouterModule, RoleSelectorComponent, PermissionTreeSelectorComponent, RoleListComponent, SchoolSettingsComponent],
+  imports: [CommonModule, FormsModule, PluginLauncherComponent, RouterModule, RoleSelectorComponent, PermissionTreeSelectorComponent, RoleListComponent, SchoolSettingsComponent, SearchInputComponent],
   template: `
     <div class="tenant-settings compact">
 
@@ -67,6 +68,10 @@ import { RoleListComponent } from '../roles/role-list.component';
                 </div>
               </div>
               <div class="actions right">
+                <app-search-input
+                  class="users-search"
+                  placeholder="Search users..."
+                  (search)="onUserSearch($event)" />
                 <button class="btn primary" (click)="openUserModal()">
                   <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Zm7-3h-2v-2h-2V7h2V5h2v2h2v2h-2v2Z" fill="currentColor"/></svg>
                   Add User
@@ -79,7 +84,7 @@ import { RoleListComponent } from '../roles/role-list.component';
                   <tr><th style="width:48px;"><input type="checkbox" [checked]="selectAllUsers()" (change)="toggleSelectAll($event)" /></th><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let user of users()">
+                  <tr *ngFor="let user of filteredUsers()">
                     <td><input type="checkbox" [checked]="selectedUserIds().has(user.id)" (change)="toggleUserSelection(user)" /></td>
                     <td>
                       <div class="user-identity">
@@ -532,6 +537,16 @@ import { RoleListComponent } from '../roles/role-list.component';
     .invite-roles { min-width: 190px; height: 42px; display: flex; align-items: center; border: none; border-radius: 12px; padding: 0; background: transparent; color: var(--color-text-secondary); position: relative; }
     .invite-submit { height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem 1rem; color: var(--color-surface, #0f0f12); background: linear-gradient(135deg, #E8BE14 0%, #BF9532 100%); box-shadow: 0 4px 12px rgba(232,190,20,0.4); border: none; font-weight: 700; letter-spacing: 0.5px; border-radius: 999px; margin-left: 0.5rem; }
     .invite-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(232,190,20,0.6); }
+    .users-search { min-width: 220px; }
+    :host ::ng-deep .users-search .search-field {
+      background: color-mix(in srgb, var(--color-surface) 85%, transparent);
+      border: 1px solid rgba(232,190,20,0.28);
+      border-radius: 12px;
+      padding: 0.35rem 0.5rem;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.25);
+    }
+    :host ::ng-deep .users-search .search-field input { color: var(--color-text-primary); background: transparent; }
+    :host ::ng-deep .users-search .search-field .icon { color: #70C6E1; }
     .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; background: rgba(0,0,0,0.1); padding: 0.3rem 0.5rem; border-radius: 10px; }
     .selected-roles .chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 5px 9px; border-radius: 999px; border: none; font-weight: 700; box-shadow: 0 10px 20px rgba(16,185,129,0.18); }
     .selected-roles .chip svg { width: 14px; height: 14px; }
@@ -802,6 +817,7 @@ export class TenantSettingsComponent implements OnInit {
   userForm: { name: string; email: string; password: string; forcePasswordReset?: boolean; mfaEnabled?: boolean } = { name: '', email: '', password: '', forcePasswordReset: true, mfaEnabled: true };
   selectedUserIds = signal<Set<string>>(new Set());
   selectAllUsers = signal(false);
+  userSearch = signal('');
   showPermissionModal = signal(false);
   selectedPermissionIds = signal<string[]>([]);
 
@@ -1239,5 +1255,20 @@ export class TenantSettingsComponent implements OnInit {
   isValidEmail(email: string): boolean {
     const value = (email || '').trim();
     return !!value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  filteredUsers(): User[] {
+    const term = this.userSearch().toLowerCase().trim();
+    if (!term) return this.users();
+    return this.users().filter(u => {
+      const roleName = u.role?.name?.toLowerCase() || '';
+      return (u.name && u.name.toLowerCase().includes(term))
+        || (u.email && u.email.toLowerCase().includes(term))
+        || roleName.includes(term);
+    });
+  }
+
+  onUserSearch(term: string): void {
+    this.userSearch.set(term);
   }
 }
