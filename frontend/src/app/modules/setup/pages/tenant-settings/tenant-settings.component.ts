@@ -44,28 +44,29 @@ import { RoleListComponent } from '../roles/role-list.component';
           </div>
           <div class="card invites-card tight users-card">
             <div class="card-body toolbar">
-              <div class="left">
+              <div class="selection-toolbar" [class.active]="selectedUserIds().size">
                 <span class="selected-count" *ngIf="selectedUserIds().size">{{ selectedUserIds().size }} selected</span>
+                <div class="actions left-actions">
+                  <button class="btn ghost small danger" [disabled]="!selectedUserIds().size" (click)="bulkDelete()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 6h18" />
+                      <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" />
+                      <path d="M10 10v6" />
+                      <path d="M14 10v6" />
+                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                    </svg>
+                    Bulk Delete
+                  </button>
+                  <button class="btn primary small" [disabled]="!selectedUserIds().size" (click)="openPermissionModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+                      <path d="m9 12 2 2 4-4" />
+                    </svg>
+                    Assign Permissions
+                  </button>
+                </div>
               </div>
-              <div class="actions">
-                <button class="btn ghost small danger" [disabled]="!selectedUserIds().size" (click)="bulkDelete()">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 6h18" />
-                    <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" />
-                    <path d="M10 10v6" />
-                    <path d="M14 10v6" />
-                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                  </svg>
-                  Bulk Delete
-                </button>
-                <button class="btn primary small" [disabled]="!selectedUserIds().size" (click)="openPermissionModal()">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
-                    <path d="m9 12 2 2 4-4" />
-                  </svg>
-                  Assign Permissions
-                </button>
-                <span class="actions-spacer"></span>
+              <div class="actions right">
                 <button class="btn primary" (click)="openUserModal()">
                   <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Zm7-3h-2v-2h-2V7h2V5h2v2h2v2h-2v2Z" fill="currentColor"/></svg>
                   Add User
@@ -85,7 +86,7 @@ import { RoleListComponent } from '../roles/role-list.component';
                         <span class="avatar solid" [style.background]="getAvatarColor(user.email || user.name)">{{ getInitial(user.name || user.email) }}</span>
                         <div>
                           <div>{{ user.name }}</div>
-                          <div class="muted tiny">ID {{ user.id?.slice(-6) }}</div>
+                          <div class="muted tiny">ID {{ user.id.slice(-6) }}</div>
                         </div>
                       </div>
                     </td>
@@ -142,8 +143,8 @@ import { RoleListComponent } from '../roles/role-list.component';
                     <td class="email-cell">
                       <span class="avatar" [style.background]="getAvatarColor(inv.email)">{{ getInitial(inv.email) }}</span>
                       <div class="email-block">
-                        <span class="email mono">{{ inv.email }}</span>
-                        <span class="muted tiny">Token • {{ inv.token?.slice(-6) || '••••••' }}</span>
+                        <span class="email mono strong">{{ inv.email }}</span>
+                        <span class="muted tiny">Token • {{ inv.token ? inv.token.slice(-6) : '••••••' }}</span>
                       </div>
                     </td>
                     <td>
@@ -157,7 +158,7 @@ import { RoleListComponent } from '../roles/role-list.component';
                     </td>
                     <td>
                       <div class="expiry">
-                        <span>{{ inv.expiresAt | date:'mediumDate' }}</span>
+                        <span class="expiry-date mono">{{ inv.expiresAt | date:'mediumDate' }}</span>
                         <div class="expiry-track">
                           <span class="expiry-fill" [style.width.%]="expiryPercent(inv)"></span>
                         </div>
@@ -176,7 +177,12 @@ import { RoleListComponent } from '../roles/role-list.component';
                   </tr>
                 </tbody>
               </table>
-              <p *ngIf="!invitations().length" class="muted empty-state">No invitations yet.</p>
+              <div *ngIf="!invitations().length" class="empty-state">
+                <svg viewBox="0 0 24 24">
+                  <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v.51l8 5.33 8-5.33V6H4Zm0 3.36V18h16V9.36l-7.47 4.98a2 2 0 0 1-2.06 0L4 9.36Z" fill="currentColor"/>
+                </svg>
+                <p class="muted">No invitations have been sent yet. <strong>Send your first one above!</strong></p>
+              </div>
             </div>
           </div>
 
@@ -526,8 +532,8 @@ import { RoleListComponent } from '../roles/role-list.component';
     .invite-roles { min-width: 190px; height: 42px; display: flex; align-items: center; border: none; border-radius: 12px; padding: 0; background: transparent; color: var(--color-text-secondary); position: relative; }
     .invite-submit { height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem 1rem; color: var(--color-surface, #0f0f12); background: linear-gradient(135deg, #E8BE14 0%, #BF9532 100%); box-shadow: 0 4px 12px rgba(232,190,20,0.4); border: none; font-weight: 700; letter-spacing: 0.5px; border-radius: 999px; margin-left: 0.5rem; }
     .invite-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(232,190,20,0.6); }
-    .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; }
-    .selected-roles .chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 6px 10px; border-radius: 999px; border: none; font-weight: 700; box-shadow: 0 10px 20px rgba(16,185,129,0.18); }
+    .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; background: rgba(0,0,0,0.1); padding: 0.3rem 0.5rem; border-radius: 10px; }
+    .selected-roles .chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 5px 9px; border-radius: 999px; border: none; font-weight: 700; box-shadow: 0 10px 20px rgba(16,185,129,0.18); }
     .selected-roles .chip svg { width: 14px; height: 14px; }
     .role-stack { display: flex; flex-wrap: wrap; gap: 6px; }
     .role-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); }
@@ -537,10 +543,10 @@ import { RoleListComponent } from '../roles/role-list.component';
     .role-chip.manager { background: rgba(14,165,233,0.16); border-color: rgba(14,165,233,0.4); color: #38bdf8; }
     .role-chip.neutral { color: var(--color-text-secondary); }
     .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; font-weight: 700; text-transform: capitalize; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); }
-    .status-pill.pending { color: #f59e0b; border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.12); }
-    .status-pill.accepted { color: #22c55e; border-color: rgba(34,197,94,0.35); background: rgba(34,197,94,0.12); }
+    .status-pill.pending { color: #f59e0b; border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.12); text-shadow: 0 0 5px currentColor; }
+    .status-pill.accepted { color: #22c55e; border-color: rgba(34,197,94,0.35); background: rgba(34,197,94,0.12); text-shadow: 0 0 5px currentColor; }
     .status-pill.sent { color: #0ea5e9; border-color: rgba(14,165,233,0.35); background: rgba(14,165,233,0.12); }
-    .status-pill.revoked { color: var(--color-error); border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.12); }
+    .status-pill.revoked { color: rgba(231,76,60,0.8); border-color: rgba(231,76,60,0.25); background: rgba(231,76,60,0.1); text-decoration: line-through; }
     .status-pill.expired { color: #a855f7; border-color: rgba(168,85,247,0.35); background: rgba(168,85,247,0.12); }
     .expiry { display: flex; flex-direction: column; gap: 4px; }
     .expiry-track { width: 100%; height: 6px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
@@ -548,20 +554,21 @@ import { RoleListComponent } from '../roles/role-list.component';
     .pill { display: inline-flex; align-items: center; padding: 0.25rem 0.6rem; border-radius: 999px; font-weight: 600; background: color-mix(in srgb, var(--color-surface-hover) 80%, transparent); color: var(--color-text-secondary); }
     .pill.neutral { background: color-mix(in srgb, var(--color-surface) 75%, transparent); color: var(--color-text-primary); }
     .table { width: 100%; border-collapse: separate; border-spacing: 0 6px; background: transparent; color: var(--color-text-primary); }
-    .table th, .table td { padding: 0.68rem 0.75rem; text-align: left; color: var(--color-text-primary); background: transparent; }
-    .table th { color: var(--color-text-secondary); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; background: transparent; border-bottom: 1px solid rgba(232,190,20,0.3); padding-bottom: 12px; }
+    .table th, .table td { padding: 0.55rem 0.75rem; text-align: left; color: var(--color-text-primary); background: transparent; }
+    .table th { color: var(--color-text-secondary); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; background: transparent; border-bottom: 1px solid rgba(232,190,20,0.3); padding-bottom: 10px; }
     .table tr td:first-child, .table tr th:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
     .table tr td:last-child, .table tr th:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
     .table tbody tr { transition: background 0.2s ease, box-shadow 0.2s ease; border-bottom: 1px solid rgba(255,255,255,0.03); }
-    .table tbody tr:hover { background: rgba(255,255,255,0.03); box-shadow: inset 3px 0 0 #E8BE14; }
+    .table tbody tr:hover { background: linear-gradient(90deg, transparent, rgba(232,190,20,0.06), transparent); box-shadow: 0 8px 18px rgba(0,0,0,0.18); }
     .table.invites th, .table.invites td { padding: 0.45rem 0.65rem; line-height: 1.2; vertical-align: middle; }
     .table.invites th:last-child, .table.invites td:last-child { text-align: right; }
     .table.invites td.email-cell { display: flex; align-items: center; gap: 0.4rem; }
     .table.invites td.email-cell svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .expiry-date { font-size: 0.85rem; }
     .avatar { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; color: #0f0f12; font-weight: 800; box-shadow: 0 10px 20px rgba(0,0,0,0.25); }
     .avatar.solid { color: #0b1221; }
     .email-block { display: flex; flex-direction: column; gap: 2px; }
-    .email-block .email { font-weight: 700; }
+    .email-block .email { font-weight: 600; color: #fff; }
     .mono { font-family: SFMono-Regular, Consolas, 'Liberation Mono', monospace; }
     .tiny { font-size: 12px; }
     .table input[type="checkbox"] { accent-color: var(--color-primary); }
@@ -608,6 +615,7 @@ import { RoleListComponent } from '../roles/role-list.component';
     .badge.pending { color: var(--color-warning, #f39c12); }
     .badge.accepted { color: var(--color-success, #70ad47); }
     .actions .btn { padding: 0.4rem 0.7rem; box-shadow: 0 8px 20px rgba(0,0,0,0.18); }
+    .actions .btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); }
     .btn.small { padding: 0.4rem 0.8rem; font-size: 0.875rem; }
     .btn.danger { color: var(--color-error); }
     .shadow-md { box-shadow: var(--shadow-md, 10px 10px 20px rgba(0,0,0,0.7), -6px -6px 12px rgba(255,255,255,0.07)); }
@@ -615,7 +623,8 @@ import { RoleListComponent } from '../roles/role-list.component';
     .action-link { background: transparent; border: none; color: var(--color-info, #5eb5d7); padding: 0; font-weight: 650; cursor: pointer; text-decoration: none; }
     .action-link.danger { color: var(--color-error, #e74c3c); }
     .action-link:hover { text-decoration: underline; }
-    .empty-state { text-align: center; margin: 0.6rem 0 0; color: var(--color-text-tertiary); }
+    .empty-state { text-align: center; margin: 0.6rem 0 0; color: var(--color-text-tertiary); display: grid; place-items: center; gap: 0.4rem; }
+    .empty-state svg { width: 36px; height: 36px; color: #E8BE14; }
     /* Flatten role-selector button inside invite bar */
     :host ::ng-deep app-role-selector.invite-roles .role-trigger {
       position: relative;
@@ -683,6 +692,14 @@ import { RoleListComponent } from '../roles/role-list.component';
     .users-card { position: relative; z-index: 5; }
     .users-card .card-body { padding-top: 0.5rem; }
     .users-card .card-body.toolbar { background: color-mix(in srgb, var(--color-surface-hover) 60%, transparent); border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius: 12px; }
+    .selection-toolbar { display: flex; align-items: center; gap: 0.65rem; flex: 1; opacity: 0; max-height: 0; overflow: hidden; pointer-events: none; transform: translateY(6px); transition: all 0.25s ease; }
+    .selection-toolbar.active .selected-count { animation: pulse-highlight 0.4s ease; background: rgba(232,190,20,0.15); padding: 0.2rem 0.4rem; border-radius: 8px; }
+    .selection-toolbar.active { opacity: 1; max-height: 80px; pointer-events: auto; transform: translateY(0); }
+    @keyframes pulse-highlight {
+      0% { transform: scale(0.98); box-shadow: 0 0 0 0 rgba(232,190,20,0.35); }
+      60% { transform: scale(1.02); box-shadow: 0 0 0 6px rgba(232,190,20,0); }
+      100% { transform: scale(1); box-shadow: none; }
+    }
     .plugin-card { padding: 0.35rem 0.35rem 0.75rem; }
     .plugin-body { padding: 0.75rem 0.75rem 0.5rem; }
     /* ID Templates */
