@@ -306,13 +306,26 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
             <div class="usage-row" *ngFor="let u of usageBars">
               <div class="usage-label">
                 <span>{{ u.label }}</span>
-                <span class="muted tiny">{{ u.used }} / {{ u.limit }} used</span>
+                <span class="usage-nums">
+                  <span class="usage-used">{{ u.used }}</span>
+                  <span class="usage-total">/ {{ u.limit }} used</span>
+                </span>
               </div>
               <div class="progress">
                 <span class="fill" [style.width.%]="(u.used / u.limit) * 100" [class.warn]="(u.used / u.limit) >= 0.8"></span>
               </div>
             </div>
             <p class="hint">Need more? <strong>Pro Tier</strong> unlocks higher limits and dedicated support.</p>
+          </div>
+
+          <div class="card padded cancel-card">
+            <div class="card-header">
+              <h3>Cancel Subscription</h3>
+              <p class="subtitle">Need to stop your plan? Confirm to proceed.</p>
+            </div>
+            <div class="card-body">
+              <button class="btn ghost danger" type="button" (click)="openCancelConfirm()">Cancel Subscription</button>
+            </div>
           </div>
 
           <div class="plans padded">
@@ -464,6 +477,29 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
 
       <div class="alert" *ngIf="error()"><span>{{ error() }}</span></div>
       <div class="alert success" *ngIf="success()"><span>{{ success() }}</span></div>
+      <div class="overlay" *ngIf="showCancelConfirm()">
+        <div class="modal users-modal">
+          <header class="modal-header">
+            <div>
+              <p class="eyebrow">Confirm</p>
+              <h2>Type CANCEL to proceed</h2>
+            </div>
+            <button class="icon-btn" (click)="closeCancelConfirm()" aria-label="Close">
+              <svg viewBox="0 0 24 24"><path d="M6 6l12 12M6 18 18 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+          </header>
+          <div class="modal-body user-form">
+            <p class="hint">This action cannot be undone.</p>
+            <input type="text" [(ngModel)]="cancelConfirmText" placeholder="Type CANCEL" />
+          </div>
+          <footer class="modal-footer">
+            <button class="ghost" (click)="closeCancelConfirm()">Back</button>
+            <button class="primary danger" (click)="confirmCancel()" [disabled]="cancelConfirmText.trim() !== 'CANCEL'">
+              Confirm Cancellation
+            </button>
+          </footer>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -487,8 +523,8 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .btn { padding: 0.65rem 1.25rem; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); cursor: pointer; background: color-mix(in srgb, var(--color-surface) 85%, var(--color-surface-hover) 15%); color: var(--color-text-primary); transition: all 0.2s ease; box-shadow: 0 10px 24px rgba(0,0,0,0.12); display: inline-flex; align-items: center; gap: 0.4rem; }
     .btn svg { width: 18px; height: 18px; }
     .btn.ghost { background: transparent; border-color: color-mix(in srgb, var(--color-border) 40%, transparent); box-shadow: none; }
-    .btn.primary { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: #fff; border: none; box-shadow: 0 12px 28px rgba(var(--color-primary-rgb, 123, 140, 255), 0.3); }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 14px 28px rgba(0,0,0,0.16); }
+    .btn.primary { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: #fff; border: none; box-shadow: 0 12px 28px rgba(var(--color-primary-rgb, 123, 140, 255), 0.3); background-size: 200% 200%; background-position: 0% 50%; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 14px 28px rgba(0,0,0,0.16); background-position: 80% 20%; }
     .btn:active { transform: translateY(1px); box-shadow: 0 8px 16px rgba(0,0,0,0.12); }
     .btn.emphasized { padding: 0.7rem 1.4rem; box-shadow: 0 14px 30px rgba(var(--color-primary-rgb,123,140,255),0.28); }
     .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap: 1.5rem; }
@@ -710,7 +746,7 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .plan-card.active { box-shadow: 0 14px 34px rgba(var(--color-primary-rgb,102,126,234),0.32); outline: 2px solid rgba(var(--color-primary-rgb,102,126,234),0.35); }
     .plan-head { display: flex; justify-content: space-between; align-items: center; }
     .plan-footer { margin-top: auto; display: flex; justify-content: flex-end; }
-    .plan-card h3 { color: var(--color-primary); }
+    .plan-card h3 { color: var(--color-text-primary); }
     .price { margin: 0; font-weight: 700; color: var(--color-text-primary); }
     .billing-panel .card-header h3 { color: #fff; }
     .hero-card { background: linear-gradient(135deg, rgba(232,190,20,0.14), rgba(112,198,225,0.08)); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.1rem 1.2rem; box-shadow: 0 16px 36px rgba(0,0,0,0.24), 0 0 40px rgba(232,190,20,0.25), 0 8px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 0.5rem; }
@@ -728,6 +764,9 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .usage-card { margin-top: 0.85rem; padding: 0.85rem 1rem; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 12px 26px rgba(0,0,0,0.18); display: flex; flex-direction: column; gap: 0.65rem; }
     .usage-row { display: flex; flex-direction: column; gap: 0.25rem; }
     .usage-label { display: flex; justify-content: space-between; align-items: center; }
+    .usage-label .usage-nums { font-family: SFMono-Regular, Consolas, 'Liberation Mono', monospace; }
+    .usage-label .usage-used { font-weight: 800; color: var(--color-text-primary); }
+    .usage-label .usage-total { color: var(--color-text-tertiary); font-size: 0.85rem; }
     .progress { width: 100%; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.3); }
     .progress .fill { display: block; height: 100%; background: linear-gradient(180deg, rgba(112,198,225,0.95), rgba(63,182,222,0.75)); box-shadow: inset 0 1px 2px rgba(255,255,255,0.2); transition: width 0.2s ease; }
     .progress .fill.warn { background: linear-gradient(180deg, #f59e0b, #e76f51); animation: pulse-warn 0.8s ease; }
@@ -822,7 +861,9 @@ export class TenantSettingsComponent implements OnInit {
   userSaving = signal(false);
   error = signal<string | null>(null);
   success = signal<string | null>(null);
+  showCancelConfirm = signal(false);
   activeTab: 'school' | 'invitations' | 'roles' | 'billing' | 'plugins' | 'templates' = 'school';
+  cancelConfirmText = '';
 
   templates = {
     admissionPrefix: 'ADM',
@@ -1087,6 +1128,21 @@ export class TenantSettingsComponent implements OnInit {
         this.billingLoading.set(false);
       }
     });
+  }
+
+  openCancelConfirm(): void {
+    this.cancelConfirmText = '';
+    this.showCancelConfirm.set(true);
+  }
+
+  closeCancelConfirm(): void {
+    this.showCancelConfirm.set(false);
+  }
+
+  confirmCancel(): void {
+    // Placeholder for real cancellation; for now just acknowledge and close.
+    this.success.set('Cancellation request received');
+    this.showCancelConfirm.set(false);
   }
 
   // Users
