@@ -525,13 +525,7 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .invite-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(232,190,20,0.6); }
     .invite-submit:active { transform: translateY(1px); box-shadow: 0 3px 8px rgba(232,190,20,0.35); }
     .users-search { min-width: 220px; }
-    :host ::ng-deep .users-search .search-field {
-      background: color-mix(in srgb, var(--color-surface) 85%, transparent);
-      border: 1px solid rgba(232,190,20,0.28);
-      border-radius: 12px;
-      padding: 0.35rem 0.5rem;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.25);
-    }
+   
     :host ::ng-deep .users-search .search-field input { color: var(--color-text-primary); background: transparent; }
     :host ::ng-deep .users-search .search-field .icon { color: #70C6E1; }
     .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; background: rgba(0,0,0,0.1); padding: 0.3rem 0.5rem; border-radius: 10px; }
@@ -696,9 +690,9 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .invites-card .card-body { display: block; padding: 0.25rem 0.5rem 0.5rem; }
     .invites-card .table { margin: 0; }
     .invite-row.capsule { position: relative; z-index: 30; }
-    .users-card { position: relative; z-index: 5; }
-    .users-card .card-body { padding-top: 0.5rem; }
-    .users-card .card-body.toolbar { background: color-mix(in srgb, var(--color-surface-hover) 60%, transparent); border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius: 12px; }
+    .users-card { position: relative; z-index: 5; box-shadow: 0 12px 28px rgba(0,0,0,0.22); }
+    .users-card .card-body { padding-top: 0.35rem; }
+    .users-card .card-body.toolbar { background: color-mix(in srgb, var(--color-surface-hover) 60%, transparent); border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius: 12px; padding: 0.55rem 0.75rem; }
     @keyframes pulse-highlight {
       0% { transform: scale(0.98); box-shadow: 0 0 0 0 rgba(232,190,20,0.35); }
       60% { transform: scale(1.02); box-shadow: 0 0 0 6px rgba(232,190,20,0); }
