@@ -713,6 +713,7 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .price { margin: 0; font-weight: 700; }
     .hero-card { background: linear-gradient(135deg, rgba(232,190,20,0.14), rgba(112,198,225,0.08)); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.1rem 1.2rem; box-shadow: 0 16px 36px rgba(0,0,0,0.24), 0 0 40px rgba(232,190,20,0.25), 0 8px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 0.5rem; }
     .hero-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+    .plan-name { font-size: 2rem; font-weight: 800; color: var(--color-primary); letter-spacing: -0.01em; }
     .hero-price { display: flex; align-items: baseline; gap: 0.15rem; }
     .hero-price .currency { font-size: 1rem; color: var(--color-text-secondary); font-weight: 700; }
     .hero-price .amount { font-size: 2.4rem; font-weight: 800; color: #E8BE14; line-height: 1; }
