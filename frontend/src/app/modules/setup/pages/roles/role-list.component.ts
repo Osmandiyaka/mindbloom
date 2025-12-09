@@ -7,10 +7,10 @@ import { Role, Permission } from '../../../../core/models/role.model';
 import { PermissionTreeSelectorComponent } from '../../../../shared/components/permission-tree-selector/permission-tree-selector.component';
 
 @Component({
-    selector: 'app-role-list',
-    standalone: true,
-    imports: [CommonModule, FormsModule, PermissionTreeSelectorComponent],
-    template: `
+  selector: 'app-role-list',
+  standalone: true,
+  imports: [CommonModule, FormsModule, PermissionTreeSelectorComponent],
+  template: `
     <div class="role-list-container">
       <!-- Header -->
       <div class="page-header">
@@ -158,6 +158,7 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
           <div class="modal-content create-modal" (click)="$event.stopPropagation()">
             <div class="modal-header">
               <div>
+                <p class="eyebrow">Security</p>
                 <h2>Create Custom Role</h2>
                 <p class="modal-subtitle">Define a role name and optional description.</p>
               </div>
@@ -165,14 +166,17 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
             </div>
 
             <div class="modal-body create-form">
-              <label>
-                <span>Role name</span>
-                <input type="text" [(ngModel)]="newRole.name" placeholder="e.g., Data Entry" />
-              </label>
-              <label>
-                <span>Description</span>
-                <textarea rows="3" [(ngModel)]="newRole.description" placeholder="What can this role do?"></textarea>
-              </label>
+              <div class="fields">
+                <label class="field inset">
+                  <span>Role name <span class="required">*</span></span>
+                  <input type="text" [(ngModel)]="newRole.name" placeholder="e.g., Data Entry" />
+                </label>
+                <label class="field inset">
+                  <span>Description</span>
+                  <textarea rows="3" [(ngModel)]="newRole.description" placeholder="What can this role do?"></textarea>
+                </label>
+              </div>
+
               <div class="permission-selector">
                 <p class="hint">Select permissions to assign on creation.</p>
                 <app-permission-tree-selector
@@ -185,8 +189,9 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="btn" (click)="closeCreateModal()">Cancel</button>
-              <button type="button" class="btn btn-primary" (click)="submitCreate()" [disabled]="savingCreate">
+              <button type="button" class="btn ghost" (click)="closeCreateModal()">Cancel</button>
+              <button type="button" class="btn btn-primary" (click)="submitCreate()" [disabled]="savingCreate || !newRole.name.trim()">
+                <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm-1 15-5-5 1.5-1.5L11 13l5.5-5.5L18 9Z" fill="currentColor"/></svg>
                 {{ savingCreate ? 'Creating...' : 'Create role' }}
               </button>
             </div>
@@ -195,7 +200,7 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
       }
     </div>
   `,
-    styles: [`
+  styles: [`
     .role-list-container {
       padding: 2rem;
       max-width: 1400px;
@@ -466,24 +471,26 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
     }
 
     .modal-content {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
+      background: color-mix(in srgb, var(--color-surface) 85%, var(--color-surface-hover) 15%);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
       max-width: 800px;
       width: 100%;
       max-height: 90vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.05);
       color: var(--color-text-primary);
+      backdrop-filter: blur(10px);
     }
 
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--color-border);
+      padding: 1.2rem 1.25rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: relative;
     }
 
     .modal-header h2 {
@@ -498,39 +505,42 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
     }
 
     .btn-close {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      color: var(--color-text-secondary);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      font-size: 1.4rem;
+      color: var(--color-text-primary);
       cursor: pointer;
       padding: 0;
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 6px;
+      border-radius: 10px;
       transition: all 0.2s;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     }
 
     .btn-close:hover {
-      background: var(--color-surface-hover);
-      color: var(--color-text-primary);
+      background: rgba(232,190,20,0.12);
+      color: #E8BE14;
+      transform: translateY(-1px);
     }
 
     .modal-body {
       flex: 1;
       overflow-y: auto;
-      padding: 1.5rem 1.75rem;
+      padding: 1.1rem 1.25rem 1.25rem;
+      background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%);
     }
 
     .modal-footer {
       display: flex;
       justify-content: flex-end;
       gap: 1rem;
-      padding: 1.25rem 1.75rem;
-      border-top: 1px solid var(--color-border);
-      background: var(--color-surface-hover);
+      padding: 0.9rem 1.25rem 1.15rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      background: color-mix(in srgb, var(--color-surface-hover) 40%, transparent);
     }
 
     .btn-secondary {
@@ -543,7 +553,11 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
       background: var(--color-surface-hover);
     }
 
-    .create-modal { max-width: 640px; }
+    .create-modal { max-width: 700px; }
+
+    .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-tertiary); font-size: 12px; margin: 0 0 4px 0; }
+    .btn.ghost { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: var(--color-text-primary); }
+    .btn.ghost:hover { border-color: rgba(232,190,20,0.5); }
 
     .create-form label {
       display: flex;
@@ -552,29 +566,37 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
       color: var(--color-text-primary);
       font-weight: 600;
     }
+    .required { color: #E8BE14; }
+    .pill-count { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 999px; padding: 0.25rem 0.6rem; font-weight: 700; color: var(--color-text-primary); }
 
     .permission-selector {
       margin: 0.5rem 0 0;
-      padding: 0.5rem 0;
-      border-top: 1px solid var(--color-border);
+      padding: 0.65rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      border-radius: 12px;
     }
 
+    .create-form .field { display: flex; flex-direction: column; gap: 0.4rem; }
+    .create-form .field span { font-weight: 700; color: var(--color-text-secondary); }
     .create-form input,
     .create-form textarea {
-      border: 1px solid var(--color-border);
-      border-radius: 10px;
-      padding: 0.75rem 0.9rem;
-      background: var(--color-surface);
+      border: none;
+      border-radius: 12px;
+      padding: 0.8rem 0.95rem;
+      background: #3E2D20;
       color: var(--color-text-primary);
-      box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.12));
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.35);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     }
 
     .create-form input:focus,
     .create-form textarea:focus {
       outline: none;
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent);
+      border: 1px solid rgba(232,190,20,0.6);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.4), 0 0 0 2px rgba(232,190,20,0.25);
+      transform: translateY(-1px);
+      background: #463426;
     }
 
     .create-form textarea { resize: vertical; }
@@ -583,164 +605,164 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 1rem;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
     }
 
-    .hint { color: var(--color-text-secondary); margin: 0.5rem 0 0; font-size: 0.9rem; }
+    .create-form .hint { color: #AB9F95; margin: 0.5rem 0 0; font-size: 0.9rem; }
     .error-text { color: var(--color-error); margin: 0.35rem 0 0; }
   `]
 })
 export class RoleListComponent implements OnInit {
-    roleService = inject(RoleService);
-    private router = inject(Router);
+  roleService = inject(RoleService);
+  private router = inject(Router);
 
-    systemRoles = signal<Role[]>([]);
-    customRoles = signal<Role[]>([]);
+  systemRoles = signal<Role[]>([]);
+  customRoles = signal<Role[]>([]);
 
-    // Permission management state
-    showPermissionDialog = signal(false);
-    selectedRole = signal<Role | null>(null);
-    permissionTree = signal<Permission[]>([]);
-    currentPermissionIds = signal<string[]>([]);
-    tempSelectedIds = signal<string[]>([]);
-    // Create role modal
-    showCreateDialog = signal(false);
-    newRole = { name: '', description: '' };
-    createPermissionIds = signal<string[]>([]);
-    savingCreate = false;
-    createError = '';
+  // Permission management state
+  showPermissionDialog = signal(false);
+  selectedRole = signal<Role | null>(null);
+  permissionTree = signal<Permission[]>([]);
+  currentPermissionIds = signal<string[]>([]);
+  tempSelectedIds = signal<string[]>([]);
+  // Create role modal
+  showCreateDialog = signal(false);
+  newRole = { name: '', description: '' };
+  createPermissionIds = signal<string[]>([]);
+  savingCreate = false;
+  createError = '';
 
-    ngOnInit() {
-        this.loadRoles();
-        this.loadPermissionTree();
+  ngOnInit() {
+    this.loadRoles();
+    this.loadPermissionTree();
+  }
+
+  loadRoles() {
+    this.roleService.getRoles().subscribe({
+      next: (roles) => {
+        this.systemRoles.set(roles.filter(r => r.isSystemRole));
+        this.customRoles.set(roles.filter(r => !r.isSystemRole));
+      }
+    });
+  }
+
+  loadPermissionTree() {
+    this.roleService.getPermissionTree().subscribe({
+      next: (tree) => {
+        this.permissionTree.set(tree);
+      },
+      error: (err) => {
+        console.error('Failed to load permission tree:', err);
+      }
+    });
+  }
+
+  getUniqueResources(role: Role): string[] {
+    const resources = new Set(role.permissions.map(p => p.resource));
+    return Array.from(resources);
+  }
+
+  openCreateModal() {
+    this.createError = '';
+    this.newRole = { name: '', description: '' };
+    this.createPermissionIds.set([]);
+    this.showCreateDialog.set(true);
+  }
+
+  closeCreateModal() {
+    this.showCreateDialog.set(false);
+  }
+
+  submitCreate() {
+    if (!this.newRole.name.trim()) {
+      this.createError = 'Role name is required';
+      return;
     }
+    this.savingCreate = true;
+    this.createError = '';
+    const permissions = this.flattenPermissions(this.permissionTree()).filter(p => this.createPermissionIds().includes(p.id));
 
-    loadRoles() {
-        this.roleService.getRoles().subscribe({
-            next: (roles) => {
-                this.systemRoles.set(roles.filter(r => r.isSystemRole));
-                this.customRoles.set(roles.filter(r => !r.isSystemRole));
-            }
-        });
-    }
-
-    loadPermissionTree() {
-        this.roleService.getPermissionTree().subscribe({
-            next: (tree) => {
-                this.permissionTree.set(tree);
-            },
-            error: (err) => {
-                console.error('Failed to load permission tree:', err);
-            }
-        });
-    }
-
-    getUniqueResources(role: Role): string[] {
-        const resources = new Set(role.permissions.map(p => p.resource));
-        return Array.from(resources);
-    }
-
-    openCreateModal() {
-        this.createError = '';
-        this.newRole = { name: '', description: '' };
-        this.createPermissionIds.set([]);
-        this.showCreateDialog.set(true);
-    }
-
-    closeCreateModal() {
+    this.roleService.createRole({
+      name: this.newRole.name.trim(),
+      description: this.newRole.description.trim(),
+      permissions
+    }).subscribe({
+      next: () => {
+        this.savingCreate = false;
         this.showCreateDialog.set(false);
-    }
+        this.loadRoles();
+      },
+      error: (err) => {
+        this.savingCreate = false;
+        this.createError = err?.error?.message || 'Failed to create role';
+      }
+    });
+  }
 
-    submitCreate() {
-        if (!this.newRole.name.trim()) {
-            this.createError = 'Role name is required';
-            return;
+  private flattenPermissions(tree: Permission[]): Permission[] {
+    const result: Permission[] = [];
+    const walk = (nodes: Permission[]) => {
+      for (const node of nodes) {
+        result.push(node);
+        if ((node as any).children?.length) {
+          walk((node as any).children);
         }
-        this.savingCreate = true;
-        this.createError = '';
-        const permissions = this.flattenPermissions(this.permissionTree()).filter(p => this.createPermissionIds().includes(p.id));
+      }
+    };
+    walk(tree);
+    return result;
+  }
 
-        this.roleService.createRole({
-            name: this.newRole.name.trim(),
-            description: this.newRole.description.trim(),
-            permissions
-        }).subscribe({
-            next: () => {
-                this.savingCreate = false;
-                this.showCreateDialog.set(false);
-                this.loadRoles();
-            },
-            error: (err) => {
-                this.savingCreate = false;
-                this.createError = err?.error?.message || 'Failed to create role';
-            }
-        });
-    }
+  viewRole(id: string) {
+    this.router.navigate(['/setup/roles', id]);
+  }
 
-    private flattenPermissions(tree: Permission[]): Permission[] {
-        const result: Permission[] = [];
-        const walk = (nodes: Permission[]) => {
-            for (const node of nodes) {
-                result.push(node);
-                if ((node as any).children?.length) {
-                    walk((node as any).children);
-                }
-            }
-        };
-        walk(tree);
-        return result;
-    }
+  editRole(id: string) {
+    this.router.navigate(['/setup/roles', id, 'edit']);
+  }
 
-    viewRole(id: string) {
-        this.router.navigate(['/setup/roles', id]);
-    }
-
-    editRole(id: string) {
-        this.router.navigate(['/setup/roles', id, 'edit']);
-    }
-
-    deleteRole(role: Role) {
-        if (confirm(`Are you sure you want to delete the role "${role.name}"?\n\nThis action cannot be undone.`)) {
-            this.roleService.deleteRole(role.id).subscribe({
-                next: () => {
-                    // Role already removed from signal by service
-                },
-                error: (err) => {
-                    alert(`Failed to delete role: ${err.message}`);
-                }
-            });
+  deleteRole(role: Role) {
+    if (confirm(`Are you sure you want to delete the role "${role.name}"?\n\nThis action cannot be undone.`)) {
+      this.roleService.deleteRole(role.id).subscribe({
+        next: () => {
+          // Role already removed from signal by service
+        },
+        error: (err) => {
+          alert(`Failed to delete role: ${err.message}`);
         }
+      });
     }
+  }
 
-    managePermissions(role: Role) {
-        this.selectedRole.set(role);
-        this.currentPermissionIds.set(role.permissions.map(p => p.id));
-        this.tempSelectedIds.set(role.permissions.map(p => p.id));
-        this.showPermissionDialog.set(true);
-    }
+  managePermissions(role: Role) {
+    this.selectedRole.set(role);
+    this.currentPermissionIds.set(role.permissions.map(p => p.id));
+    this.tempSelectedIds.set(role.permissions.map(p => p.id));
+    this.showPermissionDialog.set(true);
+  }
 
-    closePermissionDialog() {
-        this.showPermissionDialog.set(false);
-        this.selectedRole.set(null);
-        this.tempSelectedIds.set([]);
-    }
+  closePermissionDialog() {
+    this.showPermissionDialog.set(false);
+    this.selectedRole.set(null);
+    this.tempSelectedIds.set([]);
+  }
 
-    onPermissionSelectionChange(selectedIds: string[]) {
-        this.tempSelectedIds.set(selectedIds);
-    }
+  onPermissionSelectionChange(selectedIds: string[]) {
+    this.tempSelectedIds.set(selectedIds);
+  }
 
-    savePermissions() {
-        const role = this.selectedRole();
-        if (!role) return;
+  savePermissions() {
+    const role = this.selectedRole();
+    if (!role) return;
 
-        this.roleService.addPermissionsToRole(role.id, this.tempSelectedIds()).subscribe({
-            next: () => {
-                this.closePermissionDialog();
-                this.loadRoles(); // Reload to get updated permissions
-            },
-            error: (err) => {
-                alert(`Failed to update permissions: ${err.message}`);
-            }
-        });
-    }
+    this.roleService.addPermissionsToRole(role.id, this.tempSelectedIds()).subscribe({
+      next: () => {
+        this.closePermissionDialog();
+        this.loadRoles(); // Reload to get updated permissions
+      },
+      error: (err) => {
+        alert(`Failed to update permissions: ${err.message}`);
+      }
+    });
+  }
 }
