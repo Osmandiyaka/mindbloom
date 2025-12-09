@@ -376,8 +376,55 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
               <h2>Plugins</h2>
               <p class="subtitle">Manage installed extensions or browse the marketplace.</p>
             </div>
-            <div class="actions">
+          </div>
+          <div class="card plugin-filter-card">
+            <div class="filter-row">
+              <app-search-input
+                class="plugin-search"
+                placeholder="Search plugins..."
+                (search)="onPluginSearch($event)" />
+              <div class="filters">
+                <button
+                  *ngFor="let cat of pluginCategories"
+                  class="chip filter-chip"
+                  [class.active]="cat === activePluginCategory()"
+                  (click)="setPluginCategory(cat)">
+                  {{ cat | titlecase }}
+                </button>
+              </div>
               <a routerLink="/setup/marketplace" class="btn ghost">Open Marketplace</a>
+            </div>
+          </div>
+          <div class="plugin-grid">
+            <div
+              class="plugin-card glass"
+              *ngFor="let plugin of filteredPlugins()"
+              [class.error]="plugin.status === 'error'"
+              [class.installed]="plugin.status === 'installed'">
+              <div class="plugin-top">
+                <div class="icon-wrap">
+                  <svg viewBox="0 0 24 24"><path d="M12 2 3 7v10l9 5 9-5V7l-9-5Zm0 2.18 6 3.33v2.86l-6 3.33-6-3.33V7.51l6-3.33Zm-6 8.3 6 3.33 6-3.33v2.8l-6 3.34-6-3.34v-2.8Z" fill="currentColor"/></svg>
+                </div>
+                <div class="title-block">
+                  <h3>{{ plugin.name }}</h3>
+                  <p class="muted tiny">{{ plugin.description }}</p>
+                </div>
+                <span *ngIf="plugin.status === 'installed'" class="status-pill small success">Installed</span>
+                <span *ngIf="plugin.status === 'update'" class="status-pill small info">Update</span>
+                <span *ngIf="plugin.status === 'error'" class="status-pill small danger">Error</span>
+              </div>
+              <div class="meta">
+                <span class="tag">v{{ plugin.version }}</span>
+                <span class="tag">{{ plugin.developer }}</span>
+              </div>
+              <div class="plugin-actions">
+                <button
+                  class="btn"
+                  [ngClass]="pluginActionClass(plugin.status)"
+                  type="button">
+                  {{ pluginActionLabel(plugin.status) }}
+                </button>
+              </div>
             </div>
           </div>
           <div class="card padded plugin-card">
@@ -546,6 +593,27 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .panel.users-panel { background: transparent; border: none; border-radius: 16px; padding: 0; box-shadow: none; }
     .billing-panel { background: transparent; border: none; border-radius: 16px; padding: 0; box-shadow: none; }
     .plugins-panel { max-width: 1100px; gap: 0.5rem; }
+    .plugin-filter-card { padding: 0.85rem 1rem; border-radius: 14px; background: color-mix(in srgb, var(--color-surface) 92%, var(--color-surface-hover) 8%); box-shadow: 0 14px 30px rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.08); }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; justify-content: space-between; }
+    .plugin-search { min-width: 260px; flex: 1; }
+    .filters { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .filter-chip { background: transparent; border: 1px solid rgba(232,190,20,0.4); color: var(--color-text-primary); padding: 6px 10px; border-radius: 999px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
+    .filter-chip.active { background: rgba(232,190,20,0.2); border-color: rgba(232,190,20,0.7); box-shadow: 0 6px 14px rgba(232,190,20,0.25); }
+    .plugin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+    .plugin-card { padding: 1rem; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); background: color-mix(in srgb, var(--color-surface) 90%, var(--color-surface-hover) 10%); box-shadow: 0 12px 28px rgba(0,0,0,0.18); display: flex; flex-direction: column; gap: 0.6rem; transition: transform 0.15s ease, box-shadow 0.2s ease; }
+    .plugin-card:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(0,0,0,0.22); }
+    .plugin-card.glass { border-bottom: 2px solid rgba(232,190,20,0.45); }
+    .plugin-card.error { border: 1px solid rgba(231,76,60,0.5); box-shadow: 0 12px 28px rgba(231,76,60,0.15); }
+    .plugin-card.installed { border-bottom-color: rgba(34,197,94,0.6); }
+    .plugin-top { display: grid; grid-template-columns: auto 1fr auto; gap: 0.65rem; align-items: start; }
+    .icon-wrap { width: 36px; height: 36px; border-radius: 12px; background: rgba(112,198,225,0.18); color: #70C6E1; display: grid; place-items: center; box-shadow: 0 0 0 2px rgba(112,198,225,0.2), 0 0 12px rgba(112,198,225,0.35); }
+    .icon-wrap svg { width: 20px; height: 20px; }
+    .title-block h3 { margin: 0; color: #fff; font-size: 1.05rem; letter-spacing: -0.01em; }
+    .title-block p { margin: 4px 0 0 0; }
+    .meta { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .meta .tag { font-family: SFMono-Regular, Consolas, 'Liberation Mono', monospace; color: var(--color-text-tertiary); font-size: 0.82rem; padding: 4px 8px; border-radius: 8px; background: rgba(255,255,255,0.05); }
+    .plugin-actions { display: flex; justify-content: flex-end; margin-top: auto; }
+    .btn.cyan { border: 1px solid rgba(112,198,225,0.7); color: #70C6E1; background: transparent; }
     .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0 0.35rem; }
     .panel-header.stacked { flex-direction: column; align-items: stretch; }
     .panel-header.slim { margin-bottom: 0.25rem; padding: 0 0.35rem; }
@@ -618,6 +686,8 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .status-pill.sent { color: #0ea5e9; border-color: rgba(14,165,233,0.35); background: rgba(14,165,233,0.12); }
     .status-pill.revoked { color: rgba(231,76,60,0.8); border-color: rgba(231,76,60,0.25); background: rgba(231,76,60,0.1); text-decoration: line-through; }
     .status-pill.expired { color: #a855f7; border-color: rgba(168,85,247,0.35); background: rgba(168,85,247,0.12); }
+    .status-pill.small { font-size: 0.72rem; padding: 4px 8px; }
+    .status-pill.info { color: #70C6E1; border-color: rgba(112,198,225,0.45); background: rgba(112,198,225,0.12); }
     .expiry { display: flex; flex-direction: column; gap: 4px; }
     .expiry-track { width: 100%; height: 6px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
     .expiry-fill { display: block; height: 100%; background: linear-gradient(90deg, #22c55e, #e8be14); transition: width 0.4s ease; }
@@ -910,6 +980,9 @@ export class TenantSettingsComponent implements OnInit {
   selectedUserIds = signal<Set<string>>(new Set());
   selectAllUsers = signal(false);
   userSearch = signal('');
+  pluginSearch = signal('');
+  pluginCategories = ['all', 'utilities', 'ai', 'data'];
+  activePluginCategory = signal('all');
   showPermissionModal = signal(false);
   selectedPermissionIds = signal<string[]>([]);
 
@@ -1027,6 +1100,14 @@ export class TenantSettingsComponent implements OnInit {
     return [this.templates.rollPrefix, `${classSection}-${seq}`].filter(Boolean).join('').replace('--', '-');
   }
 
+  plugins = [
+    { name: 'Analytics Suite', description: 'Deep insights and dashboards for your data.', status: 'installed', version: '2.4.1', developer: 'Mindbloom Labs', category: 'data' },
+    { name: 'AI Assistant', description: 'Answer questions and draft content with AI.', status: 'update', version: '1.9.0', developer: 'Mindbloom AI', category: 'ai' },
+    { name: 'Webhooks', description: 'Trigger external workflows on key events.', status: 'available', version: '1.2.3', developer: 'Core Team', category: 'utilities' },
+    { name: 'Backup Guard', description: 'Secure, scheduled backups with restore points.', status: 'installed', version: '3.1.0', developer: 'Core Team', category: 'utilities' },
+    { name: 'Data Bridge', description: 'Sync data between systems with reliability.', status: 'error', version: '0.9.8', developer: 'Integrations', category: 'data' },
+  ];
+
   reset(): void {
     this.load();
   }
@@ -1096,6 +1177,16 @@ export class TenantSettingsComponent implements OnInit {
         this.success.set('Invitation revoked');
       },
       error: (err) => this.error.set(err.error?.message || 'Failed to revoke invite')
+    });
+  }
+
+  filteredPlugins() {
+    const term = this.pluginSearch().toLowerCase().trim();
+    const category = this.activePluginCategory();
+    return this.plugins.filter(p => {
+      const matchesTerm = !term || p.name.toLowerCase().includes(term) || p.description.toLowerCase().includes(term);
+      const matchesCat = category === 'all' || p.category === category;
+      return matchesTerm && matchesCat;
     });
   }
 
@@ -1387,5 +1478,27 @@ export class TenantSettingsComponent implements OnInit {
 
   onUserSearch(term: string): void {
     this.userSearch.set(term);
+  }
+
+  onPluginSearch(term: string): void {
+    this.pluginSearch.set(term);
+  }
+
+  setPluginCategory(cat: string): void {
+    this.activePluginCategory.set(cat);
+  }
+
+  pluginActionLabel(status: string): string {
+    if (status === 'installed') return 'Configure';
+    if (status === 'update') return 'Update';
+    if (status === 'error') return 'Remove';
+    return 'Install';
+  }
+
+  pluginActionClass(status: string): string {
+    if (status === 'installed') return 'ghost cyan';
+    if (status === 'update') return 'primary';
+    if (status === 'error') return 'ghost danger';
+    return 'primary';
   }
 }
