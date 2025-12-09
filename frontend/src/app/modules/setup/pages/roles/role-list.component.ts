@@ -18,8 +18,11 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
           <h1>Roles & Permissions</h1>
           <p class="subtitle">Manage user roles and access control</p>
         </div>
-        <button class="btn btn-primary" (click)="openCreateModal()">
-          <span class="icon">➕</span>
+        <button class="btn btn-primary create-role-btn" (click)="openCreateModal()">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2 4 6v6c0 5 4 8.5 8 10 4-1.5 8-5 8-10V6l-8-4Z" fill="currentColor" opacity="0.85"/>
+            <path d="M12 7v4m0 0v4m0-4h4m-4 0H8" stroke="#0f0f12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
           Create Custom Role
         </button>
       </div>
@@ -245,15 +248,15 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
-      color: var(--color-background, #0f172a);
+      background: linear-gradient(135deg, #E8BE14, #C98A0A);
+      color: #0f0f12;
       border: none;
-      box-shadow: var(--shadow-md, 0 8px 20px rgba(0,0,0,0.22));
+      box-shadow: 0 14px 28px rgba(232,190,20,0.35);
     }
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: var(--shadow-md, 0 8px 20px rgba(0,0,0,0.28));
+      box-shadow: 0 16px 32px rgba(232,190,20,0.45);
     }
 
     .loading-state {
@@ -554,6 +557,9 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
 
     .create-modal { max-width: 700px; }
     .themed-title { color: var(--color-text-primary); }
+    .create-role-btn { padding: 0.8rem 1.6rem; border-radius: 14px; font-weight: 700; letter-spacing: 0.01em; gap: 0.6rem; }
+    .create-role-btn svg { width: 20px; height: 20px; }
+    .create-role-btn:active { transform: translateY(1px); box-shadow: 0 10px 18px rgba(232,190,20,0.3); }
 
     .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-tertiary); font-size: 12px; margin: 0 0 4px 0; }
     .btn.ghost { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: var(--color-text-primary); }
