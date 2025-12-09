@@ -45,28 +45,6 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
           </div>
           <div class="card invites-card tight users-card">
             <div class="card-body toolbar">
-              <div class="selection-toolbar" [class.active]="selectedUserIds().size">
-                <span class="selected-count" *ngIf="selectedUserIds().size">{{ selectedUserIds().size }} selected</span>
-                <div class="actions left-actions">
-                  <button class="btn ghost small danger" [disabled]="!selectedUserIds().size" (click)="bulkDelete()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M3 6h18" />
-                      <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" />
-                      <path d="M10 10v6" />
-                      <path d="M14 10v6" />
-                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                    </svg>
-                    Bulk Delete
-                  </button>
-                  <button class="btn primary small" [disabled]="!selectedUserIds().size" (click)="openPermissionModal()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
-                      <path d="m9 12 2 2 4-4" />
-                    </svg>
-                    Assign Permissions
-                  </button>
-                </div>
-              </div>
               <div class="actions right">
                 <app-search-input
                   class="users-search"
@@ -107,7 +85,12 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
                   </tr>
                 </tbody>
               </table>
-              <p *ngIf="!users().length" class="muted">No users yet.</p>
+              <div *ngIf="!users().length" class="empty-state">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-3 0-6 1.34-6 4v2h12v-2c0-2.66-3-4-6-4Z" fill="currentColor"/>
+                </svg>
+                <p class="muted">No users yet. <strong>Add your first user above.</strong></p>
+              </div>
             </div>
           </div>
           <div class="card invites-card tight">
@@ -469,7 +452,7 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .btn.ghost { background: transparent; border-color: color-mix(in srgb, var(--color-border) 40%, transparent); box-shadow: none; }
     .btn.primary { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: #fff; border: none; box-shadow: 0 12px 28px rgba(var(--color-primary-rgb, 123, 140, 255), 0.3); }
     .btn:hover { transform: translateY(-1px); box-shadow: 0 14px 28px rgba(0,0,0,0.16); }
-    .btn:active { transform: translateY(0); }
+    .btn:active { transform: translateY(1px); box-shadow: 0 8px 16px rgba(0,0,0,0.12); }
     .btn.emphasized { padding: 0.7rem 1.4rem; box-shadow: 0 14px 30px rgba(var(--color-primary-rgb,123,140,255),0.28); }
     .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap: 1.5rem; }
     .card { background: color-mix(in srgb, var(--color-surface) 88%, var(--color-surface-hover) 12%); border: none; border-radius: 18px; box-shadow: 0 16px 38px rgba(0,0,0,0.16); display: flex; flex-direction: column; }
@@ -493,12 +476,14 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0 0.35rem; }
     .panel-header.stacked { flex-direction: column; align-items: stretch; }
     .panel-header.slim { margin-bottom: 0.25rem; padding: 0 0.35rem; }
+    .panel-header + .invite-card,
+    .panel-header + .users-card { margin-top: 1rem; }
     .panel-header.spaced { padding: 0 0.35rem; }
     .panel-header.padded { padding: 0 0.35rem; }
     .panel-header.users-header { background: transparent; border: none; border-radius: 12px; padding: 0.9rem 0.25rem; box-shadow: none; }
     .invite-card { background: color-mix(in srgb, var(--color-surface) 65%, transparent); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1rem; box-shadow: 0 20px 40px rgba(0,0,0,0.22); display: flex; flex-direction: column; gap: 0.75rem; backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.1); }
     .invite-card.flat { box-shadow: none; border-radius: 12px; border-color: transparent; }
-    .invite-row { display: flex; align-items: center; gap: 0.4rem; background: rgba(0,0,0,0.24); padding: 0.5rem; border-radius: 14px; border: none; box-shadow: none; }
+    .invite-row { display: flex; align-items: center; gap: 0.4rem; background: rgba(0,0,0,0.24); padding: 0.5rem; border-radius: 14px; border: none; box-shadow: none; margin-bottom: 1rem; }
     .invite-row.compact { margin-bottom: 0.25rem; }
     .invite-row.capsule {
       gap: 0.4rem;
@@ -506,6 +491,7 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
       border-radius: 999px;
       padding: 0.35rem 0.5rem;
       border: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(232,190,20,0.4);
       align-items: center;
       box-shadow: none;
     }
@@ -531,12 +517,13 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
       background-position: 14px center;
     }
     .invite-input:focus {
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 1px rgba(var(--color-primary-rgb,232,190,20),0.3), 0 0 10px rgba(var(--color-primary-rgb,232,190,20),0.2);
+      border-color: #70C6E1;
+      box-shadow: 0 0 0 1px rgba(112,198,225,0.4), 0 0 10px rgba(112,198,225,0.3);
     }
     .invite-roles { min-width: 190px; height: 42px; display: flex; align-items: center; border: none; border-radius: 12px; padding: 0; background: transparent; color: var(--color-text-secondary); position: relative; }
     .invite-submit { height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0.55rem 1rem; color: var(--color-surface, #0f0f12); background: linear-gradient(135deg, #E8BE14 0%, #BF9532 100%); box-shadow: 0 4px 12px rgba(232,190,20,0.4); border: none; font-weight: 700; letter-spacing: 0.5px; border-radius: 999px; margin-left: 0.5rem; }
     .invite-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(232,190,20,0.6); }
+    .invite-submit:active { transform: translateY(1px); box-shadow: 0 3px 8px rgba(232,190,20,0.35); }
     .users-search { min-width: 220px; }
     :host ::ng-deep .users-search .search-field {
       background: color-mix(in srgb, var(--color-surface) 85%, transparent);
@@ -548,7 +535,8 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     :host ::ng-deep .users-search .search-field input { color: var(--color-text-primary); background: transparent; }
     :host ::ng-deep .users-search .search-field .icon { color: #70C6E1; }
     .selected-roles { display: flex; gap: 6px; flex-wrap: wrap; background: rgba(0,0,0,0.1); padding: 0.3rem 0.5rem; border-radius: 10px; }
-    .selected-roles .chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 5px 9px; border-radius: 999px; border: none; font-weight: 700; box-shadow: 0 10px 20px rgba(16,185,129,0.18); }
+    .selected-roles .chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); color: var(--color-primary); padding: 5px 9px; border-radius: 999px; border: none; font-weight: 700; box-shadow: 0 10px 20px rgba(16,185,129,0.18); transition: box-shadow 0.2s ease, transform 0.2s ease; }
+    .selected-roles .chip:hover { box-shadow: 0 0 12px rgba(232,190,20,0.35); transform: translateY(-1px); }
     .selected-roles .chip svg { width: 14px; height: 14px; }
     .role-stack { display: flex; flex-wrap: wrap; gap: 6px; }
     .role-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); }
@@ -577,6 +565,7 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .table tbody tr:hover { background: linear-gradient(90deg, transparent, rgba(232,190,20,0.06), transparent); box-shadow: 0 8px 18px rgba(0,0,0,0.18); }
     .table.invites th, .table.invites td { padding: 0.45rem 0.65rem; line-height: 1.2; vertical-align: middle; }
     .table.invites th:last-child, .table.invites td:last-child { text-align: right; }
+    .table td.actions { text-align: right; }
     .table.invites td.email-cell { display: flex; align-items: center; gap: 0.4rem; }
     .table.invites td.email-cell svg { width: 18px; height: 18px; flex-shrink: 0; }
     .expiry-date { font-size: 0.85rem; }
@@ -586,7 +575,10 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .email-block .email { font-weight: 600; color: #fff; }
     .mono { font-family: SFMono-Regular, Consolas, 'Liberation Mono', monospace; }
     .tiny { font-size: 12px; }
-    .table input[type="checkbox"] { accent-color: var(--color-primary); }
+    .table input[type="checkbox"] { appearance: none; width: 16px; height: 16px; border: 2px solid rgba(232,190,20,0.7); border-radius: 4px; background: color-mix(in srgb, var(--color-surface) 85%, transparent); cursor: pointer; display: inline-grid; place-items: center; transition: all 0.15s ease; position: relative; }
+    .table input[type="checkbox"]:checked { background: #E8BE14; border-color: #E8BE14; }
+    .table input[type="checkbox"]::after { content: ''; width: 8px; height: 8px; border-bottom: 2px solid #E8BE14; border-right: 2px solid #E8BE14; rotate: 45deg; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); transform-origin: center; transition: transform 0.15s ease; }
+    .table input[type="checkbox"]:checked::after { transform: translate(-50%, -50%) scale(1); }
     .mini-btn { display: inline-flex; align-items: center; gap: 6px; padding: 0.35rem 0.6rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: var(--color-text-primary); cursor: pointer; transition: transform 0.12s ease, box-shadow 0.2s ease; font-weight: 700; }
     .mini-btn svg { width: 16px; height: 16px; }
     .mini-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,0,0,0.18); }
@@ -707,9 +699,6 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .users-card { position: relative; z-index: 5; }
     .users-card .card-body { padding-top: 0.5rem; }
     .users-card .card-body.toolbar { background: color-mix(in srgb, var(--color-surface-hover) 60%, transparent); border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius: 12px; }
-    .selection-toolbar { display: flex; align-items: center; gap: 0.65rem; flex: 1; opacity: 0; max-height: 0; overflow: hidden; pointer-events: none; transform: translateY(6px); transition: all 0.25s ease; }
-    .selection-toolbar.active .selected-count { animation: pulse-highlight 0.4s ease; background: rgba(232,190,20,0.15); padding: 0.2rem 0.4rem; border-radius: 8px; }
-    .selection-toolbar.active { opacity: 1; max-height: 80px; pointer-events: auto; transform: translateY(0); }
     @keyframes pulse-highlight {
       0% { transform: scale(0.98); box-shadow: 0 0 0 0 rgba(232,190,20,0.35); }
       60% { transform: scale(1.02); box-shadow: 0 0 0 6px rgba(232,190,20,0); }
