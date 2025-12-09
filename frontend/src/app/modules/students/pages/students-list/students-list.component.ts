@@ -24,6 +24,18 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
         <app-breadcrumbs [items]="crumbs"></app-breadcrumbs>
       }
 
+      <div class="command-strip">
+        <div class="command-tabs">
+          <button *ngFor="let tab of commandTabs"
+                  type="button"
+                  class="command-tab"
+                  [class.active]="tab.active">
+            {{ tab.label }}
+          </button>
+        </div>
+        <div class="accent-line"></div>
+      </div>
+
       <div class="toolbar">
         <div class="toolbar-left">
           <app-search-input class="search-inline" placeholder="Search students..." (search)="onSearch($event)"></app-search-input>
@@ -253,6 +265,13 @@ export class StudentsListComponent implements OnInit {
   modalOpen = signal(false);
   crumbs: Crumb[] = [
     { label: 'Roster' }
+  ];
+  commandTabs = [
+    { label: 'Roster', active: true },
+    { label: 'Admission', active: false },
+    { label: 'Attendance', active: false },
+    { label: 'Reports', active: false },
+    { label: 'Notes', active: false },
   ];
 
   constructor(
