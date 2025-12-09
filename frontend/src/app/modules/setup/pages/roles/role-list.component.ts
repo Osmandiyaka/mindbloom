@@ -159,8 +159,7 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
             <div class="modal-header">
               <div>
                 <p class="eyebrow">Security</p>
-                <h2>Create Custom Role</h2>
-                <p class="modal-subtitle">Define a role name and optional description.</p>
+                <h2 class="themed-title">Create Custom Role</h2>
               </div>
               <button type="button" class="btn-close" (click)="closeCreateModal()">×</button>
             </div>
@@ -554,6 +553,7 @@ import { PermissionTreeSelectorComponent } from '../../../../shared/components/p
     }
 
     .create-modal { max-width: 700px; }
+    .themed-title { color: var(--color-text-primary); }
 
     .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-tertiary); font-size: 12px; margin: 0 0 4px 0; }
     .btn.ghost { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: var(--color-text-primary); }
