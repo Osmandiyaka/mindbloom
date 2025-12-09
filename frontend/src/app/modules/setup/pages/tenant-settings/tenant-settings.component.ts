@@ -415,11 +415,20 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
               <div class="meta">
                 <span class="tag">v{{ plugin.version }}</span>
                 <span class="tag">{{ plugin.developer }}</span>
+                <span class="tag" *ngIf="plugin.dependency">Requires: {{ plugin.dependency }}</span>
+              </div>
+              <div class="stats-row">
+                <span class="stars">
+                  <svg viewBox="0 0 24 24"><path d="m12 17-5.09 2.67 1-5.84-4.24-4.13 5.88-.86L12 3l2.45 5.84 5.88.86-4.24 4.13 1 5.84z" fill="#E8BE14"/></svg>
+                  <span>{{ plugin.rating }}</span>
+                </span>
+                <span class="installs mono">{{ plugin.installs }} installs</span>
               </div>
               <div class="plugin-actions">
                 <button
                   class="btn"
                   [ngClass]="pluginActionClass(plugin.status)"
+                  [class.ready]="plugin.status === 'installed'"
                   type="button">
                   {{ pluginActionLabel(plugin.status) }}
                 </button>
@@ -613,9 +622,15 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .title-block p { margin: 4px 0 0 0; }
     .meta { display: flex; gap: 0.5rem; flex-wrap: wrap; }
     .meta .tag { font-family: SFMono-Regular, Consolas, 'Liberation Mono', monospace; color: var(--color-text-tertiary); font-size: 0.82rem; padding: 4px 8px; border-radius: 8px; background: rgba(255,255,255,0.05); }
+    .stats-row { display: flex; justify-content: space-between; align-items: center; color: var(--color-text-secondary); font-size: 0.85rem; }
+    .stars { display: inline-flex; align-items: center; gap: 4px; color: #E8BE14; font-weight: 700; }
+    .stars svg { width: 16px; height: 16px; }
+    .installs { color: var(--color-text-tertiary); }
     .plugin-actions { display: flex; justify-content: flex-end; margin-top: auto; }
     .btn.cyan { border: 1px solid rgba(112,198,225,0.7); color: #70C6E1; background: transparent; }
     .plugin-actions .btn:active { transform: translateY(1px); box-shadow: none; }
+    .plugin-actions .btn.ready { animation: ready-pulse 1.1s ease; }
+    @keyframes ready-pulse { 0% { box-shadow: 0 0 0 0 rgba(112,198,225,0.35);} 70% { box-shadow: 0 0 0 8px rgba(112,198,225,0);} 100% { box-shadow: none; } }
     .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0 0.35rem; }
     .panel-header.stacked { flex-direction: column; align-items: stretch; }
     .panel-header.slim { margin-bottom: 0.25rem; padding: 0 0.35rem; }
@@ -848,6 +863,25 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
     .align-right { text-align: right; }
     .download-btn { transition: transform 0.12s ease, background 0.15s ease; }
     .download-btn:hover { background: rgba(112,198,225,0.12); transform: translateY(1px); }
+    /* Themed scrollbars */
+    .plugins-panel::-webkit-scrollbar,
+    .plugin-grid::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    .plugins-panel::-webkit-scrollbar-track,
+    .plugin-grid::-webkit-scrollbar-track {
+      background: color-mix(in srgb, var(--color-surface) 92%, var(--color-surface-hover) 8%);
+      border-radius: 999px;
+    }
+    .plugins-panel::-webkit-scrollbar-thumb,
+    .plugin-grid::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, rgba(232,190,20,0.7), rgba(112,198,225,0.7));
+      border-radius: 999px;
+      border: 2px solid color-mix(in srgb, var(--color-surface) 85%, var(--color-surface-hover) 15%);
+    }
+    .plugins-panel::-webkit-scrollbar-thumb:hover,
+    .plugin-grid::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, rgba(232,190,20,0.9), rgba(112,198,225,0.9)); }
     .invites-card {
       width: 100%;
       margin-top: 0;
@@ -1103,11 +1137,11 @@ export class TenantSettingsComponent implements OnInit {
   }
 
   plugins = [
-    { name: 'Analytics Suite', description: 'Deep insights and dashboards for your data.', status: 'installed', version: '2.4.1', developer: 'Mindbloom Labs', category: 'data' },
-    { name: 'AI Assistant', description: 'Answer questions and draft content with AI.', status: 'update', version: '1.9.0', developer: 'Mindbloom AI', category: 'ai' },
-    { name: 'Webhooks', description: 'Trigger external workflows on key events.', status: 'available', version: '1.2.3', developer: 'Core Team', category: 'utilities' },
-    { name: 'Backup Guard', description: 'Secure, scheduled backups with restore points.', status: 'installed', version: '3.1.0', developer: 'Core Team', category: 'utilities' },
-    { name: 'Data Bridge', description: 'Sync data between systems with reliability.', status: 'error', version: '0.9.8', developer: 'Integrations', category: 'data' },
+    { name: 'Analytics Suite', description: 'Deep insights and dashboards for your data.', status: 'installed', version: '2.4.1', developer: 'Mindbloom Labs', category: 'data', rating: '4.7', installs: '1.2k', dependency: '' },
+    { name: 'AI Assistant', description: 'Answer questions and draft content with AI.', status: 'update', version: '1.9.0', developer: 'Mindbloom AI', category: 'ai', rating: '4.6', installs: '900', dependency: 'Analytics Suite' },
+    { name: 'Webhooks', description: 'Trigger external workflows on key events.', status: 'available', version: '1.2.3', developer: 'Core Team', category: 'utilities', rating: '4.3', installs: '1.6k', dependency: '' },
+    { name: 'Backup Guard', description: 'Secure, scheduled backups with restore points.', status: 'installed', version: '3.1.0', developer: 'Core Team', category: 'utilities', rating: '4.9', installs: '2.1k', dependency: '' },
+    { name: 'Data Bridge', description: 'Sync data between systems with reliability.', status: 'error', version: '0.9.8', developer: 'Integrations', category: 'data', rating: '4.1', installs: '400', dependency: 'Database Connector' },
   ];
 
   reset(): void {
