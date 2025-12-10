@@ -23,7 +23,9 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
         />
         <app-task-sticky />
         <main class="main-content">
-          <router-outlet />
+          <div class="main-shell">
+            <router-outlet />
+          </div>
         </main>
       </div>
     </div>
@@ -82,22 +84,19 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       min-height: 0;
       min-width: 0;
       overflow-y: auto;
-      padding: clamp(1rem, 2vw, 1.5rem);
-      padding-top: clamp(0.85rem, 1.5vw, 1.25rem);
+      padding: 0;
       width: 100%;
       background: var(--content-background, var(--color-background, #12141b));
       background-color: var(--content-background, var(--color-background, #12141b));
       z-index: 1;
+    }
 
-      @media (max-width: 1024px) {
-        padding: 1.25rem;
-        padding-top: 1rem;
-      }
-
-      @media (max-width: 768px) {
-        padding: 1rem;
-        padding-top: 0.85rem;
-      }
+    .main-shell {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: clamp(1rem, 2vw, 1.5rem) clamp(1rem, 3vw, 2rem);
+      padding-top: clamp(0.85rem, 1.5vw, 1.25rem);
     }
 
     @media (max-width: 1024px) {
