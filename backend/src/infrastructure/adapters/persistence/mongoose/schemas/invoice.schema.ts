@@ -1,8 +1,28 @@
-import { Schema } from 'mongoose';
+import { Schema, Document, Types } from 'mongoose';
+
+export interface InvoiceDocument extends Document {
+    tenantId: string;
+    studentId: Types.ObjectId;
+    studentName: string;
+    planId: Types.ObjectId;
+    planName?: string;
+    dueDate: Date;
+    issuedDate: Date;
+    amount: number;
+    paidAmount: number;
+    currency: string;
+    status: string;
+    reference?: string;
+    notes?: string;
+    lastPaymentAt?: Date;
+    createdAt: Date;
+    updatedAt: Date;
+    balance?: number;
+}
 
 export const InvoiceSchema = new Schema(
     {
-        tenantId: { type: String, index: true },
+        tenantId: { type: String, index: true, required: true },
         studentId: { type: Schema.Types.ObjectId, ref: 'Student', index: true },
         studentName: { type: String, required: true },
         planId: { type: Schema.Types.ObjectId, ref: 'FeePlan', required: true },

@@ -1,36 +1,81 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
-import { InvoicesService } from './invoices.service';
-import { CreateInvoiceDto } from './dto/create-invoice.dto';
-import { RecordPaymentDto } from './dto/record-payment.dto';
+import { Body, Controller, Get, Param, Post, Query, UseGuards, ValidationPipe, UsePipes } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { TenantGuard } from '../../common/tenant/tenant.guard';
+import { TenantContext } from '../../common/tenant/tenant.context';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CreateInvoiceUseCase } from '../../application/services/fees/create-invoice.use-case';
+import { ListInvoicesUseCase } from '../../application/services/fees/list-invoices.use-case';
+import { RecordPaymentUseCase } from '../../application/services/fees/record-payment.use-case';
+import { CreateInvoiceDto } from '../../presentation/dtos/requests/fees/create-invoice.dto';
+import { RecordPaymentDto } from '../../presentation/dtos/requests/fees/record-payment.dto';
+import { FeeInvoice } from '../../domain/fees/entities/fee-invoice.entity';
+import { FeePayment } from '../../domain/fees/entities/fee-payment.entity';
 
+@ApiTags('fees')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, TenantGuard)
 @Controller('fees/invoices')
 export class InvoicesController {
-    constructor(private readonly invoicesService: InvoicesService) {}
+  constructor(
+    private readonly createInvoice: CreateInvoiceUseCase,
+    private readonly listInvoices: ListInvoicesUseCase,
+    private readonly recordPayment: RecordPaymentUseCase,
+    private readonly tenantContext: TenantContext,
+  ) {}
 
-    @Get()
-    findAll(@Query() query: any) {
-        return this.invoicesService.findAll(query);
-    }
+  @Get()
+  @ApiOperation({ summary: 'List invoices (tenant scoped)' })
+  async findAll(@Query() query: any): Promise<FeeInvoice[]> {
+    const tenantId = this.tenantContext.tenantId;
+    return this.listInvoices.execute(tenantId, {
+      studentId: query.studentId,
+      status: query.status,
+      dueFrom: query.dueFrom ? new Date(query.dueFrom) : undefined,
+      dueTo: query.dueTo ? new Date(query.dueTo) : undefined,
+    });
+  }
 
-    @Post()
-    @UsePipes(new ValidationPipe({ transform: true }))
-    create(@Body() dto: CreateInvoiceDto) {
-        return this.invoicesService.create(dto);
-    }
+  @Post()
+  @ApiOperation({ summary: 'Create invoice for a student' })
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async create(@Body() dto: CreateInvoiceDto): Promise<FeeInvoice> {
+    const tenantId = this.tenantContext.tenantId;
+    return this.createInvoice.execute({
+      tenantId,
+      studentId: dto.studentId,
+      studentName: dto.studentName,
+      planId: dto.planId,
+      planName: dto.planName,
+      amount: dto.amount,
+      currency: dto.currency,
+      dueDate: new Date(dto.dueDate),
+      issuedDate: dto.issuedDate ? new Date(dto.issuedDate) : undefined,
+      status: dto.status,
+      reference: dto.reference,
+      notes: dto.notes,
+    });
+  }
 
-    @Get(':id')
-    getById(@Param('id') id: string) {
-        return this.invoicesService.getById(id);
-    }
-
-    @Get(':id/payments')
-    getPayments(@Param('id') id: string) {
-        return this.invoicesService.getPayments(id);
-    }
-
-    @Patch(':id/pay')
-    @UsePipes(new ValidationPipe({ transform: true }))
-    recordPayment(@Param('id') id: string, @Body() dto: RecordPaymentDto) {
-        return this.invoicesService.recordPayment(id, dto);
-    }
+  @Post(':id/payments')
+  @ApiOperation({ summary: 'Record a payment against an invoice' })
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async record(
+    @Param('id') invoiceId: string,
+    @Body() dto: RecordPaymentDto,
+  ): Promise<{ invoice: FeeInvoice; payment: FeePayment }> {
+    const tenantId = this.tenantContext.tenantId;
+    return this.recordPayment.execute({
+      tenantId,
+      invoiceId,
+      studentId: dto.studentId,
+      amount: dto.amount,
+      currency: dto.currency,
+      method: dto.method,
+      reference: dto.reference,
+      notes: dto.notes,
+      status: dto.status,
+      paidAt: dto.paidAt ? new Date(dto.paidAt) : undefined,
+      recordedBy: dto.recordedBy,
+    });
+  }
 }

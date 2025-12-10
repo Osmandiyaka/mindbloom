@@ -3,7 +3,6 @@ import { AdmissionsService } from './admissions.service';
 import { CreateAdmissionDto } from './dto/create-admission.dto';
 import { UpdateAdmissionStatusDto } from './dto/update-admission-status.dto';
 import { AdmissionsQueryDto } from './dto/admissions-query.dto';
-import { RecentInvoicesQueryDto } from './dto/recent-invoices-query.dto';
 
 @Controller('admissions')
 export class AdmissionsController {
@@ -24,12 +23,6 @@ export class AdmissionsController {
     @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
     pipeline(@Query() query: AdmissionsQueryDto) {
         return this.admissionsService.getPipeline(query);
-    }
-
-    @Get('recent-invoices')
-    @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-    recentInvoices(@Query() query: RecentInvoicesQueryDto) {
-        return this.admissionsService.recentInvoices(query);
     }
 
     @Patch(':id/status')

@@ -2,12 +2,9 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TasksService } from '../tasks/tasks.service';
-import { FeePlansService } from '../fees/plans.service';
-import { InvoicesService } from '../fees/invoices.service';
 import { CreateAdmissionDto } from './dto/create-admission.dto';
 import { UpdateAdmissionStatusDto } from './dto/update-admission-status.dto';
 import { AdmissionsQueryDto } from './dto/admissions-query.dto';
-import { RecentInvoicesQueryDto } from './dto/recent-invoices-query.dto';
 
 const STATUS_TRANSITIONS: Record<string, string[]> = {
     review: ['review', 'rejected', 'enrolled'],
@@ -21,8 +18,6 @@ export class AdmissionsService {
         @InjectModel('Admission') private admissionModel: Model<any>,
         @InjectModel('Student') private studentModel: Model<any>,
         private readonly tasksService: TasksService,
-        private readonly feePlansService: FeePlansService,
-        private readonly invoicesService: InvoicesService,
     ) { }
 
     async findAll(query: AdmissionsQueryDto = {}) {
@@ -64,11 +59,6 @@ export class AdmissionsService {
                 applications: admissions.filter(a => a.status === stage.key),
             })),
         };
-    }
-
-    async recentInvoices(query: RecentInvoicesQueryDto) {
-        const limit = query.limit ?? 5;
-        return this.invoicesService.findRecent(limit, query.tenantId);
     }
 
     async updateStatus(id: string, dto: UpdateAdmissionStatusDto, actor: string) {
@@ -125,28 +115,8 @@ export class AdmissionsService {
     }
 
     private async ensureInitialInvoice(admission: any, student: any) {
-        const reference = `ADM-${admission.id || admission._id}`;
-        const existingInvoice = await this.invoicesService.findByReference(reference, admission.tenantId);
-        if (existingInvoice) return existingInvoice;
-
-        const plans = await this.feePlansService.findAll({ tenantId: admission.tenantId });
-        const defaultPlan = plans[0];
-        if (!defaultPlan) return null;
-
-        const dueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-        return this.invoicesService.create({
-            tenantId: admission.tenantId,
-            studentId: student.id || student._id,
-            studentName: admission.applicantName,
-            planId: defaultPlan._id?.toString(),
-            planName: defaultPlan.name,
-            dueDate: dueDate.toISOString(),
-            amount: defaultPlan.amount,
-            currency: defaultPlan.currency,
-            reference,
-            notes: 'Auto-generated from admission enrollment',
-        });
+        // Fees integration removed for now
+        return null;
     }
 
     private async ensureSystemTask(admission: any, student: any, actor: string) {
