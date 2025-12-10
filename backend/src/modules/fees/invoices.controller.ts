@@ -14,7 +14,7 @@ import { FeePayment } from '../../domain/fees/entities/fee-payment.entity';
 @ApiTags('fees')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, TenantGuard)
-@Controller('fees/invoices')
+@Controller('students/:studentId/fees/invoices')
 export class InvoicesController {
   constructor(
     private readonly createInvoice: CreateInvoiceUseCase,
@@ -25,10 +25,13 @@ export class InvoicesController {
 
   @Get()
   @ApiOperation({ summary: 'List invoices (tenant scoped)' })
-  async findAll(@Query() query: any): Promise<FeeInvoice[]> {
+  async findAll(
+    @Param('studentId') studentId: string,
+    @Query() query: any,
+  ): Promise<FeeInvoice[]> {
     const tenantId = this.tenantContext.tenantId;
     return this.listInvoices.execute(tenantId, {
-      studentId: query.studentId,
+      studentId,
       status: query.status,
       dueFrom: query.dueFrom ? new Date(query.dueFrom) : undefined,
       dueTo: query.dueTo ? new Date(query.dueTo) : undefined,
@@ -38,11 +41,14 @@ export class InvoicesController {
   @Post()
   @ApiOperation({ summary: 'Create invoice for a student' })
   @UsePipes(new ValidationPipe({ transform: true }))
-  async create(@Body() dto: CreateInvoiceDto): Promise<FeeInvoice> {
+  async create(
+    @Param('studentId') studentId: string,
+    @Body() dto: CreateInvoiceDto,
+  ): Promise<FeeInvoice> {
     const tenantId = this.tenantContext.tenantId;
     return this.createInvoice.execute({
       tenantId,
-      studentId: dto.studentId,
+      studentId,
       studentName: dto.studentName,
       planId: dto.planId,
       planName: dto.planName,
@@ -60,6 +66,7 @@ export class InvoicesController {
   @ApiOperation({ summary: 'Record a payment against an invoice' })
   @UsePipes(new ValidationPipe({ transform: true }))
   async record(
+    @Param('studentId') studentId: string,
     @Param('id') invoiceId: string,
     @Body() dto: RecordPaymentDto,
   ): Promise<{ invoice: FeeInvoice; payment: FeePayment }> {
@@ -67,7 +74,7 @@ export class InvoicesController {
     return this.recordPayment.execute({
       tenantId,
       invoiceId,
-      studentId: dto.studentId,
+      studentId,
       amount: dto.amount,
       currency: dto.currency,
       method: dto.method,

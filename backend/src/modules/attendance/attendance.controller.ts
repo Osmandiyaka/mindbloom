@@ -15,7 +15,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @ApiTags('attendance')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, TenantGuard)
-@Controller('attendance')
+@Controller('students/:studentId/attendance')
 export class AttendanceController {
   constructor(
     private readonly recordAttendance: RecordAttendanceUseCase,
@@ -28,11 +28,14 @@ export class AttendanceController {
   @Post()
   @ApiOperation({ summary: 'Record attendance for a student' })
   @ApiResponse({ status: 201, type: AttendanceRecord })
-  async create(@Body() dto: CreateAttendanceDto): Promise<AttendanceRecord> {
+  async create(
+    @Param('studentId') studentId: string,
+    @Body() dto: CreateAttendanceDto,
+  ): Promise<AttendanceRecord> {
     const tenantId = this.tenantContext.tenantId;
     return this.recordAttendance.execute({
       tenantId,
-      studentId: dto.studentId,
+      studentId,
       class: dto.class,
       section: dto.section,
       date: new Date(dto.date),
@@ -44,10 +47,13 @@ export class AttendanceController {
 
   @Get()
   @ApiOperation({ summary: 'List attendance records' })
-  async findAll(@Query() query: ListAttendanceDto): Promise<AttendanceRecord[]> {
+  async findAll(
+    @Param('studentId') studentId: string,
+    @Query() query: ListAttendanceDto,
+  ): Promise<AttendanceRecord[]> {
     const tenantId = this.tenantContext.tenantId;
     return this.listAttendance.execute(tenantId, {
-      studentId: query.studentId,
+      studentId,
       class: query.class,
       section: query.section,
       status: query.status,
@@ -59,6 +65,7 @@ export class AttendanceController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update an attendance record' })
   async update(
+    @Param('studentId') studentId: string,
     @Param('id') id: string,
     @Body() dto: UpdateAttendanceDto,
   ): Promise<AttendanceRecord> {
@@ -73,15 +80,11 @@ export class AttendanceController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete an attendance record' })
-  async remove(@Param('id') id: string): Promise<void> {
+  async remove(
+    @Param('studentId') studentId: string,
+    @Param('id') id: string,
+  ): Promise<void> {
     const tenantId = this.tenantContext.tenantId;
     await this.deleteAttendance.execute(id, tenantId);
-  }
-
-  @Get('student/:studentId')
-  @ApiOperation({ summary: 'List attendance records for a student' })
-  async findByStudent(@Param('studentId') studentId: string): Promise<AttendanceRecord[]> {
-    const tenantId = this.tenantContext.tenantId;
-    return this.listAttendance.execute(tenantId, { studentId });
   }
 }
