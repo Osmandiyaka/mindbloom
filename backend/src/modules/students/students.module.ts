@@ -13,16 +13,29 @@ import {
 import { AddGuardianToStudentUseCase } from '../../application/services/student/add-guardian-to-student.use-case';
 import { UpdateStudentEnrollmentUseCase } from '../../application/services/student/update-student-enrollment.use-case';
 import { StudentsController } from '../../presentation/controllers/students.controller';
+import { StudentNotesController } from '../../presentation/controllers/student-notes.controller';
+import { StudentNoteDocument, StudentNoteSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/student-note.schema';
+import { STUDENT_NOTE_REPOSITORY } from '../../domain/ports/out/student-note-repository.port';
+import { MongooseStudentNoteRepository } from '../../infrastructure/adapters/persistence/mongoose/mongoose-student-note.repository';
+import { CreateStudentNoteUseCase } from '../../application/services/student-notes/create-student-note.use-case';
+import { GetStudentNotesUseCase } from '../../application/services/student-notes/get-student-notes.use-case';
 
 @Module({
     imports: [
-        MongooseModule.forFeature([{ name: 'Student', schema: StudentSchema }]),
+        MongooseModule.forFeature([
+            { name: 'Student', schema: StudentSchema },
+            { name: StudentNoteDocument.name, schema: StudentNoteSchema },
+        ]),
     ],
-    controllers: [StudentsController],
+    controllers: [StudentsController, StudentNotesController],
     providers: [
         {
             provide: STUDENT_REPOSITORY,
             useClass: MongooseStudentRepository,
+        },
+        {
+            provide: STUDENT_NOTE_REPOSITORY,
+            useClass: MongooseStudentNoteRepository,
         },
         CreateStudentUseCase,
         GetAllStudentsUseCase,
@@ -31,7 +44,9 @@ import { StudentsController } from '../../presentation/controllers/students.cont
         DeleteStudentUseCase,
         AddGuardianToStudentUseCase,
         UpdateStudentEnrollmentUseCase,
+        CreateStudentNoteUseCase,
+        GetStudentNotesUseCase,
     ],
-    exports: [STUDENT_REPOSITORY],
+    exports: [STUDENT_REPOSITORY, STUDENT_NOTE_REPOSITORY],
 })
 export class StudentsModule { }

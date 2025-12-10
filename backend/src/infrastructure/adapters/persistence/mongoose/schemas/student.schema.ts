@@ -118,26 +118,26 @@ class EnrollmentInfo {
 
 @Schema({ collection: 'students', timestamps: true })
 export class StudentDocument extends Document {
-    @Prop({ type: Types.ObjectId, ref: 'Tenant', required: false, index: true })
+    @Prop({ type: Types.ObjectId, ref: 'Tenant', required: true, index: true })
     tenantId: Types.ObjectId;
 
     @Prop()
     admissionId?: string;
 
     // Personal Information
-    @Prop()
+    @Prop({ required: true })
     firstName: string;
 
-    @Prop()
+    @Prop({ required: true })
     lastName: string;
 
     @Prop()
     middleName?: string;
 
-    @Prop()
+    @Prop({ required: true })
     dateOfBirth: Date;
 
-    @Prop({ enum: ['male', 'female', 'other'] })
+    @Prop({ enum: ['male', 'female', 'other'], required: true })
     gender: string;
 
     @Prop()
@@ -148,9 +148,6 @@ export class StudentDocument extends Document {
 
     @Prop()
     caste?: string;
-
-    @Prop()
-    motherTongue?: string;
 
     // Contact Information
     @Prop()
@@ -163,16 +160,16 @@ export class StudentDocument extends Document {
     address?: Address;
 
     // Guardians
-    @Prop({ type: [Guardian] })
-    guardians?: Guardian[];
+    @Prop({ type: [Guardian], required: true })
+    guardians: Guardian[];
 
     // Medical Information
     @Prop({ type: MedicalInfo })
     medicalInfo?: MedicalInfo;
 
     // Enrollment Information
-    @Prop({ type: EnrollmentInfo })
-    enrollment?: EnrollmentInfo;
+    @Prop({ type: EnrollmentInfo, required: true })
+    enrollment: EnrollmentInfo;
 
     // Status
     @Prop({
@@ -189,9 +186,6 @@ export class StudentDocument extends Document {
     // Additional Information
     @Prop()
     photo?: string;
-
-    @Prop()
-    notes?: string;
 
     createdAt: Date;
     updatedAt: Date;

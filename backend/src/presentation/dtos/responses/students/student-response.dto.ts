@@ -151,9 +151,6 @@ export class StudentResponseDto {
     caste?: string;
 
     @ApiProperty({ required: false })
-    motherTongue?: string;
-
-    @ApiProperty({ required: false })
     email?: string;
 
     @ApiProperty({ required: false })
@@ -183,9 +180,6 @@ export class StudentResponseDto {
     @ApiProperty({ required: false })
     photo?: string;
 
-    @ApiProperty({ required: false })
-    notes?: string;
-
     @ApiProperty()
     createdAt: Date;
 
@@ -198,14 +192,13 @@ export class StudentResponseDto {
         dto.firstName = student.firstName;
         dto.lastName = student.lastName;
         dto.fullName = student.fullName;
-        dto.middleName = student['props'].middleName;
+        dto.middleName = student.middleName;
         dto.dateOfBirth = student.dateOfBirth;
         dto.age = student.age;
         dto.gender = student.gender;
-        dto.nationality = student['props'].nationality;
-        dto.religion = student['props'].religion;
-        dto.caste = student['props'].caste;
-        dto.motherTongue = student['props'].motherTongue;
+        dto.nationality = student.nationality;
+        dto.religion = student.religion;
+        dto.caste = student.caste;
         dto.email = student.email;
         dto.phone = student.phone;
         dto.address = student.address;
@@ -216,7 +209,6 @@ export class StudentResponseDto {
         dto.status = student.status;
         dto.documents = student.documents;
         dto.photo = student.photo;
-        dto.notes = student.notes;
         dto.createdAt = student.createdAt;
         dto.updatedAt = student.updatedAt;
         return dto;

@@ -9,7 +9,6 @@ export interface CreateStudentCommand {
     nationality?: string;
     religion?: string;
     caste?: string;
-    motherTongue?: string;
 
     // Contact Information
     email?: string;
@@ -67,5 +66,4 @@ export interface CreateStudentCommand {
 
     // Additional Information
     photo?: string;
-    notes?: string;
 }

@@ -42,7 +42,6 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
             nationality: student['props'].nationality,
             religion: student['props'].religion,
             caste: student['props'].caste,
-            motherTongue: student['props'].motherTongue,
             email: student.email,
             phone: student.phone,
             address: student.address,
@@ -52,7 +51,6 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
             status: student.status,
             documents: student.documents,
             photo: student.photo,
-            notes: student.notes,
         });
 
         const saved = await studentDoc.save();
@@ -127,7 +125,6 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
                     nationality: student['props'].nationality,
                     religion: student['props'].religion,
                     caste: student['props'].caste,
-                    motherTongue: student['props'].motherTongue,
                     email: student.email,
                     phone: student.phone,
                     address: student.address,
@@ -137,7 +134,6 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
                     status: student.status,
                     documents: student.documents,
                     photo: student.photo,
-                    notes: student.notes,
                     updatedAt: new Date(),
                 },
             },
@@ -202,7 +198,6 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
             nationality: doc.nationality,
             religion: doc.religion,
             caste: doc.caste,
-            motherTongue: doc.motherTongue,
             email: doc.email,
             phone: doc.phone,
             address: doc.address as Address,
@@ -246,7 +241,6 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
                 uploadedAt: d.uploadedAt,
             })),
             photo: doc.photo,
-            notes: doc.notes,
             createdAt: doc.createdAt,
             updatedAt: doc.updatedAt,
         };

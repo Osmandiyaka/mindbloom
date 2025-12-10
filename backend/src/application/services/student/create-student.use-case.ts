@@ -23,11 +23,15 @@ export class CreateStudentUseCase {
             throw new Error(`Student with admission number ${command.enrollment.admissionNumber} already exists`);
         }
 
-        // Ensure guardians have IDs
+        // Ensure guardians have IDs and at least one primary
         const guardians = command.guardians.map(g => ({
             ...g,
             id: g.id || randomUUID(),
         }));
+        const hasPrimary = guardians.some(g => g.isPrimary);
+        if (!hasPrimary) {
+            throw new Error('At least one primary guardian is required');
+        }
 
         // Generate a new MongoDB ObjectId for the student
         const studentId = new Types.ObjectId().toString();
@@ -38,22 +42,23 @@ export class CreateStudentUseCase {
             firstName: command.firstName,
             lastName: command.lastName,
             middleName: command.middleName,
-            dateOfBirth: command.dateOfBirth,
+            dateOfBirth: command.dateOfBirth ? new Date(command.dateOfBirth) : null as any,
             gender: command.gender as any,
             nationality: command.nationality,
             religion: command.religion,
             caste: command.caste,
-            motherTongue: command.motherTongue,
             email: command.email,
             phone: command.phone,
             address: command.address,
             guardians: guardians as any,
             medicalInfo: command.medicalInfo as any,
-            enrollment: command.enrollment as any,
+            enrollment: {
+                ...command.enrollment,
+                admissionDate: new Date(command.enrollment.admissionDate),
+            } as any,
             status: StudentStatus.ACTIVE,
             documents: [],
             photo: command.photo,
-            notes: command.notes,
             createdAt: new Date(),
             updatedAt: new Date(),
         };

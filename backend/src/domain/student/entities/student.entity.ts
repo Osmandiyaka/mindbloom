@@ -96,7 +96,6 @@ export interface StudentProps {
     nationality?: string;
     religion?: string;
     caste?: string;
-    motherTongue?: string;
 
     // Contact Information
     email?: string;
@@ -120,7 +119,6 @@ export interface StudentProps {
 
     // Additional Information
     photo?: string;
-    notes?: string;
 
     // Metadata
     createdAt: Date;
@@ -191,6 +189,10 @@ export class Student {
         return this.props.religion;
     }
 
+    get caste(): string | undefined {
+        return this.props.caste;
+    }
+
     get fullName(): string {
         const parts = [this.props.firstName];
         if (this.props.middleName) parts.push(this.props.middleName);
@@ -257,10 +259,6 @@ export class Student {
         return this.props.photo;
     }
 
-    get notes(): string | undefined {
-        return this.props.notes;
-    }
-
     get createdAt(): Date {
         return this.props.createdAt;
     }
@@ -272,8 +270,8 @@ export class Student {
     // Business methods
     updateProfile(updates: Partial<Pick<StudentProps,
         'firstName' | 'lastName' | 'middleName' | 'email' | 'phone' |
-        'address' | 'photo' | 'notes' | 'nationality' | 'religion' |
-        'caste' | 'motherTongue'>>): void {
+        'address' | 'photo' | 'nationality' | 'religion' |
+        'caste'>>): void {
         Object.assign(this.props, updates);
         this.props.updatedAt = new Date();
     }

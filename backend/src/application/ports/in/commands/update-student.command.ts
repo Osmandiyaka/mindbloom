@@ -18,8 +18,6 @@ export interface UpdateStudentCommand {
     nationality?: string;
     religion?: string;
     caste?: string;
-    motherTongue?: string;
     status?: StudentStatus;
     photo?: string;
-    notes?: string;
 }

@@ -35,6 +35,11 @@ class AddressDto {
 }
 
 class GuardianDto {
+    @ApiProperty({ required: false })
+    @IsString()
+    @IsOptional()
+    id?: string;
+
     @ApiProperty()
     @IsString()
     name: string;
@@ -124,6 +129,7 @@ class EnrollmentInfoDto {
 
     @ApiProperty()
     @IsDateString()
+    @Type(() => Date)
     admissionDate: Date;
 
     @ApiProperty()
@@ -171,6 +177,7 @@ export class CreateStudentDto {
 
     @ApiProperty()
     @IsDateString()
+    @Type(() => Date)
     dateOfBirth: Date;
 
     @ApiProperty({ enum: ['male', 'female', 'other'] })
@@ -191,11 +198,6 @@ export class CreateStudentDto {
     @IsString()
     @IsOptional()
     caste?: string;
-
-    @ApiProperty({ required: false })
-    @IsString()
-    @IsOptional()
-    motherTongue?: string;
 
     @ApiProperty({ required: false })
     @IsEmail()
@@ -236,8 +238,4 @@ export class CreateStudentDto {
     @IsOptional()
     photo?: string;
 
-    @ApiProperty({ required: false })
-    @IsString()
-    @IsOptional()
-    notes?: string;
 }
