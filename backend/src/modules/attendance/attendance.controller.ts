@@ -1,17 +1,87 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { AttendanceService } from './attendance.service';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { TenantGuard } from '../../common/tenant/tenant.guard';
+import { TenantContext } from '../../common/tenant/tenant.context';
+import { RecordAttendanceUseCase } from '../../application/services/attendance/record-attendance.use-case';
+import { UpdateAttendanceUseCase } from '../../application/services/attendance/update-attendance.use-case';
+import { ListAttendanceUseCase } from '../../application/services/attendance/list-attendance.use-case';
+import { DeleteAttendanceUseCase } from '../../application/services/attendance/delete-attendance.use-case';
+import { CreateAttendanceDto } from '../../presentation/dtos/requests/attendance/create-attendance.dto';
+import { UpdateAttendanceDto } from '../../presentation/dtos/requests/attendance/update-attendance.dto';
+import { ListAttendanceDto } from '../../presentation/dtos/requests/attendance/list-attendance.dto';
+import { AttendanceRecord } from '../../domain/attendance/entities/attendance-record.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@ApiTags('Attendance')
+@ApiTags('attendance')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, TenantGuard)
 @Controller('attendance')
 export class AttendanceController {
-    constructor(private readonly attendanceService: AttendanceService) { }
+  constructor(
+    private readonly recordAttendance: RecordAttendanceUseCase,
+    private readonly updateAttendance: UpdateAttendanceUseCase,
+    private readonly listAttendance: ListAttendanceUseCase,
+    private readonly deleteAttendance: DeleteAttendanceUseCase,
+    private readonly tenantContext: TenantContext,
+  ) {}
 
-    @Get()
-    findAll() {
-        return this.attendanceService.findAll();
-    }
+  @Post()
+  @ApiOperation({ summary: 'Record attendance for a student' })
+  @ApiResponse({ status: 201, type: AttendanceRecord })
+  async create(@Body() dto: CreateAttendanceDto): Promise<AttendanceRecord> {
+    const tenantId = this.tenantContext.tenantId;
+    return this.recordAttendance.execute({
+      tenantId,
+      studentId: dto.studentId,
+      class: dto.class,
+      section: dto.section,
+      date: new Date(dto.date),
+      status: dto.status,
+      reason: dto.reason,
+      recordedBy: dto.recordedBy,
+    });
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'List attendance records' })
+  async findAll(@Query() query: ListAttendanceDto): Promise<AttendanceRecord[]> {
+    const tenantId = this.tenantContext.tenantId;
+    return this.listAttendance.execute(tenantId, {
+      studentId: query.studentId,
+      class: query.class,
+      section: query.section,
+      status: query.status,
+      dateFrom: query.dateFrom ? new Date(query.dateFrom) : undefined,
+      dateTo: query.dateTo ? new Date(query.dateTo) : undefined,
+    });
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update an attendance record' })
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateAttendanceDto,
+  ): Promise<AttendanceRecord> {
+    const tenantId = this.tenantContext.tenantId;
+    return this.updateAttendance.execute({
+      tenantId,
+      id,
+      status: dto.status,
+      reason: dto.reason,
+    });
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete an attendance record' })
+  async remove(@Param('id') id: string): Promise<void> {
+    const tenantId = this.tenantContext.tenantId;
+    await this.deleteAttendance.execute(id, tenantId);
+  }
+
+  @Get('student/:studentId')
+  @ApiOperation({ summary: 'List attendance records for a student' })
+  async findByStudent(@Param('studentId') studentId: string): Promise<AttendanceRecord[]> {
+    const tenantId = this.tenantContext.tenantId;
+    return this.listAttendance.execute(tenantId, { studentId });
+  }
 }
