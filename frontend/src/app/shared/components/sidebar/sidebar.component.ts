@@ -36,6 +36,7 @@ interface NavSection {
           </div>
           <div class="brand-text" *ngIf="!collapsed">
             <div class="brand-name">{{ tenantName || 'MindBloom' }}</div>
+            <div class="brand-sub">School OS</div>
           </div>
         </div>
        
@@ -77,14 +78,14 @@ interface NavSection {
   styles: [`
     :host { display: block; height: 100%; }
     .sidebar {
-      --sb-shadow-deep: color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.32)) 90%, transparent);
-      --sb-shadow-highlight: color-mix(in srgb, var(--color-surface, #ffffff) 18%, transparent);
+      --sb-shadow-deep: color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.26)) 88%, transparent);
+      --sb-shadow-highlight: color-mix(in srgb, rgba(160,170,200,0.08) 70%, transparent);
       --sb-surface-strong: color-mix(in srgb, var(--color-surface, #0f172a) 92%, var(--color-surface-hover, #e2e8f0) 8%);
       --sb-gold: var(--color-primary, #E5C100);
       --sb-text: var(--color-text-primary, #cfc7bc);
       --sb-text-secondary: var(--color-text-secondary, #a39a90);
-      --sh-dark-crisp: rgba(0,0,0,0.42);
-      --sh-dark-deep: rgba(0,0,0,0.24);
+      --sh-dark-crisp: rgba(0,0,0,0.32);
+      --sh-dark-deep: rgba(0,0,0,0.2);
       position: sticky;
       top: 0;
       height: 100vh;
@@ -99,7 +100,8 @@ interface NavSection {
       gap: 1rem;
       box-shadow:
         inset -1px 0 0 color-mix(in srgb, var(--color-border, rgba(0,0,0,0.08)) 70%, transparent),
-        12px 0 28px var(--sb-shadow-deep);
+        inset 4px 4px 14px color-mix(in srgb, var(--sb-gold) 8%, transparent),
+        8px 0 18px var(--sb-shadow-deep);
       transition: width 0.25s ease, padding 0.25s ease;
     }
     .sidebar.sidebar-collapsed { width: 84px; padding: 0.9rem 0.6rem; }
@@ -108,7 +110,7 @@ interface NavSection {
       display: flex;
       align-items: center;
       gap: 0.65rem;
-      padding: 0.1rem 0.15rem;
+      padding: 0.2rem 0.25rem;
       background: rgba(255,255,255,0.02);
       border-radius: 14px;
     }
@@ -120,11 +122,11 @@ interface NavSection {
       min-width: 0;
       background: color-mix(in srgb, var(--color-surface, #0f172a) 80%, transparent);
       border-radius: 16px;
-      padding: 0.35rem 0.45rem;
+      padding: 0.4rem 0.55rem;
       box-shadow:
-        5px 5px 10px var(--sh-dark-crisp),
-        10px 12px 28px var(--sh-dark-deep),
-        inset -3px -3px 8px color-mix(in srgb, var(--sb-gold) 12%, transparent);
+        2px 2px 6px var(--sh-dark-crisp),
+        6px 8px 14px var(--sh-dark-deep),
+        inset -1px -1px 4px color-mix(in srgb, var(--sb-gold) 10%, transparent);
     }
     .brand-mark {
       width: 42px;
@@ -134,12 +136,12 @@ interface NavSection {
       place-items: center;
       background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
       border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 12px 22px rgba(0,0,0,0.32);
+      box-shadow: 0 10px 18px rgba(0,0,0,0.26);
     }
     .logo-img { width: 32px; height: 32px; object-fit: cover; border-radius: 10px; }
     .brand-text { display: flex; flex-direction: column; min-width: 0; }
     .brand-name { font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
-    .brand-sub { font-size: 0.8rem; color: var(--color-text-secondary, rgba(232,237,247,0.75)); line-height: 1.2; }
+    .brand-sub { font-size: 0.82rem; color: var(--sb-text-secondary); line-height: 1.2; }
     .collapse-btn {
       width: 38px; height: 38px;
       border-radius: 12px;
@@ -185,28 +187,32 @@ interface NavSection {
       border-radius: 12px;
       color: var(--sb-text);
       text-decoration: none;
-      transition: background 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+      transition:
+        background-color 0.3s ease,
+        color 0.3s ease,
+        box-shadow 0.4s cubic-bezier(0.3, 1.1, 0.6, 1);
       box-shadow:
-        inset 2px 2px 4px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.18)) 80%, transparent),
-        inset -2px -2px 4px color-mix(in srgb, var(--color-surface, #ffffff) 30%, transparent);
+        inset 1.5px 1.5px 3px 0 color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.18)) 80%, transparent),
+        inset -1.5px -1.5px 3px 0 color-mix(in srgb, var(--color-surface, #ffffff) 28%, transparent);
       text-shadow: 1px 1px 1px color-mix(in srgb, var(--sb-shadow-highlight) 60%, transparent);
       background-image: radial-gradient(120% 120% at 10% 10%, color-mix(in srgb, var(--sb-gold) 4%, transparent) 0%, transparent 45%);
     }
     .nav-link:hover {
       background: color-mix(in srgb, var(--sb-gold) 10%, var(--color-surface, #f8fafc));
       box-shadow:
-        inset 3px 3px 6px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.22)) 85%, transparent),
-        inset -3px -3px 6px color-mix(in srgb, var(--color-surface, #ffffff) 35%, transparent),
-        0 0 10px color-mix(in srgb, var(--sb-shadow-deep) 30%, transparent);
+        inset 2px 2px 5px 0 color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.22)) 82%, transparent),
+        inset -2px -2px 5px 0 color-mix(in srgb, var(--color-surface, #ffffff) 32%, transparent),
+        0 0 6px 0 color-mix(in srgb, var(--sb-shadow-deep) 24%, transparent);
       color: var(--color-text-primary, #0f172a);
     }
     .nav-link.active {
       background: var(--sb-gold);
       color: var(--color-text-on-primary, #0f172a);
       box-shadow:
-        inset 5px 5px 10px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.26)) 85%, transparent),
-        inset -5px -5px 10px color-mix(in srgb, var(--color-surface, #ffffff) 45%, transparent),
-        0 0 12px color-mix(in srgb, var(--sb-gold) 30%, transparent);
+        inset 1.5px 1.5px 3px 0 color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.18)) 78%, transparent),
+        inset -1.5px -1.5px 3px 0 color-mix(in srgb, var(--color-surface, #ffffff) 32%, transparent),
+        inset 0 0 2px 0 color-mix(in srgb, rgba(255,255,255,0.45) 60%, transparent),
+        0 0 6px 0 color-mix(in srgb, var(--sb-gold) 22%, transparent);
     }
     .nav-link.active::before {
       content: '';
@@ -217,20 +223,24 @@ interface NavSection {
       width: 3px;
       border-radius: 999px;
       background: var(--sb-gold);
-      box-shadow: 0 0 8px color-mix(in srgb, var(--sb-gold) 60%, transparent);
+      box-shadow: 0 0 6px color-mix(in srgb, var(--sb-gold) 55%, transparent);
     }
     .nav-link-icon {
       width: 20px;
       height: 20px;
-      color: var(--sb-text-secondary);
+      color: color-mix(in srgb, var(--sb-text-secondary) 60%, #ffffff 40%);
       display: inline-flex;
       transition: filter 0.2s ease, transform 0.2s ease, color 0.2s ease;
       transform: translateY(-1px);
     }
-    .nav-link:hover .nav-link-icon { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--sb-gold) 50%, transparent)); }
+    .nav-link:hover .nav-link-icon {
+      color: color-mix(in srgb, var(--sb-gold) 60%, #ffffff 40%);
+      filter: drop-shadow(0 0 4px color-mix(in srgb, var(--sb-gold) 60%, transparent));
+    }
     .nav-link.active .nav-link-icon {
       color: var(--color-text-on-primary, #0f172a);
       box-shadow: inset 0 0 1px rgba(0,0,0,0.4);
+      transform: translateY(-1px) scale(1.05);
     }
     .nav-link-text { font-weight: 700; letter-spacing: -0.02em; }
     .nav-badge {
