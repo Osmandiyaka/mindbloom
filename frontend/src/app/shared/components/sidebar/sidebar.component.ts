@@ -329,6 +329,9 @@ export class SidebarComponent implements OnInit {
         { label: 'Attendance', path: '/students/attendance', icon: 'calendar' },
         { label: 'Academics', path: '/students/academics', icon: 'tasks' },
         { label: 'Conduct', path: '/conduct', icon: 'people' },
+        { label: 'Health', path: '/students/health', icon: 'health' },
+        { label: 'Documents', path: '/students/documents', icon: 'library' },
+        { label: 'Finance', path: '/accounting/fees', icon: 'fees' },
         { label: 'Reports', path: '/reports', icon: 'tasks' }
       ]
     },

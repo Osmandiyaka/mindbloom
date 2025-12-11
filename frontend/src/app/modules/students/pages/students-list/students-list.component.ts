@@ -124,133 +124,195 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
         </div>
       }
 
-      <!-- Empty State -->
-      @if (!loading() && !error() && filteredStudents().length === 0) {
-        <div class="empty-state">
-          <h3>No students found</h3>
-          <p>Get started by adding your first student</p>
-          <app-button variant="primary" (click)="openModal()">
-            + Add New Student
-          </app-button>
-        </div>
-      }
-
-      @if (!loading() && !error() && filteredStudents().length > 0) {
-        <ng-container [ngSwitch]="viewMode()">
-          <div *ngSwitchCase="'table'" class="data-table">
-            <div class="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th style="width:48px;"><input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll($event)"/></th>
+      @if (!loading() && !error()) {
+        <ng-container [ngSwitch]="activeTabLabel()">
+          <ng-container *ngSwitchCase="'Roster Lookup'">
+            @if (filteredStudents().length > 0) {
+              <ng-container [ngSwitch]="viewMode()">
+                <div *ngSwitchCase="'table'" class="data-table">
+                  <div class="table-wrapper">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th style="width:48px;"><input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll($event)"/></th>
                     <th class="sortable">Student</th>
-                    <th>Class</th>
-                    <th>Email</th>
+                    <th>ID</th>
+                    <th>Class/Section</th>
+                    <th>Guardian Contact</th>
+                    <th>Attendance Today</th>
+                    <th>Fee Flag</th>
+                    <th>Alerts</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let student of filteredStudents()" class="row-clickable" [routerLink]="['/students', student.id]">
                     <td><input type="checkbox" [checked]="isSelected(student.id)" (click)="toggleSelect($event, student.id)"/></td>
-                    <td class="col-primary student-cell">
-                      <div class="student-meta">
-                        <div class="avatar-wrap" aria-hidden="true">
-                          <span class="avatar">{{ initials(student.fullName) }}</span>
-                        </div>
-                        <div class="student-name-block">
-                          <span class="name">{{ student.fullName }}</span>
-                          <span class="student-id">ID · {{ student.enrollment.admissionNumber }}</span>
-                        </div>
+                          <td class="col-primary student-cell">
+                            <div class="student-meta">
+                              <div class="avatar-wrap" aria-hidden="true">
+                                <span class="avatar">{{ initials(student.fullName) }}</span>
+                              </div>
+                              <div class="student-name-block">
+                                <span class="name">{{ student.fullName }}</span>
+                                <span class="student-id">ID · {{ student.enrollment.admissionNumber }}</span>
+                              </div>
+                            </div>
+                          </td>
+                    <td>{{ student.enrollment.admissionNumber || '—' }}</td>
+                    <td>{{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</td>
+                    <td>
+                      <div class="meta-cell">
+                        <div>{{ primaryGuardianName(student) }}</div>
+                        <div class="muted tiny">{{ primaryGuardianPhone(student) }}</div>
                       </div>
                     </td>
-                    <td>{{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</td>
-                    <td>{{ student.email || 'N/A' }}</td>
+                    <td>{{ attendanceDisplay(student) }}</td>
+                    <td>
+                      <span class="pill" [class.danger]="hasFeeDue(student)">
+                        {{ feeDisplay(student) }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="pill neutral">{{ alertCount(student) }} alerts</span>
+                    </td>
                     <td>
                       <div class="cell-actions">
+                        <button (click)="logAttendanceAction($event, student)" title="Record attendance"><span class="icon" [innerHTML]="icon('calendar')"></span></button>
+                        <button (click)="logIncidentAction($event, student)" title="Log incident"><span class="icon" [innerHTML]="icon('tasks')"></span></button>
+                        <button (click)="contactGuardianAction($event, student)" title="Contact guardian"><span class="icon" [innerHTML]="icon('phone')"></span></button>
+                        <button (click)="openQuickView($event, student)" title="Quick view"><span class="icon" [innerHTML]="icon('eye')"></span></button>
                         <button (click)="editStudent($event, student.id)" title="Edit"><span class="icon" [innerHTML]="icon('edit')"></span></button>
                         <button (click)="deleteStudent($event, student)" title="Delete"><span class="icon" [innerHTML]="icon('trash')"></span></button>
                       </div>
                     </td>
                   </tr>
-                </tbody>
-              </table>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div *ngSwitchCase="'grid'" class="card-grid" role="list" aria-label="Student grid view">
+                  <article
+                    class="student-card"
+                    *ngFor="let student of filteredStudents()"
+                    role="listitem"
+                    tabindex="0"
+                    (click)="viewStudent($event, student.id)"
+                    (keyup.enter)="viewStudent($event, student.id)"
+                    (keyup.space)="viewStudent($event, student.id)"
+                    [attr.aria-label]="'Open profile for ' + student.fullName"
+                    [attr.aria-describedby]="'student-'+student.id"
+                  >
+                    <div class="card-hero">
+                      <div class="hero-main">
+                        <div class="avatar-wrap" aria-hidden="true">
+                          <span class="avatar">{{ initials(student.fullName) }}</span>
+                        </div>
+                        <div class="hero-text">
+                          <div class="name-line">
+                            <h3 id="{{ 'student-' + student.id }}">{{ student.fullName }}</h3>
+                          </div>
+                          <div class="sub-line">
+                            <span class="grade-pill">
+                              <span class="icon tiny" [innerHTML]="icon('students')"></span>
+                              Class {{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}
+                            </span>
+                            <span class="status-pill" [ngClass]="student.status">{{ student.status }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="meta-grid simple">
+                      <div class="meta-line">
+                        <span class="icon tiny" [innerHTML]="icon('mail')"></span>
+                        <div>
+                          <p class="eyebrow xxs">Email</p>
+                          <p class="value">{{ student.email || 'Email not provided' }}</p>
+                        </div>
+                      </div>
+                      <div class="meta-line">
+                        <span class="icon tiny" [innerHTML]="icon('students')"></span>
+                        <div>
+                          <p class="eyebrow xxs">Admission</p>
+                          <p class="value">{{ student.enrollment.admissionNumber }}</p>
+                        </div>
+                      </div>
+                      <div class="meta-line">
+                        <span class="icon tiny" [innerHTML]="icon('phone')"></span>
+                        <div>
+                          <p class="eyebrow xxs">Contact</p>
+                          <p class="value">{{ student.phone || 'Not provided' }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="divider"></div>
+                    <div class="card-actions" role="group" [attr.aria-label]="'Actions for ' + student.fullName">
+                      <button type="button" [attr.aria-label]="'View ' + student.fullName" (click)="viewStudent($event, student.id)">
+                        <span class="icon" [innerHTML]="icon('eye')"></span>
+                        <span class="sr-only">View</span>
+                      </button>
+                      <button type="button" [attr.aria-label]="'Edit ' + student.fullName" (click)="editStudent($event, student.id)">
+                        <span class="icon" [innerHTML]="icon('edit')"></span>
+                        <span class="sr-only">Edit</span>
+                      </button>
+                      <button type="button" [attr.aria-label]="'Delete ' + student.fullName" (click)="deleteStudent($event, student)">
+                        <span class="icon" [innerHTML]="icon('trash')"></span>
+                        <span class="sr-only">Delete</span>
+                      </button>
+                    </div>
+                  </article>
+                </div>
+              </ng-container>
+            }
+            @if (filteredStudents().length === 0) {
+              <div class="empty-state">
+                <h3>No students found</h3>
+                <p>Get started by adding your first student</p>
+                <app-button variant="primary" (click)="openModal()">
+                  + Add New Student
+                </app-button>
+              </div>
+            }
+          </ng-container>
+
+          <div *ngSwitchCase="'Today Triage'" class="stub-panel">
+            <h3>Today Triage</h3>
+            <div class="stub-grid">
+              <div class="stub-card" *ngFor="let item of triageToday">
+                <div class="stub-title">{{ item.name }}</div>
+                <div class="stub-value">{{ item.value }}</div>
+                <button type="button" class="stub-cta">{{ item.cta }}</button>
+              </div>
             </div>
           </div>
 
-          <div *ngSwitchCase="'grid'" class="card-grid" role="list" aria-label="Student grid view">
-            <!-- Before: flat cards with tiny avatars and unlabelled icons -->
-            <!-- After: hierarchical hero cards with focus rings, labelled actions, and responsive spacing -->
-            <article
-              class="student-card"
-              *ngFor="let student of filteredStudents()"
-              role="listitem"
-              tabindex="0"
-              (click)="viewStudent($event, student.id)"
-              (keyup.enter)="viewStudent($event, student.id)"
-              (keyup.space)="viewStudent($event, student.id)"
-              [attr.aria-label]="'Open profile for ' + student.fullName"
-              [attr.aria-describedby]="'student-'+student.id"
-            >
-              <div class="card-hero">
-                <div class="hero-main">
-                  <div class="avatar-wrap" aria-hidden="true">
-                    <span class="avatar">{{ initials(student.fullName) }}</span>
-                  </div>
-                  <div class="hero-text">
-                    <div class="name-line">
-                      <h3 id="{{ 'student-' + student.id }}">{{ student.fullName }}</h3>
-                    </div>
-                    <div class="sub-line">
-                      <span class="grade-pill">
-                        <span class="icon tiny" [innerHTML]="icon('students')"></span>
-                        Class {{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}
-                      </span>
-                      <span class="status-pill" [ngClass]="student.status">{{ student.status }}</span>
-                    </div>
-                  </div>
-                </div>
+          <div *ngSwitchCase="'Health Flags'" class="stub-panel">
+            <h3>Health Flags</h3>
+            <div class="stub-grid">
+              <div class="stub-card" *ngFor="let item of healthFlags">
+                <div class="stub-title">{{ item.name }}</div>
+                <div class="stub-value">{{ item.value }}</div>
+                <button type="button" class="stub-cta">{{ item.cta }}</button>
               </div>
+            </div>
+          </div>
 
-              <div class="meta-grid simple">
-                <div class="meta-line">
-                  <span class="icon tiny" [innerHTML]="icon('mail')"></span>
-                  <div>
-                    <p class="eyebrow xxs">Email</p>
-                    <p class="value">{{ student.email || 'Email not provided' }}</p>
-                  </div>
-                </div>
-                <div class="meta-line">
-                  <span class="icon tiny" [innerHTML]="icon('students')"></span>
-                  <div>
-                    <p class="eyebrow xxs">Admission</p>
-                    <p class="value">{{ student.enrollment.admissionNumber }}</p>
-                  </div>
-                </div>
-                <div class="meta-line">
-                  <span class="icon tiny" [innerHTML]="icon('phone')"></span>
-                  <div>
-                    <p class="eyebrow xxs">Contact</p>
-                    <p class="value">{{ student.phone || 'Not provided' }}</p>
-                  </div>
-                </div>
-              </div>
+          <div *ngSwitchCase="'Pending Tasks'" class="stub-panel">
+            <h3>Pending Tasks</h3>
+            <ul class="stub-list">
+              <li *ngFor="let item of pendingTasks">
+                <div class="stub-title">{{ item.name }}</div>
+                <div class="stub-detail">{{ item.detail }}</div>
+              </li>
+            </ul>
+          </div>
 
-              <div class="divider"></div>
-              <div class="card-actions" role="group" [attr.aria-label]="'Actions for ' + student.fullName">
-                <button type="button" [attr.aria-label]="'View ' + student.fullName" (click)="viewStudent($event, student.id)">
-                  <span class="icon" [innerHTML]="icon('eye')"></span>
-                  <span class="sr-only">View</span>
-                </button>
-                <button type="button" [attr.aria-label]="'Edit ' + student.fullName" (click)="editStudent($event, student.id)">
-                  <span class="icon" [innerHTML]="icon('edit')"></span>
-                  <span class="sr-only">Edit</span>
-                </button>
-                <button type="button" [attr.aria-label]="'Delete ' + student.fullName" (click)="deleteStudent($event, student)">
-                  <span class="icon" [innerHTML]="icon('trash')"></span>
-                  <span class="sr-only">Delete</span>
-                </button>
-              </div>
-            </article>
+          <div *ngSwitchDefault class="stub-panel">
+            <h3>{{ activeTabLabel() }}</h3>
+            <p>Content coming soon.</p>
           </div>
         </ng-container>
       }
@@ -269,21 +331,35 @@ export class StudentsListComponent implements OnInit {
   searchTerm = '';
   viewMode = signal<'table' | 'grid'>('table');
   gradeFilter = '';
-  statusFilter = '';
+  statusFilter = 'active';
   actionsOpen = false;
   grades: string[] = ['Grade 5', 'Grade 6', 'Grade 7', 'Grade 8'];
   statuses: string[] = ['active', 'inactive', 'transferred'];
   selectedIds = signal<Set<string>>(new Set());
   modalOpen = signal(false);
+  triageToday = [
+    { name: 'Late arrivals', value: 3, cta: 'Process' },
+    { name: 'Early leaves', value: 1, cta: 'Review' },
+    { name: 'Absences to verify', value: 4, cta: 'Verify' }
+  ];
+  healthFlags = [
+    { name: 'Medication needed', value: 2, cta: 'View orders' },
+    { name: 'Allergy alerts', value: 3, cta: 'Notify staff' },
+    { name: 'Clinic visits today', value: 1, cta: 'Review log' }
+  ];
+  pendingTasks = [
+    { name: 'Call guardian', detail: 'John Doe - absence note missing' },
+    { name: 'Collect documents', detail: 'Maria Lee - birth certificate' },
+    { name: 'Fee query', detail: 'Sam Patel - overdue notice' }
+  ];
   crumbs: Crumb[] = [
     { label: 'Roster' }
   ];
   commandTabs = [
-    { label: 'Roster', active: true },
-    { label: 'Admissions', active: false },
-    { label: 'Attendance', active: false },
-    { label: 'Reports', active: false },
-    { label: 'Notes', active: false },
+    { label: 'Roster Lookup', active: true },
+    { label: 'Today Triage', active: false },
+    { label: 'Health Flags', active: false },
+    { label: 'Pending Tasks', active: false },
   ];
 
   constructor(
@@ -454,8 +530,64 @@ export class StudentsListComponent implements OnInit {
     this.commandTabs = this.commandTabs.map(tab => ({ ...tab, active: tab.label === label }));
   }
 
+  activeTabLabel(): string {
+    return this.commandTabs.find(t => t.active)?.label || 'Roster Lookup';
+  }
+
   bulkAction(action: 'attendance' | 'note') {
     // Placeholder for future wiring; keeps UI aligned with bulk flow
     console.log(`Bulk action: ${action}`, Array.from(this.selectedIds()));
+  }
+
+  openQuickView(event: Event, student: Student) {
+    event.stopPropagation();
+    console.log('Quick view (stub):', student);
+  }
+
+  logAttendanceAction(event: Event, student: Student) {
+    event.stopPropagation();
+    console.log('Record attendance (stub):', student);
+  }
+
+  logIncidentAction(event: Event, student: Student) {
+    event.stopPropagation();
+    console.log('Log incident (stub):', student);
+  }
+
+  contactGuardianAction(event: Event, student: Student) {
+    event.stopPropagation();
+    console.log('Contact guardian (stub):', this.primaryGuardianPhone(student));
+  }
+
+  primaryGuardianName(student: Student): string {
+    const g = student.guardians && student.guardians.length ? student.guardians[0] : null;
+    return g?.name || '—';
+  }
+
+  primaryGuardianPhone(student: Student): string {
+    const g = student.guardians && student.guardians.length ? student.guardians[0] : null;
+    return g?.phone || student.phone || 'No contact';
+  }
+
+  attendanceDisplay(student: Student): string {
+    return student.status || '—';
+  }
+
+  hasFeeDue(student: Student): boolean {
+    const due = (student as any).fees?.dueAmount;
+    return typeof due === 'number' ? due > 0 : false;
+  }
+
+  feeDisplay(student: Student): string {
+    const due = (student as any).fees?.dueAmount;
+    if (typeof due === 'number' && due > 0) {
+      return `Due (${due})`;
+    }
+    return 'Clear';
+  }
+
+  alertCount(student: Student): number {
+    const alerts = (student as any).alerts;
+    return Array.isArray(alerts) ? alerts.length : 0;
   }
 }
