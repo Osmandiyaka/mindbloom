@@ -153,14 +153,14 @@ interface NavSection {
     }
     .collapse-btn:hover { transform: translateY(-1px); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); }
 
-    .sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; display: grid; gap: 0.9rem; padding-right: 0.15rem; }
+    .sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; display: grid; gap: 0.9rem; padding-right: 0.15rem; scroll-behavior: smooth; }
     .nav-section-title {
       font-size: 0.85rem;
       font-weight: 400;
       color: var(--sb-text-secondary);
       padding: 0.15rem 0.3rem 0.5rem;
       margin: 0.55rem 0 0.35rem;
-      letter-spacing: -0.01em;
+      letter-spacing: 0.08em;
       border-bottom: 1px solid color-mix(in srgb, var(--sb-gold) 14%, transparent);
       background: linear-gradient(90deg, color-mix(in srgb, var(--sb-gold) 6%, transparent), transparent);
     }
@@ -176,6 +176,8 @@ interface NavSection {
       gap: 0.25rem;
     }
     .nav-link {
+      position: relative;
+      z-index: 1;
       display: inline-flex;
       align-items: center;
       gap: 0.6rem;
@@ -183,18 +185,19 @@ interface NavSection {
       border-radius: 12px;
       color: var(--sb-text);
       text-decoration: none;
-      position: relative;
       transition: background 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
       box-shadow:
         inset 2px 2px 4px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.18)) 80%, transparent),
         inset -2px -2px 4px color-mix(in srgb, var(--color-surface, #ffffff) 30%, transparent);
       text-shadow: 1px 1px 1px color-mix(in srgb, var(--sb-shadow-highlight) 60%, transparent);
+      background-image: radial-gradient(120% 120% at 10% 10%, color-mix(in srgb, var(--sb-gold) 4%, transparent) 0%, transparent 45%);
     }
     .nav-link:hover {
       background: color-mix(in srgb, var(--sb-gold) 10%, var(--color-surface, #f8fafc));
       box-shadow:
         inset 3px 3px 6px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.22)) 85%, transparent),
-        inset -3px -3px 6px color-mix(in srgb, var(--color-surface, #ffffff) 35%, transparent);
+        inset -3px -3px 6px color-mix(in srgb, var(--color-surface, #ffffff) 35%, transparent),
+        0 0 10px color-mix(in srgb, var(--sb-shadow-deep) 30%, transparent);
       color: var(--color-text-primary, #0f172a);
     }
     .nav-link.active {
@@ -218,7 +221,10 @@ interface NavSection {
     }
     .nav-link-icon { width: 20px; height: 20px; color: var(--sb-text-secondary); display: inline-flex; transition: filter 0.2s ease; }
     .nav-link:hover .nav-link-icon { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--sb-gold) 50%, transparent)); }
-    .nav-link.active .nav-link-icon { color: var(--color-text-on-primary, #0f172a); }
+    .nav-link.active .nav-link-icon {
+      color: var(--color-text-on-primary, #0f172a);
+      box-shadow: inset 0 0 1px rgba(0,0,0,0.4);
+    }
     .nav-link-text { font-weight: 700; letter-spacing: -0.02em; }
     .nav-badge {
       margin-left: auto;
@@ -314,6 +320,16 @@ export class SidebarComponent implements OnInit {
       items: [
         { label: 'Accounting', path: '/accounting', icon: 'accounting' },
         { label: 'Fee Management', path: '/accounting/fees', icon: 'tasks' }
+      ]
+    },
+    {
+      title: 'Human Resources',
+      items: [
+        { label: 'Directory', path: '/hr/directory', icon: 'hr' },
+        { label: 'Profiles', path: '/hr/profiles', icon: 'dashboard' },
+        { label: 'Leave', path: '/hr/leave', icon: 'calendar' },
+        { label: 'Attendance', path: '/hr/attendance', icon: 'tasks' },
+        { label: 'Settings', path: '/hr/settings', icon: 'settings' }
       ]
     },
     {
