@@ -83,6 +83,9 @@ interface NavSection {
       --sb-shadow-deep: color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.32)) 90%, transparent);
       --sb-shadow-highlight: color-mix(in srgb, var(--color-surface, #ffffff) 18%, transparent);
       --sb-surface-strong: color-mix(in srgb, var(--color-surface, #0f172a) 92%, var(--color-surface-hover, #e2e8f0) 8%);
+      --sb-gold: var(--color-primary, #E5C100);
+      --sb-text: var(--color-text-primary, #cfc7bc);
+      --sb-text-secondary: var(--color-text-secondary, #a39a90);
       position: sticky;
       top: 0;
       height: 100vh;
@@ -91,7 +94,7 @@ interface NavSection {
       box-sizing: border-box;
       background: var(--sb-surface-strong);
       background-color: var(--color-surface-glass, color-mix(in srgb, var(--color-surface, #f8fafc) 80%, transparent));
-      color: var(--color-text-primary, #0f172a);
+      color: var(--sb-text);
       display: flex;
       flex-direction: column;
       gap: 1rem;
@@ -131,7 +134,15 @@ interface NavSection {
     .collapse-btn:hover { transform: translateY(-1px); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); }
 
     .sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; display: grid; gap: 0.9rem; padding-right: 0.15rem; }
-    .nav-section-title { font-size: 0.85rem; color: var(--color-text-secondary, rgba(232,237,247,0.72)); padding: 0 0.3rem; margin: 0 0 0.25rem; letter-spacing: -0.01em; }
+    .nav-section-title {
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: var(--sb-text-secondary);
+      padding: 0 0.3rem 0.35rem;
+      margin: 0 0 0.35rem;
+      letter-spacing: -0.01em;
+      border-bottom: 1px solid color-mix(in srgb, var(--sb-gold) 18%, transparent);
+    }
     .nav-card {
       background: color-mix(in srgb, var(--color-surface, #f8fafc) 85%, var(--color-surface-hover, #e2e8f0) 15%);
       border: 1px solid color-mix(in srgb, var(--color-border, rgba(0,0,0,0.08)) 75%, transparent);
@@ -149,7 +160,7 @@ interface NavSection {
       gap: 0.6rem;
       padding: 0.55rem 0.65rem;
       border-radius: 12px;
-      color: var(--color-text-primary, #0f172a);
+      color: var(--sb-text);
       text-decoration: none;
       position: relative;
       transition: background 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
@@ -158,14 +169,15 @@ interface NavSection {
         inset -2px -2px 4px color-mix(in srgb, var(--color-surface, #ffffff) 30%, transparent);
     }
     .nav-link:hover {
-      background: color-mix(in srgb, var(--color-primary, #E8BE14) 8%, var(--color-surface, #f8fafc));
+      background: color-mix(in srgb, var(--sb-gold) 10%, var(--color-surface, #f8fafc));
       box-shadow:
         inset 3px 3px 6px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.22)) 85%, transparent),
         inset -3px -3px 6px color-mix(in srgb, var(--color-surface, #ffffff) 35%, transparent);
+      color: var(--color-text-primary, #0f172a);
     }
     .nav-link.active {
-      background: color-mix(in srgb, var(--color-primary, #E8BE14) 16%, var(--color-surface, #f8fafc));
-      color: var(--color-text-on-primary, var(--color-text-primary, #0f172a));
+      background: color-mix(in srgb, var(--sb-gold) 18%, var(--color-surface, #f8fafc));
+      color: var(--color-text-on-primary, #0f172a);
       box-shadow:
         inset 5px 5px 10px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.26)) 90%, transparent),
         inset -5px -5px 10px color-mix(in srgb, var(--color-surface, #ffffff) 45%, transparent);
@@ -178,13 +190,25 @@ interface NavSection {
       bottom: 8px;
       width: 3px;
       border-radius: 999px;
-      background: linear-gradient(180deg, var(--color-primary, #E8BE14), color-mix(in srgb, var(--color-primary, #E8BE14) 60%, transparent));
-      box-shadow: 0 0 10px color-mix(in srgb, var(--color-primary, #E8BE14) 70%, transparent);
+      background: linear-gradient(180deg, var(--sb-gold), color-mix(in srgb, var(--sb-gold) 60%, transparent));
+      box-shadow: 0 0 10px color-mix(in srgb, var(--sb-gold) 70%, transparent);
     }
-    .nav-link-icon { width: 20px; height: 20px; color: var(--color-text-secondary, rgba(232,237,247,0.82)); display: inline-flex; }
-    .nav-link.active .nav-link-icon { color: var(--color-text-on-primary, var(--color-text-primary, #0f172a)); }
+    .nav-link-icon { width: 20px; height: 20px; color: var(--sb-text-secondary); display: inline-flex; transition: filter 0.2s ease; }
+    .nav-link:hover .nav-link-icon { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--sb-gold) 50%, transparent)); }
+    .nav-link.active .nav-link-icon { color: var(--color-text-on-primary, #0f172a); }
     .nav-link-text { font-weight: 700; letter-spacing: -0.02em; }
-    .nav-badge { margin-left: auto; min-width: 28px; text-align: center; background: color-mix(in srgb, var(--color-primary, #E8BE14) 20%, var(--color-surface, #0f172a)); color: var(--color-text-on-primary, #0c2243); padding: 0.2rem 0.45rem; border-radius: 999px; font-weight: 800; }
+    .nav-badge {
+      margin-left: auto;
+      min-width: 28px;
+      text-align: center;
+      background: color-mix(in srgb, var(--sb-gold) 20%, var(--color-surface, #0f172a));
+      color: var(--color-text-on-primary, #0c2243);
+      padding: 0.15rem 0.45rem;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+    }
 
     .sidebar.sidebar-collapsed .nav-section-title { display: none; }
     .sidebar.sidebar-collapsed .nav-card { padding: 0.35rem; }
