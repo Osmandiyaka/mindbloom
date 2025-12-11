@@ -158,10 +158,11 @@ interface NavSection {
       font-size: 0.85rem;
       font-weight: 400;
       color: var(--sb-text-secondary);
-      padding: 0 0.3rem 0.35rem;
-      margin: 0 0 0.35rem;
+      padding: 0.15rem 0.3rem 0.5rem;
+      margin: 0.55rem 0 0.35rem;
       letter-spacing: -0.01em;
-      border-bottom: 1px solid color-mix(in srgb, var(--sb-gold) 18%, transparent);
+      border-bottom: 1px solid color-mix(in srgb, var(--sb-gold) 14%, transparent);
+      background: linear-gradient(90deg, color-mix(in srgb, var(--sb-gold) 6%, transparent), transparent);
     }
     .nav-card {
       background: color-mix(in srgb, var(--color-surface, #f8fafc) 85%, var(--color-surface-hover, #e2e8f0) 15%);
@@ -187,6 +188,7 @@ interface NavSection {
       box-shadow:
         inset 2px 2px 4px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.18)) 80%, transparent),
         inset -2px -2px 4px color-mix(in srgb, var(--color-surface, #ffffff) 30%, transparent);
+      text-shadow: 1px 1px 1px color-mix(in srgb, var(--sb-shadow-highlight) 60%, transparent);
     }
     .nav-link:hover {
       background: color-mix(in srgb, var(--sb-gold) 10%, var(--color-surface, #f8fafc));
