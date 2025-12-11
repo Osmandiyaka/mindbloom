@@ -333,10 +333,21 @@ export class SidebarComponent implements OnInit {
       ]
     },
     {
-      title: 'Finance',
+      title: 'Finance & Reporting',
       items: [
-        { label: 'Accounting', path: '/accounting', icon: 'accounting' },
-        { label: 'Fee Management', path: '/accounting/fees', icon: 'tasks' }
+        { label: 'Fee Management', path: '/accounting/fees', icon: 'fees' },
+        { label: 'Fee Structures', path: '/accounting/fee-structures', icon: 'settings' },
+        { label: 'Fee Reports', path: '/accounting/fee-reports', icon: 'reports' },
+        { label: 'Accounts Payable', path: '/accounting/payables', icon: 'expense' },
+        { label: 'Expense Records', path: '/accounting/expenses', icon: 'expense' },
+        { label: 'Bills Queue', path: '/accounting/bill-queue', icon: 'bill' },
+        { label: 'General Ledger', path: '/accounting/gl', icon: 'bank' },
+        { label: 'Chart of Accounts', path: '/accounting/accounts', icon: 'list' },
+        { label: 'Journal Entries', path: '/accounting/journals', icon: 'journal' },
+        { label: 'Bank Reconciliation', path: '/accounting/bank-recon', icon: 'check-circle' },
+        { label: 'Analytics', path: '/reports/analytics', icon: 'dashboard' },
+        { label: 'Financial Reports', path: '/reports/financial', icon: 'file-text' },
+        { label: 'Data Exports', path: '/reports/exports', icon: 'download' }
       ]
     },
     {
