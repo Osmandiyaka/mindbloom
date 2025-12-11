@@ -24,43 +24,52 @@ interface NavSection {
   imports: [CommonModule, RouterModule],
   template: `
     <aside class="sidebar" [class.sidebar-collapsed]="collapsed">
-      <!-- Logo/Brand -->
       <div class="sidebar-header">
-        <div class="sidebar-logo">
-          <ng-container *ngIf="tenantLogo; else defaultLogo">
-            <img [src]="tenantLogo" alt="Tenant logo" class="logo-img" />
-          </ng-container>
-          <ng-template #defaultLogo>
-            <span class="nav-icon" [innerHTML]="icon('dashboard')"></span>
-          </ng-template>
-          <span>{{ tenantName || 'MindBloom' }}</span>
+        <div class="brand">
+          <div class="brand-mark">
+            <ng-container *ngIf="tenantLogo; else defaultLogo">
+              <img [src]="tenantLogo" alt="Tenant logo" class="logo-img" />
+            </ng-container>
+            <ng-template #defaultLogo>
+              <span class="nav-icon" [innerHTML]="icon('dashboard')"></span>
+            </ng-template>
+          </div>
+          <div class="brand-text" *ngIf="!collapsed">
+            <div class="brand-name">{{ tenantName || 'MindBloom' }}</div>
+            <div class="brand-sub">School OS</div>
+          </div>
         </div>
+        <button class="collapse-btn" type="button" (click)="collapsed = !collapsed">
+          <span [innerHTML]="icon('menu')"></span>
+        </button>
       </div>
 
-      <!-- Navigation -->
       <nav class="sidebar-nav">
-        <div class="nav-section" *ngFor="let section of navSections">
-          <div class="nav-section-title">{{ section.title }}</div>
-          <div class="nav-item" *ngFor="let item of section.items">
+        <section class="nav-section" *ngFor="let section of navSections">
+          <header class="nav-section-title" *ngIf="!collapsed">{{ section.title }}</header>
+          <div class="nav-card">
             <a
+              class="nav-link"
+              *ngFor="let item of section.items"
               [routerLink]="item.path"
               routerLinkActive="active"
               [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }">
-              <span class="nav-icon" [innerHTML]="icon(item.icon)"></span>
-              <span class="nav-text">{{ item.label }}</span>
-              <span class="nav-badge" *ngIf="item.badge">{{ item.badge }}</span>
+              <span class="nav-link-icon" [innerHTML]="icon(item.icon)"></span>
+              <span class="nav-link-text" *ngIf="!collapsed">{{ item.label }}</span>
+              <span class="nav-badge" *ngIf="item.badge && !collapsed">{{ item.badge }}</span>
             </a>
           </div>
-        </div>
+        </section>
       </nav>
 
-      <!-- User Profile -->
       <div class="sidebar-footer">
+        <div class="footer-cta" *ngIf="!collapsed">
+          <button type="button" class="ghost">Try demo</button>
+          <button type="button" class="ghost">Need help?</button>
+        </div>
         <div class="user-profile" (click)="logout()">
-          <div class="user-avatar">
-            {{ getUserInitials() }}
-          </div>
-          <div class="user-info">
+          <div class="user-avatar">{{ getUserInitials() }}</div>
+          <div class="user-info" *ngIf="!collapsed">
             <div class="user-name">{{ currentUser?.name }}</div>
             <div class="user-role">{{ currentUser?.role }}</div>
           </div>
@@ -71,190 +80,159 @@ interface NavSection {
   styles: [`
     :host { display: block; height: 100%; }
     .sidebar {
+      --sb-shadow-deep: color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.32)) 90%, transparent);
+      --sb-shadow-highlight: color-mix(in srgb, var(--color-surface, #ffffff) 18%, transparent);
+      --sb-surface-strong: color-mix(in srgb, var(--color-surface, #0f172a) 92%, var(--color-surface-hover, #e2e8f0) 8%);
       position: sticky;
       top: 0;
       height: 100vh;
-      width: var(--sidebar-width, 260px);
+      width: var(--sidebar-width, 270px);
+      padding: 0.9rem;
       box-sizing: border-box;
-      padding: 0.7rem 0.85rem 0.95rem;
-      background: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--color-surface, #ffffff) 85%, var(--color-background, #f7f9fc) 15%) 0%,
-        color-mix(in srgb, var(--color-surface, #0f172a) 78%, var(--color-background, #111827) 22%) 100%
-      );
-      border-right: none;
+      background: var(--sb-surface-strong);
+      background-color: var(--color-surface-glass, color-mix(in srgb, var(--color-surface, #f8fafc) 80%, transparent));
+      color: var(--color-text-primary, #0f172a);
       display: flex;
       flex-direction: column;
-      gap: 0.8rem;
-      transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: inset -2px 0 6px color-mix(in srgb, var(--color-border, rgba(0,0,0,0.25)) 65%, transparent);
+      gap: 1rem;
+      box-shadow:
+        inset -1px 0 0 color-mix(in srgb, var(--color-border, rgba(0,0,0,0.08)) 70%, transparent),
+        12px 0 28px var(--sb-shadow-deep);
+      transition: width 0.25s ease, padding 0.25s ease;
     }
-    .sidebar.sidebar-collapsed {
-      padding: 0.75rem 0.5rem;
-    }
-    .sidebar-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .sidebar-logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.7rem;
-      font-weight: 700;
-      color: var(--color-text-primary, #1f2937);
-      letter-spacing: -0.02em;
-      transition: opacity 0.2s ease;
-    }
-    .sidebar-logo .logo-img {
-      width: 32px;
-      height: 32px;
-      border-radius: 9px;
-      object-fit: cover;
-      box-shadow: 0 8px 16px color-mix(in srgb, rgba(0,0,0,0.22) 80%, var(--color-surface, #ffffff) 20%);
-      background: color-mix(in srgb, var(--color-surface-hover, #e5e7eb) 90%, transparent);
-    }
-    .sidebar.sidebar-collapsed .sidebar-logo span:last-child {
-      opacity: 0;
-      width: 0;
-      overflow: hidden;
-    }
-    .sidebar-nav {
+    .sidebar.sidebar-collapsed { width: 84px; padding: 0.9rem 0.6rem; }
+
+    .sidebar-header { display: flex; align-items: center; justify-content: space-between; gap: 0.65rem; }
+    .brand { display: inline-flex; align-items: center; gap: 0.65rem; }
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
       display: grid;
-      gap: 1.2rem;
-      overflow-y: auto;
-      flex: 1;
-      min-height: 0;
-      padding-right: 0.2rem;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 12px 22px rgba(0,0,0,0.32);
     }
-    .nav-section {
+    .logo-img { width: 32px; height: 32px; object-fit: cover; border-radius: 10px; }
+    .brand-text { display: flex; flex-direction: column; }
+    .brand-name { font-weight: 700; letter-spacing: -0.01em; }
+    .brand-sub { font-size: 0.8rem; color: var(--color-text-secondary, rgba(232,237,247,0.75)); }
+    .collapse-btn {
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      border: 1px solid color-mix(in srgb, var(--color-border, rgba(255,255,255,0.12)) 70%, transparent);
+      background: color-mix(in srgb, var(--color-surface-hover, rgba(255,255,255,0.04)) 80%, transparent);
+      color: var(--color-text-primary, #e8edf7);
+      display: grid; place-items: center;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+    .collapse-btn:hover { transform: translateY(-1px); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); }
+
+    .sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; display: grid; gap: 0.9rem; padding-right: 0.15rem; }
+    .nav-section-title { font-size: 0.85rem; color: var(--color-text-secondary, rgba(232,237,247,0.72)); padding: 0 0.3rem; margin: 0 0 0.25rem; letter-spacing: -0.01em; }
+    .nav-card {
+      background: color-mix(in srgb, var(--color-surface, #f8fafc) 85%, var(--color-surface-hover, #e2e8f0) 15%);
+      border: 1px solid color-mix(in srgb, var(--color-border, rgba(0,0,0,0.08)) 75%, transparent);
+      border-radius: 14px;
+      box-shadow:
+        inset 0 1px 0 var(--sb-shadow-highlight),
+        0 16px 30px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.22)) 90%, transparent);
+      padding: 0.3rem;
       display: grid;
-      gap: 0.3rem;
+      gap: 0.25rem;
     }
-    .nav-section-title {
-      font-size: 0.82rem;
-      letter-spacing: -0.01em;
-      text-transform: none;
-      font-weight: 500;
-      color: var(--color-text-secondary, color-mix(in srgb, var(--color-text-secondary, #a0a0a0) 90%, #ffffff 10%));
-      padding: 0 0.35rem 0.1rem 0.35rem;
-      margin-top: 2.2rem;
-      margin-bottom: 0.1rem;
-      transition: opacity 0.2s ease;
-    }
-    .nav-section:first-of-type .nav-section-title { margin-top: 0.4rem; }
-    .sidebar.sidebar-collapsed .nav-section-title {
-      opacity: 0;
-      height: 0;
-      padding: 0;
-    }
-    .nav-item a {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.58rem;
-      padding: 0.45rem 0.8rem;
-      border-radius: 16px;
-      color: var(--color-text-primary, #f5f7fb);
-      text-decoration: none;
-      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
-      position: relative;
-      overflow: hidden;
-      letter-spacing: -0.2px;
-      font-weight: 600;
-    }
-    .nav-item a::after {
-      content: '';
-      position: absolute;
-      inset: -1px;
-      border-radius: 16px;
-      background: color-mix(in srgb, var(--color-primary, #00c4cc) 12%, transparent);
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      z-index: 0;
-    }
-    .nav-item a:hover { background: color-mix(in srgb, var(--color-surface-hover, rgba(255,255,255,0.06)) 80%, transparent); transform: translateX(1px); }
-    .nav-item a:hover::after { opacity: 1; }
-    .nav-item a.active {
-      background: color-mix(in srgb, var(--color-primary, #00c4cc) 10%, transparent);
-      color: var(--color-primary, #00c4cc);
-      font-weight: 600;
-    }
-    .nav-item a.active::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 3px;
-      background: var(--color-primary, #00c4cc);
-      border-radius: 0 8px 8px 0;
-      box-shadow: 0 0 8px rgba(0, 196, 204, 0.5);
-      transform-origin: left center;
-      animation: accent-pop 0.2s ease-out;
-    }
-    .nav-item a.active::after {
-      opacity: 1;
-      background: color-mix(in srgb, var(--color-primary, #00c4cc) 18%, transparent);
-    }
-    @keyframes accent-pop {
-      0% { transform: scaleY(0.4); opacity: 0.6; }
-      100% { transform: scaleY(1); opacity: 1; }
-    }
-    .sidebar.sidebar-collapsed .nav-item a { justify-content: center; }
-    .nav-icon { width: 20px; height: 20px; display: inline-flex; color: color-mix(in srgb, var(--color-text-secondary, #cdd1d7) 90%, #ffffff 10%); }
-    .nav-item a.active .nav-icon { color: var(--color-primary, #00c4cc); }
-    .nav-text { transition: opacity 0.2s ease, transform 0.2s ease; font-weight: 600; letter-spacing: -0.2px; }
-    .sidebar.sidebar-collapsed .nav-text {
-      opacity: 0;
-      transform: translateX(-6px);
-      width: 0;
-      overflow: hidden;
-    }
-    .nav-badge {
-      margin-left: auto;
-      background: color-mix(in srgb, var(--color-primary, #00c4cc) 15%, var(--color-surface, #fff));
-      color: var(--color-text-primary, #1f2937);
-      padding: 0.1rem 0.45rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-    .sidebar-footer {
-      margin-top: auto;
-      padding-top: 0.3rem;
-      border-top: none;
-      background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--color-surface-hover, #e5e7eb) 12%, transparent) 100%);
-    }
-    .user-profile {
+    .nav-link {
       display: inline-flex;
       align-items: center;
       gap: 0.6rem;
-      width: 100%;
-      padding: 0.5rem 0.55rem;
+      padding: 0.55rem 0.65rem;
       border-radius: 12px;
-      cursor: pointer;
-      transition: background 0.2s ease;
+      color: var(--color-text-primary, #0f172a);
+      text-decoration: none;
+      position: relative;
+      transition: background 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+      box-shadow:
+        inset 2px 2px 4px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.18)) 80%, transparent),
+        inset -2px -2px 4px color-mix(in srgb, var(--color-surface, #ffffff) 30%, transparent);
     }
-    .user-profile:hover { background: color-mix(in srgb, var(--color-surface-hover, #e5e7eb) 14%, transparent); }
+    .nav-link:hover {
+      background: color-mix(in srgb, var(--color-primary, #E8BE14) 8%, var(--color-surface, #f8fafc));
+      box-shadow:
+        inset 3px 3px 6px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.22)) 85%, transparent),
+        inset -3px -3px 6px color-mix(in srgb, var(--color-surface, #ffffff) 35%, transparent);
+    }
+    .nav-link.active {
+      background: color-mix(in srgb, var(--color-primary, #E8BE14) 16%, var(--color-surface, #f8fafc));
+      color: var(--color-text-on-primary, var(--color-text-primary, #0f172a));
+      box-shadow:
+        inset 5px 5px 10px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.26)) 90%, transparent),
+        inset -5px -5px 10px color-mix(in srgb, var(--color-surface, #ffffff) 45%, transparent);
+    }
+    .nav-link.active::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 8px;
+      bottom: 8px;
+      width: 3px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--color-primary, #E8BE14), color-mix(in srgb, var(--color-primary, #E8BE14) 60%, transparent));
+      box-shadow: 0 0 10px color-mix(in srgb, var(--color-primary, #E8BE14) 70%, transparent);
+    }
+    .nav-link-icon { width: 20px; height: 20px; color: var(--color-text-secondary, rgba(232,237,247,0.82)); display: inline-flex; }
+    .nav-link.active .nav-link-icon { color: var(--color-text-on-primary, var(--color-text-primary, #0f172a)); }
+    .nav-link-text { font-weight: 700; letter-spacing: -0.02em; }
+    .nav-badge { margin-left: auto; min-width: 28px; text-align: center; background: color-mix(in srgb, var(--color-primary, #E8BE14) 20%, var(--color-surface, #0f172a)); color: var(--color-text-on-primary, #0c2243); padding: 0.2rem 0.45rem; border-radius: 999px; font-weight: 800; }
+
+    .sidebar.sidebar-collapsed .nav-section-title { display: none; }
+    .sidebar.sidebar-collapsed .nav-card { padding: 0.35rem; }
+    .sidebar.sidebar-collapsed .nav-link { justify-content: center; padding: 0.55rem; }
+    .sidebar.sidebar-collapsed .nav-link-text, .sidebar.sidebar-collapsed .nav-badge { display: none; }
+
+    .sidebar-footer { margin-top: auto; display: grid; gap: 0.5rem; }
+    .footer-cta { display: flex; justify-content: space-between; gap: 0.5rem; }
+    .ghost {
+      flex: 1;
+      padding: 0.5rem 0.6rem;
+      border-radius: 12px;
+      border: 1px solid color-mix(in srgb, var(--color-border, rgba(255,255,255,0.12)) 70%, transparent);
+      background: color-mix(in srgb, var(--color-surface, #0f172a) 92%, transparent);
+      color: var(--color-text-primary, #e8edf7);
+      cursor: pointer;
+      transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .ghost:hover { background: color-mix(in srgb, var(--color-primary, #E8BE14) 10%, transparent); border-color: color-mix(in srgb, var(--color-primary, #E8BE14) 35%, transparent); }
+
+    .user-profile {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--color-surface, #0f172a) 92%, transparent);
+      border: 1px solid color-mix(in srgb, var(--color-border, rgba(255,255,255,0.08)) 80%, transparent);
+      cursor: pointer;
+      transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .user-profile:hover { background: color-mix(in srgb, var(--color-primary, #E8BE14) 10%, transparent); border-color: color-mix(in srgb, var(--color-primary, #E8BE14) 40%, transparent); }
     .user-avatar {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       display: grid;
       place-items: center;
-      background: var(--color-primary, #00c4cc);
-      color: #0b0b0f;
+      background: linear-gradient(135deg, var(--color-primary, #E8BE14), color-mix(in srgb, var(--color-primary, #E8BE14) 65%, transparent));
+      color: var(--color-text-on-primary, #0c2243);
       font-weight: 800;
-      box-shadow: 0 10px 18px rgba(0,0,0,0.22);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
     }
-    .user-info { transition: opacity 0.2s ease, width 0.2s ease; }
-    .sidebar.sidebar-collapsed .user-info {
-      opacity: 0;
-      width: 0;
-      overflow: hidden;
-    }
-    .user-name { font-weight: 700; color: var(--color-text-primary, #e5e7eb); }
-    .user-role { font-size: 0.85rem; color: var(--color-text-secondary, #a1a1aa); }
+    .user-info { display: grid; gap: 0.05rem; }
+    .user-name { font-weight: 700; color: var(--color-text-primary, #e8edf7); }
+    .user-role { font-size: 0.85rem; color: var(--color-text-secondary, rgba(232,237,247,0.7)); }
+    .sidebar.sidebar-collapsed .footer-cta { display: none; }
+    .sidebar.sidebar-collapsed .user-info { display: none; }
   `]
 })
 export class SidebarComponent implements OnInit {
@@ -274,48 +252,21 @@ export class SidebarComponent implements OnInit {
       ]
     },
     {
-      title: 'Academic',
+      title: 'Students',
       items: [
-        { label: 'Student Workspace', path: '/students', icon: 'dashboard' },
-        // Sub-links are available inside the Student Workspace quick links.
+        { label: 'Workspace', path: '/students', icon: 'dashboard' },
+        { label: 'Admissions', path: '/admissions', icon: 'tasks' },
+        { label: 'Attendance', path: '/students/attendance', icon: 'calendar' },
+        { label: 'Academics', path: '/students/academics', icon: 'tasks' },
+        { label: 'Conduct', path: '/conduct', icon: 'people' },
+        { label: 'Reports', path: '/reports', icon: 'tasks' }
       ]
     },
     {
-      title: 'HR',
+      title: 'Finance',
       items: [
-        { label: 'Directory', path: '/hr/directory', icon: 'people' },
-        { label: 'Leave', path: '/hr/leave', icon: 'calendar' }
-      ]
-    },
-    {
-      title: 'Financial',
-      items: [
-        // { label: 'Fees', path: '/fees', icon: '💰' },
-        // { label: 'Invoices', path: '/fees/invoices', icon: '🧾' },
-        // { label: 'Fee Plans', path: '/fees/plans', icon: '🗂️' },
-        // { label: 'Bulk Invoice', path: '/fees/bulk-invoices', icon: '📥' },
         { label: 'Accounting', path: '/accounting', icon: 'accounting' },
-        // { label: 'Finance', path: '/finance', icon: '📈' },
-        // { label: 'Payroll', path: '/payroll', icon: '💵' }
-      ]
-    },
-    {
-      title: 'Staff & Resources',
-      items: [
-        { label: 'HR', path: '/hr', icon: 'hr' },
-        { label: 'Library', path: '/library', icon: 'library' },
-        { label: 'Hostel', path: '/hostel', icon: 'hostel' },
-        { label: 'Transport', path: '/transport', icon: 'transport' }
-      ]
-    },
-    {
-      title: 'Human Resources',
-      items: [
-        { label: 'Directory', path: '/hr/directory', icon: 'hr' },
-        { label: 'Profiles', path: '/hr/profiles', icon: 'dashboard' },
-        { label: 'Leave', path: '/hr/leave', icon: 'calendar' },
-        { label: 'Attendance', path: '/hr/attendance', icon: 'tasks' },
-        { label: 'Settings', path: '/hr/settings', icon: 'settings' }
+        { label: 'Fee Management', path: '/accounting/fees', icon: 'tasks' }
       ]
     },
     {
