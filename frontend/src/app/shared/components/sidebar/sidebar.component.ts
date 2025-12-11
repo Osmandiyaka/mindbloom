@@ -25,7 +25,7 @@ interface NavSection {
   template: `
     <aside class="sidebar" [class.sidebar-collapsed]="collapsed">
       <div class="sidebar-header">
-        <div class="brand">
+        <div class="brand logo-bar">
           <div class="brand-mark">
             <ng-container *ngIf="tenantLogo; else defaultLogo">
               <img [src]="tenantLogo" alt="Tenant logo" class="logo-img" />
@@ -83,6 +83,8 @@ interface NavSection {
       --sb-gold: var(--color-primary, #E5C100);
       --sb-text: var(--color-text-primary, #cfc7bc);
       --sb-text-secondary: var(--color-text-secondary, #a39a90);
+      --sh-dark-crisp: rgba(0,0,0,0.42);
+      --sh-dark-deep: rgba(0,0,0,0.24);
       position: sticky;
       top: 0;
       height: 100vh;
@@ -107,13 +109,22 @@ interface NavSection {
       align-items: center;
       gap: 0.65rem;
       padding: 0.1rem 0.15rem;
+      background: rgba(255,255,255,0.02);
+      border-radius: 14px;
     }
-    .brand {
+    .brand.logo-bar {
       display: inline-flex;
       align-items: center;
       gap: 0.65rem;
       flex: 1;
       min-width: 0;
+      background: color-mix(in srgb, var(--color-surface, #0f172a) 80%, transparent);
+      border-radius: 16px;
+      padding: 0.35rem 0.45rem;
+      box-shadow:
+        5px 5px 10px var(--sh-dark-crisp),
+        10px 12px 28px var(--sh-dark-deep),
+        inset -3px -3px 8px color-mix(in srgb, var(--sb-gold) 12%, transparent);
     }
     .brand-mark {
       width: 42px;
