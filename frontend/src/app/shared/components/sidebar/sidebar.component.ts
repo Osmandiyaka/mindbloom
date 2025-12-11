@@ -219,7 +219,14 @@ interface NavSection {
       background: var(--sb-gold);
       box-shadow: 0 0 8px color-mix(in srgb, var(--sb-gold) 60%, transparent);
     }
-    .nav-link-icon { width: 20px; height: 20px; color: var(--sb-text-secondary); display: inline-flex; transition: filter 0.2s ease; }
+    .nav-link-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--sb-text-secondary);
+      display: inline-flex;
+      transition: filter 0.2s ease, transform 0.2s ease, color 0.2s ease;
+      transform: translateY(-1px);
+    }
     .nav-link:hover .nav-link-icon { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--sb-gold) 50%, transparent)); }
     .nav-link.active .nav-link-icon {
       color: var(--color-text-on-primary, #0f172a);
