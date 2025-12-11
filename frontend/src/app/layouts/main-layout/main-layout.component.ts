@@ -32,7 +32,8 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
   `,
   styles: [`
     :host {
-      --toolbar-height: clamp(52px, 6vw, 68px);
+      --toolbar-height: 60px;
+      --task-sticky-height: 48px;
       display: block;
       height: 100%;
     }
@@ -59,7 +60,7 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       flex: 1;
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      height: 100%;
       min-height: 0;
       min-width: 0;
       overflow: hidden;
@@ -71,23 +72,23 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       flex-shrink: 0;
       position: sticky;
       top: 0;
-      z-index: 60;
-      background: rgba(18, 12, 8, 0.9);
-      backdrop-filter: blur(10px);
+      z-index: 100;
+      background: rgba(18, 12, 8, 0.88);
+      backdrop-filter: blur(12px) saturate(140%);
       box-shadow: 0 6px 14px rgba(0,0,0,0.22);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     }
 
-    app-task-sticky { top: var(--toolbar-height); z-index: 55; }
+    app-task-sticky { top: var(--toolbar-height); z-index: 90; }
 
     .main-content {
       flex: 1;
       min-height: 0;
       min-width: 0;
       overflow-y: auto;
-      padding: 0;
       width: 100%;
-      background: var(--content-background, var(--color-background, #12141b));
-      background-color: var(--content-background, var(--color-background, #12141b));
+      padding: 0;
+      background: transparent;
       z-index: 1;
     }
 
@@ -95,8 +96,11 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       width: 100%;
       max-width: 1400px;
       margin: 0 auto;
-      padding: clamp(1rem, 2vw, 1.5rem) clamp(1rem, 3vw, 2rem);
-      padding-top: clamp(0.85rem, 1.5vw, 1.25rem);
+      padding-left: clamp(1.5rem, 3vw, 2.5rem);
+      padding-right: clamp(1.5rem, 3vw, 2.5rem);
+      padding-top: 2rem;
+      padding-bottom: 4rem;
+      min-height: 100%;
     }
 
     @media (max-width: 1024px) {
@@ -105,12 +109,18 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       }
 
       :host {
-        --toolbar-height: clamp(68px, 9vw, 96px);
+        --toolbar-height: 72px;
       }
     }
 
     @media (max-width: 768px) {
-      :host { --toolbar-height: clamp(88px, 18vw, 132px); }
+      :host { --toolbar-height: 88px; }
+      .main-shell {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+        padding-top: 1.5rem;
+        padding-bottom: 3rem;
+      }
     }
   `]
 })
