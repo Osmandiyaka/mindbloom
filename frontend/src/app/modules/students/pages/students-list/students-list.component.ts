@@ -29,7 +29,8 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
           <button *ngFor="let tab of commandTabs"
                   type="button"
                   class="command-tab"
-                  [class.active]="tab.active">
+                  [class.active]="tab.active"
+                  (click)="setActiveTab(tab.label)">
             {{ tab.label }}
           </button>
         </div>
@@ -43,8 +44,17 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
             <option value="">All grades</option>
             <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
           </select>
+          <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+            <option value="">All statuses</option>
+            <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
+          </select>
         </div>
         <div class="toolbar-right">
+          <div class="bulk-inline" *ngIf="selectedIds().size">
+            <span class="selected-count">{{ selectedIds().size }} selected</span>
+            <app-button variant="secondary" size="sm" (click)="bulkAction('attendance')">Take attendance</app-button>
+            <app-button variant="secondary" size="sm" (click)="bulkAction('note')">Add note</app-button>
+          </div>
           <div class="view-toggle" role="group" aria-label="View switch">
             <button
               type="button"
@@ -259,8 +269,10 @@ export class StudentsListComponent implements OnInit {
   searchTerm = '';
   viewMode = signal<'table' | 'grid'>('table');
   gradeFilter = '';
+  statusFilter = '';
   actionsOpen = false;
   grades: string[] = ['Grade 5', 'Grade 6', 'Grade 7', 'Grade 8'];
+  statuses: string[] = ['active', 'inactive', 'transferred'];
   selectedIds = signal<Set<string>>(new Set());
   modalOpen = signal(false);
   crumbs: Crumb[] = [
@@ -268,7 +280,7 @@ export class StudentsListComponent implements OnInit {
   ];
   commandTabs = [
     { label: 'Roster', active: true },
-    { label: 'Admission', active: false },
+    { label: 'Admissions', active: false },
     { label: 'Attendance', active: false },
     { label: 'Reports', active: false },
     { label: 'Notes', active: false },
@@ -404,7 +416,8 @@ export class StudentsListComponent implements OnInit {
         s.enrollment.admissionNumber.toLowerCase().includes(term) ||
         (s.email || '').toLowerCase().includes(term);
       const matchesGrade = !this.gradeFilter || s.enrollment.class?.toLowerCase().startsWith(this.gradeFilter.toLowerCase());
-      return matchesTerm && matchesGrade;
+      const matchesStatus = !this.statusFilter || (s.status || '').toLowerCase() === this.statusFilter.toLowerCase();
+      return matchesTerm && matchesGrade && matchesStatus;
     });
   }
 
@@ -435,5 +448,14 @@ export class StudentsListComponent implements OnInit {
   allSelected() {
     const filtered = this.filteredStudents();
     return filtered.length > 0 && filtered.every(s => this.selectedIds().has(s.id));
+  }
+
+  setActiveTab(label: string) {
+    this.commandTabs = this.commandTabs.map(tab => ({ ...tab, active: tab.label === label }));
+  }
+
+  bulkAction(action: 'attendance' | 'note') {
+    // Placeholder for future wiring; keeps UI aligned with bulk flow
+    console.log(`Bulk action: ${action}`, Array.from(this.selectedIds()));
   }
 }
