@@ -120,11 +120,11 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
 
     .main-shell {
       width: 100%;
-      max-width: 1440px;
+      max-width: 1600px;
       margin: 0 auto;
-      padding-left: clamp(1.5rem, 4vw, 3rem);
-      padding-right: clamp(1.5rem, 4vw, 3rem);
-      padding-top: 2.5rem;
+      padding-left: clamp(1rem, 2vw, 1.5rem);
+      padding-right: clamp(1rem, 2vw, 1.5rem);
+      padding-top: 2rem;
       padding-bottom: 5rem;
       min-height: 100%;
       animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -148,8 +148,8 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
     @media (max-width: 768px) {
       :host { --toolbar-height: 88px; }
       .main-shell {
-        padding-left: 1.25rem;
-        padding-right: 1.25rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
         padding-top: 1.5rem;
         padding-bottom: 3rem;
       }
