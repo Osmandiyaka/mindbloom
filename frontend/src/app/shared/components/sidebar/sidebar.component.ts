@@ -36,12 +36,9 @@ interface NavSection {
           </div>
           <div class="brand-text" *ngIf="!collapsed">
             <div class="brand-name">{{ tenantName || 'MindBloom' }}</div>
-            <div class="brand-sub">School OS</div>
           </div>
         </div>
-        <button class="collapse-btn" type="button" (click)="collapsed = !collapsed">
-          <span [innerHTML]="icon('menu')"></span>
-        </button>
+       
       </div>
 
       <nav class="sidebar-nav">
@@ -105,8 +102,19 @@ interface NavSection {
     }
     .sidebar.sidebar-collapsed { width: 84px; padding: 0.9rem 0.6rem; }
 
-    .sidebar-header { display: flex; align-items: center; justify-content: space-between; gap: 0.65rem; }
-    .brand { display: inline-flex; align-items: center; gap: 0.65rem; }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.1rem 0.15rem;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex: 1;
+      min-width: 0;
+    }
     .brand-mark {
       width: 42px;
       height: 42px;
@@ -118,9 +126,9 @@ interface NavSection {
       box-shadow: 0 12px 22px rgba(0,0,0,0.32);
     }
     .logo-img { width: 32px; height: 32px; object-fit: cover; border-radius: 10px; }
-    .brand-text { display: flex; flex-direction: column; }
-    .brand-name { font-weight: 700; letter-spacing: -0.01em; }
-    .brand-sub { font-size: 0.8rem; color: var(--color-text-secondary, rgba(232,237,247,0.75)); }
+    .brand-text { display: flex; flex-direction: column; min-width: 0; }
+    .brand-name { font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
+    .brand-sub { font-size: 0.8rem; color: var(--color-text-secondary, rgba(232,237,247,0.75)); line-height: 1.2; }
     .collapse-btn {
       width: 38px; height: 38px;
       border-radius: 12px;
@@ -130,6 +138,7 @@ interface NavSection {
       display: grid; place-items: center;
       cursor: pointer;
       transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+      margin-left: auto;
     }
     .collapse-btn:hover { transform: translateY(-1px); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); }
 
@@ -176,11 +185,12 @@ interface NavSection {
       color: var(--color-text-primary, #0f172a);
     }
     .nav-link.active {
-      background: color-mix(in srgb, var(--sb-gold) 18%, var(--color-surface, #f8fafc));
+      background: var(--sb-gold);
       color: var(--color-text-on-primary, #0f172a);
       box-shadow:
-        inset 5px 5px 10px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.26)) 90%, transparent),
-        inset -5px -5px 10px color-mix(in srgb, var(--color-surface, #ffffff) 45%, transparent);
+        inset 5px 5px 10px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.26)) 85%, transparent),
+        inset -5px -5px 10px color-mix(in srgb, var(--color-surface, #ffffff) 45%, transparent),
+        0 0 12px color-mix(in srgb, var(--sb-gold) 30%, transparent);
     }
     .nav-link.active::before {
       content: '';
@@ -190,8 +200,8 @@ interface NavSection {
       bottom: 8px;
       width: 3px;
       border-radius: 999px;
-      background: linear-gradient(180deg, var(--sb-gold), color-mix(in srgb, var(--sb-gold) 60%, transparent));
-      box-shadow: 0 0 10px color-mix(in srgb, var(--sb-gold) 70%, transparent);
+      background: var(--sb-gold);
+      box-shadow: 0 0 8px color-mix(in srgb, var(--sb-gold) 60%, transparent);
     }
     .nav-link-icon { width: 20px; height: 20px; color: var(--sb-text-secondary); display: inline-flex; transition: filter 0.2s ease; }
     .nav-link:hover .nav-link-icon { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--sb-gold) 50%, transparent)); }
