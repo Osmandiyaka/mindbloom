@@ -269,7 +269,7 @@ export class AccountingOverviewComponent implements OnInit {
     return this.accounting.trialBalance().slice(0, 5);
   }
 
-  constructor(public accounting: AccountingService, private icons: IconRegistryService) {}
+  constructor(public accounting: AccountingService, private icons: IconRegistryService) { }
 
   tiles = [
     { label: 'Collections today', value: '$18,400', sub: '+8.5% vs plan', icon: 'collection', status: 'ready', statusLabel: 'On track' },

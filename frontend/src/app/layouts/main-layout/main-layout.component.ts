@@ -34,8 +34,16 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
     :host {
       --toolbar-height: 60px;
       --task-sticky-height: 48px;
+      --brand-gold: #E5C100;
+      --brand-surface-deep: #12141b;
       display: block;
       height: 100%;
+    }
+
+    ::selection {
+      background: var(--brand-gold);
+      color: #000;
+      text-shadow: none;
     }
 
     .app-layout {
@@ -44,8 +52,8 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       height: 100vh;
       max-height: 100vh;
       overflow: hidden;
-      background: var(--content-background, var(--color-background, #12141b));
-      transition: grid-template-columns 0.25s ease;
+      background: var(--content-background, var(--brand-surface-deep));
+      transition: grid-template-columns 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
     @supports (height: 100dvh) {
@@ -64,7 +72,11 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       min-height: 0;
       min-width: 0;
       overflow: hidden;
-      background: linear-gradient(180deg, rgba(18, 12, 8, 0.9), rgba(12, 8, 6, 0.95));
+      background: radial-gradient(
+        circle at 50% 30%,
+        rgba(30, 20, 15, 0.4) 0%,
+        rgba(12, 8, 6, 0.95) 80%
+      );
     }
 
     app-global-toolbar,
@@ -73,10 +85,10 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(18, 12, 8, 0.88);
-      backdrop-filter: blur(12px) saturate(140%);
-      box-shadow: 0 6px 14px rgba(0,0,0,0.22);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      background: rgba(18, 12, 8, 0.85);
+      backdrop-filter: blur(16px) saturate(180%);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     }
 
     app-task-sticky { top: var(--toolbar-height); z-index: 90; }
@@ -86,21 +98,41 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       min-height: 0;
       min-width: 0;
       overflow-y: auto;
+      overflow-x: hidden;
       width: 100%;
       padding: 0;
       background: transparent;
       z-index: 1;
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
     }
+
+    .main-content::-webkit-scrollbar { width: 8px; }
+    .main-content::-webkit-scrollbar-track { background: transparent; }
+    .main-content::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      border: 3px solid transparent;
+      background-clip: content-box;
+    }
+    .main-content::-webkit-scrollbar-thumb:hover { background-color: rgba(255, 255, 255, 0.2); }
 
     .main-shell {
       width: 100%;
-      max-width: 1400px;
+      max-width: 1440px;
       margin: 0 auto;
-      padding-left: clamp(1.5rem, 3vw, 2.5rem);
-      padding-right: clamp(1.5rem, 3vw, 2.5rem);
-      padding-top: 2rem;
-      padding-bottom: 4rem;
+      padding-left: clamp(1.5rem, 4vw, 3rem);
+      padding-right: clamp(1.5rem, 4vw, 3rem);
+      padding-top: 2.5rem;
+      padding-bottom: 5rem;
       min-height: 100%;
+      animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     @media (max-width: 1024px) {
@@ -116,8 +148,8 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
     @media (max-width: 768px) {
       :host { --toolbar-height: 88px; }
       .main-shell {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
         padding-top: 1.5rem;
         padding-bottom: 3rem;
       }
