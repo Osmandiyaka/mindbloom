@@ -153,7 +153,7 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                               <div class="student-name-block">
                                 <div class="name-row">
                                   <span class="name">{{ student.fullName }}</span>
-                                  <span class="status-chip" [ngClass]="hasFeeDue(student) ? 'due' : 'clear'">{{ hasFeeDue(student) ? 'Fees Due' : 'Clear' }}</span>
+                                  <span class="status-chip" [ngClass]="hasFeeDue(student) ? 'due' : 'clear'">{{ hasFeeDue(student) ? 'Fees Due' : 'No Fees Due' }}</span>
                                 </div>
                                 <span class="student-id">ID · {{ student.enrollment.admissionNumber }}</span>
                               </div>
