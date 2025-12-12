@@ -20,10 +20,6 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
   styleUrls: ['./students-list.component.scss'],
   template: `
     <div class="students-page">
-      @if (showBreadcrumbs) {
-        <app-breadcrumbs [items]="crumbs"></app-breadcrumbs>
-      }
-
       <div class="page-context">
         <div>
           <p class="eyebrow">Students / Hub</p>
@@ -55,19 +51,6 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
             <span class="metric-value">{{ healthFlagTotal() }}</span>
           </div>
         </div>
-      </div>
-
-      <div class="command-strip">
-        <div class="command-tabs">
-          <button *ngFor="let tab of commandTabs"
-                  type="button"
-                  class="command-tab"
-                  [class.active]="tab.active"
-                  (click)="setActiveTab(tab.label)">
-            {{ tab.label }}
-          </button>
-        </div>
-        <div class="accent-line"></div>
       </div>
 
       <div class="toolbar">
