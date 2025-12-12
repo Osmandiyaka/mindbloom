@@ -40,14 +40,18 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
       <div class="toolbar">
         <div class="toolbar-left">
           <app-search-input class="search-inline" placeholder="Search students..." (search)="onSearch($event)"></app-search-input>
-          <select [(ngModel)]="gradeFilter" (change)="applyFilters()">
-            <option value="">All grades</option>
-            <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
-          </select>
-          <select [(ngModel)]="statusFilter" (change)="applyFilters()">
-            <option value="">All statuses</option>
-            <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
-          </select>
+          <div class="filter-chip">
+            <select [(ngModel)]="gradeFilter" (change)="applyFilters()">
+              <option value="">All grades</option>
+              <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+            </select>
+          </div>
+          <div class="filter-chip">
+            <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+              <option value="">All statuses</option>
+              <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
+            </select>
+          </div>
         </div>
         <div class="toolbar-right">
           <div class="bulk-inline" *ngIf="selectedIds().size">
@@ -151,7 +155,10 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                                 <span class="avatar">{{ initials(student.fullName) }}</span>
                               </div>
                               <div class="student-name-block">
-                                <span class="name">{{ student.fullName }}</span>
+                                <div class="name-row">
+                                  <span class="name">{{ student.fullName }}</span>
+                                  <span class="status-chip" [ngClass]="student.status || 'active'">{{ (student.status || 'active') | titlecase }}</span>
+                                </div>
                                 <span class="student-id">ID · {{ student.enrollment.admissionNumber }}</span>
                               </div>
                             </div>
