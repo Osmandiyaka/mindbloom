@@ -326,6 +326,62 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
       }
     </div>
 
+    <!-- Quick View Drawer -->
+    <div class="quick-view-overlay" *ngIf="quickViewStudent()">
+      <div class="quick-view-backdrop" (click)="closeQuickView()"></div>
+      <aside class="quick-view-drawer">
+        <header class="quick-view-header">
+          <div class="header-main">
+            <div class="avatar-wrap">
+              <span class="avatar">{{ initials(quickViewStudent()!.fullName) }}</span>
+            </div>
+            <div class="header-text">
+              <div class="name-row">
+                <h3>{{ quickViewStudent()!.fullName }}</h3>
+                <span class="status-chip" [ngClass]="hasFeeDue(quickViewStudent()!) ? 'due' : 'clear'">
+                  {{ hasFeeDue(quickViewStudent()!) ? 'Fees Due' : 'No Fees Due' }}
+                </span>
+              </div>
+              <p class="subline">ID · {{ quickViewStudent()!.enrollment.admissionNumber }}</p>
+              <p class="subline">Class {{ quickViewStudent()!.enrollment.class }}{{ quickViewStudent()!.enrollment.section ? '-' + quickViewStudent()!.enrollment.section : '' }}</p>
+            </div>
+          </div>
+          <button class="icon-btn" type="button" (click)="closeQuickView()" aria-label="Close quick view">
+            <span [innerHTML]="icon('close')"></span>
+          </button>
+        </header>
+        <div class="quick-view-body">
+          <div class="kv">
+            <span class="label">Guardian</span>
+            <span class="value">{{ primaryGuardianName(quickViewStudent()!) }}</span>
+          </div>
+          <div class="kv">
+            <span class="label">Phone</span>
+            <a class="value link" [href]="primaryGuardianPhoneHref(quickViewStudent()!)">{{ primaryGuardianPhone(quickViewStudent()!) }}</a>
+          </div>
+          <div class="kv">
+            <span class="label">Status</span>
+            <span class="pill subtle">{{ (quickViewStudent()!.status || 'active') | titlecase }}</span>
+          </div>
+          <div class="kv">
+            <span class="label">Alerts</span>
+            <span class="pill critical" *ngIf="hasFeeDue(quickViewStudent()!)">Fee alert</span>
+            <span class="pill neutral" *ngIf="!hasFeeDue(quickViewStudent()!)">No outstanding alerts</span>
+          </div>
+        </div>
+        <footer class="quick-view-footer">
+          <app-button variant="secondary" size="sm" (click)="logAttendanceAction($event, quickViewStudent()!)">
+            <span class="icon" [innerHTML]="icon('calendar')"></span>
+            Record attendance
+          </app-button>
+          <app-button variant="primary" size="sm" (click)="viewStudent($event, quickViewStudent()!.id)">
+            <span class="icon" [innerHTML]="icon('eye')"></span>
+            Open profile
+          </app-button>
+        </footer>
+      </aside>
+    </div>
+
     <app-modal [isOpen]="modalOpen()" (closed)="closeModal()" title="Add Student" size="xl">
       <app-student-form (submitted)="onModalSubmit()" (cancelled)="closeModal()"></app-student-form>
     </app-modal>
@@ -346,6 +402,7 @@ export class StudentsListComponent implements OnInit {
   statuses: string[] = ['active', 'inactive', 'transferred'];
   selectedIds = signal<Set<string>>(new Set());
   modalOpen = signal(false);
+  quickViewStudent = signal<Student | null>(null);
   triageToday = [
     { name: 'Late arrivals', value: 3, cta: 'Process' },
     { name: 'Early leaves', value: 1, cta: 'Review' },
@@ -562,7 +619,11 @@ export class StudentsListComponent implements OnInit {
   openQuickView(event: Event, student: Student) {
     event.stopPropagation();
     this.closeRowMenu();
-    console.log('Quick view (stub):', student);
+    this.quickViewStudent.set(student);
+  }
+
+  closeQuickView() {
+    this.quickViewStudent.set(null);
   }
 
   logAttendanceAction(event: Event, student: Student) {
