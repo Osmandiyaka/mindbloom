@@ -464,7 +464,7 @@ app-modal ::ng-deep .modal-header h3 {
 
                         .name {
                             font-weight: 800;
-                            color: var(--mb-text-primary);
+                            color: #ffffff; /* stronger contrast on warm surfaces */
                             white-space: nowrap;
                             overflow: hidden;
                             text-overflow: ellipsis;
