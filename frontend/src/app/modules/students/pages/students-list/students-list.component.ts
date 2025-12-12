@@ -40,18 +40,14 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
       <div class="toolbar">
         <div class="toolbar-left">
           <app-search-input class="search-inline" placeholder="Search students..." (search)="onSearch($event)"></app-search-input>
-          <div class="filter-chip">
-            <select [(ngModel)]="gradeFilter" (change)="applyFilters()">
-              <option value="">All grades</option>
-              <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
-            </select>
-          </div>
-          <div class="filter-chip">
-            <select [(ngModel)]="statusFilter" (change)="applyFilters()">
-              <option value="">All statuses</option>
-              <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
-            </select>
-          </div>
+          <select [(ngModel)]="gradeFilter" (change)="applyFilters()">
+            <option value="">All grades</option>
+            <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+          </select>
+          <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+            <option value="">All statuses</option>
+            <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
+          </select>
         </div>
         <div class="toolbar-right">
           <div class="bulk-inline" *ngIf="selectedIds().size">
@@ -157,7 +153,7 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                               <div class="student-name-block">
                                 <div class="name-row">
                                   <span class="name">{{ student.fullName }}</span>
-                                  <span class="status-chip" [ngClass]="student.status || 'active'">{{ (student.status || 'active') | titlecase }}</span>
+                                  <span class="status-chip" [ngClass]="hasFeeDue(student) ? 'due' : 'clear'">{{ hasFeeDue(student) ? 'Fees Due' : 'Clear' }}</span>
                                 </div>
                                 <span class="student-id">ID · {{ student.enrollment.admissionNumber }}</span>
                               </div>
@@ -552,6 +548,11 @@ export class StudentsListComponent implements OnInit {
   contactGuardianAction(event: Event, student: Student) {
     event.stopPropagation();
     console.log('Contact guardian (stub):', this.primaryGuardianPhone(student));
+  }
+
+  hasFeeDue(student: Student): boolean {
+    const anyStudent = student as any;
+    return Boolean(anyStudent.feeFlag || anyStudent.feeDue || anyStudent.feeBalance || anyStudent.balanceDue);
   }
 
   primaryGuardianName(student: Student): string {
