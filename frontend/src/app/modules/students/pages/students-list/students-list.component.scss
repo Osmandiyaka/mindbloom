@@ -153,6 +153,20 @@
     flex-wrap: nowrap;
     flex: 1 1 auto;
     min-width: 0;
+
+    .filter-field {
+      display: grid;
+      gap: 0.2rem;
+      min-width: 160px;
+
+      .filter-label {
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: color-mix(in srgb, var(--mb-text-secondary) 85%, #ffffff 15%);
+        font-weight: 700;
+      }
+    }
 }
 
 .toolbar-left h2 {

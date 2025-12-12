@@ -47,15 +47,24 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
 
       <div class="toolbar">
         <div class="toolbar-left">
-          <app-search-input class="search-inline" placeholder="Search students..." (search)="onSearch($event)"></app-search-input>
-          <select [(ngModel)]="gradeFilter" (change)="applyFilters()">
-            <option value="">All grades</option>
-            <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
-          </select>
-          <select [(ngModel)]="statusFilter" (change)="applyFilters()">
-            <option value="">All statuses</option>
-            <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
-          </select>
+          <div class="filter-field">
+            <span class="filter-label">Search</span>
+            <app-search-input class="search-inline" placeholder="Search students..." (search)="onSearch($event)"></app-search-input>
+          </div>
+          <div class="filter-field">
+            <span class="filter-label">Grade</span>
+            <select [(ngModel)]="gradeFilter" (change)="applyFilters()">
+              <option value="">All grades</option>
+              <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <span class="filter-label">Status</span>
+            <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+              <option value="">All statuses</option>
+              <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
+            </select>
+          </div>
         </div>
         <div class="toolbar-right">
           <div class="bulk-inline" *ngIf="selectedIds().size">
