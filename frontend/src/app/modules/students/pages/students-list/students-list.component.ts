@@ -181,7 +181,17 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                     <td>
                       <div class="meta-cell">
                         <div>{{ primaryGuardianName(student) }}</div>
-                        <div class="muted tiny">{{ primaryGuardianPhone(student) }}</div>
+                        <div class="muted tiny phone-line">
+                          <span>{{ primaryGuardianPhone(student) }}</span>
+                          <a
+                            class="phone-link"
+                            [href]="primaryGuardianPhoneHref(student)"
+                            [attr.aria-label]="'Call ' + primaryGuardianName(student)"
+                            (click)="$event.stopPropagation()">
+                            <span class="icon" [innerHTML]="icon('phone')"></span>
+                            Call
+                          </a>
+                        </div>
                         <div class="trust-pill">
                           <span class="icon" [innerHTML]="icon('lock')"></span>
                           <span>Protected contact</span>
@@ -192,10 +202,10 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                       <div class="cell-actions">
                         <button (click)="logAttendanceAction($event, student)" title="Record attendance"><span class="icon" [innerHTML]="icon('calendar')"></span></button>
                         <button (click)="contactGuardianAction($event, student)" title="Contact guardian"><span class="icon" [innerHTML]="icon('phone')"></span></button>
-                        <button (click)="openQuickView($event, student)" title="Quick view"><span class="icon" [innerHTML]="icon('eye')"></span></button>
                         <div class="more-menu" [class.open]="rowMenuOpen() === student.id">
                           <button (click)="toggleRowMenu($event, student.id)" title="More actions"><span class="icon" [innerHTML]="icon('ellipsis')"></span></button>
                           <div class="menu-panel" *ngIf="rowMenuOpen() === student.id">
+                            <button (click)="openQuickView($event, student)">Quick view</button>
                             <button (click)="logIncidentAction($event, student)">Log incident</button>
                             <button (click)="editStudent($event, student.id)">Edit</button>
                             <button class="danger" (click)="deleteStudent($event, student)">Delete</button>
@@ -605,6 +615,12 @@ export class StudentsListComponent implements OnInit {
   primaryGuardianPhone(student: Student): string {
     const g = student.guardians && student.guardians.length ? student.guardians[0] : null;
     return g?.phone || student.phone || 'No contact';
+  }
+
+  primaryGuardianPhoneHref(student: Student): string {
+    const raw = this.primaryGuardianPhone(student);
+    const digitsOnly = raw.replace(/[^0-9+]/g, '');
+    return digitsOnly ? `tel:${digitsOnly}` : '#';
   }
 
 }
