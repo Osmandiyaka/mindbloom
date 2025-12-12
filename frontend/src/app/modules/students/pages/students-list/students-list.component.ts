@@ -24,6 +24,14 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
         <app-breadcrumbs [items]="crumbs"></app-breadcrumbs>
       }
 
+      <div class="page-context">
+        <div>
+          <p class="eyebrow">Students / Hub</p>
+          <h1>Student Management Workspace</h1>
+          <p class="muted">Live roster, triage, and quick actions for front-desk staff.</p>
+        </div>
+      </div>
+
       <div class="command-strip">
         <div class="command-tabs">
           <button *ngFor="let tab of commandTabs"

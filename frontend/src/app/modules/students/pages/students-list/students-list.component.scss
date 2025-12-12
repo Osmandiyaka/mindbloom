@@ -24,7 +24,44 @@
   flex-direction: column;
   gap: var(--mb-gap);
   font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
   padding: clamp(1.1rem, 2vw, 1.65rem);
+}
+
+.page-context {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.8rem 0.9rem;
+  background: color-mix(in srgb, var(--mb-surface) 86%, #0f0c08 14%);
+  border: 1px solid var(--mb-border);
+  border-radius: var(--mb-radius);
+  box-shadow: 0 12px 26px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.05);
+  color: var(--mb-text-primary);
+  margin-bottom: 0.5rem;
+
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    color: color-mix(in srgb, var(--mb-text-secondary) 80%, #ffffff 20%);
+    margin: 0 0 0.15rem 0;
+    font-size: 0.72rem;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+    line-height: 1.2;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+
+  .muted {
+    margin: 0.1rem 0 0;
+    color: var(--mb-text-muted);
+  }
 }
 
 .sr-only {
