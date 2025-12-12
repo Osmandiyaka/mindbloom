@@ -1628,6 +1628,8 @@ app-modal ::ng-deep .modal-header h3 {
 .quick-view-drawer {
   position: relative;
   width: min(1280px, 100%);
+  max-width: calc(100% - 2rem);
+  margin-inline: auto;
   max-height: 80vh;
   background: color-mix(in srgb, var(--mb-surface-strong) 94%, rgba(255,255,255,0.08));
   border: 1px solid color-mix(in srgb, var(--mb-border) 80%, rgba(255,255,255,0.08));
