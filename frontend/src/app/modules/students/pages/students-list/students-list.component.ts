@@ -154,7 +154,7 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                           <th style="width:48px;"><input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll($event)"/></th>
                     <th class="sortable">Student</th>
                     <th>ID</th>
-                    <th>Class/Section</th>
+                    <th class="class-col">Class/Section</th>
                     <th>Guardian Name and Phone</th>
                     <th>Actions</th>
                   </tr>
@@ -177,7 +177,7 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                             </div>
                           </td>
                     <td>{{ student.enrollment.admissionNumber || '—' }}</td>
-                    <td>{{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</td>
+                    <td class="class-col">{{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</td>
                     <td>
                       <div class="meta-cell">
                         <div>{{ primaryGuardianName(student) }}</div>
@@ -191,11 +191,16 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                     <td>
                       <div class="cell-actions">
                         <button (click)="logAttendanceAction($event, student)" title="Record attendance"><span class="icon" [innerHTML]="icon('calendar')"></span></button>
-                        <button (click)="logIncidentAction($event, student)" title="Log incident"><span class="icon" [innerHTML]="icon('tasks')"></span></button>
                         <button (click)="contactGuardianAction($event, student)" title="Contact guardian"><span class="icon" [innerHTML]="icon('phone')"></span></button>
                         <button (click)="openQuickView($event, student)" title="Quick view"><span class="icon" [innerHTML]="icon('eye')"></span></button>
-                        <button (click)="editStudent($event, student.id)" title="Edit"><span class="icon" [innerHTML]="icon('edit')"></span></button>
-                        <button (click)="deleteStudent($event, student)" title="Delete"><span class="icon" [innerHTML]="icon('trash')"></span></button>
+                        <div class="more-menu" [class.open]="rowMenuOpen() === student.id">
+                          <button (click)="toggleRowMenu($event, student.id)" title="More actions"><span class="icon" [innerHTML]="icon('ellipsis')"></span></button>
+                          <div class="menu-panel" *ngIf="rowMenuOpen() === student.id">
+                            <button (click)="logIncidentAction($event, student)">Log incident</button>
+                            <button (click)="editStudent($event, student.id)">Edit</button>
+                            <button class="danger" (click)="deleteStudent($event, student)">Delete</button>
+                          </div>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -342,6 +347,7 @@ export class StudentsListComponent implements OnInit {
   error = signal<string | null>(null);
   searchTerm = '';
   viewMode = signal<'table' | 'grid'>('table');
+  rowMenuOpen = signal<string | null>(null);
   gradeFilter = '';
   statusFilter = 'active';
   actionsOpen = false;
@@ -423,11 +429,13 @@ export class StudentsListComponent implements OnInit {
 
   editStudent(event: Event, id: string): void {
     event.stopPropagation();
+    this.closeRowMenu();
     this.router.navigate(['/students', id, 'edit']);
   }
 
   deleteStudent(event: Event, student: Student): void {
     event.stopPropagation();
+    this.closeRowMenu();
     if (confirm(`Are you sure you want to delete ${student.fullName}?`)) {
       this.studentService.deleteStudent(student.id).subscribe({
         next: () => {
@@ -551,23 +559,36 @@ export class StudentsListComponent implements OnInit {
     console.log(`Bulk action: ${action}`, Array.from(this.selectedIds()));
   }
 
+  toggleRowMenu(event: Event, id: string) {
+    event.stopPropagation();
+    this.rowMenuOpen.set(this.rowMenuOpen() === id ? null : id);
+  }
+
+  closeRowMenu() {
+    this.rowMenuOpen.set(null);
+  }
+
   openQuickView(event: Event, student: Student) {
     event.stopPropagation();
+    this.closeRowMenu();
     console.log('Quick view (stub):', student);
   }
 
   logAttendanceAction(event: Event, student: Student) {
     event.stopPropagation();
+    this.closeRowMenu();
     console.log('Record attendance (stub):', student);
   }
 
   logIncidentAction(event: Event, student: Student) {
     event.stopPropagation();
+    this.closeRowMenu();
     console.log('Log incident (stub):', student);
   }
 
   contactGuardianAction(event: Event, student: Student) {
     event.stopPropagation();
+    this.closeRowMenu();
     console.log('Contact guardian (stub):', this.primaryGuardianPhone(student));
   }
 

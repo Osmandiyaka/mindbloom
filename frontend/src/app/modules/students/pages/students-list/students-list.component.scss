@@ -1,11 +1,12 @@
 @import '../../../../../styles/theme/index';
 
 .students-page {
-  --mb-bg: radial-gradient(circle at 10% 10%, color-mix(in srgb, var(--color-primary, #7ab8ff) 8%, transparent), transparent 35%),
-            radial-gradient(circle at 80% 0%, color-mix(in srgb, var(--color-info, #38bdf8) 12%, transparent), transparent 38%),
-            color-mix(in srgb, var(--color-background, #0f172a) 70%, var(--color-surface, #101725) 30%);
-  --mb-surface: color-mix(in srgb, var(--color-surface, #1e293b) 80%, #0e1625 20%);
-  --mb-surface-strong: color-mix(in srgb, var(--color-surface, #1e293b) 92%, #0e1625 8%);
+  --mb-bg: radial-gradient(circle at 12% 12%, color-mix(in srgb, var(--color-primary, #7ab8ff) 10%, transparent), transparent 38%),
+            radial-gradient(circle at 70% 20%, color-mix(in srgb, var(--color-info, #38bdf8) 14%, transparent), transparent 42%),
+            radial-gradient(circle at 65% 75%, color-mix(in srgb, var(--color-warning, #D68E42) 10%, transparent), transparent 45%),
+            color-mix(in srgb, var(--color-background, #0f172a) 55%, var(--color-surface, #1b2433) 45%);
+  --mb-surface: color-mix(in srgb, var(--color-surface, #1f2a3b) 78%, #1a2232 22%);
+  --mb-surface-strong: color-mix(in srgb, var(--color-surface, #223145) 86%, #1a2232 14%);
   --mb-border: color-mix(in srgb, var(--color-border, #334155) 70%, transparent 30%);
   --mb-amber: var(--color-warning, #D68E42); /* burnt sienna for caution */
   --mb-amber-light: color-mix(in srgb, var(--mb-amber) 65%, #fef3c7 35%);
@@ -698,6 +699,7 @@ app-modal ::ng-deep .modal-header h3 {
                         display: flex;
                         gap: $spacing-2;
                         align-items: center;
+                        position: relative;
 
                         button {
                             padding: 8px;
@@ -732,6 +734,52 @@ app-modal ::ng-deep .modal-header h3 {
                                     width: 16px;
                                     height: 16px;
                                     stroke: currentColor;
+                                }
+                            }
+                        }
+
+                        .more-menu {
+                            position: relative;
+                            display: inline-flex;
+
+                            .menu-panel {
+                                position: absolute;
+                                right: 0;
+                                top: 110%;
+                                min-width: 160px;
+                                background: color-mix(in srgb, var(--mb-surface) 95%, rgba(255,255,255,0.02));
+                                border: 1px solid color-mix(in srgb, var(--mb-border) 80%, transparent);
+                                border-radius: 12px;
+                                box-shadow: 0 14px 32px rgba(0,0,0,0.28);
+                                padding: 0.35rem;
+                                display: grid;
+                                gap: 0.25rem;
+                                z-index: 10;
+
+                                button {
+                                    width: 100%;
+                                    justify-content: flex-start;
+                                    background: transparent;
+                                    border: 1px solid transparent;
+                                    box-shadow: none;
+                                    padding: 0.5rem 0.65rem;
+                                    color: var(--mb-text-primary);
+                                    border-radius: 10px;
+                                    @include transition(all, 0.15s, ease);
+
+                                    &:hover {
+                                        background: color-mix(in srgb, var(--sb-gold) 12%, transparent);
+                                        color: var(--color-text-primary, #fff);
+                                    }
+
+                                    &.danger {
+                                        color: #e97474;
+
+                                        &:hover {
+                                            background: rgba(233, 116, 116, 0.12);
+                                            color: #fff;
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -1368,7 +1416,8 @@ app-modal ::ng-deep .modal-header h3 {
 }
 
 .premium-table-card {
-  background: linear-gradient(145deg, rgba(99, 77, 59, 0.3), rgba(79, 58, 41, 0.3));
+  background: linear-gradient(145deg, rgba(99, 77, 59, 0.24), rgba(79, 58, 41, 0.16)),
+              linear-gradient(180deg, rgba(214, 142, 66, 0.08), transparent 55%);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.05);
   border-radius: 16px;
@@ -1406,6 +1455,10 @@ app-modal ::ng-deep .modal-header h3 {
   }
   
   td { padding: 16px 24px; vertical-align: middle; }
+}
+
+.class-col {
+  text-align: left !important;
 }
 
 .identity-wrapper {
