@@ -20,6 +20,12 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
   styleUrls: ['./students-list.component.scss'],
   template: `
     <div class="students-page">
+      <div class="page-context-card">
+        <div class="context-kicker">Students / Hub</div>
+        <div class="context-title">Student Management Workspace</div>
+        <div class="context-subtitle">Live roster, triage, and quick actions for front-desk staff.</div>
+      </div>
+
       <div class="engagement-hero">
         <div class="hero-left">
           <div class="hero-label">Above the fold</div>
