@@ -26,31 +26,6 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
         <div class="context-subtitle">Live roster, triage, and quick actions for front-desk staff.</div>
       </div>
 
-      <div class="engagement-hero">
-        <div class="hero-left">
-          <div class="hero-label">Above the fold</div>
-          <div class="hero-headline">Triage students faster with live status and one-click actions.</div>
-          <div class="hero-actions">
-            <button class="cta primary" type="button" (click)="setActiveTab('Today Triage')">Open Today’s Triage</button>
-            <button class="cta ghost" type="button" (click)="openModal()">Add Student</button>
-          </div>
-        </div>
-        <div class="hero-metrics">
-          <div class="metric-card">
-            <span class="metric-label">Active students</span>
-            <span class="metric-value">{{ activeCount() }}</span>
-          </div>
-          <div class="metric-card">
-            <span class="metric-label">Items to triage</span>
-            <span class="metric-value">{{ triageTotal() }}</span>
-          </div>
-          <div class="metric-card">
-            <span class="metric-label">Health flags</span>
-            <span class="metric-value">{{ healthFlagTotal() }}</span>
-          </div>
-        </div>
-      </div>
-
       <div class="toolbar">
         <div class="toolbar-left">
           <div class="filter-field">
