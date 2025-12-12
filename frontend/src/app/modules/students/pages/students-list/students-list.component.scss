@@ -458,6 +458,41 @@ app-modal ::ng-deep .modal-header h3 {
                     vertical-align: middle;
                     white-space: nowrap;
 
+                    .meta-cell {
+                      display: grid;
+                      gap: 0.15rem;
+                      align-items: start;
+                      color: var(--mb-text-primary);
+
+                      .trust-pill {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 0.3rem;
+                        margin-top: 0.15rem;
+                        padding: 0.2rem 0.45rem;
+                        border-radius: 10px;
+                        background: color-mix(in srgb, var(--mb-surface) 92%, rgba(255,255,255,0.03));
+                        border: 1px solid color-mix(in srgb, var(--mb-border) 70%, transparent);
+                        color: color-mix(in srgb, var(--mb-text-secondary) 80%, #ffffff 20%);
+                        font-size: 0.78rem;
+                        font-weight: 700;
+                        letter-spacing: 0.01em;
+
+                        .icon {
+                          width: 14px;
+                          height: 14px;
+                          display: inline-flex;
+                          color: color-mix(in srgb, var(--color-primary, #7ab8ff) 65%, #ffffff 35%);
+
+                          svg {
+                            width: 14px;
+                            height: 14px;
+                            stroke: currentColor;
+                          }
+                        }
+                      }
+                    }
+
                     .avatar {
                         width: 36px;
                         height: 36px;

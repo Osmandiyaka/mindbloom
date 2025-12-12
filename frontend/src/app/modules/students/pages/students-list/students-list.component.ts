@@ -173,6 +173,10 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                       <div class="meta-cell">
                         <div>{{ primaryGuardianName(student) }}</div>
                         <div class="muted tiny">{{ primaryGuardianPhone(student) }}</div>
+                        <div class="trust-pill">
+                          <span class="icon" [innerHTML]="icon('lock')"></span>
+                          <span>Protected contact</span>
+                        </div>
                       </div>
                     </td>
                     <td>
