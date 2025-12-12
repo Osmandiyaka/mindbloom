@@ -389,9 +389,9 @@ app-modal ::ng-deep .modal-header h3 {
                 }
 
                 &:hover {
-                    background: color-mix(in srgb, var(--color-surface-hover) 78%, var(--mb-surface) 22%);
-                    transform: translateY(-1px);
-                    box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+                    background: linear-gradient(90deg, color-mix(in srgb, var(--color-surface-hover) 82%, var(--mb-surface) 18%), color-mix(in srgb, var(--color-surface-hover) 70%, transparent));
+                    transform: translateY(-2px);
+                    box-shadow: 0 12px 26px rgba(0,0,0,0.24), inset 3px 0 0 color-mix(in srgb, var(--color-primary, #7ab8ff) 65%, transparent);
                 }
 
                 &.row-clickable {
