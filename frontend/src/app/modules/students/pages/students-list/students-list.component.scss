@@ -1608,39 +1608,44 @@ app-modal ::ng-deep .modal-header h3 {
 .quick-view-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1400;
+  z-index: 9000; /* ensure it sits above sidebar/header */
   pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem;
 }
 
 .quick-view-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
   pointer-events: auto;
-  z-index: 1405;
+  z-index: 9001;
 }
 
 .quick-view-drawer {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 70vh;
-  background: color-mix(in srgb, var(--mb-surface-strong) 92%, rgba(255,255,255,0.05));
-  border-top: 1px solid color-mix(in srgb, var(--mb-border) 70%, transparent);
-  box-shadow: 0 -14px 32px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.04);
-  backdrop-filter: blur(14px) saturate(140%);
-  padding: 1.15rem 1.25rem 1.35rem;
+  position: relative;
+  width: min(1280px, 100%);
+  max-height: 80vh;
+  background: color-mix(in srgb, var(--mb-surface-strong) 94%, rgba(255,255,255,0.08));
+  border: 1px solid color-mix(in srgb, var(--mb-border) 80%, rgba(255,255,255,0.08));
+  box-shadow:
+    0 -10px 32px rgba(0,0,0,0.38),
+    0 24px 48px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  backdrop-filter: blur(16px) saturate(160%);
+  padding: 1.35rem 1.45rem 1.6rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   pointer-events: auto;
-  border-top-left-radius: 18px;
-  border-top-right-radius: 18px;
-  z-index: 1410;
-  align-items: center;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  overflow: hidden;
+  z-index: 9002;
+  align-items: stretch;
 }
 
 .drawer-handle {
@@ -1651,13 +1656,23 @@ app-modal ::ng-deep .modal-header h3 {
   margin: 0 auto 0.35rem;
 }
 
+.drawer-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.25rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .quick-view-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.9rem;
+  gap: 1rem;
   border-bottom: 1px solid color-mix(in srgb, var(--mb-border) 70%, transparent);
-  padding-bottom: 0.9rem;
+  padding-bottom: 1rem;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
@@ -1667,11 +1682,12 @@ app-modal ::ng-deep .modal-header h3 {
     gap: 0.85rem;
     align-items: flex-start;
     min-width: 0;
+    flex-wrap: wrap;
   }
 
   .photo-frame {
-    width: 56px;
-    height: 56px;
+    width: 96px;
+    height: 96px;
     border-radius: 16px;
     display: grid;
     place-items: center;
@@ -1689,7 +1705,7 @@ app-modal ::ng-deep .modal-header h3 {
     .avatar {
       color: #0b0b0f;
       font-weight: 800;
-      font-size: 1rem;
+      font-size: 1.55rem;
     }
 
     &.has-photo {
@@ -1698,25 +1714,93 @@ app-modal ::ng-deep .modal-header h3 {
     }
   }
 
-  .header-text h3 {
-    margin: 0;
-    color: #fff;
-    font-size: 1.15rem;
-    letter-spacing: -0.01em;
-    line-height: 1.3;
-    word-break: break-word;
+  .header-text {
+    display: grid;
+    gap: 0.4rem;
+    min-width: 0;
+
+    h3 {
+      margin: 0;
+      color: #fff;
+      font-size: 1.6rem;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+
+    .name-row {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+
+      .status-pill {
+        padding: 0.3rem 0.65rem;
+        border-radius: 999px;
+        background: color-mix(in srgb, #1e2f1e 70%, transparent);
+        color: #c8f5c8;
+        border: 1px solid color-mix(in srgb, #7ac07a 60%, transparent);
+        font-weight: 700;
+        font-size: 0.86rem;
+
+        &.inactive { background: color-mix(in srgb, var(--mb-border) 70%, transparent); color: #f4e7c3; }
+      }
+
+      .id-chip,
+      .grade-chip {
+        padding: 0.28rem 0.55rem;
+        border-radius: 10px;
+        background: color-mix(in srgb, var(--mb-surface) 90%, rgba(255,255,255,0.04));
+        border: 1px solid color-mix(in srgb, var(--mb-border) 70%, transparent);
+        color: #f8f8f8;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        font-size: 0.85rem;
+      }
+
+      .grade-chip { color: var(--mb-gold-hot); }
+
+      .status-chip {
+        padding: 0.32rem 0.7rem;
+        border-radius: 12px;
+        font-weight: 800;
+        letter-spacing: 0.01em;
+        border: 1px solid color-mix(in srgb, var(--mb-border) 70%, transparent);
+        font-size: 0.85rem;
+
+        &.due {
+          background: color-mix(in srgb, var(--mb-crimson) 25%, rgba(0,0,0,0.45));
+          color: #fff;
+        }
+        &.clear {
+          background: color-mix(in srgb, var(--mb-surface) 90%, rgba(255,255,255,0.04));
+          color: var(--mb-text-primary);
+        }
+      }
+    }
   }
 
   .subline {
-    margin: 0.08rem 0 0;
-    color: var(--mb-text-muted);
-    font-size: 0.9rem;
-  }
+  margin: 0;
+  color: var(--mb-text-muted);
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+}
 
-  .icon-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
+.header-alert {
+  justify-content: flex-end;
+  min-width: 180px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
     border: 1px solid color-mix(in srgb, var(--mb-border) 80%, transparent);
     background: color-mix(in srgb, var(--mb-surface) 85%, rgba(255,255,255,0.02));
     color: #fff;
@@ -1726,6 +1810,24 @@ app-modal ::ng-deep .modal-header h3 {
     transition: all 0.18s ease;
 
     &:hover { transform: translateY(-1px); border-color: var(--mb-gold-hot); }
+  }
+
+  .header-alert {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    margin-left: auto;
+
+    .pill.critical {
+      background: color-mix(in srgb, var(--mb-crimson) 35%, rgba(0,0,0,0.4));
+      color: #fff;
+      border: 1px solid color-mix(in srgb, var(--mb-crimson) 65%, transparent);
+      padding: 0.3rem 0.65rem;
+      border-radius: 12px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
   }
 }
 
@@ -1916,18 +2018,20 @@ app-modal ::ng-deep .modal-header h3 {
 
 .panel-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 0.85rem;
+  align-items: stretch;
 }
 
 .panel {
   background: color-mix(in srgb, var(--mb-surface) 90%, rgba(255,255,255,0.02));
   border: 1px solid color-mix(in srgb, var(--mb-border) 70%, transparent);
   border-radius: 14px;
-  padding: 0.85rem 1rem;
+  padding: 1rem 1.1rem;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 12px 24px rgba(0,0,0,0.22);
   display: grid;
-  gap: 0.35rem;
+  gap: 0.45rem;
+  height: 100%;
 }
 
 .kv-row {
@@ -1944,8 +2048,9 @@ app-modal ::ng-deep .modal-header h3 {
 
   .label {
     color: var(--mb-text-muted);
-    font-size: 0.82rem;
-    letter-spacing: 0.01em;
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
   }
 
   .value {
@@ -1959,6 +2064,8 @@ app-modal ::ng-deep .modal-header h3 {
   display: flex;
   align-items: center;
   gap: 0.65rem;
+  flex-wrap: wrap;
+  padding: 0.15rem 0;
 }
 
 .ring {
@@ -1988,11 +2095,15 @@ app-modal ::ng-deep .modal-header h3 {
 
 .quick-view-footer {
   margin-top: auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.6rem;
-  padding-top: 0.35rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
   width: 100%;
   max-width: 1200px;
   align-self: center;
+  border-top: 1px solid color-mix(in srgb, var(--mb-border) 65%, transparent);
+  padding-top: 0.75rem;
+  padding-bottom: 0.25rem;
+  background: color-mix(in srgb, var(--mb-surface) 94%, rgba(255,255,255,0.01));
 }
