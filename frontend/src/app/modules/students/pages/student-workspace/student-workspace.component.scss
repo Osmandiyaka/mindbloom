@@ -77,7 +77,7 @@
 
 .columns.main-grid {
   display: grid;
-  grid-template-columns: minmax(0, 2.4fr) minmax(280px, 0.5fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   align-items: start;
 
@@ -99,9 +99,7 @@
 }
 
 .right-pane {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: none;
 }
 
 .hero {

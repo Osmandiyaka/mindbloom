@@ -139,9 +139,6 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                     <th>ID</th>
                     <th>Class/Section</th>
                     <th>Guardian Contact</th>
-                    <th>Attendance Today</th>
-                    <th>Fee Flag</th>
-                    <th>Alerts</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -166,15 +163,6 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                         <div>{{ primaryGuardianName(student) }}</div>
                         <div class="muted tiny">{{ primaryGuardianPhone(student) }}</div>
                       </div>
-                    </td>
-                    <td>{{ attendanceDisplay(student) }}</td>
-                    <td>
-                      <span class="pill" [class.danger]="hasFeeDue(student)">
-                        {{ feeDisplay(student) }}
-                      </span>
-                    </td>
-                    <td>
-                      <span class="pill neutral">{{ alertCount(student) }} alerts</span>
                     </td>
                     <td>
                       <div class="cell-actions">
@@ -569,25 +557,4 @@ export class StudentsListComponent implements OnInit {
     return g?.phone || student.phone || 'No contact';
   }
 
-  attendanceDisplay(student: Student): string {
-    return student.status || '—';
-  }
-
-  hasFeeDue(student: Student): boolean {
-    const due = (student as any).fees?.dueAmount;
-    return typeof due === 'number' ? due > 0 : false;
-  }
-
-  feeDisplay(student: Student): string {
-    const due = (student as any).fees?.dueAmount;
-    if (typeof due === 'number' && due > 0) {
-      return `Due (${due})`;
-    }
-    return 'Clear';
-  }
-
-  alertCount(student: Student): number {
-    const alerts = (student as any).alerts;
-    return Array.isArray(alerts) ? alerts.length : 0;
-  }
 }
