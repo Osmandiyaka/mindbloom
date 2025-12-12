@@ -572,7 +572,7 @@ app-modal ::ng-deep .modal-header h3 {
                           padding: 0.2rem 0.55rem;
                           border-radius: 12px;
                           background: color-mix(in srgb, var(--mb-forest) 18%, var(--mb-surface));
-                          color: color-mix(in srgb, var(--mb-forest) 82%, #e2f7e8 18%);
+                          color: #ffffff;
                           border: 1px solid color-mix(in srgb, var(--mb-forest) 35%, var(--mb-border));
                           font-weight: 700;
                           font-size: 0.82rem;
@@ -580,15 +580,15 @@ app-modal ::ng-deep .modal-header h3 {
                           box-shadow: 0 6px 14px rgba(0,0,0,0.16);
 
                           &.due {
-                            background: color-mix(in srgb, var(--mb-crimson) 18%, var(--mb-surface));
-                            color: color-mix(in srgb, var(--mb-crimson) 85%, #ffeaea 15%);
+                            background: color-mix(in srgb, var(--mb-crimson) 28%, var(--mb-surface));
+                            color: #ffffff;
                             border-color: color-mix(in srgb, var(--mb-crimson) 42%, var(--mb-border));
                           }
 
                           &.clear {
-                            background: color-mix(in srgb, var(--mb-forest) 18%, var(--mb-surface));
-                            color: color-mix(in srgb, var(--mb-forest) 82%, #e2f7e8 18%);
-                            border-color: color-mix(in srgb, var(--mb-forest) 35%, var(--mb-border));
+                            background: color-mix(in srgb, var(--mb-forest) 28%, var(--mb-surface));
+                            color: #ffffff;
+                            border-color: color-mix(in srgb, var(--mb-forest) 45%, var(--mb-border));
                           }
                         }
                     }
