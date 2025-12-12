@@ -155,7 +155,7 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                     <th class="sortable">Student</th>
                     <th>ID</th>
                     <th>Class/Section</th>
-                    <th>Guardian Contact</th>
+                    <th>Guardian Name and Phone</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
