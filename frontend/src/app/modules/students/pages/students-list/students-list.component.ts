@@ -32,6 +32,31 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
         </div>
       </div>
 
+      <div class="engagement-hero">
+        <div class="hero-left">
+          <div class="hero-label">Above the fold</div>
+          <div class="hero-headline">Triage students faster with live status and one-click actions.</div>
+          <div class="hero-actions">
+            <button class="cta primary" type="button" (click)="setActiveTab('Today Triage')">Open Today’s Triage</button>
+            <button class="cta ghost" type="button" (click)="openModal()">Add Student</button>
+          </div>
+        </div>
+        <div class="hero-metrics">
+          <div class="metric-card">
+            <span class="metric-label">Active students</span>
+            <span class="metric-value">{{ activeCount() }}</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Items to triage</span>
+            <span class="metric-value">{{ triageTotal() }}</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Health flags</span>
+            <span class="metric-value">{{ healthFlagTotal() }}</span>
+          </div>
+        </div>
+      </div>
+
       <div class="command-strip">
         <div class="command-tabs">
           <button *ngFor="let tab of commandTabs"
@@ -600,6 +625,19 @@ export class StudentsListComponent implements OnInit {
     event.stopPropagation();
     this.closeRowMenu();
     console.log('Contact guardian (stub):', this.primaryGuardianPhone(student));
+  }
+
+  activeCount(): number {
+    const actives = this.allStudents().filter(s => (s.status || '').toLowerCase() === 'active');
+    return actives.length || this.allStudents().length;
+  }
+
+  triageTotal(): number {
+    return this.triageToday.reduce((sum, item) => sum + (item.value || 0), 0);
+  }
+
+  healthFlagTotal(): number {
+    return this.healthFlags.reduce((sum, item) => sum + (item.value || 0), 0);
   }
 
   hasFeeDue(student: Student): boolean {
