@@ -824,9 +824,9 @@ app-modal ::ng-deep .modal-header h3 {
                         }
                     }
 
-                    .cell-actions {
+                .cell-actions {
                         display: flex;
-                        gap: $spacing-2;
+                        gap: 1rem; /* ensure touch targets are comfortably spaced (>=16px) */
                         align-items: center;
                         position: relative;
 
