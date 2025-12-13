@@ -1,14 +1,26 @@
 @import '../../../../../styles/theme/index';
 
-$surface: #0f172a;
-$surface-2: #111827;
-$muted: rgba(232, 237, 247, 0.7);
-$border: rgba(255, 255, 255, 0.08);
-$gold: #e8be14;
-$teal: #12b981;
-$danger: #ef4444;
-$warning: #f59e0b;
-$info: #3b82f6;
+$background: var(--color-background, #0a0f1d);
+$background-alt: var(--color-background-alt, #0b1324);
+$surface: var(--color-surface, #0f172a);
+$surface-2: var(--color-surface-alt, #111827);
+$surface-hover: var(--color-surface-hover, color-mix(in srgb, var(--color-surface, #111827) 92%, #ffffff 8%));
+$text-primary: var(--color-text-primary, #e8edf7);
+$text-secondary: var(--color-text-secondary, rgba(232, 237, 247, 0.7));
+$border: var(--color-border, rgba(255, 255, 255, 0.08));
+$border-light: var(--color-border-light, rgba(255, 255, 255, 0.06));
+$primary: var(--color-primary, #3b82f6);
+$primary-dark: var(--color-primary-dark, #2563eb);
+$success: var(--color-success, #12b981);
+$warning: var(--color-warning, #f59e0b);
+$danger: var(--color-error, #ef4444);
+$info: var(--color-info, #3b82f6);
+$highlight: var(--color-warning, #e8be14);
+$text-contrast: var(--color-text-contrast, #0c2243);
+$veil-03: color-mix(in srgb, $surface 96%, #ffffff 4%);
+$veil-04: color-mix(in srgb, $surface 94%, #ffffff 6%);
+$veil-05: color-mix(in srgb, $surface 92%, #ffffff 8%);
+$veil-08: color-mix(in srgb, $surface 88%, #ffffff 12%);
 
 .workspace {
   padding: clamp(1rem, 3vw, 1.5rem);
@@ -16,8 +28,8 @@ $info: #3b82f6;
   flex-direction: column;
   gap: 1.25rem;
   background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.04), transparent 35%),
-    linear-gradient(180deg, #0b1324 0%, #0a0f1d 100%);
-  color: #e8edf7;
+    linear-gradient(180deg, $background-alt 0%, $background 100%);
+  color: $text-primary;
   min-height: 100vh;
 }
 
@@ -36,7 +48,7 @@ $info: #3b82f6;
 
   .subtitle {
     margin: 0;
-    color: $muted;
+    color: $text-secondary;
   }
 
   .chips {
@@ -50,7 +62,7 @@ $info: #3b82f6;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.75rem;
-  color: $muted;
+  color: $text-secondary;
   margin: 0 0 0.25rem;
 }
 
@@ -60,9 +72,9 @@ $info: #3b82f6;
   gap: 0.35rem;
   padding: 0.35rem 0.65rem;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
+  background: $veil-05;
   border: 1px solid $border;
-  color: #e8edf7;
+  color: $text-primary;
   font-weight: 700;
 }
 
@@ -81,7 +93,7 @@ $info: #3b82f6;
 }
 
 .card.glass {
-  background: rgba(17, 24, 39, 0.8);
+  background: color-mix(in srgb, $surface-2 85%, rgba(255, 255, 255, 0.08) 15%);
   backdrop-filter: blur(12px);
 }
 
@@ -115,12 +127,12 @@ $info: #3b82f6;
     padding: 0.7rem 0.8rem;
     border-radius: 12px;
     border: 1px solid $border;
-    background: rgba(255, 255, 255, 0.04);
-    color: #e8edf7;
+    background: $veil-04;
+    color: $text-primary;
   }
 
   input::placeholder {
-    color: rgba(232, 237, 247, 0.55);
+    color: color-mix(in srgb, $text-secondary 75%, transparent 25%);
   }
 }
 
@@ -146,7 +158,7 @@ $info: #3b82f6;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: #e8edf7;
+    color: $text-primary;
   }
 }
 
@@ -155,7 +167,7 @@ $info: #3b82f6;
 
   .balance {
     font-weight: 800;
-    color: $gold;
+    color: $highlight;
   }
 }
 
@@ -166,8 +178,8 @@ $info: #3b82f6;
   width: 28px;
   height: 28px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #e8edf7;
+  background: $veil-05;
+  color: $text-primary;
 }
 
 .pill.warning {
@@ -175,11 +187,11 @@ $info: #3b82f6;
 }
 
 .pill.success {
-  color: $teal;
+  color: $success;
 }
 
 .pill.muted {
-  color: $muted;
+  color: $text-secondary;
 }
 
 .badge {
@@ -190,12 +202,12 @@ $info: #3b82f6;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
   font-weight: 800;
-  color: #0c2243;
-  background: #e5e7eb;
+  color: $text-contrast;
+  background: $border-light;
 
   &.gold {
-    background: $gold;
-    color: #0c2243;
+    background: $highlight;
+    color: $text-contrast;
   }
 
   &.danger {
@@ -205,7 +217,7 @@ $info: #3b82f6;
 
   &.warning {
     background: $warning;
-    color: #1f2937;
+    color: $text-contrast;
   }
 
   &.info {
@@ -214,15 +226,15 @@ $info: #3b82f6;
   }
 
   &.success {
-    background: $teal;
-    color: #0b1324;
+    background: $success;
+    color: $text-contrast;
   }
 }
 
 .btn {
   border: 1px solid $border;
-  background: rgba(255, 255, 255, 0.04);
-  color: #e8edf7;
+  background: $veil-04;
+  color: $text-primary;
   padding: 0.65rem 0.9rem;
   border-radius: 12px;
   cursor: pointer;
@@ -234,14 +246,14 @@ $info: #3b82f6;
 
   &:hover {
     transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.08);
+    background: $surface-hover;
   }
 }
 
 .btn.gold {
-  background: linear-gradient(135deg, #f8d14a, $gold);
-  color: #0c2243;
-  border-color: rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, color-mix(in srgb, $highlight 10%, #ffffff 90%), $highlight);
+  color: $text-contrast;
+  border-color: color-mix(in srgb, $highlight 20%, transparent);
 }
 
 .btn.ghost {
@@ -250,14 +262,14 @@ $info: #3b82f6;
 }
 
 .btn.teal {
-  background: linear-gradient(135deg, #34d399, #0ea769);
-  color: #0c2243;
+  background: linear-gradient(135deg, color-mix(in srgb, $success 35%, #34d399 65%), $success);
+  color: $text-contrast;
   border: none;
 }
 
 .btn.primary {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: #e8edf7;
+  background: linear-gradient(135deg, $primary, $primary-dark);
+  color: $text-primary;
   border: none;
 }
 
@@ -302,19 +314,19 @@ $info: #3b82f6;
     padding: 0.65rem 0.75rem;
     border-radius: 10px;
     border: 1px solid $border;
-    background: rgba(255, 255, 255, 0.03);
-    color: #e8edf7;
+    background: $veil-04;
+    color: $text-primary;
   }
 
   input::placeholder {
-    color: $muted;
+    color: $text-secondary;
   }
 
   .icon-btn {
     border-radius: 12px;
     border: 1px solid $border;
-    background: rgba(255, 255, 255, 0.05);
-    color: #e8edf7;
+    background: $veil-05;
+    color: $text-primary;
     display: grid;
     place-items: center;
     cursor: pointer;
@@ -324,7 +336,7 @@ $info: #3b82f6;
 .table-card {
   margin: 0.45rem;
   padding: 0.65rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: $veil-03;
   border: 1px solid $border;
   border-radius: 14px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -349,8 +361,8 @@ $info: #3b82f6;
       padding: 0.45rem 0.55rem;
       border-radius: 10px;
       border: 1px solid $border;
-      background: rgba(255, 255, 255, 0.03);
-      color: #e8edf7;
+      background: $veil-04;
+      color: $text-primary;
     }
   }
 }
@@ -358,23 +370,23 @@ $info: #3b82f6;
 .status-table {
   width: 100%;
   border-collapse: collapse;
-  color: #e8edf7;
-  background: rgba(255, 255, 255, 0.01);
+  color: $text-primary;
+  background: $veil-03;
 
   th,
   td {
     padding: 0.7rem 0.7rem;
     text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid $border-light;
   }
 
   .status-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: $veil-05;
   }
 
   thead th {
     font-size: 0.85rem;
-    color: $muted;
+    color: $text-secondary;
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
@@ -392,7 +404,7 @@ $info: #3b82f6;
   border-radius: 10px;
   display: grid;
   place-items: center;
-  background: rgba(255, 255, 255, 0.08);
+  background: $veil-08;
   font-weight: 800;
 }
 
@@ -401,7 +413,7 @@ $info: #3b82f6;
 }
 
 .student-meta .id {
-  color: $muted;
+  color: $text-secondary;
   font-size: 0.9rem;
 }
 
@@ -411,26 +423,26 @@ $info: #3b82f6;
   padding: 0.25rem 0.55rem;
   border-radius: 10px;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.05);
+  background: $veil-05;
   border: 1px solid $border;
 
   &.late {
     color: $warning;
-    border-color: rgba(245, 158, 11, 0.6);
-    background: rgba(245, 158, 11, 0.12);
+    border-color: color-mix(in srgb, $warning 60%, transparent 40%);
+    background: color-mix(in srgb, $warning 18%, $surface 82%);
   }
 
   &.present {
-    color: #22c55e;
-    border-color: rgba(34, 197, 94, 0.4);
-    background: rgba(34, 197, 94, 0.12);
+    color: $success;
+    border-color: color-mix(in srgb, $success 55%, transparent 45%);
+    background: color-mix(in srgb, $success 16%, $surface 84%);
   }
 }
 
 .action-btn {
-  background: rgba(255, 255, 255, 0.08);
+  background: $veil-08;
   border: 1px solid $border;
-  color: #e8edf7;
+  color: $text-primary;
   border-radius: 12px;
   padding: 0.45rem 0.8rem;
   font-weight: 700;
@@ -448,7 +460,7 @@ $info: #3b82f6;
 .event {
   padding: 0.65rem 0.75rem;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: $veil-05;
   border: 1px solid $border;
   display: flex;
   align-items: center;
@@ -466,10 +478,10 @@ $info: #3b82f6;
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #9ca3af;
+  background: color-mix(in srgb, $text-secondary 60%, transparent 40%);
 
   &.success {
-    background: #22c55e;
+    background: $success;
   }
 
   &.warning {
@@ -477,16 +489,16 @@ $info: #3b82f6;
   }
 
   &.info {
-    background: #60a5fa;
+    background: color-mix(in srgb, $info 75%, #ffffff 25%);
   }
 }
 
 .event-text {
-  color: #e8edf7;
+  color: $text-primary;
   font-weight: 600;
 }
 
 .event-time {
-  color: $muted;
+  color: $text-secondary;
   font-size: 0.9rem;
 }
