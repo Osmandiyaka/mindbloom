@@ -364,53 +364,68 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                 </button>
               </header>
               <div class="quick-view-body">
-                <div class="panel-grid">
-                  <div class="panel">
-                    <div class="section-title">Contact</div>
-                    <div class="kv-row"><span class="label">Phone</span><a class="value link" [href]="primaryGuardianPhoneHref(quickViewStudent()!)">{{ primaryGuardianPhone(quickViewStudent()!) }}</a></div>
-                    <div class="kv-row"><span class="label">Email</span><span class="value">{{ quickViewStudent()!.email || primaryGuardianEmail(quickViewStudent()!) || 'Not provided' }}</span></div>
-                    <div class="section-title sub">Guardian</div>
-                    <div class="kv-row"><span class="label">Name</span><span class="value">{{ primaryGuardianName(quickViewStudent()!) }}</span></div>
-                    <div class="kv-row"><span class="label">Relationship</span><span class="value">{{ primaryGuardianRelationship(quickViewStudent()!) }}</span></div>
-                    <div class="kv-row"><span class="label">Contact</span><a class="value link" [href]="primaryGuardianPhoneHref(quickViewStudent()!)">{{ primaryGuardianPhone(quickViewStudent()!) }}</a></div>
-                  </div>
-                  <div class="panel">
-                    <div class="section-title">Academic</div>
-                    <div class="ring-row">
-                      <div class="ring" [style.--val]="attendancePercent(quickViewStudent()!) * 3.6"><span>{{ attendancePercent(quickViewStudent()!) }}%</span></div>
-                      <div class="ring-label">Attendance</div>
+                <div class="pane-grid">
+                  <div class="pane identity-pane">
+                    <div class="identity-block">
+                      <div class="photo-frame hero large" [class.has-photo]="quickViewStudent()!.photo">
+                        <img *ngIf="quickViewStudent()!.photo" [src]="quickViewStudent()!.photo" [alt]="quickViewStudent()!.fullName" />
+                        <span *ngIf="!quickViewStudent()!.photo" class="avatar">{{ initials(quickViewStudent()!.fullName) }}</span>
+                      </div>
+                      <div class="id-copy">
+                        <div class="name-lg">{{ quickViewStudent()!.fullName }}</div>
+                        <div class="id-line">
+                          <span class="badge id">{{ quickViewStudent()!.enrollment.admissionNumber || 'ID —' }}</span>
+                          <span class="badge grade">Grade {{ quickViewStudent()!.enrollment.class }}{{ quickViewStudent()!.enrollment.section ? '-' + quickViewStudent()!.enrollment.section : '' }}</span>
+                        </div>
+                        <div class="alert-block" *ngIf="healthAlert(quickViewStudent()!) || hasFeeDue(quickViewStudent()!)">
+                          <span class="pill critical" *ngIf="healthAlert(quickViewStudent()!)">{{ healthAlert(quickViewStudent()!) }}</span>
+                          <span class="pill warn" *ngIf="hasFeeDue(quickViewStudent()!)">Fees outstanding</span>
+                        </div>
+                      </div>
                     </div>
-                    <div class="kv-row"><span class="label">Next class</span><span class="value">Class {{ quickViewStudent()!.enrollment.class }}{{ quickViewStudent()!.enrollment.section ? '-' + quickViewStudent()!.enrollment.section : '' }}</span></div>
-                    <div class="kv-row"><span class="label">Fee status</span><span class="pill subtle" [ngClass]="hasFeeDue(quickViewStudent()!) ? 'due' : 'clear'">{{ hasFeeDue(quickViewStudent()!) ? 'Outstanding' : 'Clear' }}</span></div>
-                    <div class="kv-row"><span class="label">Last updated</span><span class="value">{{ quickViewStudent()!.updatedAt | date:'mediumDate' }}</span></div>
+                    <app-button variant="primary" size="sm" (click)="viewStudent($event, quickViewStudent()!.id)">
+                      <span class="icon" [innerHTML]="icon('eye')"></span>
+                      Open full profile
+                    </app-button>
                   </div>
-                  <div class="panel">
-                    <div class="section-title">Health & alerts</div>
-                    <div class="kv-row"><span class="label">Health flags</span><span class="pill critical" *ngIf="healthAlert(quickViewStudent()!)">{{ healthAlert(quickViewStudent()!) }}</span><span class="pill neutral" *ngIf="!healthAlert(quickViewStudent()!)">No active flags</span></div>
-                    <div class="kv-row"><span class="label">Blood group</span><span class="value">{{ quickViewStudent()!.medicalInfo?.bloodGroup || '—' }}</span></div>
-                    <div class="kv-row"><span class="label">Allergies</span><span class="value">{{ allergyCount(quickViewStudent()!) }} listed</span></div>
-                    <div class="kv-row"><span class="label">Documents</span><span class="value">{{ documentsCount(quickViewStudent()!) }} on file</span></div>
-                  </div>
-                </div>
 
-                <div class="activity-grid">
-                  <div class="stat-card">
-                    <span class="label">Age</span>
-                    <span class="value prominent">{{ quickViewStudent()!.age || '—' }}</span>
-                    <span class="meta">yrs</span>
+                  <div class="pane middle-pane">
+                    <div class="tile">
+                      <div class="section-title">Primary guardian</div>
+                      <div class="kv-row"><span class="label">Name</span><span class="value">{{ primaryGuardianName(quickViewStudent()!) }}</span></div>
+                      <div class="kv-row"><span class="label">Relationship</span><span class="value">{{ primaryGuardianRelationship(quickViewStudent()!) }}</span></div>
+                      <div class="kv-row action-row"><span class="label">Contact</span><a class="value link" [href]="primaryGuardianPhoneHref(quickViewStudent()!)">{{ primaryGuardianPhone(quickViewStudent()!) }}</a></div>
+                    </div>
+                    <div class="tile">
+                      <div class="section-title">Logistics</div>
+                      <div class="kv-row"><span class="label">Current class</span><span class="value">Class {{ quickViewStudent()!.enrollment.class }}{{ quickViewStudent()!.enrollment.section ? '-' + quickViewStudent()!.enrollment.section : '' }}</span></div>
+                      <div class="kv-row"><span class="label">Fee status</span><span class="pill subtle" [ngClass]="hasFeeDue(quickViewStudent()!) ? 'due' : 'clear'">{{ hasFeeDue(quickViewStudent()!) ? 'Outstanding' : 'Clear' }}</span></div>
+                      <div class="kv-row"><span class="label">Last updated</span><span class="value">{{ quickViewStudent()!.updatedAt | date:'mediumDate' }}</span></div>
+                    </div>
                   </div>
-                  <div class="stat-card">
-                    <span class="label">Gender</span>
-                    <span class="value">{{ (quickViewStudent()!.gender || '') | titlecase }}</span>
-                  </div>
-                  <div class="stat-card">
-                    <span class="label">Documents</span>
-                    <span class="value">{{ documentsCount(quickViewStudent()!) }}</span>
-                    <span class="meta">Stored in vault</span>
-                  </div>
-                  <div class="stat-card">
-                    <span class="label">Fees</span>
-                    <span class="value" [ngClass]="hasFeeDue(quickViewStudent()!) ? 'due' : 'clear'">{{ hasFeeDue(quickViewStudent()!) ? 'Outstanding' : 'Clear' }}</span>
+
+                  <div class="pane right-pane">
+                    <div class="tile gauge">
+                      <div class="section-title">Attendance</div>
+                      <div class="ring-row">
+                        <div class="ring" [style.--val]="attendancePercent(quickViewStudent()!) * 3.6"><span>{{ attendancePercent(quickViewStudent()!) }}%</span></div>
+                        <div class="ring-label">Year to date</div>
+                      </div>
+                      <div class="kv-row"><span class="label">Health flags</span><span class="pill critical" *ngIf="healthAlert(quickViewStudent()!)">{{ healthAlert(quickViewStudent()!) }}</span><span class="pill neutral" *ngIf="!healthAlert(quickViewStudent()!)">No active flags</span></div>
+                      <div class="kv-row"><span class="label">Documents</span><span class="value">{{ documentsCount(quickViewStudent()!) }} on file</span></div>
+                    </div>
+                    <div class="tile">
+                      <div class="section-title">Recent activity</div>
+                      <ul class="activity-list">
+                        <li *ngFor="let item of quickViewTimeline(quickViewStudent()!)">
+                          <span class="bullet" [ngClass]="item.tone"></span>
+                          <div class="activity-copy">
+                            <div class="activity-title">{{ item.title }}</div>
+                            <div class="activity-meta">{{ item.meta }}</div>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -760,5 +775,38 @@ export class StudentsListComponent implements OnInit {
       return Math.min(100, Math.max(0, raw));
     }
     return 0;
+  }
+
+  quickViewTimeline(student: Student): { title: string; meta: string; tone: 'success' | 'warn' | 'danger' | 'neutral' }[] {
+    const items: { title: string; meta: string; tone: 'success' | 'warn' | 'danger' | 'neutral' }[] = [];
+    const attendance = this.attendancePercent(student);
+    items.push({
+      title: `Attendance ${attendance}%`,
+      meta: attendance ? 'Year-to-date attendance' : 'Attendance not recorded',
+      tone: attendance >= 90 ? 'success' : attendance >= 70 ? 'warn' : 'danger'
+    });
+
+    const feeDue = this.hasFeeDue(student);
+    items.push({
+      title: feeDue ? 'Fees outstanding' : 'Fees clear',
+      meta: feeDue ? 'Balance requires follow-up' : 'No balance due',
+      tone: feeDue ? 'warn' : 'success'
+    });
+
+    const health = this.healthAlert(student);
+    items.push({
+      title: health ? 'Health alert' : 'Health status',
+      meta: health || 'No active flags',
+      tone: health ? 'danger' : 'neutral'
+    });
+
+    const updatedAt = (student as any)?.updatedAt ? new Date((student as any).updatedAt) : null;
+    items.push({
+      title: 'Last updated',
+      meta: updatedAt ? updatedAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Synced recently',
+      tone: 'neutral'
+    });
+
+    return items;
   }
 }
