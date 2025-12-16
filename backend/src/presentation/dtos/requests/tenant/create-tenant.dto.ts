@@ -65,6 +65,30 @@ export class CreateTenantDto {
     @IsString()
     ownerId?: string;
 
+    @ApiPropertyOptional({ description: 'Locale (defaults to en-GB)', example: 'en-GB' })
+    @IsOptional()
+    @IsString()
+    locale?: string;
+
+    @ApiPropertyOptional({ description: 'Timezone (defaults to Europe/London)', example: 'Europe/London' })
+    @IsOptional()
+    @IsString()
+    timezone?: string;
+
+    @ApiPropertyOptional({ description: 'Week start (defaults to monday)', enum: ['monday', 'sunday'] })
+    @IsOptional()
+    @IsEnum(['monday', 'sunday'])
+    weekStartsOn?: 'monday' | 'sunday';
+
+    @ApiPropertyOptional({ description: 'Academic year template', example: { start: '2025-09-01', end: '2026-07-31', name: 'AY 2025-2026' } })
+    @IsOptional()
+    @IsObject()
+    academicYear?: {
+        start: string;
+        end: string;
+        name?: string;
+    };
+
     @ApiProperty({
         description: 'Tenant plan',
         enum: ['trial', 'free', 'basic', 'premium', 'enterprise'],

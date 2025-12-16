@@ -17,6 +17,9 @@ const buildTenant = (): Tenant => {
         contactPhone: '+1-202-555-0123',
         address: { city: 'Springfield', country: 'USA' },
         logo: 'https://cdn/logo.png',
+        locale: 'en-GB',
+        timezone: 'Europe/London',
+        weekStartsOn: 'monday' as any,
         plan: TenantPlan.TRIAL,
         status: TenantStatus.PENDING,
         metadata: { schoolId: 'SCH-ABC123' },
@@ -59,6 +62,10 @@ describe('TenantController', () => {
             contactEmail: 'admin@greenfield.edu',
             adminName: 'Jane Doe',
             adminEmail: 'admin@greenfield.edu',
+            locale: 'en-GB',
+            timezone: 'Europe/London',
+            weekStartsOn: 'monday',
+            academicYear: { start: '2025-09-01', end: '2026-07-31', name: 'AY 25/26' },
         } as any);
 
         expect(createTenantUseCase.execute).toHaveBeenCalledWith(expect.objectContaining({

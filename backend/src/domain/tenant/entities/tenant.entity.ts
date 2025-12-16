@@ -233,6 +233,7 @@ export class Tenant {
         weekStartsOn?: WeekStart;
         currency?: string;
         metadata?: Record<string, any>;
+        academicYear?: AcademicYearSettings;
     }): Tenant {
         const plan = props.plan || TenantPlan.TRIAL;
         const status = props.status || TenantStatus.PENDING;
@@ -266,7 +267,7 @@ export class Tenant {
             props.timezone || 'UTC',
             props.weekStartsOn || WeekStart.MONDAY,
             props.currency || 'USD',
-            undefined,
+            props.academicYear,
             [],
             false,
             false,

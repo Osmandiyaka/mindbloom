@@ -1,7 +1,7 @@
 import { ConflictException } from '@nestjs/common';
 import { expect } from '@jest/globals';
 import { randomUUID } from 'crypto';
-import { Tenant, TenantPlan, TenantStatus } from '../../../domain/tenant/entities/tenant.entity';
+import { Tenant, TenantPlan, TenantStatus, WeekStart } from '../../../domain/tenant/entities/tenant.entity';
 import { ITenantRepository } from '../../../domain/ports/out/tenant-repository.port';
 import { SYSTEM_ROLE_NAMES } from '../../../domain/rbac/entities/system-roles';
 import { CreateTenantUseCase } from './create-tenant.use-case';
@@ -73,6 +73,10 @@ describe('CreateTenantUseCase', () => {
             contactPhone: '+1-202-555-0123',
             address: { city: 'Springfield', country: 'USA' },
             logo: 'https://cdn/logo.png',
+            locale: 'en-GB',
+            timezone: 'Europe/London',
+            weekStartsOn: 'monday',
+            academicYear: { start: '2025-09-01', end: '2026-07-31', name: 'AY 2025-2026' },
         });
 
         expect(tenant.subdomain).toBe('greenfield-high-school');
@@ -80,6 +84,10 @@ describe('CreateTenantUseCase', () => {
         expect(tenant.contactInfo.phone).toBe('+1-202-555-0123');
         expect(tenant.contactInfo.address?.city).toBe('Springfield');
         expect(tenant.customization?.logo).toBe('https://cdn/logo.png');
+        expect(tenant.locale).toBe('en-GB');
+        expect(tenant.timezone).toBe('Europe/London');
+        expect(tenant.weekStartsOn).toBe(WeekStart.MONDAY);
+        expect(tenant.academicYear?.name).toBe('AY 2025-2026');
         expect(users.execute).toHaveBeenCalledWith(expect.objectContaining({
             tenantId: tenant.id,
             email: 'admin@greenfield.edu',
@@ -106,6 +114,7 @@ describe('CreateTenantUseCase', () => {
         });
 
         expect(second.subdomain).toBe('greenfield-1');
+        expect(second.metadata?.schoolId).toMatch(/SCH-/);
     });
 
     it('rolls back tenant when user creation fails', async () => {

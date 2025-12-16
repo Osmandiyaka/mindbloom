@@ -1,6 +1,6 @@
 import { Inject, Injectable, BadRequestException, ConflictException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { Tenant, TenantPlan, TenantStatus } from '../../../domain/tenant/entities/tenant.entity';
+import { Tenant, TenantPlan, TenantStatus, WeekStart, AcademicYearSettings } from '../../../domain/tenant/entities/tenant.entity';
 import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/ports/out/tenant-repository.port';
 import { CreateTenantCommand } from '../../ports/in/commands/create-tenant.command';
 import { InitializeSystemRolesUseCase } from '../rbac/initialize-system-roles.use-case';
@@ -25,6 +25,10 @@ export class CreateTenantUseCase {
         const subdomain = await this.ensureUniqueSubdomain(baseSubdomain);
         const schoolId = command.schoolId || this.generateSchoolId();
         const adminPassword = command.adminPassword || this.generateTemporaryPassword();
+        const locale = command.locale || 'en-GB';
+        const timezone = command.timezone || 'Europe/London';
+        const weekStartsOn = (command.weekStartsOn as WeekStart) || WeekStart.MONDAY;
+        const academicYear = this.resolveAcademicYear(command.academicYear);
 
         const tenant = Tenant.create({
             name: command.name,
@@ -36,7 +40,11 @@ export class CreateTenantUseCase {
             logo: command.logo,
             plan: (command.plan || TenantPlan.TRIAL) as TenantPlan,
             status: (command.status || TenantStatus.PENDING) as TenantStatus,
-            metadata: { schoolId },
+            locale,
+            timezone,
+            weekStartsOn,
+            academicYear,
+            metadata: { schoolId, initialConfigRequired: true },
         });
 
         const createdTenant = await this.tenantRepository.create(tenant);
@@ -98,5 +106,26 @@ export class CreateTenantUseCase {
     private generateTemporaryPassword(): string {
         const raw = randomUUID().replace(/-/g, '');
         return `${raw.slice(0, 6)}Aa!${raw.slice(6, 10)}`;
+    }
+
+    private resolveAcademicYear(input?: { start: Date | string; end: Date | string; name?: string; }): AcademicYearSettings | undefined {
+        if (input?.start && input?.end) {
+            return {
+                start: new Date(input.start),
+                end: new Date(input.end),
+                name: input.name,
+            };
+        }
+
+        const today = new Date();
+        const year = today.getFullYear();
+        const startYear = today.getMonth() >= 7 ? year : year - 1; // academic year starts Sep (month 8)
+        const start = new Date(Date.UTC(startYear, 8, 1)); // Sep 1
+        const end = new Date(Date.UTC(startYear + 1, 6, 31, 23, 59, 59, 999)); // July 31 next year
+        return {
+            start,
+            end,
+            name: `AY ${start.getUTCFullYear()}-${end.getUTCFullYear()}`,
+        };
     }
 }

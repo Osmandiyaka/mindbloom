@@ -20,6 +20,21 @@ export class TenantResponseDto {
     @ApiProperty({ description: 'Tenant plan' })
     plan: string;
 
+    @ApiProperty({ description: 'Locale' })
+    locale: string;
+
+    @ApiProperty({ description: 'Timezone' })
+    timezone: string;
+
+    @ApiProperty({ description: 'Week start' })
+    weekStartsOn: string;
+
+    @ApiProperty({ description: 'Academic year settings', required: false })
+    academicYear?: { start: Date; end: Date; name?: string };
+
+    @ApiProperty({ description: 'Whether initial configuration is required', required: false })
+    initialConfigRequired?: boolean;
+
     @ApiProperty({ description: 'Owner user id', required: false })
     ownerId?: string | null;
 
@@ -48,6 +63,11 @@ export class TenantResponseDto {
             address: tenant.contactInfo.address,
             logo: tenant.customization?.logo,
             schoolId: tenant.metadata?.schoolId,
+            locale: tenant.locale,
+            timezone: tenant.timezone,
+            weekStartsOn: tenant.weekStartsOn,
+            academicYear: tenant.academicYear,
+            initialConfigRequired: tenant.metadata?.initialConfigRequired,
         };
     }
 }
