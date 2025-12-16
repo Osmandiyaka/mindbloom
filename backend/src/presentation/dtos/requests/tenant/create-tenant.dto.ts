@@ -1,5 +1,33 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsEmail, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsEnum, IsOptional, IsEmail, MinLength, ValidateNested, IsObject } from 'class-validator';
+import { Type } from 'class-transformer';
+
+class AddressDto {
+    @ApiPropertyOptional({ example: '123 Main St' })
+    @IsOptional()
+    @IsString()
+    street?: string;
+
+    @ApiPropertyOptional({ example: 'Springfield' })
+    @IsOptional()
+    @IsString()
+    city?: string;
+
+    @ApiPropertyOptional({ example: 'CA' })
+    @IsOptional()
+    @IsString()
+    state?: string;
+
+    @ApiPropertyOptional({ example: '90210' })
+    @IsOptional()
+    @IsString()
+    postalCode?: string;
+
+    @ApiPropertyOptional({ example: 'USA' })
+    @IsOptional()
+    @IsString()
+    country?: string;
+}
 
 export class CreateTenantDto {
     @ApiProperty({ description: 'Tenant name', example: 'Greenfield High School' })
@@ -7,14 +35,30 @@ export class CreateTenantDto {
     @IsNotEmpty()
     name: string;
 
-    @ApiProperty({ description: 'Tenant subdomain/code', example: 'greenfield' })
+    @ApiPropertyOptional({ description: 'Tenant subdomain/code. If omitted, the system generates from name.', example: 'greenfield' })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    subdomain: string;
+    subdomain?: string;
 
     @ApiProperty({ description: 'Primary contact email', example: 'admin@greenfield.edu' })
     @IsEmail()
     contactEmail: string;
+
+    @ApiPropertyOptional({ description: 'Primary contact phone', example: '+1-202-555-0123' })
+    @IsOptional()
+    @IsString()
+    contactPhone?: string;
+
+    @ApiPropertyOptional({ description: 'School address' })
+    @IsOptional()
+    @ValidateNested()
+    @Type(() => AddressDto)
+    address?: AddressDto;
+
+    @ApiPropertyOptional({ description: 'School logo URL' })
+    @IsOptional()
+    @IsString()
+    logo?: string;
 
     @ApiProperty({ description: 'Owner user id', required: false })
     @IsOptional()
@@ -40,9 +84,9 @@ export class CreateTenantDto {
     @IsEmail()
     adminEmail: string;
 
-    @ApiProperty({ description: 'Admin password', example: 'Str0ngP@ssw0rd!' })
+    @ApiPropertyOptional({ description: 'Admin password. If omitted, a secure temporary password will be generated and force-reset enforced.', example: 'Str0ngP@ssw0rd!' })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
     @MinLength(8)
-    adminPassword: string;
+    adminPassword?: string;
 }

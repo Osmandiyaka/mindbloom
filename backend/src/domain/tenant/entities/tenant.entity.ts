@@ -217,12 +217,22 @@ export class Tenant {
         subdomain: string;
         ownerId?: string | null;
         contactEmail: string;
+        contactPhone?: string;
+        address?: {
+            street?: string;
+            city?: string;
+            state?: string;
+            postalCode?: string;
+            country?: string;
+        };
+        logo?: string;
         plan?: TenantPlan;
         status?: TenantStatus;
         locale?: string;
         timezone?: string;
         weekStartsOn?: WeekStart;
         currency?: string;
+        metadata?: Record<string, any>;
     }): Tenant {
         const plan = props.plan || TenantPlan.TRIAL;
         const status = props.status || TenantStatus.PENDING;
@@ -233,7 +243,11 @@ export class Tenant {
             status,
             plan,
             props.ownerId || null,
-            { email: props.contactEmail },
+            {
+                email: props.contactEmail,
+                phone: props.contactPhone,
+                address: props.address,
+            },
             getDefaultLimitsForPlan(plan),
             {
                 currentStudents: 0,
@@ -244,10 +258,10 @@ export class Tenant {
                 currentBandwidth: 0,
             },
             [],
+            props.logo ? { logo: props.logo } : undefined,
             undefined,
             undefined,
-            undefined,
-            {},
+            props.metadata || {},
             props.locale || 'en',
             props.timezone || 'UTC',
             props.weekStartsOn || WeekStart.MONDAY,

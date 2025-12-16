@@ -11,6 +11,9 @@ export class TenantResponseDto {
     @ApiProperty({ description: 'Tenant subdomain/code' })
     subdomain: string;
 
+    @ApiProperty({ description: 'Generated school identifier' })
+    schoolId: string;
+
     @ApiProperty({ description: 'Tenant status' })
     status: string;
 
@@ -23,6 +26,15 @@ export class TenantResponseDto {
     @ApiProperty({ description: 'Contact email' })
     contactEmail: string;
 
+    @ApiProperty({ description: 'Contact phone', required: false })
+    contactPhone?: string;
+
+    @ApiProperty({ description: 'School address', required: false })
+    address?: Record<string, any>;
+
+    @ApiProperty({ description: 'Logo url', required: false })
+    logo?: string;
+
     static fromDomain(tenant: Tenant): TenantResponseDto {
         return {
             id: tenant.id,
@@ -32,6 +44,10 @@ export class TenantResponseDto {
             plan: tenant.plan,
             ownerId: tenant.ownerId,
             contactEmail: tenant.contactInfo.email,
+            contactPhone: tenant.contactInfo.phone,
+            address: tenant.contactInfo.address,
+            logo: tenant.customization?.logo,
+            schoolId: tenant.metadata?.schoolId,
         };
     }
 }
