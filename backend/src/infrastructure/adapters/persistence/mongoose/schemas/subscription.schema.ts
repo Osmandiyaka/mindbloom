@@ -9,6 +9,9 @@ export class SubscriptionDocument extends Document {
     @Prop({ required: true, enum: ['free', 'basic', 'premium', 'enterprise'], default: 'free' })
     plan: string;
 
+    @Prop({ type: String })
+    planId?: string;
+
     @Prop({ required: true, enum: ['active', 'past_due', 'canceled', 'trialing'], default: 'active' })
     status: string;
 
@@ -40,3 +43,4 @@ export class SubscriptionDocument extends Document {
 
 export const SubscriptionSchema = SchemaFactory.createForClass(SubscriptionDocument);
 SubscriptionSchema.index({ tenantId: 1 }, { unique: true });
+SubscriptionSchema.index({ planId: 1 });

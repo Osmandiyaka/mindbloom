@@ -23,11 +23,17 @@ export class MongooseSubscriptionRepository extends TenantScopedRepository<Subsc
         return doc ? this.toDomain(doc) : null;
     }
 
+    async findByPlanId(planId: string): Promise<Subscription[]> {
+        const docs = await this.subscriptionModel.find({ planId }).exec();
+        return docs.map((d) => this.toDomain(d));
+    }
+
     async save(subscription: Subscription): Promise<Subscription> {
         const doc = await this.subscriptionModel.findOneAndUpdate(
             { tenantId: subscription.tenantId },
             {
                 plan: subscription.plan,
+                planId: subscription.planId,
                 status: subscription.status,
                 currentPeriodEnd: subscription.currentPeriodEnd,
                 billingEmail: subscription.billingEmail,
@@ -44,6 +50,7 @@ export class MongooseSubscriptionRepository extends TenantScopedRepository<Subsc
         return new Subscription(
             doc._id.toString(),
             doc.tenantId,
+            doc.planId || null,
             doc.plan as any,
             doc.status as any,
             doc.currentPeriodEnd,

@@ -14,6 +14,7 @@ export class Subscription {
     constructor(
         public readonly id: string,
         public readonly tenantId: string,
+        public readonly planId: string | null,
         public readonly plan: SubscriptionPlan,
         public readonly status: SubscriptionStatus,
         public readonly currentPeriodEnd: Date,
@@ -25,10 +26,11 @@ export class Subscription {
         public readonly updatedAt?: Date,
     ) { }
 
-    static create(tenantId: string, billingEmail: string, plan: SubscriptionPlan = 'free'): Subscription {
+    static create(tenantId: string, billingEmail: string, plan: SubscriptionPlan = 'free', planId: string | null = null): Subscription {
         return new Subscription(
             '',
             tenantId,
+            planId,
             plan,
             'active',
             new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -41,10 +43,11 @@ export class Subscription {
         );
     }
 
-    changePlan(plan: SubscriptionPlan): Subscription {
+    changePlan(plan: SubscriptionPlan, planId: string | null = null): Subscription {
         return new Subscription(
             this.id,
             this.tenantId,
+            planId,
             plan,
             'active',
             new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -61,6 +64,7 @@ export class Subscription {
         return new Subscription(
             this.id,
             this.tenantId,
+            this.planId,
             this.plan,
             this.status,
             this.currentPeriodEnd,

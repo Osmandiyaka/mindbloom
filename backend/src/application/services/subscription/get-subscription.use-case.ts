@@ -30,6 +30,7 @@ export class GetSubscriptionUseCase {
         return new Subscription(
             base.id,
             base.tenantId,
+            base.planId,
             base.plan,
             base.status,
             base.currentPeriodEnd,

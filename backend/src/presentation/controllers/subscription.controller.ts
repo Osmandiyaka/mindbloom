@@ -29,6 +29,7 @@ export class SubscriptionController {
     async changePlan(@Body() dto: ChangePlanDto) {
         const command = new ChangePlanCommand(
             this.tenantContext.tenantId,
+            dto.planId || null,
             dto.plan,
             dto.billingEmail,
             dto.paymentMethodLast4,

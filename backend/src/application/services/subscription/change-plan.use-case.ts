@@ -18,12 +18,13 @@ export class ChangePlanUseCase {
             throw new BadRequestException('Already on this plan');
         }
 
-        const subscription = (current || Subscription.create(command.tenantId, command.billingEmail))
-            .changePlan(nextPlan);
+        const subscription = (current || Subscription.create(command.tenantId, command.billingEmail, nextPlan, command.planId || null))
+            .changePlan(nextPlan, command.planId || null);
 
         const updated = await this.subscriptionRepository.save(new Subscription(
             subscription.id,
             subscription.tenantId,
+            command.planId || subscription.planId || null,
             subscription.plan,
             subscription.status,
             subscription.currentPeriodEnd,
