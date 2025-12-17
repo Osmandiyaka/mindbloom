@@ -37,6 +37,11 @@ export class MongooseTenantRepository implements ITenantRepository {
         return tenant ? this.toDomain(tenant) : null;
     }
 
+    async findByCustomDomain(customDomain: string): Promise<Tenant | null> {
+        const tenant = await this.tenantModel.findOne({ 'customization.customDomain': customDomain }).exec();
+        return tenant ? this.toDomain(tenant) : null;
+    }
+
     async create(tenant: Tenant): Promise<Tenant> {
         const created = await this.tenantModel.create(this.toDocument(tenant));
         return this.toDomain(created);

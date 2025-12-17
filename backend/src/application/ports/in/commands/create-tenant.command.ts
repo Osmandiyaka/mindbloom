@@ -11,7 +11,14 @@ export interface CreateTenantCommand {
         postalCode?: string;
         country?: string;
     };
-    logo?: string;
+    branding?: {
+        logo?: string;
+        favicon?: string;
+        primaryColor?: string;
+        secondaryColor?: string;
+        accentColor?: string;
+        customDomain?: string;
+    };
     ownerId?: string;
     plan?: 'trial' | 'free' | 'basic' | 'premium' | 'enterprise';
     status?: 'pending' | 'active' | 'suspended' | 'inactive';

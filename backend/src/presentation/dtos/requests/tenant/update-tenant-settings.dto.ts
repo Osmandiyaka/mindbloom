@@ -1,26 +1,36 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsIn, IsObject, IsBoolean, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsIn, IsObject, IsBoolean, IsNumber, Matches } from 'class-validator';
 
 export class UpdateTenantSettingsDto {
     @ApiPropertyOptional({ description: 'Primary brand color' })
     @IsOptional()
-    @IsString()
+    @Matches(/^#[0-9A-Fa-f]{6}$/)
     primaryColor?: string;
 
     @ApiPropertyOptional({ description: 'Secondary brand color' })
     @IsOptional()
-    @IsString()
+    @Matches(/^#[0-9A-Fa-f]{6}$/)
     secondaryColor?: string;
 
     @ApiPropertyOptional({ description: 'Accent color' })
     @IsOptional()
-    @IsString()
+    @Matches(/^#[0-9A-Fa-f]{6}$/)
     accentColor?: string;
 
     @ApiPropertyOptional({ description: 'Logo URL' })
     @IsOptional()
     @IsString()
     logo?: string;
+
+    @ApiPropertyOptional({ description: 'Favicon URL' })
+    @IsOptional()
+    @IsString()
+    favicon?: string;
+
+    @ApiPropertyOptional({ description: 'Custom domain (apex or subdomain)' })
+    @IsOptional()
+    @IsString()
+    customDomain?: string;
 
     @ApiPropertyOptional({ description: 'Locale (e.g., en-US)' })
     @IsOptional()

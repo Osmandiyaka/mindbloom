@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsEmail, MinLength, ValidateNested, IsObject, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsOptional, IsEmail, MinLength, ValidateNested, IsObject, IsNumber, Matches } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class AddressDto {
@@ -61,6 +61,38 @@ class LimitsDto {
     maxBandwidth?: number;
 }
 
+class BrandingDto {
+    @ApiPropertyOptional({ description: 'School logo URL' })
+    @IsOptional()
+    @IsString()
+    logo?: string;
+
+    @ApiPropertyOptional({ description: 'Favicon URL' })
+    @IsOptional()
+    @IsString()
+    favicon?: string;
+
+    @ApiPropertyOptional({ description: 'Primary color (hex)', example: '#1F2937' })
+    @IsOptional()
+    @Matches(/^#[0-9A-Fa-f]{6}$/)
+    primaryColor?: string;
+
+    @ApiPropertyOptional({ description: 'Secondary color (hex)', example: '#10B981' })
+    @IsOptional()
+    @Matches(/^#[0-9A-Fa-f]{6}$/)
+    secondaryColor?: string;
+
+    @ApiPropertyOptional({ description: 'Accent color (hex)', example: '#F59E0B' })
+    @IsOptional()
+    @Matches(/^#[0-9A-Fa-f]{6}$/)
+    accentColor?: string;
+
+    @ApiPropertyOptional({ description: 'Custom domain (apex or subdomain)', example: 'school.mindbloom.app' })
+    @IsOptional()
+    @IsString()
+    customDomain?: string;
+}
+
 export class CreateTenantDto {
     @ApiProperty({ description: 'Tenant name', example: 'Greenfield High School' })
     @IsString()
@@ -87,10 +119,11 @@ export class CreateTenantDto {
     @Type(() => AddressDto)
     address?: AddressDto;
 
-    @ApiPropertyOptional({ description: 'School logo URL' })
+    @ApiPropertyOptional({ description: 'Branding settings' })
     @IsOptional()
-    @IsString()
-    logo?: string;
+    @ValidateNested()
+    @Type(() => BrandingDto)
+    branding?: BrandingDto;
 
     @ApiProperty({ description: 'Owner user id', required: false })
     @IsOptional()

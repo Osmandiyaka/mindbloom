@@ -23,6 +23,10 @@ class InMemoryTenantRepository implements ITenantRepository {
         return Array.from(this.store.values()).find((t) => t.subdomain === subdomain) || null;
     }
 
+    async findByCustomDomain(customDomain: string): Promise<Tenant | null> {
+        return Array.from(this.store.values()).find((t) => t.customization?.customDomain === customDomain) || null;
+    }
+
     async create(tenant: Tenant): Promise<Tenant> {
         const id = randomUUID();
         const created = { ...tenant, id } as Tenant;
@@ -74,7 +78,10 @@ describe('CreateTenantUseCase', () => {
             adminEmail: 'admin@greenfield.edu',
             contactPhone: '+1-202-555-0123',
             address: { city: 'Springfield', country: 'USA' },
-            logo: 'https://cdn/logo.png',
+            branding: {
+                logo: 'https://cdn/logo.png',
+                customDomain: 'greenfield.example.edu',
+            },
             locale: 'en-GB',
             timezone: 'Europe/London',
             weekStartsOn: 'monday',
@@ -86,6 +93,7 @@ describe('CreateTenantUseCase', () => {
         expect(tenant.contactInfo.phone).toBe('+1-202-555-0123');
         expect(tenant.contactInfo.address?.city).toBe('Springfield');
         expect(tenant.customization?.logo).toBe('https://cdn/logo.png');
+        expect(tenant.customization?.customDomain).toBe('greenfield.example.edu');
         expect(tenant.locale).toBe('en-GB');
         expect(tenant.timezone).toBe('Europe/London');
         expect(tenant.weekStartsOn).toBe(WeekStart.MONDAY);
@@ -105,6 +113,7 @@ describe('CreateTenantUseCase', () => {
             contactEmail: 'first@school.com',
             adminName: 'First',
             adminEmail: 'first@school.com',
+            branding: { customDomain: 'school.mindbloom.app' },
         });
 
         const second = await useCase.execute({
@@ -113,6 +122,7 @@ describe('CreateTenantUseCase', () => {
             contactEmail: 'second@school.com',
             adminName: 'Second',
             adminEmail: 'second@school.com',
+            branding: { customDomain: 'second.mindbloom.app' },
         });
 
         expect(second.subdomain).toBe('greenfield-1');
@@ -141,6 +151,24 @@ describe('CreateTenantUseCase', () => {
             contactEmail: 'x@x.com',
             adminName: 'Admin',
             adminEmail: 'x@x.com',
+        })).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('rejects duplicate custom domain', async () => {
+        await useCase.execute({
+            name: 'Domain One',
+            contactEmail: 'one@school.com',
+            adminName: 'One',
+            adminEmail: 'one@school.com',
+            branding: { customDomain: 'alias.school.com' },
+        });
+
+        await expect(useCase.execute({
+            name: 'Domain Two',
+            contactEmail: 'two@school.com',
+            adminName: 'Two',
+            adminEmail: 'two@school.com',
+            branding: { customDomain: 'alias.school.com' },
         })).rejects.toBeInstanceOf(ConflictException);
     });
 });

@@ -47,7 +47,8 @@ export class TenantController {
             contactEmail: createTenantDto.contactEmail,
             contactPhone: createTenantDto.contactPhone,
             address: createTenantDto.address,
-            logo: createTenantDto.logo,
+            branding: createTenantDto.branding,
+            limits: createTenantDto.limits,
             plan: createTenantDto.plan || 'trial',
             locale: createTenantDto.locale,
             timezone: createTenantDto.timezone,
@@ -76,9 +77,11 @@ export class TenantController {
         const command = new UpdateTenantSettingsCommand(this.tenantContext.tenantId, {
             customization: {
                 logo: dto.logo,
+                favicon: dto.favicon,
                 primaryColor: dto.primaryColor,
                 secondaryColor: dto.secondaryColor,
                 accentColor: dto.accentColor,
+                customDomain: dto.customDomain,
             },
             locale: dto.locale,
             timezone: dto.timezone,

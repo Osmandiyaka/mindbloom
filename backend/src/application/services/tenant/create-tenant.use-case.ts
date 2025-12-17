@@ -34,6 +34,17 @@ export class CreateTenantUseCase {
         const academicYear = this.resolveAcademicYear(command.academicYear);
         const limits = this.resolveLimits(command.plan || TenantPlan.TRIAL, command.limits);
 
+        const customization = {
+            logo: command.branding?.logo,
+            favicon: command.branding?.favicon,
+            primaryColor: command.branding?.primaryColor,
+            secondaryColor: command.branding?.secondaryColor,
+            accentColor: command.branding?.accentColor,
+            customDomain: command.branding?.customDomain,
+        };
+
+        await this.ensureCustomDomainAvailable(customization.customDomain);
+
         const tenant = Tenant.create({
             name: command.name,
             subdomain,
@@ -41,7 +52,7 @@ export class CreateTenantUseCase {
             contactEmail: command.contactEmail,
             contactPhone: command.contactPhone,
             address: command.address,
-            logo: command.logo,
+            customization,
             plan: (command.plan || TenantPlan.TRIAL) as TenantPlan,
             status: (command.status || TenantStatus.PENDING) as TenantStatus,
             locale,
@@ -112,6 +123,14 @@ export class CreateTenantUseCase {
             }
         }
         return candidate;
+    }
+
+    private async ensureCustomDomainAvailable(customDomain?: string): Promise<void> {
+        if (!customDomain) return;
+        const existing = await this.tenantRepository.findByCustomDomain(customDomain);
+        if (existing) {
+            throw new ConflictException('Custom domain is already in use');
+        }
     }
 
     private generateSchoolId(): string {

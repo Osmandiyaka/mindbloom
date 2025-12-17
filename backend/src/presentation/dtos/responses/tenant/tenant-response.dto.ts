@@ -60,6 +60,21 @@ export class TenantResponseDto {
     @ApiProperty({ description: 'Logo url', required: false })
     logo?: string;
 
+    @ApiProperty({ description: 'Favicon url', required: false })
+    favicon?: string;
+
+    @ApiProperty({ description: 'Primary color', required: false })
+    primaryColor?: string;
+
+    @ApiProperty({ description: 'Secondary color', required: false })
+    secondaryColor?: string;
+
+    @ApiProperty({ description: 'Accent color', required: false })
+    accentColor?: string;
+
+    @ApiProperty({ description: 'Custom domain', required: false })
+    customDomain?: string;
+
     static fromDomain(tenant: Tenant): TenantResponseDto {
         return {
             id: tenant.id,
@@ -72,6 +87,11 @@ export class TenantResponseDto {
             contactPhone: tenant.contactInfo.phone,
             address: tenant.contactInfo.address,
             logo: tenant.customization?.logo,
+            favicon: tenant.customization?.favicon,
+            primaryColor: tenant.customization?.primaryColor,
+            secondaryColor: tenant.customization?.secondaryColor,
+            accentColor: tenant.customization?.accentColor,
+            customDomain: tenant.customization?.customDomain,
             schoolId: tenant.metadata?.schoolId,
             locale: tenant.locale,
             timezone: tenant.timezone,

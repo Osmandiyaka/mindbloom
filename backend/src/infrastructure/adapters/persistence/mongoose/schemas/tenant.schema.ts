@@ -39,7 +39,7 @@ class CustomizationSchema {
     @Prop({ match: /^#[0-9A-F]{6}$/i })
     accentColor?: string;
 
-    @Prop()
+    @Prop({ unique: true, sparse: true })
     customDomain?: string;
 
     @Prop()
@@ -297,6 +297,7 @@ TenantSchema.index({ deletedAt: 1 });
 TenantSchema.index({ tags: 1 });
 TenantSchema.index({ status: 1, plan: 1 });
 TenantSchema.index({ status: 1, deletedAt: 1 });
+TenantSchema.index({ 'customization.customDomain': 1 }, { unique: true, sparse: true });
 
 TenantSchema.virtual('isTrialExpired').get(function () {
     return this.plan === TenantPlan.TRIAL &&

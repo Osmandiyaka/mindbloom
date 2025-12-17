@@ -226,6 +226,11 @@ export class Tenant {
             country?: string;
         };
         logo?: string;
+        favicon?: string;
+        primaryColor?: string;
+        secondaryColor?: string;
+        accentColor?: string;
+        customDomain?: string;
         plan?: TenantPlan;
         status?: TenantStatus;
         locale?: string;
@@ -235,6 +240,7 @@ export class Tenant {
         metadata?: Record<string, any>;
         academicYear?: AcademicYearSettings;
         limits?: ResourceLimits;
+        customization?: CustomizationSettings;
     }): Tenant {
         const plan = props.plan || TenantPlan.TRIAL;
         const status = props.status || TenantStatus.PENDING;
@@ -261,7 +267,7 @@ export class Tenant {
                 currentBandwidth: 0,
             },
             [],
-            props.logo ? { logo: props.logo } : undefined,
+            props.customization || (props.logo ? { logo: props.logo } : undefined),
             undefined,
             undefined,
             props.metadata || {},

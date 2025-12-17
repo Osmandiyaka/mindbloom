@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/ports/out/tenant-repository.port';
 import { Tenant } from '../../../domain/tenant/entities/tenant.entity';
 import { UpdateTenantSettingsCommand } from '../../ports/in/commands/update-tenant-settings.command';
@@ -14,6 +14,13 @@ export class UpdateTenantSettingsUseCase {
         const tenant = await this.tenantRepository.findById(command.tenantId);
         if (!tenant) {
             throw new NotFoundException('Tenant not found');
+        }
+
+        if (command.settings.customization?.customDomain && command.settings.customization.customDomain !== tenant.customization?.customDomain) {
+            const existing = await this.tenantRepository.findByCustomDomain(command.settings.customization.customDomain);
+            if (existing && existing.id !== tenant.id) {
+                throw new ConflictException('Custom domain is already in use');
+            }
         }
 
         const updated = await this.tenantRepository.update(tenant.id, {

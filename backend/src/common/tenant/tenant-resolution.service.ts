@@ -32,13 +32,22 @@ export class TenantResolutionService {
         }
 
         // 3. Subdomain lookup
-        const host: string | undefined = request.headers?.host;
-        const subdomain = host ? host.split('.')[0] : null;
-        if (subdomain && subdomain !== 'localhost' && subdomain !== 'www') {
-            const tenant = await this.tenantRepository.findBySubdomain(subdomain);
-            if (tenant) {
-                this.tenantContext.setTenantId(tenant.id);
-                return tenant.id;
+        const hostHeader: string | undefined = request.headers?.host;
+        const host = hostHeader?.split(':')[0];
+        if (host) {
+            const tenantByDomain = await this.tenantRepository.findByCustomDomain(host);
+            if (tenantByDomain) {
+                this.tenantContext.setTenantId(tenantByDomain.id);
+                return tenantByDomain.id;
+            }
+
+            const subdomain = host.split('.')[0];
+            if (subdomain && subdomain !== 'localhost' && subdomain !== 'www') {
+                const tenant = await this.tenantRepository.findBySubdomain(subdomain);
+                if (tenant) {
+                    this.tenantContext.setTenantId(tenant.id);
+                    return tenant.id;
+                }
             }
         }
 
