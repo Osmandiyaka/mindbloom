@@ -32,6 +32,16 @@ export class TenantResponseDto {
     @ApiProperty({ description: 'Academic year settings', required: false })
     academicYear?: { start: Date; end: Date; name?: string };
 
+    @ApiProperty({ description: 'Resource limits' })
+    limits: {
+        maxStudents: number;
+        maxTeachers: number;
+        maxClasses: number;
+        maxAdmins?: number;
+        maxStorage?: number;
+        maxBandwidth?: number;
+    };
+
     @ApiProperty({ description: 'Whether initial configuration is required', required: false })
     initialConfigRequired?: boolean;
 
@@ -68,6 +78,7 @@ export class TenantResponseDto {
             weekStartsOn: tenant.weekStartsOn,
             academicYear: tenant.academicYear,
             initialConfigRequired: tenant.metadata?.initialConfigRequired,
+            limits: tenant.limits,
         };
     }
 }

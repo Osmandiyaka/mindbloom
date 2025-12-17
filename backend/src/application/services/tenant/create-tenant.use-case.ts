@@ -1,11 +1,13 @@
 import { Inject, Injectable, BadRequestException, ConflictException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { Tenant, TenantPlan, TenantStatus, WeekStart, AcademicYearSettings } from '../../../domain/tenant/entities/tenant.entity';
+import { Tenant, TenantPlan, TenantStatus, WeekStart, AcademicYearSettings, ResourceLimits } from '../../../domain/tenant/entities/tenant.entity';
+import { getDefaultLimitsForPlan } from '../../../domain/tenant/entities/tenant.entity';
 import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/ports/out/tenant-repository.port';
 import { CreateTenantCommand } from '../../ports/in/commands/create-tenant.command';
 import { InitializeSystemRolesUseCase } from '../rbac/initialize-system-roles.use-case';
 import { CreateUserUseCase } from '../user';
 import { SYSTEM_ROLE_NAMES } from '../../../domain/rbac/entities/system-roles';
+import { TenantPlanMailer } from './tenant-plan.mailer';
 
 @Injectable()
 export class CreateTenantUseCase {
@@ -14,6 +16,7 @@ export class CreateTenantUseCase {
         private readonly tenantRepository: ITenantRepository,
         private readonly initializeSystemRolesUseCase: InitializeSystemRolesUseCase,
         private readonly createUserUseCase: CreateUserUseCase,
+        private readonly tenantPlanMailer: TenantPlanMailer,
     ) { }
 
     async execute(command: CreateTenantCommand): Promise<Tenant> {
@@ -29,6 +32,7 @@ export class CreateTenantUseCase {
         const timezone = command.timezone || 'Europe/London';
         const weekStartsOn = (command.weekStartsOn as WeekStart) || WeekStart.MONDAY;
         const academicYear = this.resolveAcademicYear(command.academicYear);
+        const limits = this.resolveLimits(command.plan || TenantPlan.TRIAL, command.limits);
 
         const tenant = Tenant.create({
             name: command.name,
@@ -44,6 +48,7 @@ export class CreateTenantUseCase {
             timezone,
             weekStartsOn,
             academicYear,
+            limits,
             metadata: { schoolId, initialConfigRequired: true },
         });
 
@@ -67,10 +72,20 @@ export class CreateTenantUseCase {
                 forcePasswordReset: true,
             });
 
-            return await this.tenantRepository.update(createdTenant.id, {
+            const updated = await this.tenantRepository.update(createdTenant.id, {
                 ...createdTenant,
                 ownerId: adminUser.id,
             } as Tenant);
+
+            // fire-and-forget email notification; do not block creation on mail failure
+            this.tenantPlanMailer.sendPlanAssignment(
+                adminUser.email,
+                createdTenant.name,
+                createdTenant.plan,
+                limits,
+            ).catch(() => undefined);
+
+            return updated;
         } catch (error) {
             await this.tenantRepository.delete(createdTenant.id);
             throw error;
@@ -106,6 +121,16 @@ export class CreateTenantUseCase {
     private generateTemporaryPassword(): string {
         const raw = randomUUID().replace(/-/g, '');
         return `${raw.slice(0, 6)}Aa!${raw.slice(6, 10)}`;
+    }
+
+    private resolveLimits(plan: TenantPlan | string, overrides?: Partial<ResourceLimits>): ResourceLimits {
+        const basePlan = (plan as TenantPlan) || TenantPlan.TRIAL;
+        const baseLimits = getDefaultLimitsForPlan(basePlan as TenantPlan);
+
+        return {
+            ...baseLimits,
+            ...(overrides || {}),
+        } as ResourceLimits;
     }
 
     private resolveAcademicYear(input?: { start: Date | string; end: Date | string; name?: string; }): AcademicYearSettings | undefined {

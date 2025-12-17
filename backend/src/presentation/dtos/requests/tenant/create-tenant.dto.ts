@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsEmail, MinLength, ValidateNested, IsObject } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsOptional, IsEmail, MinLength, ValidateNested, IsObject, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class AddressDto {
@@ -27,6 +27,38 @@ class AddressDto {
     @IsOptional()
     @IsString()
     country?: string;
+}
+
+class LimitsDto {
+    @ApiPropertyOptional({ example: 100 })
+    @IsOptional()
+    @IsNumber()
+    maxStudents?: number;
+
+    @ApiPropertyOptional({ example: 20 })
+    @IsOptional()
+    @IsNumber()
+    maxTeachers?: number;
+
+    @ApiPropertyOptional({ example: 10 })
+    @IsOptional()
+    @IsNumber()
+    maxClasses?: number;
+
+    @ApiPropertyOptional({ example: 5 })
+    @IsOptional()
+    @IsNumber()
+    maxAdmins?: number;
+
+    @ApiPropertyOptional({ example: 5000, description: 'Storage in MB; use -1 for unlimited' })
+    @IsOptional()
+    @IsNumber()
+    maxStorage?: number;
+
+    @ApiPropertyOptional({ example: 100, description: 'Bandwidth in GB/month; use -1 for unlimited' })
+    @IsOptional()
+    @IsNumber()
+    maxBandwidth?: number;
 }
 
 export class CreateTenantDto {
@@ -88,6 +120,12 @@ export class CreateTenantDto {
         end: string;
         name?: string;
     };
+
+    @ApiPropertyOptional({ description: 'Override plan limits' })
+    @IsOptional()
+    @ValidateNested()
+    @Type(() => LimitsDto)
+    limits?: LimitsDto;
 
     @ApiProperty({
         description: 'Tenant plan',

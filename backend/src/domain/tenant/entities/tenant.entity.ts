@@ -234,9 +234,11 @@ export class Tenant {
         currency?: string;
         metadata?: Record<string, any>;
         academicYear?: AcademicYearSettings;
+        limits?: ResourceLimits;
     }): Tenant {
         const plan = props.plan || TenantPlan.TRIAL;
         const status = props.status || TenantStatus.PENDING;
+        const limits = props.limits || getDefaultLimitsForPlan(plan);
         return new Tenant(
             '',
             props.name,
@@ -249,7 +251,7 @@ export class Tenant {
                 phone: props.contactPhone,
                 address: props.address,
             },
-            getDefaultLimitsForPlan(plan),
+            limits,
             {
                 currentStudents: 0,
                 currentTeachers: 0,
@@ -284,7 +286,7 @@ export class Tenant {
     }
 }
 
-function getDefaultLimitsForPlan(plan: TenantPlan): ResourceLimits {
+export function getDefaultLimitsForPlan(plan: TenantPlan): ResourceLimits {
     const limits = {
         [TenantPlan.TRIAL]: {
             maxStudents: 50,

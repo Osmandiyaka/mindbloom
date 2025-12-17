@@ -10,12 +10,14 @@ import { ResendInvitationUseCase } from '../../application/services/invitation/r
 import { RevokeInvitationUseCase } from '../../application/services/invitation/revoke-invitation.use-case';
 import { InvitationsSeeder } from './invitations.seeder';
 import { InvitationMailer } from '../../application/services/invitation/invitation.mailer';
+import { MailModule } from '../../infrastructure/mail/mail.module';
 
 @Module({
     imports: [
         MongooseModule.forFeature([
             { name: 'Invitation', schema: InvitationSchema },
         ]),
+        MailModule,
     ],
     controllers: [InvitationsController],
     providers: [

@@ -49,6 +49,7 @@ describe('CreateTenantUseCase', () => {
     let repo: InMemoryTenantRepository;
     let roles: InitializeSystemRolesUseCase;
     let users: CreateUserUseCase;
+    let tenantPlanMailer: { sendPlanAssignment: jest.Mock };
     let useCase: CreateTenantUseCase;
 
     beforeEach(() => {
@@ -61,7 +62,8 @@ describe('CreateTenantUseCase', () => {
         users = {
             execute: jest.fn().mockResolvedValue({ id: 'user-1' }),
         } as any;
-        useCase = new CreateTenantUseCase(repo, roles, users);
+        tenantPlanMailer = { sendPlanAssignment: jest.fn().mockResolvedValue(undefined) } as any;
+        useCase = new CreateTenantUseCase(repo, roles, users, tenantPlanMailer as any);
     });
 
     it('creates a tenant with generated subdomain, schoolId, contact info, and admin account', async () => {
@@ -132,7 +134,7 @@ describe('CreateTenantUseCase', () => {
 
     it('throws when too many collisions occur', async () => {
         jest.spyOn(repo, 'findBySubdomain').mockResolvedValue(true as any);
-        useCase = new CreateTenantUseCase(repo, roles, users);
+        useCase = new CreateTenantUseCase(repo, roles, users, tenantPlanMailer as any);
 
         await expect(useCase.execute({
             name: 'Repeat',

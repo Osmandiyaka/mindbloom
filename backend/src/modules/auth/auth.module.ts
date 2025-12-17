@@ -13,6 +13,7 @@ import { LoginUseCase, RegisterUseCase, ForgotPasswordUseCase, ResetPasswordUseC
 import { AuthController } from '../../presentation/controllers/auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { MailModule } from '../../infrastructure/mail/mail.module';
 
 @Module({
     imports: [
@@ -29,6 +30,7 @@ import { LocalStrategy } from './strategies/local.strategy';
                 signOptions: { expiresIn: config.get('JWT_EXPIRES_IN') || '15m' },
             }),
         }),
+        MailModule,
     ],
     controllers: [AuthController],
     providers: [

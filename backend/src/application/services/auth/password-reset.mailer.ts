@@ -1,72 +1,41 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
+import { MailService } from '../../../infrastructure/mail/mail.service';
 
 @Injectable()
 export class PasswordResetMailer {
-  private readonly logger = new Logger(PasswordResetMailer.name);
-  private readonly from: string;
-
-  constructor(private readonly configService: ConfigService) {
-    this.from = this.configService.get<string>('EMAIL_FROM') || 'no-reply@mindbloom.app';
-  }
+  constructor(
+    private readonly mailService: MailService,
+  ) { }
 
   async sendResetEmail(to: string, name: string, resetLink: string, expiresAt: Date): Promise<void> {
     const subject = 'Reset your MindBloom password';
     const text = `Hi ${name || 'there'},\n\nWe received a request to reset your MindBloom password. Click the link below to set a new password. This link expires at ${expiresAt.toUTCString()}.\n\n${resetLink}\n\nIf you did not request this, you can safely ignore this email.`;
-    const html = `
-            <div style="font-family: 'Inter', Arial, sans-serif; background:#0f172a; padding:24px;">
-              <div style="max-width:560px; margin:0 auto; background:#111827; border-radius:14px; overflow:hidden; box-shadow:0 12px 30px rgba(0,0,0,0.35);">
-                <div style="padding:24px 24px 8px; color:#e2e8f0;">
-                  <h2 style="margin:0 0 8px; font-size:20px; color:#f8fafc;">Reset your MindBloom password</h2>
-                  <p style="margin:0 0 12px; line-height:1.6;">Hi ${name || 'there'},</p>
-                  <p style="margin:0 0 16px; line-height:1.6;">We received a request to reset your MindBloom password. Click the button below to choose a new password. This link will expire at <strong>${expiresAt.toUTCString()}</strong>.</p>
-                  <div style="text-align:center; margin:24px 0;">
-                    <a href="${resetLink}" style="display:inline-block; padding:12px 20px; background:#38bdf8; color:#0b1221; border-radius:10px; font-weight:700; text-decoration:none; box-shadow:0 10px 30px rgba(56,189,248,0.4);">
-                      Reset password
-                    </a>
-                  </div>
-                  <p style="margin:0 0 12px; line-height:1.6;">If the button doesn't work, copy and paste this link into your browser:</p>
-                  <p style="word-break:break-all; background:#0b1221; padding:12px; border-radius:10px; font-family:monospace; font-size:13px; color:#e2e8f0;">${resetLink}</p>
-                  <p style="margin:20px 0 0; color:#94a3b8; font-size:13px;">If you didn't request this, you can safely ignore this email.</p>
-                </div>
-              </div>
+    const body = `
+            <h2 style="margin:0 0 10px; font-size:20px; color:#f8fafc;">Reset your MindBloom password</h2>
+            <p style="margin:0 0 12px; line-height:1.6;">Hi {{name}},</p>
+            <p style="margin:0 0 16px; line-height:1.6;">We received a request to reset your MindBloom password. Click the button below to choose a new password. This link will expire at <strong>{{expiry}}</strong>.</p>
+            <div style="text-align:center; margin:24px 0;">
+              <a href="{{resetLink}}" style="display:inline-block; padding:12px 20px; background:#38bdf8; color:#0b1221; border-radius:10px; font-weight:700; text-decoration:none; box-shadow:0 10px 30px rgba(56,189,248,0.4);">
+                Reset password
+              </a>
             </div>
+            <p style="margin:0 0 12px; line-height:1.6;">If the button doesn't work, copy and paste this link into your browser:</p>
+            <p style="word-break:break-all; background:#0b1221; padding:12px; border-radius:10px; font-family:monospace; font-size:13px; color:#e2e8f0;">{{resetLink}}</p>
+            <p style="margin:20px 0 0; color:#94a3b8; font-size:13px;">If you didn't request this, you can safely ignore this email.</p>
         `;
 
-    const smtpUrl = this.configService.get<string>('SMTP_URL');
-    const smtpPort = Number(this.configService.get<string>('EMAIL_PORT') || 0);
-    const smtpUser = this.configService.get<string>('EMAIL_USER');
-    const smtpPass = this.configService.get<string>('EMAIL_PASS');
-
-    if (smtpUrl) {
-      try {
-        // Lazy load to avoid build-time dependency in environments without SMTP configured
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const nodemailer = require('nodemailer');
-        const transporter = (smtpUser && smtpPass)
-          ? nodemailer.createTransport({
-            host: smtpUrl,
-            port: smtpPort || 587,
-            secure: (smtpPort || 587) === 465,
-            auth: { user: smtpUser, pass: smtpPass },
-          })
-          : nodemailer.createTransport(smtpUrl); // fallback to raw connection string if provided
-
-        await transporter.sendMail({
-          to,
-          from: this.from,
-          subject,
-          text,
-          html,
-        });
-        return;
-      } catch (error) {
-        this.logger.warn(`SMTP send failed, falling back to console: ${(error as Error).message}`);
-      }
-    }
-
-    // Fallback: log the email content so developers can verify in non-SMTP environments
-    this.logger.log(`Password reset link for ${to}: ${resetLink}`);
-    this.logger.debug(html);
+    await this.mailService.send({
+      to,
+      subject,
+      text,
+      template: {
+        body,
+        context: {
+          name: name || 'there',
+          expiry: expiresAt.toUTCString(),
+          resetLink,
+        },
+      },
+    });
   }
 }

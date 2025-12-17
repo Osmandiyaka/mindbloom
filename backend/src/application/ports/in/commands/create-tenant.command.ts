@@ -20,6 +20,14 @@ export interface CreateTenantCommand {
     locale?: string;
     timezone?: string;
     weekStartsOn?: 'monday' | 'sunday';
+    limits?: {
+        maxStudents?: number;
+        maxTeachers?: number;
+        maxClasses?: number;
+        maxAdmins?: number;
+        maxStorage?: number;
+        maxBandwidth?: number;
+    };
     academicYear?: {
         start: Date | string;
         end: Date | string;
