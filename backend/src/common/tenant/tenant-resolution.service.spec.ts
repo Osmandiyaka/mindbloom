@@ -1,6 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { expect } from '@jest/globals';
-import { ITenantRepository } from '../../domain/ports/out/tenant-repository.port';
+import { ITenantRepository, TenantListQuery, TenantListResult } from '../../domain/ports/out/tenant-repository.port';
 import { TenantContext } from './tenant.context';
 import { TenantResolutionService } from './tenant-resolution.service';
 
@@ -12,6 +12,10 @@ class FakeTenantRepository implements ITenantRepository {
     async create(): Promise<any> { throw new Error('not implemented'); }
     async update(): Promise<any> { throw new Error('not implemented'); }
     async delete(): Promise<void> { return; }
+
+    async findWithFilters(query: TenantListQuery): Promise<TenantListResult> {
+        return { data: [], total: 0, page: query.page || 1, pageSize: query.pageSize || 0 };
+    }
 
     async findByCustomDomain(customDomain: string) {
         const match = this.tenants.find((t) => t.customDomain === customDomain);

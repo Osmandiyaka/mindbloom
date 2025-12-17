@@ -5,9 +5,11 @@ import { Tenant } from '../../domain/tenant/entities/tenant.entity';
 import { TenantStatus, TenantPlan } from '../../domain/tenant/entities/tenant.entity';
 import { TenantContext } from '../../common/tenant/tenant.context';
 import { TenantResponseDto } from '../dtos/responses/tenant/tenant-response.dto';
-import { CreateTenantUseCase, GetTenantBySubdomainUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase } from '../../application/services/tenant';
+import { CreateTenantUseCase, GetTenantBySubdomainUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, ListTenantsUseCase } from '../../application/services/tenant';
 import { TenantGuard } from '../../common/tenant/tenant.guard';
 import { TenantResolutionService } from '../../common/tenant/tenant-resolution.service';
+import { PermissionGuard } from '../../common/guards/permission.guard';
+import { USER_REPOSITORY } from '../../domain/ports/out/repository.tokens';
 
 const buildTenant = (): Tenant => {
     const tenant = Tenant.create({
@@ -34,6 +36,7 @@ describe('TenantController', () => {
     const getTenantBySubdomainUseCase = { execute: jest.fn() };
     const getTenantSettingsUseCase = { execute: jest.fn() };
     const updateTenantSettingsUseCase = { execute: jest.fn() };
+    const listTenantsUseCase = { execute: jest.fn() };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -43,9 +46,12 @@ describe('TenantController', () => {
                 { provide: GetTenantBySubdomainUseCase, useValue: getTenantBySubdomainUseCase },
                 { provide: GetTenantSettingsUseCase, useValue: getTenantSettingsUseCase },
                 { provide: UpdateTenantSettingsUseCase, useValue: updateTenantSettingsUseCase },
+                { provide: ListTenantsUseCase, useValue: listTenantsUseCase },
                 { provide: TenantContext, useValue: { tenantId: 'tenant-ctx', setTenantId: jest.fn(), hasTenantId: () => true } },
                 { provide: TenantGuard, useValue: { canActivate: jest.fn().mockResolvedValue(true) } },
                 { provide: TenantResolutionService, useValue: { resolve: jest.fn() } },
+                { provide: PermissionGuard, useValue: { canActivate: jest.fn().mockResolvedValue(true) } },
+                { provide: USER_REPOSITORY, useValue: { findById: jest.fn() } },
             ],
         }).compile();
 
@@ -73,5 +79,30 @@ describe('TenantController', () => {
             contactEmail: 'admin@greenfield.edu',
         }));
         expect(result).toEqual(TenantResponseDto.fromDomain(tenant));
+    });
+
+    it('lists tenants with aggregates', async () => {
+        const tenant = buildTenant();
+        (listTenantsUseCase.execute as jest.Mock).mockResolvedValue({
+            data: [tenant],
+            total: 1,
+            page: 1,
+            pageSize: 20,
+            aggregates: {
+                total: 1,
+                active: 0,
+                suspended: 0,
+                trial: 1,
+                trialExpiring: 0,
+                usageTotals: { students: 0, teachers: 0, classes: 0, storageMb: 0 },
+            },
+        });
+
+        const result = await controller.listTenants({ page: 1, pageSize: 20 } as any);
+
+        expect(listTenantsUseCase.execute).toHaveBeenCalledWith(expect.objectContaining({ page: 1, pageSize: 20 }));
+        expect(result.total).toBe(1);
+        expect(result.data[0].id).toBe('tenant-1');
+        expect(result.aggregates.total).toBe(1);
     });
 });

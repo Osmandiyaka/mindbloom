@@ -12,7 +12,7 @@ import {
     CustomizationSettings,
     AcademicYearSettings,
 } from '../../../../domain/tenant/entities/tenant.entity';
-import { ITenantRepository } from '../../../../domain/ports/out/tenant-repository.port';
+import { ITenantRepository, TenantListQuery, TenantListResult } from '../../../../domain/ports/out/tenant-repository.port';
 import { TenantDocument } from './schemas/tenant.schema';
 
 @Injectable()
@@ -40,6 +40,118 @@ export class MongooseTenantRepository implements ITenantRepository {
     async findByCustomDomain(customDomain: string): Promise<Tenant | null> {
         const tenant = await this.tenantModel.findOne({ 'customization.customDomain': customDomain }).exec();
         return tenant ? this.toDomain(tenant) : null;
+    }
+
+    async findWithFilters(query: TenantListQuery): Promise<TenantListResult> {
+        const filter: Record<string, any> = {};
+
+        if (query.statuses && query.statuses.length > 0) {
+            filter.status = { $in: query.statuses };
+        }
+
+        if (query.plans && query.plans.length > 0) {
+            filter.plan = { $in: query.plans };
+        }
+
+        if (query.trialExpiringBefore) {
+            filter.trialEndsAt = { $lte: query.trialExpiringBefore };
+        }
+
+        if (query.search && query.search.trim()) {
+            const regex = new RegExp(query.search.trim(), 'i');
+            filter.$or = [
+                { name: regex },
+                { subdomain: regex },
+                { 'contactInfo.email': regex },
+                { 'customization.customDomain': regex },
+            ];
+        }
+
+        const page = Math.max(query.page || 1, 1);
+        const pageSize = Math.min(Math.max(query.pageSize || 20, 1), 100);
+        const sortField = query.sortBy || 'createdAt';
+        const sortDirection = query.sortDirection === 'asc' ? 1 : -1;
+        const trialCutoff = query.trialExpiringBefore || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+
+        const [docs, total, usageAgg, statusAgg] = await Promise.all([
+            this.tenantModel
+                .find(filter)
+                .sort({ [sortField]: sortDirection })
+                .skip((page - 1) * pageSize)
+                .limit(pageSize)
+                .exec(),
+            this.tenantModel.countDocuments(filter),
+            this.tenantModel.aggregate([
+                { $match: filter },
+                {
+                    $group: {
+                        _id: null,
+                        students: { $sum: '$usage.currentStudents' },
+                        teachers: { $sum: '$usage.currentTeachers' },
+                        classes: { $sum: '$usage.currentClasses' },
+                        storageMb: { $sum: '$usage.currentStorage' },
+                    },
+                },
+            ]),
+            this.tenantModel.aggregate([
+                { $match: filter },
+                {
+                    $group: {
+                        _id: null,
+                        active: { $sum: { $cond: [{ $eq: ['$status', TenantStatus.ACTIVE] }, 1, 0] } },
+                        suspended: { $sum: { $cond: [{ $eq: ['$status', TenantStatus.SUSPENDED] }, 1, 0] } },
+                        trial: { $sum: { $cond: [{ $eq: ['$plan', TenantPlan.TRIAL] }, 1, 0] } },
+                        trialExpiring: {
+                            $sum: {
+                                $cond: [
+                                    {
+                                        $and: [
+                                            { $eq: ['$plan', TenantPlan.TRIAL] },
+                                            { $lte: ['$trialEndsAt', trialCutoff] },
+                                        ]
+                                    },
+                                    1,
+                                    0,
+                                ],
+                            },
+                        },
+                    },
+                },
+            ]),
+        ]);
+
+        const usageTotals = usageAgg?.[0] ? {
+            students: usageAgg[0].students || 0,
+            teachers: usageAgg[0].teachers || 0,
+            classes: usageAgg[0].classes || 0,
+            storageMb: usageAgg[0].storageMb || 0,
+        } : {
+            students: 0,
+            teachers: 0,
+            classes: 0,
+            storageMb: 0,
+        };
+
+        const statusCounts = statusAgg?.[0] ? {
+            active: statusAgg[0].active || 0,
+            suspended: statusAgg[0].suspended || 0,
+            trial: statusAgg[0].trial || 0,
+            trialExpiring: statusAgg[0].trialExpiring || 0,
+        } : {
+            active: 0,
+            suspended: 0,
+            trial: 0,
+            trialExpiring: 0,
+        };
+
+        return {
+            data: docs.map((d) => this.toDomain(d)),
+            total,
+            page,
+            pageSize,
+            usageTotals,
+            statusCounts,
+        };
     }
 
     async create(tenant: Tenant): Promise<Tenant> {

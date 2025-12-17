@@ -1,7 +1,7 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { expect } from '@jest/globals';
 import { Tenant, TenantPlan } from '../../../domain/tenant/entities/tenant.entity';
-import { ITenantRepository } from '../../../domain/ports/out/tenant-repository.port';
+import { ITenantRepository, TenantListQuery, TenantListResult } from '../../../domain/ports/out/tenant-repository.port';
 import { UpdateTenantSettingsUseCase } from './update-tenant-settings.use-case';
 import { UpdateTenantSettingsCommand } from '../../ports/in/commands/update-tenant-settings.command';
 
@@ -22,6 +22,13 @@ class FakeTenantRepository implements ITenantRepository {
 
     async findByCustomDomain(customDomain: string): Promise<Tenant | null> {
         return Array.from(this.store.values()).find((t) => t.customization?.customDomain === customDomain) || null;
+    }
+
+    async findWithFilters(query: TenantListQuery): Promise<TenantListResult> {
+        const data = Array.from(this.store.values());
+        const page = query.page || 1;
+        const pageSize = query.pageSize || data.length || 1;
+        return { data, total: data.length, page, pageSize };
     }
 
     async create(): Promise<Tenant> {

@@ -2,7 +2,7 @@ import { ConflictException } from '@nestjs/common';
 import { expect } from '@jest/globals';
 import { randomUUID } from 'crypto';
 import { Tenant, TenantPlan, TenantStatus, WeekStart } from '../../../domain/tenant/entities/tenant.entity';
-import { ITenantRepository } from '../../../domain/ports/out/tenant-repository.port';
+import { ITenantRepository, TenantListQuery, TenantListResult } from '../../../domain/ports/out/tenant-repository.port';
 import { SYSTEM_ROLE_NAMES } from '../../../domain/rbac/entities/system-roles';
 import { CreateTenantUseCase } from './create-tenant.use-case';
 import { InitializeSystemRolesUseCase } from '../rbac/initialize-system-roles.use-case';
@@ -25,6 +25,15 @@ class InMemoryTenantRepository implements ITenantRepository {
 
     async findByCustomDomain(customDomain: string): Promise<Tenant | null> {
         return Array.from(this.store.values()).find((t) => t.customization?.customDomain === customDomain) || null;
+    }
+
+    async findWithFilters(query: TenantListQuery): Promise<TenantListResult> {
+        const data = Array.from(this.store.values());
+        const page = query.page || 1;
+        const pageSize = query.pageSize || data.length || 1;
+        const start = (page - 1) * pageSize;
+        const pageData = data.slice(start, start + pageSize);
+        return { data: pageData, total: data.length, page, pageSize };
     }
 
     async create(tenant: Tenant): Promise<Tenant> {

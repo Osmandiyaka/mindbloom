@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Put, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { GetTenantBySubdomainUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase } from '../../application/services/tenant';
+import { GetTenantBySubdomainUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, ListTenantsUseCase } from '../../application/services/tenant';
 import { UpdateTenantSettingsCommand } from '../../application/ports/in/commands/update-tenant-settings.command';
 import { TenantResponseDto } from '../dtos/responses/tenant/tenant-response.dto';
 import { CreateTenantDto } from '../dtos/requests/tenant/create-tenant.dto';
@@ -9,6 +9,10 @@ import { TenantGuard } from '../../common/tenant/tenant.guard';
 import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
 import { TenantContext } from '../../common/tenant/tenant.context';
 import { UpdateTenantSettingsDto } from '../dtos/requests/tenant/update-tenant-settings.dto';
+import { ListTenantsQueryDto } from '../dtos/requests/tenant/list-tenants.query.dto';
+import { TenantListItemDto, TenantListResponseDto } from '../dtos/responses/tenant/tenant-list.response.dto';
+import { Permissions } from '../../common/decorators/permissions.decorator';
+import { PermissionGuard } from '../../common/guards/permission.guard';
 
 @ApiTags('Tenants')
 @Controller('tenants')
@@ -18,6 +22,7 @@ export class TenantController {
         private readonly createTenantUseCase: CreateTenantUseCase,
         private readonly getTenantSettingsUseCase: GetTenantSettingsUseCase,
         private readonly updateTenantSettingsUseCase: UpdateTenantSettingsUseCase,
+        private readonly listTenantsUseCase: ListTenantsUseCase,
         private readonly tenantContext: TenantContext,
     ) { }
 
@@ -68,6 +73,36 @@ export class TenantController {
     async getSettings() {
         const settings = await this.getTenantSettingsUseCase.execute(this.tenantContext.tenantId);
         return settings;
+    }
+
+    @UseGuards(JwtAuthGuard, PermissionGuard)
+    @Permissions('tenants:read')
+    @Get()
+    @ApiOperation({ summary: 'List all tenants (Super Admin)' })
+    @ApiResponse({ status: 200, description: 'List tenants with aggregates', type: TenantListResponseDto })
+    async listTenants(@Query() query: ListTenantsQueryDto): Promise<TenantListResponseDto> {
+        const trialExpiringBefore = query.trialExpiringInDays
+            ? new Date(Date.now() + query.trialExpiringInDays * 24 * 60 * 60 * 1000)
+            : undefined;
+
+        const result = await this.listTenantsUseCase.execute({
+            search: query.search,
+            statuses: query.statuses as any,
+            plans: query.plans as any,
+            page: query.page,
+            pageSize: query.pageSize,
+            sortBy: query.sortBy,
+            sortDirection: query.sortDirection,
+            trialExpiringBefore,
+        });
+
+        return {
+            data: result.data.map((t) => TenantListItemDto.fromDomain(t)),
+            total: result.total,
+            page: result.page,
+            pageSize: result.pageSize,
+            aggregates: result.aggregates,
+        };
     }
 
     @UseGuards(JwtAuthGuard, TenantGuard)
