@@ -28,10 +28,11 @@ export class NodemailerSender implements MailSender {
             return null;
         }
 
-        const transporter = smtpUrl
+        const isUrlLike = !!smtpUrl && smtpUrl.includes('://');
+        const transporter = smtpUrl && isUrlLike
             ? createTransport(smtpUrl)
             : createTransport({
-                host,
+                host: smtpUrl && !isUrlLike ? smtpUrl : host,
                 port: port || 587,
                 secure: typeof secure === 'boolean' ? secure : (port || 587) === 465,
                 ignoreTLS,
