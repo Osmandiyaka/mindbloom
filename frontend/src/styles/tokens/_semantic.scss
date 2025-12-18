@@ -1,0 +1,30 @@
+:root {
+    /* Semantic surfaces */
+    --surface-app: var(--surface-app, var(--color-background, #f8f9fb));
+    --surface-elevated: var(--color-surface, #ffffff);
+    --surface-header: var(--color-surface, #ffffff);
+    --surface-sidebar: var(--color-surface, #ffffff);
+    --surface-hover: var(--color-surface-hover, #f3f6fb);
+
+    /* Text */
+    --text-primary: var(--color-text-primary, #1a1e27);
+    --text-secondary: var(--color-text-secondary, #4a5568);
+    --text-muted: var(--color-text-tertiary, #8b95a5);
+
+    /* Borders */
+    --border-default: var(--color-border, #dfe5ee);
+    --border-subtle: var(--color-border-light, #eef2f6);
+
+    /* Icons */
+    --icon-default: var(--text-secondary);
+    --icon-muted: var(--text-muted);
+    --icon-active: var(--color-primary, #667eea);
+
+    /* Focus */
+    --focus-ring: var(--color-primary, #667eea);
+
+    /* Shadows */
+    --shadow-1: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.08));
+    --shadow-2: var(--shadow-md, 0 4px 10px rgba(0, 0, 0, 0.08));
+    --shadow-3: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.12));
+}

@@ -1,7 +1,9 @@
+// Import theme and global styles (must come before CSS rules)
+@use 'styles/tokens/semantic';
+@import 'styles/theme/index';
+
 // Premium font pairing for the entire app
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap');
-// Import theme and global styles
-@import 'styles/theme/index';
 @import 'styles/reset';
 @import 'styles/typography';
 @import 'styles/hr-tokens';
@@ -35,8 +37,8 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
-    background: var(--content-background, var(--color-background, $bg-primary)) !important;
-    background-color: var(--content-background, var(--color-background, $bg-primary)) !important;
+    background: var(--surface-app) !important;
+    background-color: var(--surface-app) !important;
 }
 
 body {

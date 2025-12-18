@@ -1,4 +1,5 @@
 // Component styles index
+// Legacy partials still rely on @import scoping; theme index imports tokens/mixins beforehand
 @import 'button';
 @import 'input';
 @import 'card';

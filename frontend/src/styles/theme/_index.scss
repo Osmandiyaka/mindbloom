@@ -1,10 +1,8 @@
-// Theme index - imports all theme files
-@import 'colors';
-@import 'typography';
-@import 'spacing';
-@import 'shadows';
-@import 'borders';
-@import 'mixins';
-@import 'components/index';
-@import 'neumorphism';
-@import 'dark-soft';
+// Theme index - import structural theme modules (legacy-friendly)
+@import './colors';
+@import './typography';
+@import './spacing';
+@import './shadows';
+@import './borders';
+@import './mixins';
+@import './components/index';
