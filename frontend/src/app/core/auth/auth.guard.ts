@@ -1,7 +1,6 @@
 import { inject } from '@angular/core';
-import { Router, type CanActivateFn } from '@angular/router';
+import { Router, type CanActivateFn, type NavigationExtras } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
-import { firstValueFrom } from 'rxjs';
 
 export const authGuard: CanActivateFn = async (route, state) => {
     const authService = inject(AuthService);
@@ -27,9 +26,15 @@ export const authGuard: CanActivateFn = async (route, state) => {
     }
 
     // Not authenticated; redirect to login with returnUrl
-    const queryParams: Record<string, string> = {
-        returnUrl: state.url,
-    };
+    const attemptedUrl = state.url && state.url.trim() ? state.url : '/dashboard';
+    const blockedPrefixes = ['/login', '/auth/login'];
+    const shouldAttachReturnUrl =
+        attemptedUrl.startsWith('/') && !blockedPrefixes.some(prefix => attemptedUrl.startsWith(prefix));
 
-    return router.createUrlTree(['/login'], { queryParams });
+    const extras: NavigationExtras = {};
+    if (shouldAttachReturnUrl) {
+        extras.queryParams = { returnUrl: attemptedUrl };
+    }
+
+    return router.createUrlTree(['/login'], extras);
 };

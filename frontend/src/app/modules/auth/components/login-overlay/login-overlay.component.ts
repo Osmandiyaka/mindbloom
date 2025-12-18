@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TenantService } from '../../../../core/services/tenant.service';
 import { TenantRegistrationComponent } from '../tenant-registration/tenant-registration.component';
+import { sanitizeReturnUrl } from '../../../../core/auth/return-url.util';
 
 @Component({
     selector: 'app-login-overlay',
@@ -30,6 +31,8 @@ export class LoginOverlayComponent {
 
     // Registration state
     showRegistration = signal(false);
+    private readonly defaultReturnUrl = '/dashboard';
+    private targetAfterLogin = this.defaultReturnUrl;
 
     constructor(
         private authService: AuthService,
@@ -39,6 +42,11 @@ export class LoginOverlayComponent {
     ) {
         this.route.queryParamMap.subscribe(params => {
             this.resetSuccess.set(params.get('reset') === 'success');
+            this.targetAfterLogin = sanitizeReturnUrl(
+                this.router,
+                params.get('returnUrl'),
+                this.defaultReturnUrl
+            );
         });
     }
 
@@ -144,7 +152,7 @@ export class LoginOverlayComponent {
         this.authService.login(this.username(), this.password()).subscribe({
             next: (response) => {
                 this.isLoading.set(false);
-                this.router.navigate(['/dashboard']);
+                this.router.navigateByUrl(this.targetAfterLogin);
             },
             error: (error) => {
                 this.isLoading.set(false);
