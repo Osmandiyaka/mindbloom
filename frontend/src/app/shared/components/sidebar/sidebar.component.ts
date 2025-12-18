@@ -33,7 +33,7 @@ interface NavSection {
       [attr.aria-label]="ariaLabel"
     >
       <div class="sidebar-header">
-        <div class="brand logo-bar">
+        <div class="identity">
           <div class="brand-mark">
             <ng-container *ngIf="tenantLogo; else defaultLogo">
               <img [src]="tenantLogo" alt="Tenant logo" class="logo-img" loading="lazy" />
@@ -47,7 +47,6 @@ interface NavSection {
             <div class="brand-sub">School OS</div>
           </div>
         </div>
-       
       </div>
 
       <nav class="sidebar-nav">
@@ -59,7 +58,9 @@ interface NavSection {
               *ngFor="let item of section.items"
               [routerLink]="item.path"
               routerLinkActive="active"
+              #rla="routerLinkActive"
               [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
+              [attr.aria-current]="rla.isActive ? 'page' : null"
               (click)="onNavigate()">
               <span class="nav-link-icon" [innerHTML]="icon(item.icon)"></span>
               <span class="nav-link-text" *ngIf="!collapsed">{{ item.label }}</span>
@@ -87,234 +88,188 @@ interface NavSection {
   styles: [`
     :host { display: block; height: 100%; }
     .sidebar {
-      --sb-shadow-deep: color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.26)) 88%, transparent);
-      --sb-shadow-highlight: color-mix(in srgb, rgba(160,170,200,0.08) 70%, transparent);
-      --sb-surface-strong: color-mix(in srgb, var(--color-surface, #0f172a) 92%, var(--color-surface-hover, #e2e8f0) 8%);
-      --sb-gold: var(--color-primary, #E5C100);
-      --sb-text: var(--color-text-primary, #cfc7bc);
-      --sb-text-secondary: var(--color-text-secondary, #a39a90);
-      --sh-dark-crisp: rgba(0,0,0,0.32);
-      --sh-dark-deep: rgba(0,0,0,0.2);
+      --accent-primary: var(--color-primary, #8bc6ff);
+      --surface-sidebar: var(--color-surface, #0f172a);
+      --surface-hover: color-mix(in srgb, var(--color-surface-hover, rgba(255,255,255,0.04)) 90%, transparent);
+      --text-primary: var(--color-text-primary, #e5e7eb);
+      --text-secondary: var(--color-text-secondary, #9ca3af);
+      --text-muted: color-mix(in srgb, var(--color-text-secondary, #9ca3af) 75%, transparent);
+      --border-subtle: var(--color-border, rgba(255,255,255,0.08));
       position: sticky;
       top: 0;
       height: 100vh;
       width: var(--sidebar-width, 270px);
-      padding: 0.9rem;
+      padding: 1rem 0.75rem;
       box-sizing: border-box;
-      background: var(--sb-surface-strong);
-      background-color: var(--color-surface-glass, color-mix(in srgb, var(--color-surface, #f8fafc) 80%, transparent));
-      color: var(--sb-text);
+      background: var(--surface-sidebar);
+      color: var(--text-primary);
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      box-shadow:
-        inset -1px 0 0 color-mix(in srgb, var(--color-border, rgba(0,0,0,0.08)) 70%, transparent),
-        inset 4px 4px 14px color-mix(in srgb, var(--sb-gold) 8%, transparent),
-        8px 0 18px var(--sb-shadow-deep);
+      gap: 0.5rem;
+      border-right: 1px solid var(--border-subtle);
       transition: width 0.25s ease, padding 0.25s ease;
+      overflow: hidden;
     }
-    .sidebar.sidebar-collapsed { width: 84px; padding: 0.9rem 0.6rem; }
+    .sidebar.sidebar-collapsed { width: 84px; padding: 1rem 0.55rem; }
 
     .sidebar-header {
+      position: sticky;
+      top: 0;
+      padding: 0.2rem 0.4rem 0.6rem;
+      background: var(--surface-sidebar);
+      z-index: 2;
+    }
+
+    .identity {
       display: flex;
       align-items: center;
-      gap: 0.65rem;
-      padding: 0.2rem 0.25rem;
-      background: rgba(255,255,255,0.02);
-      border-radius: 14px;
+      gap: 0.55rem;
+      padding: 0.35rem 0.4rem;
+      border-radius: 8px;
     }
-    .brand.logo-bar {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.65rem;
-      flex: 1;
-      min-width: 0;
-      background: color-mix(in srgb, var(--color-surface, #0f172a) 80%, transparent);
-      border-radius: 16px;
-      padding: 0.4rem 0.55rem;
-      box-shadow:
-        2px 2px 6px var(--sh-dark-crisp),
-        6px 8px 14px var(--sh-dark-deep),
-        inset -1px -1px 4px color-mix(in srgb, var(--sb-gold) 10%, transparent);
-    }
+
     .brand-mark {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
       display: grid;
       place-items: center;
-      background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 10px 18px rgba(0,0,0,0.26);
+      background: color-mix(in srgb, #ffffff 6%, transparent);
+      border: 1px solid color-mix(in srgb, var(--border-subtle) 80%, transparent);
     }
-    .logo-img { width: 32px; height: 32px; object-fit: cover; border-radius: 10px; }
+    .logo-img { width: 28px; height: 28px; object-fit: cover; border-radius: 8px; }
     .brand-text { display: flex; flex-direction: column; min-width: 0; }
-    .brand-name { font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
-    .brand-sub { font-size: 0.82rem; color: var(--sb-text-secondary); line-height: 1.2; }
-    .collapse-btn {
-      width: 38px; height: 38px;
-      border-radius: 12px;
-      border: 1px solid color-mix(in srgb, var(--color-border, rgba(255,255,255,0.12)) 70%, transparent);
-      background: color-mix(in srgb, var(--color-surface-hover, rgba(255,255,255,0.04)) 80%, transparent);
-      color: var(--color-text-primary, #e8edf7);
-      display: grid; place-items: center;
-      cursor: pointer;
-      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-      margin-left: auto;
-    }
-    .collapse-btn:hover { transform: translateY(-1px); background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); }
+    .brand-name { font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; color: var(--text-primary); }
+    .brand-sub { font-size: 0.78rem; color: var(--text-muted); line-height: 1.2; }
 
-    .sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; display: grid; gap: 0.9rem; padding-right: 0.15rem; scroll-behavior: smooth; }
+    .sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; padding: 0.25rem 0.15rem 1rem; scroll-behavior: smooth; }
+
+    .nav-section { display: grid; gap: 4px; }
+
     .nav-section-title {
-      font-size: 0.85rem;
-      font-weight: 400;
-      color: var(--sb-text-secondary);
-      padding: 0.15rem 0.3rem 0.5rem;
-      margin: 0.55rem 0 0.35rem;
-      letter-spacing: 0.08em;
-      border-bottom: 1px solid color-mix(in srgb, var(--sb-gold) 14%, transparent);
-      background: linear-gradient(90deg, color-mix(in srgb, var(--sb-gold) 6%, transparent), transparent);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 0 0.9rem;
+      margin-top: 1rem;
+      margin-bottom: 0.35rem;
+      font-weight: 600;
     }
+
     .nav-card {
-      background: color-mix(in srgb, var(--color-surface, #f8fafc) 85%, var(--color-surface-hover, #e2e8f0) 15%);
-      border: 1px solid color-mix(in srgb, var(--color-border, rgba(0,0,0,0.08)) 75%, transparent);
-      border-radius: 14px;
-      box-shadow:
-        inset 0 1px 0 var(--sb-shadow-highlight),
-        0 16px 30px color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.22)) 90%, transparent);
-      padding: 0.3rem;
       display: grid;
-      gap: 0.25rem;
+      gap: 4px;
+      padding: 0;
     }
+
     .nav-link {
       position: relative;
-      z-index: 1;
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 0.6rem;
-      padding: 0.55rem 0.65rem;
-      border-radius: 12px;
-      color: var(--sb-text);
+      gap: 12px;
+      height: 40px;
+      padding: 0 0.9rem;
+      border-radius: 8px;
+      color: var(--text-secondary);
       text-decoration: none;
-      transition:
-        background-color 0.3s ease,
-        color 0.3s ease,
-        box-shadow 0.4s cubic-bezier(0.3, 1.1, 0.6, 1);
-      box-shadow:
-        inset 1.5px 1.5px 3px 0 color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.18)) 80%, transparent),
-        inset -1.5px -1.5px 3px 0 color-mix(in srgb, var(--color-surface, #ffffff) 28%, transparent);
-      text-shadow: 1px 1px 1px color-mix(in srgb, var(--sb-shadow-highlight) 60%, transparent);
-      background-image: radial-gradient(120% 120% at 10% 10%, color-mix(in srgb, var(--sb-gold) 4%, transparent) 0%, transparent 45%);
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
-    .nav-link:hover {
-      background: color-mix(in srgb, var(--sb-gold) 10%, var(--color-surface, #f8fafc));
-      box-shadow:
-        inset 2px 2px 5px 0 color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.22)) 82%, transparent),
-        inset -2px -2px 5px 0 color-mix(in srgb, var(--color-surface, #ffffff) 32%, transparent),
-        0 0 6px 0 color-mix(in srgb, var(--sb-shadow-deep) 24%, transparent);
-      color: var(--color-text-primary, #0f172a);
-    }
-    .nav-link:focus-visible {
-      outline: 2px solid var(--sb-gold);
-      outline-offset: 2px;
-    }
-    .nav-link.active {
-      background: var(--sb-gold);
-      color: var(--color-text-on-primary, #0f172a);
-      box-shadow:
-        inset 1.5px 1.5px 3px 0 color-mix(in srgb, var(--color-shadow, rgba(0,0,0,0.18)) 78%, transparent),
-        inset -1.5px -1.5px 3px 0 color-mix(in srgb, var(--color-surface, #ffffff) 32%, transparent),
-        inset 0 0 2px 0 color-mix(in srgb, rgba(255,255,255,0.45) 60%, transparent),
-        0 0 6px 0 color-mix(in srgb, var(--sb-gold) 22%, transparent);
-    }
-    .nav-link.active::before {
+
+    .nav-link::before {
       content: '';
       position: absolute;
-      left: 6px;
-      top: 8px;
-      bottom: 8px;
+      left: 0;
+      top: 6px;
+      bottom: 6px;
       width: 3px;
-      border-radius: 999px;
-      background: var(--sb-gold);
-      box-shadow: 0 0 6px color-mix(in srgb, var(--sb-gold) 55%, transparent);
+      border-radius: 2px;
+      background: transparent;
+      transition: background-color 0.2s ease;
     }
+
+    .nav-link:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .nav-link:focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+    }
+
+    .nav-link.active {
+      background: transparent;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .nav-link.active::before {
+      background: var(--accent-primary);
+    }
+
     .nav-link-icon {
-      width: 20px;
-      height: 20px;
-      color: color-mix(in srgb, var(--sb-text-secondary) 60%, #ffffff 40%);
+      width: 18px;
+      height: 18px;
       display: inline-flex;
-      transition: filter 0.2s ease, transform 0.2s ease, color 0.2s ease;
-      transform: translateY(-1px);
+      color: var(--text-secondary);
+      opacity: 0.85;
+      transition: color 0.2s ease, opacity 0.2s ease;
     }
-    .nav-link:hover .nav-link-icon {
-      color: color-mix(in srgb, var(--sb-gold) 60%, #ffffff 40%);
-      filter: drop-shadow(0 0 4px color-mix(in srgb, var(--sb-gold) 60%, transparent));
-    }
-    .nav-link.active .nav-link-icon {
-      color: var(--color-text-on-primary, #0f172a);
-      box-shadow: inset 0 0 1px rgba(0,0,0,0.4);
-      transform: translateY(-1px) scale(1.05);
-    }
-    .nav-link-text { font-weight: 700; letter-spacing: -0.02em; }
+
+    .nav-link:hover .nav-link-icon { color: var(--text-primary); opacity: 1; }
+    .nav-link.active .nav-link-icon { color: var(--accent-primary); opacity: 1; }
+
+    .nav-link-text { font-weight: 500; letter-spacing: -0.01em; font-size: 14px; line-height: 1; }
+
     .nav-badge {
       margin-left: auto;
       min-width: 28px;
       text-align: center;
-      background: color-mix(in srgb, var(--sb-gold) 20%, var(--color-surface, #0f172a));
-      color: var(--color-text-on-primary, #0c2243);
+      background: color-mix(in srgb, var(--accent-primary) 14%, transparent);
+      color: var(--accent-primary);
       padding: 0.15rem 0.45rem;
       border-radius: 10px;
-      font-weight: 800;
-      font-size: 0.65rem;
+      font-weight: 700;
+      font-size: 0.7rem;
       text-transform: uppercase;
     }
 
     .sidebar.sidebar-collapsed .nav-section-title { display: none; }
-    .sidebar.sidebar-collapsed .nav-card { padding: 0.35rem; }
-    .sidebar.sidebar-collapsed .nav-link { justify-content: center; padding: 0.55rem; }
+    .sidebar.sidebar-collapsed .nav-link { justify-content: center; padding: 0 0.65rem; }
     .sidebar.sidebar-collapsed .nav-link-text, .sidebar.sidebar-collapsed .nav-badge { display: none; }
 
-    .sidebar-footer { margin-top: auto; display: grid; gap: 0.5rem; }
-    .footer-cta { display: flex; justify-content: space-between; gap: 0.5rem; }
-    .ghost {
-      flex: 1;
-      padding: 0.5rem 0.6rem;
-      border-radius: 12px;
-      border: 1px solid color-mix(in srgb, var(--color-border, rgba(255,255,255,0.12)) 70%, transparent);
-      background: color-mix(in srgb, var(--color-surface, #0f172a) 92%, transparent);
-      color: var(--color-text-primary, #e8edf7);
-      cursor: pointer;
-      transition: background 0.18s ease, border-color 0.18s ease;
-    }
-    .ghost:hover { background: color-mix(in srgb, var(--color-primary, #E8BE14) 10%, transparent); border-color: color-mix(in srgb, var(--color-primary, #E8BE14) 35%, transparent); }
-
+    .sidebar-footer { margin-top: auto; display: grid; gap: 0.4rem; padding: 0.6rem 0.9rem 0.4rem; color: var(--text-secondary); }
+    .footer-cta { display: none; }
     .user-profile {
       display: inline-flex;
       align-items: center;
-      gap: 0.65rem;
+      gap: 0.55rem;
       padding: 0.55rem 0.65rem;
-      border-radius: 12px;
-      background: color-mix(in srgb, var(--color-surface, #0f172a) 92%, transparent);
-      border: 1px solid color-mix(in srgb, var(--color-border, rgba(255,255,255,0.08)) 80%, transparent);
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid color-mix(in srgb, var(--border-subtle) 60%, transparent);
       cursor: pointer;
-      transition: background 0.18s ease, border-color 0.18s ease;
+      transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
     }
-    .user-profile:hover { background: color-mix(in srgb, var(--color-primary, #E8BE14) 10%, transparent); border-color: color-mix(in srgb, var(--color-primary, #E8BE14) 40%, transparent); }
+    .user-profile:hover {
+      background: var(--surface-hover);
+      border-color: var(--accent-primary);
+      color: var(--text-primary);
+    }
     .user-avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
       display: grid;
       place-items: center;
-      background: linear-gradient(135deg, var(--color-primary, #E8BE14), color-mix(in srgb, var(--color-primary, #E8BE14) 65%, transparent));
-      color: var(--color-text-on-primary, #0c2243);
-      font-weight: 800;
-      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+      background: color-mix(in srgb, var(--accent-primary) 30%, transparent);
+      color: var(--text-primary);
+      font-weight: 700;
     }
     .user-info { display: grid; gap: 0.05rem; }
-    .user-name { font-weight: 700; color: var(--color-text-primary, #e8edf7); }
-    .user-role { font-size: 0.85rem; color: var(--color-text-secondary, rgba(232,237,247,0.7)); }
-    .sidebar.sidebar-collapsed .footer-cta { display: none; }
+    .user-name { font-weight: 600; color: var(--text-primary); }
+    .user-role { font-size: 0.85rem; color: var(--text-secondary); }
     .sidebar.sidebar-collapsed .user-info { display: none; }
 
     .sidebar.is-mobile {
@@ -329,8 +284,7 @@ interface NavSection {
       transition: transform 0.28s ease;
       box-shadow: 10px 0 30px rgba(0,0,0,0.35);
       z-index: 200;
-      overflow-y: auto;
-      padding-bottom: 1.5rem;
+      overflow: hidden;
     }
 
     .sidebar.is-mobile.open {
@@ -350,8 +304,7 @@ interface NavSection {
         transition: transform 0.28s ease;
         box-shadow: 10px 0 30px rgba(0,0,0,0.35);
         z-index: 200;
-        overflow-y: auto;
-        padding-bottom: 1.5rem;
+        overflow: hidden;
       }
 
       .sidebar.open {
@@ -360,8 +313,10 @@ interface NavSection {
 
       .sidebar.sidebar-collapsed {
         width: min(320px, 85vw);
-        padding: 0.9rem;
+        padding: 1rem 0.75rem;
       }
+
+      .sidebar-nav { padding-right: 0.25rem; }
     }
   `]
 })
