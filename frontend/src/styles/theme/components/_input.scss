@@ -32,7 +32,7 @@
             border-color: $error;
 
             &:focus {
-                box-shadow: $shadow-focus-error;
+                box-shadow: var(--shadow-focus-error, $shadow-focus-error);
             }
         }
     }

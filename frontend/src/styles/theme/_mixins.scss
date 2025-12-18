@@ -44,14 +44,14 @@
     background: $card-bg;
     border: $border-default;
     border-radius: $card-radius;
-    box-shadow: $card-shadow;
+    box-shadow: var(--shadow-2, $card-shadow);
     padding: $card-padding;
 }
 
 // Focus state
 @mixin focus-ring {
     outline: none;
-    box-shadow: $shadow-focus;
+    box-shadow: var(--shadow-focus, $shadow-focus);
 }
 
 // Hover lift effect
@@ -60,7 +60,7 @@
 
     &:hover {
         transform: translateY(-2px);
-        box-shadow: $shadow-hover;
+        box-shadow: var(--shadow-2, $shadow-hover);
     }
 }
 

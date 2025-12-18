@@ -31,17 +31,17 @@
     &.btn-primary {
         background: $gradient-blue;
         color: $text-inverse;
-        box-shadow: $button-shadow;
+        box-shadow: var(--shadow-1, $button-shadow);
 
         &:hover:not(:disabled) {
             background: $gradient-blue-hover;
-            box-shadow: $shadow-md;
+            box-shadow: var(--shadow-2, $shadow-md);
             transform: translateY(-1px);
         }
 
         &:active:not(:disabled) {
             transform: translateY(0);
-            box-shadow: $shadow-sm;
+            box-shadow: var(--shadow-1, $shadow-sm);
         }
     }
 
@@ -68,7 +68,7 @@
 
         &:hover:not(:disabled) {
             background: darken($success, 5%);
-            box-shadow: $shadow-md;
+            box-shadow: var(--shadow-2, $shadow-md);
         }
     }
 
@@ -79,7 +79,7 @@
 
         &:hover:not(:disabled) {
             background: darken($error, 5%);
-            box-shadow: $shadow-md;
+            box-shadow: var(--shadow-2, $shadow-md);
         }
     }
 

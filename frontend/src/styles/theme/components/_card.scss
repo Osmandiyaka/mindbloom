@@ -6,7 +6,7 @@
     background: var(--color-surface, $card-bg);
     border: 1px solid var(--color-border, $card-border);
     border-radius: $card-radius;
-    box-shadow: var(--shadow-md, $card-shadow);
+    box-shadow: var(--shadow-2, $card-shadow);
     padding: $card-padding;
     color: var(--color-text-primary, $text-primary);
     @include transition(all, 0.2s, ease);
@@ -88,7 +88,7 @@
     }
 
     &.card-elevated {
-        box-shadow: $shadow-lg;
+        box-shadow: var(--shadow-3, $shadow-lg);
     }
 
     &.card-borderless {
@@ -111,7 +111,7 @@
     background: var(--color-surface, $card-bg);
     border: 1px solid var(--color-border, $card-border);
     border-radius: $card-radius;
-    box-shadow: var(--shadow-md, $card-shadow);
+    box-shadow: var(--shadow-2, $card-shadow);
     padding: $card-padding;
     display: flex;
     align-items: center;
