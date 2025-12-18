@@ -18,6 +18,9 @@ import { SearchInputComponent } from '../search-input/search-input.component';
 })
 export class GlobalToolbarComponent {
     @Input() collapsed = false;
+    @Input() isMobile = false;
+    @Input() navOpen = false;
+    @Output() navToggle = new EventEmitter<void>();
     @Output() sidebarToggle = new EventEmitter<void>();
     searchQuery: string = '';
     tenantName = computed(() => this.tenantService.currentTenant()?.name || 'School');
@@ -73,7 +76,8 @@ export class GlobalToolbarComponent {
         this.authService.logout();
     }
 
-    onToggleSidebar() {
+    onNavToggle() {
+        this.navToggle.emit();
         this.sidebarToggle.emit();
     }
 }

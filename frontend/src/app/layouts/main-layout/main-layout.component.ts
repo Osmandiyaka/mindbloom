@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
@@ -12,18 +12,44 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
   template: `
     <div
       class="app-layout"
-      [class.collapsed]="sidebarCollapsed"
-      [style.--sidebar-width]="sidebarCollapsed ? '78px' : '260px'"
+      [class.mobile]="isMobile"
+      [class.collapsed]="!isMobile && sidebarCollapsed"
+      [style.--sidebar-width]="isMobile ? 'min(320px, 85vw)' : sidebarCollapsed ? '78px' : '260px'"
     >
-      <app-sidebar [collapsed]="sidebarCollapsed" />
+      <div
+        class="sidebar-shell"
+        [class.mobile]="isMobile"
+        [class.open]="isMobile && mobileNavOpen"
+      >
+        <app-sidebar
+          id="app-sidebar"
+          [sidebarId]="'app-sidebar'"
+          [ariaLabel]="'Main navigation'"
+          [collapsed]="isMobile ? false : sidebarCollapsed"
+          [isMobile]="isMobile"
+          [mobileOpen]="mobileNavOpen"
+          (navigate)="handleSidebarNavigate()"
+        />
+      </div>
+
+      <div
+        class="sidebar-backdrop"
+        *ngIf="isMobile && mobileNavOpen"
+        (click)="closeMobileNav()"
+        aria-hidden="true"
+      ></div>
+
       <div class="content-wrapper">
         <app-global-toolbar
           [collapsed]="sidebarCollapsed"
-          (sidebarToggle)="toggleSidebar()"
+          [isMobile]="isMobile"
+          [navOpen]="mobileNavOpen"
+          (navToggle)="toggleNav()"
         />
         <app-task-sticky />
-        <main class="main-content">
+        <main class="main-content" tabindex="-1">
           <div class="main-shell">
+            <div class="breadcrumbs-slot" aria-hidden="true"></div>
             <router-outlet />
           </div>
         </main>
@@ -53,7 +79,8 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       max-height: 100vh;
       overflow: hidden;
       background: var(--content-background, var(--brand-surface-deep));
-      transition: grid-template-columns 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transition: grid-template-columns 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative;
     }
 
     @supports (height: 100dvh) {
@@ -61,6 +88,41 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
         height: 100dvh;
         max-height: 100dvh;
       }
+    }
+
+    .sidebar-shell {
+      height: 100%;
+      position: relative;
+      z-index: 180;
+    }
+
+    .sidebar-shell.mobile {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: var(--sidebar-width, min(320px, 85vw));
+      max-width: 360px;
+      transform: translateX(-100%);
+      transition: transform 0.28s ease, opacity 0.2s ease;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.4);
+      opacity: 0;
+      pointer-events: none;
+      background: transparent;
+    }
+
+    .sidebar-shell.mobile.open {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sidebar-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(2px);
+      z-index: 150;
     }
 
     .content-wrapper {
@@ -128,6 +190,12 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       padding-bottom: 5rem;
       min-height: 100%;
       animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-sizing: border-box;
+    }
+
+    .breadcrumbs-slot {
+      min-height: 16px;
+      margin-bottom: 0.5rem;
     }
 
     @keyframes fadeUp {
@@ -147,19 +215,86 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
 
     @media (max-width: 768px) {
       :host { --toolbar-height: 88px; }
+      .app-layout {
+        grid-template-columns: 1fr;
+      }
+
       .main-shell {
         padding-left: 1rem;
         padding-right: 1rem;
         padding-top: 1.5rem;
         padding-bottom: 3rem;
       }
+
+      .sidebar-shell {
+        width: 88vw;
+        max-width: 380px;
+      }
     }
   `]
 })
-export class MainLayoutComponent {
+export class MainLayoutComponent implements OnInit, OnDestroy {
   sidebarCollapsed = false;
+  isMobile = false;
+  mobileNavOpen = false;
+  private mql?: MediaQueryList;
 
-  toggleSidebar() {
-    this.sidebarCollapsed = !this.sidebarCollapsed;
+  ngOnInit(): void {
+    if (typeof window !== 'undefined' && 'matchMedia' in window) {
+      this.mql = window.matchMedia('(max-width: 768px)');
+      this.handleMediaChange(this.mql);
+      this.mql.addEventListener('change', this.handleMediaChange);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.mql) {
+      this.mql.removeEventListener('change', this.handleMediaChange);
+    }
+    this.setBodyScrollLock(false);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape' && this.isMobile && this.mobileNavOpen) {
+      this.closeMobileNav();
+    }
+  }
+
+  toggleNav(): void {
+    if (this.isMobile) {
+      this.mobileNavOpen = !this.mobileNavOpen;
+      this.setBodyScrollLock(this.mobileNavOpen);
+    } else {
+      this.sidebarCollapsed = !this.sidebarCollapsed;
+    }
+  }
+
+  closeMobileNav(): void {
+    if (this.isMobile) {
+      this.mobileNavOpen = false;
+      this.setBodyScrollLock(false);
+    }
+  }
+
+  handleSidebarNavigate(): void {
+    this.closeMobileNav();
+  }
+
+  private handleMediaChange = (event: MediaQueryList | MediaQueryListEvent) => {
+    this.isMobile = event.matches;
+    if (this.isMobile) {
+      this.sidebarCollapsed = true;
+      this.mobileNavOpen = false;
+      this.setBodyScrollLock(false);
+    } else {
+      this.mobileNavOpen = false;
+      this.setBodyScrollLock(false);
+    }
+  };
+
+  private setBodyScrollLock(lock: boolean): void {
+    if (typeof document === 'undefined') return;
+    document.body.style.overflow = lock ? 'hidden' : '';
   }
 }

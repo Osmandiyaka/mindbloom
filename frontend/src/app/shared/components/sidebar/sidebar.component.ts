@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -23,12 +23,20 @@ interface NavSection {
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <aside class="sidebar" [class.sidebar-collapsed]="collapsed">
+    <aside
+      class="sidebar"
+      [class.sidebar-collapsed]="collapsed && !isMobile"
+      [class.is-mobile]="isMobile"
+      [class.open]="isMobile && mobileOpen"
+      [attr.id]="sidebarId"
+      role="navigation"
+      [attr.aria-label]="ariaLabel"
+    >
       <div class="sidebar-header">
         <div class="brand logo-bar">
           <div class="brand-mark">
             <ng-container *ngIf="tenantLogo; else defaultLogo">
-              <img [src]="tenantLogo" alt="Tenant logo" class="logo-img" />
+              <img [src]="tenantLogo" alt="Tenant logo" class="logo-img" loading="lazy" />
             </ng-container>
             <ng-template #defaultLogo>
               <span class="nav-icon" [innerHTML]="icon('dashboard')"></span>
@@ -51,7 +59,8 @@ interface NavSection {
               *ngFor="let item of section.items"
               [routerLink]="item.path"
               routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }">
+              [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
+              (click)="onNavigate()">
               <span class="nav-link-icon" [innerHTML]="icon(item.icon)"></span>
               <span class="nav-link-text" *ngIf="!collapsed">{{ item.label }}</span>
               <span class="nav-badge" *ngIf="item.badge && !collapsed">{{ item.badge }}</span>
@@ -205,6 +214,10 @@ interface NavSection {
         0 0 6px 0 color-mix(in srgb, var(--sb-shadow-deep) 24%, transparent);
       color: var(--color-text-primary, #0f172a);
     }
+    .nav-link:focus-visible {
+      outline: 2px solid var(--sb-gold);
+      outline-offset: 2px;
+    }
     .nav-link.active {
       background: var(--sb-gold);
       color: var(--color-text-on-primary, #0f172a);
@@ -303,10 +316,62 @@ interface NavSection {
     .user-role { font-size: 0.85rem; color: var(--color-text-secondary, rgba(232,237,247,0.7)); }
     .sidebar.sidebar-collapsed .footer-cta { display: none; }
     .sidebar.sidebar-collapsed .user-info { display: none; }
+
+    .sidebar.is-mobile {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      height: 100vh;
+      width: min(320px, 85vw);
+      max-width: 360px;
+      transform: translateX(-100%);
+      transition: transform 0.28s ease;
+      box-shadow: 10px 0 30px rgba(0,0,0,0.35);
+      z-index: 200;
+      overflow-y: auto;
+      padding-bottom: 1.5rem;
+    }
+
+    .sidebar.is-mobile.open {
+      transform: translateX(0);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        height: 100vh;
+        width: min(320px, 85vw);
+        max-width: 360px;
+        transform: translateX(-100%);
+        transition: transform 0.28s ease;
+        box-shadow: 10px 0 30px rgba(0,0,0,0.35);
+        z-index: 200;
+        overflow-y: auto;
+        padding-bottom: 1.5rem;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar.sidebar-collapsed {
+        width: min(320px, 85vw);
+        padding: 0.9rem;
+      }
+    }
   `]
 })
 export class SidebarComponent implements OnInit {
   @Input() collapsed = false;
+  @Input() isMobile = false;
+  @Input() mobileOpen = false;
+  @Input() sidebarId = 'app-sidebar';
+  @Input() ariaLabel = 'Main navigation';
+  @Output() navigate = new EventEmitter<void>();
   currentUser: any;
   tenantLogo: string | null = null;
   tenantName: string | null = null;
@@ -437,5 +502,9 @@ export class SidebarComponent implements OnInit {
 
   logout(): void {
     this.authService.logout();
+  }
+
+  onNavigate(): void {
+    this.navigate.emit();
   }
 }
