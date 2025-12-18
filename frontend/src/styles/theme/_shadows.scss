@@ -25,3 +25,24 @@ $card-shadow: $shadow-sm;
 $dropdown-shadow: $shadow-lg;
 $modal-shadow: $shadow-2xl;
 $button-shadow: $shadow-xs;
+
+:root {
+    /* Defaults before ThemeService runs */
+    --shadow-xs: #{$shadow-xs};
+    --shadow-sm: #{$shadow-sm};
+    --shadow-md: #{$shadow-md};
+    --shadow-lg: #{$shadow-lg};
+    --shadow-xl: #{$shadow-xl};
+    --shadow-2xl: #{$shadow-2xl};
+
+    --shadow-inner: #{$shadow-inner};
+
+    /* Focus rings as shadows */
+    --shadow-focus: #{$shadow-focus};
+    --shadow-focus-error: #{$shadow-focus-error};
+
+    /* Semantic elevation tokens */
+    --shadow-1: var(--shadow-sm);
+    --shadow-2: var(--shadow-md);
+    --shadow-3: var(--shadow-lg);
+}
