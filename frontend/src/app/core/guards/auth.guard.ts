@@ -1,29 +1,12 @@
-import { inject } from '@angular/core';
-import { Router, type CanActivateFn } from '@angular/router';
-import { map } from 'rxjs';
-import { AuthService } from '../services/auth.service';
+/**
+ * Compatibility bridge for legacy imports from '/core/guards/auth.guard'.
+ * This file re-exports the auth guard from '/core/auth/auth.guard'.
+ * 
+ * New code should import from:
+ *   import { authGuard } from '../auth/auth.guard';
+ * 
+ * Legacy code will continue to work with:
+ *   import { authGuard } from '../guards/auth.guard';
+ */
 
-export const authGuard: CanActivateFn = (route, state) => {
-    const authService = inject(AuthService);
-    const router = inject(Router);
-
-    if (route.data?.['public'] === true) {
-        return true;
-    }
-
-    return authService.ensureAuthenticated().pipe(
-        map(isAuthed => {
-            if (isAuthed) {
-                return true;
-            }
-
-            const queryParams: Record<string, string> = { returnUrl: state.url };
-            const sessionExpired = (authService as any).hasAttemptedRefresh === true;
-            if (sessionExpired) {
-                queryParams['sessionExpired'] = 'true';
-            }
-
-            return router.createUrlTree(['/login'], { queryParams });
-        }),
-    );
-};
+export { authGuard } from '../auth/auth.guard';

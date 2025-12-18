@@ -1,42 +1,12 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { catchError, switchMap, throwError } from 'rxjs';
-import { AuthService } from '../services/auth.service';
+/**
+ * Compatibility bridge for legacy imports from '/core/interceptors/auth.interceptor'.
+ * This file re-exports the auth interceptor from '/core/auth/auth.interceptor'.
+ * 
+ * New code should import from:
+ *   import { authInterceptor } from '../auth/auth.interceptor';
+ * 
+ * Legacy code will continue to work with:
+ *   import { authInterceptor } from '../interceptors/auth.interceptor';
+ */
 
-export const authInterceptor: HttpInterceptorFn = (req, next) => {
-    const authService = inject(AuthService);
-    const isAuthEndpoint = req.url.includes('/auth/login') || req.url.includes('/auth/refresh') || req.url.includes('/auth/logout');
-
-    const token = authService.getToken();
-    if (token) {
-        req = req.clone({
-            setHeaders: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-    }
-
-    return next(req).pipe(
-        catchError((error: HttpErrorResponse) => {
-            if (error.status === 401 && !isAuthEndpoint) {
-                return authService.refreshAccessToken().pipe(
-                    switchMap((newToken) => {
-                        if (!newToken) {
-                            authService.handleSessionEnd('expired');
-                            return throwError(() => error);
-                        }
-                        const retryReq = req.clone({
-                            setHeaders: { Authorization: `Bearer ${newToken}` }
-                        });
-                        return next(retryReq);
-                    }),
-                    catchError(refreshErr => {
-                        authService.handleSessionEnd('expired');
-                        return throwError(() => refreshErr);
-                    })
-                );
-            }
-            return throwError(() => error);
-        })
-    );
-};
+export { authInterceptor } from '../auth/auth.interceptor';

@@ -1,21 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { LoginOverlayComponent } from './modules/auth/components/login-overlay/login-overlay.component';
-import { AuthService } from './core/services/auth.service';
+import { AuthService } from './core/auth/auth.service';
 import { TenantService } from './core/services/tenant.service';
 import { ThemeService } from './core/services/theme.service';
 import { environment } from '../environments/environment';
 import { filter } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-root',
     standalone: true,
-    imports: [RouterOutlet, LoginOverlayComponent],
+    imports: [RouterOutlet, LoginOverlayComponent, CommonModule],
     template: `
-        <div class="app-root" [class.dimmed]="authService.showLoginOverlay() && !authRoute">
-            <router-outlet />
+        <div class="app-root" [class.dimmed]="authService.status() === 'authenticated' && authRoute">
+            <!-- Auth resolving gate: show minimal loading while unresolved -->
+            @if (authService.status() === 'unresolved') {
+                <div class="auth-loading-gate">
+                    <div class="spinner"></div>
+                    <p>Loading session...</p>
+                </div>
+            } @else {
+                <router-outlet />
+            }
         </div>
-        @if (authService.showLoginOverlay() && !authRoute) {
+        @if (authService.status() === 'anonymous' && authRoute) {
             <app-login-overlay />
         }
     `,
@@ -29,23 +38,45 @@ import { filter } from 'rxjs';
             opacity: 0.95;
             pointer-events: none;
         }
+        .auth-loading-gate {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--surface-app, #ffffff);
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--color-primary-200, #e0e7ff);
+            border-top-color: var(--color-primary-500, #6366f1);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .auth-loading-gate p {
+            margin-top: 1rem;
+            color: var(--color-text-secondary, #666);
+            font-size: 0.875rem;
+        }
     `]
 })
 export class AppComponent implements OnInit {
     title = 'MindBloom';
     authRoute = false;
-
-    constructor(
-        public authService: AuthService,
-        private tenantService: TenantService,
-        private themeService: ThemeService, // Initialize theme service
-        private router: Router
-    ) { }
+    authService = inject(AuthService);
+    private tenantService = inject(TenantService);
+    private themeService = inject(ThemeService);
+    private router = inject(Router);
 
     ngOnInit(): void {
         this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {
             this.authRoute = e.urlAfterRedirects?.startsWith('/auth');
         });
+
         // For development: Set a default tenant if none exists
         if (!environment.production && !this.tenantService.getTenantId()) {
             const devTenant = {
