@@ -228,13 +228,19 @@ interface NavSection {
     .nav-link-icon {
       width: 18px;
       height: 18px;
+      font-size: 18px;
       display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      top: 0.5px;
       color: var(--text-secondary);
-      opacity: 0.85;
-      transition: color 0.2s ease, opacity 0.2s ease;
+      opacity: 0.78;
+      transition: color 0.2s ease, opacity 0.2s ease, transform 0.12s ease;
     }
+    .nav-link-icon svg { width: 18px; height: 18px; stroke-width: 1.75; stroke: currentColor; }
 
-    .nav-link:hover .nav-link-icon { color: var(--text-primary); opacity: 1; }
+    .nav-link:hover .nav-link-icon { color: var(--text-primary); opacity: 1; transform: translateX(1px); }
     .nav-link.active .nav-link-icon { color: var(--accent-primary); opacity: 1; }
 
     .nav-link-text { font-weight: 400; letter-spacing: 0.01em; font-size: 14px; line-height: 1.15; }
