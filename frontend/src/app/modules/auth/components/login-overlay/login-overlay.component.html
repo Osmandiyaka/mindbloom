@@ -52,7 +52,8 @@
                         <svg class="input-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
                             <path
                                 d="M2 6L8 2L14 6V13C14 13.5304 13.7893 14.0391 13.4142 14.4142C13.0391 14.7893 12.5304 15 12 15H4C3.46957 15 2.96086 14.7893 2.58579 14.4142C2.21071 14.0391 2 13.5304 2 13V6Z"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
                         </svg>
                         <input type="text" class="form-input" [value]="currentTenant" readonly />
                     </div>
@@ -71,7 +72,8 @@
                         <svg class="input-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
                             <path
                                 d="M2 6L8 2L14 6V13C14 13.5304 13.7893 14.0391 13.4142 14.4142C13.0391 14.7893 12.5304 15 12 15H4C3.46957 15 2.96086 14.7893 2.58579 14.4142C2.21071 14.0391 2 13.5304 2 13V6Z"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
                         </svg>
                         <input type="text" class="form-input tenant-edit-input" [value]="tenantEditValue()"
                             (input)="tenantEditValue.set($any($event.target).value)" (keydown)="onTenantKeyDown($event)"
@@ -140,15 +142,20 @@
                     </svg>
                     <input [type]="showPassword() ? 'text' : 'password'" class="form-input" [value]="password()"
                         (input)="password.set($any($event.target).value)" required />
-                    <button type="button" class="input-toggle" (click)="togglePassword()" aria-label="Toggle password visibility">
+                    <button type="button" class="input-toggle" (click)="togglePassword()"
+                        aria-label="Toggle password visibility">
                         <svg *ngIf="!showPassword()" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M1.333 8c1.4-2.8 3.733-4.333 6.667-4.333S13.267 5.2 14.667 8c-1.4 2.8-3.733 4.333-6.667 4.333S2.733 10.8 1.333 8Z" stroke="currentColor" stroke-width="1.2"/>
-                            <circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.2"/>
+                            <path
+                                d="M1.333 8c1.4-2.8 3.733-4.333 6.667-4.333S13.267 5.2 14.667 8c-1.4 2.8-3.733 4.333-6.667 4.333S2.733 10.8 1.333 8Z"
+                                stroke="currentColor" stroke-width="1.2" />
+                            <circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.2" />
                         </svg>
                         <svg *ngIf="showPassword()" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M2 2l12 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-                            <path d="M3.2 4.1C1.9 5.2 1.067 6.6 1.333 8c1.4 2.8 3.733 4.333 6.667 4.333 1.06 0 2.04-.2 2.94-.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-                            <path d="M6.233 6.233A2.333 2.333 0 0 1 9.8 9.8" stroke="currentColor" stroke-width="1.2"/>
+                            <path d="M2 2l12 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                            <path
+                                d="M3.2 4.1C1.9 5.2 1.067 6.6 1.333 8c1.4 2.8 3.733 4.333 6.667 4.333 1.06 0 2.04-.2 2.94-.6"
+                                stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                            <path d="M6.233 6.233A2.333 2.333 0 0 1 9.8 9.8" stroke="currentColor" stroke-width="1.2" />
                         </svg>
                     </button>
                 </div>
