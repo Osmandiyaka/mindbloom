@@ -23,6 +23,7 @@ export class GlobalToolbarComponent {
     @Output() navToggle = new EventEmitter<void>();
     @Output() sidebarToggle = new EventEmitter<void>();
     searchQuery: string = '';
+    searchExpanded = false;
     tenantName = computed(() => this.tenantService.currentTenant()?.name || 'School');
 
     constructor(
@@ -42,6 +43,10 @@ export class GlobalToolbarComponent {
         }
         console.log('Search:', this.searchQuery);
         // Implement global search functionality
+    }
+
+    toggleSearch() {
+        this.searchExpanded = !this.searchExpanded;
     }
 
     onDashboardClick() {

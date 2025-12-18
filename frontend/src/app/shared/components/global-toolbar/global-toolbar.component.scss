@@ -4,52 +4,89 @@
     left: 0;
     right: 0;
     width: 100%;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    grid-template-areas: "left center right";
-    align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid var(--color-border);
-    padding: 8px 16px;
-    min-height: var(--toolbar-height, 56px);
-    z-index: 1000;
-    box-shadow: var(--shadow-sm);
-    backdrop-filter: blur(8px);
-    background: var(--color-surface);
-}
-
-.toolbar-left {
-    grid-area: left;
+    height: 56px;
+    padding: 0 16px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    row-gap: 6px;
+    gap: 12px;
+    background: var(--surface-header, var(--color-surface));
+    border-bottom: 1px solid var(--border-subtle, var(--color-border));
+    color: var(--text-primary, var(--color-text-primary));
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+.toolbar-left,
+.toolbar-center,
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     min-width: 0;
 }
 
-.toggle-btn {
-    width: 36px;
-    height: 36px;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    background: var(--color-surface-hover);
-
-    .chevron {
-        font-weight: 800;
-    }
+.toolbar-left {
+    flex: 0 0 auto;
 }
 
-.hamburger-btn {
-    display: inline-flex;
-    align-items: center;
+.toolbar-center {
+    flex: 1 1 auto;
     justify-content: center;
 }
 
+.toolbar-right {
+    flex: 0 0 auto;
+    justify-content: flex-end;
+}
+
+.toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary, var(--color-text-secondary));
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.toolbar-btn .icon {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+}
+
+.toolbar-btn:hover {
+    background: var(--surface-hover, rgba(255, 255, 255, 0.04));
+    color: var(--text-primary, #fff);
+}
+
+.toolbar-btn:focus-visible {
+    outline: 2px solid var(--accent-primary, var(--color-primary));
+    outline-offset: 2px;
+}
+
+.toggle-btn {
+    border: 1px solid var(--border-subtle, var(--color-border));
+    background: var(--surface-elevated, transparent);
+}
+
+.chevron {
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1;
+}
+
 .hamburger {
-    width: 20px;
+    width: 18px;
     height: 14px;
-    position: relative;
     display: inline-flex;
     flex-direction: column;
     justify-content: space-between;
@@ -76,259 +113,185 @@
     transform: translateY(-6px) rotate(-45deg);
 }
 
-.toolbar-btn {
-    display: flex;
+.context-label {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: transparent;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-    padding: 0;
-
-    .icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 20px;
-        height: 20px;
-        color: var(--color-text-primary);
-    }
-
-    .icon svg {
-        width: 20px;
-        height: 20px;
-        stroke: currentColor;
-    }
-
-    &:hover {
-        background: var(--color-surface-hover);
-        color: var(--color-primary);
-    }
-
-    &:focus-visible {
-        outline: 2px solid var(--color-primary);
-        outline-offset: 2px;
-    }
-
-    &:active {
-        transform: scale(0.95);
-    }
-
-    &.marketplace-btn {
-        color: var(--color-primary);
-
-        &:hover {
-            background: var(--color-primary);
-            color: white;
-        }
-    }
+    gap: 8px;
+    padding: 8px 10px;
+    color: var(--text-secondary, #9ca3af);
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
 }
 
-.hide-compact {
-    @media (max-width: 520px) {
-        display: none !important;
-    }
+.context-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-primary, var(--color-primary));
+    opacity: 0.7;
+}
+
+.context-text {
+    max-width: 180px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.toolbar-center {
+    gap: 10px;
+}
+
+.search-trigger {
+    display: none;
+}
+
+.search-shell {
+    flex: 1;
+    max-width: 560px;
+    min-width: 0;
+    transition: max-width 0.2s ease, opacity 0.2s ease;
+    overflow: hidden;
+}
+
+.search-shell.collapsed {
+    max-width: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.search-container {
+    display: block;
+    width: 100%;
+    height: 36px;
+}
+
+.toolbar-right {
+    gap: 10px;
 }
 
 .toolbar-divider {
     width: 1px;
     height: 24px;
-    background: var(--color-border);
-    margin: 0 6px;
+    background: var(--border-subtle, var(--color-border));
 }
 
-.toolbar-center {
-    grid-area: center;
-    min-width: 0;
-    display: flex;
+app-theme-selector {
+    display: inline-flex;
     align-items: center;
-    gap: 16px;
     justify-content: center;
-    max-width: 880px;
-    width: 100%;
-    margin: 0 auto;
+    height: 36px;
 }
 
-.school-name {
-    display: flex;
+.user-chip {
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
-    background: var(--color-primary);
-    border-radius: 8px;
-    color: white;
-    font-weight: 600;
-    font-size: 15px;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    min-width: 0;
-
-    svg {
-        width: 20px;
-        height: 20px;
-        stroke-width: 2.5;
-    }
-
-    .school-name-text {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-}
-
-.search-container {
-    width: 100%;
-    max-width: 540px;
-    min-width: 0;
-    flex: 1;
-}
-
-.toolbar-right {
-    grid-area: right;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    row-gap: 6px;
-}
-
-.logout-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border: none;
+    padding: 0 10px 0 4px;
+    height: 36px;
+    border: 1px solid var(--border-subtle, var(--color-border));
+    border-radius: 10px;
     background: transparent;
-    color: var(--color-text-secondary);
+    color: var(--text-primary, #fff);
     cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.user-chip:hover {
+    background: var(--surface-hover, rgba(255, 255, 255, 0.04));
+    border-color: var(--accent-primary, var(--color-primary));
+}
+
+.user-chip:focus-visible {
+    outline: 2px solid var(--accent-primary, var(--color-primary));
+    outline-offset: 2px;
+}
+
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--accent-primary, #8bc6ff) 20%, transparent);
+    color: var(--text-primary, #fff);
+}
+
+.user-name {
     font-size: 14px;
     font-weight: 500;
+    color: var(--text-primary, #fff);
+}
 
-    svg {
-        width: 18px;
-        height: 18px;
-    }
-
-    span {
-        font-family: inherit;
-    }
-
-    &:hover {
-        background: rgba(var(--color-error-rgb, 239, 68, 68), 0.1);
-        color: var(--color-error);
-    }
-
-    &:active {
-        transform: scale(0.98);
+.hide-sm {
+    @media (max-width: 520px) {
+        display: none !important;
     }
 }
 
-@media (max-width: 1100px) {
-    .global-toolbar {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto auto;
-        grid-template-areas:
-            "left right"
-            "center center";
-        align-items: start;
-        row-gap: 10px;
+.hide-xs {
+    @media (max-width: 520px) {
+        display: none !important;
     }
+}
 
-    .toolbar-left {
-        justify-content: flex-start;
-    }
+.show-xs {
+    display: none;
 
-    .toolbar-right {
-        justify-content: flex-end;
-    }
-
-    .toolbar-center {
-        width: 100%;
-        max-width: none;
-        justify-content: flex-start;
-        gap: 12px;
-    }
-
-    .school-name {
-        padding: 8px 12px;
-        font-size: 14px;
-    }
-
-    .search-container {
-        max-width: none;
+    @media (max-width: 520px) {
+        display: inline-flex;
     }
 }
 
 @media (max-width: 768px) {
     .global-toolbar {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto;
-        grid-template-areas:
-            "left"
-            "center"
-            "right";
-        padding: 8px 12px;
-        row-gap: 8px;
+        height: 52px;
+        padding: 0 12px;
+        gap: 10px;
     }
 
-    .toolbar-left {
-        gap: 4px;
-        row-gap: 6px;
-
-        .toolbar-btn {
-            width: 32px;
-            height: 32px;
-
-            svg {
-                width: 18px;
-                height: 18px;
-            }
-        }
+    .context-label {
+        padding: 6px 8px;
+        font-size: 12px;
     }
 
     .toolbar-center {
-        max-width: none;
-        width: 100%;
         justify-content: flex-start;
     }
 
-    .school-name {
-        padding: 6px 10px;
-        font-size: 13px;
-
-        svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        .school-name-text {
-            max-width: 120px;
-        }
-    }
-
-    .search-container {
-        display: none; // Hide search on mobile
-    }
-
-    .toolbar-divider {
-        margin: 0 4px;
-    }
-
-    .logout-btn span {
-        display: none; // Show only icon on mobile
+    .search-shell {
+        max-width: 100%;
     }
 }
 
 @media (max-width: 520px) {
-    .toolbar-right {
-        justify-content: flex-end;
+    .toolbar-center {
+        justify-content: flex-start;
+    }
+
+    .search-trigger {
+        display: inline-flex;
+    }
+
+    .search-shell {
+        max-width: 100%;
+    }
+
+    .context-text {
+        max-width: 120px;
+    }
+}
+
+@media (max-width: 380px) {
+    .toolbar-right .toolbar-btn {
+        display: none !important;
+    }
+
+    .toolbar-right app-theme-selector {
+        display: none !important;
+    }
+
+    .context-label {
+        display: none !important;
     }
 }

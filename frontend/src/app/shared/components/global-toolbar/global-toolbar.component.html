@@ -1,8 +1,7 @@
-<div class="global-toolbar">
+<div class="global-toolbar" role="banner">
     <div class="toolbar-left">
-        <!-- Navigation Toggle (mobile vs desktop) -->
         <ng-container *ngIf="isMobile; else desktopToggle">
-            <button class="toolbar-btn toggle-btn hamburger-btn" (click)="onNavToggle()"
+            <button type="button" class="toolbar-btn toggle-btn hamburger-btn" (click)="onNavToggle()"
                 [attr.aria-controls]="'app-sidebar'" [attr.aria-expanded]="navOpen"
                 [attr.aria-label]="navOpen ? 'Close navigation' : 'Open navigation'">
                 <span class="hamburger" [class.open]="navOpen">
@@ -11,82 +10,50 @@
             </button>
         </ng-container>
         <ng-template #desktopToggle>
-            <button class="toolbar-btn toggle-btn" (click)="onNavToggle()"
+            <button type="button" class="toolbar-btn toggle-btn chevron-btn" (click)="onNavToggle()"
                 [appTooltip]="collapsed ? 'Expand navigation' : 'Collapse navigation'" tooltipPosition="bottom"
-                [attr.aria-pressed]="collapsed" aria-label="Toggle navigation">
-                <span class="chevron">{{ collapsed ? '›' : '‹' }}</span>
+                [attr.aria-controls]="'app-sidebar'" [attr.aria-expanded]="!collapsed"
+                [attr.aria-label]="collapsed ? 'Open navigation' : 'Close navigation'">
+                <span class="chevron" aria-hidden="true">{{ collapsed ? '›' : '‹' }}</span>
             </button>
         </ng-template>
 
-        <!-- Dashboard Button -->
-        <button class="toolbar-btn hide-compact" (click)="onDashboardClick()" [appTooltip]="'Dashboard'"
-            tooltipPosition="bottom">
-            <span class="icon" [innerHTML]="icon('dashboard')"></span>
-        </button>
-
-        <!-- Students Button -->
-        <button class="toolbar-btn hide-compact" (click)="onStudentsClick()" [appTooltip]="'Students'"
-            tooltipPosition="bottom">
-            <span class="icon" [innerHTML]="icon('students')"></span>
-        </button>
-
-        <!-- Calendar Button -->
-        <button class="toolbar-btn hide-compact" (click)="onCalendarClick()" [appTooltip]="'Calendar'"
-            tooltipPosition="bottom">
-            <span class="icon" [innerHTML]="icon('calendar')"></span>
-        </button>
-
-        <!-- Reports Button -->
-        <button class="toolbar-btn hide-compact" (click)="onReportsClick()" [appTooltip]="'Reports'"
-            tooltipPosition="bottom">
-            <span class="icon" [innerHTML]="icon('reports')"></span>
-        </button>
-
-        <div class="toolbar-divider hide-compact"></div>
-
-        <!-- Marketplace Button -->
-        <button class="toolbar-btn marketplace-btn hide-compact" (click)="onMarketplaceClick()"
-            [appTooltip]="'Plugin Marketplace'" tooltipPosition="bottom">
-            <span class="icon" [innerHTML]="icon('marketplace')"></span>
-        </button>
-
-        <div class="toolbar-divider hide-compact"></div>
-
-        <!-- Notifications Button -->
-        <button class="toolbar-btn hide-compact" (click)="onNotificationsClick()" [appTooltip]="'Notifications'"
-            tooltipPosition="bottom">
-            <span class="icon" [innerHTML]="icon('alarm')"></span>
-        </button>
-
-        <!-- Messages Button -->
-        <button class="toolbar-btn hide-compact" (click)="onMessagesClick()" [appTooltip]="'Messages'"
-            tooltipPosition="bottom">
-            <span class="icon" [innerHTML]="icon('inbox')"></span>
-        </button>
+        <div class="context-label hide-xs" [attr.title]="tenantName()">
+            <span class="context-dot" aria-hidden="true"></span>
+            <span class="context-text">{{ tenantName() }}</span>
+        </div>
     </div>
 
     <div class="toolbar-center">
-        <!-- School Name -->
-        <div class="school-name">
-            <span class="icon" [innerHTML]="icon('academics')"></span>
-            <span class="school-name-text">{{ tenantName() }}</span>
+        <button type="button" class="toolbar-btn search-trigger show-xs" (click)="toggleSearch()"
+            [attr.aria-expanded]="searchExpanded" aria-label="Toggle search">
+            <span class="icon" [innerHTML]="icon('search')"></span>
+        </button>
+        <div class="search-shell" [class.collapsed]="isMobile && !searchExpanded">
+            <app-search-input class="search-container" placeholder="Search..."
+                (search)="onSearch($event)"></app-search-input>
         </div>
-
-        <!-- Global Search Bar -->
-        <app-search-input class="search-container" placeholder="Search..." (search)="onSearch($event)">
-        </app-search-input>
     </div>
 
     <div class="toolbar-right">
-        <!-- Theme Selector -->
+        <button type="button" class="toolbar-btn" (click)="onNotificationsClick()" [appTooltip]="'Notifications'"
+            tooltipPosition="bottom" aria-label="Notifications">
+            <span class="icon" [innerHTML]="icon('alarm')"></span>
+        </button>
+
         <app-theme-selector />
 
-        <div class="toolbar-divider"></div>
+        <button type="button" class="toolbar-btn hide-sm" (click)="onMessagesClick()" [appTooltip]="'Messages'"
+            tooltipPosition="bottom" aria-label="Messages">
+            <span class="icon" [innerHTML]="icon('inbox')"></span>
+        </button>
 
-        <!-- Logout Button -->
-        <button class="logout-btn" (click)="onLogout()" [appTooltip]="'Logout'" tooltipPosition="bottom">
-            <span class="icon" [innerHTML]="icon('logout')"></span>
-            <span>Logout</span>
+        <div class="toolbar-divider hide-sm"></div>
+
+        <button type="button" class="user-chip" (click)="onLogout()" [appTooltip]="'Logout'" tooltipPosition="bottom"
+            aria-label="Logout">
+            <span class="avatar-circle" [innerHTML]="icon('logout')"></span>
+            <span class="user-name hide-sm">Logout</span>
         </button>
     </div>
 </div>
