@@ -199,7 +199,7 @@ app-theme-selector {
     border: 1px solid var(--border-subtle, var(--color-border));
     border-radius: 10px;
     background: var(--surface-elevated, transparent);
-    color: var(--text-primary, var(--color-text-primary));
+    color: var(--accent-primary, var(--color-primary));
     cursor: pointer;
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
@@ -207,7 +207,7 @@ app-theme-selector {
 .user-chip:hover {
     background: var(--surface-hover, color-mix(in srgb, var(--color-surface-hover, rgba(255, 255, 255, 0.04)) 90%, transparent));
     border-color: var(--accent-primary, var(--color-primary));
-    color: var(--text-primary, var(--color-text-primary));
+    color: var(--accent-primary, var(--color-primary));
 }
 
 .user-chip:focus-visible {
@@ -228,7 +228,7 @@ app-theme-selector {
 .user-name {
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-primary, var(--color-text-primary));
+    color: var(--accent-primary, var(--color-primary));
 }
 
 .hide-sm {
