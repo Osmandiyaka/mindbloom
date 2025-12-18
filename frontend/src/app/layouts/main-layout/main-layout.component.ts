@@ -60,15 +60,13 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
     :host {
       --toolbar-height: 60px;
       --task-sticky-height: 48px;
-      --brand-gold: #E5C100;
-      --brand-surface-deep: #12141b;
       display: block;
       height: 100%;
     }
 
     ::selection {
-      background: var(--brand-gold);
-      color: #000;
+      background: color-mix(in srgb, var(--accent-primary) 70%, transparent);
+      color: var(--text-inverse, #000);
       text-shadow: none;
     }
 
@@ -78,7 +76,7 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       height: 100vh;
       max-height: 100vh;
       overflow: hidden;
-      background: var(--content-background, var(--brand-surface-deep));
+      background: var(--surface-app, var(--content-background, var(--color-background)));
       transition: grid-template-columns 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
       position: relative;
     }
@@ -134,11 +132,13 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       min-height: 0;
       min-width: 0;
       overflow: hidden;
-      background: radial-gradient(
-        circle at 50% 30%,
-        rgba(30, 20, 15, 0.4) 0%,
-        rgba(12, 8, 6, 0.95) 80%
-      );
+      background:
+        radial-gradient(circle at 36% 14%, color-mix(in srgb, var(--accent-primary, #6ba8ff) 6%, transparent) 0%, transparent 42%),
+        radial-gradient(circle at 82% 6%, color-mix(in srgb, var(--accent-primary, #6ba8ff) 5%, transparent) 0%, transparent 38%),
+        linear-gradient(180deg,
+          color-mix(in srgb, var(--surface-app, var(--content-background-solid)) 98%, transparent) 0%,
+          var(--surface-app, var(--content-background-solid)) 100%);
+      color: var(--text-primary);
     }
 
     app-global-toolbar,
@@ -147,10 +147,10 @@ import { TaskStickyComponent } from '../../shared/components/task-sticky/task-st
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(18, 12, 8, 0.85);
-      backdrop-filter: blur(16px) saturate(180%);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      background: color-mix(in srgb, var(--surface-header, var(--surface-app)) 90%, transparent);
+      backdrop-filter: blur(12px) saturate(150%);
+      box-shadow: var(--shadow-1, 0 4px 12px rgba(0,0,0,0.3));
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     app-task-sticky { top: var(--toolbar-height); z-index: 90; }

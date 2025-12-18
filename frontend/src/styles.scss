@@ -61,18 +61,48 @@ textarea {
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.numeric, .table-cell-numeric {
+.numeric,
+.table-cell-numeric {
     font-family: var(--font-mono, 'Roboto Mono', monospace);
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum';
 }
 
-.heading-1 { font-size: var(--text-3xl); font-weight: var(--font-semibold); line-height: var(--leading-tight); }
-.heading-2 { font-size: var(--text-2xl); font-weight: var(--font-semibold); line-height: var(--leading-tight); }
-.heading-3 { font-size: var(--text-xl); font-weight: var(--font-semibold); line-height: var(--leading-normal); }
-.subheading { font-size: var(--text-lg); font-weight: var(--font-medium); line-height: var(--leading-normal); }
-.body-text { font-size: var(--text-base); font-weight: var(--font-normal); line-height: var(--leading-relaxed); }
-.small-text { font-size: var(--text-sm); font-weight: var(--font-medium); line-height: var(--leading-normal); }
+.heading-1 {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-semibold);
+    line-height: var(--leading-tight);
+}
+
+.heading-2 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+    line-height: var(--leading-tight);
+}
+
+.heading-3 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    line-height: var(--leading-normal);
+}
+
+.subheading {
+    font-size: var(--text-lg);
+    font-weight: var(--font-medium);
+    line-height: var(--leading-normal);
+}
+
+.body-text {
+    font-size: var(--text-base);
+    font-weight: var(--font-normal);
+    line-height: var(--leading-relaxed);
+}
+
+.small-text {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    line-height: var(--leading-normal);
+}
 
 input::placeholder,
 textarea::placeholder {
@@ -134,8 +164,8 @@ textarea:disabled {
 // Theme-tinted canvas for content areas
 :root {
     /* solid fallbacks */
-    --content-background: var(--color-background, #f8f9fb);
-    --content-background-solid: var(--color-background, #f8f9fb);
+    --content-background: var(--surface-app, var(--color-background, #f8f9fb));
+    --content-background-solid: var(--surface-app, var(--color-background, #f8f9fb));
     --surface-dark: #1e2130;
     --surface-highlight: #2a2d3f;
     --border-dark: #383a4a;
@@ -143,28 +173,29 @@ textarea:disabled {
 
 @supports (background: color-mix(in srgb, red, blue)) {
     :root {
-        --content-background: radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--color-background, $bg-primary) 90%, var(--color-surface, #ffffff) 10%), transparent 36%),
-                             radial-gradient(circle at 85% 0%, color-mix(in srgb, var(--color-primary, #667eea) 10%, transparent), transparent 48%),
-                             radial-gradient(circle at 10% 80%, color-mix(in srgb, var(--color-primary, #667eea) 6%, transparent), transparent 40%),
-                             color-mix(in srgb, var(--color-background, $bg-primary) 90%, var(--color-surface, #ffffff) 10%);
-        --content-background-solid: color-mix(in srgb, var(--color-background, #f8f9fb) 92%, var(--color-surface, #ffffff) 8%);
+        --content-background: linear-gradient(180deg,
+                color-mix(in srgb, var(--surface-app, var(--color-background, #f8f9fb)) 98%, transparent) 0%,
+                var(--surface-app, var(--color-background, #f8f9fb)) 100%);
+        --content-background-solid: var(--surface-app, var(--color-background, #f8f9fb));
     }
 
     [data-theme="dark"] {
-        --content-background: radial-gradient(circle at 22% 18%, color-mix(in srgb, var(--color-background, #12141b) 92%, #1b2438 8%), transparent 34%),
-                             radial-gradient(circle at 80% 0%, color-mix(in srgb, var(--color-primary, #7ab8ff) 8%, transparent), transparent 45%),
-                             radial-gradient(circle at 12% 80%, color-mix(in srgb, var(--color-primary, #7ab8ff) 5%, transparent), transparent 40%),
-                             color-mix(in srgb, var(--color-background, #12141b) 96%, var(--color-surface, #1e2130) 4%);
-        --content-background-solid: color-mix(in srgb, var(--color-background, #12141b) 96%, var(--color-surface, #1e2130) 4%);
+        --content-background: linear-gradient(180deg,
+                color-mix(in srgb, var(--surface-app, var(--color-background, #0f172a)) 95%, transparent) 0%,
+                var(--surface-app, var(--color-background, #0f172a)) 100%);
+        --content-background-solid: var(--surface-app, var(--color-background, #0f172a));
     }
 }
 
 [data-theme="dark"] {
     /* ensure solid fallback when gradients unsupported */
-    --content-background: var(--content-background, #12141b);
-    --content-background-solid: var(--content-background-solid, #12141b);
+    --content-background: var(--content-background, var(--surface-app, #12141b));
+    --content-background-solid: var(--content-background-solid, var(--surface-app, #12141b));
 
-    html, body, .app-shell, .app-content {
+    html,
+    body,
+    .app-shell,
+    .app-content {
         background: var(--content-background-solid, #12141b) !important;
     }
 }
