@@ -32,9 +32,9 @@ interface NavSection {
       role="navigation"
       [attr.aria-label]="ariaLabel"
     >
-      <div class="sidebar-header">
-        <div class="identity">
-          <div class="brand-mark">
+      <div class="sidebar-header tenant-header" role="button" aria-label="Open tenant settings" (click)="goToTenantSettings($event)" tabindex="0" (keydown.enter)="goToTenantSettings($event)" (keydown.space)="goToTenantSettings($event)">
+        <div class="tenant-identity">
+          <div class="tenant-logo">
             <ng-container *ngIf="tenantLogo; else defaultLogo">
               <img [src]="tenantLogo" alt="Tenant logo" class="logo-img" loading="lazy" />
             </ng-container>
@@ -42,9 +42,9 @@ interface NavSection {
               <span class="nav-icon" [innerHTML]="icon('dashboard')"></span>
             </ng-template>
           </div>
-          <div class="brand-text" *ngIf="!collapsed">
-            <div class="brand-name">{{ tenantName || 'MindBloom' }}</div>
-            <div class="brand-sub">School OS</div>
+          <div class="tenant-text" *ngIf="!collapsed">
+            <div class="tenant-name">{{ tenantName || 'MindBloom' }}</div>
+            <div class="tenant-subtitle">School OS</div>
           </div>
         </div>
       </div>
@@ -64,6 +64,7 @@ interface NavSection {
               (click)="onNavigate()">
               <span class="nav-link-icon" [innerHTML]="icon(item.icon)"></span>
               <span class="nav-link-text" *ngIf="!collapsed">{{ item.label }}</span>
+              <span class="nav-meta" *ngIf="!collapsed"></span>
               <span class="nav-badge" *ngIf="item.badge && !collapsed">{{ item.badge }}</span>
             </a>
           </div>
@@ -91,6 +92,7 @@ interface NavSection {
       --accent-primary: var(--color-primary, #8bc6ff);
       --surface-sidebar: var(--color-surface, #0f172a);
       --surface-hover: color-mix(in srgb, var(--color-surface-hover, rgba(255,255,255,0.04)) 90%, transparent);
+      --surface-elevated: color-mix(in srgb, var(--color-surface, #0f172a) 82%, #ffffff 8%);
       --text-primary: var(--color-text-primary, #e5e7eb);
       --text-secondary: var(--color-text-secondary, #9ca3af);
       --text-muted: color-mix(in srgb, var(--color-text-secondary, #9ca3af) 75%, transparent);
@@ -115,40 +117,48 @@ interface NavSection {
     .sidebar-header {
       position: sticky;
       top: 0;
-      padding: 0.2rem 0.4rem 0.6rem;
       background: var(--surface-sidebar);
       z-index: 2;
     }
 
-    .identity {
-      display: flex;
-      align-items: center;
-      gap: 0.55rem;
-      padding: 0.35rem 0.4rem;
-      border-radius: 8px;
+    .tenant-header {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: background-color 0.18s ease;
     }
 
-    .brand-mark {
+    .tenant-header:hover { background: var(--surface-hover); }
+    .tenant-header:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: -2px; }
+
+    .tenant-identity {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.1rem 0;
+    }
+
+    .tenant-logo {
       width: 36px;
       height: 36px;
-      border-radius: 10px;
+      border-radius: 8px;
       display: grid;
       place-items: center;
-      background: color-mix(in srgb, #ffffff 6%, transparent);
-      border: 1px solid color-mix(in srgb, var(--border-subtle) 80%, transparent);
+      background: var(--surface-elevated);
     }
-    .logo-img { width: 28px; height: 28px; object-fit: cover; border-radius: 8px; }
-    .brand-text { display: flex; flex-direction: column; min-width: 0; }
-    .brand-name { font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; color: var(--text-primary); }
-    .brand-sub { font-size: 0.78rem; color: var(--text-muted); line-height: 1.2; }
+    .logo-img { width: 24px; height: 24px; object-fit: contain; border-radius: 6px; }
+    .tenant-text { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+    .tenant-name { font-size: 14px; font-weight: 500; line-height: 1.2; letter-spacing: -0.005em; color: var(--text-primary); }
+    .tenant-subtitle { font-size: 12px; color: var(--text-muted); line-height: 1.2; letter-spacing: 0; }
 
     .sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; padding: 0.25rem 0.15rem 1rem; scroll-behavior: smooth; }
 
-    .nav-section { display: grid; gap: 4px; }
+    .nav-section { display: grid; gap: 4px; margin-top: 28px; margin-bottom: 6px; }
+    .nav-section:first-child { margin-top: 10px; }
 
     .nav-section-title {
       font-size: 11px;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--text-muted);
       padding: 0 0.9rem;
@@ -168,11 +178,14 @@ interface NavSection {
       display: flex;
       align-items: center;
       gap: 12px;
-      height: 40px;
+      height: 42px;
       padding: 0 0.9rem;
       border-radius: 8px;
       color: var(--text-secondary);
       text-decoration: none;
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.01em;
       transition: background-color 0.2s ease, color 0.2s ease;
     }
 
@@ -184,8 +197,11 @@ interface NavSection {
       bottom: 6px;
       width: 3px;
       border-radius: 2px;
-      background: transparent;
-      transition: background-color 0.2s ease;
+      background: var(--accent-primary);
+      opacity: 0;
+      transform: scaleY(0.6);
+      transform-origin: center;
+      transition: transform 120ms ease, opacity 120ms ease;
     }
 
     .nav-link:hover {
@@ -195,17 +211,18 @@ interface NavSection {
 
     .nav-link:focus-visible {
       outline: 2px solid var(--accent-primary);
-      outline-offset: 2px;
+      outline-offset: -2px;
     }
 
     .nav-link.active {
       background: transparent;
       color: var(--text-primary);
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .nav-link.active::before {
-      background: var(--accent-primary);
+      opacity: 1;
+      transform: scaleY(1);
     }
 
     .nav-link-icon {
@@ -220,7 +237,9 @@ interface NavSection {
     .nav-link:hover .nav-link-icon { color: var(--text-primary); opacity: 1; }
     .nav-link.active .nav-link-icon { color: var(--accent-primary); opacity: 1; }
 
-    .nav-link-text { font-weight: 500; letter-spacing: -0.01em; font-size: 14px; line-height: 1; }
+    .nav-link-text { font-weight: 400; letter-spacing: 0.01em; font-size: 14px; line-height: 1.15; }
+
+    .nav-meta { margin-left: auto; min-width: 16px; height: 18px; display: inline-flex; align-items: center; justify-content: flex-end; }
 
     .nav-badge {
       margin-left: auto;
@@ -237,7 +256,7 @@ interface NavSection {
 
     .sidebar.sidebar-collapsed .nav-section-title { display: none; }
     .sidebar.sidebar-collapsed .nav-link { justify-content: center; padding: 0 0.65rem; }
-    .sidebar.sidebar-collapsed .nav-link-text, .sidebar.sidebar-collapsed .nav-badge { display: none; }
+    .sidebar.sidebar-collapsed .nav-link-text, .sidebar.sidebar-collapsed .nav-badge, .sidebar.sidebar-collapsed .nav-meta { display: none; }
 
     .sidebar-footer { margin-top: auto; display: grid; gap: 0.4rem; padding: 0.6rem 0.9rem 0.4rem; color: var(--text-secondary); }
     .footer-cta { display: none; }
@@ -461,5 +480,11 @@ export class SidebarComponent implements OnInit {
 
   onNavigate(): void {
     this.navigate.emit();
+  }
+
+  goToTenantSettings(event?: Event): void {
+    event?.preventDefault();
+    this.onNavigate();
+    this.router.navigate(['/setup/tenant-settings']);
   }
 }
