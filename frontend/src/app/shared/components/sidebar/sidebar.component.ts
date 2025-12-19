@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -7,6 +7,7 @@ import { TenantService, Tenant } from '../../../core/services/tenant.service';
 import { SchoolSettingsService } from '../../../core/services/school-settings.service';
 import { CanDirective } from '../../security/can.directive';
 import { PERMS } from '../../security/permissions';
+import { NavFilterService } from '../../services/nav-filter.service';
 
 interface NavItem {
   label: string;
@@ -14,6 +15,8 @@ interface NavItem {
   icon: string;
   badge?: string;
   permission?: string;
+  moduleKey?: string;  // Module entitlement check
+  rolesAllowed?: string[];  // RBAC role check
 }
 
 interface NavSection {
@@ -53,13 +56,12 @@ interface NavSection {
       </div>
 
       <nav class="sidebar-nav">
-        <section class="nav-section" *ngFor="let section of navSections">
+        <section class="nav-section" *ngFor="let section of filteredNavSections()">
           <header class="nav-section-title" *ngIf="!collapsed">{{ section.title }}</header>
           <div class="nav-card">
             <ng-container *ngFor="let item of section.items">
               <a
                 class="nav-link"
-                *can="item.permission || ''"
                 [routerLink]="item.path"
                 routerLinkActive="active"
                 #rla="routerLinkActive"
@@ -368,68 +370,74 @@ export class SidebarComponent implements OnInit {
     {
       title: 'Main',
       items: [
-        { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' }
+        { label: 'Dashboard', path: '/dashboard', icon: 'dashboard', moduleKey: 'dashboard' }
       ]
     },
     {
       title: 'Students',
       items: [
-        { label: 'Workspace', path: '/students', icon: 'dashboard', permission: PERMS.STUDENTS_READ },
-        { label: 'Admissions', path: '/admissions', icon: 'tasks', permission: PERMS.ADMISSIONS_READ },
-        { label: 'Attendance', path: '/students/attendance', icon: 'calendar', permission: PERMS.ATTENDANCE_READ },
-        { label: 'Academics', path: '/students/academics', icon: 'tasks', permission: PERMS.ACADEMICS_READ },
-        { label: 'Conduct', path: '/conduct', icon: 'people', permission: PERMS.STUDENTS_READ },
-        { label: 'Health', path: '/students/health', icon: 'health', permission: PERMS.STUDENTS_READ },
-        { label: 'Documents', path: '/students/documents', icon: 'library', permission: PERMS.STUDENTS_READ },
-        { label: 'Finance', path: '/accounting/fees', icon: 'fees', permission: PERMS.FEES_READ },
-        { label: 'Reports', path: '/reports', icon: 'tasks', permission: PERMS.REPORTS_VIEW }
+        { label: 'Workspace', path: '/students', icon: 'dashboard', permission: PERMS.STUDENTS_READ, moduleKey: 'students' },
+        { label: 'Admissions', path: '/admissions', icon: 'tasks', permission: PERMS.ADMISSIONS_READ, moduleKey: 'admissions' },
+        { label: 'Attendance', path: '/students/attendance', icon: 'calendar', permission: PERMS.ATTENDANCE_READ, moduleKey: 'attendance' },
+        { label: 'Academics', path: '/students/academics', icon: 'tasks', permission: PERMS.ACADEMICS_READ, moduleKey: 'academics' },
+        { label: 'Conduct', path: '/conduct', icon: 'people', permission: PERMS.STUDENTS_READ, moduleKey: 'students' },
+        { label: 'Health', path: '/students/health', icon: 'health', permission: PERMS.STUDENTS_READ, moduleKey: 'students' },
+        { label: 'Documents', path: '/students/documents', icon: 'library', permission: PERMS.STUDENTS_READ, moduleKey: 'students' },
+        { label: 'Finance', path: '/accounting/fees', icon: 'fees', permission: PERMS.FEES_READ, moduleKey: 'fees' },
+        { label: 'Reports', path: '/reports', icon: 'tasks', permission: PERMS.REPORTS_VIEW, moduleKey: 'students' }
       ]
     },
     {
       title: 'Finance & Reporting',
       items: [
-        { label: 'Fee Management', path: '/accounting/fees', icon: 'fees', permission: PERMS.FEES_READ },
-        { label: 'Fee Structures', path: '/accounting/fee-structures', icon: 'settings', permission: PERMS.FEES_WRITE },
-        { label: 'Fee Reports', path: '/accounting/fee-reports', icon: 'reports', permission: PERMS.FEES_READ },
-        { label: 'Accounts Payable', path: '/accounting/payables', icon: 'expense', permission: PERMS.ACCOUNTING_READ },
-        { label: 'Expense Records', path: '/accounting/expenses', icon: 'expense', permission: PERMS.ACCOUNTING_READ },
-        { label: 'Bills Queue', path: '/accounting/bill-queue', icon: 'bill', permission: PERMS.ACCOUNTING_WRITE },
-        { label: 'General Ledger', path: '/accounting/gl', icon: 'bank', permission: PERMS.ACCOUNTING_READ },
-        { label: 'Chart of Accounts', path: '/accounting/accounts', icon: 'list', permission: PERMS.ACCOUNTING_WRITE },
-        { label: 'Journal Entries', path: '/accounting/journals', icon: 'journal', permission: PERMS.ACCOUNTING_WRITE },
-        { label: 'Bank Reconciliation', path: '/accounting/bank-recon', icon: 'check-circle', permission: PERMS.ACCOUNTING_WRITE },
-        { label: 'Analytics', path: '/reports/analytics', icon: 'dashboard', permission: PERMS.REPORTS_VIEW },
-        { label: 'Financial Reports', path: '/reports/financial', icon: 'file-text', permission: PERMS.REPORTS_VIEW },
-        { label: 'Data Exports', path: '/reports/exports', icon: 'download', permission: PERMS.REPORTS_EXPORT }
+        { label: 'Fee Management', path: '/accounting/fees', icon: 'fees', permission: PERMS.FEES_READ, moduleKey: 'fees' },
+        { label: 'Fee Structures', path: '/accounting/fee-structures', icon: 'settings', permission: PERMS.FEES_WRITE, moduleKey: 'fees' },
+        { label: 'Fee Reports', path: '/accounting/fee-reports', icon: 'reports', permission: PERMS.FEES_READ, moduleKey: 'fees' },
+        { label: 'Accounts Payable', path: '/accounting/payables', icon: 'expense', permission: PERMS.ACCOUNTING_READ, moduleKey: 'accounting' },
+        { label: 'Expense Records', path: '/accounting/expenses', icon: 'expense', permission: PERMS.ACCOUNTING_READ, moduleKey: 'accounting' },
+        { label: 'Bills Queue', path: '/accounting/bill-queue', icon: 'bill', permission: PERMS.ACCOUNTING_WRITE, moduleKey: 'accounting' },
+        { label: 'General Ledger', path: '/accounting/gl', icon: 'bank', permission: PERMS.ACCOUNTING_READ, moduleKey: 'accounting' },
+        { label: 'Chart of Accounts', path: '/accounting/accounts', icon: 'list', permission: PERMS.ACCOUNTING_WRITE, moduleKey: 'accounting' },
+        { label: 'Journal Entries', path: '/accounting/journals', icon: 'journal', permission: PERMS.ACCOUNTING_WRITE, moduleKey: 'accounting' },
+        { label: 'Bank Reconciliation', path: '/accounting/bank-recon', icon: 'check-circle', permission: PERMS.ACCOUNTING_WRITE, moduleKey: 'accounting' },
+        { label: 'Analytics', path: '/reports/analytics', icon: 'dashboard', permission: PERMS.REPORTS_VIEW, moduleKey: 'dashboard' },
+        { label: 'Financial Reports', path: '/reports/financial', icon: 'file-text', permission: PERMS.REPORTS_VIEW, moduleKey: 'finance' },
+        { label: 'Data Exports', path: '/reports/exports', icon: 'download', permission: PERMS.REPORTS_EXPORT, moduleKey: 'setup' }
       ]
     },
     {
       title: 'Human Resources',
       items: [
-        { label: 'Directory', path: '/hr/directory', icon: 'hr', permission: PERMS.HR_READ },
-        { label: 'Profiles', path: '/hr/profiles', icon: 'dashboard', permission: PERMS.HR_READ },
-        { label: 'Leave', path: '/hr/leave', icon: 'calendar', permission: PERMS.HR_READ },
-        { label: 'Attendance', path: '/hr/attendance', icon: 'tasks', permission: PERMS.HR_READ },
-        { label: 'Settings', path: '/hr/settings', icon: 'settings', permission: PERMS.HR_WRITE }
+        { label: 'Directory', path: '/hr/directory', icon: 'hr', permission: PERMS.HR_READ, moduleKey: 'hr' },
+        { label: 'Profiles', path: '/hr/profiles', icon: 'dashboard', permission: PERMS.HR_READ, moduleKey: 'hr' },
+        { label: 'Leave', path: '/hr/leave', icon: 'calendar', permission: PERMS.HR_READ, moduleKey: 'hr' },
+        { label: 'Attendance', path: '/hr/attendance', icon: 'tasks', permission: PERMS.HR_READ, moduleKey: 'hr' },
+        { label: 'Settings', path: '/hr/settings', icon: 'settings', permission: PERMS.HR_WRITE, moduleKey: 'hr' }
       ]
     },
     {
       title: 'System',
       items: [
-        { label: 'Tenant Settings', path: '/setup/tenant-settings', icon: 'settings', permission: PERMS.SETUP_WRITE },
-        { label: 'Marketplace', path: '/setup/marketplace', icon: 'marketplace', permission: PERMS.SETUP_READ },
-        { label: 'Plugins', path: '/plugins', icon: 'plugins', permission: PERMS.SETUP_READ },
-        { label: 'Tasks', path: '/tasks', icon: 'tasks', permission: PERMS.TASKS_READ }
+        { label: 'Tenant Settings', path: '/setup/tenant-settings', icon: 'settings', permission: PERMS.SETUP_WRITE, moduleKey: 'setup' },
+        { label: 'Marketplace', path: '/setup/marketplace', icon: 'marketplace', permission: PERMS.SETUP_READ, moduleKey: 'setup' },
+        { label: 'Plugins', path: '/plugins', icon: 'plugins', permission: PERMS.SETUP_READ, moduleKey: 'plugins' },
+        { label: 'Tasks', path: '/tasks', icon: 'tasks', permission: PERMS.TASKS_READ, moduleKey: 'tasks' }
       ]
     }
   ];
+
+  // Filtered navigation based on entitlements and permissions
+  filteredNavSections = computed(() => {
+    return this.navFilterService.filterNavigationSync(this.navSections);
+  });
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private icons: IconRegistryService,
     private tenantService: TenantService,
-    private schoolSettingsService: SchoolSettingsService
+    private schoolSettingsService: SchoolSettingsService,
+    private navFilterService: NavFilterService
   ) { }
 
   icon(name: string) {

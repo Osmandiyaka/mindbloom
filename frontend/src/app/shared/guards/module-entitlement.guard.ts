@@ -40,6 +40,17 @@ export const moduleEntitlementGuard: CanMatchFn = (
         return true;
     }
 
+    // Special case: 'apply' is public, don't gate it
+    if (moduleKey === 'apply') {
+        return true;
+    }
+
+    // Prevent redirect loops - always allow access to module-not-enabled page
+    const attemptedPath = '/' + segments.map(s => s.path).join('/');
+    if (attemptedPath === '/module-not-enabled') {
+        return true;
+    }
+
     // Check if module is enabled for current tenant
     const isEnabled = entitlements.isEnabled(moduleKey);
 
@@ -48,13 +59,12 @@ export const moduleEntitlementGuard: CanMatchFn = (
     }
 
     // Module not enabled - redirect to not-enabled page with context
-    const attemptedPath = segments.map(s => s.path).join('/');
     const queryParams = {
         module: moduleKey,
-        returnUrl: attemptedPath ? `/${attemptedPath}` : undefined
+        returnUrl: attemptedPath
     };
 
-    console.log('[ModuleEntitlement] Access denied to module:', moduleKey);
+    console.log('[ModuleEntitlement] Access denied to module:', moduleKey, 'Attempted path:', attemptedPath);
 
     return router.createUrlTree(['/module-not-enabled'], { queryParams });
 };
@@ -80,6 +90,16 @@ export const moduleEntitlementActivateGuard: CanActivateFn = (
         return true;
     }
 
+    // Special case: 'apply' is public, don't gate it
+    if (moduleKey === 'apply') {
+        return true;
+    }
+
+    // Prevent redirect loops
+    if (state.url.startsWith('/module-not-enabled')) {
+        return true;
+    }
+
     // Check if module is enabled
     const isEnabled = entitlements.isEnabled(moduleKey);
 
@@ -93,7 +113,7 @@ export const moduleEntitlementActivateGuard: CanActivateFn = (
         returnUrl: state.url
     };
 
-    console.log('[ModuleEntitlement] Access denied to module:', moduleKey);
+    console.log('[ModuleEntitlement] Access denied to module:', moduleKey, 'URL:', state.url);
 
     return router.createUrlTree(['/module-not-enabled'], { queryParams });
 };

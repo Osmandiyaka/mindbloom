@@ -19,6 +19,7 @@ const PLAN_ENTITLEMENTS: Record<TenantPlan, ReadonlySet<ModuleKey>> = {
         MODULE_KEYS.DASHBOARD,
         MODULE_KEYS.STUDENTS,
         MODULE_KEYS.ADMISSIONS,
+        MODULE_KEYS.APPLY,  // Public portal, always accessible
         MODULE_KEYS.ACADEMICS,
         MODULE_KEYS.ATTENDANCE,
         MODULE_KEYS.SETUP
@@ -26,12 +27,14 @@ const PLAN_ENTITLEMENTS: Record<TenantPlan, ReadonlySet<ModuleKey>> = {
     free: new Set([
         MODULE_KEYS.DASHBOARD,
         MODULE_KEYS.STUDENTS,
+        MODULE_KEYS.APPLY,  // Public portal, always accessible
         MODULE_KEYS.SETUP
     ]),
     basic: new Set([
         MODULE_KEYS.DASHBOARD,
         MODULE_KEYS.STUDENTS,
         MODULE_KEYS.ADMISSIONS,
+        MODULE_KEYS.APPLY,  // Public portal, always accessible
         MODULE_KEYS.ACADEMICS,
         MODULE_KEYS.ATTENDANCE,
         MODULE_KEYS.SETUP
@@ -40,6 +43,7 @@ const PLAN_ENTITLEMENTS: Record<TenantPlan, ReadonlySet<ModuleKey>> = {
         MODULE_KEYS.DASHBOARD,
         MODULE_KEYS.STUDENTS,
         MODULE_KEYS.ADMISSIONS,
+        MODULE_KEYS.APPLY,  // Public portal, always accessible
         MODULE_KEYS.ACADEMICS,
         MODULE_KEYS.ATTENDANCE,
         MODULE_KEYS.FEES,
@@ -54,6 +58,7 @@ const PLAN_ENTITLEMENTS: Record<TenantPlan, ReadonlySet<ModuleKey>> = {
         MODULE_KEYS.DASHBOARD,
         MODULE_KEYS.STUDENTS,
         MODULE_KEYS.ADMISSIONS,
+        MODULE_KEYS.APPLY,  // Public portal, always accessible
         MODULE_KEYS.ACADEMICS,
         MODULE_KEYS.ATTENDANCE,
         MODULE_KEYS.FEES,
