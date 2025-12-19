@@ -1,9 +1,11 @@
+import { expect, jest } from '@jest/globals';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { StripePaymentGateway } from './stripe-payment.gateway';
 
-jest.mock('stripe', () => {
-    return jest.fn().mockImplementation(() => ({
+jest.mock('stripe', () => ({
+    __esModule: true,
+    default: jest.fn().mockImplementation(() => ({
         checkout: {
             sessions: {
                 create: jest.fn(),
@@ -15,8 +17,8 @@ jest.mock('stripe', () => {
         webhooks: {
             constructEvent: jest.fn(),
         },
-    }));
-});
+    })),
+}));
 
 describe('StripePaymentGateway', () => {
     const stripeInstance = () => {

@@ -2,12 +2,14 @@ import { BadRequestException, Controller, HttpCode, Post, Req } from '@nestjs/co
 import { Request } from 'express';
 import { PaymentGatewayRegistry } from '../../application/services/payments/payment-gateway.registry';
 import { EventBus, PlatformEvent } from '../../core/plugins/event-bus.service';
+import { PaymentHistoryService } from '../../application/services/payments/payment-history.service';
 
 @Controller('webhooks/payments')
 export class PaymentWebhookController {
     constructor(
         private readonly paymentGatewayRegistry: PaymentGatewayRegistry,
         private readonly eventBus: EventBus,
+        private readonly paymentHistory: PaymentHistoryService,
     ) { }
 
     @Post('stripe')
@@ -21,6 +23,22 @@ export class PaymentWebhookController {
             const verification = await gateway.verifyWebhook(rawBody, signature);
             const payload: any = verification.payload ?? {};
             const tenantId = payload.metadata?.tenantId || payload.tenantId || payload.customer?.tenantId;
+
+            await this.paymentHistory.upsertFromGatewayEvent({
+                gateway: gateway.name,
+                eventId: verification.eventId,
+                eventType: verification.type,
+                externalId: payload.id,
+                externalType: payload.object,
+                amount: payload.amount_total ?? payload.amount_due ?? payload.amount ?? payload.amount_paid,
+                currency: payload.currency,
+                invoiceId: payload.metadata?.invoiceId ?? payload.invoice,
+                tenantId,
+                metadata: payload.metadata,
+                statusHint: verification.type,
+                failureCode: payload.failure_code || payload.last_payment_error?.code,
+                failureMessage: payload.failure_message || payload.last_payment_error?.message,
+            });
 
             if (tenantId) {
                 if (verification.type === 'invoice.payment_succeeded' || verification.type === 'checkout.session.completed') {

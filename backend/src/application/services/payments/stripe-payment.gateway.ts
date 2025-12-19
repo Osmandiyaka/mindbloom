@@ -22,7 +22,7 @@ export class StripePaymentGateway implements IPaymentGateway {
             throw new Error('STRIPE_SECRET_KEY is not configured');
         }
 
-        this.stripe = new Stripe(secretKey);
+        this.stripe = new Stripe(secretKey, { apiVersion: '2022-11-15' });
     }
 
     async createCheckoutSession(input: CreateCheckoutSessionInput): Promise<CheckoutSession> {
