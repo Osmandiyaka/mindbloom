@@ -23,6 +23,17 @@ export enum SubscriptionState {
     DEACTIVATED = 'deactivated',
 }
 
+export type ExpirationAction = 'FALLBACK_TO_FREE' | 'SUSPEND' | 'DEACTIVATE';
+
+export interface ExpirationPolicyOverride {
+    expirationAction?: ExpirationAction;
+    graceDays?: number;
+    fallbackEditionId?: string | null;
+    notifyDaysBeforeExpiry?: number[];
+    pastDueWindowDays?: number;
+    maxPastDueDaysBeforeAction?: number | null;
+}
+
 export interface EditionFeatures {
     editionCode: string;
     editionName: string;
@@ -250,6 +261,7 @@ export class Tenant {
         public readonly lastPaymentSuccessAt?: Date,
         public readonly lastInvoiceId?: string,
         public readonly stateVersion: number = 1,
+        public readonly expirationPolicy?: ExpirationPolicyOverride,
     ) {
         if (this.subscriptionEndDate && this.gracePeriodEndDate && this.gracePeriodEndDate < this.subscriptionEndDate) {
             throw new Error('Grace period end date must be on or after subscription end date.');

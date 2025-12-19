@@ -1,4 +1,4 @@
-import { Tenant, TenantPlan, TenantStatus } from '../../tenant/entities/tenant.entity';
+import { Tenant, TenantPlan, TenantStatus, SubscriptionState } from '../../tenant/entities/tenant.entity';
 import { TENANT_REPOSITORY } from './repository.tokens';
 
 export interface TenantListQuery {
@@ -6,6 +6,13 @@ export interface TenantListQuery {
     statuses?: TenantStatus[];
     plans?: TenantPlan[];
     trialExpiringBefore?: Date;
+    subscriptionStates?: SubscriptionState[];
+    subscriptionEndDateBefore?: Date;
+    subscriptionEndDateAfter?: Date;
+    gracePeriodEndDateBefore?: Date;
+    gracePeriodEndDateAfter?: Date;
+    pastDueSinceBefore?: Date;
+    pastDueSinceAfter?: Date;
     page?: number;
     pageSize?: number;
     sortBy?: 'createdAt' | 'name' | 'status' | 'plan';

@@ -11,6 +11,8 @@ import {
     ResourceUsage,
     CustomizationSettings,
     AcademicYearSettings,
+    SubscriptionState,
+    ExpirationPolicyOverride,
 } from '../../../../domain/tenant/entities/tenant.entity';
 import { ITenantRepository, TenantListQuery, TenantListResult } from '../../../../domain/ports/out/tenant-repository.port';
 import { TenantDocument } from './schemas/tenant.schema';
@@ -55,6 +57,31 @@ export class MongooseTenantRepository implements ITenantRepository {
 
         if (query.trialExpiringBefore) {
             filter.trialEndsAt = { $lte: query.trialExpiringBefore };
+        }
+
+        if (query.subscriptionStates && query.subscriptionStates.length > 0) {
+            filter.subscriptionState = { $in: query.subscriptionStates };
+        }
+
+        const subscriptionEndFilter: Record<string, any> = {};
+        if (query.subscriptionEndDateBefore) subscriptionEndFilter.$lte = query.subscriptionEndDateBefore;
+        if (query.subscriptionEndDateAfter) subscriptionEndFilter.$gte = query.subscriptionEndDateAfter;
+        if (Object.keys(subscriptionEndFilter).length > 0) {
+            filter.subscriptionEndDate = subscriptionEndFilter;
+        }
+
+        const graceEndFilter: Record<string, any> = {};
+        if (query.gracePeriodEndDateBefore) graceEndFilter.$lte = query.gracePeriodEndDateBefore;
+        if (query.gracePeriodEndDateAfter) graceEndFilter.$gte = query.gracePeriodEndDateAfter;
+        if (Object.keys(graceEndFilter).length > 0) {
+            filter.gracePeriodEndDate = graceEndFilter;
+        }
+
+        const pastDueFilter: Record<string, any> = {};
+        if (query.pastDueSinceBefore) pastDueFilter.$lte = query.pastDueSinceBefore;
+        if (query.pastDueSinceAfter) pastDueFilter.$gte = query.pastDueSinceAfter;
+        if (Object.keys(pastDueFilter).length > 0) {
+            filter.pastDueSince = pastDueFilter;
         }
 
         if (query.search && query.search.trim()) {
@@ -215,6 +242,17 @@ export class MongooseTenantRepository implements ITenantRepository {
             doc.subscriptionEndDate,
             doc.isSuspended ?? false,
             doc.gracePeriodEndDate,
+            doc.subscriptionState as SubscriptionState,
+            doc.subscriptionStartDate,
+            doc.pastDueSince,
+            doc.trialEndDate,
+            doc.graceStartedAt,
+            doc.deactivatedAt,
+            doc.lastPaymentFailureAt,
+            doc.lastPaymentSuccessAt,
+            doc.lastInvoiceId,
+            doc.stateVersion ?? 1,
+            doc.expirationPolicy as ExpirationPolicyOverride,
         );
     }
 
@@ -255,6 +293,17 @@ export class MongooseTenantRepository implements ITenantRepository {
             subscriptionEndDate: tenant.subscriptionEndDate,
             isSuspended: tenant.isSuspended,
             gracePeriodEndDate: tenant.gracePeriodEndDate,
+            subscriptionState: tenant.subscriptionState,
+            subscriptionStartDate: tenant.subscriptionStartDate,
+            pastDueSince: tenant.pastDueSince,
+            trialEndDate: tenant.trialEndDate,
+            graceStartedAt: tenant.graceStartedAt,
+            deactivatedAt: tenant.deactivatedAt,
+            lastPaymentFailureAt: tenant.lastPaymentFailureAt,
+            lastPaymentSuccessAt: tenant.lastPaymentSuccessAt,
+            lastInvoiceId: tenant.lastInvoiceId,
+            stateVersion: tenant.stateVersion,
+            expirationPolicy: tenant.expirationPolicy,
         };
 
         Object.keys(doc).forEach((key) => doc[key] === undefined && delete doc[key]);

@@ -13,6 +13,7 @@ import {
     ScheduledChangeNotSupportedException,
     TenantNotFoundException,
 } from '../../../domain/exceptions/tenant-subscription.exception';
+import { EventBus, PlatformEvent } from '../../../core/plugins/event-bus.service';
 
 interface AuditSnapshot {
     editionId: string | null | undefined;
@@ -34,6 +35,7 @@ export class TenantManager {
     constructor(
         @Inject(TENANT_REPOSITORY) private readonly tenants: ITenantRepository,
         private readonly editionManager: EditionManager,
+        private readonly events: EventBus,
         @Inject(REQUEST) private readonly request: any,
     ) { }
 
@@ -159,6 +161,18 @@ export class TenantManager {
                 prorationPolicy,
             },
         );
+
+        this.events.publish(PlatformEvent.SUBSCRIPTION_PLAN_CHANGED, {
+            tenantId,
+            previousState: tenant.subscriptionState,
+            newState: updated.subscriptionState,
+            subscriptionEndDate: updated.subscriptionEndDate,
+            gracePeriodEndDate: updated.gracePeriodEndDate,
+            previousEditionId: before.editionId,
+            newEditionId,
+            effectiveDate: effective,
+            timestamp: new Date(),
+        }, tenantId);
     }
 
     async suspendTenant(tenantId: string, reason: string): Promise<void> {

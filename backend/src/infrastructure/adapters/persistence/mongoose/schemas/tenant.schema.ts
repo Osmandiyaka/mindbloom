@@ -174,6 +174,27 @@ class SsoConfigSchema {
     issuer: string;
 }
 
+@Schema({ _id: false })
+class ExpirationPolicySchema {
+    @Prop()
+    expirationAction?: string;
+
+    @Prop()
+    graceDays?: number;
+
+    @Prop()
+    fallbackEditionId?: string;
+
+    @Prop({ type: [Number], default: undefined })
+    notifyDaysBeforeExpiry?: number[];
+
+    @Prop()
+    pastDueWindowDays?: number;
+
+    @Prop()
+    maxPastDueDaysBeforeAction?: number;
+}
+
 @Schema({
     collection: 'tenants',
     timestamps: true,
@@ -318,6 +339,9 @@ export class TenantDocument extends Document {
 
     @Prop({ type: [String] })
     tags?: string[];
+
+    @Prop({ type: ExpirationPolicySchema })
+    expirationPolicy?: ExpirationPolicySchema;
 
     @Prop({ type: Object })
     idTemplates?: {

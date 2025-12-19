@@ -113,11 +113,17 @@ export class SubscriptionLifecycleService {
 
         this.events.publish(PlatformEvent.SUBSCRIPTION_PAYMENT_SUCCEEDED, {
             tenantId,
+            editionId: tenant.editionId,
             invoiceId: payload.invoiceId,
             paymentId: payload.paymentId,
-            paidThroughDate,
+            subscriptionEndDate: paidThroughDate,
+            gracePeriodEndDate: null,
             previousState: tenant.subscriptionState,
             newState: SubscriptionState.ACTIVE,
+            timestamp: new Date(),
+            metadata: {
+                paidThroughDate,
+            },
         }, tenantId);
     }
 
@@ -150,11 +156,19 @@ export class SubscriptionLifecycleService {
 
         this.events.publish(PlatformEvent.SUBSCRIPTION_PAYMENT_FAILED, {
             tenantId,
+            editionId: tenant.editionId,
             invoiceId: payload.invoiceId,
             failureReason: payload.reasonCode,
             failedAt,
             previousState: tenant.subscriptionState,
             newState: updated.subscriptionState,
+            subscriptionEndDate: tenant.subscriptionEndDate,
+            gracePeriodEndDate: gracePeriodEndDate ?? tenant.gracePeriodEndDate,
+            timestamp: failedAt,
+            metadata: {
+                reason: payload.reasonCode,
+                gracePeriodEndDate,
+            },
         }, tenantId);
     }
 

@@ -24,6 +24,7 @@ import { TenantContext } from '../../common/tenant/tenant.context';
 import { FeatureValidationService } from '../../application/services/features/feature-validation.service';
 import { SubscriptionLifecycleService } from '../../application/services/subscription/subscription-lifecycle.service';
 import { PluginsModule } from '../plugins/plugins.module';
+import { ExpirationPolicyEngine } from '../../application/services/subscription/expiration-policy.engine';
 
 @Module({
     imports: [
@@ -60,6 +61,7 @@ import { PluginsModule } from '../plugins/plugins.module';
         ListTenantsUseCase,
         TenantManager,
         EditionManager,
+        ExpirationPolicyEngine,
         SubscriptionLifecycleService,
         FeatureValidationService,
         EffectiveFeatureResolver,
@@ -80,6 +82,7 @@ import { PluginsModule } from '../plugins/plugins.module';
         ListTenantsUseCase,
         TenantManager,
         EditionManager,
+        ExpirationPolicyEngine,
         SubscriptionLifecycleService,
         FeatureValidationService,
         EffectiveFeatureResolver,
