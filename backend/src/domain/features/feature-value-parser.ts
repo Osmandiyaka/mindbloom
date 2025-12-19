@@ -4,32 +4,45 @@ import { InvalidFeatureValueException } from '../exceptions/invalid-feature-valu
 
 export class FeatureValueParser {
     static validate(definition: FeatureDefinition, raw: string): void {
-        this.parse(definition, raw);
+        this.validateValue(definition.valueType, raw, definition.key);
     }
 
-    static parse(definition: FeatureDefinition, raw: string): boolean | number | string {
-        switch (definition.valueType) {
-            case FeatureValueType.BOOLEAN: {
-                if (raw === 'true' || raw === 'false') {
-                    return raw === 'true';
-                }
-                throw new InvalidFeatureValueException(definition.key, 'boolean', raw);
-            }
-            case FeatureValueType.INT: {
-                if (/^-?\d+$/.test(raw)) {
-                    return parseInt(raw, 10);
-                }
-                throw new InvalidFeatureValueException(definition.key, 'int', raw);
-            }
-            case FeatureValueType.DECIMAL: {
-                if (!Number.isNaN(Number(raw))) {
-                    return Number(raw);
-                }
-                throw new InvalidFeatureValueException(definition.key, 'decimal', raw);
-            }
+    static validateValue(valueType: FeatureValueType, raw: string, featureKey?: string): void {
+        switch (valueType) {
+            case FeatureValueType.BOOLEAN:
+                this.parseBoolean(raw, featureKey);
+                return;
+            case FeatureValueType.INT:
+                this.parseInt(raw, featureKey);
+                return;
+            case FeatureValueType.DECIMAL:
+                this.parseDecimal(raw, featureKey);
+                return;
             case FeatureValueType.STRING:
             default:
-                return raw;
+                return;
         }
+    }
+
+    static parseBoolean(value: string, featureKey?: string): boolean {
+        const normalized = value?.toLowerCase();
+        if (normalized === 'true') return true;
+        if (normalized === 'false') return false;
+        throw new InvalidFeatureValueException(featureKey ?? 'unknown', 'boolean', value);
+    }
+
+    static parseInt(value: string, featureKey?: string): number {
+        if (/^-?\d+$/.test(value)) {
+            return Number.parseInt(value, 10);
+        }
+        throw new InvalidFeatureValueException(featureKey ?? 'unknown', 'int', value);
+    }
+
+    static parseDecimal(value: string, featureKey?: string): number {
+        const n = Number(value);
+        if (!Number.isNaN(n)) {
+            return n;
+        }
+        throw new InvalidFeatureValueException(featureKey ?? 'unknown', 'decimal', value);
     }
 }

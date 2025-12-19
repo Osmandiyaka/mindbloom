@@ -19,7 +19,7 @@ export class TenantFeatureOverride {
         this._value = props.value;
     }
 
-    static create(props: TenantFeatureOverrideProps, catalog: FeatureCatalog): TenantFeatureOverride {
+    static create(props: TenantFeatureOverrideProps, catalog: typeof FeatureCatalog = FeatureCatalog): TenantFeatureOverride {
         const definition = catalog.get(props.featureKey);
         if (!definition) {
             throw new UnknownFeatureKeyException(props.featureKey);
@@ -32,7 +32,7 @@ export class TenantFeatureOverride {
         return this._value;
     }
 
-    setValue(raw: string, catalog: FeatureCatalog): void {
+    setValue(raw: string, catalog: typeof FeatureCatalog = FeatureCatalog): void {
         const definition = catalog.get(this.featureKey);
         FeatureValueParser.validate(definition, raw);
         this._value = raw;

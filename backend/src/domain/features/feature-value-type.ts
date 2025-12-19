@@ -1,6 +1,6 @@
 export enum FeatureValueType {
-    BOOLEAN = 'boolean',
-    INT = 'int',
-    DECIMAL = 'decimal',
-    STRING = 'string',
+    BOOLEAN = 'BOOLEAN',
+    INT = 'INT',
+    DECIMAL = 'DECIMAL',
+    STRING = 'STRING',
 }
