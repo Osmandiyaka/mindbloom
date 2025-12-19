@@ -34,6 +34,14 @@ export class TenantContextService {
     }
 
     /**
+     * Check if tenant context exists (synchronous)
+     * Used by guards for fast tenant presence check
+     */
+    hasTenant(): boolean {
+        return this._activeTenant$.value !== null;
+    }
+
+    /**
      * Set active tenant and persist to storage
      */
     setActiveTenant(tenant: TenantMembership | null): void {

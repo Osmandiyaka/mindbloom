@@ -1,63 +1,42 @@
 /**
- * Tenant guard.
+ * Tenant Guard
  * 
- * Ensures tenant context is available before activating protected routes.
- * Routes to tenant selection if user is authenticated but has no active tenant.
- * Prevents "flash" of tenant UI without tenant context.
+ * Enforces tenant context presence for protected routes.
+ * Must run AFTER AuthGuard in the guard chain.
+ * 
+ * Guard Ordering: AuthGuard → TenantGuard → RBAC/Module Guards
+ * 
+ * Behavior:
+ * - Allows public routes (data.public = true)
+ * - Allows routes that skip tenant check (data.skipTenant = true)
+ * - Blocks tenant-scoped routes when no tenant context exists
+ * - Redirects to /select-school with returnUrl
  */
 
 import { inject } from '@angular/core';
 import { Router, type CanActivateFn } from '@angular/router';
-import { TenantResolverService } from './tenant.service';
 import { TenantContextService } from './tenant-context.service';
-import { AuthService } from '../auth/auth.service';
 
-export const tenantGuard: CanActivateFn = async (route, state) => {
-    const tenantResolverService = inject(TenantResolverService);
+export const tenantGuard: CanActivateFn = (route, state) => {
     const tenantContext = inject(TenantContextService);
-    const authService = inject(AuthService);
     const router = inject(Router);
 
-    // Allow public routes (marked with data: { public: true })
+    // Allow public routes
     if (route.data?.['public'] === true) {
         return true;
     }
 
-    // Check if user is authenticated
-    const isAuthenticated = authService.isAuthenticated();
-
-    if (!isAuthenticated) {
-        // Not authenticated, let auth guard handle it
+    // Allow routes that explicitly skip tenant check (e.g., platform-only routes)
+    if (route.data?.['skipTenant'] === true) {
         return true;
     }
 
-    // Check if tenant context is already set
-    const activeTenant = tenantContext.activeTenant();
-
-    if (activeTenant) {
-        // Tenant context exists, allow access
+    // Check if tenant context exists
+    if (tenantContext.hasTenant()) {
         return true;
     }
 
-    // No active tenant - try to resolve from environment (URL, JWT, etc.)
-    const resolved = await tenantResolverService.resolveTenant();
-
-    if (resolved) {
-        // Tenant resolved successfully
-        return true;
-    }
-
-    // No tenant context available
-    // Check if user has memberships to choose from
-    const session = authService.session();
-    const memberships = session?.memberships || [];
-
-    if (memberships.length === 0) {
-        // No access to any tenants
-        return router.createUrlTree(['/no-access']);
-    }
-
-    // User has memberships but no active tenant - redirect to selection
+    // No tenant context - redirect to selection screen with returnUrl
     return router.createUrlTree(['/select-school'], {
         queryParams: { returnUrl: state.url }
     });
