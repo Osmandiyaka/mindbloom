@@ -19,6 +19,9 @@ import { STUDENT_NOTE_REPOSITORY } from '../../domain/ports/out/student-note-rep
 import { MongooseStudentNoteRepository } from '../../infrastructure/adapters/persistence/mongoose/mongoose-student-note.repository';
 import { CreateStudentNoteUseCase } from '../../application/services/student-notes/create-student-note.use-case';
 import { GetStudentNotesUseCase } from '../../application/services/student-notes/get-student-notes.use-case';
+import { TenantLimitEnforcementService } from '../../application/services/tenant/tenant-limit-enforcement.service';
+import { TenantModule } from '../tenant/tenant.module';
+import { PluginsModule } from '../plugins/plugins.module';
 
 @Module({
     imports: [
@@ -26,6 +29,8 @@ import { GetStudentNotesUseCase } from '../../application/services/student-notes
             { name: 'Student', schema: StudentSchema },
             { name: StudentNoteDocument.name, schema: StudentNoteSchema },
         ]),
+        TenantModule,
+        PluginsModule,
     ],
     controllers: [StudentsController, StudentNotesController],
     providers: [
@@ -46,6 +51,7 @@ import { GetStudentNotesUseCase } from '../../application/services/student-notes
         UpdateStudentEnrollmentUseCase,
         CreateStudentNoteUseCase,
         GetStudentNotesUseCase,
+        TenantLimitEnforcementService,
     ],
     exports: [STUDENT_REPOSITORY, STUDENT_NOTE_REPOSITORY],
 })

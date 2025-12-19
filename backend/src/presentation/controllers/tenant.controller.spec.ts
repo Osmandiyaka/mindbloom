@@ -5,7 +5,7 @@ import { Tenant } from '../../domain/tenant/entities/tenant.entity';
 import { TenantStatus, TenantPlan } from '../../domain/tenant/entities/tenant.entity';
 import { TenantContext } from '../../common/tenant/tenant.context';
 import { TenantResponseDto } from '../dtos/responses/tenant/tenant-response.dto';
-import { CreateTenantUseCase, GetTenantBySubdomainUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, ListTenantsUseCase } from '../../application/services/tenant';
+import { CreateTenantUseCase, GetTenantBySubdomainUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, ListTenantsUseCase, GetTenantByIdUseCase } from '../../application/services/tenant';
 import { TenantGuard } from '../../common/tenant/tenant.guard';
 import { TenantResolutionService } from '../../common/tenant/tenant-resolution.service';
 import { PermissionGuard } from '../../common/guards/permission.guard';
@@ -34,6 +34,7 @@ describe('TenantController', () => {
     let controller: TenantController;
     const createTenantUseCase = { execute: jest.fn() };
     const getTenantBySubdomainUseCase = { execute: jest.fn() };
+    const getTenantByIdUseCase = { execute: jest.fn() };
     const getTenantSettingsUseCase = { execute: jest.fn() };
     const updateTenantSettingsUseCase = { execute: jest.fn() };
     const listTenantsUseCase = { execute: jest.fn() };
@@ -44,6 +45,7 @@ describe('TenantController', () => {
             providers: [
                 { provide: CreateTenantUseCase, useValue: createTenantUseCase },
                 { provide: GetTenantBySubdomainUseCase, useValue: getTenantBySubdomainUseCase },
+                { provide: GetTenantByIdUseCase, useValue: getTenantByIdUseCase },
                 { provide: GetTenantSettingsUseCase, useValue: getTenantSettingsUseCase },
                 { provide: UpdateTenantSettingsUseCase, useValue: updateTenantSettingsUseCase },
                 { provide: ListTenantsUseCase, useValue: listTenantsUseCase },

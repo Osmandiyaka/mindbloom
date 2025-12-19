@@ -136,4 +136,7 @@ export enum PlatformEvent {
     PLUGIN_INSTALLED = 'plugin.installed',
     PLUGIN_ENABLED = 'plugin.enabled',
     PLUGIN_DISABLED = 'plugin.disabled',
+
+    // Limit events
+    TENANT_LIMIT_THRESHOLD_REACHED = 'tenant.limit.threshold',
 }

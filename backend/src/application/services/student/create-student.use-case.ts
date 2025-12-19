@@ -4,12 +4,14 @@ import { Types } from 'mongoose';
 import { Student, StudentProps, StudentStatus } from '../../../domain/student/entities/student.entity';
 import { IStudentRepository, STUDENT_REPOSITORY } from '../../../domain/ports/out/student-repository.port';
 import { CreateStudentCommand } from '../../ports/in/commands/create-student.command';
+import { TenantLimitEnforcementService } from '../tenant/tenant-limit-enforcement.service';
 
 @Injectable()
 export class CreateStudentUseCase {
     constructor(
         @Inject(STUDENT_REPOSITORY)
         private readonly studentRepository: IStudentRepository,
+        private readonly tenantLimits: TenantLimitEnforcementService,
     ) { }
 
     async execute(command: CreateStudentCommand): Promise<Student> {
@@ -62,6 +64,8 @@ export class CreateStudentUseCase {
             createdAt: new Date(),
             updatedAt: new Date(),
         };
+
+        await this.tenantLimits.assertCanCreateStudent(command.tenantId);
 
         const student = new Student(studentProps);
         return await this.studentRepository.create(student);
