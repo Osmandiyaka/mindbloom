@@ -72,12 +72,7 @@ interface CurrentLoginInfoResponse {
         name: string;
         roleId: string | null;
         role?: any;
-        permissions?: Array<{
-            id?: string;
-            resource: string;
-            actions: string[];
-            scope?: string;
-        }>;
+        permissions?: string[];
     };
     tenant: {
         id: string;
@@ -91,18 +86,6 @@ interface CurrentLoginInfoResponse {
         contactInfo?: { email: string };
     };
     edition: EditionSnapshot;
-    roles: Array<{
-        id: string;
-        name: string;
-        description?: string;
-        isSystemRole?: boolean;
-        permissions?: any[];
-    }>;
-    permissions: {
-        effective: string[];
-        role: any[];
-        direct: any[];
-    };
 }
 
 // Legacy User type for compatibility
@@ -550,14 +533,21 @@ export class AuthService {
 
             this.rbacService.setSession(rbacSession);
 
-            const roles: RoleDefinition[] = (loginInfo.roles || []).map((role) => this.mapRoleFromApi(role));
+            const roles: RoleDefinition[] = [];
 
-            if (loginInfo.permissions?.effective?.length) {
+            if (loginInfo.user.role) {
+                roles.push(this.mapRoleFromApi(loginInfo.user.role));
+            }
+
+            const inlinePermissions = (loginInfo.user.permissions || [])
+                .map((p: string) => this.normalizePermissionKey(p));
+
+            if (inlinePermissions.length) {
                 roles.push({
                     id: 'login-info-inline',
                     name: 'Login Info Permissions',
                     description: 'Permissions returned with login context',
-                    permissions: loginInfo.permissions.effective.map((p) => this.normalizePermissionKey(p)),
+                    permissions: inlinePermissions,
                     isSystem: true,
                 });
             }

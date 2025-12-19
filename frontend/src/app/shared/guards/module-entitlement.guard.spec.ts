@@ -1,20 +1,20 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree, Route, UrlSegment } from '@angular/router';
 import { moduleEntitlementGuard } from './module-entitlement.guard';
-import { EntitlementsService } from '../services/entitlements.service';
+import { EditionService } from '../services/entitlements.service';
 import { MODULE_KEYS } from '../types/module-keys';
 
 describe('moduleEntitlementGuard', () => {
-    let entitlementsService: jasmine.SpyObj<EntitlementsService>;
+    let entitlementsService: jasmine.SpyObj<EditionService>;
     let router: jasmine.SpyObj<Router>;
 
     beforeEach(() => {
-        entitlementsService = jasmine.createSpyObj('EntitlementsService', ['isEnabled']);
+        entitlementsService = jasmine.createSpyObj('EditionService', ['isEnabled']);
         router = jasmine.createSpyObj('Router', ['createUrlTree']);
 
         TestBed.configureTestingModule({
             providers: [
-                { provide: EntitlementsService, useValue: entitlementsService },
+                { provide: EditionService, useValue: entitlementsService },
                 { provide: Router, useValue: router }
             ]
         });

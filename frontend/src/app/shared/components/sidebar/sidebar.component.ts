@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { AuthorizationService } from '../../security/authorization.service';
-import { EntitlementsService } from '../../services/entitlements.service';
+import { EditionService } from '../../services/entitlements.service';
 import { RbacService } from '../../../core/rbac/rbac.service';
 import { IconRegistryService } from '../../services/icon-registry.service';
 import { TenantService, Tenant } from '../../../core/services/tenant.service';
@@ -437,7 +437,7 @@ export class SidebarComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private authorization: AuthorizationService,
-    private entitlements: EntitlementsService,
+    private entitlements: EditionService,
     private rbac: RbacService,
     private router: Router,
     private icons: IconRegistryService,

@@ -11,7 +11,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CardComponent } from '../../components/card/card.component';
 import { ButtonComponent } from '../../components/button/button.component';
 import { ModuleKey, MODULE_NAMES } from '../../types/module-keys';
-import { EntitlementsService } from '../../services/entitlements.service';
+import { EditionService } from '../../services/entitlements.service';
 
 @Component({
     selector: 'app-module-not-enabled',
@@ -198,7 +198,7 @@ import { EntitlementsService } from '../../services/entitlements.service';
 export class ModuleNotEnabledComponent implements OnInit {
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
-    private readonly entitlements = inject(EntitlementsService);
+    private readonly entitlements = inject(EditionService);
 
     // Signals for component state
     readonly moduleKey = signal<ModuleKey | null>(null);

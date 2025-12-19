@@ -1,5 +1,5 @@
 /**
- * EntitlementsService - Module Entitlement Management
+ * EditionService - Module Entitlement Management
  * 
  * Determines which modules are enabled for the current tenant based on subscription plan.
  * Integrates with TenantService to provide reactive module access control.
@@ -14,7 +14,7 @@ import { ModuleKey, MODULE_KEYS } from '../types/module-keys';
 @Injectable({
     providedIn: 'root'
 })
-export class EntitlementsService {
+export class EditionService {
     private readonly editions = inject(EditionFeaturesService);
 
     // Reactive enabled modules based on current tenant plan

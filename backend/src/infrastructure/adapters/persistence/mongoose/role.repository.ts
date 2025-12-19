@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Role } from '../../../../domain/rbac/entities/role.entity';
-import { Permission } from '../../../../domain/rbac/entities/permission.entity';
-import { createGlobalRoles } from '../../../../domain/rbac/entities/system-roles';
+import { Permission, PermissionAction } from '../../../../domain/rbac/entities/permission.entity';
+import { createGlobalRoles, SYSTEM_ROLE_NAMES } from '../../../../domain/rbac/entities/system-roles';
 import { IRoleRepository } from '../../../../domain/ports/out/role-repository.port';
 import { RoleDocument } from './schemas/role.schema';
 import { TenantScopedRepository } from '../../../../common/tenant/tenant-scoped.repository';
@@ -170,8 +170,40 @@ export class MongooseRoleRepository extends TenantScopedRepository<RoleDocument,
 
     async initializeGlobalRoles(): Promise<Role[]> {
         const existing = await this.findGlobalRoles();
+
+        // If roles already exist, ensure critical system roles carry wildcard access
         if (existing.length > 0) {
-            return existing;
+            let updated = false;
+
+            for (const role of existing) {
+                const isAdminRole = role.name === SYSTEM_ROLE_NAMES.HOST_ADMIN || role.name === SYSTEM_ROLE_NAMES.TENANT_ADMIN;
+                if (!isAdminRole) {
+                    continue;
+                }
+
+                const hasWildcard = role.permissions.some(
+                    (p) => p.resource === '*' || p.actions?.includes(PermissionAction.MANAGE),
+                );
+
+                if (!hasWildcard) {
+                    role.permissions.push(Permission.wildcard('*'));
+                    await this.roleModel.updateOne(
+                        { _id: role.id },
+                        {
+                            permissions: role.permissions.map((p) => ({
+                                resource: p.resource,
+                                actions: p.actions,
+                                scope: p.scope,
+                                conditions: p.conditions,
+                            })),
+                            updatedAt: new Date(),
+                        },
+                    ).exec();
+                    updated = true;
+                }
+            }
+
+            return updated ? this.findGlobalRoles() : existing;
         }
 
         const globalRoles = createGlobalRoles();

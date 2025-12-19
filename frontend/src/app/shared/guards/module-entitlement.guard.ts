@@ -7,7 +7,7 @@
 
 import { inject } from '@angular/core';
 import { CanMatchFn, Router, UrlTree, Route, UrlSegment } from '@angular/router';
-import { EntitlementsService } from '../services/entitlements.service';
+import { EditionService } from '../services/entitlements.service';
 import { ModuleKey } from '../types/module-keys';
 
 /**
@@ -29,7 +29,7 @@ export const moduleEntitlementGuard: CanMatchFn = (
     route: Route,
     segments: UrlSegment[]
 ): boolean | UrlTree => {
-    const entitlements = inject(EntitlementsService);
+    const entitlements = inject(EditionService);
     const router = inject(Router);
 
     // Extract moduleKey from route data
@@ -79,7 +79,7 @@ export const moduleEntitlementActivateGuard: CanActivateFn = (
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
 ): boolean | UrlTree => {
-    const entitlements = inject(EntitlementsService);
+    const entitlements = inject(EditionService);
     const router = inject(Router);
 
     // Extract moduleKey from route data

@@ -1,20 +1,18 @@
 import { TestBed } from '@angular/core/testing';
-import { EntitlementsService } from './entitlements.service';
-import { TestBed } from '@angular/core/testing';
-import { EntitlementsService } from './entitlements.service';
+import { EditionService } from './entitlements.service';
 import { EditionFeaturesService } from './edition-features.service';
 import { MODULE_KEYS } from '../types/module-keys';
 
-describe('EntitlementsService', () => {
-    let service: EntitlementsService;
+describe('EditionService', () => {
+    let service: EditionService;
     let editionService: EditionFeaturesService;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [EntitlementsService, EditionFeaturesService],
+            providers: [EditionService, EditionFeaturesService],
         });
 
-        service = TestBed.inject(EntitlementsService);
+        service = TestBed.inject(EditionService);
         editionService = TestBed.inject(EditionFeaturesService);
     });
 
@@ -35,7 +33,6 @@ describe('EntitlementsService', () => {
         expect(enabled.has(MODULE_KEYS.FEES)).toBe(true);
         expect(enabled.has(MODULE_KEYS.APPLY)).toBe(false);
     });
-});
 });
 
 describe('getModulesForPlan()', () => {

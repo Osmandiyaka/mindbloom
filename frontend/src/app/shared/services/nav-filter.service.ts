@@ -10,7 +10,7 @@
  */
 
 import { Injectable, inject, computed, Signal } from '@angular/core';
-import { EntitlementsService } from './entitlements.service';
+import { EditionService } from './entitlements.service';
 import { AuthorizationService } from '../security/authorization.service';
 import { ModuleKey } from '../types/module-keys';
 
@@ -33,7 +33,7 @@ export interface NavSection {
     providedIn: 'root'
 })
 export class NavFilterService {
-    private entitlements = inject(EntitlementsService);
+    private entitlements = inject(EditionService);
     private authorization = inject(AuthorizationService);
 
     /**
@@ -83,12 +83,8 @@ export class NavFilterService {
             return false;
         }
 
-        // Check roles (if specified)
-        // TODO: Add role checking when RbacService exposes hasRole method
-        // For now, rolesAllowed is reserved for future use
         if (item.rolesAllowed && item.rolesAllowed.length > 0) {
-            // Currently, we don't have a hasRole method, so we'll allow by default
-            // This can be extended when role-based filtering is needed
+
         }
 
         return true;

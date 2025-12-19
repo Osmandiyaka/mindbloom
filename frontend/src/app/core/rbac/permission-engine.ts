@@ -120,6 +120,8 @@ export class PermissionEngine {
      * @returns true if all permissions are granted
      */
     static canAll(permissions: PermissionKey[], granted: Set<PermissionKey>): boolean {
-        return permissions.every(perm => this.can(perm, granted));
+        const results = permissions.every(perm => this.can(perm, granted));
+        console.log('canAll check for permissions', permissions, '=>', results);
+        return results;
     }
 }

@@ -42,10 +42,8 @@ export function createGlobalRoles(): Role[] {
             isSystemRole: true,
             isGlobal: true,
             permissions: [
-                Permission.wildcard('tenants', PermissionScope.ALL),
-                Permission.wildcard('users', PermissionScope.ALL),
-                Permission.wildcard('roles', PermissionScope.ALL),
-                Permission.wildcard('settings', PermissionScope.ALL),
+                // Full tenant access aligned to frontend permission keys (students.read, fees.write, etc.)
+                Permission.wildcard('*', PermissionScope.ALL),
             ],
         }),
 

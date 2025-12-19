@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { NavFilterService, NavSection } from './nav-filter.service';
-import { EntitlementsService } from './entitlements.service';
+import { EditionService } from './entitlements.service';
 import { AuthorizationService } from '../security/authorization.service';
 
 describe('NavFilterService', () => {
     let service: NavFilterService;
-    let entitlementsService: jasmine.SpyObj<EntitlementsService>;
+    let entitlementsService: jasmine.SpyObj<EditionService>;
     let authorizationService: jasmine.SpyObj<AuthorizationService>;
 
     const mockNavSections: NavSection[] = [
@@ -38,19 +38,19 @@ describe('NavFilterService', () => {
     ];
 
     beforeEach(() => {
-        const entitlementsServiceSpy = jasmine.createSpyObj('EntitlementsService', ['isEnabled']);
+        const entitlementsServiceSpy = jasmine.createSpyObj('EditionService', ['isEnabled']);
         const authorizationServiceSpy = jasmine.createSpyObj('AuthorizationService', ['can']);
 
         TestBed.configureTestingModule({
             providers: [
                 NavFilterService,
-                { provide: EntitlementsService, useValue: entitlementsServiceSpy },
+                { provide: EditionService, useValue: entitlementsServiceSpy },
                 { provide: AuthorizationService, useValue: authorizationServiceSpy }
             ]
         });
 
         service = TestBed.inject(NavFilterService);
-        entitlementsService = TestBed.inject(EntitlementsService) as jasmine.SpyObj<EntitlementsService>;
+        entitlementsService = TestBed.inject(EditionService) as jasmine.SpyObj<EditionService>;
         authorizationService = TestBed.inject(AuthorizationService) as jasmine.SpyObj<AuthorizationService>;
     });
 
