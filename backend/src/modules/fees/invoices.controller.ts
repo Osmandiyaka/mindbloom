@@ -3,6 +3,8 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { TenantGuard } from '../../common/tenant/tenant.guard';
 import { TenantContext } from '../../common/tenant/tenant.context';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { FeatureGateGuard } from '../../common/guards/feature-gate.guard';
+import { RequiresFeature } from '../../common/decorators/requires-feature.decorator';
 import { CreateInvoiceUseCase } from '../../application/services/fees/create-invoice.use-case';
 import { ListInvoicesUseCase } from '../../application/services/fees/list-invoices.use-case';
 import { RecordPaymentUseCase } from '../../application/services/fees/record-payment.use-case';
@@ -13,7 +15,8 @@ import { FeePayment } from '../../domain/fees/entities/fee-payment.entity';
 
 @ApiTags('fees')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, FeatureGateGuard)
+@RequiresFeature('modules.fees.enabled')
 @Controller('students/:studentId/fees/invoices')
 export class InvoicesController {
   constructor(
@@ -21,7 +24,7 @@ export class InvoicesController {
     private readonly listInvoices: ListInvoicesUseCase,
     private readonly recordPayment: RecordPaymentUseCase,
     private readonly tenantContext: TenantContext,
-  ) {}
+  ) { }
 
   @Get()
   @ApiOperation({ summary: 'List invoices (tenant scoped)' })

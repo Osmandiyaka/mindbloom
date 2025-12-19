@@ -2,6 +2,8 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } f
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TenantGuard } from '../../common/tenant/tenant.guard';
 import { TenantContext } from '../../common/tenant/tenant.context';
+import { FeatureGateGuard } from '../../common/guards/feature-gate.guard';
+import { RequiresFeature } from '../../common/decorators/requires-feature.decorator';
 import { RecordAttendanceUseCase } from '../../application/services/attendance/record-attendance.use-case';
 import { UpdateAttendanceUseCase } from '../../application/services/attendance/update-attendance.use-case';
 import { ListAttendanceUseCase } from '../../application/services/attendance/list-attendance.use-case';
@@ -14,7 +16,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('attendance')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, FeatureGateGuard)
+@RequiresFeature('modules.attendance.enabled')
 @Controller('students/:studentId/attendance')
 export class AttendanceController {
   constructor(
@@ -23,7 +26,7 @@ export class AttendanceController {
     private readonly listAttendance: ListAttendanceUseCase,
     private readonly deleteAttendance: DeleteAttendanceUseCase,
     private readonly tenantContext: TenantContext,
-  ) {}
+  ) { }
 
   @Post()
   @ApiOperation({ summary: 'Record attendance for a student' })

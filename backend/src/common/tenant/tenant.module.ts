@@ -3,11 +3,12 @@ import { DatabaseModule } from '../database/database.module';
 import { TenantResolutionService } from './tenant-resolution.service';
 import { TenantGuard } from './tenant.guard';
 import { TenantModule } from '../../modules/tenant/tenant.module';
+import { FeatureGateGuard } from '../guards/feature-gate.guard';
 
 @Global()
 @Module({
     imports: [DatabaseModule, TenantModule],
-    providers: [TenantResolutionService, TenantGuard],
-    exports: [TenantResolutionService, TenantGuard],
+    providers: [TenantResolutionService, TenantGuard, FeatureGateGuard],
+    exports: [TenantResolutionService, TenantGuard, FeatureGateGuard],
 })
 export class TenantSupportModule { }

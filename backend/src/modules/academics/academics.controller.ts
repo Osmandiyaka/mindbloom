@@ -3,6 +3,8 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/tenant/tenant.guard';
 import { TenantContext } from '../../common/tenant/tenant.context';
+import { FeatureGateGuard } from '../../common/guards/feature-gate.guard';
+import { RequiresFeature } from '../../common/decorators/requires-feature.decorator';
 import { CreateAcademicRecordUseCase } from '../../application/services/academics/create-academic-record.use-case';
 import { ListAcademicRecordsUseCase } from '../../application/services/academics/list-academic-records.use-case';
 import { UpdateAcademicRecordUseCase } from '../../application/services/academics/update-academic-record.use-case';
@@ -14,7 +16,8 @@ import { AcademicRecord } from '../../domain/academics/entities/academic-record.
 
 @ApiTags('academics')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, FeatureGateGuard)
+@RequiresFeature('modules.academics.enabled')
 @Controller('students/:studentId/academics')
 export class AcademicsController {
     constructor(
