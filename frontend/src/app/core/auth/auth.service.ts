@@ -49,6 +49,7 @@ interface LoginResponse {
 // Legacy API login shape (access_token + user)
 interface LegacyLoginResponse {
     access_token: string;
+    tenantSlug?: string;
     user: {
         id: string;
         tenantId?: string;
@@ -373,7 +374,7 @@ export class AuthService {
             ? (response as LoginResponse).memberships
             : [{
                 tenantId: legacyUser.tenantId || '',
-                tenantSlug: legacyUser.tenantId || '',
+                tenantSlug: (response as LegacyLoginResponse).tenantSlug || legacyUser.tenantId || '',
                 tenantName: (user as any).tenantName || 'Tenant',
                 roles: [(user as any).role?.name || 'User'],
                 permissions: (user as any).role?.permissions?.map((p: any) => p.displayName) || [],

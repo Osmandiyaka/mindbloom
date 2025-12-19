@@ -29,13 +29,17 @@ export class AuthController {
     @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
     @ApiResponse({ status: 401, description: 'Invalid credentials' })
     async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response): Promise<LoginResponseDto> {
-        const { refreshToken, refreshTokenExpiresAt, ...result } = await this.loginUseCase.execute({
+        const result = await this.loginUseCase.execute({
             email: loginDto.email,
             password: loginDto.password,
         });
 
-        this.setRefreshTokenCookie(res, refreshToken, refreshTokenExpiresAt);
-        return result;
+        this.setRefreshTokenCookie(res, result.refreshToken, result.refreshTokenExpiresAt);
+        return {
+            access_token: result.access_token,
+            tenantSlug: result.tenantSlug,
+            user: result.user,
+        };
     }
 
     @Post('register')
@@ -77,9 +81,13 @@ export class AuthController {
     @ApiResponse({ status: 200, description: 'Token refreshed', type: LoginResponseDto })
     async refresh(@Req() req: Request & { cookies?: Record<string, string> }, @Res({ passthrough: true }) res: Response): Promise<LoginResponseDto> {
         const refreshToken = req.cookies?.['refresh_token'] as string | undefined;
-        const { refreshToken: newToken, refreshTokenExpiresAt, ...result } = await this.refreshTokenUseCase.execute(refreshToken);
-        this.setRefreshTokenCookie(res, newToken, refreshTokenExpiresAt);
-        return result;
+        const result = await this.refreshTokenUseCase.execute(refreshToken);
+        this.setRefreshTokenCookie(res, result.refreshToken, result.refreshTokenExpiresAt);
+        return {
+            access_token: result.access_token,
+            tenantSlug: result.tenantSlug,
+            user: result.user,
+        };
     }
 
     @UseGuards(JwtAuthGuard)

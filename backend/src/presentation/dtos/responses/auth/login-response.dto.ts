@@ -5,6 +5,9 @@ export class LoginResponseDto {
     access_token: string;
 
     @ApiProperty()
+    tenantSlug: string;
+
+    @ApiProperty()
     user: {
         id: string;
         tenantId: string;

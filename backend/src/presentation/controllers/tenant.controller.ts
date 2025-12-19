@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { GetTenantBySubdomainUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, ListTenantsUseCase } from '../../application/services/tenant';
+import { GetTenantBySubdomainUseCase, GetTenantByIdUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, ListTenantsUseCase } from '../../application/services/tenant';
 import { UpdateTenantSettingsCommand } from '../../application/ports/in/commands/update-tenant-settings.command';
 import { TenantResponseDto } from '../dtos/responses/tenant/tenant-response.dto';
 import { CreateTenantDto } from '../dtos/requests/tenant/create-tenant.dto';
@@ -19,6 +19,7 @@ import { PermissionGuard } from '../../common/guards/permission.guard';
 export class TenantController {
     constructor(
         private readonly getTenantBySubdomainUseCase: GetTenantBySubdomainUseCase,
+        private readonly getTenantByIdUseCase: GetTenantByIdUseCase,
         private readonly createTenantUseCase: CreateTenantUseCase,
         private readonly getTenantSettingsUseCase: GetTenantSettingsUseCase,
         private readonly updateTenantSettingsUseCase: UpdateTenantSettingsUseCase,
@@ -33,6 +34,21 @@ export class TenantController {
     @ApiResponse({ status: 404, description: 'Tenant not found' })
     async getTenantByCode(@Param('code') code: string): Promise<TenantResponseDto | null> {
         const tenant = await this.getTenantBySubdomainUseCase.execute(code);
+
+        if (!tenant) {
+            return null;
+        }
+
+        return TenantResponseDto.fromDomain(tenant);
+    }
+
+    @Public()
+    @Get(':id')
+    @ApiOperation({ summary: 'Get tenant by ID' })
+    @ApiResponse({ status: 200, description: 'Tenant found', type: TenantResponseDto })
+    @ApiResponse({ status: 404, description: 'Tenant not found' })
+    async getTenantById(@Param('id') id: string): Promise<TenantResponseDto | null> {
+        const tenant = await this.getTenantByIdUseCase.execute(id);
 
         if (!tenant) {
             return null;

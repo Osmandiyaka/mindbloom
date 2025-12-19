@@ -1,24 +1,35 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
-import { authGuard } from './core/guards/auth.guard';
+import { authGuard } from './core/auth/auth.guard';
+import { tenantGuard } from './core/tenant/tenant.guard';
+import { TenantNotFoundComponent } from './pages/tenant-not-found/tenant-not-found.component';
 
 export const routes: Routes = [
     {
         path: 'login',
-        loadComponent: () => import('./modules/auth/components/login-overlay/login-overlay.component').then(m => m.LoginOverlayComponent)
+        loadComponent: () => import('./modules/auth/components/login-overlay/login-overlay.component').then(m => m.LoginOverlayComponent),
+        data: { public: true }
     },
     {
         path: 'auth/forgot',
-        loadComponent: () => import('./modules/auth/pages/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+        loadComponent: () => import('./modules/auth/pages/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+        data: { public: true }
     },
     {
         path: 'auth/reset/:token',
-        loadComponent: () => import('./modules/auth/pages/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+        loadComponent: () => import('./modules/auth/pages/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+        data: { public: true }
+    },
+    {
+        path: 'tenant-not-found',
+        component: TenantNotFoundComponent,
+        data: { public: true }
     },
     {
         path: '',
         component: MainLayoutComponent,
-        canActivateChild: [authGuard],
+        canActivate: [authGuard, tenantGuard],
+        canActivateChild: [authGuard, tenantGuard],
         children: [
             {
                 path: '',

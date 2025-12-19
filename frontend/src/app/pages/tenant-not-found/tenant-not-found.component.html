@@ -1,0 +1,36 @@
+<div class="tenant-not-found-container">
+    <div class="content">
+        <!-- Icon/Illustration -->
+        <div class="illustration">
+            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        </div>
+
+        <!-- Title -->
+        <h1 class="title">{{ title() }}</h1>
+
+        <!-- Description -->
+        <p class="description">{{ description() }}</p>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn btn-primary" (click)="navigateToLogin()">
+                Back to Login
+            </button>
+
+            <button class="btn btn-secondary" (click)="retryLoading()">
+                Retry
+            </button>
+        </div>
+
+        <!-- Help text -->
+        <div class="help-text">
+            <p>
+                Need help? Contact your school administrator or support team.
+            </p>
+        </div>
+    </div>
+</div>

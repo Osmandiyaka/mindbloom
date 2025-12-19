@@ -1,15 +1,17 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { IUserRepository } from '../../../domain/ports/out/user-repository.port';
-import { REFRESH_TOKEN_REPOSITORY, USER_REPOSITORY } from '../../../domain/ports/out/repository.tokens';
+import { REFRESH_TOKEN_REPOSITORY, USER_REPOSITORY, TENANT_REPOSITORY } from '../../../domain/ports/out/repository.tokens';
 import { MongooseUserRepository } from '../../../infrastructure/adapters/persistence/mongoose/user.repository';
 import { LoginCommand } from '../../ports/in/commands/login.command';
 import { IRefreshTokenRepository } from '../../../domain/ports/out/refresh-token-repository.port';
+import { ITenantRepository } from '../../../domain/ports/out/tenant-repository.port';
 import { TokenService } from './token.service';
 
 export interface LoginResult {
     access_token: string;
     refreshToken: string;
     refreshTokenExpiresAt: Date;
+    tenantSlug: string;
     user: {
         id: string;
         tenantId: string;
@@ -40,6 +42,8 @@ export class LoginUseCase {
         private readonly userRepository: IUserRepository & MongooseUserRepository,
         @Inject(REFRESH_TOKEN_REPOSITORY)
         private readonly refreshTokenRepository: IRefreshTokenRepository,
+        @Inject(TENANT_REPOSITORY)
+        private readonly tenantRepository: ITenantRepository,
         private readonly tokenService: TokenService,
     ) { }
 
@@ -60,6 +64,12 @@ export class LoginUseCase {
             throw new UnauthorizedException('Invalid credentials');
         }
 
+        // Fetch tenant to get the slug
+        const tenant = await this.tenantRepository.findById(user.tenantId);
+        if (!tenant) {
+            throw new UnauthorizedException('Tenant not found');
+        }
+
         const access_token = this.tokenService.createAccessToken(user);
         const refresh = this.tokenService.createRefreshToken();
         await this.refreshTokenRepository.create(user.id, refresh.tokenHash, refresh.expiresAt);
@@ -68,6 +78,7 @@ export class LoginUseCase {
             access_token,
             refreshToken: refresh.token,
             refreshTokenExpiresAt: refresh.expiresAt,
+            tenantSlug: tenant.subdomain,
             user: {
                 id: user.id,
                 tenantId: user.tenantId,

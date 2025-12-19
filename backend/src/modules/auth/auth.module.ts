@@ -3,8 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { USER_REPOSITORY } from '../../domain/ports/out/repository.tokens';
-import { REFRESH_TOKEN_REPOSITORY } from '../../domain/ports/out/repository.tokens';
+import { USER_REPOSITORY, REFRESH_TOKEN_REPOSITORY, TENANT_REPOSITORY } from '../../domain/ports/out/repository.tokens';
 import { MongooseUserRepository } from '../../infrastructure/adapters/persistence/mongoose/user.repository';
 import { MongooseRefreshTokenRepository } from '../../infrastructure/adapters/persistence/mongoose/refresh-token.repository';
 import { UserSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/user.schema';
@@ -14,6 +13,7 @@ import { AuthController } from '../../presentation/controllers/auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { MailModule } from '../../infrastructure/mail/mail.module';
+import { TenantModule } from '../tenant/tenant.module';
 
 @Module({
     imports: [
@@ -31,6 +31,7 @@ import { MailModule } from '../../infrastructure/mail/mail.module';
             }),
         }),
         MailModule,
+        TenantModule,
     ],
     controllers: [AuthController],
     providers: [
