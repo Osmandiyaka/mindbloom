@@ -15,14 +15,29 @@ import {
 import { GetPermissionTreeUseCase } from '../../application/services/rbac/get-permission-tree.use-case';
 import { AddPermissionsToRoleUseCase } from '../../application/services/rbac/add-permissions-to-role.use-case';
 import { RolesController, PermissionsController } from '../../presentation/controllers/roles.controller';
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 
 @Injectable()
-class GlobalRolesInitializer implements OnModuleInit {
-    constructor(private readonly initializeGlobalRoles: InitializeGlobalRolesUseCase) { }
+class RolesInitializer implements OnApplicationBootstrap {
+    private readonly logger = new Logger(RolesInitializer.name);
 
-    async onModuleInit(): Promise<void> {
-        await this.initializeGlobalRoles.execute().catch(() => undefined);
+    constructor(
+        private readonly initializeGlobalRoles: InitializeGlobalRolesUseCase,
+        private readonly initializeSystemRoles: InitializeSystemRolesUseCase,
+    ) { }
+
+    async onApplicationBootstrap(): Promise<void> {
+        try {
+            const globalRoles = await this.initializeGlobalRoles.execute();
+            this.logger.log(`Global roles ready (${globalRoles.length})`);
+
+            // Initialize system roles once (delegates to global in repository implementation)
+            const systemRoles = await this.initializeSystemRoles.execute('global-seed');
+            this.logger.log(`System roles initialized (${systemRoles.length})`);
+        } catch (err) {
+            this.logger.error('Failed to initialize roles', err?.stack || String(err));
+            throw err;
+        }
     }
 }
 
@@ -47,7 +62,12 @@ class GlobalRolesInitializer implements OnModuleInit {
         InitializeGlobalRolesUseCase,
         GetPermissionTreeUseCase,
         AddPermissionsToRoleUseCase,
-        GlobalRolesInitializer,
+        RolesInitializer,
+        {
+            provide: 'ROLES_INITIALIZER_RUNNER',
+            useFactory: async (initializer: RolesInitializer) => initializer.onApplicationBootstrap(),
+            inject: [RolesInitializer],
+        },
     ],
     exports: [ROLE_REPOSITORY, InitializeSystemRolesUseCase, InitializeGlobalRolesUseCase],
 })

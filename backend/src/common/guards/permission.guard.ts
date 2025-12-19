@@ -38,8 +38,8 @@ export class PermissionGuard implements CanActivate {
             return false; // No user
         }
 
-        // SuperAdmin has all permissions
-        if (jwtUser.roleName === 'SuperAdmin') {
+        // Host Admin has all permissions
+        if (jwtUser.roleName === 'Host Admin') {
             return true;
         }
 

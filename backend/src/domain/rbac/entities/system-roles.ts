@@ -3,11 +3,11 @@ import { Role } from './role.entity';
 
 /**
  * Predefined System Roles
- * These roles are created automatically for each tenant
+ * Now global: created once and shared across tenants
  */
 
 export const SYSTEM_ROLE_NAMES = {
-    SUPER_ADMIN: 'Super Admin',
+    HOST_ADMIN: 'Host Admin',
     TENANT_ADMIN: 'Tenant Admin',
     PRINCIPAL: 'Principal',
     VICE_PRINCIPAL: 'Vice Principal',
@@ -24,29 +24,23 @@ export const SYSTEM_ROLE_NAMES = {
  */
 export function createGlobalRoles(): Role[] {
     return [
-        // Super Admin - Full platform access (cross-tenant)
+        // Host Admin - Full platform access (cross-tenant)
         new Role({
             tenantId: null,
-            name: SYSTEM_ROLE_NAMES.SUPER_ADMIN,
-            description: 'Platform administrator with full access',
+            name: SYSTEM_ROLE_NAMES.HOST_ADMIN,
+            description: 'Platform host administrator with full access',
             isSystemRole: true,
             isGlobal: true,
             permissions: [Permission.wildcard('*', PermissionScope.ALL)],
         }),
-    ];
-}
 
-/**
- * Create system roles for a tenant (tenant-scoped, excludes global roles)
- */
-export function createTenantSystemRoles(tenantId: string): Role[] {
-    return [
-        // Tenant Admin - Full tenant management
+        // Tenant Admin - Full tenant management (global role shared, but intended for tenant-level assignment)
         new Role({
-            tenantId,
+            tenantId: null,
             name: SYSTEM_ROLE_NAMES.TENANT_ADMIN,
             description: 'School administrator with full tenant access',
             isSystemRole: true,
+            isGlobal: true,
             permissions: [
                 Permission.wildcard('tenants', PermissionScope.ALL),
                 Permission.wildcard('users', PermissionScope.ALL),
@@ -57,10 +51,11 @@ export function createTenantSystemRoles(tenantId: string): Role[] {
 
         // Principal - School-wide access
         new Role({
-            tenantId,
+            tenantId: null,
             name: SYSTEM_ROLE_NAMES.PRINCIPAL,
             description: 'Principal with school-wide access',
             isSystemRole: true,
+            isGlobal: true,
             permissions: [
                 Permission.wildcard('students', PermissionScope.ALL),
                 Permission.wildcard('staff', PermissionScope.ALL),
@@ -78,10 +73,11 @@ export function createTenantSystemRoles(tenantId: string): Role[] {
 
         // Vice Principal
         new Role({
-            tenantId,
+            tenantId: null,
             name: SYSTEM_ROLE_NAMES.VICE_PRINCIPAL,
             description: 'Vice Principal with broad access',
             isSystemRole: true,
+            isGlobal: true,
             permissions: [
                 Permission.wildcard('students', PermissionScope.ALL),
                 Permission.wildcard('attendance', PermissionScope.ALL),
@@ -96,10 +92,11 @@ export function createTenantSystemRoles(tenantId: string): Role[] {
 
         // Head of Department
         new Role({
-            tenantId,
+            tenantId: null,
             name: SYSTEM_ROLE_NAMES.HOD,
             description: 'Department head with department-level access',
             isSystemRole: true,
+            isGlobal: true,
             permissions: [
                 new Permission({
                     resource: 'students',
@@ -121,10 +118,11 @@ export function createTenantSystemRoles(tenantId: string): Role[] {
 
         // Teacher - Class-level access
         new Role({
-            tenantId,
+            tenantId: null,
             name: SYSTEM_ROLE_NAMES.TEACHER,
             description: 'Teacher with access to assigned classes',
             isSystemRole: true,
+            isGlobal: true,
             permissions: [
                 new Permission({
                     resource: 'students',
@@ -151,10 +149,11 @@ export function createTenantSystemRoles(tenantId: string): Role[] {
 
         // Accountant - Financial access
         new Role({
-            tenantId,
+            tenantId: null,
             name: SYSTEM_ROLE_NAMES.ACCOUNTANT,
             description: 'Accountant with financial management access',
             isSystemRole: true,
+            isGlobal: true,
             permissions: [
                 Permission.wildcard('fees', PermissionScope.ALL),
                 Permission.wildcard('payments', PermissionScope.ALL),
@@ -174,10 +173,11 @@ export function createTenantSystemRoles(tenantId: string): Role[] {
 
         // Librarian
         new Role({
-            tenantId,
+            tenantId: null,
             name: SYSTEM_ROLE_NAMES.LIBRARIAN,
             description: 'Librarian with library management access',
             isSystemRole: true,
+            isGlobal: true,
             permissions: [
                 Permission.wildcard('library', PermissionScope.ALL),
                 new Permission({
@@ -195,10 +195,11 @@ export function createTenantSystemRoles(tenantId: string): Role[] {
 
         // Parent - Limited to own children
         new Role({
-            tenantId,
+            tenantId: null,
             name: SYSTEM_ROLE_NAMES.PARENT,
             description: 'Parent with access to their children\'s information',
             isSystemRole: true,
+            isGlobal: true,
             permissions: [
                 new Permission({
                     resource: 'students',
@@ -225,10 +226,11 @@ export function createTenantSystemRoles(tenantId: string): Role[] {
 
         // Student - Very limited access
         new Role({
-            tenantId,
+            tenantId: null,
             name: SYSTEM_ROLE_NAMES.STUDENT,
             description: 'Student with access to their own information',
             isSystemRole: true,
+            isGlobal: true,
             permissions: [
                 new Permission({
                     resource: 'profile',

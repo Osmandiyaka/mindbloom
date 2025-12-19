@@ -60,8 +60,8 @@ export class HasPermissionDirective implements OnInit, OnDestroy {
             return false;
         }
 
-        // SuperAdmin has all permissions
-        if (this.isSuperAdmin(user)) {
+        // Host Admin has all permissions
+        if (this.isHostAdmin(user)) {
             return true;
         }
 
@@ -71,8 +71,8 @@ export class HasPermissionDirective implements OnInit, OnDestroy {
         );
     }
 
-    private isSuperAdmin(user: any): boolean {
-        return user.role?.name === 'SuperAdmin';
+    private isHostAdmin(user: any): boolean {
+        return user.role?.name === 'Host Admin';
     }
 
     private hasPermissionInRole(user: any, requiredPermission: string): boolean {

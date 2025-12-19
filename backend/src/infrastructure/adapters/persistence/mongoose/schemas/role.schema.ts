@@ -42,10 +42,10 @@ export const RoleSchema = new Schema(
     },
 );
 
-// Compound index for tenant isolation and unique role names per tenant
+// Compound index for tenant isolation and unique role names per tenant (allows null for global)
 RoleSchema.index({ tenantId: 1, name: 1 }, { unique: true });
 
-// Unique constraint for global role names
+// Unique constraint for global role names (tenantId null)
 RoleSchema.index({ name: 1 }, { unique: true, partialFilterExpression: { isGlobal: true } });
 
 // Index for finding system roles

@@ -68,7 +68,7 @@ export class CreateTenantUseCase {
         try {
             const roles = await this.initializeSystemRolesUseCase.execute(createdTenant.id);
             const tenantAdminRole = roles.find((role) => role.name === SYSTEM_ROLE_NAMES.TENANT_ADMIN)
-                || roles.find((role) => role.name === SYSTEM_ROLE_NAMES.SUPER_ADMIN);
+                || roles.find((role) => role.name === SYSTEM_ROLE_NAMES.HOST_ADMIN);
 
             if (!tenantAdminRole) {
                 throw new Error('Tenant Admin role could not be initialized');

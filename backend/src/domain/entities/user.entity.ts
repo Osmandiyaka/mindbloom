@@ -18,7 +18,7 @@ export class User {
     ) { }
 
     isAdmin(): boolean {
-        return this.role?.name === 'TenantAdmin' || this.role?.name === 'SuperAdmin';
+        return this.role?.name === 'Tenant Admin' || this.role?.name === 'Host Admin';
     }
 
     /**
@@ -49,15 +49,15 @@ export class User {
                 this.email,
                 this.name,
                 this.roleId,
-            this.role,
-            [...this.permissions, permission],
-            this.profilePicture,
-            this.forcePasswordReset,
-            this.mfaEnabled,
-            this.createdAt,
-            new Date(),
-        );
-    }
+                this.role,
+                [...this.permissions, permission],
+                this.profilePicture,
+                this.forcePasswordReset,
+                this.mfaEnabled,
+                this.createdAt,
+                new Date(),
+            );
+        }
         return this;
     }
 

@@ -29,8 +29,8 @@ function checkPermissions(requiredPermissions: string[], user: any): boolean {
         return false;
     }
 
-    // SuperAdmin has all permissions
-    if (user.role?.name === 'SuperAdmin') {
+    // Host Admin has all permissions
+    if (user.role?.name === 'Host Admin') {
         return true;
     }
 

@@ -1,13 +1,15 @@
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ContextIdFactory, NestFactory } from '@nestjs/core';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
 import * as path from 'path';
+import { InitializeGlobalRolesUseCase, InitializeSystemRolesUseCase } from './application/services/rbac';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
+    const logger = new Logger('Bootstrap');
 
     // Global prefix
     app.setGlobalPrefix('api');
@@ -42,6 +44,21 @@ async function bootstrap() {
     // Serve local storage files when using local driver
     const storageRoot = process.env.FILE_STORAGE_ROOT || path.join(process.cwd(), 'storage');
     app.use('/files', express.static(storageRoot));
+
+    // Ensure system/global roles exist before serving
+    try {
+        const contextId = ContextIdFactory.create();
+        const initializeGlobalRoles = await app.resolve(InitializeGlobalRolesUseCase, contextId);
+        const globalRoles = await initializeGlobalRoles.execute();
+        logger.log(`Global roles ready (${globalRoles.length})`);
+
+        const initializeSystemRoles = await app.resolve(InitializeSystemRolesUseCase, contextId);
+        const systemRoles = await initializeSystemRoles.execute('global-seed');
+        logger.log(`System roles initialized (${systemRoles.length})`);
+    } catch (err) {
+        logger.error('Failed to initialize roles', err?.stack || String(err));
+        throw err;
+    }
 
     const port = process.env.PORT || 3000;
     await app.listen(port);

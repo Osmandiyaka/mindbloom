@@ -94,7 +94,7 @@ export class TenantController {
     @UseGuards(JwtAuthGuard, PermissionGuard)
     @Permissions('tenants:read')
     @Get()
-    @ApiOperation({ summary: 'List all tenants (Super Admin)' })
+    @ApiOperation({ summary: 'List all tenants (Host Admin)' })
     @ApiResponse({ status: 200, description: 'List tenants with aggregates', type: TenantListResponseDto })
     async listTenants(@Query() query: ListTenantsQueryDto): Promise<TenantListResponseDto> {
         const trialExpiringBefore = query.trialExpiringInDays

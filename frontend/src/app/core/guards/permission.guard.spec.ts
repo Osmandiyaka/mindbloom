@@ -62,12 +62,12 @@ describe('Permission Guards', () => {
             });
         });
 
-        it('should allow access for SuperAdmin', () => {
+        it('should allow access for Host Admin', () => {
             route.data = { permissions: ['students:create'] };
             authService.getCurrentUser.and.returnValue({
                 id: '1',
                 email: 'admin@test.com',
-                role: { name: 'SuperAdmin' }
+                role: { name: 'Host Admin' }
             } as any);
 
             const result = TestBed.runInInjectionContext(() =>
@@ -219,12 +219,12 @@ describe('Permission Guards', () => {
             });
         });
 
-        it('should allow access for SuperAdmin', () => {
+        it('should allow access for Host Admin', () => {
             route.data = { permissions: ['students:read'] };
             authService.getCurrentUser.and.returnValue({
                 id: '1',
                 email: 'admin@test.com',
-                role: { name: 'SuperAdmin' }
+                role: { name: 'Host Admin' }
             } as any);
 
             const result = TestBed.runInInjectionContext(() =>

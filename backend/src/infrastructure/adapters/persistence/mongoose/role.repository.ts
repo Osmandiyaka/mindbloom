@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Role } from '../../../../domain/rbac/entities/role.entity';
 import { Permission } from '../../../../domain/rbac/entities/permission.entity';
-import { createGlobalRoles, createTenantSystemRoles } from '../../../../domain/rbac/entities/system-roles';
+import { createGlobalRoles } from '../../../../domain/rbac/entities/system-roles';
 import { IRoleRepository } from '../../../../domain/ports/out/role-repository.port';
 import { RoleDocument } from './schemas/role.schema';
 import { TenantScopedRepository } from '../../../../common/tenant/tenant-scoped.repository';
@@ -87,12 +87,9 @@ export class MongooseRoleRepository extends TenantScopedRepository<RoleDocument,
         return docs.map((doc) => this.mapToEntity(doc));
     }
 
-    async findSystemRoles(tenantId: string): Promise<Role[]> {
-        const resolved = this.requireTenant(tenantId);
-        const docs = await this.roleModel
-            .find({ tenantId: resolved, isSystemRole: true })
-            .exec();
-        return docs.map((doc) => this.mapToEntity(doc));
+    async findSystemRoles(_tenantId: string): Promise<Role[]> {
+        // All system roles are global
+        return this.findGlobalRoles();
     }
 
     async findCustomRoles(tenantId: string): Promise<Role[]> {
@@ -166,23 +163,9 @@ export class MongooseRoleRepository extends TenantScopedRepository<RoleDocument,
         return count > 0;
     }
 
-    async initializeSystemRoles(tenantId: string): Promise<Role[]> {
-        // Check if system roles already exist
-        const existingSystemRoles = await this.findSystemRoles(tenantId);
-        if (existingSystemRoles.length > 0) {
-            return existingSystemRoles;
-        }
-
-        // Create system roles
-        const systemRoles = createTenantSystemRoles(tenantId);
-        const createdRoles: Role[] = [];
-
-        for (const role of systemRoles) {
-            const created = await this.create(role);
-            createdRoles.push(created);
-        }
-
-        return createdRoles;
+    async initializeSystemRoles(_tenantId: string): Promise<Role[]> {
+        // Delegate to global initializer since all system roles are global
+        return this.initializeGlobalRoles();
     }
 
     async initializeGlobalRoles(): Promise<Role[]> {
