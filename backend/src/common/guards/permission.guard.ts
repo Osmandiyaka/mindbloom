@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, Inject, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PermissionAction } from '../../domain/rbac/entities/permission.entity';
 import { IUserRepository } from '../../domain/ports/out/user-repository.port';
@@ -35,7 +35,7 @@ export class PermissionGuard implements CanActivate {
         const jwtUser = request.user; // From JWT payload
 
         if (!jwtUser || !jwtUser.userId) {
-            return false; // No user
+            throw new UnauthorizedException();
         }
 
         // Host Admin has all permissions
@@ -51,7 +51,12 @@ export class PermissionGuard implements CanActivate {
         }
 
         // Check if user's role has all required permissions
-        return this.hasPermissions(user.role, requiredPermissions);
+        const allowed = this.hasPermissions(user.role, requiredPermissions);
+        if (!allowed) {
+            throw new ForbiddenException('INSUFFICIENT_PERMISSIONS');
+        }
+
+        return true;
     }
 
     private hasPermissions(role: any, required: string[]): boolean {
@@ -61,6 +66,19 @@ export class PermissionGuard implements CanActivate {
 
         // Check each required permission
         return required.every((requiredPerm) => {
+            if (requiredPerm.startsWith('Host.') && !(role.name && role.name.toLowerCase().includes('host'))) {
+                return false;
+            }
+
+            const colonIndex = requiredPerm.indexOf(':');
+            if (colonIndex === -1) {
+                return role.permissions.some((permission: any) =>
+                    permission.resource === '*' ||
+                    permission.id === requiredPerm ||
+                    permission.resource === requiredPerm,
+                );
+            }
+
             const [resource, action] = requiredPerm.split(':');
 
             // Find matching permission in role

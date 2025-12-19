@@ -445,6 +445,57 @@ export function createPermissionTree(): Permission[] {
                 }),
             ],
         }),
+        // 13. Host / Platform operations
+        new Permission({
+            id: 'Host',
+            resource: 'Host',
+            displayName: 'Host / Platform',
+            description: 'Platform-wide administration (host-only)',
+            actions: [PermissionAction.MANAGE],
+            scope: PermissionScope.ALL,
+            children: [
+                new Permission({
+                    id: 'Host.Editions.View',
+                    resource: 'Host.Editions.View',
+                    displayName: 'View Editions',
+                    description: 'Read editions and their feature definitions',
+                    actions: [PermissionAction.READ],
+                    scope: PermissionScope.ALL,
+                    parentId: 'Host',
+                    order: 1,
+                }),
+                new Permission({
+                    id: 'Host.Editions.Manage',
+                    resource: 'Host.Editions.Manage',
+                    displayName: 'Manage Editions',
+                    description: 'Create and update editions and their feature assignments',
+                    actions: [PermissionAction.MANAGE],
+                    scope: PermissionScope.ALL,
+                    parentId: 'Host',
+                    order: 2,
+                }),
+                new Permission({
+                    id: 'Host.Tenants.AssignEdition',
+                    resource: 'Host.Tenants.AssignEdition',
+                    displayName: 'Assign Edition to Tenant',
+                    description: 'Assign editions to tenants from host context',
+                    actions: [PermissionAction.MANAGE],
+                    scope: PermissionScope.ALL,
+                    parentId: 'Host',
+                    order: 3,
+                }),
+                new Permission({
+                    id: 'Host.Subscriptions.Manage',
+                    resource: 'Host.Subscriptions.Manage',
+                    displayName: 'Manage Tenant Subscriptions',
+                    description: 'Extend, suspend, reactivate, and change tenant subscriptions',
+                    actions: [PermissionAction.MANAGE],
+                    scope: PermissionScope.ALL,
+                    parentId: 'Host',
+                    order: 4,
+                }),
+            ],
+        }),
     ];
 }
 

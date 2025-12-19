@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TenantController } from '../../presentation/controllers/tenant.controller';
+import { HostEditionsController } from '../../presentation/controllers/host-editions.controller';
+import { HostTenantSubscriptionsController } from '../../presentation/controllers/host-tenant-subscriptions.controller';
 import { GetTenantBySubdomainUseCase, GetTenantByIdUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, ListTenantsUseCase, TenantManager } from '../../application/services/tenant';
 import { TenantPlanMailer } from '../../application/services/tenant/tenant-plan.mailer';
 import { TenantSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/tenant.schema';
@@ -10,6 +12,7 @@ import { RolesModule } from '../roles/roles.module';
 import { UsersModule } from '../users/users.module';
 import { MailModule } from '../../infrastructure/mail/mail.module';
 import { PermissionGuard } from '../../common/guards/permission.guard';
+import { HostContextGuard } from '../../common/guards/host-context.guard';
 import { EditionSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/edition.schema';
 import { EditionFeatureSettingSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/edition-feature-setting.schema';
 import { MongooseEditionRepository } from '../../infrastructure/adapters/persistence/mongoose/edition.repository';
@@ -32,7 +35,7 @@ import { FeatureValidationService } from '../../application/services/features/fe
         UsersModule,
         MailModule,
     ],
-    controllers: [TenantController],
+    controllers: [TenantController, HostEditionsController, HostTenantSubscriptionsController],
     providers: [
         {
             provide: TENANT_REPOSITORY,
@@ -58,6 +61,7 @@ import { FeatureValidationService } from '../../application/services/features/fe
         EffectiveFeatureResolver,
         TenantPlanMailer,
         PermissionGuard,
+        HostContextGuard,
         TenantContext,
     ],
     exports: [

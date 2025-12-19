@@ -10,6 +10,7 @@ export interface IEditionRepository {
     update(id: string, data: Partial<Edition>): Promise<Edition>;
     findById(id: string): Promise<Edition | null>;
     findByName(name: string): Promise<Edition | null>;
+    findAll(): Promise<Edition[]>;
     replaceFeatures(editionId: string, assignments: EditionFeatureAssignment[]): Promise<void>;
     getFeaturesMap(editionId: string): Promise<Record<string, string>>;
 }

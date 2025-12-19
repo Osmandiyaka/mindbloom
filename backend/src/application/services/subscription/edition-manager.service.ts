@@ -41,6 +41,10 @@ export class EditionManager {
         private readonly featureValidator: FeatureValidationService,
     ) { }
 
+    async listEditions(): Promise<Edition[]> {
+        return this.editions.findAll();
+    }
+
     async createEdition(input: CreateEditionInput): Promise<Edition> {
         const name = input.name?.trim();
         if (!name) throw new Error('Edition name is required');

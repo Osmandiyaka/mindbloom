@@ -50,6 +50,11 @@ export class MongooseEditionRepository implements IEditionRepository {
         return doc ? this.toDomain(doc) : null;
     }
 
+    async findAll(): Promise<Edition[]> {
+        const docs = await this.editionModel.find().sort({ sortOrder: 1, name: 1 }).exec();
+        return docs.map(doc => this.toDomain(doc));
+    }
+
     async replaceFeatures(editionId: string, assignments: EditionFeatureAssignment[]): Promise<void> {
         const session = await this.editionModel.db.startSession();
         await session.withTransaction(async () => {
