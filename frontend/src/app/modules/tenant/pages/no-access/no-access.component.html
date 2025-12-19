@@ -1,0 +1,26 @@
+<div class="no-access-container">
+    <div class="no-access-card">
+        <div class="icon-container">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <path d="M12 8v4"></path>
+                <path d="M12 16h.01"></path>
+            </svg>
+        </div>
+
+        <h1 class="title">No School Access</h1>
+        <p class="message">
+            Your account is not currently assigned to any schools.
+            Please contact your system administrator or support team to request access.
+        </p>
+
+        <div class="actions">
+            <button type="button" class="btn btn-primary" (click)="contactSupport()">
+                Contact Support
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="logout()">
+                Logout
+            </button>
+        </div>
+    </div>
+</div>

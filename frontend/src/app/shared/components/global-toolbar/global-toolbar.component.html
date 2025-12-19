@@ -18,10 +18,42 @@
             </button>
         </ng-template>
 
+        <!-- Tenant Switcher -->
+        @if (availableTenants().length > 1) {
+        <div class="tenant-switcher hide-xs" appClickOutside (clickOutside)="closeTenantMenu()">
+            <button type="button" class="tenant-button" (click)="toggleTenantMenu()" [appTooltip]="'Switch school'"
+                tooltipPosition="bottom" [attr.aria-expanded]="tenantMenuOpen()">
+                <span class="context-dot" aria-hidden="true"></span>
+                <span class="context-text">{{ tenantName() }}</span>
+                <span class="chevron-down" aria-hidden="true">▼</span>
+            </button>
+
+            @if (tenantMenuOpen()) {
+            <div class="tenant-menu" (click)="$event.stopPropagation()">
+                <div class="tenant-menu-header">Switch School</div>
+                <div class="tenant-menu-list">
+                    @for (tenant of availableTenants(); track tenant.tenantId) {
+                    <button type="button" class="tenant-menu-item" [class.active]="isActiveTenant(tenant.tenantId)"
+                        [disabled]="isSwitchingTenant()" (click)="switchTenant(tenant)">
+                        <div class="tenant-item-content">
+                            <div class="tenant-item-name">{{ tenant.tenantName }}</div>
+                            <div class="tenant-item-slug">{{ tenant.tenantSlug }}</div>
+                        </div>
+                        @if (isActiveTenant(tenant.tenantId)) {
+                        <span class="check-icon">✓</span>
+                        }
+                    </button>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+        } @else {
         <div class="context-label hide-xs" [attr.title]="tenantName()">
             <span class="context-dot" aria-hidden="true"></span>
             <span class="context-text">{{ tenantName() }}</span>
         </div>
+        }
     </div>
 
     <div class="toolbar-center">

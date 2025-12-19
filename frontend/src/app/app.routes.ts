@@ -26,6 +26,16 @@ export const routes: Routes = [
         data: { public: true }
     },
     {
+        path: 'select-school',
+        loadComponent: () => import('./modules/tenant/pages/tenant-select/tenant-select.component').then(m => m.TenantSelectComponent),
+        canActivate: [authGuard] // Auth required, but NOT tenant guard
+    },
+    {
+        path: 'no-access',
+        loadComponent: () => import('./modules/tenant/pages/no-access/no-access.component').then(m => m.NoAccessComponent),
+        canActivate: [authGuard] // Auth required, but NOT tenant guard
+    },
+    {
         path: '',
         component: MainLayoutComponent,
         canActivate: [authGuard, tenantGuard],

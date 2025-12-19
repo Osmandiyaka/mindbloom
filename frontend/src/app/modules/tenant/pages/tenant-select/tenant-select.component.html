@@ -1,0 +1,88 @@
+<div class="tenant-select-container">
+    <div class="tenant-select-card">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="title">Select a School</h1>
+            <p class="subtitle">Choose the school you want to manage</p>
+        </div>
+
+        <!-- No Access State -->
+        @if (hasNoAccess()) {
+        <div class="no-access">
+            <div class="no-access-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <h2>No Schools Assigned</h2>
+            <p>Your account doesn't have access to any schools yet.</p>
+            <button type="button" class="btn btn-primary" (click)="contactSupport()">
+                Contact Support
+            </button>
+        </div>
+        } @else {
+        <!-- Search and Selection -->
+        <!-- Search -->
+        @if (memberships().length > 3) {
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="Search schools..." [value]="searchQuery()"
+                (input)="searchQuery.set($any($event.target).value)" />
+        </div>
+        }
+
+        <!-- Tenant List -->
+        <div class="tenant-list">
+            @for (tenant of filteredMemberships(); track tenant.tenantId) {
+            <div class="tenant-card" [class.selected]="selectedTenant()?.tenantId === tenant.tenantId"
+                (click)="selectTenant(tenant)">
+                <div class="tenant-card-content">
+                    <div class="tenant-icon">
+                        {{ tenant.tenantName.charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="tenant-info">
+                        <h3 class="tenant-name">{{ tenant.tenantName }}</h3>
+                        <p class="tenant-slug">{{ tenant.tenantSlug }}</p>
+                    </div>
+                </div>
+                <div class="tenant-card-check">
+                    @if (selectedTenant()?.tenantId === tenant.tenantId) {
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                    </svg>
+                    }
+                </div>
+            </div>
+            }
+
+            @if (filteredMemberships().length === 0) {
+            <div class="no-results">
+                <p>No schools match your search.</p>
+            </div>
+            }
+        </div>
+
+        <!-- Error Message -->
+        @if (errorMessage()) {
+        <div class="error-message">
+            {{ errorMessage() }}
+        </div>
+        }
+
+        <!-- Actions -->
+        <div class="actions">
+            <button type="button" class="btn btn-primary btn-lg" [disabled]="!selectedTenant() || isLoading()"
+                (click)="continue()">
+                @if (isLoading()) {
+                <span class="spinner"></span>
+                Loading...
+                } @else {
+                Continue
+                }
+            </button>
+        </div>
+        }
+    </div>
+</div>

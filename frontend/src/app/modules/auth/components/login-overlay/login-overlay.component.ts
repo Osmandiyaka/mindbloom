@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TenantService } from '../../../../core/services/tenant.service';
+import { TenantPostLoginRouter } from '../../../../core/tenant/tenant-post-login-router.service';
 import { TenantRegistrationComponent } from '../tenant-registration/tenant-registration.component';
 import { sanitizeReturnUrl } from '../../../../core/auth/return-url.util';
 
@@ -37,6 +38,7 @@ export class LoginOverlayComponent {
     constructor(
         private authService: AuthService,
         private tenantService: TenantService,
+        private tenantPostLoginRouter: TenantPostLoginRouter,
         private router: Router,
         private route: ActivatedRoute
     ) {
@@ -150,9 +152,17 @@ export class LoginOverlayComponent {
         this.errorMessage.set('');
 
         this.authService.login(this.username(), this.password()).subscribe({
-            next: (response) => {
+            next: async (response) => {
                 this.isLoading.set(false);
-                this.router.navigateByUrl(this.targetAfterLogin);
+
+                // Use tenant post-login router to handle routing based on memberships
+                const session = this.authService.session();
+                if (session?.memberships) {
+                    await this.tenantPostLoginRouter.route(session.memberships, this.targetAfterLogin);
+                } else {
+                    // Fallback to default behavior
+                    this.router.navigateByUrl(this.targetAfterLogin);
+                }
             },
             error: (error) => {
                 this.isLoading.set(false);
