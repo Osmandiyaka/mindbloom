@@ -13,7 +13,6 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { StudentFormComponent } from '../../../setup/pages/students/student-form/student-form.component';
 import { CanDirective } from '../../../../shared/security/can.directive';
-import { PERMS } from '../../../../shared/security/permissions';
 
 @Component({
   selector: 'app-students-list',

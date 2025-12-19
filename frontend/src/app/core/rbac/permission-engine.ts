@@ -13,6 +13,10 @@
 import { PermissionKey, RoleDefinition, UserSession } from './permissions.types';
 
 export class PermissionEngine {
+    private static normalize(permission: PermissionKey): PermissionKey {
+        return permission.replace(/:/g, '.').trim().toLowerCase();
+    }
+
     /**
      * Build set of granted permissions from user session and role definitions
      * 
@@ -32,18 +36,29 @@ export class PermissionEngine {
         }
 
         // Aggregate permissions from all assigned roles
-        const roleMap = new Map(roles.map(r => [r.id, r]));
+        // Allow matching by id or name (case-insensitive) to tolerate payload mismatches
+        const roleMapById = new Map<string, RoleDefinition>();
+        const roleMapByName = new Map<string, RoleDefinition>();
+        for (const role of roles) {
+            if (role.id !== undefined && role.id !== null) {
+                roleMapById.set(String(role.id).toLowerCase(), role);
+            }
+            if (role.name) {
+                roleMapByName.set(String(role.name).toLowerCase(), role);
+            }
+        }
 
         for (const roleId of session.roleIds) {
-            const role = roleMap.get(roleId);
+            const key = String(roleId).toLowerCase();
+            const role = roleMapById.get(key) || roleMapByName.get(key);
             if (role) {
-                role.permissions.forEach(perm => granted.add(perm));
+                role.permissions.forEach(perm => granted.add(this.normalize(perm)));
             }
         }
 
         // Add explicit allow overrides if present
         if (session.permissionOverrides?.allow) {
-            session.permissionOverrides.allow.forEach(perm => granted.add(perm));
+            session.permissionOverrides.allow.forEach(perm => granted.add(this.normalize(perm)));
         }
 
         // Note: deny overrides not yet implemented
@@ -60,7 +75,30 @@ export class PermissionEngine {
      * @returns true if permission is explicitly granted, false otherwise (deny-by-default)
      */
     static can(permission: PermissionKey, granted: Set<PermissionKey>): boolean {
-        return granted.has(permission);
+        const normalized = this.normalize(permission);
+        if (granted.has(normalized)) {
+            return true;
+        }
+
+        const parts = normalized.split('.');
+        if (parts.length < 2) {
+            return false;
+        }
+
+        const resource = parts[0];
+        const action = parts.slice(1).join('.');
+
+        // Wildcards and manage imply full access to resource
+        if (granted.has(`${resource}.manage`) || granted.has(`${resource}.*`) || granted.has('*.*') || granted.has('*')) {
+            return true;
+        }
+
+        // If action already contains wildcard
+        if (action === '*' && granted.has(`${resource}.manage`)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -71,7 +109,7 @@ export class PermissionEngine {
      * @returns true if at least one permission is granted
      */
     static canAny(permissions: PermissionKey[], granted: Set<PermissionKey>): boolean {
-        return permissions.some(perm => granted.has(perm));
+        return permissions.some(perm => this.can(perm, granted));
     }
 
     /**
@@ -82,6 +120,6 @@ export class PermissionEngine {
      * @returns true if all permissions are granted
      */
     static canAll(permissions: PermissionKey[], granted: Set<PermissionKey>): boolean {
-        return permissions.every(perm => granted.has(perm));
+        return permissions.every(perm => this.can(perm, granted));
     }
 }

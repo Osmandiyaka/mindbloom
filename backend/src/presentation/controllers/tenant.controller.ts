@@ -13,6 +13,8 @@ import { ListTenantsQueryDto } from '../dtos/requests/tenant/list-tenants.query.
 import { TenantListItemDto, TenantListResponseDto } from '../dtos/responses/tenant/tenant-list.response.dto';
 import { Permissions } from '../../common/decorators/permissions.decorator';
 import { PermissionGuard } from '../../common/guards/permission.guard';
+import { TenantEditionResponseDto } from '../dtos/responses/tenant/tenant-edition.response.dto';
+import { Tenant } from '../../domain/tenant/entities/tenant.entity';
 
 @ApiTags('Tenants')
 @Controller('tenants')
@@ -89,6 +91,17 @@ export class TenantController {
     async getSettings() {
         const settings = await this.getTenantSettingsUseCase.execute(this.tenantContext.tenantId);
         return settings;
+    }
+
+    @UseGuards(JwtAuthGuard, TenantGuard)
+    @Get('current/edition')
+    @ApiOperation({ summary: 'Get current tenant edition and features' })
+    @ApiResponse({ status: 200, type: TenantEditionResponseDto })
+    async getCurrentEdition(): Promise<TenantEditionResponseDto | null> {
+        const tenant = await this.getTenantByIdUseCase.execute(this.tenantContext.tenantId);
+        if (!tenant) return null;
+
+        return Tenant.editionSnapshot(tenant);
     }
 
     @UseGuards(JwtAuthGuard, PermissionGuard)

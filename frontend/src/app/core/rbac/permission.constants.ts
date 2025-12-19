@@ -1,6 +1,6 @@
 /**
  * Permission Constants
- * 
+ *
  * Centralized permission keys to avoid typos and provide IDE autocompletion.
  * Use these constants in code instead of raw strings.
  */
@@ -10,8 +10,16 @@ export const PERMISSIONS = {
         read: 'students.read',
         write: 'students.write',
         create: 'students.create',
+        update: 'students.update',
         delete: 'students.delete',
         export: 'students.export'
+    },
+    admissions: {
+        read: 'admissions.read',
+        write: 'admissions.write',
+        create: 'admissions.create',
+        update: 'admissions.update',
+        delete: 'admissions.delete'
     },
     fees: {
         read: 'fees.read',
@@ -25,6 +33,16 @@ export const PERMISSIONS = {
             record: 'fees.payment.record',
             refund: 'fees.payment.refund'
         }
+    },
+    accounting: {
+        read: 'accounting.read',
+        write: 'accounting.write',
+        approve: 'accounting.approve'
+    },
+    finance: {
+        read: 'finance.read',
+        write: 'finance.write',
+        reports: 'finance.reports'
     },
     attendance: {
         read: 'attendance.read',
@@ -41,16 +59,57 @@ export const PERMISSIONS = {
             publish: 'academics.grades.publish'
         }
     },
+    hr: {
+        read: 'hr.read',
+        write: 'hr.write',
+        create: 'hr.create',
+        update: 'hr.update',
+        delete: 'hr.delete'
+    },
+    payroll: {
+        read: 'payroll.read',
+        write: 'payroll.write',
+        process: 'payroll.process',
+        approve: 'payroll.approve'
+    },
     library: {
         read: 'library.read',
         write: 'library.write',
         issue: 'library.issue',
         return: 'library.return'
     },
+    hostel: {
+        read: 'hostel.read',
+        write: 'hostel.write',
+        allocate: 'hostel.allocate'
+    },
+    transport: {
+        read: 'transport.read',
+        write: 'transport.write',
+        assign: 'transport.assign'
+    },
     reports: {
         view: 'reports.view',
         export: 'reports.export',
         admin: 'reports.admin'
+    },
+    roles: {
+        read: 'roles.read',
+        write: 'roles.write',
+        create: 'roles.create',
+        update: 'roles.update',
+        delete: 'roles.delete'
+    },
+    setup: {
+        read: 'setup.read',
+        write: 'setup.write'
+    },
+    tasks: {
+        read: 'tasks.read',
+        write: 'tasks.write',
+        create: 'tasks.create',
+        update: 'tasks.update',
+        delete: 'tasks.delete'
     },
     settings: {
         read: 'settings.read',
@@ -61,124 +120,9 @@ export const PERMISSIONS = {
         read: 'users.read',
         create: 'users.create',
         edit: 'users.edit',
+        update: 'users.update',
         delete: 'users.delete',
         impersonate: 'users.impersonate'
     }
 } as const;
 
-/**
- * Mock role definitions for development
- * TODO: Replace with backend API endpoint
- */
-export const MOCK_ROLES = [
-    {
-        id: 'admin',
-        name: 'Administrator',
-        description: 'Full system access',
-        permissions: [
-            PERMISSIONS.students.read,
-            PERMISSIONS.students.write,
-            PERMISSIONS.students.create,
-            PERMISSIONS.students.delete,
-            PERMISSIONS.students.export,
-            PERMISSIONS.fees.read,
-            PERMISSIONS.fees.write,
-            PERMISSIONS.fees.invoice.create,
-            PERMISSIONS.fees.invoice.approve,
-            PERMISSIONS.fees.invoice.cancel,
-            PERMISSIONS.fees.payment.record,
-            PERMISSIONS.fees.payment.refund,
-            PERMISSIONS.attendance.read,
-            PERMISSIONS.attendance.mark,
-            PERMISSIONS.attendance.edit,
-            PERMISSIONS.attendance.report,
-            PERMISSIONS.academics.read,
-            PERMISSIONS.academics.write,
-            PERMISSIONS.academics.grades.view,
-            PERMISSIONS.academics.grades.edit,
-            PERMISSIONS.academics.grades.publish,
-            PERMISSIONS.library.read,
-            PERMISSIONS.library.write,
-            PERMISSIONS.library.issue,
-            PERMISSIONS.library.return,
-            PERMISSIONS.reports.view,
-            PERMISSIONS.reports.export,
-            PERMISSIONS.reports.admin,
-            PERMISSIONS.settings.read,
-            PERMISSIONS.settings.write,
-            PERMISSIONS.settings.system,
-            PERMISSIONS.users.read,
-            PERMISSIONS.users.create,
-            PERMISSIONS.users.edit,
-            PERMISSIONS.users.delete,
-            PERMISSIONS.users.impersonate
-        ],
-        isSystem: true,
-        priority: 100
-    },
-    {
-        id: 'teacher',
-        name: 'Teacher',
-        description: 'Teaching staff with academic and attendance access',
-        permissions: [
-            PERMISSIONS.students.read,
-            PERMISSIONS.attendance.read,
-            PERMISSIONS.attendance.mark,
-            PERMISSIONS.academics.read,
-            PERMISSIONS.academics.write,
-            PERMISSIONS.academics.grades.view,
-            PERMISSIONS.academics.grades.edit,
-            PERMISSIONS.library.read,
-            PERMISSIONS.library.issue,
-            PERMISSIONS.library.return,
-            PERMISSIONS.reports.view
-        ],
-        isSystem: true,
-        priority: 50
-    },
-    {
-        id: 'accountant',
-        name: 'Accountant',
-        description: 'Financial management and fee processing',
-        permissions: [
-            PERMISSIONS.students.read,
-            PERMISSIONS.fees.read,
-            PERMISSIONS.fees.write,
-            PERMISSIONS.fees.invoice.create,
-            PERMISSIONS.fees.payment.record,
-            PERMISSIONS.reports.view,
-            PERMISSIONS.reports.export
-        ],
-        isSystem: true,
-        priority: 50
-    },
-    {
-        id: 'parent',
-        name: 'Parent',
-        description: 'View child information and make payments',
-        permissions: [
-            PERMISSIONS.students.read,
-            PERMISSIONS.fees.read,
-            PERMISSIONS.attendance.read,
-            PERMISSIONS.academics.read,
-            PERMISSIONS.academics.grades.view,
-            PERMISSIONS.library.read
-        ],
-        isSystem: true,
-        priority: 10
-    },
-    {
-        id: 'student',
-        name: 'Student',
-        description: 'View own information',
-        permissions: [
-            PERMISSIONS.attendance.read,
-            PERMISSIONS.academics.read,
-            PERMISSIONS.academics.grades.view,
-            PERMISSIONS.library.read,
-            PERMISSIONS.fees.read
-        ],
-        isSystem: true,
-        priority: 1
-    }
-];

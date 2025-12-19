@@ -14,6 +14,12 @@ export enum TenantPlan {
     ENTERPRISE = 'enterprise',
 }
 
+export interface EditionFeatures {
+    editionCode: string;
+    editionName: string;
+    features: string[];
+}
+
 export enum WeekStart {
     MONDAY = 'monday',
     SUNDAY = 'sunday',
@@ -95,13 +101,83 @@ export interface IdTemplateSettings {
 }
 
 export class Tenant {
-    private static readonly FEATURE_MAP: Record<TenantPlan, string[]> = {
-        [TenantPlan.TRIAL]: ['basic_features', 'student_management', 'attendance', 'grades'],
-        [TenantPlan.FREE]: ['basic_features', 'student_management'],
-        [TenantPlan.BASIC]: ['basic_features', 'student_management', 'attendance', 'grades'],
-        [TenantPlan.PREMIUM]: ['basic_features', 'student_management', 'attendance', 'grades', 'finance', 'library', 'reports'],
-        [TenantPlan.ENTERPRISE]: ['all_features'],
+    public static readonly FEATURE_MAP: Record<TenantPlan, string[]> = {
+        [TenantPlan.TRIAL]: [
+            'dashboard',
+            'students',
+            'admissions',
+            'apply',
+            'academics',
+            'attendance',
+            'setup',
+        ],
+        [TenantPlan.FREE]: [
+            'dashboard',
+            'students',
+            'apply',
+            'setup',
+        ],
+        [TenantPlan.BASIC]: [
+            'dashboard',
+            'students',
+            'admissions',
+            'apply',
+            'academics',
+            'attendance',
+            'setup',
+        ],
+        [TenantPlan.PREMIUM]: [
+            'dashboard',
+            'students',
+            'admissions',
+            'apply',
+            'academics',
+            'attendance',
+            'fees',
+            'accounting',
+            'finance',
+            'library',
+            'tasks',
+            'setup',
+            'plugins',
+        ],
+        [TenantPlan.ENTERPRISE]: [
+            'dashboard',
+            'students',
+            'admissions',
+            'apply',
+            'academics',
+            'attendance',
+            'fees',
+            'accounting',
+            'finance',
+            'hr',
+            'payroll',
+            'library',
+            'hostel',
+            'transport',
+            'roles',
+            'tasks',
+            'setup',
+            'plugins',
+        ],
     };
+
+    static featuresForPlan(plan: TenantPlan): string[] {
+        return [...(Tenant.FEATURE_MAP[plan] || [])];
+    }
+
+    static editionSnapshot(tenant: Tenant): EditionFeatures {
+        const features = tenant.enabledModules?.length
+            ? tenant.enabledModules
+            : Tenant.featuresForPlan(tenant.plan);
+
+        return {
+            editionCode: tenant.plan,
+            editionName: tenant.plan,
+            features,
+        };
+    }
 
     constructor(
         public readonly id: string,

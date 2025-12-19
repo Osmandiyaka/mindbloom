@@ -1,15 +1,17 @@
-import { Controller, Post, Body, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Req, Res, UseGuards, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ForgotPasswordUseCase, LoginUseCase, RegisterUseCase, ResetPasswordUseCase, RefreshTokenUseCase, LogoutUseCase } from '../../application/services/auth';
+import { ForgotPasswordUseCase, LoginUseCase, RegisterUseCase, ResetPasswordUseCase, RefreshTokenUseCase, LogoutUseCase, GetCurrentLoginInfoUseCase } from '../../application/services/auth';
 import { LoginDto } from '../dtos/requests/auth/login.dto';
 import { RegisterDto } from '../dtos/requests/auth/register.dto';
 import { ForgotPasswordDto } from '../dtos/requests/auth/forgot-password.dto';
 import { ResetPasswordDto } from '../dtos/requests/auth/reset-password.dto';
 import { LoginResponseDto } from '../dtos/responses/auth/login-response.dto';
+import { CurrentLoginInfoResponseDto } from '../dtos/responses/auth/current-login-info.response.dto';
 import { UserResponseDto } from '../dtos/responses/user-response.dto';
 import { Response, Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
+import { TenantGuard } from '../../common/tenant/tenant.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -21,6 +23,7 @@ export class AuthController {
         private readonly resetPasswordUseCase: ResetPasswordUseCase,
         private readonly refreshTokenUseCase: RefreshTokenUseCase,
         private readonly logoutUseCase: LogoutUseCase,
+        private readonly getCurrentLoginInfoUseCase: GetCurrentLoginInfoUseCase,
         private readonly configService: ConfigService,
     ) { }
 
@@ -88,6 +91,16 @@ export class AuthController {
             tenantSlug: result.tenantSlug,
             user: result.user,
         };
+    }
+
+    @UseGuards(JwtAuthGuard, TenantGuard)
+    @Get('login-info')
+    @ApiOperation({ summary: 'Get current login context (user, tenant, roles, permissions)' })
+    @ApiResponse({ status: 200, type: CurrentLoginInfoResponseDto })
+    async getCurrentLoginInfo(@Req() req: any): Promise<CurrentLoginInfoResponseDto> {
+        const { userId, tenantId } = req.user;
+        const result = await this.getCurrentLoginInfoUseCase.execute(userId, tenantId);
+        return CurrentLoginInfoResponseDto.from(result);
     }
 
     @UseGuards(JwtAuthGuard)

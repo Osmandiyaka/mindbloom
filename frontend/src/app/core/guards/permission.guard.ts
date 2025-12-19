@@ -13,41 +13,21 @@
  *   path: 'students',
  *   canMatch: [permissionMatchGuard],
  *   canActivate: [permissionGuard],
- *   data: { permissions: ['students:read'] }
+ *   data: { permissions: ['students.read'] }
  * }
  */
 
 import { inject } from '@angular/core';
-import { CanActivateFn, CanMatchFn, Router, UrlTree } from '@angular/router';
+import { CanActivateFn, CanMatchFn, Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import { RbacService } from '../rbac/rbac.service';
 
 /**
  * Check if user has required permissions
  */
-function checkPermissions(requiredPermissions: string[], user: any): boolean {
-    if (!user) {
-        return false;
-    }
-
-    // Host Admin has all permissions
-    if (user.role?.name === 'Host Admin') {
-        return true;
-    }
-
-    // Check if user's role has all required permissions (AND semantics)
-    if (!user.role || !user.role.permissions) {
-        return false;
-    }
-
-    return requiredPermissions.every(requiredPermission => {
-        const [resource, action] = requiredPermission.split(':');
-
-        return user.role.permissions.some((permission: any) => {
-            return permission.resource === resource &&
-                (permission.actions.includes(action) ||
-                    permission.actions.includes('manage'));
-        });
-    });
+function normalizePermissions(required: string[] | undefined): string[] {
+    if (!required || required.length === 0) return [];
+    return required.map((perm) => perm.replace(/:/g, '.').trim().toLowerCase());
 }
 
 /**
@@ -56,35 +36,40 @@ function checkPermissions(requiredPermissions: string[], user: any): boolean {
  * Prevents navigation to routes that require specific permissions.
  * Redirects unauthorized users to /access-denied with return URL.
  */
-export const permissionGuard: CanActivateFn = (route, state) => {
+export const permissionGuard: CanActivateFn = async (route, state) => {
     const authService = inject(AuthService);
+    const rbacService = inject(RbacService);
     const router = inject(Router);
 
-    // Get required permissions from route data
-    const requiredPermissions = route.data?.['permissions'] as string[] | undefined;
+    const requiredPermissions = normalizePermissions(route.data?.['permissions'] as string[] | undefined);
 
-    // If no permissions specified, allow access
-    if (!requiredPermissions || requiredPermissions.length === 0) {
+    if (requiredPermissions.length === 0) {
         return true;
     }
 
-    // Check if user is authenticated
-    const user = authService.getCurrentUser();
-    if (!user) {
-        // Not authenticated - redirect to login with return URL
+    const session = authService.getSession();
+    if (!session) {
         return router.createUrlTree(['/login'], {
-            queryParams: { returnUrl: state.url }
+            queryParams: { returnUrl: state.url },
         });
     }
 
-    // Check if user has required permissions
-    if (checkPermissions(requiredPermissions, user)) {
+    await authService.ensureRbacLoaded();
+
+    const membership = authService.getActiveMembership();
+    const isElevated = membership?.roles?.some((role) => role === 'Host Admin' || role === 'Tenant Admin');
+
+    if (isElevated) {
         return true;
     }
 
-    // User is authenticated but lacks permissions - redirect to access denied
+    const hasPermissions = rbacService.canAll(requiredPermissions);
+    if (hasPermissions) {
+        return true;
+    }
+
     return router.createUrlTree(['/access-denied'], {
-        queryParams: { from: state.url }
+        queryParams: { from: state.url },
     });
 };
 
@@ -95,37 +80,41 @@ export const permissionGuard: CanActivateFn = (route, state) => {
  * This is critical for preventing page flashes - the module code
  * is never loaded or executed if the user is unauthorized.
  */
-export const permissionMatchGuard: CanMatchFn = (route, segments) => {
+export const permissionMatchGuard: CanMatchFn = async (route, segments) => {
     const authService = inject(AuthService);
+    const rbacService = inject(RbacService);
     const router = inject(Router);
 
-    // Get required permissions from route data
-    const requiredPermissions = route.data?.['permissions'] as string[] | undefined;
+    const requiredPermissions = normalizePermissions(route.data?.['permissions'] as string[] | undefined);
 
-    // If no permissions specified, allow access
-    if (!requiredPermissions || requiredPermissions.length === 0) {
+    if (requiredPermissions.length === 0) {
         return true;
     }
 
-    // Check if user is authenticated
-    const user = authService.getCurrentUser();
-    if (!user) {
-        // Not authenticated - redirect to login
-        // Build attempted URL from segments
-        const attemptedUrl = '/' + segments.map(s => s.path).join('/');
+    const session = authService.getSession();
+    const attemptedUrl = '/' + segments.map((s) => s.path).join('/');
+
+    if (!session) {
         return router.createUrlTree(['/login'], {
-            queryParams: { returnUrl: attemptedUrl }
+            queryParams: { returnUrl: attemptedUrl },
         });
     }
 
-    // Check if user has required permissions
-    if (checkPermissions(requiredPermissions, user)) {
+    await authService.ensureRbacLoaded();
+
+    const membership = authService.getActiveMembership();
+    const isElevated = membership?.roles?.some((role) => role === 'Host Admin' || role === 'Tenant Admin');
+
+    if (isElevated) {
         return true;
     }
 
-    // User is authenticated but lacks permissions - redirect to access denied
-    const attemptedUrl = '/' + segments.map(s => s.path).join('/');
+    const hasPermissions = rbacService.canAll(requiredPermissions);
+    if (hasPermissions) {
+        return true;
+    }
+
     return router.createUrlTree(['/access-denied'], {
-        queryParams: { from: attemptedUrl }
+        queryParams: { from: attemptedUrl },
     });
 };

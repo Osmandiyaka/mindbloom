@@ -5,97 +5,26 @@
  * Integrates with TenantService to provide reactive module access control.
  */
 
-import { Injectable, computed, signal, inject } from '@angular/core';
-import { Observable, map, distinctUntilChanged, of } from 'rxjs';
-import { TenantService, TenantPlan } from '../../core/services/tenant.service';
+import { Injectable, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Observable, distinctUntilChanged, map } from 'rxjs';
+import { EditionFeaturesService } from './edition-features.service';
 import { ModuleKey, MODULE_KEYS } from '../types/module-keys';
-
-/**
- * Plan-based module entitlements mapping
- * Each plan defines which modules are accessible
- */
-const PLAN_ENTITLEMENTS: Record<TenantPlan, ReadonlySet<ModuleKey>> = {
-    trial: new Set([
-        MODULE_KEYS.DASHBOARD,
-        MODULE_KEYS.STUDENTS,
-        MODULE_KEYS.ADMISSIONS,
-        MODULE_KEYS.APPLY,  // Public portal, always accessible
-        MODULE_KEYS.ACADEMICS,
-        MODULE_KEYS.ATTENDANCE,
-        MODULE_KEYS.SETUP
-    ]),
-    free: new Set([
-        MODULE_KEYS.DASHBOARD,
-        MODULE_KEYS.STUDENTS,
-        MODULE_KEYS.APPLY,  // Public portal, always accessible
-        MODULE_KEYS.SETUP
-    ]),
-    basic: new Set([
-        MODULE_KEYS.DASHBOARD,
-        MODULE_KEYS.STUDENTS,
-        MODULE_KEYS.ADMISSIONS,
-        MODULE_KEYS.APPLY,  // Public portal, always accessible
-        MODULE_KEYS.ACADEMICS,
-        MODULE_KEYS.ATTENDANCE,
-        MODULE_KEYS.SETUP
-    ]),
-    premium: new Set([
-        MODULE_KEYS.DASHBOARD,
-        MODULE_KEYS.STUDENTS,
-        MODULE_KEYS.ADMISSIONS,
-        MODULE_KEYS.APPLY,  // Public portal, always accessible
-        MODULE_KEYS.ACADEMICS,
-        MODULE_KEYS.ATTENDANCE,
-        MODULE_KEYS.FEES,
-        MODULE_KEYS.ACCOUNTING,
-        MODULE_KEYS.FINANCE,
-        MODULE_KEYS.LIBRARY,
-        MODULE_KEYS.TASKS,
-        MODULE_KEYS.SETUP,
-        MODULE_KEYS.PLUGINS
-    ]),
-    enterprise: new Set([
-        MODULE_KEYS.DASHBOARD,
-        MODULE_KEYS.STUDENTS,
-        MODULE_KEYS.ADMISSIONS,
-        MODULE_KEYS.APPLY,  // Public portal, always accessible
-        MODULE_KEYS.ACADEMICS,
-        MODULE_KEYS.ATTENDANCE,
-        MODULE_KEYS.FEES,
-        MODULE_KEYS.ACCOUNTING,
-        MODULE_KEYS.FINANCE,
-        MODULE_KEYS.HR,
-        MODULE_KEYS.PAYROLL,
-        MODULE_KEYS.LIBRARY,
-        MODULE_KEYS.HOSTEL,
-        MODULE_KEYS.TRANSPORT,
-        MODULE_KEYS.ROLES,
-        MODULE_KEYS.TASKS,
-        MODULE_KEYS.SETUP,
-        MODULE_KEYS.PLUGINS
-    ])
-};
 
 @Injectable({
     providedIn: 'root'
 })
 export class EntitlementsService {
-    private readonly tenantService = inject(TenantService);
+    private readonly editions = inject(EditionFeaturesService);
 
     // Reactive enabled modules based on current tenant plan
     private readonly _enabledModules = computed(() => {
-        const tenant = this.tenantService.currentTenant();
-        if (!tenant) {
-            // No tenant = no modules enabled (except public routes)
-            return new Set<ModuleKey>([MODULE_KEYS.DASHBOARD]);
+        const featureSet = this.editions.features();
+        if (featureSet.size > 0) {
+            return new Set(featureSet) as Set<ModuleKey>;
         }
-
-        // Use custom enabledModules if defined, otherwise use plan-based defaults
-        if (tenant.enabledModules && tenant.enabledModules.length > 0) {
-            return new Set(tenant.enabledModules as ModuleKey[]);
-        }
-
-        return PLAN_ENTITLEMENTS[tenant.plan] || new Set([MODULE_KEYS.DASHBOARD]);
+        // Minimal safe surface when edition not yet loaded
+        return new Set<ModuleKey>([MODULE_KEYS.DASHBOARD, MODULE_KEYS.APPLY]);
     });
 
     /**
@@ -123,55 +52,19 @@ export class EntitlementsService {
      * @returns Observable<boolean> that emits when entitlement changes
      */
     isEnabled$(moduleKey: ModuleKey): Observable<boolean> {
-        return this.tenantService.currentTenant$.pipe(
-            map(tenant => {
-                if (!tenant) return false;
-
-                // Check custom enabledModules first
-                if (tenant.enabledModules && tenant.enabledModules.length > 0) {
-                    return tenant.enabledModules.includes(moduleKey);
-                }
-
-                // Fall back to plan-based entitlements
-                const planModules = PLAN_ENTITLEMENTS[tenant.plan];
-                return planModules?.has(moduleKey) || false;
-            }),
+        return toObservable(this._enabledModules).pipe(
+            map((set) => set.has(moduleKey)),
             distinctUntilChanged()
         );
-    }
-
-    /**
-     * Refresh entitlements from backend
-     * TODO: Implement API call to fetch latest tenant subscription/plan
-     * For now, this re-fetches the tenant which triggers entitlement recalculation
-     */
-    async refresh(): Promise<void> {
-        const tenant = this.tenantService.getCurrentTenantValue();
-        if (!tenant?.id) {
-            console.warn('[Entitlements] Cannot refresh: no active tenant');
-            return;
-        }
-
-        try {
-            // Re-fetch tenant to get latest plan/enabledModules
-            const updatedTenant = await this.tenantService.getTenantById(tenant.id).toPromise();
-            if (updatedTenant) {
-                this.tenantService.setTenant(updatedTenant);
-                console.log('[Entitlements] Refreshed for plan:', updatedTenant.plan);
-            }
-        } catch (error) {
-            console.error('[Entitlements] Refresh failed:', error);
-            throw error;
-        }
     }
 
     /**
      * Get the current tenant plan
      * @returns TenantPlan or null if no tenant
      */
-    getCurrentPlan(): TenantPlan | null {
-        const tenant = this.tenantService.getCurrentTenantValue();
-        return tenant?.plan || null;
+    getCurrentPlan(): string | null {
+        const code = this.editions.code();
+        return code || null;
     }
 
     /**
@@ -181,11 +74,7 @@ export class EntitlementsService {
      * @returns true if plan includes module
      */
     isPlanIncluded(moduleKey: ModuleKey): boolean {
-        const plan = this.getCurrentPlan();
-        if (!plan) return false;
-
-        const planModules = PLAN_ENTITLEMENTS[plan];
-        return planModules?.has(moduleKey) || false;
+        return this.isEnabled(moduleKey);
     }
 
     /**
@@ -193,8 +82,11 @@ export class EntitlementsService {
      * @param plan The plan to query
      * @returns Set of modules available in that plan
      */
-    getModulesForPlan(plan: TenantPlan): ReadonlySet<ModuleKey> {
-        return PLAN_ENTITLEMENTS[plan] || new Set();
+    getModulesForPlan(plan: string): ReadonlySet<ModuleKey> {
+        if (this.editions.code() === plan) {
+            return this._enabledModules();
+        }
+        return new Set<ModuleKey>();
     }
 
     /**
@@ -203,7 +95,7 @@ export class EntitlementsService {
      * @param targetPlan Plan to compare against
      * @returns Array of additional modules available in target plan
      */
-    getAdditionalModulesInPlan(targetPlan: TenantPlan): ModuleKey[] {
+    getAdditionalModulesInPlan(targetPlan: string): ModuleKey[] {
         const currentModules = this._enabledModules();
         const targetModules = this.getModulesForPlan(targetPlan);
 

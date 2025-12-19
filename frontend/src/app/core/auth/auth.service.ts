@@ -1,13 +1,15 @@
 import { Injectable, computed, signal, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpBackend, HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, throwError, BehaviorSubject, of } from 'rxjs';
+import { Observable, throwError, BehaviorSubject, of, firstValueFrom } from 'rxjs';
 import { tap, catchError, map, finalize, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { AuthSession, AuthTokens } from './auth.models';
 import { AuthStorage } from './auth.storage';
 import { RbacService } from '../rbac/rbac.service';
-import { MOCK_ROLES } from '../rbac/permission.constants';
+import { RoleDefinition } from '../rbac/permissions.types';
+import { TenantService } from '../services/tenant.service';
+import { EditionFeaturesService, EditionSnapshot } from '../../shared/services/edition-features.service';
 
 interface RefreshTokenRequest {
     refreshToken: string;
@@ -62,6 +64,47 @@ interface LegacyLoginResponse {
     };
 }
 
+interface CurrentLoginInfoResponse {
+    user: {
+        id: string;
+        tenantId: string;
+        email: string;
+        name: string;
+        roleId: string | null;
+        role?: any;
+        permissions?: Array<{
+            id?: string;
+            resource: string;
+            actions: string[];
+            scope?: string;
+        }>;
+    };
+    tenant: {
+        id: string;
+        name: string;
+        subdomain: string;
+        status: string;
+        plan: string;
+        locale?: string;
+        timezone?: string;
+        enabledModules?: string[];
+        contactInfo?: { email: string };
+    };
+    edition: EditionSnapshot;
+    roles: Array<{
+        id: string;
+        name: string;
+        description?: string;
+        isSystemRole?: boolean;
+        permissions?: any[];
+    }>;
+    permissions: {
+        effective: string[];
+        role: any[];
+        direct: any[];
+    };
+}
+
 // Legacy User type for compatibility
 export interface User {
     id: string;
@@ -82,7 +125,10 @@ export interface AuthResponse {
 })
 export class AuthService {
     private readonly rbacService = inject(RbacService);
-    private readonly http = inject(HttpClient);
+    // Use bare HttpClient (no interceptors) to avoid DI circularity with auth/tenant interceptors
+    private readonly http = new HttpClient(inject(HttpBackend));
+    private readonly tenantService = inject(TenantService);
+    private readonly editionFeatures = inject(EditionFeaturesService);
     private readonly router = inject(Router);
     private readonly API_URL = environment.apiUrl;
 
@@ -96,6 +142,11 @@ export class AuthService {
 
     // Prevent concurrent refresh calls
     private refreshInFlight: Promise<boolean> | null = null;
+
+    // Ensure RBAC roles load once per session
+    private rbacLoadPromise: Promise<void> | null = null;
+
+    private readonly allActions = ['create', 'read', 'update', 'delete', 'export', 'import', 'approve', 'manage', 'mark', 'issue', 'return', 'process', 'publish', 'edit', 'view', 'write', 'assign', 'allocate', 'impersonate', 'system', 'record', 'refund', 'cancel'];
 
     // Fallback expiry for tokens that do not provide exp
     private readonly defaultTtlMs = 10 * 60 * 1000; // 10 minutes
@@ -131,7 +182,8 @@ export class AuthService {
             this.session.set(stored);
             this.status.set('authenticated');
             // Re-initialize RBAC from restored session
-            this.initializeRbac(stored);
+            this.rbacLoadPromise = this.loadRbacForSession(stored);
+            await this.rbacLoadPromise;
             return;
         }
 
@@ -159,7 +211,8 @@ export class AuthService {
         AuthStorage.write(session);
 
         // Initialize RBAC with user session and role definitions
-        this.initializeRbac(session);
+        this.rbacLoadPromise = this.loadRbacForSession(session);
+        void this.rbacLoadPromise;
     }
 
     /**
@@ -172,6 +225,7 @@ export class AuthService {
         this.status.set('anonymous');
         AuthStorage.clear();
         this.rbacService.clear();
+        this.rbacLoadPromise = null;
     }
 
     /**
@@ -204,6 +258,28 @@ export class AuthService {
      */
     getAccessToken(): string | null {
         return this.accessToken();
+    }
+
+    /**
+     * Get current session (synchronous accessor)
+     */
+    getSession(): AuthSession | null {
+        return this.session();
+    }
+
+    /**
+     * Get active membership (prefers activeTenantId then first membership)
+     */
+    getActiveMembership(): AuthSession['memberships'][number] | undefined {
+        const current = this.session();
+        return this.getActiveMembershipFromSession(current as AuthSession);
+    }
+
+    /**
+     * Wait for RBAC roles to finish loading (used by guards/directives)
+     */
+    ensureRbacLoaded(): Promise<void> {
+        return this.rbacLoadPromise ?? Promise.resolve();
     }
 
     /**
@@ -439,37 +515,274 @@ export class AuthService {
         return undefined;
     }
 
-    /**
-     * Initialize RBAC service with user session
-     * 
-     * TODO: Replace MOCK_ROLES with backend API endpoint
-     * GET /api/roles or /api/rbac/roles/{tenantId}
-     */
-    private initializeRbac(session: AuthSession): void {
-        // Build UserSession for RBAC from AuthSession
-        const currentTenant = session.memberships?.[0]; // Use first membership as fallback
+    private async loadRbacForSession(session: AuthSession): Promise<void> {
+        const membership = this.getActiveMembershipFromSession(session);
 
-        if (!currentTenant) {
+        if (!membership) {
             console.warn('[AuthService] No tenant membership found, RBAC not initialized');
             this.rbacService.clear();
             return;
         }
 
+        const loginInfo = await this.fetchCurrentLoginInfo(membership.tenantId, session.tokens.accessToken);
+
+        if (loginInfo) {
+            if (loginInfo.tenant) {
+                try {
+                    this.tenantService.setTenant({
+                        ...loginInfo.tenant,
+                        enabledModules: loginInfo.tenant.enabledModules || [],
+                    } as any);
+                } catch (error) {
+                    console.warn('[AuthService] Failed to cache tenant from login-info', error);
+                }
+            }
+
+            if (loginInfo.edition) {
+                this.editionFeatures.setEdition(loginInfo.edition);
+            }
+
+            const rbacSession = {
+                userId: loginInfo.user.id,
+                tenantId: loginInfo.user.tenantId,
+                roleIds: this.roleIdsFromLoginInfo(loginInfo),
+            };
+
+            this.rbacService.setSession(rbacSession);
+
+            const roles: RoleDefinition[] = (loginInfo.roles || []).map((role) => this.mapRoleFromApi(role));
+
+            if (loginInfo.permissions?.effective?.length) {
+                roles.push({
+                    id: 'login-info-inline',
+                    name: 'Login Info Permissions',
+                    description: 'Permissions returned with login context',
+                    permissions: loginInfo.permissions.effective.map((p) => this.normalizePermissionKey(p)),
+                    isSystem: true,
+                });
+            }
+
+            this.rbacService.setRoles(roles);
+            return;
+        }
+
+        // Ensure tenant details (plan, enabledModules) are loaded from backend to drive entitlements
+        await this.ensureTenantLoaded(membership.tenantId);
+
+        // Load edition/features for current tenant (backend-driven)
+        const edition = await this.fetchEditionForTenant(membership.tenantId, session.tokens.accessToken);
+        if (edition) {
+            this.editionFeatures.setEdition(edition);
+        }
+
         const rbacSession = {
             userId: session.user.id,
-            tenantId: currentTenant.tenantId,
-            roleIds: currentTenant.roles || []
+            tenantId: membership.tenantId,
+            roleIds: membership.roles || []
         };
 
-        // Set session in RBAC service
         this.rbacService.setSession(rbacSession);
 
-        // Load role definitions
-        // TODO: Replace with backend API call:
-        // this.http.get<RoleDefinition[]>(`${this.API_URL}/rbac/roles/${currentTenant.tenantId}`)
-        //     .subscribe(roles => this.rbacService.setRoles(roles));
-        this.rbacService.setRoles(MOCK_ROLES);
+        const roles: RoleDefinition[] = [];
 
-        console.log('[AuthService] RBAC initialized with', rbacSession.roleIds.length, 'roles');
+        // Inline permissions from membership (if provided by backend)
+        if (membership.permissions?.length) {
+            roles.push({
+                id: 'membership-inline',
+                name: 'Membership Permissions',
+                description: 'Permissions provided by membership',
+                permissions: membership.permissions.map((p) => this.normalizePermissionKey(p)),
+                isSystem: true,
+            });
+        }
+
+        // Fetch role definitions from backend
+        try {
+            const apiRoles = await this.fetchRolesForTenant(membership.tenantId);
+            roles.push(...apiRoles);
+        } catch (error) {
+            console.error('[AuthService] Failed to load roles from API', error);
+        }
+
+        this.rbacService.setRoles(roles);
+    }
+
+    private getActiveMembershipFromSession(session?: AuthSession): AuthSession['memberships'][number] | undefined {
+        if (!session?.memberships?.length) return undefined;
+        if (session.activeTenantId) {
+            const match = session.memberships.find((m) => m.tenantId === session.activeTenantId);
+            if (match) return match;
+        }
+        return session.memberships[0];
+    }
+
+    private normalizePermissionKey(permission: string): string {
+        return permission
+            .replace(/:/g, '.')
+            .replace(/\s+/g, '')
+            .toLowerCase();
+    }
+
+    private roleIdsFromLoginInfo(info: CurrentLoginInfoResponse): string[] {
+        const roleIds: string[] = [];
+        if (info.user.roleId) {
+            roleIds.push(info.user.roleId);
+        }
+        if (info.user.role?.name) {
+            roleIds.push(info.user.role.name);
+        }
+        return roleIds;
+    }
+
+    private mapRoleFromApi(role: any): RoleDefinition {
+        const permissions = this.flattenPermissions(role.permissions || []);
+
+        return {
+            id: role.id || role._id || role.name,
+            name: role.name,
+            description: role.description,
+            permissions,
+            isSystem: role.isSystemRole || role.isSystem,
+        };
+    }
+
+    private flattenPermissions(permissions: any[]): string[] {
+        const set = new Set<string>();
+
+        for (const perm of permissions) {
+            // Global wildcard grants everything
+            if (perm === '*' || (typeof perm === 'object' && perm?.permission === '*')) {
+                set.add('*');
+                set.add('*.*');
+                continue;
+            }
+
+            // Support string permission keys: "students.read"
+            if (typeof perm === 'string') {
+                if (perm.trim() === '*') {
+                    set.add('*');
+                    set.add('*.*');
+                    continue;
+                }
+                set.add(this.normalizePermissionKey(perm));
+                continue;
+            }
+
+            const resource = perm.resource || perm.name || perm.id;
+            const actions = perm.actions || perm.action || perm.verbs;
+
+            // If permission already carries a fully qualified key
+            if (!resource && perm.permission) {
+                set.add(this.normalizePermissionKey(perm.permission));
+                continue;
+            }
+
+            if (!resource || !actions) continue;
+
+            const actionList = Array.isArray(actions) ? actions : [actions];
+
+            for (const action of actionList) {
+                if (action === '*') {
+                    set.add(this.normalizePermissionKey(`${resource}.*`));
+                    set.add(this.normalizePermissionKey(`${resource}.manage`));
+                    continue;
+                }
+                if (action === 'manage') {
+                    // Grant all known actions for this resource
+                    for (const a of this.allActions) {
+                        set.add(this.normalizePermissionKey(`${resource}.${a}`));
+                    }
+                    set.add(this.normalizePermissionKey(`${resource}.*`));
+                } else {
+                    set.add(this.normalizePermissionKey(`${resource}.${action}`));
+                }
+            }
+        }
+
+        return Array.from(set);
+    }
+
+    private async fetchRolesForTenant(tenantId: string): Promise<RoleDefinition[]> {
+        const response = await firstValueFrom(
+            this.http.get<any>(`${this.API_URL}/roles`, {
+                withCredentials: true,
+                headers: {
+                    'x-tenant-id': tenantId,
+                },
+            }),
+        );
+
+        const rolesArray = Array.isArray(response)
+            ? response
+            : Array.isArray(response?.data)
+                ? response.data
+                : [];
+
+        if (!rolesArray.length) {
+            console.warn('[AuthService] /roles returned no roles for tenant', tenantId, 'raw response:', response);
+            return [];
+        }
+
+        return rolesArray.map((role: any) => this.mapRoleFromApi(role));
+    }
+
+    private async fetchCurrentLoginInfo(tenantId: string, accessToken: string | undefined): Promise<CurrentLoginInfoResponse | null> {
+        if (!accessToken) return null;
+
+        try {
+            const response = await firstValueFrom(
+                this.http.get<CurrentLoginInfoResponse>(`${this.API_URL}/auth/login-info`, {
+                    withCredentials: true,
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        'x-tenant-id': tenantId,
+                    },
+                }),
+            );
+            return response;
+        } catch (error) {
+            console.warn('[AuthService] Failed to fetch current login info', { tenantId, error });
+            return null;
+        }
+    }
+
+    private async ensureTenantLoaded(tenantId: string): Promise<void> {
+        try {
+            const current = this.tenantService.getCurrentTenantValue?.();
+            if (current?.id === tenantId) {
+                return;
+            }
+
+            const tenant = await firstValueFrom(this.tenantService.getTenantById(tenantId));
+            if (tenant) {
+                this.tenantService.setTenant(tenant);
+                console.debug('[AuthService] Tenant loaded for RBAC', {
+                    tenantId: tenant.id,
+                    plan: tenant.plan,
+                    enabledModules: tenant.enabledModules,
+                });
+            }
+        } catch (error) {
+            console.warn('[AuthService] Failed to load tenant for RBAC', { tenantId, error });
+        }
+    }
+
+    private async fetchEditionForTenant(tenantId: string, accessToken: string | undefined): Promise<EditionSnapshot | null> {
+        try {
+            if (!accessToken) return null;
+            const dto = await firstValueFrom(
+                this.http.get<EditionSnapshot>(`${this.API_URL}/tenants/current/edition`, {
+                    withCredentials: true,
+                    headers: {
+                        'x-tenant-id': tenantId,
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }),
+            );
+            return dto;
+        } catch (error) {
+            console.warn('[AuthService] Failed to load edition/features', { tenantId, error });
+            return null;
+        }
     }
 }

@@ -2,11 +2,14 @@ import { Component, EventEmitter, Input, OnInit, Output, computed, signal } from
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { AuthorizationService } from '../../security/authorization.service';
+import { EntitlementsService } from '../../services/entitlements.service';
+import { RbacService } from '../../../core/rbac/rbac.service';
 import { IconRegistryService } from '../../services/icon-registry.service';
 import { TenantService, Tenant } from '../../../core/services/tenant.service';
 import { SchoolSettingsService } from '../../../core/services/school-settings.service';
 import { CanDirective } from '../../security/can.directive';
-import { PERMS } from '../../security/permissions';
+import { PERMISSIONS } from '../../../core/rbac/permission.constants';
 import { NavFilterService } from '../../services/nav-filter.service';
 
 interface NavItem {
@@ -376,52 +379,52 @@ export class SidebarComponent implements OnInit {
     {
       title: 'Students',
       items: [
-        { label: 'Workspace', path: '/students', icon: 'dashboard', permission: PERMS.STUDENTS_READ, moduleKey: 'students' },
-        { label: 'Admissions', path: '/admissions', icon: 'tasks', permission: PERMS.ADMISSIONS_READ, moduleKey: 'admissions' },
-        { label: 'Attendance', path: '/students/attendance', icon: 'calendar', permission: PERMS.ATTENDANCE_READ, moduleKey: 'attendance' },
-        { label: 'Academics', path: '/students/academics', icon: 'tasks', permission: PERMS.ACADEMICS_READ, moduleKey: 'academics' },
-        { label: 'Conduct', path: '/conduct', icon: 'people', permission: PERMS.STUDENTS_READ, moduleKey: 'students' },
-        { label: 'Health', path: '/students/health', icon: 'health', permission: PERMS.STUDENTS_READ, moduleKey: 'students' },
-        { label: 'Documents', path: '/students/documents', icon: 'library', permission: PERMS.STUDENTS_READ, moduleKey: 'students' },
-        { label: 'Finance', path: '/accounting/fees', icon: 'fees', permission: PERMS.FEES_READ, moduleKey: 'fees' },
-        { label: 'Reports', path: '/reports', icon: 'tasks', permission: PERMS.REPORTS_VIEW, moduleKey: 'students' }
+        { label: 'Workspace', path: '/students', icon: 'dashboard', permission: PERMISSIONS.students.read, moduleKey: 'students' },
+        { label: 'Admissions', path: '/admissions', icon: 'tasks', permission: PERMISSIONS.admissions.read, moduleKey: 'admissions' },
+        { label: 'Attendance', path: '/students/attendance', icon: 'calendar', permission: PERMISSIONS.attendance.read, moduleKey: 'attendance' },
+        { label: 'Academics', path: '/students/academics', icon: 'tasks', permission: PERMISSIONS.academics.read, moduleKey: 'academics' },
+        { label: 'Conduct', path: '/conduct', icon: 'people', permission: PERMISSIONS.students.read, moduleKey: 'students' },
+        { label: 'Health', path: '/students/health', icon: 'health', permission: PERMISSIONS.students.read, moduleKey: 'students' },
+        { label: 'Documents', path: '/students/documents', icon: 'library', permission: PERMISSIONS.students.read, moduleKey: 'students' },
+        { label: 'Finance', path: '/accounting/fees', icon: 'fees', permission: PERMISSIONS.fees.read, moduleKey: 'fees' },
+        { label: 'Reports', path: '/reports', icon: 'tasks', permission: PERMISSIONS.reports.view, moduleKey: 'students' }
       ]
     },
     {
       title: 'Finance & Reporting',
       items: [
-        { label: 'Fee Management', path: '/accounting/fees', icon: 'fees', permission: PERMS.FEES_READ, moduleKey: 'fees' },
-        { label: 'Fee Structures', path: '/accounting/fee-structures', icon: 'settings', permission: PERMS.FEES_WRITE, moduleKey: 'fees' },
-        { label: 'Fee Reports', path: '/accounting/fee-reports', icon: 'reports', permission: PERMS.FEES_READ, moduleKey: 'fees' },
-        { label: 'Accounts Payable', path: '/accounting/payables', icon: 'expense', permission: PERMS.ACCOUNTING_READ, moduleKey: 'accounting' },
-        { label: 'Expense Records', path: '/accounting/expenses', icon: 'expense', permission: PERMS.ACCOUNTING_READ, moduleKey: 'accounting' },
-        { label: 'Bills Queue', path: '/accounting/bill-queue', icon: 'bill', permission: PERMS.ACCOUNTING_WRITE, moduleKey: 'accounting' },
-        { label: 'General Ledger', path: '/accounting/gl', icon: 'bank', permission: PERMS.ACCOUNTING_READ, moduleKey: 'accounting' },
-        { label: 'Chart of Accounts', path: '/accounting/accounts', icon: 'list', permission: PERMS.ACCOUNTING_WRITE, moduleKey: 'accounting' },
-        { label: 'Journal Entries', path: '/accounting/journals', icon: 'journal', permission: PERMS.ACCOUNTING_WRITE, moduleKey: 'accounting' },
-        { label: 'Bank Reconciliation', path: '/accounting/bank-recon', icon: 'check-circle', permission: PERMS.ACCOUNTING_WRITE, moduleKey: 'accounting' },
-        { label: 'Analytics', path: '/reports/analytics', icon: 'dashboard', permission: PERMS.REPORTS_VIEW, moduleKey: 'dashboard' },
-        { label: 'Financial Reports', path: '/reports/financial', icon: 'file-text', permission: PERMS.REPORTS_VIEW, moduleKey: 'finance' },
-        { label: 'Data Exports', path: '/reports/exports', icon: 'download', permission: PERMS.REPORTS_EXPORT, moduleKey: 'setup' }
+        { label: 'Fee Management', path: '/accounting/fees', icon: 'fees', permission: PERMISSIONS.fees.read, moduleKey: 'fees' },
+        { label: 'Fee Structures', path: '/accounting/fee-structures', icon: 'settings', permission: PERMISSIONS.fees.write, moduleKey: 'fees' },
+        { label: 'Fee Reports', path: '/accounting/fee-reports', icon: 'reports', permission: PERMISSIONS.fees.read, moduleKey: 'fees' },
+        { label: 'Accounts Payable', path: '/accounting/payables', icon: 'expense', permission: PERMISSIONS.accounting.read, moduleKey: 'accounting' },
+        { label: 'Expense Records', path: '/accounting/expenses', icon: 'expense', permission: PERMISSIONS.accounting.read, moduleKey: 'accounting' },
+        { label: 'Bills Queue', path: '/accounting/bill-queue', icon: 'bill', permission: PERMISSIONS.accounting.write, moduleKey: 'accounting' },
+        { label: 'General Ledger', path: '/accounting/gl', icon: 'bank', permission: PERMISSIONS.accounting.read, moduleKey: 'accounting' },
+        { label: 'Chart of Accounts', path: '/accounting/accounts', icon: 'list', permission: PERMISSIONS.accounting.write, moduleKey: 'accounting' },
+        { label: 'Journal Entries', path: '/accounting/journals', icon: 'journal', permission: PERMISSIONS.accounting.write, moduleKey: 'accounting' },
+        { label: 'Bank Reconciliation', path: '/accounting/bank-recon', icon: 'check-circle', permission: PERMISSIONS.accounting.write, moduleKey: 'accounting' },
+        { label: 'Analytics', path: '/reports/analytics', icon: 'dashboard', permission: PERMISSIONS.reports.view, moduleKey: 'dashboard' },
+        { label: 'Financial Reports', path: '/reports/financial', icon: 'file-text', permission: PERMISSIONS.reports.view, moduleKey: 'finance' },
+        { label: 'Data Exports', path: '/reports/exports', icon: 'download', permission: PERMISSIONS.reports.export, moduleKey: 'setup' }
       ]
     },
     {
       title: 'Human Resources',
       items: [
-        { label: 'Directory', path: '/hr/directory', icon: 'hr', permission: PERMS.HR_READ, moduleKey: 'hr' },
-        { label: 'Profiles', path: '/hr/profiles', icon: 'dashboard', permission: PERMS.HR_READ, moduleKey: 'hr' },
-        { label: 'Leave', path: '/hr/leave', icon: 'calendar', permission: PERMS.HR_READ, moduleKey: 'hr' },
-        { label: 'Attendance', path: '/hr/attendance', icon: 'tasks', permission: PERMS.HR_READ, moduleKey: 'hr' },
-        { label: 'Settings', path: '/hr/settings', icon: 'settings', permission: PERMS.HR_WRITE, moduleKey: 'hr' }
+        { label: 'Directory', path: '/hr/directory', icon: 'hr', permission: PERMISSIONS.hr.read, moduleKey: 'hr' },
+        { label: 'Profiles', path: '/hr/profiles', icon: 'dashboard', permission: PERMISSIONS.hr.read, moduleKey: 'hr' },
+        { label: 'Leave', path: '/hr/leave', icon: 'calendar', permission: PERMISSIONS.hr.read, moduleKey: 'hr' },
+        { label: 'Attendance', path: '/hr/attendance', icon: 'tasks', permission: PERMISSIONS.hr.read, moduleKey: 'hr' },
+        { label: 'Settings', path: '/hr/settings', icon: 'settings', permission: PERMISSIONS.hr.write, moduleKey: 'hr' }
       ]
     },
     {
       title: 'System',
       items: [
-        { label: 'Tenant Settings', path: '/setup/tenant-settings', icon: 'settings', permission: PERMS.SETUP_WRITE, moduleKey: 'setup' },
-        { label: 'Marketplace', path: '/setup/marketplace', icon: 'marketplace', permission: PERMS.SETUP_READ, moduleKey: 'setup' },
-        { label: 'Plugins', path: '/plugins', icon: 'plugins', permission: PERMS.SETUP_READ, moduleKey: 'plugins' },
-        { label: 'Tasks', path: '/tasks', icon: 'tasks', permission: PERMS.TASKS_READ, moduleKey: 'tasks' }
+        { label: 'Tenant Settings', path: '/setup/tenant-settings', icon: 'settings', permission: PERMISSIONS.setup.write, moduleKey: 'setup' },
+        { label: 'Marketplace', path: '/setup/marketplace', icon: 'marketplace', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
+        { label: 'Plugins', path: '/plugins', icon: 'plugins', permission: PERMISSIONS.setup.read, moduleKey: 'plugins' },
+        { label: 'Tasks', path: '/tasks', icon: 'tasks', permission: PERMISSIONS.tasks.read, moduleKey: 'tasks' }
       ]
     }
   ];
@@ -433,6 +436,9 @@ export class SidebarComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
+    private authorization: AuthorizationService,
+    private entitlements: EntitlementsService,
+    private rbac: RbacService,
     private router: Router,
     private icons: IconRegistryService,
     private tenantService: TenantService,

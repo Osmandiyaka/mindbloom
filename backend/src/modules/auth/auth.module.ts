@@ -3,23 +3,27 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { USER_REPOSITORY, REFRESH_TOKEN_REPOSITORY, TENANT_REPOSITORY } from '../../domain/ports/out/repository.tokens';
+import { USER_REPOSITORY, REFRESH_TOKEN_REPOSITORY, TENANT_REPOSITORY, ROLE_REPOSITORY } from '../../domain/ports/out/repository.tokens';
 import { MongooseUserRepository } from '../../infrastructure/adapters/persistence/mongoose/user.repository';
 import { MongooseRefreshTokenRepository } from '../../infrastructure/adapters/persistence/mongoose/refresh-token.repository';
 import { UserSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/user.schema';
 import { RefreshTokenSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/refresh-token.schema';
-import { LoginUseCase, RegisterUseCase, ForgotPasswordUseCase, ResetPasswordUseCase, PasswordResetMailer, RefreshTokenUseCase, LogoutUseCase, TokenService } from '../../application/services/auth';
+import { LoginUseCase, RegisterUseCase, ForgotPasswordUseCase, ResetPasswordUseCase, PasswordResetMailer, RefreshTokenUseCase, LogoutUseCase, TokenService, GetCurrentLoginInfoUseCase } from '../../application/services/auth';
 import { AuthController } from '../../presentation/controllers/auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { MailModule } from '../../infrastructure/mail/mail.module';
 import { TenantModule } from '../tenant/tenant.module';
+import { RoleSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/role.schema';
+import { MongooseRoleRepository } from '../../infrastructure/adapters/persistence/mongoose/role.repository';
+import { GetPermissionTreeUseCase } from '../../application/services/rbac/get-permission-tree.use-case';
 
 @Module({
     imports: [
         MongooseModule.forFeature([
             { name: 'User', schema: UserSchema },
             { name: 'RefreshToken', schema: RefreshTokenSchema },
+            { name: 'Role', schema: RoleSchema },
         ]),
         PassportModule,
         JwtModule.registerAsync({
@@ -44,6 +48,10 @@ import { TenantModule } from '../tenant/tenant.module';
             provide: REFRESH_TOKEN_REPOSITORY,
             useClass: MongooseRefreshTokenRepository,
         },
+        {
+            provide: ROLE_REPOSITORY,
+            useClass: MongooseRoleRepository,
+        },
         // Use cases
         LoginUseCase,
         RegisterUseCase,
@@ -52,6 +60,8 @@ import { TenantModule } from '../tenant/tenant.module';
         PasswordResetMailer,
         RefreshTokenUseCase,
         LogoutUseCase,
+        GetCurrentLoginInfoUseCase,
+        GetPermissionTreeUseCase,
         TokenService,
         // Strategies
         JwtStrategy,

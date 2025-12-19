@@ -6,3 +6,4 @@ export * from './password-reset.mailer';
 export * from './refresh-token.use-case';
 export * from './logout.use-case';
 export * from './token.service';
+export * from './get-current-login-info.use-case';
