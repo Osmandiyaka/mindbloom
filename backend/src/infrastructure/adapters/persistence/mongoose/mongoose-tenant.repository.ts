@@ -211,11 +211,15 @@ export class MongooseTenantRepository implements ITenantRepository {
             doc.idTemplates,
             doc.createdAt,
             doc.updatedAt,
+            doc.editionId ? doc.editionId.toString() : null,
+            doc.subscriptionEndDate,
+            doc.isSuspended ?? false,
+            doc.gracePeriodEndDate,
         );
     }
 
-    private toDocument(tenant: Tenant) {
-        return {
+    private toDocument(tenant: Partial<Tenant>) {
+        const doc: Record<string, any> = {
             name: tenant.name,
             subdomain: tenant.subdomain,
             status: tenant.status,
@@ -247,6 +251,13 @@ export class MongooseTenantRepository implements ITenantRepository {
             tags: tenant.tags,
             trialEndsAt: tenant.trialEndsAt,
             idTemplates: tenant.idTemplates,
+            editionId: tenant.editionId,
+            subscriptionEndDate: tenant.subscriptionEndDate,
+            isSuspended: tenant.isSuspended,
+            gracePeriodEndDate: tenant.gracePeriodEndDate,
         };
+
+        Object.keys(doc).forEach((key) => doc[key] === undefined && delete doc[key]);
+        return doc;
     }
 }
