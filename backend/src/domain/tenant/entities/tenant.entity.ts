@@ -227,7 +227,15 @@ export class Tenant {
         public readonly idTemplates?: IdTemplateSettings,
         public readonly createdAt?: Date,
         public readonly updatedAt?: Date,
-    ) { }
+        public readonly editionId?: string | null,
+        public readonly subscriptionEndDate?: Date,
+        public readonly isSuspended: boolean = false,
+        public readonly gracePeriodEndDate?: Date,
+    ) {
+        if (this.subscriptionEndDate && this.gracePeriodEndDate && this.gracePeriodEndDate < this.subscriptionEndDate) {
+            throw new Error('Grace period end date must be on or after subscription end date.');
+        }
+    }
 
     isActive(): boolean {
         return this.status === TenantStatus.ACTIVE && !this.isTrialExpired();
@@ -235,10 +243,6 @@ export class Tenant {
 
     isPending(): boolean {
         return this.status === TenantStatus.PENDING;
-    }
-
-    isSuspended(): boolean {
-        return this.status === TenantStatus.SUSPENDED;
     }
 
     isTrialExpired(): boolean {
