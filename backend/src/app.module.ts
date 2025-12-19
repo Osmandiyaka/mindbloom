@@ -23,6 +23,7 @@ import { PluginsModule } from './modules/plugins/plugins.module';
 import { InvitationsModule } from './modules/invitations/invitations.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
 import { TenantSupportModule } from './common/tenant/tenant.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
     imports: [
@@ -36,6 +37,7 @@ import { TenantSupportModule } from './common/tenant/tenant.module';
         UsersModule,
         PluginsModule,
         SubscriptionModule,
+        PaymentsModule,
         InvitationsModule,
         StudentsModule,
         AcademicsModule,

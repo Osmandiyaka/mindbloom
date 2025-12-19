@@ -74,6 +74,18 @@ npm run prisma:generate
 npm run prisma:push
 ```
 
+### 6. Configure Payments (Stripe)
+
+Add Stripe test keys to `backend/.env` to enable the payment gateway abstraction:
+
+```env
+PAYMENTS_PROVIDER=stripe
+STRIPE_SECRET_KEY="sk_test_your_key"
+STRIPE_WEBHOOK_SECRET="whsec_your_webhook_secret"
+```
+
+Use Stripe test keys locally. The webhook secret should match the value configured in your Stripe CLI/endpoint settings.
+
 ## 🎯 Running the Application
 
 ### Option 1: Run Everything Together (Recommended)
