@@ -139,4 +139,12 @@ export enum PlatformEvent {
 
     // Limit events
     TENANT_LIMIT_THRESHOLD_REACHED = 'tenant.limit.threshold',
+
+    // Subscription events
+    SUBSCRIPTION_STATE_CHANGED = 'subscription.state.changed',
+    SUBSCRIPTION_PAYMENT_SUCCEEDED = 'subscription.payment.succeeded',
+    SUBSCRIPTION_PAYMENT_FAILED = 'subscription.payment.failed',
+    TENANT_SUSPENDED = 'tenant.subscription.suspended',
+    TENANT_DEACTIVATED = 'tenant.subscription.deactivated',
+    TENANT_REACTIVATED = 'tenant.subscription.reactivated',
 }

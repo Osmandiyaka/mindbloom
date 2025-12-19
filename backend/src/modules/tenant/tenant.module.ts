@@ -22,6 +22,8 @@ import { MongooseTenantFeatureOverrideRepository } from '../../infrastructure/ad
 import { EffectiveFeatureResolver } from '../../application/services/features/effective-feature-resolver.service';
 import { TenantContext } from '../../common/tenant/tenant.context';
 import { FeatureValidationService } from '../../application/services/features/feature-validation.service';
+import { SubscriptionLifecycleService } from '../../application/services/subscription/subscription-lifecycle.service';
+import { PluginsModule } from '../plugins/plugins.module';
 
 @Module({
     imports: [
@@ -34,6 +36,7 @@ import { FeatureValidationService } from '../../application/services/features/fe
         RolesModule,
         UsersModule,
         MailModule,
+        PluginsModule,
     ],
     controllers: [TenantController, HostEditionsController, HostTenantSubscriptionsController],
     providers: [
@@ -57,6 +60,7 @@ import { FeatureValidationService } from '../../application/services/features/fe
         ListTenantsUseCase,
         TenantManager,
         EditionManager,
+        SubscriptionLifecycleService,
         FeatureValidationService,
         EffectiveFeatureResolver,
         TenantPlanMailer,
@@ -76,6 +80,7 @@ import { FeatureValidationService } from '../../application/services/features/fe
         ListTenantsUseCase,
         TenantManager,
         EditionManager,
+        SubscriptionLifecycleService,
         FeatureValidationService,
         EffectiveFeatureResolver,
         TenantContext,

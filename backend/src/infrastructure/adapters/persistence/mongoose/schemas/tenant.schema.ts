@@ -17,6 +17,15 @@ export enum TenantPlan {
     ENTERPRISE = 'enterprise',
 }
 
+export enum SubscriptionState {
+    TRIALING = 'trialing',
+    ACTIVE = 'active',
+    PAST_DUE = 'past_due',
+    GRACE = 'grace',
+    SUSPENDED = 'suspended',
+    DEACTIVATED = 'deactivated',
+}
+
 export enum WeekStart {
     MONDAY = 'monday',
     SUNDAY = 'sunday',
@@ -262,6 +271,36 @@ export class TenantDocument extends Document {
     @Prop()
     gracePeriodEndDate?: Date;
 
+    @Prop({ enum: Object.values(SubscriptionState), default: SubscriptionState.TRIALING })
+    subscriptionState: SubscriptionState;
+
+    @Prop()
+    subscriptionStartDate?: Date;
+
+    @Prop()
+    pastDueSince?: Date;
+
+    @Prop()
+    graceStartedAt?: Date;
+
+    @Prop()
+    deactivatedAt?: Date;
+
+    @Prop()
+    lastPaymentFailureAt?: Date;
+
+    @Prop()
+    lastPaymentSuccessAt?: Date;
+
+    @Prop()
+    lastInvoiceId?: string;
+
+    @Prop({ default: 1 })
+    stateVersion: number;
+
+    @Prop()
+    trialEndDate?: Date;
+
     @Prop()
     deletedAt?: Date;
 
@@ -312,6 +351,9 @@ TenantSchema.index({ status: 1, deletedAt: 1 });
 TenantSchema.index({ 'customization.customDomain': 1 }, { unique: true, sparse: true });
 TenantSchema.index({ editionId: 1 }, { sparse: true });
 TenantSchema.index({ subscriptionEndDate: 1 }, { sparse: true });
+TenantSchema.index({ subscriptionState: 1 });
+TenantSchema.index({ pastDueSince: 1 }, { sparse: true });
+TenantSchema.index({ gracePeriodEndDate: 1 }, { sparse: true });
 
 TenantSchema.virtual('isTrialExpired').get(function () {
     return this.plan === TenantPlan.TRIAL &&

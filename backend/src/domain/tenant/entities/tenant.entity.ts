@@ -14,6 +14,15 @@ export enum TenantPlan {
     ENTERPRISE = 'enterprise',
 }
 
+export enum SubscriptionState {
+    TRIALING = 'trialing',
+    ACTIVE = 'active',
+    PAST_DUE = 'past_due',
+    GRACE = 'grace',
+    SUSPENDED = 'suspended',
+    DEACTIVATED = 'deactivated',
+}
+
 export interface EditionFeatures {
     editionCode: string;
     editionName: string;
@@ -231,6 +240,16 @@ export class Tenant {
         public readonly subscriptionEndDate?: Date,
         public readonly isSuspended: boolean = false,
         public readonly gracePeriodEndDate?: Date,
+        public readonly subscriptionState: SubscriptionState = SubscriptionState.TRIALING,
+        public readonly subscriptionStartDate?: Date,
+        public readonly pastDueSince?: Date,
+        public readonly trialEndDate?: Date,
+        public readonly graceStartedAt?: Date,
+        public readonly deactivatedAt?: Date,
+        public readonly lastPaymentFailureAt?: Date,
+        public readonly lastPaymentSuccessAt?: Date,
+        public readonly lastInvoiceId?: string,
+        public readonly stateVersion: number = 1,
     ) {
         if (this.subscriptionEndDate && this.gracePeriodEndDate && this.gracePeriodEndDate < this.subscriptionEndDate) {
             throw new Error('Grace period end date must be on or after subscription end date.');
@@ -246,9 +265,8 @@ export class Tenant {
     }
 
     isTrialExpired(): boolean {
-        return this.plan === TenantPlan.TRIAL &&
-            !!this.trialEndsAt &&
-            this.trialEndsAt < new Date();
+        const trialEnd = this.trialEndDate || this.trialEndsAt;
+        return this.plan === TenantPlan.TRIAL && !!trialEnd && trialEnd < new Date();
     }
 
     canAccessFeature(feature: string): boolean {
@@ -257,6 +275,43 @@ export class Tenant {
         if (!planFeatures.includes(feature)) return false;
         if (this.enabledModules.length > 0 && !this.enabledModules.includes(feature)) return false;
         return this.isActive();
+    }
+
+    subscriptionSnapshot(): {
+        state: SubscriptionState;
+        subscriptionEndDate?: Date;
+        trialEndsAt?: Date;
+        trialEndDate?: Date;
+        gracePeriodEndDate?: Date;
+        pastDueSince?: Date;
+        isSuspended?: boolean;
+        deactivatedAt?: Date;
+    } {
+        return {
+            state: this.subscriptionState,
+            subscriptionEndDate: this.subscriptionEndDate,
+            trialEndsAt: this.trialEndsAt,
+            trialEndDate: this.trialEndDate ?? this.trialEndsAt,
+            gracePeriodEndDate: this.gracePeriodEndDate,
+            pastDueSince: this.pastDueSince,
+            isSuspended: this.isSuspended,
+            deactivatedAt: this.deactivatedAt,
+        };
+    }
+
+    isSubscriptionActive(policy: { includePastDue?: boolean; includeGrace?: boolean } = { includePastDue: true, includeGrace: true }): boolean {
+        const includePastDue = policy.includePastDue !== false;
+        const includeGrace = policy.includeGrace !== false;
+        if (this.subscriptionState === SubscriptionState.TRIALING || this.subscriptionState === SubscriptionState.ACTIVE) {
+            return true;
+        }
+        if (includePastDue && this.subscriptionState === SubscriptionState.PAST_DUE) {
+            return true;
+        }
+        if (includeGrace && this.subscriptionState === SubscriptionState.GRACE) {
+            return true;
+        }
+        return false;
     }
 
     hasReachedLimit(resource: 'students' | 'teachers' | 'classes' | 'storage'): boolean {
