@@ -6,4 +6,5 @@ export interface IFeatureValueProvider {
     getDecimal(tenantId: string, featureKey: string): Promise<number>;
     invalidateTenantFeatureCache(tenantId: string): Promise<void>;
     invalidateEditionImpactCache(editionId: string): Promise<void>;
+    explainFeatureValue?(tenantId: string, featureKey: string): Promise<any>;
 }

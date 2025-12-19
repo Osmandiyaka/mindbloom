@@ -18,6 +18,7 @@ import { TenantFeatureOverrideSchema } from '../../infrastructure/adapters/persi
 import { MongooseTenantFeatureOverrideRepository } from '../../infrastructure/adapters/persistence/mongoose/tenant-feature-override.repository';
 import { EffectiveFeatureResolver } from '../../application/services/features/effective-feature-resolver.service';
 import { TenantContext } from '../../common/tenant/tenant.context';
+import { FeatureValidationService } from '../../application/services/features/feature-validation.service';
 
 @Module({
     imports: [
@@ -53,6 +54,7 @@ import { TenantContext } from '../../common/tenant/tenant.context';
         ListTenantsUseCase,
         TenantManager,
         EditionManager,
+        FeatureValidationService,
         EffectiveFeatureResolver,
         TenantPlanMailer,
         PermissionGuard,
@@ -70,6 +72,7 @@ import { TenantContext } from '../../common/tenant/tenant.context';
         ListTenantsUseCase,
         TenantManager,
         EditionManager,
+        FeatureValidationService,
         EffectiveFeatureResolver,
         TenantContext,
     ],

@@ -8,6 +8,7 @@ import { UnknownFeatureKeyException } from '../../../domain/exceptions/unknown-f
 import { InvalidFeatureValueException } from '../../../domain/exceptions/invalid-feature-value.exception';
 import { FeatureCatalog } from '../../../domain/features/feature-catalog';
 import { FeatureValueParser } from '../../../domain/features/feature-value-parser';
+import { FeatureValidationService } from '../features/feature-validation.service';
 
 export interface CreateEditionInput {
     name: string;
@@ -37,6 +38,7 @@ export class EditionManager {
     constructor(
         @Inject(EDITION_REPOSITORY)
         private readonly editions: IEditionRepository,
+        private readonly featureValidator: FeatureValidationService,
     ) { }
 
     async createEdition(input: CreateEditionInput): Promise<Edition> {
@@ -101,6 +103,7 @@ export class EditionManager {
         const edition = await this.editions.findById(editionId);
         if (!edition) throw new Error('Edition not found');
 
+        this.featureValidator.validateAssignments(assignments);
         const normalizedAssignments = this.normalizeAssignments(assignments);
         const withParents = this.ensureParents(normalizedAssignments);
 

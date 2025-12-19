@@ -4,10 +4,10 @@ import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/ports/out/
 import { IFeatureValueProvider } from './feature-value-provider.interface';
 import { FeatureCatalog } from '../../../domain/features/feature-catalog';
 import { FeatureValueParser } from '../../../domain/features/feature-value-parser';
-import { FeatureValueType } from '../../../domain/features/feature-value-type';
 import { InvalidFeatureValueException } from '../../../domain/exceptions/invalid-feature-value.exception';
 import { ITenantFeatureOverrideRepository, TENANT_FEATURE_OVERRIDE_REPOSITORY } from '../../../domain/ports/out/tenant-feature-override-repository.port';
 import { TenantNotFoundException } from '../../../domain/exceptions/tenant-subscription.exception';
+import { FeatureValidationService } from './feature-validation.service';
 
 interface CacheEntry {
     expiresAt: number;
@@ -26,6 +26,7 @@ export class EffectiveFeatureResolver implements IFeatureValueProvider {
         @Inject(TENANT_REPOSITORY) private readonly tenants: ITenantRepository,
         private readonly editionManager: EditionManager,
         @Inject(TENANT_FEATURE_OVERRIDE_REPOSITORY) private readonly overrides: ITenantFeatureOverrideRepository,
+        private readonly validator: FeatureValidationService,
     ) { }
 
     async getEffectiveFeaturesForTenant(tenantId: string): Promise<Record<string, string>> {
@@ -59,9 +60,9 @@ export class EffectiveFeatureResolver implements IFeatureValueProvider {
         const overrides = await this.overrides.findMapByTenantId(tenantId);
         this.applyAssignments(effective, overrides, tenantId, tenant.editionId ?? null, 'override');
 
-        this.enforceHierarchy(effective);
+        const gated = this.validator.applyParentGating(effective);
 
-        const value = { ...effective };
+        const value = { ...gated };
         this.cache.set(tenantId, { value, expiresAt: Date.now() + this.ttlMs });
         return value;
     }
@@ -99,6 +100,10 @@ export class EffectiveFeatureResolver implements IFeatureValueProvider {
         this.cache.clear();
     }
 
+    async explainFeatureValue(tenantId: string, featureKey: string) {
+        return this.validator.explainFeatureValue(tenantId, featureKey);
+    }
+
     private applyAssignments(
         effective: Record<string, string>,
         assignments: Record<string, string>,
@@ -119,7 +124,7 @@ export class EffectiveFeatureResolver implements IFeatureValueProvider {
             }
 
             try {
-                FeatureValueParser.validate(def, rawValue);
+                this.validator.validateValue(def.key, rawValue);
                 effective[def.key] = rawValue;
             } catch (error) {
                 const isInvalid = error instanceof InvalidFeatureValueException;
@@ -130,36 +135,6 @@ export class EffectiveFeatureResolver implements IFeatureValueProvider {
                     value: rawValue,
                     source,
                 });
-            }
-        }
-    }
-
-    private enforceHierarchy(effective: Record<string, string>): void {
-        for (const def of FeatureCatalog.ALL_FEATURES) {
-            if (def.valueType !== FeatureValueType.BOOLEAN) continue;
-            const ancestors = FeatureCatalog.getAncestors(def.key);
-            let hasDisabledAncestor = false;
-            for (const ancestor of ancestors) {
-                if (ancestor.valueType !== FeatureValueType.BOOLEAN) continue;
-                try {
-                    const ancestorValue = effective[ancestor.key] ?? ancestor.defaultValue;
-                    const isEnabled = FeatureValueParser.parseBoolean(ancestorValue, ancestor.key);
-                    if (!isEnabled) {
-                        hasDisabledAncestor = true;
-                        break;
-                    }
-                } catch (error) {
-                    if (error instanceof InvalidFeatureValueException) {
-                        this.logOnce('warn', `hierarchy-invalid-${ancestor.key}`, `Invalid boolean value for ancestor feature '${ancestor.key}'`, {
-                            featureKey: def.key,
-                            ancestorKey: ancestor.key,
-                            value: effective[ancestor.key],
-                        });
-                    }
-                }
-            }
-            if (hasDisabledAncestor) {
-                effective[def.key] = 'false';
             }
         }
     }
