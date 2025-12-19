@@ -6,6 +6,8 @@ import { tap, catchError, map, finalize, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { AuthSession, AuthTokens } from './auth.models';
 import { AuthStorage } from './auth.storage';
+import { RbacService } from '../rbac/rbac.service';
+import { MOCK_ROLES } from '../rbac/permission.constants';
 
 interface RefreshTokenRequest {
     refreshToken: string;
@@ -79,6 +81,7 @@ export interface AuthResponse {
     providedIn: 'root',
 })
 export class AuthService {
+    private readonly rbacService = inject(RbacService);
     private readonly http = inject(HttpClient);
     private readonly router = inject(Router);
     private readonly API_URL = environment.apiUrl;
@@ -127,6 +130,8 @@ export class AuthService {
             // Token is still valid
             this.session.set(stored);
             this.status.set('authenticated');
+            // Re-initialize RBAC from restored session
+            this.initializeRbac(stored);
             return;
         }
 
@@ -146,23 +151,27 @@ export class AuthService {
     /**
      * Set session directly (e.g., after login).
      * Writes to storage and updates signals.
+     * Also initializes RBAC permissions.
      */
     setSession(session: AuthSession): void {
         this.session.set(session);
         this.status.set('authenticated');
         AuthStorage.write(session);
+
+        // Initialize RBAC with user session and role definitions
+        this.initializeRbac(session);
     }
 
     /**
      * Clear session from memory and storage.
      * Emits 'anonymous' status.
-     * Call tenant service clear if available (placeholder for future).
+     * Also clears RBAC state.
      */
     clearSession(): void {
         this.session.set(null);
         this.status.set('anonymous');
         AuthStorage.clear();
-        // TODO: Emit event or call tenantService?.clear() if available
+        this.rbacService.clear();
     }
 
     /**
@@ -428,5 +437,39 @@ export class AuthService {
             // ignore
         }
         return undefined;
+    }
+
+    /**
+     * Initialize RBAC service with user session
+     * 
+     * TODO: Replace MOCK_ROLES with backend API endpoint
+     * GET /api/roles or /api/rbac/roles/{tenantId}
+     */
+    private initializeRbac(session: AuthSession): void {
+        // Build UserSession for RBAC from AuthSession
+        const currentTenant = session.memberships?.[0]; // Use first membership as fallback
+
+        if (!currentTenant) {
+            console.warn('[AuthService] No tenant membership found, RBAC not initialized');
+            this.rbacService.clear();
+            return;
+        }
+
+        const rbacSession = {
+            userId: session.user.id,
+            tenantId: currentTenant.tenantId,
+            roleIds: currentTenant.roles || []
+        };
+
+        // Set session in RBAC service
+        this.rbacService.setSession(rbacSession);
+
+        // Load role definitions
+        // TODO: Replace with backend API call:
+        // this.http.get<RoleDefinition[]>(`${this.API_URL}/rbac/roles/${currentTenant.tenantId}`)
+        //     .subscribe(roles => this.rbacService.setRoles(roles));
+        this.rbacService.setRoles(MOCK_ROLES);
+
+        console.log('[AuthService] RBAC initialized with', rbacSession.roleIds.length, 'roles');
     }
 }
