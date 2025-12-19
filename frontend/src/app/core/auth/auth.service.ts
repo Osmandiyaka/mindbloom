@@ -525,10 +525,16 @@ export class AuthService {
                 this.editionFeatures.setEdition(loginInfo.edition);
             }
 
+            const inlinePermissions = (loginInfo.user.permissions || [])
+                .map((p: string) => this.normalizePermissionKey(p));
+
             const rbacSession = {
                 userId: loginInfo.user.id,
                 tenantId: loginInfo.user.tenantId,
                 roleIds: this.roleIdsFromLoginInfo(loginInfo),
+                permissionOverrides: inlinePermissions.length
+                    ? { allow: inlinePermissions }
+                    : undefined,
             };
 
             this.rbacService.setSession(rbacSession);
@@ -537,19 +543,6 @@ export class AuthService {
 
             if (loginInfo.user.role) {
                 roles.push(this.mapRoleFromApi(loginInfo.user.role));
-            }
-
-            const inlinePermissions = (loginInfo.user.permissions || [])
-                .map((p: string) => this.normalizePermissionKey(p));
-
-            if (inlinePermissions.length) {
-                roles.push({
-                    id: 'login-info-inline',
-                    name: 'Login Info Permissions',
-                    description: 'Permissions returned with login context',
-                    permissions: inlinePermissions,
-                    isSystem: true,
-                });
             }
 
             this.rbacService.setRoles(roles);

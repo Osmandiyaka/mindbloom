@@ -4,6 +4,7 @@ import { ITenantRepository } from '../../../domain/ports/out/tenant-repository.p
 import { USER_REPOSITORY, TENANT_REPOSITORY } from '../../../domain/ports/out/repository.tokens';
 import { Tenant } from '../../../domain/tenant/entities/tenant.entity';
 import { Permission, PermissionAction } from '../../../domain/rbac/entities/permission.entity';
+import { SYSTEM_ROLE_NAMES } from '../../../domain/rbac/entities/system-roles';
 import { User } from '../../../domain/entities/user.entity';
 
 export interface CurrentLoginInfoResult {
@@ -38,7 +39,13 @@ export class GetCurrentLoginInfoUseCase {
         const rolePermissions = user.role?.permissions ?? [];
         const directPermissions = user.permissions ?? [];
         const effectivePermissions = [...rolePermissions, ...directPermissions];
-        const permissionKeys = this.toPermissionKeys(effectivePermissions);
+        let permissionKeys = this.toPermissionKeys(effectivePermissions);
+
+        // Guarantee full access for Tenant Admin/Host Admin even if stored role lacks wildcard permissions
+        const roleName = user.role?.name;
+        if (roleName === SYSTEM_ROLE_NAMES.TENANT_ADMIN || roleName === SYSTEM_ROLE_NAMES.HOST_ADMIN) {
+            permissionKeys = ['*', '*.*'];
+        }
 
 
         return {
