@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { permissionGuard } from '../../core/guards/permission.guard';
 
 export const STUDENTS_ROUTES: Routes = [
     {
@@ -39,11 +40,15 @@ export const STUDENTS_ROUTES: Routes = [
     },
     {
         path: 'new',
-        loadComponent: () => import('../setup/pages/students/student-form/student-form.component').then(m => m.StudentFormComponent)
+        loadComponent: () => import('../setup/pages/students/student-form/student-form.component').then(m => m.StudentFormComponent),
+        canActivate: [permissionGuard],
+        data: { permissions: ['students:create'] }
     },
     {
         path: ':id/edit',
-        loadComponent: () => import('../setup/pages/students/student-form/student-form.component').then(m => m.StudentFormComponent)
+        loadComponent: () => import('../setup/pages/students/student-form/student-form.component').then(m => m.StudentFormComponent),
+        canActivate: [permissionGuard],
+        data: { permissions: ['students:update'] }
     },
     {
         path: ':id',
