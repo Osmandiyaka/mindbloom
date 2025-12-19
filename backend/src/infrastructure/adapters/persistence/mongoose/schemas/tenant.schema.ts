@@ -250,6 +250,18 @@ export class TenantDocument extends Document {
     @Prop()
     suspensionReason?: string;
 
+    @Prop({ type: Types.ObjectId, ref: 'Edition' })
+    editionId?: Types.ObjectId;
+
+    @Prop()
+    subscriptionEndDate?: Date;
+
+    @Prop({ default: false })
+    isSuspended: boolean;
+
+    @Prop()
+    gracePeriodEndDate?: Date;
+
     @Prop()
     deletedAt?: Date;
 
@@ -298,6 +310,8 @@ TenantSchema.index({ tags: 1 });
 TenantSchema.index({ status: 1, plan: 1 });
 TenantSchema.index({ status: 1, deletedAt: 1 });
 TenantSchema.index({ 'customization.customDomain': 1 }, { unique: true, sparse: true });
+TenantSchema.index({ editionId: 1 }, { sparse: true });
+TenantSchema.index({ subscriptionEndDate: 1 }, { sparse: true });
 
 TenantSchema.virtual('isTrialExpired').get(function () {
     return this.plan === TenantPlan.TRIAL &&
