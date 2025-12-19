@@ -12,11 +12,13 @@ import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/bread
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { StudentFormComponent } from '../../../setup/pages/students/student-form/student-form.component';
+import { CanDirective } from '../../../../shared/security/can.directive';
+import { PERMS } from '../../../../shared/security/permissions';
 
 @Component({
   selector: 'app-students-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, CardComponent, ButtonComponent, BadgeComponent, BreadcrumbsComponent, SearchInputComponent, ModalComponent, StudentFormComponent],
+  imports: [CommonModule, RouterModule, FormsModule, CardComponent, ButtonComponent, BadgeComponent, BreadcrumbsComponent, SearchInputComponent, ModalComponent, StudentFormComponent, CanDirective],
   styleUrls: ['./students-list.component.scss'],
   template: `
     <div class="students-page">
@@ -50,8 +52,8 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
         <div class="toolbar-right">
           <div class="bulk-inline" *ngIf="selectedIds().size">
             <span class="selected-count">{{ selectedIds().size }} selected</span>
-            <app-button variant="secondary" size="sm" (click)="bulkAction('attendance')">Take attendance</app-button>
-            <app-button variant="secondary" size="sm" (click)="bulkAction('note')">Add note</app-button>
+            <app-button *can="'students.write'" variant="secondary" size="sm" (click)="bulkAction('attendance')">Take attendance</app-button>
+            <app-button *can="'students.write'" variant="secondary" size="sm" (click)="bulkAction('note')">Add note</app-button>
           </div>
           <div class="view-toggle" role="group" aria-label="View switch">
             <button
@@ -82,17 +84,17 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
               <span class="chevron">▾</span>
             </app-button>
             <div class="menu" *ngIf="actionsOpen">
-              <button type="button" (click)="exportAndClose()">
+              <button *can="'students.export'" type="button" (click)="exportAndClose()">
                 <span class="icon" [innerHTML]="icon('download')"></span>
                 Export
               </button>
-              <button type="button" (click)="importAndClose()">
+              <button *can="'students.create'" type="button" (click)="importAndClose()">
                 <span class="icon" [innerHTML]="icon('upload')"></span>
                 Import
               </button>
             </div>
           </div>
-          <app-button variant="primary" size="sm" (click)="openModal()">
+          <app-button *can="'students.create'" variant="primary" size="sm" (click)="openModal()">
             <span class="icon" [innerHTML]="icon('student-add')"></span> Add Student
           </app-button>
         </div>
@@ -186,10 +188,10 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                         <div class="more-menu" [class.open]="rowMenuOpen() === student.id">
                           <button (click)="toggleRowMenu($event, student.id)" title="More actions"><span class="icon" [innerHTML]="icon('ellipsis')"></span></button>
                           <div class="menu-panel" *ngIf="rowMenuOpen() === student.id">
-                            <button (click)="openQuickView($event, student)">Quick view</button>
-                            <button (click)="logIncidentAction($event, student)">Log incident</button>
-                            <button (click)="editStudent($event, student.id)">Edit</button>
-                            <button class="danger" (click)="deleteStudent($event, student)">Delete</button>
+                            <button *can="'students.read'" (click)="openQuickView($event, student)">Quick view</button>
+                            <button *can="'students.write'" (click)="logIncidentAction($event, student)">Log incident</button>
+                            <button *can="'students.update'" (click)="editStudent($event, student.id)">Edit</button>
+                            <button *can="'students.delete'" class="danger" (click)="deleteStudent($event, student)">Delete</button>
                           </div>
                         </div>
                       </div>
@@ -262,11 +264,11 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
                         <span class="icon" [innerHTML]="icon('eye')"></span>
                         <span class="sr-only">View</span>
                       </button>
-                      <button type="button" [attr.aria-label]="'Edit ' + student.fullName" (click)="editStudent($event, student.id)">
+                      <button *can="'students.update'" type="button" [attr.aria-label]="'Edit ' + student.fullName" (click)="editStudent($event, student.id)">
                         <span class="icon" [innerHTML]="icon('edit')"></span>
                         <span class="sr-only">Edit</span>
                       </button>
-                      <button type="button" [attr.aria-label]="'Delete ' + student.fullName" (click)="deleteStudent($event, student)">
+                      <button *can="'students.delete'" type="button" [attr.aria-label]="'Delete ' + student.fullName" (click)="deleteStudent($event, student)">
                         <span class="icon" [innerHTML]="icon('trash')"></span>
                         <span class="sr-only">Delete</span>
                       </button>

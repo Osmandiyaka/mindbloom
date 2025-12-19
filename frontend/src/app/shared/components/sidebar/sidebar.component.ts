@@ -5,12 +5,15 @@ import { AuthService } from '../../../core/services/auth.service';
 import { IconRegistryService } from '../../services/icon-registry.service';
 import { TenantService, Tenant } from '../../../core/services/tenant.service';
 import { SchoolSettingsService } from '../../../core/services/school-settings.service';
+import { CanDirective } from '../../security/can.directive';
+import { PERMS } from '../../security/permissions';
 
 interface NavItem {
   label: string;
   path: string;
   icon: string;
   badge?: string;
+  permission?: string;
 }
 
 interface NavSection {
@@ -21,7 +24,7 @@ interface NavSection {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, CanDirective],
   template: `
     <aside
       class="sidebar"
@@ -53,20 +56,22 @@ interface NavSection {
         <section class="nav-section" *ngFor="let section of navSections">
           <header class="nav-section-title" *ngIf="!collapsed">{{ section.title }}</header>
           <div class="nav-card">
-            <a
-              class="nav-link"
-              *ngFor="let item of section.items"
-              [routerLink]="item.path"
-              routerLinkActive="active"
-              #rla="routerLinkActive"
-              [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
-              [attr.aria-current]="rla.isActive ? 'page' : null"
-              (click)="onNavigate()">
-              <span class="nav-link-icon" [innerHTML]="icon(item.icon)"></span>
-              <span class="nav-link-text" *ngIf="!collapsed">{{ item.label }}</span>
-              <span class="nav-meta" *ngIf="!collapsed"></span>
-              <span class="nav-badge" *ngIf="item.badge && !collapsed">{{ item.badge }}</span>
-            </a>
+            <ng-container *ngFor="let item of section.items">
+              <a
+                class="nav-link"
+                *can="item.permission || ''"
+                [routerLink]="item.path"
+                routerLinkActive="active"
+                #rla="routerLinkActive"
+                [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
+                [attr.aria-current]="rla.isActive ? 'page' : null"
+                (click)="onNavigate()">
+                <span class="nav-link-icon" [innerHTML]="icon(item.icon)"></span>
+                <span class="nav-link-text" *ngIf="!collapsed">{{ item.label }}</span>
+                <span class="nav-meta" *ngIf="!collapsed"></span>
+                <span class="nav-badge" *ngIf="item.badge && !collapsed">{{ item.badge }}</span>
+              </a>
+            </ng-container>
           </div>
         </section>
       </nav>
@@ -369,52 +374,52 @@ export class SidebarComponent implements OnInit {
     {
       title: 'Students',
       items: [
-        { label: 'Workspace', path: '/students', icon: 'dashboard' },
-        { label: 'Admissions', path: '/admissions', icon: 'tasks' },
-        { label: 'Attendance', path: '/students/attendance', icon: 'calendar' },
-        { label: 'Academics', path: '/students/academics', icon: 'tasks' },
-        { label: 'Conduct', path: '/conduct', icon: 'people' },
-        { label: 'Health', path: '/students/health', icon: 'health' },
-        { label: 'Documents', path: '/students/documents', icon: 'library' },
-        { label: 'Finance', path: '/accounting/fees', icon: 'fees' },
-        { label: 'Reports', path: '/reports', icon: 'tasks' }
+        { label: 'Workspace', path: '/students', icon: 'dashboard', permission: PERMS.STUDENTS_READ },
+        { label: 'Admissions', path: '/admissions', icon: 'tasks', permission: PERMS.ADMISSIONS_READ },
+        { label: 'Attendance', path: '/students/attendance', icon: 'calendar', permission: PERMS.ATTENDANCE_READ },
+        { label: 'Academics', path: '/students/academics', icon: 'tasks', permission: PERMS.ACADEMICS_READ },
+        { label: 'Conduct', path: '/conduct', icon: 'people', permission: PERMS.STUDENTS_READ },
+        { label: 'Health', path: '/students/health', icon: 'health', permission: PERMS.STUDENTS_READ },
+        { label: 'Documents', path: '/students/documents', icon: 'library', permission: PERMS.STUDENTS_READ },
+        { label: 'Finance', path: '/accounting/fees', icon: 'fees', permission: PERMS.FEES_READ },
+        { label: 'Reports', path: '/reports', icon: 'tasks', permission: PERMS.REPORTS_VIEW }
       ]
     },
     {
       title: 'Finance & Reporting',
       items: [
-        { label: 'Fee Management', path: '/accounting/fees', icon: 'fees' },
-        { label: 'Fee Structures', path: '/accounting/fee-structures', icon: 'settings' },
-        { label: 'Fee Reports', path: '/accounting/fee-reports', icon: 'reports' },
-        { label: 'Accounts Payable', path: '/accounting/payables', icon: 'expense' },
-        { label: 'Expense Records', path: '/accounting/expenses', icon: 'expense' },
-        { label: 'Bills Queue', path: '/accounting/bill-queue', icon: 'bill' },
-        { label: 'General Ledger', path: '/accounting/gl', icon: 'bank' },
-        { label: 'Chart of Accounts', path: '/accounting/accounts', icon: 'list' },
-        { label: 'Journal Entries', path: '/accounting/journals', icon: 'journal' },
-        { label: 'Bank Reconciliation', path: '/accounting/bank-recon', icon: 'check-circle' },
-        { label: 'Analytics', path: '/reports/analytics', icon: 'dashboard' },
-        { label: 'Financial Reports', path: '/reports/financial', icon: 'file-text' },
-        { label: 'Data Exports', path: '/reports/exports', icon: 'download' }
+        { label: 'Fee Management', path: '/accounting/fees', icon: 'fees', permission: PERMS.FEES_READ },
+        { label: 'Fee Structures', path: '/accounting/fee-structures', icon: 'settings', permission: PERMS.FEES_WRITE },
+        { label: 'Fee Reports', path: '/accounting/fee-reports', icon: 'reports', permission: PERMS.FEES_READ },
+        { label: 'Accounts Payable', path: '/accounting/payables', icon: 'expense', permission: PERMS.ACCOUNTING_READ },
+        { label: 'Expense Records', path: '/accounting/expenses', icon: 'expense', permission: PERMS.ACCOUNTING_READ },
+        { label: 'Bills Queue', path: '/accounting/bill-queue', icon: 'bill', permission: PERMS.ACCOUNTING_WRITE },
+        { label: 'General Ledger', path: '/accounting/gl', icon: 'bank', permission: PERMS.ACCOUNTING_READ },
+        { label: 'Chart of Accounts', path: '/accounting/accounts', icon: 'list', permission: PERMS.ACCOUNTING_WRITE },
+        { label: 'Journal Entries', path: '/accounting/journals', icon: 'journal', permission: PERMS.ACCOUNTING_WRITE },
+        { label: 'Bank Reconciliation', path: '/accounting/bank-recon', icon: 'check-circle', permission: PERMS.ACCOUNTING_WRITE },
+        { label: 'Analytics', path: '/reports/analytics', icon: 'dashboard', permission: PERMS.REPORTS_VIEW },
+        { label: 'Financial Reports', path: '/reports/financial', icon: 'file-text', permission: PERMS.REPORTS_VIEW },
+        { label: 'Data Exports', path: '/reports/exports', icon: 'download', permission: PERMS.REPORTS_EXPORT }
       ]
     },
     {
       title: 'Human Resources',
       items: [
-        { label: 'Directory', path: '/hr/directory', icon: 'hr' },
-        { label: 'Profiles', path: '/hr/profiles', icon: 'dashboard' },
-        { label: 'Leave', path: '/hr/leave', icon: 'calendar' },
-        { label: 'Attendance', path: '/hr/attendance', icon: 'tasks' },
-        { label: 'Settings', path: '/hr/settings', icon: 'settings' }
+        { label: 'Directory', path: '/hr/directory', icon: 'hr', permission: PERMS.HR_READ },
+        { label: 'Profiles', path: '/hr/profiles', icon: 'dashboard', permission: PERMS.HR_READ },
+        { label: 'Leave', path: '/hr/leave', icon: 'calendar', permission: PERMS.HR_READ },
+        { label: 'Attendance', path: '/hr/attendance', icon: 'tasks', permission: PERMS.HR_READ },
+        { label: 'Settings', path: '/hr/settings', icon: 'settings', permission: PERMS.HR_WRITE }
       ]
     },
     {
       title: 'System',
       items: [
-        { label: 'Tenant Settings', path: '/setup/tenant-settings', icon: 'settings' },
-        { label: 'Marketplace', path: '/setup/marketplace', icon: 'marketplace' },
-        { label: 'Plugins', path: '/plugins', icon: 'plugins' },
-        { label: 'Tasks', path: '/tasks', icon: 'tasks' }
+        { label: 'Tenant Settings', path: '/setup/tenant-settings', icon: 'settings', permission: PERMS.SETUP_WRITE },
+        { label: 'Marketplace', path: '/setup/marketplace', icon: 'marketplace', permission: PERMS.SETUP_READ },
+        { label: 'Plugins', path: '/plugins', icon: 'plugins', permission: PERMS.SETUP_READ },
+        { label: 'Tasks', path: '/tasks', icon: 'tasks', permission: PERMS.TASKS_READ }
       ]
     }
   ];
