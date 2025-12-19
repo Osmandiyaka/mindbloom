@@ -10,10 +10,21 @@ import {
     UpdateRoleUseCase,
     DeleteRoleUseCase,
     InitializeSystemRolesUseCase,
+    InitializeGlobalRolesUseCase,
 } from '../../application/services/rbac';
 import { GetPermissionTreeUseCase } from '../../application/services/rbac/get-permission-tree.use-case';
 import { AddPermissionsToRoleUseCase } from '../../application/services/rbac/add-permissions-to-role.use-case';
 import { RolesController, PermissionsController } from '../../presentation/controllers/roles.controller';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+
+@Injectable()
+class GlobalRolesInitializer implements OnModuleInit {
+    constructor(private readonly initializeGlobalRoles: InitializeGlobalRolesUseCase) { }
+
+    async onModuleInit(): Promise<void> {
+        await this.initializeGlobalRoles.execute().catch(() => undefined);
+    }
+}
 
 @Module({
     imports: [
@@ -33,9 +44,11 @@ import { RolesController, PermissionsController } from '../../presentation/contr
         UpdateRoleUseCase,
         DeleteRoleUseCase,
         InitializeSystemRolesUseCase,
+        InitializeGlobalRolesUseCase,
         GetPermissionTreeUseCase,
         AddPermissionsToRoleUseCase,
+        GlobalRolesInitializer,
     ],
-    exports: [ROLE_REPOSITORY, InitializeSystemRolesUseCase],
+    exports: [ROLE_REPOSITORY, InitializeSystemRolesUseCase, InitializeGlobalRolesUseCase],
 })
 export class RolesModule { }

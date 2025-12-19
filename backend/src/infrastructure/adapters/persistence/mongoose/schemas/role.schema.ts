@@ -4,7 +4,7 @@ export const RoleSchema = new Schema(
     {
         tenantId: {
             type: String,
-            required: true,
+            required: function () { return !this.isGlobal; },
             index: true,
         },
         name: {
@@ -16,6 +16,10 @@ export const RoleSchema = new Schema(
             required: true,
         },
         isSystemRole: {
+            type: Boolean,
+            default: false,
+        },
+        isGlobal: {
             type: Boolean,
             default: false,
         },
@@ -41,15 +45,20 @@ export const RoleSchema = new Schema(
 // Compound index for tenant isolation and unique role names per tenant
 RoleSchema.index({ tenantId: 1, name: 1 }, { unique: true });
 
+// Unique constraint for global role names
+RoleSchema.index({ name: 1 }, { unique: true, partialFilterExpression: { isGlobal: true } });
+
 // Index for finding system roles
 RoleSchema.index({ tenantId: 1, isSystemRole: 1 });
+RoleSchema.index({ isGlobal: 1 });
 
 export interface RoleDocument {
     _id: string;
-    tenantId: string;
+    tenantId: string | null;
     name: string;
     description: string;
     isSystemRole: boolean;
+    isGlobal: boolean;
     permissions: Array<{
         resource: string;
         actions: string[];

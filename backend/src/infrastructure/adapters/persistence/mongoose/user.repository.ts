@@ -142,10 +142,11 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
 
             role = new Role({
                 id: roleDoc._id?.toString() || '',
-                tenantId: roleDoc.tenantId?.toString() || '',
+                tenantId: roleDoc.tenantId ? roleDoc.tenantId.toString() : null,
                 name: roleDoc.name,
                 description: roleDoc.description,
                 isSystemRole: roleDoc.isSystemRole,
+                isGlobal: (roleDoc as any).isGlobal,
                 permissions: rolePermissions,
                 parentRoleId: roleDoc.parentRoleId?.toString(),
                 createdAt: roleDoc.createdAt,

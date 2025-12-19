@@ -20,19 +20,27 @@ export const SYSTEM_ROLE_NAMES = {
 } as const;
 
 /**
- * Create system roles for a tenant
+ * Global roles shared across tenants (tenantId = null)
  */
-export function createSystemRoles(tenantId: string): Role[] {
+export function createGlobalRoles(): Role[] {
     return [
         // Super Admin - Full platform access (cross-tenant)
         new Role({
-            tenantId,
+            tenantId: null,
             name: SYSTEM_ROLE_NAMES.SUPER_ADMIN,
             description: 'Platform administrator with full access',
             isSystemRole: true,
+            isGlobal: true,
             permissions: [Permission.wildcard('*', PermissionScope.ALL)],
         }),
+    ];
+}
 
+/**
+ * Create system roles for a tenant (tenant-scoped, excludes global roles)
+ */
+export function createTenantSystemRoles(tenantId: string): Role[] {
+    return [
         // Tenant Admin - Full tenant management
         new Role({
             tenantId,

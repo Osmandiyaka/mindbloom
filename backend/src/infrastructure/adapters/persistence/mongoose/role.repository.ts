@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Role } from '../../../../domain/rbac/entities/role.entity';
 import { Permission } from '../../../../domain/rbac/entities/permission.entity';
-import { createSystemRoles } from '../../../../domain/rbac/entities/system-roles';
+import { createGlobalRoles, createTenantSystemRoles } from '../../../../domain/rbac/entities/system-roles';
 import { IRoleRepository } from '../../../../domain/ports/out/role-repository.port';
 import { RoleDocument } from './schemas/role.schema';
 import { TenantScopedRepository } from '../../../../common/tenant/tenant-scoped.repository';
@@ -20,11 +20,14 @@ export class MongooseRoleRepository extends TenantScopedRepository<RoleDocument,
     }
 
     async create(role: Role): Promise<Role> {
+        const tenantId = role.isGlobal ? null : this.requireTenant(role.tenantId || undefined);
+
         const doc = new this.roleModel({
-            tenantId: role.tenantId,
+            tenantId,
             name: role.name,
             description: role.description,
             isSystemRole: role.isSystemRole,
+            isGlobal: role.isGlobal ?? false,
             permissions: role.permissions.map((p) => ({
                 resource: p.resource,
                 actions: p.actions,
@@ -40,19 +43,47 @@ export class MongooseRoleRepository extends TenantScopedRepository<RoleDocument,
 
     async findById(id: string, tenantId: string): Promise<Role | null> {
         const resolved = this.requireTenant(tenantId);
-        const doc = await this.roleModel.findOne({ _id: id, tenantId: resolved }).exec();
+        const doc = await this.roleModel
+            .findOne({
+                _id: id,
+                $or: [
+                    { tenantId: resolved },
+                    { isGlobal: true },
+                ],
+            })
+            .exec();
         return doc ? this.mapToEntity(doc) : null;
     }
 
     async findByName(name: string, tenantId: string): Promise<Role | null> {
         const resolved = this.requireTenant(tenantId);
-        const doc = await this.roleModel.findOne({ name, tenantId: resolved }).exec();
+        const doc = await this.roleModel
+            .findOne({
+                name,
+                $or: [
+                    { tenantId: resolved },
+                    { isGlobal: true },
+                ],
+            })
+            .exec();
         return doc ? this.mapToEntity(doc) : null;
     }
 
     async findAll(tenantId: string): Promise<Role[]> {
         const resolved = this.requireTenant(tenantId);
-        const docs = await this.roleModel.find({ tenantId: resolved }).exec();
+        const docs = await this.roleModel
+            .find({
+                $or: [
+                    { tenantId: resolved },
+                    { isGlobal: true },
+                ],
+            })
+            .exec();
+        return docs.map((doc) => this.mapToEntity(doc));
+    }
+
+    async findGlobalRoles(): Promise<Role[]> {
+        const docs = await this.roleModel.find({ isGlobal: true }).exec();
         return docs.map((doc) => this.mapToEntity(doc));
     }
 
@@ -73,13 +104,18 @@ export class MongooseRoleRepository extends TenantScopedRepository<RoleDocument,
     }
 
     async update(role: Role): Promise<Role> {
-        const resolved = this.requireTenant(role.tenantId);
+        const filter = role.isGlobal
+            ? { _id: role.id, isGlobal: true }
+            : { _id: role.id, tenantId: this.requireTenant(role.tenantId) };
+
         const updated = await this.roleModel
             .findOneAndUpdate(
-                { _id: role.id, tenantId: resolved },
+                filter,
                 {
                     name: role.name,
                     description: role.description,
+                    isGlobal: role.isGlobal ?? false,
+                    isSystemRole: role.isSystemRole,
                     permissions: role.permissions.map((p) => ({
                         resource: p.resource,
                         actions: p.actions,
@@ -102,7 +138,13 @@ export class MongooseRoleRepository extends TenantScopedRepository<RoleDocument,
 
     async delete(id: string, tenantId: string): Promise<void> {
         const result = await this.roleModel
-            .deleteOne({ _id: id, tenantId })
+            .deleteOne({
+                _id: id,
+                $or: [
+                    { tenantId: this.requireTenant(tenantId) },
+                    { isGlobal: true },
+                ],
+            })
             .exec();
 
         if (result.deletedCount === 0) {
@@ -111,7 +153,16 @@ export class MongooseRoleRepository extends TenantScopedRepository<RoleDocument,
     }
 
     async exists(name: string, tenantId: string): Promise<boolean> {
-        const count = await this.roleModel.countDocuments({ name, tenantId }).exec();
+        const resolved = this.requireTenant(tenantId);
+        const count = await this.roleModel
+            .countDocuments({
+                name,
+                $or: [
+                    { tenantId: resolved },
+                    { isGlobal: true },
+                ],
+            })
+            .exec();
         return count > 0;
     }
 
@@ -123,7 +174,7 @@ export class MongooseRoleRepository extends TenantScopedRepository<RoleDocument,
         }
 
         // Create system roles
-        const systemRoles = createSystemRoles(tenantId);
+        const systemRoles = createTenantSystemRoles(tenantId);
         const createdRoles: Role[] = [];
 
         for (const role of systemRoles) {
@@ -134,16 +185,34 @@ export class MongooseRoleRepository extends TenantScopedRepository<RoleDocument,
         return createdRoles;
     }
 
+    async initializeGlobalRoles(): Promise<Role[]> {
+        const existing = await this.findGlobalRoles();
+        if (existing.length > 0) {
+            return existing;
+        }
+
+        const globalRoles = createGlobalRoles();
+        const created: Role[] = [];
+
+        for (const role of globalRoles) {
+            const createdRole = await this.create(role);
+            created.push(createdRole);
+        }
+
+        return created;
+    }
+
     /**
      * Map MongoDB document to domain entity
      */
     private mapToEntity(doc: RoleDocument): Role {
         return new Role({
             id: doc._id.toString(),
-            tenantId: doc.tenantId,
+            tenantId: doc.tenantId ?? null,
             name: doc.name,
             description: doc.description,
             isSystemRole: doc.isSystemRole,
+            isGlobal: doc.isGlobal,
             permissions: doc.permissions.map(
                 (p) =>
                     new Permission({

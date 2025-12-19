@@ -5,12 +5,15 @@ import { Permission } from './permission.entity';
  */
 export class Role {
     id: string;
-    tenantId: string;
+    tenantId: string | null;
     name: string;
     description: string;
 
     /** System roles cannot be deleted or modified */
     isSystemRole: boolean;
+
+    /** Global roles are shared across all tenants (tenantId is null) */
+    isGlobal?: boolean;
 
     /** Permissions assigned to this role */
     permissions: Permission[];
@@ -25,6 +28,7 @@ export class Role {
         Object.assign(this, data);
         this.permissions = this.permissions || [];
         this.isSystemRole = this.isSystemRole || false;
+        this.isGlobal = this.isGlobal || false;
         this.createdAt = this.createdAt || new Date();
         this.updatedAt = this.updatedAt || new Date();
     }
@@ -65,7 +69,7 @@ export class Role {
      * Validate role can be modified (not a system role)
      */
     validateModifiable(): void {
-        if (this.isSystemRole) {
+        if (this.isSystemRole || this.isGlobal) {
             throw new Error(`Cannot modify system role: ${this.name}`);
         }
     }
@@ -74,15 +78,17 @@ export class Role {
      * Create a new role
      */
     static create(data: {
-        tenantId: string;
+        tenantId?: string | null;
         name: string;
         description: string;
         permissions?: Permission[];
         isSystemRole?: boolean;
+        isGlobal?: boolean;
     }): Role {
         return new Role({
             id: undefined, // Will be set by repository
             ...data,
+            isGlobal: data.isGlobal ?? false,
             createdAt: new Date(),
             updatedAt: new Date(),
         });

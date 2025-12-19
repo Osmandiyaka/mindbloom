@@ -24,7 +24,20 @@ export interface IRoleRepository {
     /**
      * Find all roles for a tenant
      */
+    /**
+     * Find all roles visible to a tenant (tenant-scoped + global)
+     */
     findAll(tenantId: string): Promise<Role[]>;
+
+    /**
+     * Find global roles (shared across tenants)
+     */
+    findGlobalRoles(): Promise<Role[]>;
+
+    /**
+     * Initialize global roles (idempotent)
+     */
+    initializeGlobalRoles(): Promise<Role[]>;
 
     /**
      * Find system roles for a tenant

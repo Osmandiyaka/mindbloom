@@ -25,6 +25,10 @@ export class CreateRoleUseCase {
     ) { }
 
     async execute(dto: CreateRoleDto): Promise<Role> {
+        if ((dto as any).isGlobal) {
+            throw new Error('Creating global roles via tenant endpoint is not allowed');
+        }
+
         // Check if role already exists
         const exists = await this.roleRepository.exists(dto.name, dto.tenantId);
         if (exists) {
