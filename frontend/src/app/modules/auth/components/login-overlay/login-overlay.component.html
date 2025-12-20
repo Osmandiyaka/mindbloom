@@ -42,11 +42,40 @@
         <h2 class="welcome-title">Welcome to MindBloom</h2>
 
         <form (ngSubmit)="onSubmit()" class="login-form">
-            <div class="mode-switch">
-                <button type="button" class="mode-btn" [class.active]="loginMode() === 'tenant'"
-                    (click)="setMode('tenant')">School Admin</button>
-                <button type="button" class="mode-btn" [class.active]="loginMode() === 'host'"
-                    (click)="setMode('host')">Platform Host</button>
+            <div class="mode-switch" role="tablist" aria-label="Sign-in mode">
+                <button type="button" role="tab" [attr.aria-selected]="loginMode() === 'tenant'" class="mode-btn"
+                    [class.active]="loginMode() === 'tenant'" (click)="setMode('tenant')">
+                    <span class="mode-icon" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor" opacity="0.95" />
+                            <path d="M4 10v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6" stroke="currentColor" stroke-width="1"
+                                fill="none" />
+                        </svg>
+                    </span>
+                    <span class="mode-content">
+                        <span class="mode-title">School Admin</span>
+                        <span class="mode-caption">Tenant-scoped access</span>
+                    </span>
+                    <span class="tab-deco" aria-hidden="true"></span>
+                </button>
+
+                <button type="button" role="tab" [attr.aria-selected]="loginMode() === 'host'" class="mode-btn"
+                    [class.active]="loginMode() === 'host'" (click)="setMode('host')">
+                    <span class="mode-icon" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2a9 9 0 1 0 0 18 9 9 0 0 0 0-18z" stroke="currentColor" stroke-width="1"
+                                fill="none" opacity="0.9" />
+                            <path d="M7 12h10M12 7v10" stroke="currentColor" stroke-width="1.2"
+                                stroke-linecap="round" />
+                        </svg>
+                    </span>
+                    <span class="mode-content">
+                        <span class="mode-title">Platform Host</span>
+                        <span class="mode-caption">Cross‑tenant control</span>
+                    </span>
+                    <span class="badge badge-enterprise" aria-hidden="true">Enterprise</span>
+                    <span class="tab-deco" aria-hidden="true"></span>
+                </button>
             </div>
 
             <!-- School Code -->
