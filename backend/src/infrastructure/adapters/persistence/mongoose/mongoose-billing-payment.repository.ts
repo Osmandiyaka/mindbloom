@@ -1,10 +1,10 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { Payment } from '../../../domain/billing/entities/payment.entity';
-import { PaymentRepository } from '../../../domain/ports/out/payment-repository.port';
-import { TenantScopedRepository } from '../../../common/tenant/tenant-scoped.repository';
-import { TenantContext } from '../../../common/tenant/tenant.context';
+import { Payment } from '../../../../domain/billing/entities/payment.entity';
+import { PaymentRepository } from '../../../../domain/ports/out/payment-repository.port';
+import { TenantScopedRepository } from '../../../../common/tenant/tenant-scoped.repository';
+import { TenantContext } from '../../../../common/tenant/tenant.context';
 import { BillingPaymentDocument } from './schemas/billing-payment.schema';
 
 @Injectable()

@@ -1,6 +1,6 @@
 import { Document, Schema } from 'mongoose';
 
-export interface BillingInvoiceDocument extends Document {
+export interface BillingInvoiceDocument extends Document<string> {
     _id: string;
     tenantId: string;
     editionId?: string | null;

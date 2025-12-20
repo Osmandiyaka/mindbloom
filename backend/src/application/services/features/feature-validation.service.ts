@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { FeatureCatalog } from '../../../domain/features/feature-catalog';
 import { FeatureValueParser } from '../../../domain/features/feature-value-parser';
 import { FeatureValueType } from '../../../domain/features/feature-value-type';
@@ -33,7 +33,7 @@ export class FeatureValidationService {
 
     constructor(
         @Inject(TENANT_REPOSITORY) private readonly tenants: ITenantRepository,
-        private readonly editionManager: EditionManager,
+        @Inject(forwardRef(() => EditionManager)) private readonly editionManager: EditionManager,
         @Inject(TENANT_FEATURE_OVERRIDE_REPOSITORY) private readonly overrides: ITenantFeatureOverrideRepository,
     ) { }
 

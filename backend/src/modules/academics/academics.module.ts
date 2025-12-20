@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AcademicsController } from './academics.controller';
 import { AcademicRecordSchema, AcademicRecordDocument } from '../../infrastructure/adapters/persistence/mongoose/schemas/academic-record.schema';
@@ -8,12 +8,14 @@ import { CreateAcademicRecordUseCase } from '../../application/services/academic
 import { ListAcademicRecordsUseCase } from '../../application/services/academics/list-academic-records.use-case';
 import { UpdateAcademicRecordUseCase } from '../../application/services/academics/update-academic-record.use-case';
 import { DeleteAcademicRecordUseCase } from '../../application/services/academics/delete-academic-record.use-case';
+import { TenantSupportModule } from '../../common/tenant/tenant.module';
 
 @Module({
     imports: [
         MongooseModule.forFeature([
             { name: AcademicRecordDocument.name, schema: AcademicRecordSchema },
         ]),
+        TenantSupportModule,
     ],
     controllers: [AcademicsController],
     providers: [

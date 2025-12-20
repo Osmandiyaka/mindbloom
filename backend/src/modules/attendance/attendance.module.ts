@@ -8,12 +8,14 @@ import { RecordAttendanceUseCase } from '../../application/services/attendance/r
 import { UpdateAttendanceUseCase } from '../../application/services/attendance/update-attendance.use-case';
 import { ListAttendanceUseCase } from '../../application/services/attendance/list-attendance.use-case';
 import { DeleteAttendanceUseCase } from '../../application/services/attendance/delete-attendance.use-case';
+import { TenantSupportModule } from '../../common/tenant/tenant.module';
 
 @Module({
     imports: [
         MongooseModule.forFeature([
             { name: AttendanceDocument.name, schema: AttendanceSchema },
         ]),
+        TenantSupportModule,
     ],
     controllers: [AttendanceController],
     providers: [

@@ -12,6 +12,7 @@ import { FEE_INVOICE_REPOSITORY } from '../../domain/ports/out/fee-invoice-repos
 import { FEE_PAYMENT_REPOSITORY } from '../../domain/ports/out/fee-payment-repository.port';
 import { MongooseFeeInvoiceRepository } from '../../infrastructure/adapters/persistence/mongoose/mongoose-fee-invoice.repository';
 import { MongooseFeePaymentRepository } from '../../infrastructure/adapters/persistence/mongoose/mongoose-fee-payment.repository';
+import { TenantSupportModule } from '../../common/tenant/tenant.module';
 
 @Module({
     imports: [
@@ -21,6 +22,7 @@ import { MongooseFeePaymentRepository } from '../../infrastructure/adapters/pers
             { name: 'Payment', schema: PaymentSchema },
         ]),
         AccountingModule,
+        TenantSupportModule,
     ],
     controllers: [InvoicesController],
     providers: [

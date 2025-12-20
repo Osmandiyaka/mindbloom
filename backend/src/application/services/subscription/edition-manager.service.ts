@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { Edition } from '../../../domain/edition/entities/edition.entity';
 import { EditionFeatureAssignment, IEditionRepository } from '../../../domain/ports/out/edition-repository.port';
@@ -38,7 +38,7 @@ export class EditionManager {
     constructor(
         @Inject(EDITION_REPOSITORY)
         private readonly editions: IEditionRepository,
-        private readonly featureValidator: FeatureValidationService,
+        @Inject(forwardRef(() => FeatureValidationService)) private readonly featureValidator: FeatureValidationService,
     ) { }
 
     async listEditions(): Promise<Edition[]> {
