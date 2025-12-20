@@ -58,7 +58,7 @@ class EditionsInitializer implements OnApplicationBootstrap {
         MailModule,
         PluginsModule,
     ],
-    controllers: [TenantController, HostEditionsController, HostTenantSubscriptionsController],
+    controllers: [TenantController, HostEditionsController, HostTenantSubscriptionsController, (require('../../presentation/controllers/editions.controller').EditionsController)],
     providers: [
         {
             provide: TENANT_REPOSITORY,

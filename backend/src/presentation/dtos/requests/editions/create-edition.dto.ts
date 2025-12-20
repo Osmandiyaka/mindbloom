@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsOptional, IsString, IsInt, Min } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, IsInt, Min, IsNumber } from 'class-validator';
 
 export class CreateEditionDto {
     @ApiProperty({ description: 'System name (unique, lowercase)' })
@@ -27,4 +27,27 @@ export class CreateEditionDto {
     @IsInt()
     @Min(0)
     sortOrder?: number;
+
+    @ApiProperty({ description: 'Monthly price in USD (integer cents or dollars depending on convention)', required: false })
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    monthlyPrice?: number | null;
+
+    @ApiProperty({ description: 'Annual price in USD', required: false })
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    annualPrice?: number | null;
+
+    @ApiProperty({ description: 'Per-student monthly price', required: false })
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    perStudentMonthly?: number | null;
+
+    @ApiProperty({ description: 'Notes about annual pricing (e.g., "Custom")', required: false })
+    @IsOptional()
+    @IsString()
+    annualPriceNotes?: string | null;
 }

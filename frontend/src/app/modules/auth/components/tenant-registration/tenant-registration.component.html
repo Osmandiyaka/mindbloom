@@ -158,57 +158,26 @@
                 <div class="form-group">
                     <label class="form-label">Select Edition</label>
                     <div class="plan-cards">
-                        <div class="plan-card" [class.selected]="selectedEdition() === 'free'"
-                            (click)="selectEdition('free')">
-                            <div class="plan-header">
-                                <div class="plan-name">Free</div>
-                                <span class="badge subtle">Starter</span>
+                        @if (loadingEditions()) {
+                        <div>Loading editions...</div>
+                        } @else if (editionLoadError()) {
+                        <div class="error-message">{{ editionLoadError() }}</div>
+                        } @else {
+                        <ng-container *ngFor="let e of editions()">
+                            <div class="plan-card" [class.selected]="selectedEdition() === e.name"
+                                (click)="selectEdition(e.name)">
+                                <div class="plan-header">
+                                    <div class="plan-name">{{ e.displayName }}</div>
+                                </div>
+                                <div class="plan-price">{{ e.monthlyPrice ? ('$' + e.monthlyPrice + '/month') :
+                                    (e.perStudentMonthly ? ('$' + e.perStudentMonthly + '/student/mo') : (e.annualPrice
+                                    ? ('$' + e.annualPrice + '/yr') : (e.annualPriceNotes || 'Talk to us')) ) }}</div>
+                                <ul class="plan-features">
+                                    <li *ngFor="let f of featureKeys(e.features)">{{ f.replace('_', ' ') }}</li>
+                                </ul>
                             </div>
-                            <div class="plan-price">$0/month</div>
-                            <ul class="plan-features">
-                                <li>Student management</li>
-                                <li>Basic attendance</li>
-                                <li>Email support</li>
-                            </ul>
-                        </div>
-                        <div class="plan-card" [class.selected]="selectedEdition() === 'basic'"
-                            (click)="selectEdition('basic')">
-                            <div class="plan-header">
-                                <div class="plan-name">Basic</div>
-                            </div>
-                            <div class="plan-price">$49/month</div>
-                            <ul class="plan-features">
-                                <li>Students & attendance</li>
-                                <li>Progress reports</li>
-                                <li>Core integrations</li>
-                            </ul>
-                        </div>
-                        <div class="plan-card popular" [class.selected]="selectedEdition() === 'premium'"
-                            (click)="selectEdition('premium')">
-                            <div class="plan-header">
-                                <div class="plan-name">Premium</div>
-                                <span class="badge">Most Popular</span>
-                            </div>
-                            <div class="plan-price">$99/month</div>
-                            <ul class="plan-features">
-                                <li>Finance + Library modules</li>
-                                <li>Advanced analytics</li>
-                                <li>Priority support</li>
-                            </ul>
-                        </div>
-                        <div class="plan-card" [class.selected]="selectedEdition() === 'enterprise'"
-                            (click)="selectEdition('enterprise')">
-                            <div class="plan-header">
-                                <div class="plan-name">Enterprise</div>
-                                <span class="badge subtle">Custom</span>
-                            </div>
-                            <div class="plan-price">Talk to us</div>
-                            <ul class="plan-features">
-                                <li>All features unlocked</li>
-                                <li>Custom SLAs</li>
-                                <li>Dedicated success manager</li>
-                            </ul>
-                        </div>
+                        </ng-container>
+                        }
                     </div>
                 </div>
 

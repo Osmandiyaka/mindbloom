@@ -12,6 +12,19 @@ export class EditionDocument extends Document {
     @Prop()
     description?: string;
 
+    // Pricing fields
+    @Prop({ type: Number })
+    monthlyPrice?: number | null;
+
+    @Prop({ type: Number })
+    annualPrice?: number | null;
+
+    @Prop({ type: Number })
+    perStudentMonthly?: number | null;
+
+    @Prop()
+    annualPriceNotes?: string | null;
+
     @Prop({ required: true, default: true })
     isActive: boolean;
 

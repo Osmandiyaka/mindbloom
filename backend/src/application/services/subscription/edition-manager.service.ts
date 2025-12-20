@@ -14,6 +14,10 @@ export interface CreateEditionInput {
     name: string;
     displayName: string;
     description?: string | null;
+    monthlyPrice?: number | null;
+    annualPrice?: number | null;
+    perStudentMonthly?: number | null;
+    annualPriceNotes?: string | null;
     isActive?: boolean;
     sortOrder?: number;
 }
@@ -21,6 +25,10 @@ export interface CreateEditionInput {
 export interface UpdateEditionInput {
     displayName?: string;
     description?: string | null;
+    monthlyPrice?: number | null;
+    annualPrice?: number | null;
+    perStudentMonthly?: number | null;
+    annualPriceNotes?: string | null;
     isActive?: boolean;
     sortOrder?: number;
 }
@@ -45,6 +53,16 @@ export class EditionManager {
         return this.editions.findAll();
     }
 
+    async listEditionsWithFeatures(): Promise<Array<{ edition: Edition; features: Record<string, string> }>> {
+        const edits = await this.listEditions();
+        const out: Array<{ edition: Edition; features: Record<string, string> }> = [];
+        for (const e of edits) {
+            const features = await this.getFeatureMapCached(e.id);
+            out.push({ edition: e, features });
+        }
+        return out;
+    }
+
     async createEdition(input: CreateEditionInput): Promise<Edition> {
         const name = input.name?.trim();
         if (!name) throw new Error('Edition name is required');
@@ -65,6 +83,10 @@ export class EditionManager {
             name: normalized,
             displayName,
             description: input.description ?? null,
+            monthlyPrice: input.monthlyPrice ?? null,
+            annualPrice: input.annualPrice ?? null,
+            perStudentMonthly: input.perStudentMonthly ?? null,
+            annualPriceNotes: input.annualPriceNotes ?? null,
             isActive: input.isActive ?? true,
             sortOrder,
         });

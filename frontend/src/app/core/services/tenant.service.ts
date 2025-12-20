@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export type TenantStatus = 'pending' | 'active' | 'suspended' | 'inactive' | 'deleted';
-export type TenantEdition = 'trial' | 'free' | 'basic' | 'premium' | 'enterprise';
+export type TenantEdition = 'trial' | 'starter' | 'professional' | 'premium' | 'enterprise';
 // Backwards-compatible alias
 export type TenantPlan = TenantEdition;
 
@@ -83,6 +83,10 @@ export class TenantService {
         return this.http.get<Tenant>(`${this.API_URL}/tenants/${id}`);
     }
 
+    listPublicEditions(): Observable<Array<{ id: string; name: string; displayName: string; description?: string | null; features: Record<string, string>; monthlyPrice?: number | null; annualPrice?: number | null; perStudentMonthly?: number | null; annualPriceNotes?: string | null; isActive?: boolean }>> {
+        return this.http.get<Array<{ id: string; name: string; displayName: string; description?: string | null; features: Record<string, string>; monthlyPrice?: number | null; annualPrice?: number | null; perStudentMonthly?: number | null; annualPriceNotes?: string | null; isActive?: boolean }>>(`${this.API_URL}/editions`);
+    }
+
     getTenantBySubdomain(subdomain: string): Observable<Tenant> {
         return this.http.get<Tenant>(`${this.API_URL}/tenants/subdomain/${subdomain}`);
     }
@@ -145,9 +149,9 @@ export class TenantService {
 
         const featuresByEdition: Record<TenantEdition, string[]> = {
             trial: ['basic_features', 'student_management', 'attendance', 'grades'],
-            free: ['basic_features'],
-            basic: ['basic_features', 'student_management', 'attendance'],
-            premium: ['basic_features', 'student_management', 'attendance', 'finance', 'library'],
+            starter: ['basic_features', 'student_management', 'attendance', 'grades'],
+            professional: ['basic_features', 'timetabling', 'parent_portal', 'library'],
+            premium: ['basic_features', 'student_management', 'attendance', 'finance', 'library', 'analytics'],
             enterprise: ['basic_features', 'student_management', 'attendance', 'finance', 'library', 'hr', 'transport', 'hostel'],
         };
 

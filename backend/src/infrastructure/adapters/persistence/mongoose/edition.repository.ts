@@ -19,6 +19,10 @@ export class MongooseEditionRepository implements IEditionRepository {
             name: edition.name,
             displayName: edition.displayName,
             description: edition.description,
+            monthlyPrice: edition.monthlyPrice ?? null,
+            annualPrice: edition.annualPrice ?? null,
+            perStudentMonthly: edition.perStudentMonthly ?? null,
+            annualPriceNotes: edition.annualPriceNotes ?? null,
             isActive: edition.isActive,
             sortOrder: edition.sortOrder,
             isFallback: false,
@@ -30,8 +34,13 @@ export class MongooseEditionRepository implements IEditionRepository {
         const updated = await this.editionModel.findByIdAndUpdate(id, {
             displayName: data.displayName,
             description: data.description,
+            monthlyPrice: (data as any).monthlyPrice ?? null,
+            annualPrice: (data as any).annualPrice ?? null,
+            perStudentMonthly: (data as any).perStudentMonthly ?? null,
+            annualPriceNotes: (data as any).annualPriceNotes ?? null,
             isActive: data.isActive,
             sortOrder: data.sortOrder,
+            updatedAt: new Date(),
         }, { new: true }).exec();
         if (!updated) {
             throw new Error('Edition not found');
@@ -56,19 +65,44 @@ export class MongooseEditionRepository implements IEditionRepository {
     }
 
     async replaceFeatures(editionId: string, assignments: EditionFeatureAssignment[]): Promise<void> {
+        // Try to use transactions where supported (replica set), but fall back to non-transactional operations
+        // for single-node/local MongoDB instances (which don't support transactions).
         const session = await this.editionModel.db.startSession();
-        await session.withTransaction(async () => {
-            await this.editionFeatureModel.deleteMany({ editionId: new Types.ObjectId(editionId) }, { session }).exec();
-            if (assignments.length) {
-                const docs = assignments.map(a => ({
-                    editionId: new Types.ObjectId(editionId),
-                    featureKey: a.featureKey,
-                    value: a.value,
-                }));
-                await this.editionFeatureModel.insertMany(docs, { session });
+        let usedTransaction = false;
+        try {
+            await session.withTransaction(async () => {
+                usedTransaction = true;
+                await this.editionFeatureModel.deleteMany({ editionId: new Types.ObjectId(editionId) }, { session }).exec();
+                if (assignments.length) {
+                    const docs = assignments.map(a => ({
+                        editionId: new Types.ObjectId(editionId),
+                        featureKey: a.featureKey,
+                        value: a.value,
+                    }));
+                    await this.editionFeatureModel.insertMany(docs, { session });
+                }
+            });
+        } catch (err: any) {
+            // If transactions are not supported (e.g., standalone Mongo), fall back to plain operations
+            const msg = String(err.message || err);
+            if (msg.includes('Transaction numbers are only allowed') || msg.includes('transactions are not supported')) {
+                // eslint-disable-next-line no-console
+                console.warn('Transactions not supported by MongoDB deployment, falling back to non-transactional feature replacement');
+                await this.editionFeatureModel.deleteMany({ editionId: new Types.ObjectId(editionId) }).exec();
+                if (assignments.length) {
+                    const docs = assignments.map(a => ({
+                        editionId: new Types.ObjectId(editionId),
+                        featureKey: a.featureKey,
+                        value: a.value,
+                    }));
+                    await this.editionFeatureModel.insertMany(docs);
+                }
+            } else {
+                throw err;
             }
-        });
-        session.endSession();
+        } finally {
+            try { session.endSession(); } catch (e) { /* ignore */ }
+        }
     }
 
     async getFeaturesMap(editionId: string): Promise<Record<string, string>> {
@@ -118,12 +152,16 @@ export class MongooseEditionRepository implements IEditionRepository {
                 continue;
             }
 
-            // If metadata differs, update it
+            // If metadata or pricing differs, update it
             const needsUpdate =
                 found.displayName !== d.displayName ||
                 (found.description ?? null) !== (d.description ?? null) ||
                 found.isActive !== d.isActive ||
-                found.sortOrder !== d.sortOrder;
+                found.sortOrder !== d.sortOrder ||
+                (found as any).monthlyPrice !== (d as any).monthlyPrice ||
+                (found as any).annualPrice !== (d as any).annualPrice ||
+                (found as any).perStudentMonthly !== (d as any).perStudentMonthly ||
+                (found as any).annualPriceNotes !== (d as any).annualPriceNotes;
 
             if (needsUpdate) {
                 await this.update(found.id, d as any);
@@ -152,6 +190,10 @@ export class MongooseEditionRepository implements IEditionRepository {
             name: doc.name,
             displayName: doc.displayName,
             description: doc.description,
+            monthlyPrice: doc.monthlyPrice ?? null,
+            annualPrice: doc.annualPrice ?? null,
+            perStudentMonthly: doc.perStudentMonthly ?? null,
+            annualPriceNotes: doc.annualPriceNotes ?? null,
             isActive: doc.isActive,
             sortOrder: doc.sortOrder,
             createdAt: doc.createdAt,

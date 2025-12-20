@@ -1,4 +1,5 @@
 import { Component, signal, output } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TenantService, Tenant, TenantEdition, TenantPlan } from '../../../../core/services/tenant.service';
@@ -23,6 +24,9 @@ export class TenantRegistrationComponent {
     adminPasswordConfirm = signal('');
     phone = signal('');
     selectedEdition = signal<TenantEdition>('trial');
+    editions = signal<Array<{ id: string; name: string; displayName: string; description?: string | null; features: Record<string, string>; monthlyPrice?: number | null; annualPrice?: number | null; perStudentMonthly?: number | null; annualPriceNotes?: string | null; isActive?: boolean }>>([]);
+    loadingEditions = signal(false);
+    editionLoadError = signal('');
     acceptTerms = signal(false);
     codeStatus = signal<'idle' | 'checking' | 'available' | 'taken' | 'error'>('idle');
     codeStatusMessage = signal('');
@@ -36,7 +40,25 @@ export class TenantRegistrationComponent {
     cancelled = output<void>();
     registered = output<{ tenantId: string; subdomain: string }>();
 
-    constructor(private tenantService: TenantService) { }
+    constructor(private tenantService: TenantService) {
+        this.loadEditions();
+    }
+
+    async loadEditions(): Promise<void> {
+        this.loadingEditions.set(true);
+        this.editionLoadError.set('');
+        try {
+            const eds = await firstValueFrom(this.tenantService.listPublicEditions());
+            this.editions.set(eds.filter(e => e.isActive));
+            // pick default edition if trial
+            if (!eds.length) return;
+            this.selectedEdition.set(eds[0].name as TenantEdition || 'trial');
+        } catch (err: any) {
+            this.editionLoadError.set('Failed to load available editions');
+        } finally {
+            this.loadingEditions.set(false);
+        }
+    }
 
     onCancel(): void {
         this.cancelled.emit();
@@ -83,8 +105,12 @@ export class TenantRegistrationComponent {
         });
     }
 
-    selectEdition(edition: TenantEdition): void {
-        this.selectedEdition.set(edition);
+    selectEdition(edition: string | TenantEdition): void {
+        this.selectedEdition.set(edition as TenantEdition);
+    }
+
+    featureKeys(features: Record<string, string>): string[] {
+        return Object.keys(features || {});
     }
 
     // Step navigation with validation
