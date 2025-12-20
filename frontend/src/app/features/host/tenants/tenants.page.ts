@@ -148,24 +148,24 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
       border-radius: 14px;
       overflow: hidden;
       background: var(--host-surface-elevated);
-      box-shadow: 0 8px 20px rgba(15,23,42,0.04);
+      box-shadow: 0 10px 30px rgba(2,6,23,0.06);
       font-family: var(--host-font-family);
       color: var(--host-text-color);
     }
 
     /* Table */
-    .table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { padding: 14px 12px; border-bottom: 1px solid rgba(15,23,42,0.04); text-align: left; vertical-align: top; }
-    th { font-size: 12px; color: var(--host-muted-color); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
-    td { color: var(--host-text-color); }
+    .table { width: 100%; border-collapse: collapse; font-size: var(--host-font-size); line-height: 1.45; color: var(--host-text-color); }
+    th, td { padding: 14px 12px; border-bottom: 1px solid var(--host-border-subtle); text-align: left; vertical-align: top; }
+    th { font-size: 12px; color: var(--host-heading-color); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; background: rgba(15,23,42,0.02); }
+    td { color: var(--host-text-color); font-size: var(--host-font-size); }
 
     .right { text-align: right; }
 
-    .name { font-weight: 700; font-size: 15px; color: var(--host-text-color); }
-    .muted { color: var(--host-muted-color); font-size: 13px; margin-top: 4px; }
+    .name { font-weight: 700; font-size: 16px; color: var(--host-text-color); }
+    .muted { color: var(--host-muted-color); font-size: var(--host-small-font-size); margin-top: 4px; }
 
     /* Row hover for readability */
-    tbody tr:hover { background: rgba(14, 165, 233, 0.02); }
+    tbody tr:hover { background: var(--host-surface-muted); }
 
     /* Status pills */
     .pill {
@@ -173,13 +173,13 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
       padding: 6px 12px;
       border-radius: 999px;
       font-size: 12px;
-      border: 1px solid rgba(15,23,42,0.04);
-      background: #f8fafc;
-      color: #0f172a;
-      font-weight: 600;
+      border: 1px solid rgba(15,23,42,0.06);
+      background: var(--host-surface-muted);
+      color: var(--host-text-color);
+      font-weight: 700;
     }
     .pill.suspended { border-color: #fca5a5; background: #fff1f2; color: #7f1d1d; }
-    .pill.trial { border-color: #93c5fd; background: #eff6ff; color: #1e3a8a; }
+    .pill.trial { border-color: #3b82f6; background: #eff6ff; color: #1e3a8a; }
 
     /* Buttons */
     .btn {
