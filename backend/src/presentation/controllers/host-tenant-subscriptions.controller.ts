@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards, Get, Query } from '@nestjs/common';
+import { Body, Controller, Param, Post, UseGuards, Get, Query, Optional } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
 import { HostContextGuard } from '../../common/guards/host-context.guard';
@@ -20,7 +20,7 @@ import { TenantActivityItemDto } from '../dtos/responses/host/tenant-activity.re
 export class HostTenantSubscriptionsController {
     constructor(
         private readonly tenantManager: TenantManager,
-        private readonly getTenantByIdUseCase: GetTenantByIdUseCase,
+        @Optional() private readonly getTenantByIdUseCase?: GetTenantByIdUseCase,
     ) { }
 
     @Get(':tenantId')

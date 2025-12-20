@@ -22,6 +22,7 @@ import { TenantContext } from '../tenant/tenant.context';
             { name: 'Student', schema: StudentSchema },
             { name: 'Class', schema: ClassSchema },
             { name: 'Tenant', schema: TenantSchema },
+            { name: 'AuditLog', schema: (await import('../../infrastructure/adapters/persistence/mongoose/schemas/audit.schema')).AuditLogSchema },
         ]),
     ],
     providers: [TenantContext],

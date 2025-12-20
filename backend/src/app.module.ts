@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
@@ -18,6 +20,9 @@ import { SetupModule } from './modules/setup/setup.module';
 import { AdmissionsModule } from './modules/admissions/admissions.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { DatabaseModule } from './common/database/database.module';
+import { AuditModule } from './modules/audit/audit.module';
+import { HostAuditController } from './presentation/controllers/host-audit.controller';
+import { AppAuditController } from './presentation/controllers/app-audit.controller';
 import { RolesModule } from './modules/roles/roles.module';
 import { UsersModule } from './modules/users/users.module';
 import { PluginsModule } from './modules/plugins/plugins.module';
@@ -34,6 +39,7 @@ import { SubscriptionJobsModule } from './modules/subscription/subscription-jobs
         }),
         ScheduleModule.forRoot(),
         DatabaseModule,
+        AuditModule,
         AuthModule,
         TenantModule,
         RolesModule,
@@ -59,5 +65,7 @@ import { SubscriptionJobsModule } from './modules/subscription/subscription-jobs
         TasksModule,
         TenantSupportModule,
     ],
+    controllers: [HostAuditController, AppAuditController],
+    providers: [{ provide: APP_INTERCEPTOR, useClass: AuditInterceptor }],
 })
 export class AppModule { }

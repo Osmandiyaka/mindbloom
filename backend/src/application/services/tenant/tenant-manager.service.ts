@@ -1,9 +1,10 @@
-import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
+import { Inject, Injectable, Logger, Scope, Optional } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { EditionManager } from '../subscription/edition-manager.service';
 import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/ports/out/tenant-repository.port';
 import { AssignBehavior, ProrationPolicy } from '../../../domain/tenant/entities/tenant-subscription.types';
 import { Tenant } from '../../../domain/tenant/entities/tenant.entity';
+import { AuditService } from '../audit/audit.service';
 import {
     EditionNotFoundException,
     InvalidEffectiveDateException,
@@ -37,6 +38,7 @@ export class TenantManager {
         private readonly editionManager: EditionManager,
         private readonly events: EventBus,
         @Inject(REQUEST) private readonly request: any,
+        @Optional() private readonly audit?: AuditService,
     ) { }
 
     async assignEditionToTenant(
@@ -86,6 +88,20 @@ export class TenantManager {
                 subscriptionEndDate: normalizedEndDate,
             },
         );
+
+        // record audit log via AuditService (best-effort)
+        void (this.audit?.log?.({
+            category: 'TENANT_MGMT',
+            action: 'TENANT.ASSIGN_EDITION',
+            scope: 'HOST',
+            tenantId: tenantId,
+            actorType: this.getActor().actorTenantContext === 'host' ? 'HOST_USER' : 'TENANT_USER',
+            actorUserId: this.getActor().userId ?? undefined,
+            actorEmailSnapshot: (this.request?.user as any)?.email ?? undefined,
+            message: `Assigned edition ${editionId} to tenant ${tenantId}`,
+            before: before,
+            after: this.snapshot(updated),
+        }));
     }
 
     async extendSubscription(tenantId: string, newEndDate: Date): Promise<void> {
