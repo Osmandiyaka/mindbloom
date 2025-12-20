@@ -3,10 +3,10 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { EditionLookup, TenantCreateInput, TenantListItem, TenantUpdateInput } from '../../../core/api/models';
 
 @Component({
-    selector: 'tenant-form-dialog',
-    standalone: true,
-    imports: [ReactiveFormsModule],
-    template: `
+  selector: 'tenant-form-dialog',
+  standalone: true,
+  imports: [ReactiveFormsModule],
+  template: `
     @if (open()) {
       <div class="backdrop" (click)="close()"></div>
 
@@ -67,7 +67,7 @@ import { EditionLookup, TenantCreateInput, TenantListItem, TenantUpdateInput } f
       </div>
     }
   `,
-    styles: [`
+  styles: [`
     .backdrop {
       position: fixed; inset: 0;
       background: rgba(0,0,0,.35);
@@ -78,6 +78,7 @@ import { EditionLookup, TenantCreateInput, TenantListItem, TenantUpdateInput } f
       transform: translate(-50%, -50%);
       width: min(720px, calc(100vw - 24px));
       background: #fff;
+      color: #111827; /* ensure readable text on light dialog */
       border-radius: 16px;
       border: 1px solid #e5e7eb;
       box-shadow: 0 20px 50px rgba(0,0,0,.2);
@@ -85,122 +86,126 @@ import { EditionLookup, TenantCreateInput, TenantListItem, TenantUpdateInput } f
       z-index: 10;
     }
     .header { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
-    h2 { margin: 0; font-size: 18px; }
+    h2 { margin: 0; font-size: 18px; color: #111827; }
     .muted { margin: 4px 0 0; color: #6b7280; font-size: 13px; }
-    .icon { border: 1px solid #e5e7eb; background: #fff; border-radius: 10px; padding: 6px 10px; cursor: pointer; }
+    .icon { border: 1px solid #e5e7eb; background: #fff; border-radius: 10px; padding: 6px 10px; cursor: pointer; color: #111827; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
     @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
     .field { display: grid; gap: 6px; }
+    .field span { color: #111827; font-weight: 600; }
     input, select {
       border: 1px solid #e5e7eb;
       border-radius: 10px;
       padding: 10px;
       outline: none;
+      color: #111827; /* ensure input text is dark */
+      background: #fff;
     }
+    input::placeholder { color: #9ca3af; }
     .error { color: #dc2626; }
     .footer { display: flex; justify-content: end; gap: 8px; margin-top: 16px; }
-    .btn { border: 1px solid #e5e7eb; background: #fff; padding: 10px 12px; border-radius: 10px; cursor: pointer; }
+    .btn { border: 1px solid #e5e7eb; background: #fff; padding: 10px 12px; border-radius: 10px; cursor: pointer; color: #111827; }
     .btn.primary { background: #111827; color: #fff; border-color: #111827; }
     .btn:disabled { opacity: .6; cursor: not-allowed; }
   `],
 })
 export class TenantFormDialogComponent {
-    @Input({ required: true }) editions: EditionLookup[] = [];
+  @Input({ required: true }) editions: EditionLookup[] = [];
 
-    // open state controlled by parent
-    open = signal(false);
+  // open state controlled by parent
+  open = signal(false);
 
-    // create | edit
-    private _mode = signal<'create' | 'edit'>('create');
-    mode = computed(() => this._mode());
+  // create | edit
+  private _mode = signal<'create' | 'edit'>('create');
+  mode = computed(() => this._mode());
 
-    // for edit mode
-    private _tenant = signal<TenantListItem | null>(null);
-    tenant = computed(() => this._tenant());
+  // for edit mode
+  private _tenant = signal<TenantListItem | null>(null);
+  tenant = computed(() => this._tenant());
 
-    @Output() closed = new EventEmitter<void>();
-    @Output() create = new EventEmitter<TenantCreateInput>();
-    @Output() update = new EventEmitter<{ id: string; input: TenantUpdateInput }>();
+  @Output() closed = new EventEmitter<void>();
+  @Output() create = new EventEmitter<TenantCreateInput>();
+  @Output() update = new EventEmitter<{ id: string; input: TenantUpdateInput }>();
 
-    submitting = signal(false);
+  submitting = signal(false);
 
-    title = computed(() => this.mode() === 'create' ? 'Create Tenant' : 'Edit Tenant');
-    subtitle = computed(() => this.mode() === 'create'
-        ? 'Add a new school (tenant) to the platform.'
-        : 'Update tenant details.'
-    );
+  title = computed(() => this.mode() === 'create' ? 'Create Tenant' : 'Edit Tenant');
+  subtitle = computed(() => this.mode() === 'create'
+    ? 'Add a new school (tenant) to the platform.'
+    : 'Update tenant details.'
+  );
 
-    form = this.fb.group({
-        name: ['', Validators.required],
-        subdomain: [
-            '',
-            [
-                Validators.required,
-                Validators.pattern(/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/), // simple subdomain rule
-            ],
-        ],
-        editionId: [null as string | null],
-        trialDays: [null as number | null],
+  form = this.fb.group({
+    name: ['', Validators.required],
+    subdomain: [
+      '',
+      [
+        Validators.required,
+        Validators.pattern(/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/), // simple subdomain rule
+      ],
+    ],
+    editionId: [null as string | null],
+    trialDays: [null as number | null],
+  });
+
+  constructor(private fb: FormBuilder) { }
+
+  showCreate() {
+    this._mode.set('create');
+    this._tenant.set(null);
+    this.form.reset({ name: '', subdomain: '', editionId: null, trialDays: null });
+    this.open.set(true);
+  }
+
+  showEdit(tenant: TenantListItem) {
+    this._mode.set('edit');
+    this._tenant.set(tenant);
+    this.form.reset({
+      name: tenant.name,
+      subdomain: tenant.subdomain,
+      editionId: tenant.editionId ?? null,
+      trialDays: null,
     });
+    this.open.set(true);
+  }
 
-    constructor(private fb: FormBuilder) { }
+  close() {
+    this.open.set(false);
+    this.closed.emit();
+  }
 
-    showCreate() {
-        this._mode.set('create');
-        this._tenant.set(null);
-        this.form.reset({ name: '', subdomain: '', editionId: null, trialDays: null });
-        this.open.set(true);
+  async submit() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
     }
 
-    showEdit(tenant: TenantListItem) {
-        this._mode.set('edit');
-        this._tenant.set(tenant);
-        this.form.reset({
-            name: tenant.name,
-            subdomain: tenant.subdomain,
-            editionId: tenant.editionId ?? null,
-            trialDays: null,
+    const v = this.form.getRawValue();
+    this.submitting.set(true);
+
+    try {
+      if (this.mode() === 'create') {
+        this.create.emit({
+          name: v.name!,
+          subdomain: v.subdomain!,
+          editionId: v.editionId ?? null,
+          trialDays: v.trialDays ?? null,
         });
-        this.open.set(true);
+      } else {
+        const t = this.tenant();
+        if (!t) return;
+
+        this.update.emit({
+          id: t.id,
+          input: {
+            name: v.name!,
+            subdomain: v.subdomain!,
+            editionId: v.editionId ?? null,
+          },
+        });
+      }
+    } finally {
+      this.submitting.set(false);
     }
-
-    close() {
-        this.open.set(false);
-        this.closed.emit();
-    }
-
-    async submit() {
-        if (this.form.invalid) {
-            this.form.markAllAsTouched();
-            return;
-        }
-
-        const v = this.form.getRawValue();
-        this.submitting.set(true);
-
-        try {
-            if (this.mode() === 'create') {
-                this.create.emit({
-                    name: v.name!,
-                    subdomain: v.subdomain!,
-                    editionId: v.editionId ?? null,
-                    trialDays: v.trialDays ?? null,
-                });
-            } else {
-                const t = this.tenant();
-                if (!t) return;
-
-                this.update.emit({
-                    id: t.id,
-                    input: {
-                        name: v.name!,
-                        subdomain: v.subdomain!,
-                        editionId: v.editionId ?? null,
-                    },
-                });
-            }
-        } finally {
-            this.submitting.set(false);
-        }
-    }
+  }
 }
