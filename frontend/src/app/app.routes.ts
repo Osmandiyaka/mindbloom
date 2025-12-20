@@ -38,6 +38,12 @@ export const routes: Routes = [
         canActivate: [authGuard] // Auth required, but NOT tenant guard
     },
     {
+        path: 'host',
+        loadComponent: () => import('./modules/host/pages/host-dashboard/host-dashboard.component').then(m => m.HostDashboardComponent),
+        canActivate: [authGuard],
+        data: { skipTenant: true }
+    },
+    {
         path: '',
         component: MainLayoutComponent,
         canActivate: [authGuard, tenantGuard],

@@ -23,6 +23,7 @@ export class LoginOverlayComponent {
     isLoading = signal(false);
     errorMessage = signal('');
     resetSuccess = signal(false);
+    loginMode = signal<'tenant' | 'host'>('tenant');
 
     // Tenant editing state
     isEditingTenant = signal(false);
@@ -53,11 +54,25 @@ export class LoginOverlayComponent {
     }
 
     get currentTenant(): string {
+        if (this.loginMode() === 'host') {
+            return 'Host context';
+        }
         const tenant = this.tenantService.getCurrentTenantValue();
         return tenant?.name || 'No Tenant Selected';
     }
 
+    setMode(mode: 'tenant' | 'host'): void {
+        this.loginMode.set(mode);
+        if (mode === 'host') {
+            this.isEditingTenant.set(false);
+            this.tenantErrorMessage.set('');
+        }
+    }
+
     onChangeTenant(): void {
+        if (this.loginMode() === 'host') {
+            return;
+        }
         // Clear any previous tenant error
         this.tenantErrorMessage.set('');
 
@@ -155,8 +170,14 @@ export class LoginOverlayComponent {
             next: async (response) => {
                 this.isLoading.set(false);
 
-                // Use tenant post-login router to handle routing based on memberships
                 const session = this.authService.session();
+
+                if (session?.mode === 'host') {
+                    await this.router.navigateByUrl('/host');
+                    return;
+                }
+
+                // Use tenant post-login router to handle routing based on memberships
                 if (session?.memberships) {
                     await this.tenantPostLoginRouter.route(session.memberships, this.targetAfterLogin);
                 } else {

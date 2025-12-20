@@ -18,10 +18,12 @@ export class TokenService {
         private readonly configService: ConfigService,
     ) { }
 
-    createAccessToken(user: User): string {
+    createAccessToken(user: User, options?: { isHost?: boolean }): string {
+        const tenantId = options?.isHost ? null : (user.tenantId ?? null);
+
         const payload = {
             sub: user.id,
-            tenantId: user.tenantId,
+            tenantId,
             email: user.email,
             roleId: user.roleId,
             roleName: user.role?.name || null

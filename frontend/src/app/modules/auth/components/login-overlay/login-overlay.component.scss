@@ -625,6 +625,35 @@
     }
 
     .welcome-title {
+
+        .mode-switch {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .mode-btn {
+            padding: 0.65rem 0.75rem;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            border-radius: 10px;
+            font-weight: 600;
+            color: #111827;
+            cursor: pointer;
+            transition: all 0.15s ease;
+
+            &.active {
+                border-color: #2563eb;
+                color: #1d4ed8;
+                box-shadow: 0 10px 25px -10px rgba(37, 99, 235, 0.3);
+            }
+
+            &:hover {
+                border-color: #cbd5e1;
+            }
+        }
+
         margin-bottom: 20px;
     }
 }

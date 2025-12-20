@@ -171,9 +171,11 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
                 : String(doc.roleId))
             : null;
 
+        const tenantId = doc.tenantId ? doc.tenantId.toString() : null;
+
         return new User(
             doc.id,
-            doc.tenantId ? doc.tenantId.toString() : '',
+            tenantId,
             doc.email,
             doc.name,
             roleId,

@@ -29,9 +29,12 @@ interface LoginRequest {
 interface LoginResponse {
     user: {
         id: string;
+        tenantId?: string | null;
         email: string;
         fullName?: string;
         avatarUrl?: string;
+        role?: any;
+        roleId?: string | null;
     };
     memberships: {
         tenantId: string;
@@ -48,20 +51,22 @@ interface LoginResponse {
     };
     expiresAt: string;
     issuedAt?: string;
+    isHost?: boolean;
 }
 
 // Legacy API login shape (access_token + user)
 interface LegacyLoginResponse {
     access_token: string;
-    tenantSlug?: string;
+    tenantSlug?: string | null;
     user: {
         id: string;
-        tenantId?: string;
+        tenantId?: string | null;
         email: string;
         name?: string;
         roleId?: string;
         role?: any;
     };
+    isHost?: boolean;
 }
 
 interface CurrentLoginInfoResponse {
@@ -410,6 +415,7 @@ export class AuthService {
         legacyUser: User;
     } {
         const isLegacy = (response as LegacyLoginResponse).access_token !== undefined;
+        const roleName = (response as any)?.user?.role?.name || (response as any)?.roleName;
 
         // Extract tokens
         const accessToken = isLegacy
@@ -434,19 +440,25 @@ export class AuthService {
             id: user.id,
             email: user.email,
             name: (user as any).fullName || (user as any).name || user.email,
-            tenantId: (user as any).tenantId || (response as any).activeTenantId || '',
+            tenantId: (user as any).tenantId ?? (response as any).activeTenantId ?? null,
             role: (user as any).role,
         };
 
+        const isHost = (response as any).isHost === true
+            || roleName === 'Host Admin'
+            || (!legacyUser.tenantId && !((response as any).activeTenantId));
+
+        const hostPermissions = this.flattenPermissions(((user as any)?.role?.permissions as any[]) || []);
+
         const memberships = !isLegacy
-            ? (response as LoginResponse).memberships
-            : [{
+            ? ((isHost ? [] : (response as LoginResponse).memberships))
+            : (isHost ? [] : [{
                 tenantId: legacyUser.tenantId || '',
                 tenantSlug: (response as LegacyLoginResponse).tenantSlug || legacyUser.tenantId || '',
                 tenantName: (user as any).tenantName || 'Tenant',
                 roles: [(user as any).role?.name || 'User'],
                 permissions: (user as any).role?.permissions?.map((p: any) => p.displayName) || [],
-            }];
+            }]);
 
         const session: AuthSession = {
             user: {
@@ -456,7 +468,7 @@ export class AuthService {
                 avatarUrl: (user as any).avatarUrl,
             },
             memberships,
-            activeTenantId: (response as any).activeTenantId || legacyUser.tenantId,
+            activeTenantId: isHost ? undefined : ((response as any).activeTenantId || legacyUser.tenantId || undefined),
             tokens: {
                 accessToken,
                 refreshToken,
@@ -464,6 +476,11 @@ export class AuthService {
             },
             expiresAt,
             issuedAt: this.deriveIssuedAtFromToken(accessToken),
+            mode: isHost ? 'host' : 'tenant',
+            hostContext: isHost ? {
+                roleName: roleName || 'Host Admin',
+                permissions: hostPermissions,
+            } : undefined,
         };
 
         return { session, legacyUser };
@@ -499,6 +516,32 @@ export class AuthService {
     }
 
     private async loadRbacForSession(session: AuthSession): Promise<void> {
+        if (this.isHostSession(session)) {
+            const permissions = session.hostContext?.permissions?.length
+                ? session.hostContext.permissions.map((p) => this.normalizePermissionKey(p))
+                : ['*', '*.*'];
+
+            const roleName = session.hostContext?.roleName || 'Host Admin';
+
+            this.rbacService.setSession({
+                userId: session.user.id,
+                tenantId: 'host',
+                roleIds: [roleName],
+                permissionOverrides: { allow: permissions },
+            });
+
+            this.rbacService.setRoles([
+                {
+                    id: roleName,
+                    name: roleName,
+                    description: 'Platform host access',
+                    permissions,
+                    isSystem: true,
+                },
+            ]);
+            return;
+        }
+
         const membership = this.getActiveMembershipFromSession(session);
 
         if (!membership) {
@@ -767,5 +810,11 @@ export class AuthService {
             console.warn('[AuthService] Failed to load edition/features', { tenantId, error });
             return null;
         }
+    }
+
+    private isHostSession(session?: AuthSession | null): boolean {
+        if (!session) return false;
+        if (session.mode === 'host') return true;
+        return (session.hostContext !== undefined) && (!session.memberships || session.memberships.length === 0);
     }
 }

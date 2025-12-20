@@ -4,7 +4,7 @@ import { Role } from '../rbac/entities/role.entity';
 export class User {
     constructor(
         public readonly id: string,
-        public readonly tenantId: string,
+        public readonly tenantId: string | null,
         public readonly email: string,
         public readonly name: string,
         public readonly roleId: string | null = null,
@@ -83,7 +83,7 @@ export class User {
 
     static create(data: {
         id?: string;
-        tenantId: string;
+        tenantId?: string | null;
         email: string;
         name: string;
         roleId?: string | null;
@@ -97,7 +97,7 @@ export class User {
     }): User {
         return new User(
             data.id || crypto.randomUUID(),
-            data.tenantId,
+            data.tenantId ?? null,
             data.email,
             data.name,
             data.roleId || null,

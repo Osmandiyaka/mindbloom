@@ -9,6 +9,7 @@ import { TenantContextService } from './tenant-context.service';
 import { TenantBootstrapService } from './tenant-bootstrap.service';
 import { TenantMembership } from '../auth/auth.models';
 import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -17,6 +18,7 @@ export class TenantPostLoginRouter {
     private readonly tenantContext = inject(TenantContextService);
     private readonly tenantBootstrap = inject(TenantBootstrapService);
     private readonly router = inject(Router);
+    private readonly authService = inject(AuthService);
 
     /**
      * Route user after successful login based on their memberships
@@ -26,6 +28,15 @@ export class TenantPostLoginRouter {
         const safeReturnUrl = this.sanitizeReturnUrl(returnUrl);
 
         console.log('[TenantPostLoginRouter] Routing with', memberships.length, 'memberships');
+
+        // Host sessions should bypass tenant selection entirely
+        if (memberships.length === 0) {
+            const session = this.authService.session();
+            if (session?.mode === 'host') {
+                await this.router.navigate(['/host']);
+                return;
+            }
+        }
 
         // No memberships - route to no access page
         if (memberships.length === 0) {

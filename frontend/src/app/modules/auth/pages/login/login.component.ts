@@ -7,10 +7,10 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 import { CardComponent } from '../../../../shared/components/card/card.component';
 
 @Component({
-    selector: 'app-login',
-    standalone: true,
-    imports: [CommonModule, FormsModule, ButtonComponent, CardComponent],
-    template: `
+  selector: 'app-login',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ButtonComponent, CardComponent],
+  template: `
     <div class="login-page">
       <div class="login-container">
         <div class="login-header">
@@ -70,7 +70,7 @@ import { CardComponent } from '../../../../shared/components/card/card.component
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .login-page {
       min-height: 100vh;
       display: flex;
@@ -112,32 +112,37 @@ import { CardComponent } from '../../../../shared/components/card/card.component
   `]
 })
 export class LoginComponent {
-    credentials = {
-        email: '',
-        password: ''
-    };
-    rememberMe = false;
-    loading = false;
-    error = '';
+  credentials = {
+    email: '',
+    password: ''
+  };
+  rememberMe = false;
+  loading = false;
+  error = '';
 
-    constructor(
-        private authService: AuthService,
-        private router: Router
-    ) { }
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) { }
 
-    onSubmit(): void {
-        this.loading = true;
-        this.error = '';
+  onSubmit(): void {
+    this.loading = true;
+    this.error = '';
 
-        this.authService.login(this.credentials.email, this.credentials.password)
-            .subscribe({
-                next: () => {
-                    this.router.navigate(['/dashboard']);
-                },
-                error: (err) => {
-                    this.error = err.error?.message || 'Invalid credentials';
-                    this.loading = false;
-                }
-            });
-    }
+    this.authService.login(this.credentials.email, this.credentials.password)
+      .subscribe({
+        next: () => {
+          const session = this.authService.session();
+          if (session?.mode === 'host') {
+            this.router.navigate(['/host']);
+            return;
+          }
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err) => {
+          this.error = err.error?.message || 'Invalid credentials';
+          this.loading = false;
+        }
+      });
+  }
 }

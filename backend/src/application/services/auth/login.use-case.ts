@@ -6,15 +6,17 @@ import { LoginCommand } from '../../ports/in/commands/login.command';
 import { IRefreshTokenRepository } from '../../../domain/ports/out/refresh-token-repository.port';
 import { ITenantRepository } from '../../../domain/ports/out/tenant-repository.port';
 import { TokenService } from './token.service';
+import { SYSTEM_ROLE_NAMES } from '../../../domain/rbac/entities/system-roles';
 
 export interface LoginResult {
     access_token: string;
     refreshToken: string;
     refreshTokenExpiresAt: Date;
-    tenantSlug: string;
+    tenantSlug: string | null;
+    isHost: boolean;
     user: {
         id: string;
-        tenantId: string;
+        tenantId: string | null;
         email: string;
         name: string;
         roleId: string | null;
@@ -64,13 +66,19 @@ export class LoginUseCase {
             throw new UnauthorizedException('Invalid credentials');
         }
 
+        const isHostUser = user.role?.name === SYSTEM_ROLE_NAMES.HOST_ADMIN || !user.tenantId;
+
         // Fetch tenant to get the slug
-        const tenant = await this.tenantRepository.findById(user.tenantId);
-        if (!tenant) {
-            throw new UnauthorizedException('Tenant not found');
+        let tenantSlug: string | null = null;
+        if (!isHostUser) {
+            const tenant = await this.tenantRepository.findById(user.tenantId);
+            if (!tenant) {
+                throw new UnauthorizedException('Tenant not found');
+            }
+            tenantSlug = tenant.subdomain;
         }
 
-        const access_token = this.tokenService.createAccessToken(user);
+        const access_token = this.tokenService.createAccessToken(user, { isHost: isHostUser });
         const refresh = this.tokenService.createRefreshToken();
         await this.refreshTokenRepository.create(user.id, refresh.tokenHash, refresh.expiresAt);
 
@@ -78,10 +86,11 @@ export class LoginUseCase {
             access_token,
             refreshToken: refresh.token,
             refreshTokenExpiresAt: refresh.expiresAt,
-            tenantSlug: tenant.subdomain,
+            tenantSlug,
+            isHost: isHostUser,
             user: {
                 id: user.id,
-                tenantId: user.tenantId,
+                tenantId: user.tenantId ?? null,
                 email: user.email,
                 name: user.name,
                 roleId: user.roleId,

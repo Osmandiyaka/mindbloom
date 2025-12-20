@@ -42,7 +42,15 @@
         <h2 class="welcome-title">Welcome to MindBloom</h2>
 
         <form (ngSubmit)="onSubmit()" class="login-form">
+            <div class="mode-switch">
+                <button type="button" class="mode-btn" [class.active]="loginMode() === 'tenant'"
+                    (click)="setMode('tenant')">School Admin</button>
+                <button type="button" class="mode-btn" [class.active]="loginMode() === 'host'"
+                    (click)="setMode('host')">Platform Host</button>
+            </div>
+
             <!-- School Code -->
+            @if (loginMode() === 'tenant') {
             <div class="form-group">
                 <label class="form-label">School Code</label>
                 <div class="tenant-field">
@@ -113,6 +121,12 @@
                     <a href="#" class="register-link" (click)="onRegisterTenant($event)">Register new school</a>
                 </p>
             </div>
+            } @else {
+            <div class="form-group">
+                <label class="form-label">Host login</label>
+                <p class="form-help">Host admins can sign in without selecting a school.</p>
+            </div>
+            }
 
             <!-- Username -->
             <div class="form-group">

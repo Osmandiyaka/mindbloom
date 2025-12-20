@@ -26,6 +26,11 @@ export interface AuthSession {
   tokens: AuthTokens;
   expiresAt: string;
   issuedAt?: string;
+  mode?: 'tenant' | 'host';
+  hostContext?: {
+    roleName?: string;
+    permissions?: string[];
+  };
 }
 
 export function validateAuthSession(data: unknown): AuthSession | null {

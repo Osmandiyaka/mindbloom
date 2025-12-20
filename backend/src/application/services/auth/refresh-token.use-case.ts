@@ -4,15 +4,17 @@ import { USER_REPOSITORY, REFRESH_TOKEN_REPOSITORY, TENANT_REPOSITORY } from '..
 import { IRefreshTokenRepository } from '../../../domain/ports/out/refresh-token-repository.port';
 import { ITenantRepository } from '../../../domain/ports/out/tenant-repository.port';
 import { TokenService } from './token.service';
+import { SYSTEM_ROLE_NAMES } from '../../../domain/rbac/entities/system-roles';
 
 export interface RefreshTokenResult {
     access_token: string;
     refreshToken: string;
     refreshTokenExpiresAt: Date;
-    tenantSlug: string;
+    tenantSlug: string | null;
+    isHost: boolean;
     user: {
         id: string;
-        tenantId: string;
+        tenantId: string | null;
         email: string;
         name: string;
         roleId: string | null;
@@ -48,15 +50,21 @@ export class RefreshTokenUseCase {
             throw new UnauthorizedException('User not found for refresh token');
         }
 
-        // Fetch tenant to get the slug
-        const tenant = await this.tenantRepository.findById(user.tenantId);
-        if (!tenant) {
-            throw new UnauthorizedException('Tenant not found');
+        const isHostUser = user.role?.name === SYSTEM_ROLE_NAMES.HOST_ADMIN || !user.tenantId;
+
+        // Fetch tenant to get the slug (tenant users only)
+        let tenantSlug: string | null = null;
+        if (!isHostUser) {
+            const tenant = await this.tenantRepository.findById(user.tenantId);
+            if (!tenant) {
+                throw new UnauthorizedException('Tenant not found');
+            }
+            tenantSlug = tenant.subdomain;
         }
 
         await this.refreshTokenRepository.revokeById(stored.id);
 
-        const access_token = this.tokenService.createAccessToken(user);
+        const access_token = this.tokenService.createAccessToken(user, { isHost: isHostUser });
         const refresh = this.tokenService.createRefreshToken();
         await this.refreshTokenRepository.create(user.id, refresh.tokenHash, refresh.expiresAt);
 
@@ -64,7 +72,8 @@ export class RefreshTokenUseCase {
             access_token,
             refreshToken: refresh.token,
             refreshTokenExpiresAt: refresh.expiresAt,
-            tenantSlug: tenant.subdomain,
+            tenantSlug,
+            isHost: isHostUser,
             user: this.tokenService.buildUserResponse(user)
         };
     }

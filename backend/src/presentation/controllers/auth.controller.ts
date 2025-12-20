@@ -41,6 +41,7 @@ export class AuthController {
         return {
             access_token: result.access_token,
             tenantSlug: result.tenantSlug,
+            isHost: result.isHost,
             user: result.user,
         };
     }
@@ -89,6 +90,7 @@ export class AuthController {
         return {
             access_token: result.access_token,
             tenantSlug: result.tenantSlug,
+            isHost: result.isHost,
             user: result.user,
         };
     }
