@@ -25,6 +25,25 @@ import { FeatureValidationService } from '../../application/services/features/fe
 import { SubscriptionLifecycleService } from '../../application/services/subscription/subscription-lifecycle.service';
 import { PluginsModule } from '../plugins/plugins.module';
 import { ExpirationPolicyEngine } from '../../application/services/subscription/expiration-policy.engine';
+import { InitializeGlobalEditionsUseCase } from '../../application/services/subscription/initialize-global-editions.use-case';
+import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+
+@Injectable()
+class EditionsInitializer implements OnApplicationBootstrap {
+    private readonly logger = new Logger(EditionsInitializer.name);
+
+    constructor(private readonly initializeGlobalEditions: InitializeGlobalEditionsUseCase) { }
+
+    async onApplicationBootstrap(): Promise<void> {
+        try {
+            const editions = await this.initializeGlobalEditions.execute();
+            this.logger.log(`Global editions ready (${editions.length})`);
+        } catch (err) {
+            this.logger.error('Failed to initialize global editions', err?.stack || String(err));
+            throw err;
+        }
+    }
+}
 
 @Module({
     imports: [
@@ -69,6 +88,14 @@ import { ExpirationPolicyEngine } from '../../application/services/subscription/
         PermissionGuard,
         HostContextGuard,
         TenantContext,
+        // Edition initializer machinery
+        InitializeGlobalEditionsUseCase,
+        EditionsInitializer,
+        {
+            provide: 'EDITIONS_INITIALIZER_RUNNER',
+            useFactory: async (initializer: EditionsInitializer) => initializer.onApplicationBootstrap(),
+            inject: [EditionsInitializer],
+        },
     ],
     exports: [
         TENANT_REPOSITORY,
@@ -87,6 +114,7 @@ import { ExpirationPolicyEngine } from '../../application/services/subscription/
         FeatureValidationService,
         EffectiveFeatureResolver,
         TenantContext,
+        InitializeGlobalEditionsUseCase,
     ],
 })
 export class TenantModule { }

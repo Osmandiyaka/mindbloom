@@ -13,4 +13,9 @@ export interface IEditionRepository {
     findAll(): Promise<Edition[]>;
     replaceFeatures(editionId: string, assignments: EditionFeatureAssignment[]): Promise<void>;
     getFeaturesMap(editionId: string): Promise<Record<string, string>>;
+
+    /**
+     * Ensure canonical global editions exist and are up-to-date. Safe to call repeatedly.
+     */
+    initializeGlobalEditions(): Promise<import('../../edition/entities/edition.entity').Edition[]>;
 }

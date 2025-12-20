@@ -19,9 +19,53 @@ async function seed() {
     const Edition = mongoose.model('Edition', EditionSchema);
 
     const editions = [
-        { name: 'trial', displayName: 'Trial', sortOrder: 0, isActive: true, isFallback: true },
-        { name: 'basic', displayName: 'Basic', sortOrder: 10, isActive: true },
-        { name: 'premium', displayName: 'Premium', sortOrder: 20, isActive: true },
+        {
+            name: 'starter',
+            displayName: 'Starter',
+            description: 'Core modules (students, attendance, grades), basic reports, email support, custom branding',
+            monthlyPrice: 29,
+            annualPrice: 278, // $23/mo effective
+            maxStudents: 100,
+            features: ['students', 'attendance', 'grades', 'reports', 'email_support', 'branding'],
+            sortOrder: 10,
+            isActive: true,
+            isFallback: true,
+        },
+        {
+            name: 'professional',
+            displayName: 'Professional',
+            description: 'Timetabling, parent portal, library/hostel mgmt, SMS notifications, priority support, API access',
+            monthlyPrice: 99,
+            annualPrice: 950, // $79/mo effective
+            maxStudents: 500,
+            features: ['timetabling', 'parent_portal', 'library', 'hostel', 'sms', 'priority_support', 'api_access'],
+            sortOrder: 20,
+            isActive: true,
+        },
+        {
+            name: 'premium',
+            displayName: 'Premium',
+            description: 'Transport, exams, payroll, advanced analytics, custom workflows, phone support, custom domains',
+            monthlyPrice: 299,
+            annualPrice: 2870, // $239/mo effective
+            maxStudents: 2000,
+            features: ['transport', 'exams', 'payroll', 'analytics', 'workflows', 'phone_support', 'custom_domains'],
+            sortOrder: 30,
+            isActive: true,
+        },
+        {
+            name: 'enterprise',
+            displayName: 'Enterprise',
+            description: 'Dedicated DB/support, SSO/SAML, custom modules, on-prem option, 24/7 support, white-label',
+            monthlyPrice: 599,
+            perStudentMonthly: 2,
+            annualPrice: null,
+            annualPriceNotes: 'Custom',
+            maxStudents: null, // unlimited
+            features: ['dedicated_db', 'sso', 'custom_modules', 'on_prem', '24_7_support', 'white_label'],
+            sortOrder: 40,
+            isActive: true,
+        },
     ];
 
     for (const ed of editions) {

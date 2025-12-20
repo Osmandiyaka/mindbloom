@@ -80,6 +80,72 @@ export class MongooseEditionRepository implements IEditionRepository {
         return map;
     }
 
+    async initializeGlobalEditions(): Promise<Edition[]> {
+        const existing = await this.findAll();
+        const { createGlobalEditions } = await import('../../../../domain/edition/entities/system-editions');
+        const desired = createGlobalEditions();
+
+        // Load canonical features once
+        let canonical: Record<string, EditionFeatureAssignment[]> = {};
+        try {
+            const featuresMod = await import('../../../../domain/edition/entities/system-edition-features');
+            canonical = featuresMod.createGlobalEditionFeatureAssignments();
+        } catch (err) {
+            // If features helper fails to load, we'll skip feature sync but continue
+            // eslint-disable-next-line no-console
+            console.warn('Failed to load canonical edition features', err?.stack || String(err));
+        }
+
+        const created: Edition[] = [];
+
+        // Ensure each desired edition exists and matches current metadata
+        for (const d of desired) {
+            const found = await this.findByName(d.name);
+            if (!found) {
+                const c = await this.create(d);
+                // Apply canonical features to newly created edition
+                const assignments = canonical[d.name] ?? [];
+                if (assignments.length) {
+                    try {
+                        await this.replaceFeatures(c.id, assignments);
+                    } catch (err) {
+                        // Don't block startup on feature assignment failure
+                        // eslint-disable-next-line no-console
+                        console.warn('Failed to apply features for new edition', d.name, err?.stack || String(err));
+                    }
+                }
+                created.push(c);
+                continue;
+            }
+
+            // If metadata differs, update it
+            const needsUpdate =
+                found.displayName !== d.displayName ||
+                (found.description ?? null) !== (d.description ?? null) ||
+                found.isActive !== d.isActive ||
+                found.sortOrder !== d.sortOrder;
+
+            if (needsUpdate) {
+                await this.update(found.id, d as any);
+            }
+
+            // Ensure feature assignments are in sync with canonical definitions
+            const assignments = canonical[d.name] ?? [];
+            if (assignments.length) {
+                try {
+                    await this.replaceFeatures(found.id, assignments);
+                } catch (err) {
+                    // Log and continue - do not block startup if feature sync fails
+                    // eslint-disable-next-line no-console
+                    console.warn('Failed to sync edition features for', d.name, err?.stack || String(err));
+                }
+            }
+        }
+
+        // Return current list after ensuring presence
+        return this.findAll();
+    }
+
     private toDomain(doc: EditionDocument): Edition {
         return Edition.create({
             id: doc._id.toString(),
