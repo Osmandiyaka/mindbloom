@@ -53,8 +53,11 @@ export const routes: Routes = [
             {
                 path: 'dashboard',
                 loadComponent: () => import('./modules/host/pages/host-dashboard/host-dashboard.component').then(m => m.HostDashboardComponent)
+            },
+            {
+                path: 'tenants',
+                loadComponent: () => import('./features/host/tenants/tenants.page').then(m => m.TenantsPage)
             }
-            // TODO: add additional host child routes (tenants, editions, billing, users)
         ]
     },
     {

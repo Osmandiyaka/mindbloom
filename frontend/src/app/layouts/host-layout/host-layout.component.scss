@@ -2,7 +2,19 @@
 :host {
     display: block;
     height: 100%;
+
+    /* Host-level design tokens for typography and color hierarchy */
     --host-nav-width: 320px;
+    --host-font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --host-text-color: #0f172a;
+    /* slate-900 */
+    --host-muted-color: #475569;
+    /* slate-600 */
+    --host-border-subtle: rgba(15, 23, 42, 0.06);
+    --host-surface-elevated: #ffffff;
+
+    font-family: var(--host-font-family);
+    color: var(--host-text-color);
 }
 
 .host-layout {

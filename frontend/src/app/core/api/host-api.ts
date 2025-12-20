@@ -1,0 +1,83 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import {
+    EditionLookup,
+    PagedResult,
+    TenantCreateInput,
+    TenantListItem,
+    TenantQuery,
+    TenantUpdateInput,
+} from './models';
+import { map } from 'rxjs/operators';
+
+@Injectable({ providedIn: 'root' })
+export class HostApi {
+    private http = inject(HttpClient);
+
+    listTenants(query: TenantQuery) {
+        // Map our frontend query shape to backend ListTenantsQueryDto
+        let params = new HttpParams()
+            .set('page', String(query.page ?? 1))
+            .set('pageSize', String(query.pageSize ?? 10));
+
+        if (query.q) params = params.set('search', query.q);
+        if (query.status && query.status !== 'ALL') params = params.set('statuses', query.status);
+        // editionId filter is not supported server-side yet; ignore for now
+
+        // Backend returns { data: Tenant[], total, page, pageSize }
+        return this.http.get<any>('/api/tenants', { params }).pipe(
+            // lazy map to our frontend PagedResult<TenantListItem>
+            // import map from 'rxjs/operators' at top
+            map(res => {
+                const normalizeStatus = (s: any) => {
+                    if (!s) return 'ACTIVE' as any;
+                    const up = String(s).toUpperCase();
+                    if (up === 'PENDING') return 'TRIAL';
+                    if (['ACTIVE', 'SUSPENDED', 'TRIAL'].includes(up)) return up as any;
+                    return up as any;
+                };
+
+                const items: TenantListItem[] = (res?.data || []).map((t: any) => ({
+                    id: t.id,
+                    name: t.name,
+                    subdomain: t.subdomain,
+                    editionId: t.editionId ?? null,
+                    editionName: t.editionName ?? (t.edition?.name ?? null),
+                    status: normalizeStatus(t.status),
+                    createdAt: t.createdAt,
+                }));
+
+                return {
+                    items,
+                    total: res?.total ?? 0,
+                    page: res?.page ?? 1,
+                    pageSize: res?.pageSize ?? Number(params.get('pageSize') ?? 10),
+                } as PagedResult<TenantListItem>;
+            })
+        );
+    }
+
+    createTenant(input: TenantCreateInput) {
+        return this.http.post<{ id: string }>('/api/tenants', input);
+    }
+
+    updateTenant(tenantId: string, input: TenantUpdateInput) {
+        // Host update endpoint not implemented server-side yet — optimistic path
+        return this.http.put<void>(`/api/tenants/${tenantId}`, input);
+    }
+
+    suspendTenant(tenantId: string, reason = 'Suspended by host') {
+        return this.http.post<void>(`/api/host/tenants/${tenantId}/suspend`, { reason });
+    }
+
+    activateTenant(tenantId: string) {
+        // Backend reactivation endpoint is named 'reactivate'
+        return this.http.post<void>(`/api/host/tenants/${tenantId}/reactivate`, {});
+    }
+
+    // Optional: for filter dropdown
+    listEditionsLookup() {
+        return this.http.get<EditionLookup[]>('/api/host/editions');
+    }
+}
+
