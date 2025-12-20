@@ -20,10 +20,10 @@ export class ListTenantsQueryDto {
     @Transform(({ value }) => toArray(value))
     statuses?: TenantStatus[];
 
-    @ApiPropertyOptional({ description: 'Filter by plan', enum: TenantPlan, isArray: true })
+    @ApiPropertyOptional({ description: 'Filter by edition code', isArray: true })
     @IsOptional()
     @Transform(({ value }) => toArray(value))
-    plans?: TenantPlan[];
+    editions?: string[];
 
     @ApiPropertyOptional({ description: 'Trials expiring within N days (default 14)', example: 14 })
     @IsOptional()
@@ -43,10 +43,10 @@ export class ListTenantsQueryDto {
     @IsNumber()
     pageSize?: number;
 
-    @ApiPropertyOptional({ description: 'Sort field', enum: ['createdAt', 'name', 'status', 'plan'], default: 'createdAt' })
+    @ApiPropertyOptional({ description: 'Sort field', enum: ['createdAt', 'name', 'status', 'edition'], default: 'createdAt' })
     @IsOptional()
     @IsString()
-    sortBy?: 'createdAt' | 'name' | 'status' | 'plan';
+    sortBy?: 'createdAt' | 'name' | 'status' | 'edition';
 
     @ApiPropertyOptional({ description: 'Sort direction', enum: ['asc', 'desc'], default: 'desc' })
     @IsOptional()

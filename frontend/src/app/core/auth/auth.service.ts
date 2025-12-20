@@ -791,7 +791,7 @@ export class AuthService {
                 this.tenantService.setTenant(tenant);
                 console.debug('[AuthService] Tenant loaded for RBAC', {
                     tenantId: tenant.id,
-                    plan: tenant.plan,
+                    edition: tenant.edition ?? tenant.plan,
                     enabledModules: tenant.enabledModules,
                 });
             }

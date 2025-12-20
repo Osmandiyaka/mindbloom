@@ -68,6 +68,7 @@ function makeTenant(overrides: Partial<Tenant>): Tenant {
         overrides.idTemplates,
         overrides.createdAt,
         overrides.updatedAt,
+        overrides.edition ?? undefined,
         overrides.editionId,
         overrides.subscriptionEndDate,
         overrides.isSuspended ?? false,

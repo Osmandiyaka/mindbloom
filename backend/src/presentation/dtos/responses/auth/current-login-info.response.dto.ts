@@ -89,8 +89,8 @@ class TenantInfoDto {
     @ApiProperty()
     subdomain!: string;
 
-    @ApiProperty({ enum: TenantPlan })
-    plan!: TenantPlan;
+    @ApiProperty({ description: 'Tenant edition code' })
+    edition!: string;
 
     @ApiProperty({ enum: TenantStatus })
     status!: TenantStatus;
@@ -112,7 +112,7 @@ class TenantInfoDto {
         dto.id = tenant.id;
         dto.name = tenant.name;
         dto.subdomain = tenant.subdomain;
-        dto.plan = tenant.plan;
+        dto.edition = tenant.edition ?? tenant.plan;
         dto.status = tenant.status;
         dto.locale = tenant.locale;
         dto.timezone = tenant.timezone;

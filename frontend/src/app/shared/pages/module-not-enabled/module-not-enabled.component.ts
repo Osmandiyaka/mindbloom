@@ -32,21 +32,21 @@ import { EditionService } from '../../services/entitlements.service';
                     <h1 class="title">Module Not Enabled</h1>
                     
                     <p class="description" *ngIf="moduleName()">
-                        The <strong>{{ moduleName() }}</strong> module is not included in your current plan.
+                        The <strong>{{ moduleName() }}</strong> module is not included in your current edition.
                     </p>
                     <p class="description" *ngIf="!moduleName()">
-                        This module is not included in your current plan.
+                        This module is not included in your current edition.
                     </p>
 
-                    <!-- Plan Info -->
-                    <div class="plan-info" *ngIf="currentPlan()">
-                        <span class="plan-label">Current Plan:</span>
-                        <span class="plan-badge">{{ currentPlan() | titlecase }}</span>
+                    <!-- Edition Info -->
+                    <div class="plan-info" *ngIf="currentEdition()">
+                        <span class="plan-label">Current Edition:</span>
+                        <span class="plan-badge">{{ currentEdition() | titlecase }}</span>
                     </div>
 
                     <!-- Contact Message -->
                     <p class="contact-message">
-                        Contact your system administrator or account owner to upgrade your plan and access this feature.
+                        Contact your system administrator or account owner to upgrade your edition and access this feature.
                     </p>
 
                     <!-- Actions -->
@@ -204,7 +204,7 @@ export class ModuleNotEnabledComponent implements OnInit {
     readonly moduleKey = signal<ModuleKey | null>(null);
     readonly moduleName = signal<string | null>(null);
     readonly returnUrl = signal<string | null>(null);
-    readonly currentPlan = signal<string | null>(null);
+    readonly currentEdition = signal<string | null>(null);
 
     ngOnInit(): void {
         // Read query params
@@ -222,10 +222,10 @@ export class ModuleNotEnabledComponent implements OnInit {
             }
         });
 
-        // Get current plan
-        const plan = this.entitlements.getCurrentPlan();
-        if (plan) {
-            this.currentPlan.set(plan);
+        // Get current edition
+        const code = this.entitlements.getCurrentPlan();
+        if (code) {
+            this.currentEdition.set(code);
         }
     }
 

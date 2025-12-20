@@ -280,6 +280,9 @@ export class TenantDocument extends Document {
     @Prop()
     suspensionReason?: string;
 
+    @Prop()
+    edition?: string;
+
     @Prop({ type: Types.ObjectId, ref: 'Edition' })
     editionId?: Types.ObjectId;
 
@@ -365,6 +368,7 @@ export const TenantSchema = SchemaFactory.createForClass(TenantDocument);
 TenantSchema.index({ subdomain: 1 }, { unique: true });
 TenantSchema.index({ status: 1 });
 TenantSchema.index({ plan: 1 });
+TenantSchema.index({ edition: 1 });
 TenantSchema.index({ ownerId: 1 });
 TenantSchema.index({ 'contactInfo.email': 1 });
 TenantSchema.index({ createdAt: -1 });
@@ -380,7 +384,7 @@ TenantSchema.index({ pastDueSince: 1 }, { sparse: true });
 TenantSchema.index({ gracePeriodEndDate: 1 }, { sparse: true });
 
 TenantSchema.virtual('isTrialExpired').get(function () {
-    return this.plan === TenantPlan.TRIAL &&
+    return (this.edition === 'trial' || this.plan === TenantPlan.TRIAL) &&
         this.trialEndsAt &&
         this.trialEndsAt < new Date();
 });

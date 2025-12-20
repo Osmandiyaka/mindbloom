@@ -65,8 +65,8 @@ export class ListTenantsUseCase {
         const counts = statusCounts || {
             active: tenants.filter((t) => t.status === TenantStatus.ACTIVE).length,
             suspended: tenants.filter((t) => t.status === TenantStatus.SUSPENDED).length,
-            trial: tenants.filter((t) => t.plan === TenantPlan.TRIAL).length,
-            trialExpiring: tenants.filter((t) => t.plan === TenantPlan.TRIAL && !!t.trialEndsAt && t.trialEndsAt <= expiringWindow).length,
+            trial: tenants.filter((t) => (t.edition ?? t.plan) === TenantPlan.TRIAL).length,
+            trialExpiring: tenants.filter((t) => (t.edition ?? t.plan) === TenantPlan.TRIAL && !!t.trialEndsAt && t.trialEndsAt <= expiringWindow).length,
         };
 
         return {

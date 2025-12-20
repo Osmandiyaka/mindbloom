@@ -160,8 +160,13 @@ export class CreateTenantDto {
     @Type(() => LimitsDto)
     limits?: LimitsDto;
 
+    @ApiPropertyOptional({ description: 'Tenant edition code (recommended). Use this to select a tenant edition.' })
+    @IsOptional()
+    @IsString()
+    edition?: string;
+
     @ApiProperty({
-        description: 'Tenant plan',
+        description: 'Tenant plan (deprecated). Prefer `edition` in new requests.',
         enum: ['trial', 'free', 'basic', 'premium', 'enterprise'],
         required: false,
         default: 'trial'

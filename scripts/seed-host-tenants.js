@@ -10,9 +10,9 @@ const http = require('http');
 const BASE = { hostname: 'localhost', port: 3000 };
 
 const tenantsToCreate = [
-    { name: 'Greenfield Free School', subdomain: 'greenfield-free', plan: 'free', contactEmail: 'admin@greenfield-free.test' },
-    { name: 'Riverdale Academy', subdomain: 'riverdale', plan: 'premium', contactEmail: 'admin@riverdale.test' },
-    { name: 'Summit Enterprise', subdomain: 'summit', plan: 'enterprise', contactEmail: 'admin@summit.test' },
+    { name: 'Greenfield Free School', subdomain: 'greenfield-free', edition: 'free', contactEmail: 'admin@greenfield-free.test' },
+    { name: 'Riverdale Academy', subdomain: 'riverdale', edition: 'premium', contactEmail: 'admin@riverdale.test' },
+    { name: 'Summit Enterprise', subdomain: 'summit', edition: 'enterprise', contactEmail: 'admin@summit.test' },
 ];
 
 function request(options, body) {
@@ -51,7 +51,7 @@ async function createTenant(tenant) {
     const res = await request({ path: '/api/tenants', method: 'POST' }, {
         name: tenant.name,
         subdomain: tenant.subdomain,
-        plan: tenant.plan,
+        edition: tenant.edition ?? tenant.plan,
         contactEmail: tenant.contactEmail,
         adminName: tenant.adminName || 'Admin',
         adminEmail: tenant.adminEmail || `admin@${tenant.subdomain}.test`,

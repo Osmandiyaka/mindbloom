@@ -4,14 +4,17 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export type TenantStatus = 'pending' | 'active' | 'suspended' | 'inactive' | 'deleted';
-export type TenantPlan = 'trial' | 'free' | 'basic' | 'premium' | 'enterprise';
+export type TenantEdition = 'trial' | 'free' | 'basic' | 'premium' | 'enterprise';
+// Backwards-compatible alias
+export type TenantPlan = TenantEdition;
 
 export interface Tenant {
     id: string;
     name: string;
     subdomain: string;
     status: TenantStatus;
-    plan: TenantPlan;
+    plan?: TenantPlan; // deprecated, use `edition` when available
+    edition?: TenantEdition;
     ownerId?: string | null;
     contactInfo: {
         email: string;
@@ -102,6 +105,8 @@ export class TenantService {
         adminEmail: string;
         adminPassword: string;
         ownerId?: string;
+        edition?: TenantEdition;
+        // plan is accepted as a deprecated fallback
         plan?: TenantPlan;
     }): Observable<Tenant> {
         return this.http.post<Tenant>(`${this.API_URL}/tenants`, data).pipe(
@@ -138,7 +143,7 @@ export class TenantService {
         const tenant = this.getCurrentTenantValue();
         if (!tenant) return false;
 
-        const featuresByPlan: Record<TenantPlan, string[]> = {
+        const featuresByEdition: Record<TenantEdition, string[]> = {
             trial: ['basic_features', 'student_management', 'attendance', 'grades'],
             free: ['basic_features'],
             basic: ['basic_features', 'student_management', 'attendance'],
@@ -146,7 +151,9 @@ export class TenantService {
             enterprise: ['basic_features', 'student_management', 'attendance', 'finance', 'library', 'hr', 'transport', 'hostel'],
         };
 
-        return featuresByPlan[tenant.plan]?.includes(feature) || false;
+        const code = tenant.edition ?? tenant.plan;
+        if (!code) return false;
+        return featuresByEdition[code as TenantEdition]?.includes(feature) || false;
     }
 
     private getTenantFromStorage(): Tenant | null {

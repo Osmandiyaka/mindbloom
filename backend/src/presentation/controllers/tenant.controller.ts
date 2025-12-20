@@ -72,7 +72,8 @@ export class TenantController {
             address: createTenantDto.address,
             branding: createTenantDto.branding,
             limits: createTenantDto.limits,
-            plan: createTenantDto.plan || 'trial',
+            // Prefer edition if provided, fall back to legacy plan for compatibility
+            edition: (createTenantDto.edition ?? createTenantDto.plan) || 'trial',
             locale: createTenantDto.locale,
             timezone: createTenantDto.timezone,
             weekStartsOn: createTenantDto.weekStartsOn,
@@ -117,7 +118,7 @@ export class TenantController {
         const result = await this.listTenantsUseCase.execute({
             search: query.search,
             statuses: query.statuses as any,
-            plans: query.plans as any,
+            editions: query.editions as any,
             page: query.page,
             pageSize: query.pageSize,
             sortBy: query.sortBy,

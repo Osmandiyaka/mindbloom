@@ -51,8 +51,12 @@ export class MongooseTenantRepository implements ITenantRepository {
             filter.status = { $in: query.statuses };
         }
 
-        if (query.plans && query.plans.length > 0) {
-            filter.plan = { $in: query.plans };
+        if (query.editions && query.editions.length > 0) {
+            // Match either legacy plan or new edition field
+            filter.$or = [
+                { plan: { $in: query.editions } },
+                { edition: { $in: query.editions } },
+            ];
         }
 
         if (query.trialExpiringBefore) {
@@ -127,13 +131,13 @@ export class MongooseTenantRepository implements ITenantRepository {
                         _id: null,
                         active: { $sum: { $cond: [{ $eq: ['$status', TenantStatus.ACTIVE] }, 1, 0] } },
                         suspended: { $sum: { $cond: [{ $eq: ['$status', TenantStatus.SUSPENDED] }, 1, 0] } },
-                        trial: { $sum: { $cond: [{ $eq: ['$plan', TenantPlan.TRIAL] }, 1, 0] } },
+                        trial: { $sum: { $cond: [{ $or: [{ $eq: ['$plan', TenantPlan.TRIAL] }, { $eq: ['$edition', 'trial'] }] }, 1, 0] } },
                         trialExpiring: {
                             $sum: {
                                 $cond: [
                                     {
                                         $and: [
-                                            { $eq: ['$plan', TenantPlan.TRIAL] },
+                                            { $or: [{ $eq: ['$plan', TenantPlan.TRIAL] }, { $eq: ['$edition', 'trial'] }] },
                                             { $lte: ['$trialEndsAt', trialCutoff] },
                                         ]
                                     },
@@ -238,6 +242,8 @@ export class MongooseTenantRepository implements ITenantRepository {
             doc.idTemplates,
             doc.createdAt,
             doc.updatedAt,
+            // prefer explicit edition code if present
+            doc.edition || undefined,
             doc.editionId ? doc.editionId.toString() : null,
             doc.subscriptionEndDate,
             doc.isSuspended ?? false,
@@ -262,6 +268,7 @@ export class MongooseTenantRepository implements ITenantRepository {
             subdomain: tenant.subdomain,
             status: tenant.status,
             plan: tenant.plan,
+            edition: tenant.edition,
             ownerId: tenant.ownerId,
             contactInfo: tenant.contactInfo,
             billing: tenant.billing,

@@ -86,7 +86,8 @@
                                 [class.checking]="codeStatus() === 'checking'"></span>
                         </div>
                         <button type="button" class="generate-code-btn" (click)="generateSchoolCode()"
-                            [disabled]="!schoolName().trim()" [title]="schoolName().trim() ? 'Generate a code suggestion' : 'Enter a school name first'">
+                            [disabled]="!schoolName().trim()"
+                            [title]="schoolName().trim() ? 'Generate a code suggestion' : 'Enter a school name first'">
                             <span class="generate-code-icon" aria-hidden="true">
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -153,12 +154,12 @@
             <!-- Step 3 -->
             @if (currentStep() === 3) {
             <div class="step-card">
-                <h3 class="step-title">Plan & Confirmation</h3>
+                <h3 class="step-title">Edition & Confirmation</h3>
                 <div class="form-group">
-                    <label class="form-label">Select Plan</label>
+                    <label class="form-label">Select Edition</label>
                     <div class="plan-cards">
-                        <div class="plan-card" [class.selected]="selectedPlan() === 'free'"
-                            (click)="selectPlan('free')">
+                        <div class="plan-card" [class.selected]="selectedEdition() === 'free'"
+                            (click)="selectEdition('free')">
                             <div class="plan-header">
                                 <div class="plan-name">Free</div>
                                 <span class="badge subtle">Starter</span>
@@ -170,8 +171,8 @@
                                 <li>Email support</li>
                             </ul>
                         </div>
-                        <div class="plan-card" [class.selected]="selectedPlan() === 'basic'"
-                            (click)="selectPlan('basic')">
+                        <div class="plan-card" [class.selected]="selectedEdition() === 'basic'"
+                            (click)="selectEdition('basic')">
                             <div class="plan-header">
                                 <div class="plan-name">Basic</div>
                             </div>
@@ -182,8 +183,8 @@
                                 <li>Core integrations</li>
                             </ul>
                         </div>
-                        <div class="plan-card popular" [class.selected]="selectedPlan() === 'premium'"
-                            (click)="selectPlan('premium')">
+                        <div class="plan-card popular" [class.selected]="selectedEdition() === 'premium'"
+                            (click)="selectEdition('premium')">
                             <div class="plan-header">
                                 <div class="plan-name">Premium</div>
                                 <span class="badge">Most Popular</span>
@@ -195,8 +196,8 @@
                                 <li>Priority support</li>
                             </ul>
                         </div>
-                        <div class="plan-card" [class.selected]="selectedPlan() === 'enterprise'"
-                            (click)="selectPlan('enterprise')">
+                        <div class="plan-card" [class.selected]="selectedEdition() === 'enterprise'"
+                            (click)="selectEdition('enterprise')">
                             <div class="plan-header">
                                 <div class="plan-name">Enterprise</div>
                                 <span class="badge subtle">Custom</span>

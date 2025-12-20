@@ -17,8 +17,8 @@ export class TenantResponseDto {
     @ApiProperty({ description: 'Tenant status' })
     status: string;
 
-    @ApiProperty({ description: 'Tenant plan' })
-    plan: string;
+    @ApiProperty({ description: 'Tenant edition (preferred)' })
+    edition: string;
 
     @ApiProperty({ description: 'Locale' })
     locale: string;
@@ -81,7 +81,7 @@ export class TenantResponseDto {
             name: tenant.name,
             subdomain: tenant.subdomain,
             status: tenant.status,
-            plan: tenant.plan,
+            edition: tenant.edition ?? tenant.plan,
             ownerId: tenant.ownerId,
             contactEmail: tenant.contactInfo.email,
             contactPhone: tenant.contactInfo.phone,

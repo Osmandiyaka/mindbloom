@@ -4,7 +4,8 @@ import { TENANT_REPOSITORY } from './repository.tokens';
 export interface TenantListQuery {
     search?: string;
     statuses?: TenantStatus[];
-    plans?: TenantPlan[];
+    /** Filter by edition code (supersedes legacy plan filter) */
+    editions?: string[];
     trialExpiringBefore?: Date;
     subscriptionStates?: SubscriptionState[];
     subscriptionEndDateBefore?: Date;
@@ -15,7 +16,7 @@ export interface TenantListQuery {
     pastDueSinceAfter?: Date;
     page?: number;
     pageSize?: number;
-    sortBy?: 'createdAt' | 'name' | 'status' | 'plan';
+    sortBy?: 'createdAt' | 'name' | 'status' | 'edition';
     sortDirection?: 'asc' | 'desc';
 }
 

@@ -32,7 +32,10 @@ export class CreateTenantUseCase {
         const timezone = command.timezone || 'Europe/London';
         const weekStartsOn = (command.weekStartsOn as WeekStart) || WeekStart.MONDAY;
         const academicYear = this.resolveAcademicYear(command.academicYear);
-        const limits = this.resolveLimits(command.plan || TenantPlan.TRIAL, command.limits);
+        // Prefer edition when provided; if edition corresponds to a known TenantPlan value, resolve to that plan for limits
+        const planFromEdition = (command.edition && (Object.values(TenantPlan) as string[]).includes(command.edition)) ? (command.edition as TenantPlan) : undefined;
+        const plan = (command.plan as TenantPlan) || planFromEdition || TenantPlan.TRIAL;
+        const limits = this.resolveLimits(plan, command.limits);
 
         const customization = {
             logo: command.branding?.logo,
@@ -53,7 +56,8 @@ export class CreateTenantUseCase {
             contactPhone: command.contactPhone,
             address: command.address,
             customization,
-            plan: (command.plan || TenantPlan.TRIAL) as TenantPlan,
+            plan: plan as TenantPlan,
+            edition: command.edition,
             status: (command.status || TenantStatus.PENDING) as TenantStatus,
             locale,
             timezone,

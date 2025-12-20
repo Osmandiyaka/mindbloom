@@ -22,7 +22,8 @@
         "lint:api": "cd backend && npm run lint",
         "test": "npm run test:web && npm run test:api",
         "test:web": "cd frontend && npm run test",
-        "test:api": "cd backend && npm run test"
+        "test:api": "cd backend && npm run test",
+        "migrate:tenants:edition": "node scripts/migrate-tenants-edition.js"
     },
     "devDependencies": {
         "concurrently": "^8.2.2",

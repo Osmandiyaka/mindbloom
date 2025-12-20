@@ -1,7 +1,7 @@
 import { Component, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TenantService, Tenant, TenantPlan } from '../../../../core/services/tenant.service';
+import { TenantService, Tenant, TenantEdition, TenantPlan } from '../../../../core/services/tenant.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
@@ -22,16 +22,16 @@ export class TenantRegistrationComponent {
     adminPassword = signal('');
     adminPasswordConfirm = signal('');
     phone = signal('');
-    selectedPlan = signal<TenantPlan>('trial');
+    selectedEdition = signal<TenantEdition>('trial');
     acceptTerms = signal(false);
     codeStatus = signal<'idle' | 'checking' | 'available' | 'taken' | 'error'>('idle');
     codeStatusMessage = signal('');
-    
+
     isRegistering = signal(false);
     errorMessage = signal('');
     private codeCheckTimer: any = null;
     private codeSuggestionCounter = 0;
-    
+
     // Output event when registration is cancelled or completed
     cancelled = output<void>();
     registered = output<{ tenantId: string; subdomain: string }>();
@@ -61,15 +61,17 @@ export class TenantRegistrationComponent {
             adminName: this.adminName(),
             adminEmail: this.adminEmail(),
             adminPassword: password,
-            plan: this.selectedPlan(),
+            edition: this.selectedEdition(),
+            // plan is accepted as a deprecated fallback
+            plan: this.selectedEdition() as TenantPlan,
         };
 
         this.tenantService.createTenant(tenantData).subscribe({
             next: (tenant: Tenant) => {
                 this.isRegistering.set(false);
-                this.registered.emit({ 
-                    tenantId: tenant.id, 
-                    subdomain: tenant.subdomain 
+                this.registered.emit({
+                    tenantId: tenant.id,
+                    subdomain: tenant.subdomain
                 });
             },
             error: (error: any) => {
@@ -81,8 +83,8 @@ export class TenantRegistrationComponent {
         });
     }
 
-    selectPlan(plan: TenantPlan): void {
-        this.selectedPlan.set(plan);
+    selectEdition(edition: TenantEdition): void {
+        this.selectedEdition.set(edition);
     }
 
     // Step navigation with validation

@@ -19,7 +19,7 @@ export class TenantListItemDto {
     status: string;
 
     @ApiProperty()
-    plan: string;
+    edition: string;
 
     @ApiProperty({ required: false })
     trialEndsAt?: Date;
@@ -59,7 +59,7 @@ export class TenantListItemDto {
             subdomain: tenant.subdomain,
             customDomain: tenant.customization?.customDomain,
             status: tenant.status,
-            plan: tenant.plan,
+            edition: tenant.edition ?? tenant.plan,
             trialEndsAt: tenant.trialEndsAt,
             contactEmail: tenant.contactInfo.email,
             contactPhone: tenant.contactInfo.phone,

@@ -21,8 +21,8 @@ class InMemoryTenantRepository implements ITenantRepository {
             filtered = filtered.filter((t) => query.statuses?.includes(t.status));
         }
 
-        if (query.plans && query.plans.length > 0) {
-            filtered = filtered.filter((t) => query.plans?.includes(t.plan));
+        if (query.editions && query.editions.length > 0) {
+            filtered = filtered.filter((t) => (query.editions || []).includes(t.edition ?? t.plan));
         }
 
         if (query.trialExpiringBefore) {
@@ -100,7 +100,7 @@ describe('ListTenantsUseCase', () => {
         const repo = new InMemoryTenantRepository(tenants);
         const useCase = new ListTenantsUseCase(repo as any);
 
-        const result = await useCase.execute({ plans: [TenantPlan.TRIAL] });
+        const result = await useCase.execute({ editions: ['trial'] });
 
         expect(result.aggregates.trial).toBe(1);
         expect(result.aggregates.trialExpiring).toBe(1);
