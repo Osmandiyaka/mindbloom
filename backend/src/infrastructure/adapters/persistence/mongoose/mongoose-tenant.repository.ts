@@ -290,9 +290,8 @@ export class MongooseTenantRepository implements ITenantRepository {
             tags: tenant.tags,
             trialEndsAt: tenant.trialEndsAt,
             idTemplates: tenant.idTemplates,
-            // Persist editionId (preferred). For backward compatibility, also set the legacy edition code top-level
+            // Persist editionId (preferred).
             editionId: tenant.editionId,
-            edition: tenant.metadata?.editionCode || undefined,
             subscriptionEndDate: tenant.subscriptionEndDate,
             isSuspended: tenant.isSuspended,
             gracePeriodEndDate: tenant.gracePeriodEndDate,

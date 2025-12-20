@@ -270,9 +270,6 @@ export class TenantDocument extends Document {
     @Prop()
     suspensionReason?: string;
 
-    @Prop()
-    edition?: string;
-
     @Prop({ type: Types.ObjectId, ref: 'Edition' })
     editionId?: Types.ObjectId;
 
@@ -357,14 +354,12 @@ export const TenantSchema = SchemaFactory.createForClass(TenantDocument);
 
 TenantSchema.index({ subdomain: 1 }, { unique: true });
 TenantSchema.index({ status: 1 });
-TenantSchema.index({ plan: 1 });
-TenantSchema.index({ edition: 1 });
 TenantSchema.index({ ownerId: 1 });
 TenantSchema.index({ 'contactInfo.email': 1 });
 TenantSchema.index({ createdAt: -1 });
 TenantSchema.index({ deletedAt: 1 });
 TenantSchema.index({ tags: 1 });
-TenantSchema.index({ status: 1, plan: 1 });
+TenantSchema.index({ status: 1, editionId: 1 });
 TenantSchema.index({ status: 1, deletedAt: 1 });
 TenantSchema.index({ 'customization.customDomain': 1 }, { unique: true, sparse: true });
 TenantSchema.index({ editionId: 1 }, { sparse: true });
@@ -374,7 +369,7 @@ TenantSchema.index({ pastDueSince: 1 }, { sparse: true });
 TenantSchema.index({ gracePeriodEndDate: 1 }, { sparse: true });
 
 TenantSchema.virtual('isTrialExpired').get(function () {
-    return (this.edition === 'trial' || this.metadata?.editionCode === 'trial') &&
+    return (this.metadata?.editionCode === 'trial') &&
         this.trialEndsAt &&
         this.trialEndsAt < new Date();
 });
@@ -398,9 +393,9 @@ TenantSchema.virtual('usagePercentage').get(function () {
 
 TenantSchema.pre('save', function (next) {
     if (!this.limits) {
-        this.limits = getDefaultLimitsForEdition(this.metadata?.editionCode || this.edition || 'trial');
+        this.limits = getDefaultLimitsForEdition(this.metadata?.editionCode || 'trial');
     }
-    if (this.isNew && (this.metadata?.editionCode === 'trial' || this.edition === 'trial') && !this.trialEndsAt) {
+    if (this.isNew && this.metadata?.editionCode === 'trial' && !this.trialEndsAt) {
         this.trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
     }
     next();

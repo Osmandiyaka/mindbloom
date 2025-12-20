@@ -86,17 +86,31 @@ async function findTenantByCode(code) {
     return null;
 }
 
+const dryRun = process.argv.includes('--dry-run');
+
 async function createTenant(tenant) {
     try {
-        const res = await request({ path: '/api/tenants', method: 'POST' }, {
+        // Prefer editionId when available, else fall back to edition code
+        const body = {
             name: tenant.name,
             subdomain: tenant.subdomain,
-            edition: tenant.edition ?? tenant.plan,
             contactEmail: tenant.contactEmail,
             adminName: tenant.adminName || 'Admin',
             adminEmail: tenant.adminEmail || `admin@${tenant.subdomain}.test`,
             adminPassword: tenant.adminPassword || 'admin123'
-        });
+        };
+        if (tenant.editionId) {
+            body.editionId = tenant.editionId;
+        } else if (tenant.edition) {
+            body.edition = tenant.edition;
+        }
+
+        if (dryRun) {
+            console.log('DRY RUN: POST /api/tenants', body);
+            return { id: `dry-${tenant.subdomain}`, ...body };
+        }
+
+        const res = await request({ path: '/api/tenants', method: 'POST' }, body);
 
         if (res.status === 201 || res.status === 200) {
             return res.body;
@@ -106,15 +120,8 @@ async function createTenant(tenant) {
         if (res.status === 409 && res.body && typeof res.body.message === 'string' && res.body.message.includes('User with this email already exists')) {
             const altEmail = `admin+${Date.now()}@${tenant.subdomain}.test`;
             console.warn(`Admin email conflict for ${tenant.subdomain}, retrying with ${altEmail}`);
-            const retryRes = await request({ path: '/api/tenants', method: 'POST' }, {
-                name: tenant.name,
-                subdomain: tenant.subdomain,
-                edition: tenant.edition ?? tenant.plan,
-                contactEmail: tenant.contactEmail,
-                adminName: tenant.adminName || 'Admin',
-                adminEmail: altEmail,
-                adminPassword: tenant.adminPassword || 'admin123'
-            });
+            const retryBody = { ...body, adminEmail: altEmail };
+            const retryRes = await request({ path: '/api/tenants', method: 'POST' }, retryBody);
             if (retryRes.status === 201 || retryRes.status === 200) return retryRes.body;
             console.error('Create tenant retry failed:', retryRes);
             throw new Error(`Failed to create tenant ${tenant.subdomain} after retry (${retryRes.status})`);
@@ -129,6 +136,10 @@ async function createTenant(tenant) {
 }
 
 async function createUserForTenant(tenantId, user) {
+    if (dryRun) {
+        console.log(`DRY RUN: register user ${user.email} for tenant ${tenantId}`);
+        return { id: `dry-${user.email}` };
+    }
     const res = await request({ path: '/api/auth/register', method: 'POST' }, Object.assign({ tenantId }, user));
     if (res.status === 201) return res.body;
     if (res.status === 409) {
@@ -189,7 +200,7 @@ async function main() {
     for (const t of tenantsToCreate) {
         try {
             // resolve canonical edition name and find corresponding edition record
-            const requested = (t.edition || t.plan || 'trial').toLowerCase();
+            const requested = (t.edition || 'trial').toLowerCase();
             const resolvedName = aliasMap[requested] || requested;
             const editionDoc = editionByName.get(resolvedName);
 
@@ -204,21 +215,31 @@ async function main() {
                 console.log(`- Tenant ${t.subdomain} exists (id=${tenant.id}), reusing`);
             } else {
                 console.log(`- Creating tenant ${t.subdomain}...`);
-                // send canonical edition name to createTenant API
-                tenant = await createTenant({ ...t, edition: resolvedName });
+                // prefer creating tenant with editionId if we have it
+                const createPayload = { ...t };
+                if (editionDoc) {
+                    createPayload.editionId = editionDoc.id;
+                } else {
+                    createPayload.edition = resolvedName;
+                }
+                tenant = await createTenant(createPayload);
                 console.log(`  created id=${tenant.id}`);
             }
 
             // If we have the edition's database id, update tenant document directly to set editionId
             if (editionDoc && tenant && tenant.id) {
                 try {
-                    const editionObjectId = new Types.ObjectId(editionDoc.id);
-                    const tenantObjectId = new Types.ObjectId(tenant.id);
-                    await TenantModel.updateOne(
-                        { _id: tenantObjectId },
-                        { $set: { editionId: editionObjectId, edition: editionDoc.name, 'metadata.editionCode': editionDoc.name } }
-                    ).exec();
-                    console.log(`  - tenant ${t.subdomain} updated with editionId=${editionDoc.id} (name=${editionDoc.name})`);
+                    if (dryRun) {
+                        console.log(`DRY RUN: would update tenant ${t.subdomain} (${tenant.id}) with editionId=${editionDoc.id} (name=${editionDoc.name})`);
+                    } else {
+                        const editionObjectId = new Types.ObjectId(editionDoc.id);
+                        const tenantObjectId = new Types.ObjectId(tenant.id);
+                        await TenantModel.updateOne(
+                            { _id: tenantObjectId },
+                            { $set: { editionId: editionObjectId, 'metadata.editionCode': editionDoc.name } }
+                        ).exec();
+                        console.log(`  - tenant ${t.subdomain} updated with editionId=${editionDoc.id} (name=${editionDoc.name})`);
+                    }
                 } catch (err) {
                     console.warn(`  - failed to set editionId for tenant ${t.subdomain}:`, err.message || (err.stack || err));
                 }

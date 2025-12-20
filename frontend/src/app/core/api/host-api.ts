@@ -42,7 +42,7 @@ export class HostApi {
                     name: t.name,
                     subdomain: t.subdomain,
                     editionId: t.editionId ?? null,
-                    editionName: t.editionName ?? (t.edition?.name ?? null),
+                    editionName: t.editionName ?? (t.edition ?? t.metadata?.editionCode ?? null),
                     status: normalizeStatus(t.status),
                     createdAt: t.createdAt,
                 }));
