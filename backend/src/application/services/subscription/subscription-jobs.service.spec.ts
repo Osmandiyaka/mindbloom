@@ -1,61 +1,28 @@
 import { expect, jest } from '@jest/globals';
 import { SubscriptionJobsService } from './subscription-jobs.service';
 import { SubscriptionNotificationEvent } from './subscription-notification.events';
-import { SubscriptionState, TenantPlan, TenantStatus, Tenant, WeekStart } from '../../../domain/tenant/entities/tenant.entity';
+import { SubscriptionState, TenantStatus, Tenant, WeekStart } from '../../../domain/tenant/entities/tenant.entity';
 import { TenantListResult } from '../../../domain/ports/out/tenant-repository.port';
 
 function makeTenant(overrides: Partial<Tenant>): Tenant {
-    return new Tenant(
-        overrides.id || 'tenant-1',
-        'Test School',
-        'tenant',
-        TenantStatus.ACTIVE,
-        TenantPlan.PREMIUM,
-        null,
-        { email: 'a@test.com' },
-        { maxStudents: 100, maxTeachers: 10, maxClasses: 5 },
-        undefined,
-        [],
-        undefined,
-        undefined,
-        overrides.trialEndsAt,
-        undefined,
-        'en',
-        'UTC',
-        WeekStart.MONDAY,
-        'USD',
-        undefined,
-        [],
-        false,
-        false,
-        undefined,
-        overrides.dataRetentionDays,
-        overrides.lastLoginAt,
-        overrides.onboardingCompletedAt,
-        overrides.suspendedAt,
-        overrides.suspensionReason,
-        overrides.deletedAt,
-        overrides.statusHistory,
-        overrides.tags,
-        overrides.idTemplates,
-        overrides.createdAt,
-        overrides.updatedAt,
-        overrides.editionId ?? 'paid-edition',
-        overrides.subscriptionEndDate,
-        overrides.isSuspended ?? false,
-        overrides.gracePeriodEndDate,
-        overrides.subscriptionState ?? SubscriptionState.ACTIVE,
-        overrides.subscriptionStartDate,
-        overrides.pastDueSince,
-        overrides.trialEndDate,
-        overrides.graceStartedAt,
-        overrides.deactivatedAt,
-        overrides.lastPaymentFailureAt,
-        overrides.lastPaymentSuccessAt,
-        overrides.lastInvoiceId,
-        overrides.stateVersion ?? 1,
-        overrides.expirationPolicy,
-    );
+    const tenant = Tenant.create({
+        name: 'Test School',
+        subdomain: 'tenant',
+        contactEmail: 'a@test.com',
+        metadata: overrides.metadata || { editionCode: overrides.editionId ?? 'paid-edition' },
+        status: TenantStatus.ACTIVE,
+        limits: overrides.limits || { maxStudents: 100, maxTeachers: 10, maxClasses: 5 },
+    });
+    (tenant as any).id = overrides.id || 'tenant-1';
+    (tenant as any).usage = overrides.usage || tenant.usage;
+    (tenant as any).trialEndsAt = overrides.trialEndsAt;
+    (tenant as any).subscriptionState = overrides.subscriptionState ?? SubscriptionState.ACTIVE;
+    (tenant as any).subscriptionEndDate = overrides.subscriptionEndDate;
+    (tenant as any).isSuspended = overrides.isSuspended ?? false;
+    (tenant as any).gracePeriodEndDate = overrides.gracePeriodEndDate;
+    (tenant as any).suspendedAt = overrides.suspendedAt;
+    (tenant as any).expirationPolicy = overrides.expirationPolicy;
+    return tenant;
 }
 
 describe('SubscriptionJobsService', () => {

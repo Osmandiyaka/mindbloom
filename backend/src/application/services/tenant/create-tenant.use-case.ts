@@ -1,7 +1,6 @@
 import { Inject, Injectable, BadRequestException, ConflictException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { Tenant, TenantPlan, TenantStatus, WeekStart, AcademicYearSettings, ResourceLimits } from '../../../domain/tenant/entities/tenant.entity';
-import { getDefaultLimitsForPlan } from '../../../domain/tenant/entities/tenant.entity';
+import { Tenant, TenantStatus, WeekStart, AcademicYearSettings, ResourceLimits, getDefaultLimitsForEdition } from '../../../domain/tenant/entities/tenant.entity';
 import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/ports/out/tenant-repository.port';
 import { CreateTenantCommand } from '../../ports/in/commands/create-tenant.command';
 import { InitializeSystemRolesUseCase } from '../rbac/initialize-system-roles.use-case';
@@ -32,9 +31,9 @@ export class CreateTenantUseCase {
         const timezone = command.timezone || 'Europe/London';
         const weekStartsOn = (command.weekStartsOn as WeekStart) || WeekStart.MONDAY;
         const academicYear = this.resolveAcademicYear(command.academicYear);
-        // Use explicit plan when provided; editionId (if present) is stored separately. Defaults to TRIAL.
-        const plan = (command.plan as TenantPlan) || TenantPlan.TRIAL;
-        const limits = this.resolveLimits(plan, command.limits);
+        // Determine edition code for defaults (prefer explicit metadata.editionCode; fallback to trial)
+        const editionCode = (command.metadata && command.metadata.editionCode) ? command.metadata.editionCode : (command.editionId ? 'paid' : 'trial');
+        const limits = this.resolveLimits(editionCode, command.limits);
 
         const customization = {
             logo: command.branding?.logo,
@@ -55,7 +54,6 @@ export class CreateTenantUseCase {
             contactPhone: command.contactPhone,
             address: command.address,
             customization,
-            plan: plan as TenantPlan,
             editionId: command.editionId,
             status: (command.status || TenantStatus.PENDING) as TenantStatus,
             locale,
@@ -92,10 +90,11 @@ export class CreateTenantUseCase {
             } as Tenant);
 
             // fire-and-forget email notification; do not block creation on mail failure
+            // Mail assignment using edition code for clarity
             this.tenantPlanMailer.sendPlanAssignment(
                 adminUser.email,
                 createdTenant.name,
-                createdTenant.plan,
+                createdTenant.metadata?.editionCode ?? 'trial',
                 limits,
             ).catch(() => undefined);
 
@@ -145,9 +144,9 @@ export class CreateTenantUseCase {
         return `${raw.slice(0, 6)}Aa!${raw.slice(6, 10)}`;
     }
 
-    private resolveLimits(plan: TenantPlan | string, overrides?: Partial<ResourceLimits>): ResourceLimits {
-        const basePlan = (plan as TenantPlan) || TenantPlan.TRIAL;
-        const baseLimits = getDefaultLimitsForPlan(basePlan as TenantPlan);
+    private resolveLimits(editionCode?: string, overrides?: Partial<ResourceLimits>): ResourceLimits {
+        const baseEdition = String(editionCode || 'trial').toLowerCase();
+        const baseLimits = getDefaultLimitsForEdition(baseEdition);
 
         return {
             ...baseLimits,

@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type, Transform } from 'class-transformer';
 import { IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
-import { TenantPlan, TenantStatus } from '../../../../domain/tenant/entities/tenant.entity';
+import { TenantStatus } from '../../../../domain/tenant/entities/tenant.entity';
 
 const toArray = (value: any): string[] => {
     if (Array.isArray(value)) return value;

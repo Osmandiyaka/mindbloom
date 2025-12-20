@@ -1,5 +1,5 @@
 import { expect } from '@jest/globals';
-import { Tenant, TenantPlan, TenantStatus } from '../../../domain/tenant/entities/tenant.entity';
+import { Tenant, TenantStatus } from '../../../domain/tenant/entities/tenant.entity';
 import { ITenantRepository, TenantListQuery, TenantListResult } from '../../../domain/ports/out/tenant-repository.port';
 import { ListTenantsUseCase } from './list-tenants.use-case';
 
@@ -22,7 +22,7 @@ class InMemoryTenantRepository implements ITenantRepository {
         }
 
         if (query.editions && query.editions.length > 0) {
-            filtered = filtered.filter((t) => (query.editions || []).includes(t.metadata?.editionCode ?? t.plan));
+            filtered = filtered.filter((t) => (query.editions || []).includes(t.metadata?.editionCode));
         }
 
         if (query.trialExpiringBefore) {
@@ -53,12 +53,12 @@ class InMemoryTenantRepository implements ITenantRepository {
     }
 }
 
-function buildTenant(props: Partial<Tenant> & { name: string; subdomain: string; status: TenantStatus; plan: TenantPlan; email?: string; usage?: any; trialEndsAt?: Date; customDomain?: string }): Tenant {
+function buildTenant(props: Partial<Tenant> & { name: string; subdomain: string; status: TenantStatus; editionCode?: string; email?: string; usage?: any; trialEndsAt?: Date; customDomain?: string }): Tenant {
     const tenant = Tenant.create({
         name: props.name,
         subdomain: props.subdomain,
         contactEmail: props.email || `${props.subdomain}@school.com`,
-        plan: props.plan,
+        metadata: props.editionCode ? { editionCode: props.editionCode } : undefined,
         status: props.status,
         customization: props.customDomain ? { customDomain: props.customDomain } : undefined,
     });
@@ -71,9 +71,9 @@ function buildTenant(props: Partial<Tenant> & { name: string; subdomain: string;
 describe('ListTenantsUseCase', () => {
     const now = new Date();
     const tenants = [
-        buildTenant({ name: 'Alpha School', subdomain: 'alpha', status: TenantStatus.ACTIVE, plan: TenantPlan.PREMIUM, usage: { currentStudents: 200, currentTeachers: 20, currentClasses: 10, currentAdmins: 2, currentStorage: 1024, currentBandwidth: 0 } }),
-        buildTenant({ name: 'Beta Academy', subdomain: 'beta', status: TenantStatus.SUSPENDED, plan: TenantPlan.BASIC, usage: { currentStudents: 50, currentTeachers: 5, currentClasses: 3, currentAdmins: 1, currentStorage: 256, currentBandwidth: 0 } }),
-        buildTenant({ name: 'Gamma Institute', subdomain: 'gamma', status: TenantStatus.ACTIVE, plan: TenantPlan.TRIAL, trialEndsAt: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000), customDomain: 'gamma.school.com', usage: { currentStudents: 30, currentTeachers: 3, currentClasses: 2, currentAdmins: 1, currentStorage: 128, currentBandwidth: 0 } }),
+        buildTenant({ name: 'Alpha School', subdomain: 'alpha', status: TenantStatus.ACTIVE, editionCode: 'premium', usage: { currentStudents: 200, currentTeachers: 20, currentClasses: 10, currentAdmins: 2, currentStorage: 1024, currentBandwidth: 0 } }),
+        buildTenant({ name: 'Beta Academy', subdomain: 'beta', status: TenantStatus.SUSPENDED, editionCode: 'basic', usage: { currentStudents: 50, currentTeachers: 5, currentClasses: 3, currentAdmins: 1, currentStorage: 256, currentBandwidth: 0 } }),
+        buildTenant({ name: 'Gamma Institute', subdomain: 'gamma', status: TenantStatus.ACTIVE, editionCode: 'trial', trialEndsAt: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000), customDomain: 'gamma.school.com', usage: { currentStudents: 30, currentTeachers: 3, currentClasses: 2, currentAdmins: 1, currentStorage: 128, currentBandwidth: 0 } }),
     ];
 
     it('filters, paginates, and returns aggregates', async () => {

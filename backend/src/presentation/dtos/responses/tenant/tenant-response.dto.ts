@@ -85,7 +85,7 @@ export class TenantResponseDto {
             subdomain: tenant.subdomain,
             status: tenant.status,
             editionId: tenant.editionId ?? undefined,
-            edition: tenant.metadata?.editionCode ?? tenant.plan,
+            edition: tenant.metadata?.editionCode ?? 'trial',
             ownerId: tenant.ownerId,
             contactEmail: tenant.contactInfo.email,
             contactPhone: tenant.contactInfo.phone,

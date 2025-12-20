@@ -2,7 +2,7 @@ import { expect } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TenantController } from './tenant.controller';
 import { Tenant } from '../../domain/tenant/entities/tenant.entity';
-import { TenantStatus, TenantPlan } from '../../domain/tenant/entities/tenant.entity';
+import { TenantStatus } from '../../domain/tenant/entities/tenant.entity';
 import { TenantContext } from '../../common/tenant/tenant.context';
 import { EditionManager } from '../../application/services/subscription/edition-manager.service';
 import { TenantResponseDto } from '../dtos/responses/tenant/tenant-response.dto';
@@ -23,9 +23,8 @@ const buildTenant = (): Tenant => {
         locale: 'en-GB',
         timezone: 'Europe/London',
         weekStartsOn: 'monday' as any,
-        plan: TenantPlan.TRIAL,
+        metadata: { editionCode: 'trial', schoolId: 'SCH-ABC123' },
         status: TenantStatus.PENDING,
-        metadata: { schoolId: 'SCH-ABC123' },
     });
     (tenant as any).id = 'tenant-1';
     return tenant;

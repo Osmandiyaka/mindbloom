@@ -1,7 +1,7 @@
 import { ConflictException } from '@nestjs/common';
 import { expect } from '@jest/globals';
 import { randomUUID } from 'crypto';
-import { Tenant, TenantPlan, TenantStatus, WeekStart } from '../../../domain/tenant/entities/tenant.entity';
+import { Tenant, TenantStatus, WeekStart } from '../../../domain/tenant/entities/tenant.entity';
 import { ITenantRepository, TenantListQuery, TenantListResult } from '../../../domain/ports/out/tenant-repository.port';
 import { SYSTEM_ROLE_NAMES } from '../../../domain/rbac/entities/system-roles';
 import { CreateTenantUseCase } from './create-tenant.use-case';

@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
     Tenant,
-    TenantPlan,
     TenantStatus,
     ContactInfo,
     BillingInfo,
@@ -131,13 +130,13 @@ export class MongooseTenantRepository implements ITenantRepository {
                         _id: null,
                         active: { $sum: { $cond: [{ $eq: ['$status', TenantStatus.ACTIVE] }, 1, 0] } },
                         suspended: { $sum: { $cond: [{ $eq: ['$status', TenantStatus.SUSPENDED] }, 1, 0] } },
-                        trial: { $sum: { $cond: [{ $or: [{ $eq: ['$plan', TenantPlan.TRIAL] }, { $eq: ['$edition', 'trial'] }] }, 1, 0] } },
+                        trial: { $sum: { $cond: [{ $eq: ['$edition', 'trial'] }, 1, 0] } },
                         trialExpiring: {
                             $sum: {
                                 $cond: [
                                     {
                                         $and: [
-                                            { $or: [{ $eq: ['$plan', TenantPlan.TRIAL] }, { $eq: ['$edition', 'trial'] }] },
+                                            { $eq: ['$edition', 'trial'] },
                                             { $lte: ['$trialEndsAt', trialCutoff] },
                                         ]
                                     },
@@ -212,7 +211,6 @@ export class MongooseTenantRepository implements ITenantRepository {
             doc.name,
             doc.subdomain,
             doc.status as TenantStatus,
-            doc.plan as TenantPlan,
             doc.ownerId ? doc.ownerId.toString() : null,
             doc.contactInfo as ContactInfo,
             doc.limits as ResourceLimits,
@@ -265,7 +263,6 @@ export class MongooseTenantRepository implements ITenantRepository {
             name: tenant.name,
             subdomain: tenant.subdomain,
             status: tenant.status,
-            plan: tenant.plan,
             ownerId: tenant.ownerId,
             contactInfo: tenant.contactInfo,
             billing: tenant.billing,

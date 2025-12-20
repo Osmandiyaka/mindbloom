@@ -6,13 +6,6 @@ export enum TenantStatus {
     DELETED = 'deleted',
 }
 
-export enum TenantPlan {
-    TRIAL = 'trial',
-    FREE = 'free',
-    BASIC = 'basic',
-    PREMIUM = 'premium',
-    ENTERPRISE = 'enterprise',
-}
 
 export enum SubscriptionState {
     TRIALING = 'trialing',
@@ -121,79 +114,14 @@ export interface IdTemplateSettings {
 }
 
 export class Tenant {
-    public static readonly FEATURE_MAP: Record<TenantPlan, string[]> = {
-        [TenantPlan.TRIAL]: [
-            'dashboard',
-            'students',
-            'admissions',
-            'apply',
-            'academics',
-            'attendance',
-            'setup',
-        ],
-        [TenantPlan.FREE]: [
-            'dashboard',
-            'students',
-            'apply',
-            'setup',
-        ],
-        [TenantPlan.BASIC]: [
-            'dashboard',
-            'students',
-            'admissions',
-            'apply',
-            'academics',
-            'attendance',
-            'setup',
-        ],
-        [TenantPlan.PREMIUM]: [
-            'dashboard',
-            'students',
-            'admissions',
-            'apply',
-            'academics',
-            'attendance',
-            'fees',
-            'accounting',
-            'finance',
-            'library',
-            'tasks',
-            'setup',
-            'plugins',
-        ],
-        [TenantPlan.ENTERPRISE]: [
-            'dashboard',
-            'students',
-            'admissions',
-            'apply',
-            'academics',
-            'attendance',
-            'fees',
-            'accounting',
-            'finance',
-            'hr',
-            'payroll',
-            'library',
-            'hostel',
-            'transport',
-            'roles',
-            'tasks',
-            'setup',
-            'plugins',
-        ],
-    };
-
-    static featuresForPlan(plan: TenantPlan): string[] {
-        return [...(Tenant.FEATURE_MAP[plan] || [])];
-    }
 
     static editionSnapshot(tenant: Tenant): EditionFeatures {
         const features = tenant.enabledModules?.length
             ? tenant.enabledModules
-            : Tenant.featuresForPlan(tenant.plan);
+            : [];
 
-        // With edition stored as an id, fall back to plan as the edition code when no edition details are available
-        const editionCode = tenant.plan;
+        // With edition stored as an id, fall back to metadata.editionCode or 'trial' when no edition details are available
+        const editionCode = tenant.metadata?.editionCode ?? 'trial';
 
         return {
             editionCode,
@@ -207,7 +135,6 @@ export class Tenant {
         public readonly name: string,
         public readonly subdomain: string,
         public readonly status: TenantStatus,
-        public readonly plan: TenantPlan,
         public readonly ownerId: string | null,
         public readonly contactInfo: ContactInfo,
         public readonly limits: ResourceLimits,
@@ -284,14 +211,15 @@ export class Tenant {
 
     isTrialExpired(): boolean {
         const trialEnd = this.trialEndDate || this.trialEndsAt;
-        return this.plan === TenantPlan.TRIAL && !!trialEnd && trialEnd < new Date();
+        return (this.metadata?.editionCode ?? 'trial') === 'trial' && !!trialEnd && trialEnd < new Date();
     }
 
     canAccessFeature(feature: string): boolean {
-        if (this.plan === TenantPlan.ENTERPRISE) return true;
-        const planFeatures = Tenant.FEATURE_MAP[this.plan] || [];
-        if (!planFeatures.includes(feature)) return false;
-        if (this.enabledModules.length > 0 && !this.enabledModules.includes(feature)) return false;
+        // If enterprise edition, allow all
+        if ((this.metadata?.editionCode ?? 'trial') === 'enterprise') return true;
+        // If specific modules are enabled, respect that list
+        if (this.enabledModules && this.enabledModules.length > 0) return this.enabledModules.includes(feature);
+        // Default to active tenants having access if no explicit module list
         return this.isActive();
     }
 
@@ -384,7 +312,6 @@ export class Tenant {
         secondaryColor?: string;
         accentColor?: string;
         customDomain?: string;
-        plan?: TenantPlan;
         editionId?: string;
         status?: TenantStatus;
         locale?: string;
@@ -400,16 +327,13 @@ export class Tenant {
         updatedAt?: Date;
         tags?: string[];
     }): Tenant {
-        // Resolve plan from provided plan (edition id does not contain code here)
-        const plan = props.plan || TenantPlan.TRIAL;
         const status = props.status || TenantStatus.PENDING;
-        const limits = props.limits || getDefaultLimitsForPlan(plan);
+        const limits = props.limits || getDefaultLimitsForEdition(props.editionId ?? props.metadata?.editionCode);
         return new Tenant(
             '',
             props.name,
             props.subdomain,
             status,
-            plan,
             props.ownerId || null,
             {
                 email: props.contactEmail,
@@ -465,14 +389,16 @@ export class Tenant {
             undefined, // lastPaymentSuccessAt
             undefined, // lastInvoiceId
             undefined, // stateVersion
-            undefined, // expirationPolicy
+            props.metadata?.expirationPolicy ?? undefined
         );
     }
 }
 
-export function getDefaultLimitsForPlan(plan: TenantPlan): ResourceLimits {
-    const limits = {
-        [TenantPlan.TRIAL]: {
+export function getDefaultLimitsForEdition(editionCode: string): ResourceLimits {
+    const normalized = String(editionCode || 'trial').toLowerCase();
+
+    const limitsMap: Record<string, ResourceLimits> = {
+        'trial': {
             maxStudents: 50,
             maxTeachers: 10,
             maxClasses: 5,
@@ -480,7 +406,7 @@ export function getDefaultLimitsForPlan(plan: TenantPlan): ResourceLimits {
             maxStorage: 500,
             maxBandwidth: 5,
         },
-        [TenantPlan.FREE]: {
+        'free': {
             maxStudents: 25,
             maxTeachers: 5,
             maxClasses: 3,
@@ -488,7 +414,7 @@ export function getDefaultLimitsForPlan(plan: TenantPlan): ResourceLimits {
             maxStorage: 100,
             maxBandwidth: 1,
         },
-        [TenantPlan.BASIC]: {
+        'basic': {
             maxStudents: 200,
             maxTeachers: 30,
             maxClasses: 20,
@@ -496,7 +422,7 @@ export function getDefaultLimitsForPlan(plan: TenantPlan): ResourceLimits {
             maxStorage: 5000,
             maxBandwidth: 50,
         },
-        [TenantPlan.PREMIUM]: {
+        'premium': {
             maxStudents: 1000,
             maxTeachers: 100,
             maxClasses: 50,
@@ -504,7 +430,7 @@ export function getDefaultLimitsForPlan(plan: TenantPlan): ResourceLimits {
             maxStorage: 20000,
             maxBandwidth: 200,
         },
-        [TenantPlan.ENTERPRISE]: {
+        'enterprise': {
             maxStudents: -1,
             maxTeachers: -1,
             maxClasses: -1,
@@ -513,5 +439,6 @@ export function getDefaultLimitsForPlan(plan: TenantPlan): ResourceLimits {
             maxBandwidth: -1,
         },
     };
-    return limits[plan] as ResourceLimits;
+
+    return limitsMap[normalized] || limitsMap['trial'];
 }

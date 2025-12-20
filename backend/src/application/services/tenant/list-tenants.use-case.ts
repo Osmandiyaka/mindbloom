@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ITenantRepository, TenantListQuery, TenantUsageTotals, TENANT_REPOSITORY, TenantStatusCounts } from '../../../domain/ports/out/tenant-repository.port';
-import { Tenant, TenantPlan, TenantStatus } from '../../../domain/tenant/entities/tenant.entity';
+import { Tenant, TenantStatus } from '../../../domain/tenant/entities/tenant.entity';
 
 export interface TenantListAggregates {
     total: number;
@@ -65,8 +65,8 @@ export class ListTenantsUseCase {
         const counts = statusCounts || {
             active: tenants.filter((t) => t.status === TenantStatus.ACTIVE).length,
             suspended: tenants.filter((t) => t.status === TenantStatus.SUSPENDED).length,
-            trial: tenants.filter((t) => (t.metadata?.editionCode ?? t.plan) === TenantPlan.TRIAL).length,
-            trialExpiring: tenants.filter((t) => (t.metadata?.editionCode ?? t.plan) === TenantPlan.TRIAL && !!t.trialEndsAt && t.trialEndsAt <= expiringWindow).length,
+            trial: tenants.filter((t) => (t.metadata?.editionCode ?? 'trial') === 'trial').length,
+            trialExpiring: tenants.filter((t) => (t.metadata?.editionCode ?? 'trial') === 'trial' && !!t.trialEndsAt && t.trialEndsAt <= expiringWindow).length,
         };
 
         return {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MailService } from '../../../infrastructure/mail/mail.service';
-import { TenantPlan, ResourceLimits } from '../../../domain/tenant/entities/tenant.entity';
+import { ResourceLimits } from '../../../domain/tenant/entities/tenant.entity';
 
 @Injectable()
 export class TenantPlanMailer {
@@ -10,12 +10,12 @@ export class TenantPlanMailer {
         return value === -1 ? 'Unlimited' : value.toString();
     }
 
-    async sendPlanAssignment(to: string, schoolName: string, plan: TenantPlan, limits: ResourceLimits): Promise<void> {
-        const subject = `Your MindBloom plan: ${plan}`;
+    async sendPlanAssignment(to: string, schoolName: string, editionCode: string, limits: ResourceLimits): Promise<void> {
+        const subject = `Your MindBloom edition: ${editionCode}`;
         const text = [
             `Hi ${schoolName} Admin,`,
             'Your school has been provisioned on MindBloom.',
-            `Plan: ${plan}`,
+            `Edition: ${editionCode}`,
             'Limits:',
             `Students: ${this.formatLimit(limits.maxStudents)}`,
             `Teachers: ${this.formatLimit(limits.maxTeachers)}`,
@@ -30,7 +30,7 @@ export class TenantPlanMailer {
             <h2 style="margin:0 0 10px; font-size:20px; color:#f8fafc;">Welcome to MindBloom</h2>
             <p style="margin:0 0 12px; line-height:1.6;">Hi {{schoolName}} Admin, your school has been provisioned.</p>
             <p style="margin:0 0 12px; line-height:1.6;">
-                <strong>Plan:</strong> {{plan}}
+                <strong>Edition:</strong> {{editionCode}}
             </p>
             <p style="margin:0 0 8px; font-weight:600; color:#e5e7eb;">Limits</p>
             <ul style="margin:0 0 16px 18px; padding:0; color:#d1d5db; line-height:1.6;">
@@ -52,7 +52,7 @@ export class TenantPlanMailer {
                 body,
                 context: {
                     schoolName,
-                    plan,
+                    editionCode,
                     limits: {
                         maxStudents: this.formatLimit(limits.maxStudents),
                         maxTeachers: this.formatLimit(limits.maxTeachers),

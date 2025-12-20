@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CurrentLoginInfoResult } from '../../../../application/services/auth/get-current-login-info.use-case';
-import { TenantPlan, Tenant, TenantStatus, ContactInfo } from '../../../../domain/tenant/entities/tenant.entity';
+import { Tenant, TenantStatus, ContactInfo } from '../../../../domain/tenant/entities/tenant.entity';
 import { Role } from '../../../../domain/rbac/entities/role.entity';
 import { User } from '../../../../domain/entities/user.entity';
 import { TenantEditionResponseDto } from '../tenant/tenant-edition.response.dto';
@@ -116,7 +116,7 @@ class TenantInfoDto {
         dto.name = tenant.name;
         dto.subdomain = tenant.subdomain;
         dto.editionId = tenant.editionId ?? undefined;
-        dto.edition = tenant.metadata?.editionCode ?? tenant.plan;
+        dto.edition = tenant.metadata?.editionCode ?? 'trial';
         dto.status = tenant.status;
         dto.locale = tenant.locale;
         dto.timezone = tenant.timezone;

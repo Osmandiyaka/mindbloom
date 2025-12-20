@@ -1,7 +1,7 @@
 import { expect, jest } from '@jest/globals';
 import { ExpirationPolicyEngine, ExpirationPolicyConfig, PolicyDecision } from './expiration-policy.engine';
 import { ITenantRepository, TenantListQuery, TenantListResult } from '../../../domain/ports/out/tenant-repository.port';
-import { Tenant, SubscriptionState, TenantPlan, TenantStatus, WeekStart } from '../../../domain/tenant/entities/tenant.entity';
+import { Tenant, SubscriptionState, TenantStatus, WeekStart } from '../../../domain/tenant/entities/tenant.entity';
 import { EventBus } from '../../../core/plugins/event-bus.service';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -31,8 +31,7 @@ function makeTenant(overrides: Partial<Tenant>): Tenant {
         'Test School',
         'test',
         TenantStatus.ACTIVE,
-        TenantPlan.PREMIUM,
-        null,
+        overrides.ownerId || null,
         { email: 'a@test.com' },
         { maxStudents: 100, maxTeachers: 10, maxClasses: 5 },
         undefined,

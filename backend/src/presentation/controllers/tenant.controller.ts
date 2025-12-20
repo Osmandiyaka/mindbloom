@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Put, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { GetTenantBySubdomainUseCase, GetTenantByIdUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, ListTenantsUseCase } from '../../application/services/tenant';
-import { TenantPlan } from '../../domain/tenant/entities/tenant.entity';
 import { EditionManager } from '../../application/services/subscription/edition-manager.service';
 import { UpdateTenantSettingsCommand } from '../../application/ports/in/commands/update-tenant-settings.command';
 import { TenantResponseDto } from '../dtos/responses/tenant/tenant-response.dto';
@@ -70,7 +69,6 @@ export class TenantController {
         // Resolve editionId when possible (prefer editionId, fall back to edition code if provided)
         let editionId: string | undefined = createTenantDto.editionId;
         let editionCode: string | undefined = undefined;
-        let planOverride: any = createTenantDto.plan;
         if (!editionId && createTenantDto.edition) {
             try {
                 const list = await this.editionManager.listEditions();
@@ -79,10 +77,6 @@ export class TenantController {
                 if (found) {
                     editionId = found.id;
                     editionCode = found.name;
-                    // If edition name matches a TenantPlan, prefer it for plan/limits
-                    if ((Object.values(Object.assign({}, require('../../domain/tenant/entities/tenant.entity').TenantPlan)) as string[]).includes(found.name)) {
-                        planOverride = found.name as any;
-                    }
                 }
             } catch (err) {
                 // non-fatal - continue without editionId
@@ -98,7 +92,6 @@ export class TenantController {
             branding: createTenantDto.branding,
             limits: createTenantDto.limits,
             editionId: editionId,
-            plan: planOverride || TenantPlan.TRIAL,
             metadata: editionCode ? { ...(createTenantDto['metadata'] || {}), editionCode } : undefined,
             locale: createTenantDto.locale,
             timezone: createTenantDto.timezone,

@@ -9,13 +9,6 @@ export enum TenantStatus {
     DELETED = 'deleted',
 }
 
-export enum TenantPlan {
-    TRIAL = 'trial',
-    FREE = 'free',
-    BASIC = 'basic',
-    PREMIUM = 'premium',
-    ENTERPRISE = 'enterprise',
-}
 
 export enum SubscriptionState {
     TRIALING = 'trialing',
@@ -211,9 +204,6 @@ export class TenantDocument extends Document {
     @Prop({ required: true, enum: Object.values(TenantStatus), default: TenantStatus.PENDING })
     status: TenantStatus;
 
-    @Prop({ required: true, enum: Object.values(TenantPlan), default: TenantPlan.TRIAL })
-    plan: TenantPlan;
-
     @Prop()
     trialEndsAt?: Date;
 
@@ -384,7 +374,7 @@ TenantSchema.index({ pastDueSince: 1 }, { sparse: true });
 TenantSchema.index({ gracePeriodEndDate: 1 }, { sparse: true });
 
 TenantSchema.virtual('isTrialExpired').get(function () {
-    return (this.edition === 'trial' || this.plan === TenantPlan.TRIAL) &&
+    return (this.edition === 'trial' || this.metadata?.editionCode === 'trial') &&
         this.trialEndsAt &&
         this.trialEndsAt < new Date();
 });
@@ -408,17 +398,18 @@ TenantSchema.virtual('usagePercentage').get(function () {
 
 TenantSchema.pre('save', function (next) {
     if (!this.limits) {
-        this.limits = getDefaultLimitsForPlan(this.plan as TenantPlan);
+        this.limits = getDefaultLimitsForEdition(this.metadata?.editionCode || this.edition || 'trial');
     }
-    if (this.isNew && this.plan === TenantPlan.TRIAL && !this.trialEndsAt) {
+    if (this.isNew && (this.metadata?.editionCode === 'trial' || this.edition === 'trial') && !this.trialEndsAt) {
         this.trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
     }
     next();
 });
 
-function getDefaultLimitsForPlan(plan: TenantPlan): ResourceLimitsSchema {
+function getDefaultLimitsForEdition(editionCode: string): ResourceLimitsSchema {
+    const normalized = String(editionCode || 'trial').toLowerCase();
     const limits = {
-        [TenantPlan.TRIAL]: {
+        'trial': {
             maxStudents: 50,
             maxTeachers: 10,
             maxClasses: 5,
@@ -426,7 +417,7 @@ function getDefaultLimitsForPlan(plan: TenantPlan): ResourceLimitsSchema {
             maxStorage: 500,
             maxBandwidth: 5,
         },
-        [TenantPlan.FREE]: {
+        'free': {
             maxStudents: 25,
             maxTeachers: 5,
             maxClasses: 3,
@@ -434,7 +425,7 @@ function getDefaultLimitsForPlan(plan: TenantPlan): ResourceLimitsSchema {
             maxStorage: 100,
             maxBandwidth: 1,
         },
-        [TenantPlan.BASIC]: {
+        'basic': {
             maxStudents: 200,
             maxTeachers: 30,
             maxClasses: 20,
@@ -442,7 +433,7 @@ function getDefaultLimitsForPlan(plan: TenantPlan): ResourceLimitsSchema {
             maxStorage: 5000,
             maxBandwidth: 50,
         },
-        [TenantPlan.PREMIUM]: {
+        'premium': {
             maxStudents: 1000,
             maxTeachers: 100,
             maxClasses: 50,
@@ -450,7 +441,7 @@ function getDefaultLimitsForPlan(plan: TenantPlan): ResourceLimitsSchema {
             maxStorage: 20000,
             maxBandwidth: 200,
         },
-        [TenantPlan.ENTERPRISE]: {
+        'enterprise': {
             maxStudents: -1,
             maxTeachers: -1,
             maxClasses: -1,
@@ -458,6 +449,8 @@ function getDefaultLimitsForPlan(plan: TenantPlan): ResourceLimitsSchema {
             maxStorage: -1,
             maxBandwidth: -1,
         },
-    };
-    return limits[plan] as ResourceLimitsSchema;
+    } as Record<string, ResourceLimitsSchema>;
+
+    return limits[normalized] || limits['trial'];
 }
+

@@ -1,4 +1,4 @@
-import { Tenant, TenantPlan, TenantStatus, SubscriptionState } from '../../tenant/entities/tenant.entity';
+import { Tenant, TenantStatus, SubscriptionState } from '../../tenant/entities/tenant.entity';
 import { TENANT_REPOSITORY } from './repository.tokens';
 
 export interface TenantListQuery {

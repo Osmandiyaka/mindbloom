@@ -1,6 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { expect } from '@jest/globals';
-import { Tenant, TenantPlan } from '../../../domain/tenant/entities/tenant.entity';
+import { Tenant } from '../../../domain/tenant/entities/tenant.entity';
 import { ITenantRepository, TenantListQuery, TenantListResult } from '../../../domain/ports/out/tenant-repository.port';
 import { UpdateTenantSettingsUseCase } from './update-tenant-settings.use-case';
 import { UpdateTenantSettingsCommand } from '../../ports/in/commands/update-tenant-settings.command';
@@ -55,7 +55,7 @@ function buildTenant(id: string, name: string, customization?: any): Tenant {
         name,
         subdomain: name.toLowerCase(),
         contactEmail: `${name}@school.com`,
-        plan: TenantPlan.BASIC,
+        metadata: { editionCode: 'basic' },
         customization,
     });
     (tenant as any).id = id;
