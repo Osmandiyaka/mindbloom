@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
+import { HostLayoutComponent } from './layouts/host-layout/host-layout.component';
 import { authGuard } from './core/auth/auth.guard';
 import { tenantGuard } from './core/tenant/tenant.guard';
 import { permissionMatchGuard } from './core/guards/permission.guard';
@@ -39,9 +40,22 @@ export const routes: Routes = [
     },
     {
         path: 'host',
-        loadComponent: () => import('./modules/host/pages/host-dashboard/host-dashboard.component').then(m => m.HostDashboardComponent),
+        component: HostLayoutComponent,
         canActivate: [authGuard],
-        data: { skipTenant: true }
+        canActivateChild: [authGuard],
+        data: { skipTenant: true },
+        children: [
+            {
+                path: '',
+                redirectTo: 'dashboard',
+                pathMatch: 'full'
+            },
+            {
+                path: 'dashboard',
+                loadComponent: () => import('./modules/host/pages/host-dashboard/host-dashboard.component').then(m => m.HostDashboardComponent)
+            }
+            // TODO: add additional host child routes (tenants, editions, billing, users)
+        ]
     },
     {
         path: '',

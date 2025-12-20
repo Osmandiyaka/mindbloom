@@ -429,8 +429,27 @@ export class SidebarComponent implements OnInit {
     }
   ];
 
+  // Host-specific navigation
+  hostNavSections: NavSection[] = [
+    {
+      title: 'Host',
+      items: [
+        { label: 'Dashboard', path: '/host/dashboard', icon: 'dashboard' },
+        { label: 'Tenants', path: '/host/tenants', icon: 'grid' },
+        { label: 'Editions', path: '/host/editions', icon: 'settings' },
+        { label: 'Subscriptions', path: '/host/subscriptions', icon: 'bank' },
+        { label: 'Users', path: '/host/users', icon: 'people' },
+        { label: 'Billing', path: '/host/billing', icon: 'expenses' }
+      ]
+    }
+  ];
+
   // Filtered navigation based on entitlements and permissions
   filteredNavSections = computed(() => {
+    // If this is a host nav (any host-* id), use host nav sections
+    if (typeof this.sidebarId === 'string' && this.sidebarId.startsWith('host-')) {
+      return this.navFilterService.filterNavigationSync(this.hostNavSections);
+    }
     return this.navFilterService.filterNavigationSync(this.navSections);
   });
 
@@ -510,6 +529,10 @@ export class SidebarComponent implements OnInit {
   goToTenantSettings(event?: Event): void {
     event?.preventDefault();
     this.onNavigate();
-    this.router.navigate(['/setup/tenant-settings']);
+    if (typeof this.sidebarId === 'string' && this.sidebarId.startsWith('host-')) {
+      this.router.navigate(['/host/tenants']);
+    } else {
+      this.router.navigate(['/setup/tenant-settings']);
+    }
   }
 }
