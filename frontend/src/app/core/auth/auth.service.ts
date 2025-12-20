@@ -24,6 +24,7 @@ interface RefreshTokenResponse {
 interface LoginRequest {
     email: string;
     password: string;
+    tenantId?: string;
 }
 
 interface LoginResponse {
@@ -361,9 +362,12 @@ export class AuthService {
      * Legacy: login method returning Observable<AuthResponse>.
      * Handles both new and legacy backend shapes.
      */
-    login(email: string, password: string): Observable<AuthResponse> {
+    login(email: string, password: string, tenantId?: string | null): Observable<AuthResponse> {
+        const payload: any = { email, password };
+        if (tenantId) payload.tenantId = tenantId;
+
         return this.http
-            .post<LoginResponse | LegacyLoginResponse>(`${this.API_URL}/auth/login`, { email, password }, {
+            .post<LoginResponse | LegacyLoginResponse>(`${this.API_URL}/auth/login`, payload, {
                 withCredentials: true,
             })
             .pipe(

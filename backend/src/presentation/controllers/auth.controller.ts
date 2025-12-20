@@ -35,6 +35,7 @@ export class AuthController {
         const result = await this.loginUseCase.execute({
             email: loginDto.email,
             password: loginDto.password,
+            tenantId: loginDto.tenantId ?? null,
         });
 
         this.setRefreshTokenCookie(res, result.refreshToken, result.refreshTokenExpiresAt);

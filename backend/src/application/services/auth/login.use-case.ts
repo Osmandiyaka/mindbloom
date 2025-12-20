@@ -50,17 +50,21 @@ export class LoginUseCase {
     ) { }
 
     async execute(command: LoginCommand): Promise<LoginResult> {
-        // Validate credentials
+        // Validate credentials (optionally scoped to tenant)
         const isValid = await this.userRepository.validatePassword(
             command.email,
             command.password,
+            command.tenantId ?? undefined,
         );
 
         if (!isValid) {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        const user = await this.userRepository.findByEmail(command.email);
+        // Fetch user; prefer tenant-scoped lookup when tenantId supplied
+        const user = command.tenantId
+            ? await this.userRepository.findByEmailAndTenant(command.email, command.tenantId)
+            : await this.userRepository.findByEmail(command.email);
 
         if (!user) {
             throw new UnauthorizedException('Invalid credentials');

@@ -6,7 +6,8 @@ export interface IUserRepository {
     findAll(tenantId: string): Promise<User[]>;
     create(user: User, password: string): Promise<User>;
     update(user: User): Promise<User>;
-    validatePassword(email: string, password: string): Promise<boolean>;
+    validatePassword(email: string, password: string, tenantId?: string | null): Promise<boolean>;
+    findByEmailAndTenant(email: string, tenantId: string): Promise<User | null>;
     delete(id: string, tenantId: string): Promise<void>;
     setResetToken(userId: string, tokenHash: string, expiresAt: Date): Promise<void>;
     findByResetToken(tokenHash: string): Promise<User | null>;

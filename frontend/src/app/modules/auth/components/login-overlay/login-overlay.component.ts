@@ -166,7 +166,12 @@ export class LoginOverlayComponent {
         this.isLoading.set(true);
         this.errorMessage.set('');
 
-        this.authService.login(this.username(), this.password()).subscribe({
+        // If tenant mode is selected, include the selected tenantId
+        const selectedTenant = this.tenantService.getCurrentTenantValue();
+        // Tenant model uses `id` (not tenantId) — send selected tenant id when in tenant mode
+        const tenantId = this.loginMode() === 'tenant' ? selectedTenant?.id ?? undefined : undefined;
+
+        this.authService.login(this.username(), this.password(), tenantId).subscribe({
             next: async (response) => {
                 this.isLoading.set(false);
 
@@ -187,7 +192,7 @@ export class LoginOverlayComponent {
             },
             error: (error) => {
                 this.isLoading.set(false);
-                this.errorMessage.set('Invalid username or password');
+                this.errorMessage.set(error?.error?.message || 'Invalid username or password');
             }
         });
     }

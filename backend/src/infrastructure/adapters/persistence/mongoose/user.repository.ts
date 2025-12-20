@@ -30,6 +30,11 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
         return user ? this.toDomain(user) : null;
     }
 
+    async findByEmailAndTenant(email: string, tenantId: string): Promise<User | null> {
+        const user = await this.userModel.findOne({ email, tenantId }).populate('roleId').exec();
+        return user ? this.toDomain(user) : null;
+    }
+
     async findById(id: string): Promise<User | null> {
         const user = await this.userModel.findById(id).populate('roleId').exec();
         return user ? this.toDomain(user) : null;
@@ -89,8 +94,14 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
         }
     }
 
-    async validatePassword(email: string, password: string): Promise<boolean> {
-        const user = await this.userModel.findOne({ email }).exec();
+    async validatePassword(email: string, password: string, tenantId?: string | null): Promise<boolean> {
+        // If tenantId supplied, scope the lookup to avoid cross-tenant collisions
+        const filter: any = { email };
+        if (tenantId) {
+            filter.tenantId = tenantId;
+        }
+
+        const user = await this.userModel.findOne(filter).exec();
 
         if (!user) {
             return false;

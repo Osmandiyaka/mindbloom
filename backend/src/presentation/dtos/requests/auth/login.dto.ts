@@ -10,4 +10,8 @@ export class LoginDto {
     @IsString()
     @MinLength(6)
     password: string;
+
+    @ApiProperty({ required: false, description: 'Optional tenant id to scope login for tenant users' })
+    @IsString()
+    tenantId?: string | null;
 }
