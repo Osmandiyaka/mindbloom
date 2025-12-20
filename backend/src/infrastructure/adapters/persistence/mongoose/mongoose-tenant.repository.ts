@@ -242,8 +242,6 @@ export class MongooseTenantRepository implements ITenantRepository {
             doc.idTemplates,
             doc.createdAt,
             doc.updatedAt,
-            // prefer explicit edition code if present
-            doc.edition || undefined,
             doc.editionId ? doc.editionId.toString() : null,
             doc.subscriptionEndDate,
             doc.isSuspended ?? false,
@@ -268,7 +266,6 @@ export class MongooseTenantRepository implements ITenantRepository {
             subdomain: tenant.subdomain,
             status: tenant.status,
             plan: tenant.plan,
-            edition: tenant.edition,
             ownerId: tenant.ownerId,
             contactInfo: tenant.contactInfo,
             billing: tenant.billing,
@@ -296,7 +293,9 @@ export class MongooseTenantRepository implements ITenantRepository {
             tags: tenant.tags,
             trialEndsAt: tenant.trialEndsAt,
             idTemplates: tenant.idTemplates,
+            // Persist editionId (preferred). For backward compatibility, also set the legacy edition code top-level
             editionId: tenant.editionId,
+            edition: tenant.metadata?.editionCode || undefined,
             subscriptionEndDate: tenant.subscriptionEndDate,
             isSuspended: tenant.isSuspended,
             gracePeriodEndDate: tenant.gracePeriodEndDate,

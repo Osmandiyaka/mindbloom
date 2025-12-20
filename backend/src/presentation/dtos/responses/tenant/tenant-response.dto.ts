@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Tenant } from '../../../../domain/tenant/entities/tenant.entity';
 
 export class TenantResponseDto {
@@ -17,7 +17,10 @@ export class TenantResponseDto {
     @ApiProperty({ description: 'Tenant status' })
     status: string;
 
-    @ApiProperty({ description: 'Tenant edition (preferred)' })
+    @ApiPropertyOptional({ description: 'Tenant edition id (preferred)' })
+    editionId?: string;
+
+    @ApiProperty({ description: 'Tenant edition (fallback to plan)' })
     edition: string;
 
     @ApiProperty({ description: 'Locale' })
@@ -81,7 +84,8 @@ export class TenantResponseDto {
             name: tenant.name,
             subdomain: tenant.subdomain,
             status: tenant.status,
-            edition: tenant.edition ?? tenant.plan,
+            editionId: tenant.editionId ?? undefined,
+            edition: tenant.metadata?.editionCode ?? tenant.plan,
             ownerId: tenant.ownerId,
             contactEmail: tenant.contactInfo.email,
             contactPhone: tenant.contactInfo.phone,

@@ -6,6 +6,7 @@ import { Tenant } from '../../../domain/tenant/entities/tenant.entity';
 import { Permission, PermissionAction } from '../../../domain/rbac/entities/permission.entity';
 import { SYSTEM_ROLE_NAMES } from '../../../domain/rbac/entities/system-roles';
 import { User } from '../../../domain/entities/user.entity';
+import { EditionManager } from '../subscription/edition-manager.service';
 
 export interface CurrentLoginInfoResult {
     user: User;
@@ -21,6 +22,7 @@ export class GetCurrentLoginInfoUseCase {
         private readonly userRepository: IUserRepository,
         @Inject(TENANT_REPOSITORY)
         private readonly tenantRepository: ITenantRepository,
+        private readonly editionManager: EditionManager,
     ) { }
 
     async execute(userId: string, tenantId: string): Promise<CurrentLoginInfoResult> {
@@ -35,7 +37,19 @@ export class GetCurrentLoginInfoUseCase {
             throw new NotFoundException('Tenant not found');
         }
 
-        const edition = Tenant.editionSnapshot(tenant);
+        // If tenant has an editionId, fetch edition details (name + features), otherwise fall back to plan-based snapshot
+        let edition: ReturnType<typeof Tenant.editionSnapshot> | { editionCode: string; editionName: string; features: string[] };
+        if (tenant.editionId) {
+            try {
+                const res = await this.editionManager.getEditionWithFeatures(tenant.editionId);
+                edition = { editionCode: res.edition.name, editionName: res.edition.displayName || res.edition.name, features: Object.keys(res.features) };
+            } catch (err) {
+                // If edition lookup fails, fall back to plan snapshot
+                edition = Tenant.editionSnapshot(tenant);
+            }
+        } else {
+            edition = Tenant.editionSnapshot(tenant);
+        }
         const rolePermissions = user.role?.permissions ?? [];
         const directPermissions = user.permissions ?? [];
         const effectivePermissions = [...rolePermissions, ...directPermissions];

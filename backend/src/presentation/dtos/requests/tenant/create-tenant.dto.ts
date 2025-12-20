@@ -165,6 +165,11 @@ export class CreateTenantDto {
     @IsString()
     edition?: string;
 
+    @ApiPropertyOptional({ description: 'Tenant edition id (preferred). Use this when you have the canonical edition id.' })
+    @IsOptional()
+    @IsString()
+    editionId?: string;
+
     @ApiProperty({
         description: 'Tenant plan (deprecated). Prefer `edition` in new requests.',
         enum: ['trial', 'free', 'basic', 'premium', 'enterprise'],

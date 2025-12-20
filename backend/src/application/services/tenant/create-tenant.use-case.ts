@@ -32,9 +32,8 @@ export class CreateTenantUseCase {
         const timezone = command.timezone || 'Europe/London';
         const weekStartsOn = (command.weekStartsOn as WeekStart) || WeekStart.MONDAY;
         const academicYear = this.resolveAcademicYear(command.academicYear);
-        // Prefer edition when provided; if edition corresponds to a known TenantPlan value, resolve to that plan for limits
-        const planFromEdition = (command.edition && (Object.values(TenantPlan) as string[]).includes(command.edition)) ? (command.edition as TenantPlan) : undefined;
-        const plan = (command.plan as TenantPlan) || planFromEdition || TenantPlan.TRIAL;
+        // Use explicit plan when provided; editionId (if present) is stored separately. Defaults to TRIAL.
+        const plan = (command.plan as TenantPlan) || TenantPlan.TRIAL;
         const limits = this.resolveLimits(plan, command.limits);
 
         const customization = {
@@ -57,14 +56,14 @@ export class CreateTenantUseCase {
             address: command.address,
             customization,
             plan: plan as TenantPlan,
-            edition: command.edition,
+            editionId: command.editionId,
             status: (command.status || TenantStatus.PENDING) as TenantStatus,
             locale,
             timezone,
             weekStartsOn,
             academicYear,
             limits,
-            metadata: { schoolId, initialConfigRequired: true },
+            metadata: { ...(command.metadata || {}), schoolId, initialConfigRequired: true },
         });
 
         const createdTenant = await this.tenantRepository.create(tenant);

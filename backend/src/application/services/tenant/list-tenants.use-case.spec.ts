@@ -22,7 +22,7 @@ class InMemoryTenantRepository implements ITenantRepository {
         }
 
         if (query.editions && query.editions.length > 0) {
-            filtered = filtered.filter((t) => (query.editions || []).includes(t.edition ?? t.plan));
+            filtered = filtered.filter((t) => (query.editions || []).includes(t.metadata?.editionCode ?? t.plan));
         }
 
         if (query.trialExpiringBefore) {

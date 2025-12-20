@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CurrentLoginInfoResult } from '../../../../application/services/auth/get-current-login-info.use-case';
 import { TenantPlan, Tenant, TenantStatus, ContactInfo } from '../../../../domain/tenant/entities/tenant.entity';
 import { Role } from '../../../../domain/rbac/entities/role.entity';
@@ -89,7 +89,10 @@ class TenantInfoDto {
     @ApiProperty()
     subdomain!: string;
 
-    @ApiProperty({ description: 'Tenant edition code' })
+    @ApiPropertyOptional({ description: 'Tenant edition id (preferred)' })
+    editionId?: string;
+
+    @ApiProperty({ description: 'Tenant edition code (fallback to plan)' })
     edition!: string;
 
     @ApiProperty({ enum: TenantStatus })
@@ -112,7 +115,8 @@ class TenantInfoDto {
         dto.id = tenant.id;
         dto.name = tenant.name;
         dto.subdomain = tenant.subdomain;
-        dto.edition = tenant.edition ?? tenant.plan;
+        dto.editionId = tenant.editionId ?? undefined;
+        dto.edition = tenant.metadata?.editionCode ?? tenant.plan;
         dto.status = tenant.status;
         dto.locale = tenant.locale;
         dto.timezone = tenant.timezone;

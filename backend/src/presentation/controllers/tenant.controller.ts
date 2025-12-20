@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Put, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { GetTenantBySubdomainUseCase, GetTenantByIdUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, ListTenantsUseCase } from '../../application/services/tenant';
+import { TenantPlan } from '../../domain/tenant/entities/tenant.entity';
+import { EditionManager } from '../../application/services/subscription/edition-manager.service';
 import { UpdateTenantSettingsCommand } from '../../application/ports/in/commands/update-tenant-settings.command';
 import { TenantResponseDto } from '../dtos/responses/tenant/tenant-response.dto';
 import { CreateTenantDto } from '../dtos/requests/tenant/create-tenant.dto';
@@ -27,6 +29,7 @@ export class TenantController {
         private readonly updateTenantSettingsUseCase: UpdateTenantSettingsUseCase,
         private readonly listTenantsUseCase: ListTenantsUseCase,
         private readonly tenantContext: TenantContext,
+        private readonly editionManager: EditionManager,
     ) { }
 
     @Public()
@@ -64,6 +67,28 @@ export class TenantController {
     @ApiOperation({ summary: 'Create a new tenant' })
     @ApiResponse({ status: 201, description: 'Tenant created successfully', type: TenantResponseDto })
     async createTenant(@Body() createTenantDto: CreateTenantDto): Promise<TenantResponseDto> {
+        // Resolve editionId when possible (prefer editionId, fall back to edition code if provided)
+        let editionId: string | undefined = createTenantDto.editionId;
+        let editionCode: string | undefined = undefined;
+        let planOverride: any = createTenantDto.plan;
+        if (!editionId && createTenantDto.edition) {
+            try {
+                const list = await this.editionManager.listEditions();
+                const normalized = String(createTenantDto.edition).toLowerCase();
+                const found = list.find(e => e.name?.toLowerCase() === normalized || e.displayName?.toLowerCase() === normalized);
+                if (found) {
+                    editionId = found.id;
+                    editionCode = found.name;
+                    // If edition name matches a TenantPlan, prefer it for plan/limits
+                    if ((Object.values(Object.assign({}, require('../../domain/tenant/entities/tenant.entity').TenantPlan)) as string[]).includes(found.name)) {
+                        planOverride = found.name as any;
+                    }
+                }
+            } catch (err) {
+                // non-fatal - continue without editionId
+            }
+        }
+
         const tenant = await this.createTenantUseCase.execute({
             name: createTenantDto.name,
             subdomain: createTenantDto.subdomain,
@@ -72,8 +97,9 @@ export class TenantController {
             address: createTenantDto.address,
             branding: createTenantDto.branding,
             limits: createTenantDto.limits,
-            // Prefer edition if provided, fall back to legacy plan for compatibility
-            edition: (createTenantDto.edition ?? createTenantDto.plan) || 'trial',
+            editionId: editionId,
+            plan: planOverride || TenantPlan.TRIAL,
+            metadata: editionCode ? { ...(createTenantDto['metadata'] || {}), editionCode } : undefined,
             locale: createTenantDto.locale,
             timezone: createTenantDto.timezone,
             weekStartsOn: createTenantDto.weekStartsOn,
@@ -101,6 +127,19 @@ export class TenantController {
     async getCurrentEdition(): Promise<TenantEditionResponseDto | null> {
         const tenant = await this.getTenantByIdUseCase.execute(this.tenantContext.tenantId);
         if (!tenant) return null;
+
+        if (tenant.editionId) {
+            try {
+                const { edition, features } = await this.editionManager.getEditionWithFeatures(tenant.editionId);
+                return {
+                    editionCode: edition.name,
+                    editionName: edition.displayName || edition.name,
+                    features: Object.keys(features),
+                };
+            } catch (err) {
+                return Tenant.editionSnapshot(tenant);
+            }
+        }
 
         return Tenant.editionSnapshot(tenant);
     }

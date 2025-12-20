@@ -4,6 +4,7 @@ import { TenantController } from './tenant.controller';
 import { Tenant } from '../../domain/tenant/entities/tenant.entity';
 import { TenantStatus, TenantPlan } from '../../domain/tenant/entities/tenant.entity';
 import { TenantContext } from '../../common/tenant/tenant.context';
+import { EditionManager } from '../../application/services/subscription/edition-manager.service';
 import { TenantResponseDto } from '../dtos/responses/tenant/tenant-response.dto';
 import { CreateTenantUseCase, GetTenantBySubdomainUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, ListTenantsUseCase, GetTenantByIdUseCase } from '../../application/services/tenant';
 import { TenantGuard } from '../../common/tenant/tenant.guard';
@@ -50,6 +51,7 @@ describe('TenantController', () => {
                 { provide: UpdateTenantSettingsUseCase, useValue: updateTenantSettingsUseCase },
                 { provide: ListTenantsUseCase, useValue: listTenantsUseCase },
                 { provide: TenantContext, useValue: { tenantId: 'tenant-ctx', setTenantId: jest.fn(), hasTenantId: () => true } },
+                { provide: EditionManager, useValue: { listEditions: jest.fn(), getEditionWithFeatures: jest.fn() } },
                 { provide: TenantGuard, useValue: { canActivate: jest.fn().mockResolvedValue(true) } },
                 { provide: TenantResolutionService, useValue: { resolve: jest.fn() } },
                 { provide: PermissionGuard, useValue: { canActivate: jest.fn().mockResolvedValue(true) } },

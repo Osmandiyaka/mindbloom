@@ -192,7 +192,8 @@ export class Tenant {
             ? tenant.enabledModules
             : Tenant.featuresForPlan(tenant.plan);
 
-        const editionCode = tenant.edition ?? tenant.plan;
+        // With edition stored as an id, fall back to plan as the edition code when no edition details are available
+        const editionCode = tenant.plan;
 
         return {
             editionCode,
@@ -250,9 +251,8 @@ export class Tenant {
         public readonly createdAt?: Date,
         public readonly updatedAt?: Date,
         /**
-         * New: edition code (preferred over legacy `plan` when present)
+         * Assigned edition id (references editions collection) — prefer this over legacy edition code
          */
-        public readonly edition?: string | null,
         public readonly editionId?: string | null,
         public readonly subscriptionEndDate?: Date,
         public readonly isSuspended: boolean = false,
@@ -385,7 +385,7 @@ export class Tenant {
         accentColor?: string;
         customDomain?: string;
         plan?: TenantPlan;
-        edition?: string;
+        editionId?: string;
         status?: TenantStatus;
         locale?: string;
         timezone?: string;
@@ -400,9 +400,8 @@ export class Tenant {
         updatedAt?: Date;
         tags?: string[];
     }): Tenant {
-        // Resolve plan from provided plan or edition (edition takes precedence for edition snapshot, but limits still derived from a plan)
-        const planFromEdition = (props.edition && (Object.values(TenantPlan) as string[]).includes(props.edition)) ? (props.edition as TenantPlan) : undefined;
-        const plan = props.plan || planFromEdition || TenantPlan.TRIAL;
+        // Resolve plan from provided plan (edition id does not contain code here)
+        const plan = props.plan || TenantPlan.TRIAL;
         const status = props.status || TenantStatus.PENDING;
         const limits = props.limits || getDefaultLimitsForPlan(plan);
         return new Tenant(
@@ -451,9 +450,8 @@ export class Tenant {
             props.idTemplates || undefined, // idTemplates
             props.createdAt,
             props.updatedAt,
-            // new edition value
-            props.edition || undefined,
-            undefined, // editionId
+            // editionId
+            props.editionId ?? undefined,
             undefined, // subscriptionEndDate
             false, // isSuspended
             undefined, // gracePeriodEndDate
