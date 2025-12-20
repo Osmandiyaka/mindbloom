@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
@@ -8,20 +9,24 @@ import { TenantActivityItem, TenantDetails, TenantMetrics, AuditEvent, PagedResu
 
 import { PageHeaderComponent } from '../../../core/ui/page-header/page-header.component';
 import { DataTableShellComponent } from '../../../core/ui/data-table-shell/data-table-shell.component';
+import { SimpleTableComponent, SimpleColumn } from '../../../core/ui/simple-table/simple-table.component';
 
 import { ConfirmService } from '../../../core/ui/confirm/confirm.service';
 import { ToastService } from '../../../core/ui/toast/toast.service';
 
 @Component({
-    standalone: true,
-    imports: [
-        CommonModule,
-        RouterLink,
-        DatePipe,
-        PageHeaderComponent,
-        DataTableShellComponent,
-    ],
-    template: `
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterLink,
+    DatePipe,
+    PageHeaderComponent,
+    DataTableShellComponent,
+    SimpleTableComponent,
+    // required for ngModel in selects
+    FormsModule,
+  ],
+  template: `
     <div class="crumbs">
       <a routerLink="/host/tenants">← Back to Tenants</a>
     </div>
@@ -158,7 +163,7 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
       @if (currentTab() === 'audit') {
         <div class="card">
           <div class="card-header">
-            <input class="search" placeholder="Search audit events..." (keyup.enter)="loadAudit()" #q/>
+            <input class="input" placeholder="Search audit events..." (keyup.enter)="loadAudit(q.value)" #q/>
             <button class="btn" (click)="loadAudit(q.value)">Search</button>
             <div class="spacer"></div>
             <div class="muted">Showing audit logs for this tenant</div>
@@ -167,27 +172,35 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
           <div *ngIf="auditLoading()" class="empty">Loading audit logs...</div>
           <div *ngIf="!auditLoading() && !auditResults()?.items?.length" class="empty">No audit logs found.</div>
 
-          <ul class="activity" *ngIf="!auditLoading() && auditResults()?.items?.length">
-            @for (e of auditResults()?.items ?? []; track e.id) {
-              <li class="row" (click)="selectAudit(e.id)">
-                <div class="left">
-                  <div class="msg">{{ e.action ?? e.message ?? '-' }}</div>
-                  <div class="meta">
-                    <span class="type">{{ e.category ?? 'audit' }}</span>
-                    <span class="dot">•</span>
-                    <span>{{ e.timestamp | date:'medium' }}</span>
-                    <span class="dot">•</span>
-                    <span>{{ e.actorEmailSnapshot ?? 'system' }}</span>
-                  </div>
-                </div>
-              </li>
-            }
-          </ul>
+          <div *ngIf="!auditLoading() && auditResults()?.items?.length">
+            <host-simple-table
+              [columns]="auditColumns"
+              [data]="auditResults()?.items ?? []"
+              [idKey]="'id'"
+              (rowClick)="onAuditRowClick($event)"
+              (view)="selectAudit($event.id)"
+            >
+              <ng-template #actionTemplate let-row="row">
+                <button class="btn small" (click)="$event.stopPropagation(); selectAudit(row.id)">View</button>
+                <button class="btn small" (click)="$event.stopPropagation();">Export</button>
+              </ng-template>
+            </host-simple-table>
 
-          <div class="pager">
-            <button class="btn" (click)="auditPrev()" [disabled]="auditPage()<=1">Prev</button>
-            <span>Page {{ auditPage() }} / {{ auditTotalPages() }}</span>
-            <button class="btn" (click)="auditNext()" [disabled]="auditPage()*auditPageSize() >= (auditResults()?.total ?? 0)">Next</button>
+            <div class="pager">
+              <div class="muted">Showing {{ (auditResults()?.items?.length ?? 0) }} of {{ auditResults()?.total ?? 0 }}</div>
+
+              <div class="pager-actions">
+                <button class="btn small" (click)="auditPrev()" [disabled]="auditPage() <= 1">Prev</button>
+                <span class="page">{{ auditPage() }}</span>
+                <button class="btn small" (click)="auditNext()" [disabled]="auditPage()*auditPageSize() >= (auditResults()?.total ?? 0)">Next</button>
+
+                <select class="input small" [ngModel]="auditPageSize()" (ngModelChange)="setAuditPageSize($event)">
+                  <option [ngValue]="10">10</option>
+                  <option [ngValue]="20">20</option>
+                  <option [ngValue]="50">50</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           <div *ngIf="selectedAudit()" class="card detail">
@@ -223,7 +236,7 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
 
     </host-data-table-shell>
   `,
-    styles: [`
+  styles: [`
     .crumbs { margin-bottom: 10px; }
     .crumbs a { text-decoration: none; color: #374151; }
 
@@ -306,6 +319,15 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
       border-radius: 14px;
       overflow: hidden;
     }
+
+    /* Table (consistent with Tenants list) */
+    .table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.45; color: #111827; }
+    th, td { padding: 14px 12px; border-bottom: 1px solid #f1f5f9; text-align: left; vertical-align: top; }
+    th { font-size: 12px; color: #374151; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; background: rgba(15,23,42,0.02); }
+    td { color: #111827; font-size: 14px; }
+    .right { text-align: right; }
+    .name { font-weight: 700; font-size: 16px; color: #111827; }
+
     .empty { padding: 18px; color: #6b7280; }
 
     .activity { list-style: none; margin: 0; padding: 0; }
@@ -319,176 +341,198 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
   `],
 })
 export class TenantDetailsPage {
-    private api = inject(HostApi);
-    private route = inject(ActivatedRoute);
-    private confirm = inject(ConfirmService);
-    private toast = inject(ToastService);
+  private api = inject(HostApi);
+  private route = inject(ActivatedRoute);
+  private confirm = inject(ConfirmService);
+  private toast = inject(ToastService);
 
-    tenantId = computed(() => this.route.snapshot.paramMap.get('id') ?? '');
+  tenantId = computed(() => this.route.snapshot.paramMap.get('id') ?? '');
 
-    tenant = signal<TenantDetails | null>(null);
-    metrics = signal<TenantMetrics | null>(null);
-    activity = signal<TenantActivityItem[]>([]);
+  tenant = signal<TenantDetails | null>(null);
+  metrics = signal<TenantMetrics | null>(null);
+  activity = signal<TenantActivityItem[]>([]);
 
-    // Tab state
-    currentTab = signal<'overview' | 'audit' | 'users' | 'invoices' | 'issues'>('overview');
+  // Tab state
+  currentTab = signal<'overview' | 'audit' | 'users' | 'invoices' | 'issues'>('overview');
 
-    // Audit data
-    auditResults = signal<PagedResult<AuditEvent> | null>(null);
-    auditPage = signal(1);
-    auditPageSize = signal(20);
-    auditLoading = signal(false);
-    selectedAudit = signal<AuditEvent | null>(null);
+  // Audit data
+  auditResults = signal<PagedResult<AuditEvent> | null>(null);
+  auditPage = signal(1);
+  auditPageSize = signal(20);
+  auditLoading = signal(false);
+  selectedAudit = signal<AuditEvent | null>(null);
 
-    loading = signal(false);
-    error = signal<string | null>(null);
+  loading = signal(false);
+  error = signal<string | null>(null);
 
-    tenantTitle = computed(() => this.tenant()?.name ?? 'Tenant');
-    tenantSubtitle = computed(() => {
-        const t = this.tenant();
-        if (!t) return 'Tenant overview';
-        return `${t.subdomain} • ${t.editionName ?? 'No edition'}`;
-    });
+  // Columns for the shared simple table
+  auditColumns: SimpleColumn[] = [
+    { key: 'action', label: 'Action' },
+    { key: 'category', label: 'Category' },
+    { key: 'actorEmailSnapshot', label: 'Actor' },
+    { key: 'timestamp', label: 'When' },
+    { key: 'result', label: 'Result' },
+  ];
 
-    publicUrl() {
-        const t = this.tenant();
-        if (!t) return null;
-        const domain = t.customDomain ?? `${t.subdomain}.yourapp.com`;
-        return `https://${domain}`;
+  onAuditRowClick(row: any) {
+    this.selectAudit(row.id);
+  }
+
+  tenantTitle = computed(() => this.tenant()?.name ?? 'Tenant');
+  tenantSubtitle = computed(() => {
+    const t = this.tenant();
+    if (!t) return 'Tenant overview';
+    return `${t.subdomain} • ${t.editionName ?? 'No edition'}`;
+  });
+
+  publicUrl() {
+    const t = this.tenant();
+    if (!t) return null;
+    const domain = t.customDomain ?? `${t.subdomain}.yourapp.com`;
+    return `https://${domain}`;
+  }
+
+  async ngOnInit() {
+    await this.reload();
+  }
+
+  setTab(tab: 'overview' | 'audit' | 'users' | 'invoices' | 'issues') {
+    this.currentTab.set(tab);
+    if (tab === 'audit') this.loadAudit();
+  }
+
+  async loadAudit(q?: string) {
+    const id = this.tenantId();
+    if (!id) return;
+    this.auditLoading.set(true);
+    try {
+      const res = await firstValueFrom(this.api.getTenantAudit(id, this.auditPage(), this.auditPageSize(), q));
+      this.auditResults.set(res);
+    } catch (e: any) {
+      this.toast.error(e?.message ?? 'Failed to load audit logs');
+    } finally {
+      this.auditLoading.set(false);
+    }
+  }
+
+  auditPrev() {
+    const p = Math.max(1, this.auditPage() - 1);
+    this.auditPage.set(p);
+    this.loadAudit();
+  }
+
+  auditNext() {
+    const p = this.auditPage() + 1;
+    this.auditPage.set(p);
+    this.loadAudit();
+  }
+
+  async selectAudit(id: string) {
+    try {
+      const a = await firstValueFrom(this.api.getAuditEvent(id));
+      this.selectedAudit.set(a);
+    } catch (e: any) {
+      this.toast.error('Failed to load audit detail');
+    }
+  }
+
+  trackByAuditId(_: number, e: any) { return e.id; }
+
+  setAuditPageSize(size: any) {
+    const s = Number(size) || 10;
+    this.auditPageSize.set(s);
+    this.auditPage.set(1);
+    this.loadAudit();
+  }
+
+  auditTotalPages() {
+    const total = this.auditResults()?.total ?? 0;
+    const pageSize = this.auditPageSize() || 20;
+    return Math.max(1, Math.ceil(total / pageSize));
+  }
+
+  async reload() {
+    const id = this.tenantId();
+    if (!id) {
+      this.error.set('Missing tenant id');
+      return;
     }
 
-    async ngOnInit() {
-        await this.reload();
-    }
+    this.loading.set(true);
+    this.error.set(null);
 
-    setTab(tab: 'overview' | 'audit' | 'users' | 'invoices' | 'issues') {
-        this.currentTab.set(tab);
-        if (tab === 'audit') this.loadAudit();
-    }
+    try {
+      const [t, m, a] = await Promise.all([
+        firstValueFrom(this.api.getTenantDetails(id)),
+        firstValueFrom(this.api.getTenantMetrics(id)),
+        firstValueFrom(this.api.getTenantActivity(id, 20)),
+      ]);
 
-    async loadAudit(q?: string) {
-        const id = this.tenantId();
-        if (!id) return;
-        this.auditLoading.set(true);
-        try {
-            const res = await firstValueFrom(this.api.getTenantAudit(id, this.auditPage(), this.auditPageSize(), q));
-            this.auditResults.set(res);
-        } catch (e: any) {
-            this.toast.error(e?.message ?? 'Failed to load audit logs');
-        } finally {
-            this.auditLoading.set(false);
-        }
-    }
+      this.tenant.set(t);
+      this.metrics.set(m);
+      this.activity.set(a);
 
-    auditPrev() {
-        const p = Math.max(1, this.auditPage() - 1);
-        this.auditPage.set(p);
+      if (this.currentTab() === 'audit') {
         this.loadAudit();
+      }
+    } catch (e: any) {
+      this.error.set(e?.message ?? 'Failed to load tenant details');
+      this.toast.error('Failed to load tenant details');
+    } finally {
+      this.loading.set(false);
     }
+  }
 
-    auditNext() {
-        const p = this.auditPage() + 1;
-        this.auditPage.set(p);
-        this.loadAudit();
+  storageLabel(): string {
+    const m = this.metrics();
+    if (!m) return '—';
+    if (m.storageUsedMb === undefined) return '—';
+    if (m.storageLimitMb) return `${m.storageUsedMb} / ${m.storageLimitMb} MB`;
+    return `${m.storageUsedMb} MB`;
+  }
+
+  mrrLabel(): string {
+    const m = this.metrics();
+    if (!m || m.mrr === undefined) return '—';
+    const currency = m.currency ?? 'USD';
+    return `${currency} ${m.mrr}`;
+  }
+
+  openEdit() {
+    // Keep this simple for now:
+    // Later, you can reuse TenantFormDialogComponent in a route-level dialog.
+    this.toast.success('Edit flow: reuse the tenant edit dialog from the list (next enhancement)');
+  }
+
+  async suspend() {
+    const t = this.tenant();
+    if (!t) return;
+
+    const ok = await this.confirm.confirm(`Suspend "${t.name}"? Users may be unable to access the tenant.`);
+    if (!ok) return;
+
+    try {
+      await firstValueFrom(this.api.suspendTenant(t.id));
+      this.toast.success('Tenant suspended');
+      await this.reload();
+    } catch (e: any) {
+      this.toast.error(e?.message ?? 'Failed to suspend tenant');
     }
+  }
 
-    async selectAudit(id: string) {
-        try {
-            const a = await firstValueFrom(this.api.getAuditEvent(id));
-            this.selectedAudit.set(a);
-        } catch (e: any) {
-            this.toast.error('Failed to load audit detail');
-        }
+  async activate() {
+    const t = this.tenant();
+    if (!t) return;
+
+    const ok = await this.confirm.confirm(`Activate "${t.name}"?`);
+    if (!ok) return;
+
+    try {
+      await firstValueFrom(this.api.activateTenant(t.id));
+      this.toast.success('Tenant activated');
+      await this.reload();
+    } catch (e: any) {
+      this.toast.error(e?.message ?? 'Failed to activate tenant');
     }
-
-    auditTotalPages() {
-        const total = this.auditResults()?.total ?? 0;
-        const pageSize = this.auditPageSize() || 20;
-        return Math.max(1, Math.ceil(total / pageSize));
-    }
-
-    async reload() {
-        const id = this.tenantId();
-        if (!id) {
-            this.error.set('Missing tenant id');
-            return;
-        }
-
-        this.loading.set(true);
-        this.error.set(null);
-
-        try {
-            const [t, m, a] = await Promise.all([
-                firstValueFrom(this.api.getTenantDetails(id)),
-                firstValueFrom(this.api.getTenantMetrics(id)),
-                firstValueFrom(this.api.getTenantActivity(id, 20)),
-            ]);
-
-            this.tenant.set(t);
-            this.metrics.set(m);
-            this.activity.set(a);
-
-            if (this.currentTab() === 'audit') {
-                this.loadAudit();
-            }
-        } catch (e: any) {
-            this.error.set(e?.message ?? 'Failed to load tenant details');
-            this.toast.error('Failed to load tenant details');
-        } finally {
-            this.loading.set(false);
-        }
-    }
-
-    storageLabel(): string {
-        const m = this.metrics();
-        if (!m) return '—';
-        if (m.storageUsedMb === undefined) return '—';
-        if (m.storageLimitMb) return `${m.storageUsedMb} / ${m.storageLimitMb} MB`;
-        return `${m.storageUsedMb} MB`;
-    }
-
-    mrrLabel(): string {
-        const m = this.metrics();
-        if (!m || m.mrr === undefined) return '—';
-        const currency = m.currency ?? 'USD';
-        return `${currency} ${m.mrr}`;
-    }
-
-    openEdit() {
-        // Keep this simple for now:
-        // Later, you can reuse TenantFormDialogComponent in a route-level dialog.
-        this.toast.success('Edit flow: reuse the tenant edit dialog from the list (next enhancement)');
-    }
-
-    async suspend() {
-        const t = this.tenant();
-        if (!t) return;
-
-        const ok = await this.confirm.confirm(`Suspend "${t.name}"? Users may be unable to access the tenant.`);
-        if (!ok) return;
-
-        try {
-            await firstValueFrom(this.api.suspendTenant(t.id));
-            this.toast.success('Tenant suspended');
-            await this.reload();
-        } catch (e: any) {
-            this.toast.error(e?.message ?? 'Failed to suspend tenant');
-        }
-    }
-
-    async activate() {
-        const t = this.tenant();
-        if (!t) return;
-
-        const ok = await this.confirm.confirm(`Activate "${t.name}"?`);
-        if (!ok) return;
-
-        try {
-            await firstValueFrom(this.api.activateTenant(t.id));
-            this.toast.success('Tenant activated');
-            await this.reload();
-        } catch (e: any) {
-            this.toast.error(e?.message ?? 'Failed to activate tenant');
-        }
-    }
+  }
 }

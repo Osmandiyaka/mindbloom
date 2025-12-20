@@ -14,9 +14,11 @@ import { TenantFormDialogComponent } from './tenant-form.dialog';
 import { PageHeaderComponent } from '../../../core/ui/page-header/page-header.component';
 import { ToolbarComponent } from '../../../core/ui/toolbar/toolbar.component';
 import { DataTableShellComponent } from '../../../core/ui/data-table-shell/data-table-shell.component';
+import { SimpleTableComponent, SimpleColumn } from '../../../core/ui/simple-table/simple-table.component';
 
 import { ConfirmService } from '../../../core/ui/confirm/confirm.service';
 import { ToastService } from '../../../core/ui/toast/toast.service';
+import { Router } from '@angular/router';
 
 @Component({
   standalone: true,
@@ -29,6 +31,7 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
     PageHeaderComponent,
     ToolbarComponent,
     DataTableShellComponent,
+    SimpleTableComponent,
 
     TenantFormDialogComponent,
   ],
@@ -75,48 +78,20 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
       emptyText="No tenants found for the current filters."
     >
       <div class="card">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Subdomain</th>
-              <th>Edition</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th class="right">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <ng-container *ngFor="let t of store.items(); trackBy: trackById">
-              <tr>
-                <td>
-                  <div class="name">
-                    <a [routerLink]="['/host/tenants', t.id]">{{ t.name }}</a>
-                  </div>
-                  <div class="muted">ID: {{ t.id }}</div>
-                </td>
-                <td>{{ t.subdomain }}</td>
-                <td>{{ t.editionName ?? '—' }}</td>
-                <td>
-                  <span class="pill" [class.suspended]="t.status==='SUSPENDED'" [class.trial]="t.status==='TRIAL'">
-                    {{ t.status }}
-                  </span>
-                </td>
-                <td>{{ t.createdAt | date:'mediumDate' }}</td>
-
-                <td class="right">
-                  <button class="btn small" (click)="openEdit(t)">Edit</button>
-
-                  <button *ngIf="t.status !== 'SUSPENDED'" class="btn small danger" (click)="suspend(t)">Suspend</button>
-                  <button *ngIf="t.status === 'SUSPENDED'" class="btn small" (click)="activate(t)">Activate</button>
-
-                  <button class="btn small" disabled title="Coming soon">Impersonate</button>
-                </td>
-              </tr>
-            </ng-container>
-          </tbody>
-        </table>
+        <host-simple-table
+          [columns]="tenantColumns"
+          [data]="store.items()"
+          [idKey]="'id'"
+          (rowClick)="onTenantRowClick($event)"
+          (view)="openEdit($event)"
+        >
+          <ng-template #actionTemplate let-row="row">
+            <button class="btn small" (click)="$event.stopPropagation(); openEdit(row)">Edit</button>
+            <button *ngIf="row.status !== 'SUSPENDED'" class="btn small danger" (click)="$event.stopPropagation(); suspend(row)">Suspend</button>
+            <button *ngIf="row.status === 'SUSPENDED'" class="btn small" (click)="$event.stopPropagation(); activate(row)">Activate</button>
+            <button class="btn small" disabled title="Coming soon">Impersonate</button>
+          </ng-template>
+        </host-simple-table>
 
         <div class="pager">
           <div class="muted">
@@ -228,10 +203,22 @@ export class TenantsPage {
   private toast = inject(ToastService);
 
   store = inject(TenantsStore);
+  private router = inject(Router);
 
   @ViewChild('tenantDialog') tenantDialog!: TenantFormDialogComponent;
 
+  // Columns for shared table
+  tenantColumns: SimpleColumn[] = [
+    { key: 'name', label: 'Name' },
+    { key: 'subdomain', label: 'Subdomain' },
+    { key: 'editionName', label: 'Edition' },
+    { key: 'status', label: 'Status' },
+    { key: 'createdAt', label: 'Created' },
+  ];
+
   trackById(_: number, t: any) { return t.id; }
+
+  onTenantRowClick(row: any) { this.router.navigate(['/host/tenants', row.id]); }
 
   async ngOnInit() {
     await this.loadEditionsLookupSafe();
