@@ -364,7 +364,10 @@ export class AuthService {
      */
     login(email: string, password: string, tenantId?: string | null): Observable<AuthResponse> {
         const payload: any = { email, password };
-        if (tenantId) payload.tenantId = tenantId;
+        // Only include tenantId when it's a non-empty string to avoid sending `null` which triggers backend validation
+        if (typeof tenantId === 'string' && tenantId.trim().length > 0) {
+            payload.tenantId = tenantId.trim();
+        }
 
         return this.http
             .post<LoginResponse | LegacyLoginResponse>(`${this.API_URL}/auth/login`, payload, {

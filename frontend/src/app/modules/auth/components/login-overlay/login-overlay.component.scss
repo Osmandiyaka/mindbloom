@@ -94,6 +94,64 @@
     letter-spacing: -0.5px;
 }
 
+/* mode links (replaces tabbed control) */
+.mode-links {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.mode-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 10px;
+    color: var(--color-primary, #2563eb);
+    background: transparent;
+    font-weight: 700;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease, transform 150ms ease;
+}
+
+.mode-link::after {
+    content: '';
+    display: block;
+    height: 2px;
+    width: 0%;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--color-primary, #2563eb) 100%, transparent) 0%, color-mix(in srgb, var(--color-accent, #7c3aed) 60%, transparent) 100%);
+    transition: width 220ms ease;
+    border-radius: 2px;
+    margin-left: 8px;
+}
+
+.mode-link:hover {
+    background: color-mix(in srgb, var(--color-surface, #ffffff) 92%, var(--color-background, #0f172a) 8%);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px -18px color-mix(in srgb, var(--color-primary, #2563eb) 36%, transparent);
+}
+
+.mode-link:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-primary, #2563eb) 28%, transparent);
+    outline-offset: 3px;
+}
+
+.mode-link:hover::after {
+    width: 46px;
+}
+
+@media (max-width: 640px) {
+    .mode-links {
+        justify-content: flex-start;
+    }
+
+    .mode-link {
+        padding: 0.4rem 0.6rem;
+    }
+}
+
 .login-form {
     flex: 1;
     display: flex;

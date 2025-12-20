@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginDto {
@@ -12,6 +12,7 @@ export class LoginDto {
     password: string;
 
     @ApiProperty({ required: false, description: 'Optional tenant id to scope login for tenant users' })
+    @IsOptional()
     @IsString()
     tenantId?: string | null;
 }
