@@ -43,3 +43,57 @@ export interface EditionLookup {
     id: string;
     name: string;
 }
+
+// Tenant Details + Metrics + Activity
+export interface TenantDetails {
+    id: string;
+    name: string;
+    subdomain: string;
+    editionId?: string | null;
+    editionName?: string | null;
+    status: TenantStatus;
+    createdAt: string; // ISO
+
+    // Optional extras
+    domain?: string | null;
+    customDomain?: string | null;
+    adminEmail?: string | null;
+    subscriptionEndDate?: string | null;
+}
+
+export interface TenantMetrics {
+    tenantId: string;
+
+    studentsCount: number;
+    teachersCount: number;
+    usersCount: number;
+
+    classesCount?: number;
+    staffCount?: number;
+
+    storageUsedMb?: number;
+    storageLimitMb?: number;
+
+    // Optional billing metrics
+    mrr?: number;
+    currency?: string;
+}
+
+export type TenantActivityType =
+    | 'TENANT_CREATED'
+    | 'TENANT_UPDATED'
+    | 'STATUS_CHANGED'
+    | 'USER_CREATED'
+    | 'USER_LOGIN'
+    | 'SUBSCRIPTION_CHANGED'
+    | 'INVOICE_PAID'
+    | 'SYSTEM_EVENT';
+
+export interface TenantActivityItem {
+    id: string;
+    tenantId: string;
+    type: TenantActivityType;
+    message: string;
+    createdAt: string; // ISO
+    actorEmail?: string | null;
+}

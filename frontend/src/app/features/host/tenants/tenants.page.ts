@@ -1,6 +1,7 @@
 import { Component, ViewChild, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { HostApi } from '../../../core/api/host-api';
@@ -18,19 +19,20 @@ import { ConfirmService } from '../../../core/ui/confirm/confirm.service';
 import { ToastService } from '../../../core/ui/toast/toast.service';
 
 @Component({
-    standalone: true,
-    imports: [
-        CommonModule,
-        FormsModule,
-        DatePipe,
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    DatePipe,
+    RouterLink,
 
-        PageHeaderComponent,
-        ToolbarComponent,
-        DataTableShellComponent,
+    PageHeaderComponent,
+    ToolbarComponent,
+    DataTableShellComponent,
 
-        TenantFormDialogComponent,
-    ],
-    template: `
+    TenantFormDialogComponent,
+  ],
+  template: `
     <host-page-header
       title="Tenants"
       description="Manage schools (tenants) across the entire platform."
@@ -89,7 +91,9 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
             <ng-container *ngFor="let t of store.items(); trackBy: trackById">
               <tr>
                 <td>
-                  <div class="name">{{ t.name }}</div>
+                  <div class="name">
+                    <a [routerLink]="['/host/tenants', t.id]">{{ t.name }}</a>
+                  </div>
                   <div class="muted">ID: {{ t.id }}</div>
                 </td>
                 <td>{{ t.subdomain }}</td>
@@ -141,7 +145,7 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
       (update)="handleUpdate($event.id, $event.input)"
     />
   `,
-    styles: [`
+  styles: [`
     /* Card & layout */
     .card {
       border: 1px solid var(--host-border-subtle);
@@ -219,159 +223,159 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
   `]
 })
 export class TenantsPage {
-    private api = inject(HostApi);
-    private confirm = inject(ConfirmService);
-    private toast = inject(ToastService);
+  private api = inject(HostApi);
+  private confirm = inject(ConfirmService);
+  private toast = inject(ToastService);
 
-    store = inject(TenantsStore);
+  store = inject(TenantsStore);
 
-    @ViewChild('tenantDialog') tenantDialog!: TenantFormDialogComponent;
+  @ViewChild('tenantDialog') tenantDialog!: TenantFormDialogComponent;
 
-    trackById(_: number, t: any) { return t.id; }
+  trackById(_: number, t: any) { return t.id; }
 
-    async ngOnInit() {
-        await this.loadEditionsLookupSafe();
-        await this.reload();
+  async ngOnInit() {
+    await this.loadEditionsLookupSafe();
+    await this.reload();
+  }
+
+  async loadEditionsLookupSafe() {
+    // Optional endpoint; ignore failure
+    try {
+      const editions = await firstValueFrom(this.api.listEditionsLookup());
+      this.store.editions.set(editions);
+    } catch {
+      this.store.editions.set([]);
     }
+  }
 
-    async loadEditionsLookupSafe() {
-        // Optional endpoint; ignore failure
-        try {
-            const editions = await firstValueFrom(this.api.listEditionsLookup());
-            this.store.editions.set(editions);
-        } catch {
-            this.store.editions.set([]);
-        }
+  async reload() {
+    this.store.loading.set(true);
+    this.store.error.set(null);
+
+    try {
+      const result = await firstValueFrom(this.api.listTenants(this.store.buildQuery()));
+      this.store.setItems(result.items, result.total);
+    } catch (e: any) {
+      this.store.error.set(e?.message ?? 'Failed to load tenants');
+      this.store.setItems([], 0);
+      this.toast.error('Failed to load tenants');
+    } finally {
+      this.store.loading.set(false);
     }
+  }
 
-    async reload() {
-        this.store.loading.set(true);
-        this.store.error.set(null);
+  onFilterChanged() {
+    // When filters change, reset page and reload
+    this.store.resetToFirstPage();
+    void this.reload();
+  }
 
-        try {
-            const result = await firstValueFrom(this.api.listTenants(this.store.buildQuery()));
-            this.store.setItems(result.items, result.total);
-        } catch (e: any) {
-            this.store.error.set(e?.message ?? 'Failed to load tenants');
-            this.store.setItems([], 0);
-            this.toast.error('Failed to load tenants');
-        } finally {
-            this.store.loading.set(false);
-        }
+  onPageSizeChanged() {
+    this.store.resetToFirstPage();
+    void this.reload();
+  }
+
+  prevPage() {
+    this.store.page.set(this.store.page() - 1);
+    void this.reload();
+  }
+
+  nextPage() {
+    this.store.page.set(this.store.page() + 1);
+    void this.reload();
+  }
+
+  isLastPage(): boolean {
+    const total = this.store.total();
+    const page = this.store.page();
+    const pageSize = this.store.pageSize();
+    return page * pageSize >= total;
+  }
+
+  rangeLabel(): string {
+    const total = this.store.total();
+    if (total === 0) return '0–0';
+
+    const page = this.store.page();
+    const pageSize = this.store.pageSize();
+    const start = (page - 1) * pageSize + 1;
+    const end = Math.min(page * pageSize, total);
+    return `${start}–${end}`;
+  }
+
+  openCreate() {
+    this.tenantDialog.showCreate();
+  }
+
+  openEdit(t: TenantListItem) {
+    this.tenantDialog.showEdit(t);
+  }
+
+  // Bindings from template for signal updates
+  setQ(value: string) {
+    this.store.q.set(value);
+    this.onFilterChanged();
+  }
+
+  setStatus(value: any) {
+    this.store.status.set(value);
+    this.onFilterChanged();
+  }
+
+  setEditionId(value: any) {
+    this.store.editionId.set(value);
+    this.onFilterChanged();
+  }
+
+  setPageSize(value: number) {
+    this.store.pageSize.set(value);
+    this.onPageSizeChanged();
+  }
+  async handleCreate(input: any) {
+    try {
+      await firstValueFrom(this.api.createTenant(input));
+      this.toast.success('Tenant created');
+      await this.reload();
+      this.tenantDialog.close();
+    } catch (e: any) {
+      this.toast.error(e?.message ?? 'Failed to create tenant');
     }
+  }
 
-    onFilterChanged() {
-        // When filters change, reset page and reload
-        this.store.resetToFirstPage();
-        void this.reload();
+  async handleUpdate(id: string, input: any) {
+    try {
+      await firstValueFrom(this.api.updateTenant(id, input));
+      this.toast.success('Tenant updated');
+      await this.reload();
+      this.tenantDialog.close();
+    } catch (e: any) {
+      this.toast.error(e?.message ?? 'Failed to update tenant');
     }
+  }
 
-    onPageSizeChanged() {
-        this.store.resetToFirstPage();
-        void this.reload();
+  async suspend(t: TenantListItem) {
+    const ok = await this.confirm.confirm(`Suspend "${t.name}"? Users may be unable to access the tenant.`);
+    if (!ok) return;
+
+    try {
+      await firstValueFrom(this.api.suspendTenant(t.id, `Suspended by host UI`));
+      this.toast.success('Tenant suspended');
+      await this.reload();
+    } catch (e: any) {
+      this.toast.error(e?.message ?? 'Failed to suspend tenant');
     }
+  }
 
-    prevPage() {
-        this.store.page.set(this.store.page() - 1);
-        void this.reload();
+  async activate(t: TenantListItem) {
+    const ok = await this.confirm.confirm(`Activate "${t.name}"?`);
+    if (!ok) return;
+
+    try {
+      await firstValueFrom(this.api.activateTenant(t.id));
+      this.toast.success('Tenant activated');
+      await this.reload();
+    } catch (e: any) {
+      this.toast.error(e?.message ?? 'Failed to activate tenant');
     }
-
-    nextPage() {
-        this.store.page.set(this.store.page() + 1);
-        void this.reload();
-    }
-
-    isLastPage(): boolean {
-        const total = this.store.total();
-        const page = this.store.page();
-        const pageSize = this.store.pageSize();
-        return page * pageSize >= total;
-    }
-
-    rangeLabel(): string {
-        const total = this.store.total();
-        if (total === 0) return '0–0';
-
-        const page = this.store.page();
-        const pageSize = this.store.pageSize();
-        const start = (page - 1) * pageSize + 1;
-        const end = Math.min(page * pageSize, total);
-        return `${start}–${end}`;
-    }
-
-    openCreate() {
-        this.tenantDialog.showCreate();
-    }
-
-    openEdit(t: TenantListItem) {
-        this.tenantDialog.showEdit(t);
-    }
-
-    // Bindings from template for signal updates
-    setQ(value: string) {
-        this.store.q.set(value);
-        this.onFilterChanged();
-    }
-
-    setStatus(value: any) {
-        this.store.status.set(value);
-        this.onFilterChanged();
-    }
-
-    setEditionId(value: any) {
-        this.store.editionId.set(value);
-        this.onFilterChanged();
-    }
-
-    setPageSize(value: number) {
-        this.store.pageSize.set(value);
-        this.onPageSizeChanged();
-    }
-    async handleCreate(input: any) {
-        try {
-            await firstValueFrom(this.api.createTenant(input));
-            this.toast.success('Tenant created');
-            await this.reload();
-            this.tenantDialog.close();
-        } catch (e: any) {
-            this.toast.error(e?.message ?? 'Failed to create tenant');
-        }
-    }
-
-    async handleUpdate(id: string, input: any) {
-        try {
-            await firstValueFrom(this.api.updateTenant(id, input));
-            this.toast.success('Tenant updated');
-            await this.reload();
-            this.tenantDialog.close();
-        } catch (e: any) {
-            this.toast.error(e?.message ?? 'Failed to update tenant');
-        }
-    }
-
-    async suspend(t: TenantListItem) {
-        const ok = await this.confirm.confirm(`Suspend "${t.name}"? Users may be unable to access the tenant.`);
-        if (!ok) return;
-
-        try {
-            await firstValueFrom(this.api.suspendTenant(t.id, `Suspended by host UI`));
-            this.toast.success('Tenant suspended');
-            await this.reload();
-        } catch (e: any) {
-            this.toast.error(e?.message ?? 'Failed to suspend tenant');
-        }
-    }
-
-    async activate(t: TenantListItem) {
-        const ok = await this.confirm.confirm(`Activate "${t.name}"?`);
-        if (!ok) return;
-
-        try {
-            await firstValueFrom(this.api.activateTenant(t.id));
-            this.toast.success('Tenant activated');
-            await this.reload();
-        } catch (e: any) {
-            this.toast.error(e?.message ?? 'Failed to activate tenant');
-        }
-    }
+  }
 }

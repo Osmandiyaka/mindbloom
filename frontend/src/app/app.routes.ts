@@ -55,6 +55,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./modules/host/pages/host-dashboard/host-dashboard.component').then(m => m.HostDashboardComponent)
             },
             {
+                path: 'tenants/:id',
+                loadComponent: () => import('./features/host/tenants/tenant-details.page').then(m => m.TenantDetailsPage)
+            },
+            {
                 path: 'tenants',
                 loadComponent: () => import('./features/host/tenants/tenants.page').then(m => m.TenantsPage)
             }

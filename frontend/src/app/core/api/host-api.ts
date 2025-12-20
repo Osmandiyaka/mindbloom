@@ -7,6 +7,9 @@ import {
     TenantListItem,
     TenantQuery,
     TenantUpdateInput,
+    TenantDetails,
+    TenantMetrics,
+    TenantActivityItem,
 } from './models';
 import { map } from 'rxjs/operators';
 
@@ -73,6 +76,19 @@ export class HostApi {
     activateTenant(tenantId: string) {
         // Backend reactivation endpoint is named 'reactivate'
         return this.http.post<void>(`/api/host/tenants/${tenantId}/reactivate`, {});
+    }
+
+    getTenantDetails(tenantId: string) {
+        return this.http.get<TenantDetails>(`/api/host/tenants/${tenantId}`);
+    }
+
+    getTenantMetrics(tenantId: string) {
+        return this.http.get<TenantMetrics>(`/api/host/tenants/${tenantId}/metrics`);
+    }
+
+    getTenantActivity(tenantId: string, limit = 20) {
+        const params = new HttpParams().set('limit', String(limit));
+        return this.http.get<TenantActivityItem[]>(`/api/host/tenants/${tenantId}/activity`, { params });
     }
 
     // Optional: for filter dropdown

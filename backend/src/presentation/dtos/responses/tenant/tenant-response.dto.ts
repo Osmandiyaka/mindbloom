@@ -54,6 +54,9 @@ export class TenantResponseDto {
     @ApiProperty({ description: 'Contact email' })
     contactEmail: string;
 
+    @ApiProperty({ description: 'Subscription end date', required: false })
+    subscriptionEndDate?: Date | null;
+
     @ApiProperty({ description: 'Contact phone', required: false })
     contactPhone?: string;
 
@@ -102,6 +105,7 @@ export class TenantResponseDto {
             weekStartsOn: tenant.weekStartsOn,
             academicYear: tenant.academicYear,
             initialConfigRequired: tenant.metadata?.initialConfigRequired,
+            subscriptionEndDate: tenant.subscriptionEndDate ?? null,
             limits: tenant.limits,
         };
     }

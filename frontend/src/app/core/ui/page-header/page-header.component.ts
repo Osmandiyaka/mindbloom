@@ -2,13 +2,16 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'host-page-header',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'host-page-header',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div class="page-header">
       <div class="text">
-        <h1>{{ title }}</h1>
+        <h1>
+          <a *ngIf="titleLink" class="title-link" [href]="titleLink" target="_blank" rel="noopener noreferrer">{{ title }} <span class="ext">↗</span></a>
+          <span *ngIf="!titleLink">{{ title }}</span>
+        </h1>
         <p class="description" *ngIf="description">{{ description }}</p>
       </div>
 
@@ -17,7 +20,7 @@ import { CommonModule } from '@angular/common';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .page-header {
       display: flex;
       align-items: center;
@@ -48,9 +51,22 @@ import { CommonModule } from '@angular/common';
       display: flex;
       gap: 8px;
     }
+
+    .title-link {
+      color: var(--link-color, #0b1220);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+    }
+    .title-link:hover { text-decoration: underline; }
+    .title-link .ext { font-size: 12px; opacity: .6; }
+
   `],
 })
 export class PageHeaderComponent {
-    @Input({ required: true }) title!: string;
-    @Input() description?: string;
+  @Input({ required: true }) title!: string;
+  @Input() description?: string;
+  @Input() titleLink?: string | null;
 }
