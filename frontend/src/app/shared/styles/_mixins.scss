@@ -1,0 +1,23 @@
+/* Helpful SCSS mixins that operate on CSS variables applied at runtime by ThemeService */
+
+@mixin elevation($size: sm) {
+    @if $size ==sm {
+        box-shadow: var(--elevation-sm);
+    }
+
+    @else if $size ==md {
+        box-shadow: var(--elevation-md);
+    }
+
+    @else {
+        box-shadow: var(--elevation-lg);
+    }
+}
+
+@mixin focus-ring {
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px var(--focus-ring-color);
+        border-color: var(--focus-ring-color);
+    }
+}

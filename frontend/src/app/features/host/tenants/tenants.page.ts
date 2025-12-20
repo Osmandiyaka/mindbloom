@@ -12,6 +12,9 @@ import { TenantFormDialogComponent } from './tenant-form.dialog';
 
 // UI kit (from Task 1.2)
 import { PageHeaderComponent } from '../../../core/ui/page-header/page-header.component';
+import { UiButtonComponent } from '../../../shared/ui/buttons/ui-button.component';
+import { UiInputComponent } from '../../../shared/ui/forms/ui-input.component';
+import { UiSelectComponent } from '../../../shared/ui/forms/ui-select.component';
 import { ToolbarComponent } from '../../../core/ui/toolbar/toolbar.component';
 import { DataTableShellComponent } from '../../../core/ui/data-table-shell/data-table-shell.component';
 import { SimpleTableComponent, SimpleColumn } from '../../../core/ui/simple-table/simple-table.component';
@@ -33,6 +36,11 @@ import { Router } from '@angular/router';
     DataTableShellComponent,
     SimpleTableComponent,
 
+    // Shared UI primitives
+    UiButtonComponent,
+    UiInputComponent,
+    UiSelectComponent,
+
     TenantFormDialogComponent,
   ],
   template: `
@@ -40,31 +48,29 @@ import { Router } from '@angular/router';
       title="Tenants"
       description="Manage schools (tenants) across the entire platform."
     >
-      <button class="btn primary" (click)="openCreate()">Create Tenant</button>
+      <ui-button variant="primary" (click)="openCreate()">Create Tenant</ui-button>
     </host-page-header>
 
     <host-toolbar>
-      <input
-        class="input"
-        type="text"
+      <ui-input
+        [value]="store.q()"
+        (valueChange)="setQ($event)"
         placeholder="Search by name or subdomain…"
-        [ngModel]="store.q()"
-        (ngModelChange)="setQ($event)"
-      />
+      ></ui-input>
 
-      <select class="input" [ngModel]="store.status()" (ngModelChange)="setStatus($event)">
+      <ui-select [value]="store.status()" (valueChange)="setStatus($event)">
         <option value="ALL">All statuses</option>
         <option value="ACTIVE">Active</option>
         <option value="SUSPENDED">Suspended</option>
         <option value="TRIAL">Trial</option>
-      </select>
+      </ui-select>
 
-      <select class="input" [ngModel]="store.editionId()" (ngModelChange)="setEditionId($event)">
+      <ui-select [value]="store.editionId()" (valueChange)="setEditionId($event)">
         <option value="ALL">All editions</option>
         <ng-container *ngFor="let e of store.editions()"> 
           <option [value]="e.id">{{ e.name }}</option>
         </ng-container>
-      </select>
+      </ui-select>
 
       <ng-container actions>
         <button class="btn" (click)="reload()">Refresh</button>
@@ -86,10 +92,10 @@ import { Router } from '@angular/router';
           (view)="openEdit($event)"
         >
           <ng-template #actionTemplate let-row="row">
-            <button class="btn small" (click)="$event.stopPropagation(); openEdit(row)">Edit</button>
-            <button *ngIf="row.status !== 'SUSPENDED'" class="btn small danger" (click)="$event.stopPropagation(); suspend(row)">Suspend</button>
-            <button *ngIf="row.status === 'SUSPENDED'" class="btn small" (click)="$event.stopPropagation(); activate(row)">Activate</button>
-            <button class="btn small" disabled title="Coming soon">Impersonate</button>
+            <ui-button size="sm" (click)="$event.stopPropagation(); openEdit(row)">Edit</ui-button>
+            <ui-button *ngIf="row.status !== 'SUSPENDED'" size="sm" variant="danger" (click)="$event.stopPropagation(); suspend(row)">Suspend</ui-button>
+            <ui-button *ngIf="row.status === 'SUSPENDED'" size="sm" (click)="$event.stopPropagation(); activate(row)">Activate</ui-button>
+            <ui-button size="sm" disabled title="Coming soon">Impersonate</ui-button>
           </ng-template>
         </host-simple-table>
 
@@ -99,15 +105,15 @@ import { Router } from '@angular/router';
           </div>
 
           <div class="pager-actions">
-            <button class="btn small" [disabled]="store.page() <= 1" (click)="prevPage()">Prev</button>
+            <ui-button size="sm" [disabled]="store.page() <= 1" (click)="prevPage()">Prev</ui-button>
             <span class="page">{{ store.page() }}</span>
-            <button class="btn small" [disabled]="isLastPage()" (click)="nextPage()">Next</button>
+            <ui-button size="sm" [disabled]="isLastPage()" (click)="nextPage()">Next</ui-button>
 
-            <select class="input small" [ngModel]="store.pageSize()" (ngModelChange)="setPageSize($event)">
-              <option [ngValue]="10">10</option>
-              <option [ngValue]="20">20</option>
-              <option [ngValue]="50">50</option>
-            </select>
+            <ui-select [value]="store.pageSize()" (valueChange)="setPageSize($event)">
+              <option [value]="10">10</option>
+              <option [value]="20">20</option>
+              <option [value]="50">50</option>
+            </ui-select>
           </div>
         </div>
       </div>
@@ -314,8 +320,10 @@ export class TenantsPage {
     this.onFilterChanged();
   }
 
-  setPageSize(value: number) {
-    this.store.pageSize.set(value);
+  setPageSize(value: any) {
+    // UiSelect emits string values via native select; coerce to number when appropriate
+    const numeric = typeof value === 'string' && !isNaN(Number(value)) ? Number(value) : value;
+    this.store.pageSize.set(numeric);
     this.onPageSizeChanged();
   }
   async handleCreate(input: any) {

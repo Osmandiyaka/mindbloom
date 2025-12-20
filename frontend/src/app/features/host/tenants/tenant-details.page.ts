@@ -8,6 +8,9 @@ import { HostApi } from '../../../core/api/host-api';
 import { TenantActivityItem, TenantDetails, TenantMetrics, AuditEvent, PagedResult } from '../../../core/api/models';
 
 import { PageHeaderComponent } from '../../../core/ui/page-header/page-header.component';
+import { UiButtonComponent } from '../../../shared/ui/buttons/ui-button.component';
+import { UiInputComponent } from '../../../shared/ui/forms/ui-input.component';
+import { UiSelectComponent } from '../../../shared/ui/forms/ui-select.component';
 import { DataTableShellComponent } from '../../../core/ui/data-table-shell/data-table-shell.component';
 import { SimpleTableComponent, SimpleColumn } from '../../../core/ui/simple-table/simple-table.component';
 
@@ -25,6 +28,11 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
     SimpleTableComponent,
     // required for ngModel in selects
     FormsModule,
+
+    // Shared UI primitives
+    UiButtonComponent,
+    UiInputComponent,
+    UiSelectComponent,
   ],
   template: `
     <div class="crumbs">
@@ -36,16 +44,16 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
       [description]="tenantSubtitle()"
       [titleLink]="publicUrl()"
     >
-      <button class="btn" (click)="reload()">Refresh</button>
-      <button class="btn" (click)="openEdit()" [disabled]="loading()">Edit</button>
+      <ui-button (click)="reload()">Refresh</ui-button>
+      <ui-button (click)="openEdit()" [disabled]="loading()">Edit</ui-button>
 
       @if (tenant()?.status !== 'SUSPENDED') {
-        <button class="btn danger" (click)="suspend()" [disabled]="loading()">Suspend</button>
+        <ui-button variant="danger" (click)="suspend()" [disabled]="loading()">Suspend</ui-button>
       } @else {
-        <button class="btn" (click)="activate()" [disabled]="loading()">Activate</button>
+        <ui-button (click)="activate()" [disabled]="loading()">Activate</ui-button>
       }
 
-      <button class="btn" disabled title="Coming soon">Impersonate</button>
+      <ui-button disabled title="Coming soon">Impersonate</ui-button>
     </host-page-header>
 
     <!-- Tabs -->
@@ -163,8 +171,8 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
       @if (currentTab() === 'audit') {
         <div class="card">
           <div class="card-header">
-            <input class="input" placeholder="Search audit events..." (keyup.enter)="loadAudit(q.value)" #q/>
-            <button class="btn" (click)="loadAudit(q.value)">Search</button>
+            <ui-input #q [placeholder]="'Search audit events...'" (valueChange)="undefined"></ui-input>
+            <ui-button (click)="loadAudit(q?.value)">Search</ui-button>
             <div class="spacer"></div>
             <div class="muted">Showing audit logs for this tenant</div>
           </div>
@@ -181,8 +189,8 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
               (view)="selectAudit($event.id)"
             >
               <ng-template #actionTemplate let-row="row">
-                <button class="btn small" (click)="$event.stopPropagation(); selectAudit(row.id)">View</button>
-                <button class="btn small" (click)="$event.stopPropagation();">Export</button>
+                <ui-button size="sm" (click)="$event.stopPropagation(); selectAudit(row.id)">View</ui-button>
+                <ui-button size="sm" (click)="$event.stopPropagation();">Export</ui-button>
               </ng-template>
             </host-simple-table>
 
@@ -194,11 +202,11 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
                 <span class="page">{{ auditPage() }}</span>
                 <button class="btn small" (click)="auditNext()" [disabled]="auditPage()*auditPageSize() >= (auditResults()?.total ?? 0)">Next</button>
 
-                <select class="input small" [ngModel]="auditPageSize()" (ngModelChange)="setAuditPageSize($event)">
-                  <option [ngValue]="10">10</option>
-                  <option [ngValue]="20">20</option>
-                  <option [ngValue]="50">50</option>
-                </select>
+                <ui-select [value]="auditPageSize()" (valueChange)="setAuditPageSize($event)">
+                  <option [value]="10">10</option>
+                  <option [value]="20">20</option>
+                  <option [value]="50">50</option>
+                </ui-select>
               </div>
             </div>
           </div>

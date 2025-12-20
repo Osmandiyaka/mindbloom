@@ -1,0 +1,25 @@
+/* Component-level token aliases (derived from ThemeService CSS variables)
+   These provide stable, readable names for primitives and components.
+*/
+:root {
+    /* Buttons */
+    --btn-radius: 10px;
+    --btn-padding-sm: 0.45rem 0.65rem;
+    --btn-padding-md: 0.6rem 1rem;
+    --btn-padding-lg: 0.75rem 1.25rem;
+
+    /* Use ThemeService variables as the single source of truth */
+    --btn-bg: var(--color-surface);
+    --btn-bg-hover: var(--color-surface-hover);
+    --btn-primary-bg: var(--color-primary);
+    --btn-primary-text: var(--color-text-primary);
+    --btn-primary-border: var(--color-primary);
+
+    /* Focus ring */
+    --focus-ring-color: rgba(var(--color-primary-rgb, 102, 126, 234), 0.18);
+
+    /* Elevation */
+    --elevation-sm: var(--shadow-sm);
+    --elevation-md: var(--shadow-md);
+    --elevation-lg: var(--shadow-lg);
+}

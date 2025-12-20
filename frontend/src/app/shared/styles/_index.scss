@@ -1,0 +1,19 @@
+@import 'variables';
+@import 'mixins';
+@import 'components';
+
+/* Example utilities / quick reference
+
+   Use these classes or import the partials into component SCSS files.
+   The tokens are derived from ThemeService at runtime; prefer CSS variables
+   where possible so runtime theme switching works automatically.
+*/
+
+/* Example helper class */
+.elevation-md {
+    @include elevation(md);
+}
+
+.elevation-lg {
+    @include elevation(lg);
+}
