@@ -41,19 +41,32 @@ interface NavSection {
       role="navigation"
       [attr.aria-label]="ariaLabel"
     >
-      <div class="sidebar-header tenant-header" role="button" aria-label="Open tenant settings" (click)="goToTenantSettings($event)" tabindex="0" (keydown.enter)="goToTenantSettings($event)" (keydown.space)="goToTenantSettings($event)">
+      <div class="sidebar-header tenant-header" role="button" aria-label="Open tenant or host settings" (click)="goToTenantSettings($event)" tabindex="0" (keydown.enter)="goToTenantSettings($event)" (keydown.space)="goToTenantSettings($event)">
         <div class="tenant-identity">
           <div class="tenant-logo">
-            <ng-container *ngIf="tenantLogo; else defaultLogo">
-              <img [src]="tenantLogo" alt="Tenant logo" class="logo-img" loading="lazy" />
+            <!-- If this is a host nav, show a neutral/platform icon instead of tenant logo -->
+            <ng-container *ngIf="isHostSidebar; else tenantLogoTemplate">
+              <span class="nav-icon" [innerHTML]="icon('shield')"></span>
             </ng-container>
-            <ng-template #defaultLogo>
-              <span class="nav-icon" [innerHTML]="icon('dashboard')"></span>
+            <ng-template #tenantLogoTemplate>
+              <ng-container *ngIf="tenantLogo; else defaultLogo">
+                <img [src]="tenantLogo" alt="Tenant logo" class="logo-img" loading="lazy" />
+              </ng-container>
+              <ng-template #defaultLogo>
+                <span class="nav-icon" [innerHTML]="icon('dashboard')"></span>
+              </ng-template>
             </ng-template>
           </div>
-          <div class="tenant-text" *ngIf="!collapsed">
+
+          <!-- For host navs do not display tenant name; show generic platform label -->
+          <div class="tenant-text" *ngIf="!collapsed && !isHostSidebar">
             <div class="tenant-name">{{ tenantName || 'MindBloom' }}</div>
             <div class="tenant-subtitle">School OS</div>
+          </div>
+
+          <div class="tenant-text" *ngIf="!collapsed && isHostSidebar">
+            <div class="tenant-name">MindBloom</div>
+            <div class="tenant-subtitle">Host Console</div>
           </div>
         </div>
       </div>
@@ -474,6 +487,14 @@ export class SidebarComponent implements OnInit {
       this.currentUser = user;
     });
     this.tenantService.currentTenant$.subscribe((tenant: Tenant | null) => {
+      // If sidebar is used in host mode, avoid populating tenant-specific branding
+      if (this.isHostSidebar) {
+        this.tenantLogo = null;
+        this.tenantFavicon = null;
+        this.tenantName = null;
+        return;
+      }
+
       this.tenantLogo = tenant?.customization?.logo || tenant?.customization?.favicon || null;
       this.tenantFavicon = tenant?.customization?.favicon || tenant?.customization?.logo || null;
       this.tenantName = tenant?.name || null;
@@ -487,6 +508,10 @@ export class SidebarComponent implements OnInit {
     this.schoolSettingsService.getSettings().subscribe(settings => {
       this.schoolLogo = settings.logoUrl || settings.faviconUrl || null;
       this.schoolFavicon = settings.faviconUrl || settings.logoUrl || null;
+      // Do not inherit global school name/logo into host nav
+      if (this.isHostSidebar) {
+        return;
+      }
       if (!this.tenantLogo && this.schoolLogo) {
         this.tenantLogo = this.schoolLogo;
       }
@@ -524,6 +549,10 @@ export class SidebarComponent implements OnInit {
 
   onNavigate(): void {
     this.navigate.emit();
+  }
+
+  get isHostSidebar(): boolean {
+    return typeof this.sidebarId === 'string' && this.sidebarId.startsWith('host-');
   }
 
   goToTenantSettings(event?: Event): void {
