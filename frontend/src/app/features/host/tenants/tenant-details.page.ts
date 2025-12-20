@@ -4,7 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { HostApi } from '../../../core/api/host-api';
-import { TenantActivityItem, TenantDetails, TenantMetrics } from '../../../core/api/models';
+import { TenantActivityItem, TenantDetails, TenantMetrics, AuditEvent, PagedResult } from '../../../core/api/models';
 
 import { PageHeaderComponent } from '../../../core/ui/page-header/page-header.component';
 import { DataTableShellComponent } from '../../../core/ui/data-table-shell/data-table-shell.component';
@@ -43,103 +43,184 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
       <button class="btn" disabled title="Coming soon">Impersonate</button>
     </host-page-header>
 
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab" [class.active]="currentTab() === 'overview'" (click)="setTab('overview')">Overview</button>
+      <button class="tab" [class.active]="currentTab() === 'audit'" (click)="setTab('audit')">Audit Logs</button>
+      <button class="tab" [class.active]="currentTab() === 'users'" (click)="setTab('users')">Tenant Users</button>
+      <button class="tab" [class.active]="currentTab() === 'invoices'" (click)="setTab('invoices')">Invoices</button>
+      <button class="tab" [class.active]="currentTab() === 'issues'" (click)="setTab('issues')">Issues</button>
+    </div>
+
     <host-data-table-shell
       [loading]="loading()"
       [error]="error() ?? undefined"
       [hasData]="!!tenant()"
       emptyText="Tenant not found."
     >
-      <div class="overview">
-        <!-- Summary row -->
-        <div class="summary">
-          <div class="summary-card">
-            <div class="label"><span class="icon">⚑</span> Status</div>
-            <div class="value">
-              <span class="pill"
-                    [class.suspended]="tenant()?.status==='SUSPENDED'"
-                    [class.trial]="tenant()?.status==='TRIAL'">
-                {{ tenant()?.status }}
-              </span>
+
+      <!-- Overview Tab -->
+      @if (currentTab() === 'overview') {
+        <div class="overview">
+          <!-- Summary row -->
+          <div class="summary">
+            <div class="summary-card">
+              <div class="label"><span class="icon">⚑</span> Status</div>
+              <div class="value">
+                <span class="pill"
+                      [class.suspended]="tenant()?.status==='SUSPENDED'"
+                      [class.trial]="tenant()?.status==='TRIAL'">
+                  {{ tenant()?.status }}
+                </span>
+              </div>
+            </div>
+
+            <div class="summary-card">
+              <div class="label"><span class="icon">🌐</span> Subdomain</div>
+              <div class="value">{{ tenant()?.subdomain }}</div>
+              <div class="muted">https://{{ tenant()?.subdomain }}.yourapp.com</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="label"><span class="icon">📦</span> Edition</div>
+              <div class="value">{{ tenant()?.editionName ?? '—' }}</div>
+              <div class="muted" *ngIf="tenant()?.subscriptionEndDate">Subscription ends: {{ tenant()?.subscriptionEndDate | date:'medium' }}</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="label"><span class="icon">📅</span> Created</div>
+              <div class="value">{{ tenant()?.createdAt | date:'mediumDate' }}</div>
             </div>
           </div>
 
-          <div class="summary-card">
-            <div class="label"><span class="icon">🌐</span> Subdomain</div>
-            <div class="value">{{ tenant()?.subdomain }}</div>
-            <div class="muted">https://{{ tenant()?.subdomain }}.yourapp.com</div>
-          </div>
+          <!-- Metrics cards -->
+          <div class="section-title">Metrics</div>
+          <div class="metrics">
+            <div class="metric">
+              <div class="label"><span class="icon">👩‍🎓</span> Students</div>
+              <div class="value">{{ metrics()?.studentsCount ?? '—' }}</div>
+            </div>
 
-          <div class="summary-card">
-            <div class="label"><span class="icon">📦</span> Edition</div>
-            <div class="value">{{ tenant()?.editionName ?? '—' }}</div>
-            <div class="muted" *ngIf="tenant()?.subscriptionEndDate">Subscription ends: {{ tenant()?.subscriptionEndDate | date:'medium' }}</div>
-          </div>
+            <div class="metric">
+              <div class="label"><span class="icon">🧑‍🏫</span> Teachers</div>
+              <div class="value">{{ metrics()?.teachersCount ?? '—' }}</div>
+            </div>
 
-          <div class="summary-card">
-            <div class="label"><span class="icon">📅</span> Created</div>
-            <div class="value">{{ tenant()?.createdAt | date:'mediumDate' }}</div>
-          </div>
-        </div>
+            <div class="metric">
+              <div class="label"><span class="icon">👥</span> Users</div>
+              <div class="value">{{ metrics()?.usersCount ?? '—' }}</div>
+            </div>
 
-        <!-- Metrics cards -->
-        <div class="section-title">Metrics</div>
-        <div class="metrics">
-          <div class="metric">
-            <div class="label"><span class="icon">👩‍🎓</span> Students</div>
-            <div class="value">{{ metrics()?.studentsCount ?? '—' }}</div>
-          </div>
+            <div class="metric">
+              <div class="label"><span class="icon">💾</span> Storage</div>
+              <div class="value">{{ storageLabel() }}</div>
+              <div class="muted" *ngIf="metrics()?.storageLimitMb">
+                Limit: {{ metrics()?.storageLimitMb }} MB
+              </div>
+            </div>
 
-          <div class="metric">
-            <div class="label"><span class="icon">🧑‍🏫</span> Teachers</div>
-            <div class="value">{{ metrics()?.teachersCount ?? '—' }}</div>
-          </div>
-
-          <div class="metric">
-            <div class="label"><span class="icon">👥</span> Users</div>
-            <div class="value">{{ metrics()?.usersCount ?? '—' }}</div>
-          </div>
-
-          <div class="metric">
-            <div class="label"><span class="icon">💾</span> Storage</div>
-            <div class="value">{{ storageLabel() }}</div>
-            <div class="muted" *ngIf="metrics()?.storageLimitMb">
-              Limit: {{ metrics()?.storageLimitMb }} MB
+            <div class="metric" *ngIf="metrics()?.mrr !== undefined">
+              <div class="label">MRR</div>
+              <div class="value">{{ mrrLabel() }}</div>
             </div>
           </div>
 
-          <div class="metric" *ngIf="metrics()?.mrr !== undefined">
-            <div class="label">MRR</div>
-            <div class="value">{{ mrrLabel() }}</div>
-          </div>
-        </div>
-
-        <!-- Activity -->
-        <div class="section-title">Last activity</div>
-        <div class="card">
-          @if (!activity().length) {
-            <div class="empty">No recent activity.</div>
-          } @else {
-            <ul class="activity">
-              @for (a of activity(); track a.id) {
-                <li class="row">
-                  <div class="left">
-                    <div class="msg">{{ a.message }}</div>
-                    <div class="meta">
-                      <span class="type">{{ a.type }}</span>
-                      <span class="dot">•</span>
-                      <span>{{ a.createdAt | date:'medium' }}</span>
-                      @if (a.actorEmail) {
+          <!-- Activity -->
+          <div class="section-title">Last activity</div>
+          <div class="card">
+            @if (!activity().length) {
+              <div class="empty">No recent activity.</div>
+            } @else {
+              <ul class="activity">
+                @for (a of activity(); track a.id) {
+                  <li class="row">
+                    <div class="left">
+                      <div class="msg">{{ a.message }}</div>
+                      <div class="meta">
+                        <span class="type">{{ a.type }}</span>
                         <span class="dot">•</span>
-                        <span>{{ a.actorEmail }}</span>
-                      }
+                        <span>{{ a.createdAt | date:'medium' }}</span>
+                        @if (a.actorEmail) {
+                          <span class="dot">•</span>
+                          <span>{{ a.actorEmail }}</span>
+                        }
+                      </div>
                     </div>
-                  </div>
-                </li>
-              }
-            </ul>
-          }
+                  </li>
+                }
+              </ul>
+            }
+          </div>
         </div>
-      </div>
+      }
+
+      <!-- Audit Tab -->
+      @if (currentTab() === 'audit') {
+        <div class="card">
+          <div class="card-header">
+            <input class="search" placeholder="Search audit events..." (keyup.enter)="loadAudit()" #q/>
+            <button class="btn" (click)="loadAudit(q.value)">Search</button>
+            <div class="spacer"></div>
+            <div class="muted">Showing audit logs for this tenant</div>
+          </div>
+
+          <div *ngIf="auditLoading()" class="empty">Loading audit logs...</div>
+          <div *ngIf="!auditLoading() && !auditResults()?.items?.length" class="empty">No audit logs found.</div>
+
+          <ul class="activity" *ngIf="!auditLoading() && auditResults()?.items?.length">
+            @for (e of auditResults()?.items ?? []; track e.id) {
+              <li class="row" (click)="selectAudit(e.id)">
+                <div class="left">
+                  <div class="msg">{{ e.action ?? e.message ?? '-' }}</div>
+                  <div class="meta">
+                    <span class="type">{{ e.category ?? 'audit' }}</span>
+                    <span class="dot">•</span>
+                    <span>{{ e.timestamp | date:'medium' }}</span>
+                    <span class="dot">•</span>
+                    <span>{{ e.actorEmailSnapshot ?? 'system' }}</span>
+                  </div>
+                </div>
+              </li>
+            }
+          </ul>
+
+          <div class="pager">
+            <button class="btn" (click)="auditPrev()" [disabled]="auditPage()<=1">Prev</button>
+            <span>Page {{ auditPage() }} / {{ auditTotalPages() }}</span>
+            <button class="btn" (click)="auditNext()" [disabled]="auditPage()*auditPageSize() >= (auditResults()?.total ?? 0)">Next</button>
+          </div>
+
+          <div *ngIf="selectedAudit()" class="card detail">
+            <div class="label">Audit detail</div>
+            <pre>{{ selectedAudit() | json }}</pre>
+          </div>
+        </div>
+      }
+
+      <!-- Users Tab -->
+      @if (currentTab() === 'users') {
+        <div class="card">
+          <div class="section-title">Tenant users</div>
+          <div class="empty">Coming soon — list of users for this tenant.</div>
+        </div>
+      }
+
+      <!-- Invoices Tab -->
+      @if (currentTab() === 'invoices') {
+        <div class="card">
+          <div class="section-title">Invoices</div>
+          <div class="empty">Coming soon — invoices and billing history.</div>
+        </div>
+      }
+
+      <!-- Issues Tab -->
+      @if (currentTab() === 'issues') {
+        <div class="card">
+          <div class="section-title">Issues</div>
+          <div class="empty">Coming soon — issues & support tickets.</div>
+        </div>
+      }
+
     </host-data-table-shell>
   `,
     styles: [`
@@ -149,6 +230,19 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
     .btn { border: 1px solid #e5e7eb; background: #fff; padding: 10px 12px; border-radius: 10px; cursor: pointer; }
     .btn.danger { border-color: #fecaca; background: #fff; }
     .btn:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* Tabs */
+    .tabs { display:flex; gap:8px; margin: 14px 0; }
+    .tab { background: transparent; border: none; padding: 10px 14px; border-radius: 10px; cursor: pointer; color: #6b7280; }
+    .tab.active { background: #0ea5e9; color: #fff; }
+
+    .card-header { display:flex; align-items:center; gap:12px; padding: 12px; border-bottom: 1px solid #f1f5f9; }
+    .card-header .search { flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e7eb; }
+    .spacer { flex: 1; }
+
+    .pager { display:flex; gap:12px; align-items:center; padding: 12px; }
+    .card.detail { margin:12px; padding:12px; background:#fff; border-radius:10px; }
+
 
     .overview { display: grid; gap: 14px; }
 
@@ -236,6 +330,16 @@ export class TenantDetailsPage {
     metrics = signal<TenantMetrics | null>(null);
     activity = signal<TenantActivityItem[]>([]);
 
+    // Tab state
+    currentTab = signal<'overview' | 'audit' | 'users' | 'invoices' | 'issues'>('overview');
+
+    // Audit data
+    auditResults = signal<PagedResult<AuditEvent> | null>(null);
+    auditPage = signal(1);
+    auditPageSize = signal(20);
+    auditLoading = signal(false);
+    selectedAudit = signal<AuditEvent | null>(null);
+
     loading = signal(false);
     error = signal<string | null>(null);
 
@@ -255,6 +359,52 @@ export class TenantDetailsPage {
 
     async ngOnInit() {
         await this.reload();
+    }
+
+    setTab(tab: 'overview' | 'audit' | 'users' | 'invoices' | 'issues') {
+        this.currentTab.set(tab);
+        if (tab === 'audit') this.loadAudit();
+    }
+
+    async loadAudit(q?: string) {
+        const id = this.tenantId();
+        if (!id) return;
+        this.auditLoading.set(true);
+        try {
+            const res = await firstValueFrom(this.api.getTenantAudit(id, this.auditPage(), this.auditPageSize(), q));
+            this.auditResults.set(res);
+        } catch (e: any) {
+            this.toast.error(e?.message ?? 'Failed to load audit logs');
+        } finally {
+            this.auditLoading.set(false);
+        }
+    }
+
+    auditPrev() {
+        const p = Math.max(1, this.auditPage() - 1);
+        this.auditPage.set(p);
+        this.loadAudit();
+    }
+
+    auditNext() {
+        const p = this.auditPage() + 1;
+        this.auditPage.set(p);
+        this.loadAudit();
+    }
+
+    async selectAudit(id: string) {
+        try {
+            const a = await firstValueFrom(this.api.getAuditEvent(id));
+            this.selectedAudit.set(a);
+        } catch (e: any) {
+            this.toast.error('Failed to load audit detail');
+        }
+    }
+
+    auditTotalPages() {
+        const total = this.auditResults()?.total ?? 0;
+        const pageSize = this.auditPageSize() || 20;
+        return Math.max(1, Math.ceil(total / pageSize));
     }
 
     async reload() {
@@ -277,6 +427,10 @@ export class TenantDetailsPage {
             this.tenant.set(t);
             this.metrics.set(m);
             this.activity.set(a);
+
+            if (this.currentTab() === 'audit') {
+                this.loadAudit();
+            }
         } catch (e: any) {
             this.error.set(e?.message ?? 'Failed to load tenant details');
             this.toast.error('Failed to load tenant details');

@@ -39,5 +39,4 @@ export class EditionDocument extends Document {
 }
 
 export const EditionSchema = SchemaFactory.createForClass(EditionDocument);
-EditionSchema.index({ name: 1 }, { unique: true });
 EditionSchema.index({ isFallback: 1 }, { unique: true, partialFilterExpression: { isFallback: true } });

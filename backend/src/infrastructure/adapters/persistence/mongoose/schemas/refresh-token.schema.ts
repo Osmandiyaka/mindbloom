@@ -9,7 +9,7 @@ export class RefreshTokenDocument extends Document {
     @Prop({ required: true, unique: true })
     tokenHash: string;
 
-    @Prop({ type: Date, required: true, index: true })
+    @Prop({ type: Date, required: true })
     expiresAt: Date;
 
     @Prop({ type: Date, default: null })

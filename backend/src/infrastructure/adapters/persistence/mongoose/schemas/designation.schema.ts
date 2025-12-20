@@ -10,4 +10,4 @@ export const DesignationSchema = new Schema(
     { timestamps: true },
 );
 
-DesignationSchema.index({ code: 1 }, { unique: true });
+

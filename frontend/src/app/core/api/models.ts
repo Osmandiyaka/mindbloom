@@ -97,3 +97,18 @@ export interface TenantActivityItem {
     createdAt: string; // ISO
     actorEmail?: string | null;
 }
+
+// Audit event used by host/tenant audit APIs
+export interface AuditEvent {
+    id: string;
+    timestamp: string; // ISO
+    tenantId?: string | null;
+    category?: string | null;
+    action?: string | null;
+    severity?: 'INFO' | 'WARN' | 'CRITICAL' | null;
+    result?: 'SUCCESS' | 'FAIL' | 'DENIED' | null;
+    message?: string | null;
+    actorEmailSnapshot?: string | null;
+    targetType?: string | null;
+    targetId?: string | null;
+}

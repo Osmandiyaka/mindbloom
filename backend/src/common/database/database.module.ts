@@ -5,6 +5,7 @@ import { UserSchema } from '../../infrastructure/adapters/persistence/mongoose/s
 import { StudentSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/student.schema';
 import { ClassSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/class.schema';
 import { TenantSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/tenant.schema';
+import { AuditLogSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/audit.schema';
 import { TenantContext } from '../tenant/tenant.context';
 
 @Global()
@@ -18,11 +19,8 @@ import { TenantContext } from '../tenant/tenant.context';
             }),
         }),
         MongooseModule.forFeature([
-            { name: 'User', schema: UserSchema },
-            { name: 'Student', schema: StudentSchema },
             { name: 'Class', schema: ClassSchema },
-            { name: 'Tenant', schema: TenantSchema },
-            { name: 'AuditLog', schema: (await import('../../infrastructure/adapters/persistence/mongoose/schemas/audit.schema')).AuditLogSchema },
+            { name: 'AuditLog', schema: AuditLogSchema },
         ]),
     ],
     providers: [TenantContext],

@@ -57,5 +57,4 @@ export const StaffSchema = new Schema(
     { timestamps: true },
 );
 
-StaffSchema.index({ employeeId: 1 }, { unique: true, sparse: true });
-StaffSchema.index({ email: 1 }, { unique: true, sparse: true });
+

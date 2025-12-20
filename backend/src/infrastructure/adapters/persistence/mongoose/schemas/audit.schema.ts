@@ -6,7 +6,7 @@ export class AuditLogDocument extends Document {
     @Prop({ required: true, index: true })
     id: string; // uuid
 
-    @Prop({ required: true, index: true })
+    @Prop({ required: true })
     timestamp: Date;
 
     @Prop({ index: true })

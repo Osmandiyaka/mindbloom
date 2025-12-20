@@ -352,7 +352,6 @@ export class TenantDocument extends Document {
 
 export const TenantSchema = SchemaFactory.createForClass(TenantDocument);
 
-TenantSchema.index({ subdomain: 1 }, { unique: true });
 TenantSchema.index({ status: 1 });
 TenantSchema.index({ ownerId: 1 });
 TenantSchema.index({ 'contactInfo.email': 1 });
@@ -361,7 +360,6 @@ TenantSchema.index({ deletedAt: 1 });
 TenantSchema.index({ tags: 1 });
 TenantSchema.index({ status: 1, editionId: 1 });
 TenantSchema.index({ status: 1, deletedAt: 1 });
-TenantSchema.index({ 'customization.customDomain': 1 }, { unique: true, sparse: true });
 TenantSchema.index({ editionId: 1 }, { sparse: true });
 TenantSchema.index({ subscriptionEndDate: 1 }, { sparse: true });
 TenantSchema.index({ subscriptionState: 1 });

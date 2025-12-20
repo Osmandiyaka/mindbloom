@@ -27,7 +27,6 @@ export class PlanDocument extends Document {
 }
 
 export const PlanSchema = SchemaFactory.createForClass(PlanDocument);
-PlanSchema.index({ name: 1 }, { unique: true });
 
 @Schema({ collection: 'plan_modules', timestamps: true })
 export class PlanModuleDocument extends Document {

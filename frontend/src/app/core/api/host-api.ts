@@ -10,6 +10,7 @@ import {
     TenantDetails,
     TenantMetrics,
     TenantActivityItem,
+    AuditEvent,
 } from './models';
 import { map } from 'rxjs/operators';
 
@@ -89,6 +90,20 @@ export class HostApi {
     getTenantActivity(tenantId: string, limit = 20) {
         const params = new HttpParams().set('limit', String(limit));
         return this.http.get<TenantActivityItem[]>(`/api/host/tenants/${tenantId}/activity`, { params });
+    }
+
+    // Query host audit logs filtered to a tenant
+    getTenantAudit(tenantId: string, page = 1, pageSize = 20, q?: string) {
+        let params = new HttpParams()
+            .set('tenantId', tenantId)
+            .set('page', String(page))
+            .set('pageSize', String(pageSize));
+        if (q) params = params.set('q', q);
+        return this.http.get<PagedResult<AuditEvent>>(`/api/host/audit`, { params });
+    }
+
+    getAuditEvent(id: string) {
+        return this.http.get<AuditEvent>(`/api/host/audit/${id}`);
     }
 
     // Optional: for filter dropdown

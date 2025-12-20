@@ -8,7 +8,7 @@ import { IAuditRepository, AuditEventInput, AuditQuery, PagedResult, AuditEvent 
 
 @Injectable()
 export class MongooseAuditRepository implements IAuditRepository {
-    constructor(@InjectModel(AuditLogDocument.name) private model: Model<AuditLogDocument>) { }
+    constructor(@InjectModel('AuditLog') private model: Model<AuditLogDocument>) { }
 
     async insert(event: AuditEventInput): Promise<void> {
         const doc = {
