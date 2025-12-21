@@ -8,8 +8,9 @@ import { MongooseUserRepository } from '../../infrastructure/adapters/persistenc
 import { MongooseRefreshTokenRepository } from '../../infrastructure/adapters/persistence/mongoose/refresh-token.repository';
 import { UserSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/user.schema';
 import { RefreshTokenSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/refresh-token.schema';
-import { LoginUseCase, RegisterUseCase, ForgotPasswordUseCase, ResetPasswordUseCase, PasswordResetMailer, RefreshTokenUseCase, LogoutUseCase, TokenService, GetCurrentLoginInfoUseCase } from '../../application/services/auth';
+import { LoginUseCase, RegisterUseCase, ForgotPasswordUseCase, ResetPasswordUseCase, PasswordResetMailer, RefreshTokenUseCase, LogoutUseCase, TokenService, GetCurrentLoginInfoUseCase, ImpersonateUserUseCase } from '../../application/services/auth';
 import { AuthController } from '../../presentation/controllers/auth.controller';
+import { HostImpersonationController } from '../../presentation/controllers/host-impersonation.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { MailModule } from '../../infrastructure/mail/mail.module';
@@ -17,6 +18,8 @@ import { TenantModule } from '../tenant/tenant.module';
 import { RoleSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/role.schema';
 import { MongooseRoleRepository } from '../../infrastructure/adapters/persistence/mongoose/role.repository';
 import { GetPermissionTreeUseCase } from '../../application/services/rbac/get-permission-tree.use-case';
+import { PermissionGuard } from '../../common/guards/permission.guard';
+import { HostContextGuard } from '../../common/guards/host-context.guard';
 
 @Module({
     imports: [
@@ -37,7 +40,7 @@ import { GetPermissionTreeUseCase } from '../../application/services/rbac/get-pe
         MailModule,
         TenantModule,
     ],
-    controllers: [AuthController],
+    controllers: [AuthController, HostImpersonationController],
     providers: [
         // Repository adapter
         {
@@ -61,8 +64,11 @@ import { GetPermissionTreeUseCase } from '../../application/services/rbac/get-pe
         RefreshTokenUseCase,
         LogoutUseCase,
         GetCurrentLoginInfoUseCase,
+        ImpersonateUserUseCase,
         GetPermissionTreeUseCase,
         TokenService,
+        PermissionGuard,
+        HostContextGuard,
         // Strategies
         JwtStrategy,
         LocalStrategy,

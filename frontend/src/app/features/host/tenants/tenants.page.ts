@@ -22,6 +22,9 @@ import { SimpleTableComponent, SimpleColumn } from '../../../core/ui/simple-tabl
 import { ConfirmService } from '../../../core/ui/confirm/confirm.service';
 import { ToastService } from '../../../core/ui/toast/toast.service';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth.service';
+import { TenantBootstrapService } from '../../../core/tenant/tenant-bootstrap.service';
+import { AuthSession, TenantMembership } from '../../../core/auth/auth.models';
 
 @Component({
   standalone: true,
@@ -95,7 +98,7 @@ import { Router } from '@angular/router';
             <ui-button size="sm" (click)="$event.stopPropagation(); openEdit(row)">Edit</ui-button>
             <ui-button *ngIf="row.status !== 'SUSPENDED'" size="sm" variant="danger" (click)="$event.stopPropagation(); suspend(row)">Suspend</ui-button>
             <ui-button *ngIf="row.status === 'SUSPENDED'" size="sm" (click)="$event.stopPropagation(); activate(row)">Activate</ui-button>
-            <ui-button size="sm" disabled title="Coming soon">Impersonate</ui-button>
+            <ui-button size="sm" variant="ghost" [disabled]="impersonating" (click)="$event.stopPropagation(); impersonateTenant(row)">Impersonate</ui-button>
           </ng-template>
         </host-simple-table>
 
@@ -226,9 +229,13 @@ export class TenantsPage {
   private api = inject(HostApi);
   private confirm = inject(ConfirmService);
   private toast = inject(ToastService);
+  private auth = inject(AuthService);
+  private tenantBootstrap = inject(TenantBootstrapService);
 
   store = inject(TenantsStore);
   private router = inject(Router);
+
+  impersonating = false;
 
   @ViewChild('tenantDialog') tenantDialog!: TenantFormDialogComponent;
 
@@ -344,6 +351,35 @@ export class TenantsPage {
     const numeric = typeof value === 'string' && !isNaN(Number(value)) ? Number(value) : value;
     this.store.pageSize.set(numeric);
     this.onPageSizeChanged();
+  }
+
+  async impersonateTenant(row: TenantListItem) {
+    if (this.impersonating) return;
+    const ok = await this.confirm.confirm(`Impersonate "${row.name}"? You will switch into this tenant as an admin.`);
+    if (!ok) return;
+
+    this.impersonating = true;
+    try {
+      const response = await firstValueFrom(this.api.impersonateTenant(row.id, 'Host console tenant impersonation'));
+      const session = this.auth.applyLoginResponse(response as any);
+      await this.applyTenantSession(session);
+      await this.router.navigate(['/dashboard']);
+      this.toast.success(`Now impersonating ${row.name}`);
+    } catch (e: any) {
+      this.toast.error(e?.message ?? 'Failed to start impersonation');
+    } finally {
+      this.impersonating = false;
+    }
+  }
+
+  private async applyTenantSession(session: AuthSession) {
+    const memberships = session.memberships || [];
+    const targetTenantId = session.activeTenantId || memberships[0]?.tenantId;
+    const target = memberships.find(m => m.tenantId === targetTenantId) || memberships[0];
+
+    if (target) {
+      await firstValueFrom(this.tenantBootstrap.switchTenant(target as TenantMembership));
+    }
   }
   async handleCreate(input: any) {
     try {

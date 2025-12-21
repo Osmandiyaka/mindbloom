@@ -390,6 +390,16 @@ export class AuthService {
     }
 
     /**
+     * Apply a login-like response (used for impersonation flows) to the current session.
+     */
+    applyLoginResponse(response: LoginResponse | LegacyLoginResponse) {
+        const normalized = this.normalizeLoginResponse(response);
+        this.setSession(normalized.session);
+        this.currentUserSubject.next(normalized.legacyUser);
+        return normalized.session;
+    }
+
+    /**
      * Legacy: getCurrentUser method for old code.
      */
     getCurrentUser(): User | null {

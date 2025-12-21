@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { HostApi } from '../../../core/api/host-api';
@@ -16,6 +16,9 @@ import { SimpleTableComponent, SimpleColumn } from '../../../core/ui/simple-tabl
 
 import { ConfirmService } from '../../../core/ui/confirm/confirm.service';
 import { ToastService } from '../../../core/ui/toast/toast.service';
+import { AuthService } from '../../../core/auth/auth.service';
+import { TenantBootstrapService } from '../../../core/tenant/tenant-bootstrap.service';
+import { AuthSession, TenantMembership } from '../../../core/auth/auth.models';
 
 @Component({
   standalone: true,
@@ -53,7 +56,7 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
         <ui-button (click)="activate()" [disabled]="loading()">Activate</ui-button>
       }
 
-      <ui-button disabled title="Coming soon">Impersonate</ui-button>
+      <ui-button variant="ghost" (click)="impersonateTenant()" [disabled]="loading() || impersonating()">Impersonate</ui-button>
     </host-page-header>
 
     <!-- Tabs -->
@@ -253,7 +256,7 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
                     <td>{{ u.role?.name ?? '—' }}</td>
                     <td>{{ u.createdAt ? (u.createdAt | date:'mediumDate') : '—' }}</td>
                     <td class="right">
-                      <ui-button size="sm" variant="secondary" (click)="impersonate(u)">Impersonate</ui-button>
+                      <ui-button size="sm" variant="ghost" [disabled]="impersonating()" (click)="impersonate(u)">Impersonate</ui-button>
                     </td>
                   </tr>
                 }
@@ -392,6 +395,9 @@ export class TenantDetailsPage {
   private route = inject(ActivatedRoute);
   private confirm = inject(ConfirmService);
   private toast = inject(ToastService);
+  private router = inject(Router);
+  private auth = inject(AuthService);
+  private tenantBootstrap = inject(TenantBootstrapService);
 
   tenantId = computed(() => this.route.snapshot.paramMap.get('id') ?? '');
 
@@ -411,6 +417,8 @@ export class TenantDetailsPage {
   auditPageSize = signal(20);
   auditLoading = signal(false);
   selectedAudit = signal<AuditEvent | null>(null);
+
+  impersonating = signal(false);
 
   loading = signal(false);
   error = signal<string | null>(null);
@@ -526,7 +534,52 @@ export class TenantDetailsPage {
     if (!t) return;
     const ok = await this.confirm.confirm(`Impersonate ${user.name || user.email}? This will start a session as that tenant user.`);
     if (!ok) return;
-    this.toast.info('Impersonation flow not wired yet.');
+    if (this.impersonating()) return;
+
+    this.impersonating.set(true);
+    try {
+      const response = await firstValueFrom(this.api.impersonateTenantUser(t.id, user.id, 'Host console user impersonation'));
+      const session = this.auth.applyLoginResponse(response as any);
+      await this.applyImpersonationSession(session, t.name);
+      await this.router.navigate(['/dashboard']);
+      this.toast.success(`Now impersonating ${user.name || user.email}`);
+    } catch (e: any) {
+      this.toast.error(e?.message ?? 'Failed to impersonate user');
+    } finally {
+      this.impersonating.set(false);
+    }
+  }
+
+  async impersonateTenant() {
+    const t = this.tenant();
+    if (!t || this.impersonating()) return;
+    const ok = await this.confirm.confirm(`Impersonate "${t.name}"? You will switch into this tenant as an admin.`);
+    if (!ok) return;
+
+    this.impersonating.set(true);
+    try {
+      const response = await firstValueFrom(this.api.impersonateTenant(t.id, 'Host console tenant impersonation'));
+      const session = this.auth.applyLoginResponse(response as any);
+      await this.applyImpersonationSession(session, t.name);
+      await this.router.navigate(['/dashboard']);
+      this.toast.success(`Now impersonating ${t.name}`);
+    } catch (e: any) {
+      this.toast.error(e?.message ?? 'Failed to impersonate tenant');
+    } finally {
+      this.impersonating.set(false);
+    }
+  }
+
+  private async applyImpersonationSession(session: AuthSession, tenantName: string) {
+    const memberships = session.memberships || [];
+    const targetTenantId = session.activeTenantId || memberships[0]?.tenantId;
+    const target = memberships.find(m => m.tenantId === targetTenantId) || memberships[0];
+
+    if (target) {
+      await firstValueFrom(this.tenantBootstrap.switchTenant(target as TenantMembership));
+    } else {
+      this.toast.warning(`Impersonated session for ${tenantName} has no tenant membership.`);
+    }
   }
 
   async reload() {

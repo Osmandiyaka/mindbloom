@@ -111,6 +111,15 @@ export class HostApi {
         return this.http.get<AuditEvent>(`/api/host/audit/${id}`);
     }
 
+    // Impersonation (host → tenant/user)
+    impersonateTenant(tenantId: string, reason?: string) {
+        return this.http.post<any>(`/api/host/impersonation/tenant/${tenantId}`, { reason }, { withCredentials: true });
+    }
+
+    impersonateTenantUser(tenantId: string, userId: string, reason?: string) {
+        return this.http.post<any>(`/api/host/impersonation/tenant/${tenantId}/users/${userId}`, { reason }, { withCredentials: true });
+    }
+
     // Optional: for filter dropdown
     listEditionsLookup() {
         return this.http.get<EditionLookup[]>('/api/host/editions');

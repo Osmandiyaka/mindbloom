@@ -18,16 +18,23 @@ export class TokenService {
         private readonly configService: ConfigService,
     ) { }
 
-    createAccessToken(user: User, options?: { isHost?: boolean }): string {
+    createAccessToken(user: User, options?: { isHost?: boolean; impersonatorId?: string | null; impersonatorEmail?: string | null; impersonationReason?: string | null }): string {
         const tenantId = options?.isHost ? null : (user.tenantId ?? null);
 
-        const payload = {
+        const payload: Record<string, any> = {
             sub: user.id,
             tenantId,
             email: user.email,
             roleId: user.roleId,
-            roleName: user.role?.name || null
+            roleName: user.role?.name || null,
         };
+
+        if (options?.impersonatorId) {
+            payload.impersonated = true;
+            payload.impersonatorId = options.impersonatorId;
+            payload.impersonatorEmail = options.impersonatorEmail ?? null;
+            payload.impersonationReason = options.impersonationReason ?? null;
+        }
 
         return this.jwtService.sign(payload);
     }
@@ -48,6 +55,18 @@ export class TokenService {
 
     hashToken(token: string): string {
         return createHash('sha256').update(token).digest('hex');
+    }
+
+    decodeExpiry(token: string): Date | null {
+        try {
+            const decoded = this.jwtService.decode(token) as any;
+            if (decoded?.exp) {
+                return new Date(decoded.exp * 1000);
+            }
+            return null;
+        } catch {
+            return null;
+        }
     }
 
     buildUserResponse(user: User) {
