@@ -141,6 +141,48 @@ import { AuthSession, TenantMembership } from '../../../core/auth/auth.models';
       color: var(--host-text-color);
     }
 
+    :host ::ng-deep host-page-header .description {
+      color: #0f172a !important;
+      font-weight: 700;
+      opacity: 1;
+    }
+
+    /* High-contrast buttons */
+    :host ::ng-deep ui-button button,
+    :host ::ng-deep button.btn,
+    .btn {
+      color: #111827;
+      font-weight: 700;
+      border: 1px solid #111827;
+      background: #fff;
+      box-shadow: none;
+    }
+    :host ::ng-deep ui-button[variant="primary"] button,
+    .btn.primary {
+      background: #111827;
+      color: #fff;
+      border-color: #111827;
+    }
+    :host ::ng-deep ui-button[variant="ghost"] button,
+    :host ::ng-deep ui-button[variant="secondary"] button,
+    .btn.secondary,
+    .btn.ghost {
+      background: #fff;
+      color: #111827;
+      border-color: #111827;
+    }
+    :host ::ng-deep ui-button[variant="danger"] button,
+    .btn.danger {
+      background: #fff;
+      color: #b91c1c;
+      border-color: #b91c1c;
+    }
+    .btn:disabled,
+    :host ::ng-deep ui-button button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
     /* Table */
     .table { width: 100%; border-collapse: collapse; font-size: var(--host-font-size); line-height: 1.45; color: var(--host-text-color); }
     th, td { padding: 14px 12px; border-bottom: 1px solid var(--host-border-subtle); text-align: left; vertical-align: top; }
@@ -150,7 +192,7 @@ import { AuthSession, TenantMembership } from '../../../core/auth/auth.models';
     .right { text-align: right; }
 
     .name { font-weight: 700; font-size: 16px; color: var(--host-text-color); }
-    .muted { color: var(--host-muted-color); font-size: var(--host-small-font-size); margin-top: 4px; }
+    .muted { color: #0f172a; font-size: var(--host-small-font-size); margin-top: 4px; }
 
     /* Row hover for readability */
     tbody tr:hover { background: var(--host-surface-muted); }

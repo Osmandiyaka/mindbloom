@@ -368,6 +368,48 @@ import { AuthSession, TenantMembership } from '../../../core/auth/auth.models';
     .btn.danger { border-color: #fecaca; background: #fff; }
     .btn:disabled { opacity: .6; cursor: not-allowed; }
 
+    :host ::ng-deep host-page-header .description {
+      color: #0f172a !important;
+      font-weight: 700;
+      opacity: 1;
+    }
+
+    /* High-contrast buttons */
+    :host ::ng-deep ui-button button,
+    :host ::ng-deep button.btn,
+    .btn {
+      color: #111827;
+      font-weight: 700;
+      border: 1px solid #111827;
+      background: #fff;
+      box-shadow: none;
+    }
+    :host ::ng-deep ui-button[variant="primary"] button,
+    .btn.primary {
+      background: #111827;
+      color: #fff;
+      border-color: #111827;
+    }
+    :host ::ng-deep ui-button[variant="ghost"] button,
+    :host ::ng-deep ui-button[variant="secondary"] button,
+    .btn.secondary,
+    .btn.ghost {
+      background: #fff;
+      color: #111827;
+      border-color: #111827;
+    }
+    :host ::ng-deep ui-button[variant="danger"] button,
+    .btn.danger {
+      background: #fff;
+      color: #b91c1c;
+      border-color: #b91c1c;
+    }
+    .btn:disabled,
+    :host ::ng-deep ui-button button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
     /* Tabs */
     .tabs { display:flex; gap:8px; margin: 14px 0; }
     .tab { background: transparent; border: 1px solid var(--host-border-subtle); padding: 10px 14px; border-radius: 10px; cursor: pointer; color: var(--host-tab-text, var(--host-muted-color)); font-weight: 600; transition: background .12s, color .12s, box-shadow .12s; }
@@ -399,10 +441,10 @@ import { AuthSession, TenantMembership } from '../../../core/auth/auth.models';
       padding: 12px;
     }
 
-    .label { color: var(--host-muted-color, var(--color-text-secondary, #374151)); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; display: flex; align-items: center; gap: 8px; }
+    .label { color: #0f172a; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; display: flex; align-items: center; gap: 8px; }
     .label .icon { font-size: 14px; opacity: .9; }
-    .value { font-size: 20px; font-weight: 700; margin-top: 6px; }
-    .muted { color: var(--host-muted-color, var(--color-text-secondary, #374151)); font-size: 12px; margin-top: 4px; }
+    .value { font-size: 20px; font-weight: 700; margin-top: 6px; color: #0f172a; }
+    .muted { color: #0f172a; font-size: 12px; margin-top: 4px; }
 
     .pill {
       display: inline-flex;
@@ -419,7 +461,7 @@ import { AuthSession, TenantMembership } from '../../../core/auth/auth.models';
     .section-title {
       margin-top: 6px;
       font-weight: 700;
-      color: #111827;
+      color: #0f172a;
     }
 
     .metrics {
@@ -454,14 +496,14 @@ import { AuthSession, TenantMembership } from '../../../core/auth/auth.models';
     .right { text-align: right; }
     .name { font-weight: 700; font-size: 16px; color: #111827; }
 
-    .empty { padding: 18px; color: var(--host-muted-color, var(--color-text-secondary, #374151)); }
+    .empty { padding: 18px; color: #0f172a; }
 
     .activity { list-style: none; margin: 0; padding: 0; }
     .row { border-top: 1px solid #f1f5f9; padding: 12px; }
     .row:first-child { border-top: none; }
 
     .msg { font-weight: 600; }
-    .meta { color: #6b7280; font-size: 12px; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .meta { color: #0f172a; font-size: 12px; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
     .type { border: 1px solid #e5e7eb; padding: 2px 8px; border-radius: 999px; background: #f9fafb; }
     .dot { opacity: .7; }
   `],
