@@ -38,9 +38,9 @@ export class TenantPostLoginRouter {
             }
         }
 
-        // No memberships - route to no access page
+        // No memberships - just continue to the app (no no-access detour)
         if (memberships.length === 0) {
-            await this.router.navigate(['/no-access']);
+            await this.router.navigateByUrl(safeReturnUrl);
             return;
         }
 
@@ -54,10 +54,8 @@ export class TenantPostLoginRouter {
             if (success) {
                 await this.router.navigateByUrl(safeReturnUrl);
             } else {
-                // Bootstrap failed, redirect to selection screen
-                await this.router.navigate(['/select-school'], {
-                    queryParams: { returnUrl: safeReturnUrl }
-                });
+                // Bootstrap failed, send user to their target without blocking
+                await this.router.navigateByUrl(safeReturnUrl);
             }
             return;
         }
@@ -78,11 +76,18 @@ export class TenantPostLoginRouter {
             }
         }
 
-        // Multiple tenants, no valid restoration - show selection screen
-        console.log('[TenantPostLoginRouter] Routing to tenant selection');
-        await this.router.navigate(['/select-school'], {
-            queryParams: { returnUrl: safeReturnUrl }
-        });
+        // Multiple tenants, no valid restoration - auto-pick first working tenant
+        console.log('[TenantPostLoginRouter] Auto-selecting first available tenant');
+        for (const tenant of memberships) {
+            const success = await firstValueFrom(this.tenantBootstrap.switchTenant(tenant));
+            if (success) {
+                await this.router.navigateByUrl(safeReturnUrl);
+                return;
+            }
+        }
+
+        // If none worked, still honor the target route instead of blocking
+        await this.router.navigateByUrl(safeReturnUrl);
     }
 
     /**
@@ -101,7 +106,6 @@ export class TenantPostLoginRouter {
 
         // Reject loops and public routes
         const disallowedPaths = [
-            '/select-school',
             '/no-access',
             '/login',
             '/register',

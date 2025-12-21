@@ -10,7 +10,7 @@
  * - Allows public routes (data.public = true)
  * - Allows routes that skip tenant check (data.skipTenant = true)
  * - Blocks tenant-scoped routes when no tenant context exists
- * - Redirects to /select-school with returnUrl
+ * - Allows navigation when tenant context is missing (no no-access redirect)
  * - Redirects host sessions to /host (no tenant required)
  */
 import { inject } from '@angular/core';
@@ -45,8 +45,6 @@ export const tenantGuard: CanActivateFn = (route, state) => {
         return true;
     }
 
-    // No tenant context - redirect to selection screen with returnUrl
-    return router.createUrlTree(['/select-school'], {
-        queryParams: { returnUrl: state.url }
-    });
+    // No tenant context - allow navigation without blocking on school access
+    return true;
 };
