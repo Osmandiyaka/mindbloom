@@ -269,16 +269,90 @@ import { AuthSession, TenantMembership } from '../../../core/auth/auth.models';
       <!-- Invoices Tab -->
       @if (currentTab() === 'invoices') {
         <div class="card">
-          <div class="section-title">Invoices</div>
-          <div class="empty">Coming soon — invoices and billing history.</div>
+          <div class="card-header">
+            <div>
+              <div class="section-title">Invoices</div>
+              <div class="muted">Recent billing for this tenant.</div>
+            </div>
+            <div class="spacer"></div>
+            <ui-button size="sm" variant="ghost" [disabled]="loading()">Export</ui-button>
+          </div>
+
+          @if (!invoiceRows().length) {
+            <div class="empty">No invoices yet.</div>
+          } @else {
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Period</th>
+                  <th>Status</th>
+                  <th>Amount</th>
+                  <th>Due</th>
+                  <th>Paid</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (inv of invoiceRows(); track inv.id) {
+                  <tr>
+                    <td class="cell-primary">{{ inv.number }}</td>
+                    <td class="cell-secondary">{{ inv.period }}</td>
+                    <td>
+                      <app-badge size="sm" dot [variant]="invoiceStatusVariant(inv.status)">{{ inv.status }}</app-badge>
+                    </td>
+                    <td>{{ inv.amount }}</td>
+                    <td class="cell-secondary">{{ inv.dueDate }}</td>
+                    <td class="cell-secondary">{{ inv.paidDate || '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
         </div>
       }
 
       <!-- Issues Tab -->
       @if (currentTab() === 'issues') {
         <div class="card">
-          <div class="section-title">Issues</div>
-          <div class="empty">Coming soon — issues & support tickets.</div>
+          <div class="card-header">
+            <div>
+              <div class="section-title">Issues</div>
+              <div class="muted">Support and incidents logged for this tenant.</div>
+            </div>
+            <div class="spacer"></div>
+            <ui-button size="sm" variant="ghost" [disabled]="loading()">New Issue</ui-button>
+          </div>
+
+          @if (!issueRows().length) {
+            <div class="empty">No issues reported.</div>
+          } @else {
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Severity</th>
+                  <th>Status</th>
+                  <th>Updated</th>
+                  <th>Owner</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (issue of issueRows(); track issue.id) {
+                  <tr>
+                    <td class="cell-primary">{{ issue.title }}</td>
+                    <td>
+                      <app-badge size="sm" dot [variant]="issueSeverityVariant(issue.severity)">{{ issue.severity }}</app-badge>
+                    </td>
+                    <td>
+                      <app-badge size="sm" dot [variant]="issueStatusVariant(issue.status)">{{ issue.status }}</app-badge>
+                    </td>
+                    <td class="cell-secondary">{{ issue.updatedAt }}</td>
+                    <td class="cell-secondary">{{ issue.owner }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
         </div>
       }
 
@@ -419,6 +493,19 @@ export class TenantDetailsPage {
   selectedAudit = signal<AuditEvent | null>(null);
 
   impersonating = signal(false);
+
+  // Stub data for invoices and issues (replace with real API when available)
+  invoiceRows = signal([
+    { id: 'inv-1005', number: 'INV-1005', period: 'Nov 2025', status: 'PAID', amount: '$420.00', dueDate: 'Nov 15, 2025', paidDate: 'Nov 12, 2025' },
+    { id: 'inv-1004', number: 'INV-1004', period: 'Oct 2025', status: 'PAST_DUE', amount: '$420.00', dueDate: 'Oct 15, 2025', paidDate: '' },
+    { id: 'inv-1003', number: 'INV-1003', period: 'Sep 2025', status: 'PAID', amount: '$420.00', dueDate: 'Sep 15, 2025', paidDate: 'Sep 14, 2025' },
+  ]);
+
+  issueRows = signal([
+    { id: 'iss-12', title: 'SSO login failing intermittently', severity: 'HIGH', status: 'OPEN', updatedAt: 'Dec 11, 2025', owner: 'ops@mindbloom.io' },
+    { id: 'iss-11', title: 'Report export timing out', severity: 'MEDIUM', status: 'IN_PROGRESS', updatedAt: 'Dec 5, 2025', owner: 'reports@mindbloom.io' },
+    { id: 'iss-10', title: 'Library sync mismatch', severity: 'LOW', status: 'RESOLVED', updatedAt: 'Nov 22, 2025', owner: 'plugins@mindbloom.io' },
+  ]);
 
   loading = signal(false);
   error = signal<string | null>(null);
@@ -580,6 +667,37 @@ export class TenantDetailsPage {
     } else {
       this.toast.warning(`Impersonated session for ${tenantName} has no tenant membership.`);
     }
+  }
+
+  resultVariant(result: string | null | undefined): 'success' | 'error' | 'warning' | 'neutral' {
+    const value = (result ?? '').toString().toUpperCase();
+    if (value === 'SUCCESS') return 'success';
+    if (value === 'FAIL' || value === 'DENIED' || value === 'ERROR') return 'error';
+    if (value === 'TRIAL' || value === 'PENDING') return 'warning';
+    return 'neutral';
+  }
+
+  invoiceStatusVariant(status: string): 'success' | 'error' | 'warning' | 'neutral' {
+    const value = (status || '').toUpperCase();
+    if (value === 'PAID') return 'success';
+    if (value === 'PAST_DUE' || value === 'FAILED') return 'error';
+    if (value === 'PENDING' || value === 'ISSUED') return 'warning';
+    return 'neutral';
+  }
+
+  issueSeverityVariant(severity: string): 'success' | 'error' | 'warning' | 'neutral' {
+    const value = (severity || '').toUpperCase();
+    if (value === 'HIGH' || value === 'CRITICAL') return 'error';
+    if (value === 'MEDIUM') return 'warning';
+    return 'neutral';
+  }
+
+  issueStatusVariant(status: string): 'success' | 'error' | 'warning' | 'neutral' {
+    const value = (status || '').toUpperCase();
+    if (value === 'RESOLVED' || value === 'CLOSED') return 'success';
+    if (value === 'OPEN') return 'error';
+    if (value === 'IN_PROGRESS') return 'warning';
+    return 'neutral';
   }
 
   async reload() {
