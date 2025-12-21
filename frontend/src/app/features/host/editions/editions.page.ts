@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 
 import { HostApi } from '../../../core/api/host-api';
-import { Edition, EditionFeatureAssignment, EditionWithFeatures } from '../../../core/api/models';
+import { Edition, EditionFeatureAssignment, EditionWithFeatures, FeatureDefinitionDto } from '../../../core/api/models';
 
 import { PageHeaderComponent } from '../../../core/ui/page-header/page-header.component';
 import { DataTableShellComponent } from '../../../core/ui/data-table-shell/data-table-shell.component';
@@ -119,26 +119,58 @@ interface FeatureRow {
           </div>
 
           <div class="section-title">Features</div>
-          <div class="muted">Key/value assignments applied to this edition.</div>
+          <div class="muted">Add from the validated catalog or enter custom keys if needed.</div>
+
+          <div class="feature-toolbar">
+            <label class="feature-adder">
+              <div class="label">Add from catalog</div>
+              <select [value]="selectedFeatureKey()" (change)="onSelectCatalogKey($any($event.target).value)">
+                <option value="">Select feature</option>
+                @for (opt of availableCatalogFeatures(); track opt.key) {
+                  <option [value]="opt.key">{{ opt.category }} — {{ opt.displayName }}</option>
+                }
+              </select>
+            </label>
+            <ui-button size="sm" variant="primary" (click)="addFromCatalog()" [disabled]="!selectedFeatureKey()">Add</ui-button>
+            <div class="divider"></div>
+            <label class="feature-adder">
+              <div class="label">Custom key</div>
+              <ui-input [value]="newFeature.featureKey" (valueChange)="newFeature.featureKey = $event" placeholder="feature.key" />
+            </label>
+            <label class="feature-adder">
+              <div class="label">Value</div>
+              <ui-input [value]="newFeature.value" (valueChange)="newFeature.value = $event" placeholder="value" />
+            </label>
+            <ui-button size="sm" variant="ghost" (click)="addCustomFeature()" [disabled]="!newFeature.featureKey.trim()">Add custom</ui-button>
+          </div>
 
           <div class="feature-list">
             <div class="feature-row header">
-              <div>Key</div>
+              <div>Feature</div>
               <div>Value</div>
               <div></div>
             </div>
             @for (f of featureRows(); track f) {
               <div class="feature-row">
-                <ui-input [value]="f.featureKey" (valueChange)="updateFeatureKey(f, $event)" placeholder="feature.key" />
-                <ui-input [value]="f.value" (valueChange)="updateFeatureValue(f, $event)" placeholder="enabled" />
+                <div class="feature-meta">
+                  <div class="cell-primary">{{ featureDisplayName(f.featureKey) }}</div>
+                  <div class="cell-secondary">{{ f.featureKey }}</div>
+                  <div class="muted" *ngIf="featureDescription(f.featureKey)">{{ featureDescription(f.featureKey) }}</div>
+                </div>
+                <div class="feature-value">
+                  <ng-container [ngSwitch]="featureValueType(f.featureKey)">
+                    <label class="switch" *ngSwitchCase="'BOOLEAN'">
+                      <input type="checkbox" [checked]="f.value === 'true'" (change)="updateFeatureValue(f, ($any($event.target).checked ? 'true' : 'false'))" />
+                      <span>{{ f.value === 'true' ? 'Enabled' : 'Disabled' }}</span>
+                    </label>
+                    <ui-input *ngSwitchCase="'INT'" type="number" [value]="f.value" (valueChange)="updateFeatureValue(f, $event)" />
+                    <ui-input *ngSwitchCase="'DECIMAL'" type="number" step="0.01" [value]="f.value" (valueChange)="updateFeatureValue(f, $event)" />
+                    <ui-input *ngSwitchDefault [value]="f.value" (valueChange)="updateFeatureValue(f, $event)" />
+                  </ng-container>
+                </div>
                 <ui-button size="sm" variant="ghost" (click)="removeFeature(f)">Remove</ui-button>
               </div>
             }
-            <div class="feature-row">
-              <ui-input [value]="newFeature.featureKey" (valueChange)="newFeature.featureKey = $event" placeholder="feature.key" />
-              <ui-input [value]="newFeature.value" (valueChange)="newFeature.value = $event" placeholder="value" />
-              <ui-button size="sm" variant="ghost" (click)="addFeature()">Add</ui-button>
-            </div>
           </div>
         </div>
       </div>
@@ -173,9 +205,17 @@ interface FeatureRow {
     .hint { color: #6b7280; font-size: 12px; }
     .switch-row { flex-direction: row; align-items: center; gap: 8px; padding-top: 18px; }
 
+    .feature-toolbar { display: grid; grid-template-columns: 1.3fr auto 12px 1fr 1fr auto; gap: 10px; align-items: end; padding: 10px; background: var(--host-surface); border: 1px dashed var(--host-border-subtle); border-radius: 10px; }
+    .feature-adder { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #0f172a; }
+    .feature-adder select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--host-border-subtle); background: white; }
+    .divider { border-left: 1px solid var(--host-border-subtle); height: 100%; }
+
     .feature-list { display: flex; flex-direction: column; gap: 8px; }
-    .feature-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: center; }
-    .feature-row.header { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #6b7280; }
+    .feature-row { display: grid; grid-template-columns: 1.2fr 0.9fr auto; gap: 12px; align-items: center; padding: 8px 10px; border: 1px solid var(--host-border-subtle); border-radius: 10px; background: #fff; }
+    .feature-row.header { border: none; background: transparent; padding: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #6b7280; }
+    .feature-meta { display: flex; flex-direction: column; gap: 4px; }
+    .feature-value { display: flex; align-items: center; gap: 10px; }
+    .switch { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
     .cell-primary { font-weight: 700; color: #0f172a; }
     .cell-secondary { color: #6b7280; font-size: 13px; }
   `]
@@ -193,6 +233,22 @@ export class EditionsPage {
 
   featureRows = signal<FeatureRow[]>([]);
   newFeature: FeatureRow = { featureKey: '', value: '' };
+  featureCatalog = signal<FeatureDefinitionDto[]>([]);
+  featureCatalogMap = computed(() => {
+    const map = new Map<string, FeatureDefinitionDto>();
+    for (const def of this.featureCatalog()) {
+      map.set(def.key.toLowerCase(), def);
+    }
+    return map;
+  });
+  selectedFeatureKey = signal<string>('');
+
+  availableCatalogFeatures = computed(() => {
+    const existing = new Set(this.featureRows().map(r => r.featureKey.toLowerCase()));
+    return this.featureCatalog()
+      .filter(def => !existing.has(def.key.toLowerCase()))
+      .sort((a, b) => (a.category ?? '').localeCompare(b.category ?? '') || (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.displayName.localeCompare(b.displayName));
+  });
 
   form: Partial<Edition> = {
     name: '',
@@ -215,7 +271,18 @@ export class EditionsPage {
   selectedEdition = computed(() => this.editions().find(e => e.id === this.selectedId()) || null);
 
   async ngOnInit() {
-    await this.reload();
+    await Promise.all([this.loadFeatureCatalog(), this.reload()]);
+  }
+
+  private async loadFeatureCatalog() {
+    try {
+      const defs = await firstValueFrom(this.api.listHostFeatureCatalog());
+      this.featureCatalog.set(defs || []);
+      this.featureRows.set(this.sortFeatureRows([...this.featureRows()]));
+    } catch (e) {
+      console.warn('Failed to load feature catalog', e);
+      this.featureCatalog.set([]);
+    }
   }
 
   async reload() {
@@ -295,9 +362,24 @@ export class EditionsPage {
     return value === null || value === undefined ? '' : String(value);
   }
 
-  addFeature() {
-    if (!this.newFeature.featureKey.trim()) return;
-    this.featureRows.update(list => [...list, { ...this.newFeature }]);
+  onSelectCatalogKey(key: string) {
+    this.selectedFeatureKey.set(key);
+  }
+
+  addFromCatalog() {
+    const key = this.selectedFeatureKey().trim();
+    if (!key) return;
+    const def = this.featureCatalogMap().get(key.toLowerCase());
+    const value = def?.defaultValue ?? '';
+    this.upsertFeatureRow(key, value);
+    this.selectedFeatureKey.set('');
+  }
+
+  addCustomFeature() {
+    const key = this.newFeature.featureKey.trim();
+    if (!key) return;
+    const value = this.newFeature.value ?? '';
+    this.upsertFeatureRow(key, value);
     this.newFeature = { featureKey: '', value: '' };
   }
 
@@ -305,14 +387,51 @@ export class EditionsPage {
     this.featureRows.update(list => list.filter(f => f !== row));
   }
 
-  updateFeatureKey(row: FeatureRow, value: string) {
-    row.featureKey = value;
-    this.featureRows.set([...this.featureRows()]);
-  }
-
   updateFeatureValue(row: FeatureRow, value: string) {
     row.value = value;
-    this.featureRows.set([...this.featureRows()]);
+    this.featureRows.set(this.sortFeatureRows([...this.featureRows()]));
+  }
+
+  private upsertFeatureRow(key: string, value: string) {
+    const trimmedKey = key.trim();
+    if (!trimmedKey) return;
+    const normalized = trimmedKey.toLowerCase();
+    const current = this.featureRows();
+    const idx = current.findIndex(f => f.featureKey.toLowerCase() === normalized);
+    if (idx >= 0) {
+      const next = [...current];
+      next[idx] = { featureKey: trimmedKey, value };
+      this.featureRows.set(this.sortFeatureRows(next));
+      return;
+    }
+    this.featureRows.set(this.sortFeatureRows([...current, { featureKey: trimmedKey, value }]));
+  }
+
+  featureDisplayName(key: string): string {
+    return this.featureCatalogMap().get(key.toLowerCase())?.displayName ?? key;
+  }
+
+  featureDescription(key: string): string | undefined {
+    return this.featureCatalogMap().get(key.toLowerCase())?.description;
+  }
+
+  featureValueType(key: string): FeatureDefinitionDto['valueType'] {
+    return this.featureCatalogMap().get(key.toLowerCase())?.valueType ?? 'STRING';
+  }
+
+  private sortFeatureRows(rows: FeatureRow[]): FeatureRow[] {
+    const map = this.featureCatalogMap();
+    return [...rows].sort((a, b) => {
+      const defA = map.get(a.featureKey.toLowerCase());
+      const defB = map.get(b.featureKey.toLowerCase());
+      const catA = defA?.category ?? '';
+      const catB = defB?.category ?? '';
+      if (catA !== catB) return catA.localeCompare(catB);
+      const orderA = defA?.sortOrder ?? 0;
+      const orderB = defB?.sortOrder ?? 0;
+      if (orderA !== orderB) return orderA - orderB;
+      return (defA?.displayName ?? a.featureKey).localeCompare(defB?.displayName ?? b.featureKey);
+    });
   }
 
   formValid(): boolean {
@@ -323,9 +442,10 @@ export class EditionsPage {
   }
 
   private buildFeatureAssignments(): EditionFeatureAssignment[] {
+    const seen = new Set<string>();
     return this.featureRows()
-      .filter(f => f.featureKey.trim())
-      .map(f => ({ featureKey: f.featureKey.trim(), value: f.value ?? '' }));
+      .map(f => ({ featureKey: f.featureKey.trim(), value: (f.value ?? '').toString() }))
+      .filter(f => f.featureKey && !seen.has(f.featureKey) && (seen.add(f.featureKey), true));
   }
 
   private applyEdition(detail: EditionWithFeatures) {
@@ -342,7 +462,8 @@ export class EditionsPage {
       sortOrder: edition.sortOrder ?? 0,
       isActive: edition.isActive ?? true,
     };
-    this.featureRows.set(Object.entries(features || {}).map(([k, v]) => ({ featureKey: k, value: String(v) })));
+    const rows = Object.entries(features || {}).map(([k, v]) => ({ featureKey: k, value: String(v) }));
+    this.featureRows.set(this.sortFeatureRows(rows));
   }
 
   private normalizeEdition(raw: any): Edition {

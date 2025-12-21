@@ -9,6 +9,8 @@ import { InvalidFeatureValueException } from '../../../domain/exceptions/invalid
 import { FeatureCatalog } from '../../../domain/features/feature-catalog';
 import { FeatureValueParser } from '../../../domain/features/feature-value-parser';
 import { FeatureValidationService } from '../features/feature-validation.service';
+import { FeatureScope } from '../../../domain/features/feature-scope';
+import { FeatureDefinition } from '../../../domain/features/feature-definition';
 
 export interface CreateEditionInput {
     name: string;
@@ -53,6 +55,10 @@ export class EditionManager {
 
     async listEditions(): Promise<Edition[]> {
         return this.editions.findAll();
+    }
+
+    listHostVisibleFeatures(): FeatureDefinition[] {
+        return FeatureCatalog.toClientDefinitions(FeatureScope.TENANT, 'host');
     }
 
     async listEditionsWithFeatures(): Promise<Array<{ edition: Edition; features: Record<string, string> }>> {

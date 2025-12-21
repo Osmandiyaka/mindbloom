@@ -16,6 +16,7 @@ import {
     TenantActivityItem,
     AuditEvent,
     TenantUser,
+    FeatureDefinitionDto,
 } from './models';
 import { map } from 'rxjs/operators';
 
@@ -148,6 +149,10 @@ export class HostApi {
 
     setHostEditionFeatures(id: string, features: EditionFeatureAssignment[]) {
         return this.http.put(`/api/host/editions/${id}/features`, { features });
+    }
+
+    listHostFeatureCatalog() {
+        return this.http.get<FeatureDefinitionDto[]>(`/api/host/editions/features/catalog`);
     }
 }
 

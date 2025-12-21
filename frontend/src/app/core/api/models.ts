@@ -149,4 +149,17 @@ export interface EditionWithFeatures {
     features: Record<string, string>;
 }
 
+export interface FeatureDefinitionDto {
+    key: string;
+    displayName: string;
+    description?: string;
+    category: string;
+    valueType: 'BOOLEAN' | 'INT' | 'DECIMAL' | 'STRING';
+    defaultValue: string;
+    parentKey?: string;
+    moduleKey?: string;
+    tags?: string[];
+    sortOrder?: number;
+}
+
 export type EditionUpsertInput = Partial<Omit<Edition, 'id' | 'name'>> & { name?: string };

@@ -8,6 +8,7 @@ import { EditionManager } from '../../application/services/subscription/edition-
 import { CreateEditionDto } from '../dtos/requests/editions/create-edition.dto';
 import { UpdateEditionDto } from '../dtos/requests/editions/update-edition.dto';
 import { SetEditionFeaturesDto } from '../dtos/requests/editions/set-edition-features.dto';
+import { FeatureDefinitionDto } from '../dtos/responses/editions/feature-definition.dto';
 
 @ApiTags('Host Editions')
 @Controller('host/editions')
@@ -20,6 +21,28 @@ export class HostEditionsController {
     @ApiOperation({ summary: 'List editions (host-only)' })
     async list() {
         return this.editionManager.listEditions();
+    }
+
+    @Get('features/catalog')
+    @Permissions('Host.Editions.View')
+    @ApiOperation({ summary: 'List edition feature catalog (host-only)' })
+    async catalog(): Promise<FeatureDefinitionDto[]> {
+        const defs = this.editionManager.listHostVisibleFeatures();
+        return defs
+            .slice()
+            .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.displayName.localeCompare(b.displayName))
+            .map(def => ({
+                key: def.key,
+                displayName: def.displayName,
+                description: def.description,
+                category: def.category,
+                valueType: def.valueType,
+                defaultValue: def.defaultValue,
+                parentKey: def.parentKey,
+                moduleKey: def.moduleKey,
+                sortOrder: def.sortOrder,
+                tags: def.tags,
+            }));
     }
 
     @Get(':id')
