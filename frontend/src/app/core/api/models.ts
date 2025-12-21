@@ -98,6 +98,17 @@ export interface TenantActivityItem {
     actorEmail?: string | null;
 }
 
+// Host view of tenant users
+export interface TenantUser {
+    id: string;
+    email: string;
+    name: string;
+    roleId: string | null;
+    role?: { id: string; name: string; description?: string; isSystemRole?: boolean } | null;
+    profilePicture?: string | null;
+    createdAt?: string | Date;
+}
+
 // Audit event used by host/tenant audit APIs
 export interface AuditEvent {
     id: string;

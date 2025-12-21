@@ -5,7 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { HostApi } from '../../../core/api/host-api';
-import { TenantActivityItem, TenantDetails, TenantMetrics, AuditEvent, PagedResult } from '../../../core/api/models';
+import { TenantActivityItem, TenantDetails, TenantMetrics, AuditEvent, PagedResult, TenantUser } from '../../../core/api/models';
 
 import { PageHeaderComponent } from '../../../core/ui/page-header/page-header.component';
 import { UiButtonComponent } from '../../../shared/ui/buttons/ui-button.component';
@@ -221,8 +221,45 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
       <!-- Users Tab -->
       @if (currentTab() === 'users') {
         <div class="card">
-          <div class="section-title">Tenant users</div>
-          <div class="empty">Coming soon — list of users for this tenant.</div>
+          <div class="card-header">
+            <div>
+              <div class="section-title">Tenant users</div>
+              <div class="muted">Host view of all users in this tenant.</div>
+            </div>
+            <div class="spacer"></div>
+            <ui-button size="sm" (click)="loadUsers(true)" [disabled]="tenantUsersLoading()">Refresh</ui-button>
+          </div>
+
+          <div *ngIf="tenantUsersLoading()" class="empty">Loading users...</div>
+          <div *ngIf="tenantUsersError()" class="empty">{{ tenantUsersError() }}</div>
+          <div *ngIf="!tenantUsersLoading() && !tenantUsersError() && !tenantUsers().length" class="empty">No users found.</div>
+
+          <div *ngIf="!tenantUsersLoading() && !tenantUsersError() && tenantUsers().length">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Created</th>
+                  <th class="right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (u of tenantUsers(); track u.id) {
+                  <tr>
+                    <td class="name">{{ u.name || '—' }}</td>
+                    <td>{{ u.email }}</td>
+                    <td>{{ u.role?.name ?? '—' }}</td>
+                    <td>{{ u.createdAt ? (u.createdAt | date:'mediumDate') : '—' }}</td>
+                    <td class="right">
+                      <ui-button size="sm" variant="secondary" (click)="impersonate(u)">Impersonate</ui-button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
       }
 
@@ -361,6 +398,9 @@ export class TenantDetailsPage {
   tenant = signal<TenantDetails | null>(null);
   metrics = signal<TenantMetrics | null>(null);
   activity = signal<TenantActivityItem[]>([]);
+  tenantUsers = signal<TenantUser[]>([]);
+  tenantUsersLoading = signal(false);
+  tenantUsersError = signal<string | null>(null);
 
   // Tab state
   currentTab = signal<'overview' | 'audit' | 'users' | 'invoices' | 'issues'>('overview');
@@ -409,6 +449,7 @@ export class TenantDetailsPage {
   setTab(tab: 'overview' | 'audit' | 'users' | 'invoices' | 'issues') {
     this.currentTab.set(tab);
     if (tab === 'audit') this.loadAudit();
+    if (tab === 'users') this.loadUsers();
   }
 
   async loadAudit(q?: string) {
@@ -461,6 +502,33 @@ export class TenantDetailsPage {
     return Math.max(1, Math.ceil(total / pageSize));
   }
 
+  async loadUsers(force = false) {
+    const id = this.tenantId();
+    if (!id) return;
+    if (!force && (this.tenantUsers().length || this.tenantUsersLoading())) return;
+
+    this.tenantUsersLoading.set(true);
+    this.tenantUsersError.set(null);
+
+    try {
+      const res = await firstValueFrom(this.api.getTenantUsers(id));
+      this.tenantUsers.set(res ?? []);
+    } catch (e: any) {
+      this.tenantUsersError.set(e?.message ?? 'Failed to load users');
+      this.toast.error('Failed to load users');
+    } finally {
+      this.tenantUsersLoading.set(false);
+    }
+  }
+
+  async impersonate(user: TenantUser) {
+    const t = this.tenant();
+    if (!t) return;
+    const ok = await this.confirm.confirm(`Impersonate ${user.name || user.email}? This will start a session as that tenant user.`);
+    if (!ok) return;
+    this.toast.info('Impersonation flow not wired yet.');
+  }
+
   async reload() {
     const id = this.tenantId();
     if (!id) {
@@ -484,6 +552,9 @@ export class TenantDetailsPage {
 
       if (this.currentTab() === 'audit') {
         this.loadAudit();
+      }
+      if (this.currentTab() === 'users') {
+        this.loadUsers(true);
       }
     } catch (e: any) {
       this.error.set(e?.message ?? 'Failed to load tenant details');

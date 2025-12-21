@@ -11,6 +11,7 @@ import {
     TenantMetrics,
     TenantActivityItem,
     AuditEvent,
+    TenantUser,
 } from './models';
 import { map } from 'rxjs/operators';
 
@@ -90,6 +91,10 @@ export class HostApi {
     getTenantActivity(tenantId: string, limit = 20) {
         const params = new HttpParams().set('limit', String(limit));
         return this.http.get<TenantActivityItem[]>(`/api/host/tenants/${tenantId}/activity`, { params });
+    }
+
+    getTenantUsers(tenantId: string) {
+        return this.http.get<TenantUser[]>(`/api/host/tenants/${tenantId}/users`);
     }
 
     // Query host audit logs filtered to a tenant
