@@ -13,11 +13,13 @@ import { Router, UrlTree } from '@angular/router';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { tenantGuard } from './tenant.guard';
 import { TenantContextService } from './tenant-context.service';
+import { AuthService } from '../auth/auth.service';
 import { TenantMembership } from '../auth/auth.models';
 
 describe('TenantGuard', () => {
     let tenantContextService: jasmine.SpyObj<TenantContextService>;
     let router: jasmine.SpyObj<Router>;
+    let authService: jasmine.SpyObj<AuthService>;
     let mockRoute: ActivatedRouteSnapshot;
     let mockState: RouterStateSnapshot;
 
@@ -25,12 +27,15 @@ describe('TenantGuard', () => {
         // Create spies
         tenantContextService = jasmine.createSpyObj('TenantContextService', ['hasTenant']);
         router = jasmine.createSpyObj('Router', ['createUrlTree']);
+        authService = jasmine.createSpyObj('AuthService', ['getSession']);
+        authService.getSession.and.returnValue(null);
 
         // Setup TestBed
         TestBed.configureTestingModule({
             providers: [
                 { provide: TenantContextService, useValue: tenantContextService },
-                { provide: Router, useValue: router }
+                { provide: Router, useValue: router },
+                { provide: AuthService, useValue: authService }
             ]
         });
 
@@ -85,6 +90,26 @@ describe('TenantGuard', () => {
         // Assert
         expect(result).toBe(true);
         expect(tenantContextService.hasTenant).toHaveBeenCalled();
+    });
+
+    it('should route host sessions to /host when no tenant context', () => {
+        // Arrange
+        mockRoute.data = {}; // Protected route
+        mockState.url = '/dashboard';
+        authService.getSession.and.returnValue({ mode: 'host', memberships: [], user: { id: 'u', email: 'u@example.com' }, tokens: { accessToken: 't' }, expiresAt: '2025-01-01T00:00:00Z' } as any);
+
+        const expectedUrlTree = new UrlTree();
+        router.createUrlTree.and.returnValue(expectedUrlTree);
+
+        // Act
+        const result = TestBed.runInInjectionContext(() =>
+            tenantGuard(mockRoute, mockState)
+        );
+
+        // Assert
+        expect(result).toBe(expectedUrlTree);
+        expect(router.createUrlTree).toHaveBeenCalledWith(['/host']);
+        expect(tenantContextService.hasTenant).not.toHaveBeenCalled();
     });
 
     it('should block tenant routes when tenant context is missing', () => {
