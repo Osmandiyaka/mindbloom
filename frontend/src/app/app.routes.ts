@@ -61,6 +61,10 @@ export const routes: Routes = [
             {
                 path: 'tenants',
                 loadComponent: () => import('./features/host/tenants/tenants.page').then(m => m.TenantsPage)
+            },
+            {
+                path: 'editions',
+                loadComponent: () => import('./features/host/editions/editions.page').then(m => m.EditionsPage)
             }
         ]
     },

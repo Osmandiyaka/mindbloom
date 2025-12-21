@@ -11,6 +11,7 @@ import { PageHeaderComponent } from '../../../core/ui/page-header/page-header.co
 import { UiButtonComponent } from '../../../shared/ui/buttons/ui-button.component';
 import { UiInputComponent } from '../../../shared/ui/forms/ui-input.component';
 import { UiSelectComponent } from '../../../shared/ui/forms/ui-select.component';
+import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { DataTableShellComponent } from '../../../core/ui/data-table-shell/data-table-shell.component';
 import { SimpleTableComponent, SimpleColumn } from '../../../core/ui/simple-table/simple-table.component';
 
@@ -36,6 +37,7 @@ import { AuthSession, TenantMembership } from '../../../core/auth/auth.models';
     UiButtonComponent,
     UiInputComponent,
     UiSelectComponent,
+    BadgeComponent,
   ],
   template: `
     <div class="crumbs">
@@ -298,7 +300,7 @@ import { AuthSession, TenantMembership } from '../../../core/auth/auth.models';
                     <td class="cell-primary">{{ inv.number }}</td>
                     <td class="cell-secondary">{{ inv.period }}</td>
                     <td>
-                      <app-badge size="sm" dot [variant]="invoiceStatusVariant(inv.status)">{{ inv.status }}</app-badge>
+                      <app-badge size="sm" [dot]="true" [variant]="invoiceStatusVariant(inv.status)">{{ inv.status }}</app-badge>
                     </td>
                     <td>{{ inv.amount }}</td>
                     <td class="cell-secondary">{{ inv.dueDate }}</td>
@@ -341,10 +343,10 @@ import { AuthSession, TenantMembership } from '../../../core/auth/auth.models';
                   <tr>
                     <td class="cell-primary">{{ issue.title }}</td>
                     <td>
-                      <app-badge size="sm" dot [variant]="issueSeverityVariant(issue.severity)">{{ issue.severity }}</app-badge>
+                      <app-badge size="sm" [dot]="true" [variant]="issueSeverityVariant(issue.severity)">{{ issue.severity }}</app-badge>
                     </td>
                     <td>
-                      <app-badge size="sm" dot [variant]="issueStatusVariant(issue.status)">{{ issue.status }}</app-badge>
+                      <app-badge size="sm" [dot]="true" [variant]="issueStatusVariant(issue.status)">{{ issue.status }}</app-badge>
                     </td>
                     <td class="cell-secondary">{{ issue.updatedAt }}</td>
                     <td class="cell-secondary">{{ issue.owner }}</td>

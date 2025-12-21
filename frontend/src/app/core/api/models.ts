@@ -123,3 +123,29 @@ export interface AuditEvent {
     targetType?: string | null;
     targetId?: string | null;
 }
+
+// Editions (host)
+export interface Edition {
+    id: string;
+    name: string;
+    displayName: string;
+    description?: string | null;
+    monthlyPrice?: number | null;
+    annualPrice?: number | null;
+    perStudentMonthly?: number | null;
+    annualPriceNotes?: string | null;
+    isActive?: boolean;
+    sortOrder?: number;
+}
+
+export interface EditionFeatureAssignment {
+    featureKey: string;
+    value: string;
+}
+
+export interface EditionWithFeatures {
+    edition: Edition;
+    features: Record<string, string>;
+}
+
+export type EditionUpsertInput = Partial<Omit<Edition, 'id' | 'name'>> & { name?: string };

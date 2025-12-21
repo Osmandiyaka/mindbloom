@@ -2,6 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import {
     EditionLookup,
+    Edition,
+    EditionFeatureAssignment,
+    EditionWithFeatures,
+    EditionUpsertInput,
     PagedResult,
     TenantCreateInput,
     TenantListItem,
@@ -123,6 +127,27 @@ export class HostApi {
     // Optional: for filter dropdown
     listEditionsLookup() {
         return this.http.get<EditionLookup[]>('/api/host/editions');
+    }
+
+    // Host edition management
+    listHostEditions() {
+        return this.http.get<Edition[]>('/api/host/editions');
+    }
+
+    getHostEdition(id: string) {
+        return this.http.get<EditionWithFeatures>(`/api/host/editions/${id}`);
+    }
+
+    createHostEdition(input: EditionUpsertInput & { name: string }) {
+        return this.http.post<Edition>('/api/host/editions', input);
+    }
+
+    updateHostEdition(id: string, input: EditionUpsertInput) {
+        return this.http.put<Edition>(`/api/host/editions/${id}`, input);
+    }
+
+    setHostEditionFeatures(id: string, features: EditionFeatureAssignment[]) {
+        return this.http.put(`/api/host/editions/${id}/features`, { features });
     }
 }
 
