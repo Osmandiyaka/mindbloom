@@ -7,8 +7,8 @@
 @import 'styles/reset';
 @import 'styles/typography';
 @import 'styles/hr-tokens';
-@import 'app/shared/styles/tooltip';
-@import 'app/shared/styles/index';
+@import 'styles/shared/tooltip';
+@import 'styles/shared/index';
 
 :root {
     --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
