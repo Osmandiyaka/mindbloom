@@ -146,6 +146,7 @@ export class CurrentLoginInfoResponseDto {
             editionCode: result.edition.editionCode,
             editionName: result.edition.editionName,
             features: result.edition.features,
+            modules: (result as any)?.edition?.modules ?? result.edition.features,
         } as TenantEditionResponseDto;
         return dto;
     }

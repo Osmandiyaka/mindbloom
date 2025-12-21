@@ -45,4 +45,8 @@ export class UpdateEditionDto {
     @IsOptional()
     @IsString()
     annualPriceNotes?: string | null;
+
+    @ApiProperty({ description: 'Feature module keys enabled for this edition', required: false, type: [String] })
+    @IsOptional()
+    modules?: string[];
 }

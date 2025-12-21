@@ -9,4 +9,7 @@ export class TenantEditionResponseDto {
 
     @ApiProperty({ description: 'Feature keys enabled for this tenant' })
     features!: string[];
+
+    @ApiProperty({ description: 'Module keys enabled for this tenant', required: false, type: [String] })
+    modules?: string[];
 }

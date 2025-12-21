@@ -128,6 +128,7 @@ export class TenantController {
                     editionCode: edition.name,
                     editionName: edition.displayName || edition.name,
                     features: Object.keys(features),
+                    modules: edition.modules ?? Object.keys(features),
                 };
             } catch (err) {
                 return Tenant.editionSnapshot(tenant);

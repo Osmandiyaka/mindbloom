@@ -582,7 +582,7 @@ export class AuthService {
             }
 
             if (loginInfo.edition) {
-                this.editionFeatures.setEdition(loginInfo.edition);
+                this.editionFeatures.setEdition(this.normalizeEditionSnapshot(loginInfo.edition, loginInfo.tenant));
             }
 
             const inlinePermissions = (loginInfo.user.permissions || [])
@@ -615,7 +615,7 @@ export class AuthService {
         // Load edition/features for current tenant (backend-driven)
         const edition = await this.fetchEditionForTenant(membership.tenantId, session.tokens.accessToken);
         if (edition) {
-            this.editionFeatures.setEdition(edition);
+            this.editionFeatures.setEdition(this.normalizeEditionSnapshot(edition, this.tenantService.getCurrentTenantValue?.() ?? undefined));
         }
 
         const rbacSession = {
@@ -827,6 +827,55 @@ export class AuthService {
             console.warn('[AuthService] Failed to load edition/features', { tenantId, error });
             return null;
         }
+    }
+
+    private normalizeEditionSnapshot(raw: EditionSnapshot | null | undefined, tenant?: { enabledModules?: string[] }): EditionSnapshot | null {
+        if (!raw) return null;
+
+        const modulesFromTenant = tenant?.enabledModules?.length ? tenant.enabledModules : undefined;
+        const modulesFromEdition = (raw as any).modules as string[] | undefined;
+        const featuresLegacy = raw.features ?? [];
+
+        // Normalize edition code to lower-case for lookup
+        const editionCode = (raw as any).editionCode?.toString().toLowerCase?.() || raw.editionName?.toLowerCase?.();
+
+        // Known defaults when backend omits modules
+        const defaultModulesByEdition: Record<string, string[]> = {
+            starter: ['dashboard', 'students', 'attendance', 'setup'],
+            professional: ['dashboard', 'students', 'admissions', 'attendance', 'academics', 'fees', 'library', 'tasks', 'setup', 'plugins'],
+            premium: ['dashboard', 'students', 'admissions', 'attendance', 'academics', 'fees', 'accounting', 'finance', 'hr', 'library', 'hostel', 'transport', 'roles', 'tasks', 'setup', 'plugins'],
+            enterprise: ['dashboard', 'students', 'admissions', 'apply', 'attendance', 'academics', 'fees', 'accounting', 'finance', 'hr', 'payroll', 'library', 'hostel', 'transport', 'roles', 'tasks', 'setup', 'plugins'],
+            trial: ['dashboard', 'students', 'attendance', 'setup'],
+        };
+
+        // Try explicit modules, then tenant enabledModules, then map legacy features, then defaults by edition code
+        let modules: string[] | undefined;
+
+        if (modulesFromEdition?.length) {
+            modules = modulesFromEdition;
+        } else if (modulesFromTenant?.length) {
+            modules = modulesFromTenant;
+        } else if (featuresLegacy.length) {
+            // Minimal heuristic: if enterprise-style support features present, assume enterprise module set
+            const looksEnterprise = featuresLegacy.some(f => ['dedicated_db', 'sso', 'custom_modules', 'on_prem', 'white_label', 'support_level'].includes(f));
+            if (looksEnterprise) {
+                modules = defaultModulesByEdition['enterprise'];
+            } else {
+                // Fallback: keep legacy features as-is (may align with module keys if backend sends them)
+                modules = featuresLegacy;
+            }
+        } else if (editionCode && defaultModulesByEdition[editionCode]) {
+            modules = defaultModulesByEdition[editionCode];
+        } else {
+            modules = [];
+        }
+
+        return {
+            ...raw,
+            modules,
+            // keep legacy features unchanged for backward compatibility
+            features: raw.features ?? [],
+        };
     }
 
     private isHostSession(session?: AuthSession | null): boolean {

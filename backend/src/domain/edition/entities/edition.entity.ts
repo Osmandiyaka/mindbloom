@@ -11,6 +11,7 @@ export interface EditionProps {
     annualPriceNotes?: string | null;
     isActive?: boolean;
     sortOrder?: number;
+    modules?: string[];  // Feature module keys enabled for this edition
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -26,6 +27,7 @@ export class Edition {
     private _annualPriceNotes?: string | null;
     private _isActive: boolean;
     private _sortOrder: number;
+    private _modules: string[];
     readonly createdAt?: Date;
     readonly updatedAt?: Date;
 
@@ -40,6 +42,7 @@ export class Edition {
         this._annualPriceNotes = props.annualPriceNotes ?? null;
         this._isActive = props.isActive ?? true;
         this._sortOrder = props.sortOrder ?? 0;
+        this._modules = props.modules ?? [];
         this.createdAt = props.createdAt;
         this.updatedAt = props.updatedAt;
     }
@@ -128,5 +131,9 @@ export class Edition {
 
     get annualPriceNotes(): string | null | undefined {
         return this._annualPriceNotes;
+    }
+
+    get modules(): string[] {
+        return this._modules;
     }
 }

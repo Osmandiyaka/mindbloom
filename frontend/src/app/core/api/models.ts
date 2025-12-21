@@ -134,6 +134,7 @@ export interface Edition {
     annualPrice?: number | null;
     perStudentMonthly?: number | null;
     annualPriceNotes?: string | null;
+    modules?: string[];  // Feature module keys enabled for this edition
     isActive?: boolean;
     sortOrder?: number;
 }

@@ -38,11 +38,16 @@ export class GetCurrentLoginInfoUseCase {
         }
 
         // If tenant has an editionId, fetch edition details (name + features), otherwise fall back to plan-based snapshot
-        let edition: ReturnType<typeof Tenant.editionSnapshot> | { editionCode: string; editionName: string; features: string[] };
+        let edition: ReturnType<typeof Tenant.editionSnapshot> | { editionCode: string; editionName: string; features: string[]; modules?: string[] };
         if (tenant.editionId) {
             try {
                 const res = await this.editionManager.getEditionWithFeatures(tenant.editionId);
-                edition = { editionCode: res.edition.name, editionName: res.edition.displayName || res.edition.name, features: Object.keys(res.features) };
+                edition = {
+                    editionCode: res.edition.name,
+                    editionName: res.edition.displayName || res.edition.name,
+                    features: Object.keys(res.features),
+                    modules: res.edition.modules ?? Object.keys(res.features),
+                };
             } catch (err) {
                 // If edition lookup fails, fall back to plan snapshot
                 edition = Tenant.editionSnapshot(tenant);

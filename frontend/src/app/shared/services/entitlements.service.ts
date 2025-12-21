@@ -18,10 +18,10 @@ export class EditionService {
     private readonly editions = inject(EditionFeaturesService);
 
     // Reactive enabled modules based on current tenant plan
-    private readonly _enabledModules = computed(() => {
+    private readonly _enabledModules = computed<ReadonlySet<ModuleKey>>(() => {
         const featureSet = this.editions.features();
         if (featureSet.size > 0) {
-            return new Set(featureSet) as Set<ModuleKey>;
+            return new Set(featureSet) as ReadonlySet<ModuleKey>;
         }
         // Minimal safe surface when edition not yet loaded
         return new Set<ModuleKey>([MODULE_KEYS.DASHBOARD, MODULE_KEYS.APPLY]);

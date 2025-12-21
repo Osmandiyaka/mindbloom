@@ -18,6 +18,7 @@ export interface CreateEditionInput {
     annualPrice?: number | null;
     perStudentMonthly?: number | null;
     annualPriceNotes?: string | null;
+    modules?: string[];
     isActive?: boolean;
     sortOrder?: number;
 }
@@ -29,6 +30,7 @@ export interface UpdateEditionInput {
     annualPrice?: number | null;
     perStudentMonthly?: number | null;
     annualPriceNotes?: string | null;
+    modules?: string[];
     isActive?: boolean;
     sortOrder?: number;
 }

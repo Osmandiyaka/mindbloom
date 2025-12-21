@@ -17,6 +17,12 @@ export function createGlobalEditions(): Edition[] {
             annualPriceNotes: null,
             isActive: true,
             sortOrder: 10,
+            modules: [
+                'dashboard',
+                'students',
+                'attendance',
+                'setup'
+            ],
         }),
         Edition.create({
             id: `professional-edition`,
@@ -29,6 +35,18 @@ export function createGlobalEditions(): Edition[] {
             annualPriceNotes: null,
             isActive: true,
             sortOrder: 20,
+            modules: [
+                'dashboard',
+                'students',
+                'admissions',
+                'attendance',
+                'academics',
+                'fees',
+                'library',
+                'tasks',
+                'setup',
+                'plugins'
+            ],
         }),
         Edition.create({
             id: `premium-edition`,
@@ -41,6 +59,24 @@ export function createGlobalEditions(): Edition[] {
             annualPriceNotes: null,
             isActive: true,
             sortOrder: 30,
+            modules: [
+                'dashboard',
+                'students',
+                'admissions',
+                'attendance',
+                'academics',
+                'fees',
+                'accounting',
+                'finance',
+                'hr',
+                'library',
+                'hostel',
+                'transport',
+                'roles',
+                'tasks',
+                'setup',
+                'plugins'
+            ],
         }),
         Edition.create({
             id: `enterprise-edition`,
@@ -53,6 +89,26 @@ export function createGlobalEditions(): Edition[] {
             annualPriceNotes: 'Custom',
             isActive: true,
             sortOrder: 40,
+            modules: [
+                'dashboard',
+                'students',
+                'admissions',
+                'apply',
+                'attendance',
+                'academics',
+                'fees',
+                'accounting',
+                'finance',
+                'hr',
+                'payroll',
+                'library',
+                'hostel',
+                'transport',
+                'roles',
+                'tasks',
+                'setup',
+                'plugins'
+            ],
         }),
     ];
 }

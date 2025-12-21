@@ -31,6 +31,7 @@ export interface EditionFeatures {
     editionCode: string;
     editionName: string;
     features: string[];
+    modules?: string[];
 }
 
 export enum WeekStart {
@@ -127,6 +128,7 @@ export class Tenant {
             editionCode,
             editionName: editionCode,
             features,
+            modules: features,
         };
     }
 

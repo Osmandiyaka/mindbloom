@@ -73,7 +73,6 @@ export class NavFilterService {
      * @returns true if item should be visible
      */
     private isItemVisible(item: NavItem): boolean {
-        // Check module entitlement
         if (item.moduleKey && !this.entitlements.isEnabled(item.moduleKey as ModuleKey)) {
             return false;
         }

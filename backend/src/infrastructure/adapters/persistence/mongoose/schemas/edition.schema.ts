@@ -25,6 +25,9 @@ export class EditionDocument extends Document {
     @Prop()
     annualPriceNotes?: string | null;
 
+    @Prop({ type: [String], default: [] })
+    modules: string[];
+
     @Prop({ required: true, default: true })
     isActive: boolean;
 
