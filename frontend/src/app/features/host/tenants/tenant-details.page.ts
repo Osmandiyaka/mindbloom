@@ -399,10 +399,10 @@ import { AuthSession, TenantMembership } from '../../../core/auth/auth.models';
       padding: 12px;
     }
 
-    .label { color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; display: flex; align-items: center; gap: 8px; }
+    .label { color: var(--host-muted-color, var(--color-text-secondary, #374151)); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; display: flex; align-items: center; gap: 8px; }
     .label .icon { font-size: 14px; opacity: .9; }
     .value { font-size: 20px; font-weight: 700; margin-top: 6px; }
-    .muted { color: #6b7280; font-size: 12px; margin-top: 4px; }
+    .muted { color: var(--host-muted-color, var(--color-text-secondary, #374151)); font-size: 12px; margin-top: 4px; }
 
     .pill {
       display: inline-flex;
@@ -454,7 +454,7 @@ import { AuthSession, TenantMembership } from '../../../core/auth/auth.models';
     .right { text-align: right; }
     .name { font-weight: 700; font-size: 16px; color: #111827; }
 
-    .empty { padding: 18px; color: #6b7280; }
+    .empty { padding: 18px; color: var(--host-muted-color, var(--color-text-secondary, #374151)); }
 
     .activity { list-style: none; margin: 0; padding: 0; }
     .row { border-top: 1px solid #f1f5f9; padding: 12px; }

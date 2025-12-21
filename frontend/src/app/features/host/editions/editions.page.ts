@@ -154,7 +154,6 @@ interface FeatureRow {
               <div class="feature-row">
                 <div class="feature-meta">
                   <div class="cell-primary">{{ featureDisplayName(f.featureKey) }}</div>
-                  <div class="cell-secondary">{{ f.featureKey }}</div>
                   <div class="muted" *ngIf="featureDescription(f.featureKey)">{{ featureDescription(f.featureKey) }}</div>
                 </div>
                 <div class="feature-value">
@@ -168,7 +167,7 @@ interface FeatureRow {
                     <ui-input *ngSwitchDefault [value]="f.value" (valueChange)="updateFeatureValue(f, $event)" />
                   </ng-container>
                 </div>
-                <ui-button size="sm" variant="ghost" (click)="removeFeature(f)">Remove</ui-button>
+                <ui-button size="sm" variant="primary" (click)="removeFeature(f)">Remove</ui-button>
               </div>
             }
           </div>
@@ -186,38 +185,95 @@ interface FeatureRow {
       border-radius: 14px;
       box-shadow: var(--host-shadow, 0 6px 18px rgba(0,0,0,0.06));
       padding: 12px;
+      color: var(--host-text-color, #111827);
     }
-    .list { padding: 0; color: #0f172a; }
-    .list table { color: #0f172a; }
-    .list th { color: #0f172a; }
-    .list td { color: #0f172a; }
-    .list .cell-secondary { color: #4b5563; }
+    .list { padding: 0; color: var(--host-text-color, #111827); }
+    .list table { color: var(--host-text-color, #111827); }
+    .list th { color: var(--host-text-color, #111827); }
+    .list td { color: var(--host-text-color, #111827); }
+    .list .cell-secondary { color: var(--host-text-color, #111827); }
     .editor { display: flex; flex-direction: column; gap: 12px; }
 
     .editor-header { display:flex; align-items:center; gap:10px; }
-    .section-title { font-weight: 700; color: #0f172a; }
-    .muted { color: #6b7280; font-size: 13px; }
+    .section-title { font-weight: 700; color: var(--host-text-color, #111827); }
+    .muted { color: var(--host-text-color, #111827); font-size: 13px; }
     .spacer { flex: 1; }
 
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; align-items: start; }
-    label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #0f172a; }
+    label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--host-text-color, #111827); }
     .label { font-weight: 600; }
-    .hint { color: #6b7280; font-size: 12px; }
+    .hint { color: var(--host-text-color, #111827); font-size: 12px; }
     .switch-row { flex-direction: row; align-items: center; gap: 8px; padding-top: 18px; }
 
     .feature-toolbar { display: grid; grid-template-columns: 1.3fr auto 12px 1fr 1fr auto; gap: 10px; align-items: end; padding: 10px; background: var(--host-surface); border: 1px dashed var(--host-border-subtle); border-radius: 10px; }
-    .feature-adder { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #0f172a; }
+    .feature-adder { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--host-text-color, #111827); }
     .feature-adder select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--host-border-subtle); background: white; }
     .divider { border-left: 1px solid var(--host-border-subtle); height: 100%; }
 
     .feature-list { display: flex; flex-direction: column; gap: 8px; }
     .feature-row { display: grid; grid-template-columns: 1.2fr 0.9fr auto; gap: 12px; align-items: center; padding: 8px 10px; border: 1px solid var(--host-border-subtle); border-radius: 10px; background: #fff; }
-    .feature-row.header { border: none; background: transparent; padding: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #6b7280; }
+    .feature-row.header { border: none; background: transparent; padding: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--host-text-color, #111827); }
     .feature-meta { display: flex; flex-direction: column; gap: 4px; }
     .feature-value { display: flex; align-items: center; gap: 10px; }
     .switch { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
-    .cell-primary { font-weight: 700; color: #0f172a; }
-    .cell-secondary { color: #6b7280; font-size: 13px; }
+    .cell-primary { font-weight: 700; color: var(--host-text-color, #111827); }
+    .cell-secondary { color: var(--host-text-color, #111827); font-size: 13px; }
+
+    :host ::ng-deep host-page-header .description {
+      color: var(--host-text-color, var(--text-primary, #0f172a));
+      font-weight: 600;
+      opacity: 1;
+    }
+
+    /* Button contrast overrides within this page */
+    :host ::ng-deep ui-button button,
+    :host ::ng-deep button {
+      color: #111827;
+      font-weight: 700;
+    }
+
+    :host ::ng-deep ui-button[variant="primary"] button {
+      background: #111827;
+      color: #fff;
+      border-color: #111827;
+    }
+
+    :host ::ng-deep ui-button[variant="ghost"] button {
+      border-color: #111827;
+      color: #111827;
+      background: #fff;
+    }
+
+    /* High-contrast form controls and placeholders */
+    :host ::ng-deep ui-input input,
+    :host ::ng-deep ui-input textarea,
+    :host ::ng-deep select,
+    :host ::ng-deep input,
+    :host ::ng-deep textarea {
+      color: var(--host-text-color, #111827);
+      -webkit-text-fill-color: var(--host-text-color, #111827);
+      opacity: 1;
+    }
+
+    :host ::ng-deep ui-input input::placeholder,
+    :host ::ng-deep ui-input textarea::placeholder,
+    :host ::ng-deep input::placeholder,
+    :host ::ng-deep textarea::placeholder {
+      color: var(--host-muted-color, var(--color-text-secondary, #334155));
+      opacity: 1;
+    }
+
+    :host ::ng-deep ui-input input:disabled,
+    :host ::ng-deep ui-input textarea:disabled,
+    :host ::ng-deep select:disabled,
+    :host ::ng-deep input:disabled,
+    :host ::ng-deep textarea:disabled {
+      color: var(--host-muted-color, var(--color-text-secondary, #334155));
+      -webkit-text-fill-color: var(--host-muted-color, var(--color-text-secondary, #334155));
+      background: #f8fafc;
+      border-color: var(--host-border-subtle);
+      opacity: 1;
+    }
   `]
 })
 export class EditionsPage {

@@ -114,7 +114,7 @@ import { EditionService } from '../../services/entitlements.service';
 
         .description {
             font-size: 1rem;
-            color: var(--color-text-secondary, #6b7280);
+            color: var(--color-text-secondary, #374151);
             margin: 0 0 1.5rem 0;
             line-height: 1.6;
         }
@@ -136,7 +136,7 @@ import { EditionService } from '../../services/entitlements.service';
         }
 
         .plan-label {
-            color: var(--color-text-secondary, #6b7280);
+            color: var(--color-text-secondary, #374151);
         }
 
         .plan-badge {
@@ -147,7 +147,7 @@ import { EditionService } from '../../services/entitlements.service';
 
         .contact-message {
             font-size: 0.875rem;
-            color: var(--color-text-tertiary, #9ca3af);
+            color: var(--color-text-secondary, #374151);
             margin: 0 0 2rem 0;
             line-height: 1.5;
         }

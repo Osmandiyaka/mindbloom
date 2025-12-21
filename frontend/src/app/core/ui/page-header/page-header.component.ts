@@ -43,7 +43,7 @@ import { CommonModule } from '@angular/common';
 
     .description {
       margin: 4px 0 0;
-      color: var(--text-secondary, #6b7280);
+      color: var(--text-primary, #111827);
       font-size: 14px;
     }
 

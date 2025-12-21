@@ -2,37 +2,37 @@
   display: block;
   /* Prefer table-specific tokens, then HR tokens if present, then global theme. */
   --dt-surface: var(--table-surface,
-    var(--hr-surface,
-    var(--mb-surface,
-    var(--color-surface, #f7f9fc))));
+      var(--hr-surface,
+        var(--mb-surface,
+          var(--color-surface, #f7f9fc))));
   --dt-surface-strong: var(--table-surface-strong,
-    var(--hr-surface-strong,
-    var(--mb-surface-strong,
-    color-mix(in srgb, var(--dt-surface) 90%, #000 10%))));
+      var(--hr-surface-strong,
+        var(--mb-surface-strong,
+          color-mix(in srgb, var(--dt-surface) 90%, #000 10%))));
   --dt-surface-soft: var(--table-surface-soft, color-mix(in srgb, var(--dt-surface) 90%, transparent));
   --dt-border: var(--table-border,
-    var(--hr-border,
-    var(--mb-border,
-    var(--color-border, #d9dee7))));
+      var(--hr-border,
+        var(--mb-border,
+          var(--color-border, #d9dee7))));
   --dt-text: var(--table-text,
-    var(--hr-text-strong,
-    var(--mb-text-primary,
-    var(--color-text-primary, #111827))));
+      var(--hr-text-strong,
+        var(--mb-text-primary,
+          var(--color-text-primary, #111827))));
   --dt-muted: var(--table-text-muted,
-    var(--hr-text-muted,
-    var(--mb-text-muted,
-    var(--color-text-secondary, #6b7280))));
+      var(--hr-text-muted,
+        var(--mb-text-muted,
+          var(--color-text-secondary, #6b7280))));
   --dt-accent: var(--table-accent,
-    var(--hr-accent,
-    var(--color-primary, #2563eb)));
+      var(--hr-accent,
+        var(--color-primary, #2563eb)));
   --dt-header: var(--table-header,
-    color-mix(in srgb, var(--dt-surface-strong) 92%, transparent));
+      color-mix(in srgb, var(--dt-surface-strong) 92%, transparent));
   --dt-row: var(--table-row,
-    color-mix(in srgb, var(--dt-surface) 96%, transparent));
+      color-mix(in srgb, var(--dt-surface) 96%, transparent));
   --dt-row-alt: var(--table-row-alt,
-    color-mix(in srgb, var(--dt-surface) 90%, var(--dt-border) 10%));
+      color-mix(in srgb, var(--dt-surface) 90%, var(--dt-border) 10%));
   --dt-hover: var(--table-row-hover,
-    color-mix(in srgb, var(--dt-accent) 8%, var(--dt-surface)));
+      color-mix(in srgb, var(--dt-accent) 8%, var(--dt-surface)));
 }
 
 .data-table-shell {
@@ -42,7 +42,7 @@
   border: 1px solid var(--dt-border);
   border-radius: 16px;
   padding: 0.75rem 0.9rem 0.9rem;
-  box-shadow: 0 14px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.04);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .table-toolbar {
@@ -71,10 +71,12 @@
   flex: 0 0 auto;
 }
 
-.search-box { min-width: min(320px, 100%); }
+.search-box {
+  min-width: min(320px, 100%);
+}
 
 .density-toggle button,
-.columns-toggle > button {
+.columns-toggle>button {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -86,7 +88,9 @@
   cursor: pointer;
   transition: all 0.15s ease;
 
-  .muted { color: var(--dt-muted); }
+  .muted {
+    color: var(--dt-muted);
+  }
 }
 
 .columns-toggle {
@@ -101,7 +105,7 @@
     background: var(--dt-surface);
     border: 1px solid var(--dt-border);
     border-radius: 10px;
-    box-shadow: 0 10px 26px rgba(0,0,0,0.14);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.14);
     display: grid;
     gap: 0.35rem;
 
@@ -163,7 +167,9 @@
       transform: translateY(-1px);
     }
 
-    &:active { transform: translateY(0); }
+    &:active {
+      transform: translateY(0);
+    }
   }
 }
 
@@ -217,7 +223,9 @@ th {
     font-size: 0.65rem;
     color: var(--dt-muted);
 
-    span.active { color: var(--dt-accent); }
+    span.active {
+      color: var(--dt-accent);
+    }
   }
 }
 
@@ -233,7 +241,7 @@ tbody tr {
   &:hover {
     background: var(--dt-hover);
     transform: translateY(-1px);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.14);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
   }
 }
 
@@ -246,8 +254,13 @@ td {
     padding: 0.6rem 0.7rem;
   }
 
-  &.align-right { text-align: right; }
-  &.align-center { text-align: center; }
+  &.align-right {
+    text-align: right;
+  }
+
+  &.align-center {
+    text-align: center;
+  }
 }
 
 .empty-state {
@@ -270,7 +283,10 @@ td {
     align-items: center;
     font-weight: 700;
 
-    .muted { color: var(--dt-muted); font-weight: 500; }
+    .muted {
+      color: var(--dt-muted);
+      font-weight: 500;
+    }
   }
 
   .pagination {
@@ -289,7 +305,8 @@ td {
       transition: all 0.15s ease;
 
       &:disabled {
-        opacity: 0.5;
+        color: var(--dt-muted);
+        opacity: 1;
         cursor: not-allowed;
       }
 
@@ -299,20 +316,27 @@ td {
       }
     }
 
-    .muted { color: var(--dt-muted); }
+    .muted {
+      color: var(--dt-muted);
+    }
   }
 }
 
 @media (max-width: 768px) {
-  .table-toolbar, .table-footer {
+
+  .table-toolbar,
+  .table-footer {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .toolbar-left, .toolbar-right {
+  .toolbar-left,
+  .toolbar-right {
     width: 100%;
     justify-content: space-between;
   }
 
-  .rows-control { width: fit-content; }
+  .rows-control {
+    width: fit-content;
+  }
 }

@@ -2,10 +2,10 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-confirmation-dialog',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-confirmation-dialog',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div class="dialog-overlay" *ngIf="isOpen" (click)="onOverlayClick($event)">
       <div class="dialog-content">
         <div class="dialog-header">
@@ -39,7 +39,7 @@ import { CommonModule } from '@angular/common';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .dialog-overlay {
       position: fixed;
       top: 0;
@@ -126,7 +126,7 @@ import { CommonModule } from '@angular/common';
 
     .dialog-body p {
       margin: 0;
-      color: #6b7280;
+      color: var(--color-text-secondary, #374151);
       font-size: 1rem;
       line-height: 1.6;
     }
@@ -152,7 +152,7 @@ import { CommonModule } from '@angular/common';
 
     .btn-cancel {
       background: #f3f4f6;
-      color: #4b5563;
+      color: var(--color-text-primary, #111827);
     }
 
     .btn-cancel:hover:not(:disabled) {
@@ -203,43 +203,43 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class ConfirmationDialogComponent {
-    @Input() isOpen = false;
-    @Input() title = 'Confirm Action';
-    @Input() message = 'Are you sure you want to proceed?';
-    @Input() type: 'warning' | 'danger' | 'info' | 'success' = 'warning';
-    @Input() confirmText = 'Confirm';
-    @Input() cancelText = 'Cancel';
-    @Input() processingText = 'Processing...';
-    @Input() processing = false;
+  @Input() isOpen = false;
+  @Input() title = 'Confirm Action';
+  @Input() message = 'Are you sure you want to proceed?';
+  @Input() type: 'warning' | 'danger' | 'info' | 'success' = 'warning';
+  @Input() confirmText = 'Confirm';
+  @Input() cancelText = 'Cancel';
+  @Input() processingText = 'Processing...';
+  @Input() processing = false;
 
-    @Output() confirmed = new EventEmitter<void>();
-    @Output() cancelled = new EventEmitter<void>();
+  @Output() confirmed = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<void>();
 
-    getIcon(): string {
-        const icons = {
-            warning: '⚠️',
-            danger: '🗑️',
-            info: 'ℹ️',
-            success: '✓'
-        };
-        return icons[this.type];
+  getIcon(): string {
+    const icons = {
+      warning: '⚠️',
+      danger: '🗑️',
+      info: 'ℹ️',
+      success: '✓'
+    };
+    return icons[this.type];
+  }
+
+  onConfirm(): void {
+    if (!this.processing) {
+      this.confirmed.emit();
     }
+  }
 
-    onConfirm(): void {
-        if (!this.processing) {
-            this.confirmed.emit();
-        }
+  onCancel(): void {
+    if (!this.processing) {
+      this.cancelled.emit();
     }
+  }
 
-    onCancel(): void {
-        if (!this.processing) {
-            this.cancelled.emit();
-        }
+  onOverlayClick(event: MouseEvent): void {
+    if (!this.processing && event.target === event.currentTarget) {
+      this.onCancel();
     }
-
-    onOverlayClick(event: MouseEvent): void {
-        if (!this.processing && event.target === event.currentTarget) {
-            this.onCancel();
-        }
-    }
+  }
 }

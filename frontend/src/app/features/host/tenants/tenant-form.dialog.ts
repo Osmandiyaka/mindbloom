@@ -87,7 +87,7 @@ import { EditionLookup, TenantCreateInput, TenantListItem, TenantUpdateInput } f
     }
     .header { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
     h2 { margin: 0; font-size: 18px; color: #111827; }
-    .muted { margin: 4px 0 0; color: #6b7280; font-size: 13px; }
+    .muted { margin: 4px 0 0; color: var(--host-muted-color, var(--color-text-secondary, #374151)); font-size: 13px; }
     .icon { border: 1px solid #e5e7eb; background: #fff; border-radius: 10px; padding: 6px 10px; cursor: pointer; color: #111827; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
     @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
