@@ -1,6 +1,7 @@
 // Import theme and global styles (must come before CSS rules)
 @use 'styles/tokens/semantic';
 @import 'styles/theme/index';
+@import 'styles/theme/_metronic-variables';
 
 // Premium font pairing for the entire app
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap');

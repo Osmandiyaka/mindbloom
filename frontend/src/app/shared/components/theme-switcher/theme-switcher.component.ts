@@ -1,140 +1,59 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ThemeService, ThemeMode } from '../../../core/services/theme.service';
+import { ThemeService } from '../../../core/services/theme.service';
+import { ThemeMetronicService } from '../../../core/theme/theme-metronic.service';
 
 @Component({
     selector: 'app-theme-switcher',
     standalone: true,
     imports: [CommonModule],
     template: `
-    <div class="theme-switcher">
-      <button 
-        class="theme-btn"
-        [class.active]="effectiveTheme() === 'light'"
-        (click)="setTheme('light')"
-        title="Light theme"
-        [attr.aria-label]="'Switch to light theme'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
+    <div class="theme-switcher" [attr.aria-expanded]="open()" (keyup.escape)="open.set(false)">
+      <button type="button" class="theme-toggle" (click)="toggle()" aria-haspopup="menu">
+        Theme: {{ activeThemeLabel() }}
       </button>
-
-      <button 
-        class="theme-btn"
-        [class.active]="effectiveTheme() === 'dark'"
-        (click)="setTheme('dark')"
-        title="Dark theme"
-        [attr.aria-label]="'Switch to dark theme'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-      </button>
-
-      <button 
-        class="theme-btn"
-        [class.active]="currentTheme() === 'auto'"
-        (click)="setTheme('auto')"
-        title="Auto theme (system)"
-        [attr.aria-label]="'Switch to auto theme'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-          <line x1="8" y1="21" x2="16" y2="21"/>
-          <line x1="12" y1="17" x2="12" y2="21"/>
-        </svg>
-      </button>
+      <div class="menu" *ngIf="open()" role="menu">
+        <button role="menuitem" *ngFor="let opt of options" (click)="pick(opt.id)">
+          <span class="dot" [style.background]=getDot(opt.id)></span>
+          <span>{{ opt.label }}</span>
+        </button>
+      </div>
     </div>
   `,
     styles: [`
-    .theme-switcher {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 4px;
-      background: var(--color-surface, #ffffff);
-      border: 1px solid var(--color-border, #e8edf2);
-      border-radius: 8px;
-    }
-
-    .theme-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: transparent;
-      color: var(--color-text-secondary, #4a5568);
-      cursor: pointer;
-      border-radius: 6px;
-      transition: all 0.2s ease;
-      padding: 0;
-
-      svg {
-        width: 18px;
-        height: 18px;
-      }
-
-      &:hover {
-        background: var(--color-surface-hover, #f3f6fb);
-        color: var(--color-primary, #667eea);
-      }
-
-      &.active {
-        background: var(--color-primary, #667eea);
-        color: white;
-
-        &:hover {
-          background: var(--color-primary-dark, #5a67d8);
-        }
-      }
-
-      &:active {
-        transform: scale(0.95);
-      }
-    }
-
-    @media (max-width: 768px) {
-      .theme-switcher {
-        padding: 2px;
-        gap: 2px;
-      }
-
-      .theme-btn {
-        width: 28px;
-        height: 28px;
-
-        svg {
-          width: 16px;
-          height: 16px;
-        }
-      }
-    }
+    .theme-switcher { position: relative; display: inline-block; }
+    .theme-toggle { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border, #e2e8f0); background: var(--surface, #fff); color: var(--text, #0f172a); cursor: pointer; }
+    .theme-toggle:focus-visible { outline: 2px solid var(--primary, #2b6cb0); outline-offset: 2px; }
+    .menu { position: absolute; right: 0; margin-top: 6px; background: var(--surface, #fff); border: 1px solid var(--border, #e2e8f0); border-radius: 12px; box-shadow: var(--card-shadow, 0 10px 30px rgba(0,0,0,0.1)); min-width: 220px; padding: 6px; z-index: 10; }
+    .menu button { width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; background: transparent; border: none; padding: 10px 12px; border-radius: 10px; color: var(--text, #0f172a); cursor: pointer; }
+    .menu button:hover, .menu button:focus-visible { background: var(--table-row-hover, #eef2f6); outline: none; }
+    .dot { width: 12px; height: 12px; border-radius: 999px; border: 1px solid var(--border, #e2e8f0); }
   `]
 })
 export class ThemeSwitcherComponent {
-    currentTheme = this.themeService.currentTheme;
-    currentMode = this.themeService.currentMode;
+    private readonly themes = inject(ThemeMetronicService);
+    private readonly base = inject(ThemeService);
 
-    constructor(private themeService: ThemeService) { }
+    options: Array<{ id: 'enterprise-blue' | 'education-green' | 'dark-admin'; label: string; swatch: string }> = [
+      { id: 'enterprise-blue', label: 'Enterprise Blue', swatch: '#2b6cb0' },
+      { id: 'education-green', label: 'Education Green', swatch: '#1e9d6f' },
+      { id: 'dark-admin', label: 'Dark Admin', swatch: '#66b1ff' },
+    ];
 
-    effectiveTheme() {
-        const theme = this.currentTheme();
-        return theme.mode;
+    open = signal(false);
+    activeThemeLabel = computed(() => {
+        const id = this.base.currentTheme().id;
+        return this.options.find(o => o.id === id)?.label ?? this.base.currentTheme().name;
+    });
+
+    toggle() { this.open.update(v => !v); }
+
+    pick(id: 'enterprise-blue' | 'education-green' | 'dark-admin') {
+        this.themes.setTheme(id);
+        this.open.set(false);
     }
 
-    setTheme(theme: ThemeMode | string): void {
-        if (theme === 'light' || theme === 'dark' || theme === 'auto') {
-            this.themeService.setMode(theme as ThemeMode);
-        } else {
-            this.themeService.setMode('auto');
-        }
+    getDot(id: string) {
+        return this.options.find(o => o.id === id)?.swatch || '#2b6cb0';
     }
 }

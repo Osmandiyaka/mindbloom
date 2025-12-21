@@ -43,6 +43,93 @@ export class ThemeService {
     // Available themes
     readonly themes: ThemeDefinition[] = [
         {
+            id: 'enterprise-blue',
+            name: 'Enterprise Blue',
+            mode: 'light',
+            colors: {
+                primary: '#2b6cb0',
+                primaryDark: '#245a90',
+                primaryLight: '#4c83c4',
+                secondary: '#556987',
+                accent: '#2b6cb0',
+                background: '#f8fafc',
+                surface: '#ffffff',
+                surfaceHover: '#eef2f6',
+                textPrimary: '#0f172a',
+                textSecondary: '#475569',
+                textTertiary: '#6b7280',
+                border: '#e2e8f0',
+                borderLight: '#eef2f6',
+                success: '#16a34a',
+                warning: '#d97706',
+                error: '#dc2626',
+                info: '#0ea5e9'
+            },
+            shadows: {
+                sm: '0 1px 2px rgba(15,23,42,0.08)',
+                md: '0 4px 10px rgba(15,23,42,0.08)',
+                lg: '0 10px 30px rgba(15,23,42,0.08)'
+            }
+        },
+        {
+            id: 'education-green',
+            name: 'Education Green',
+            mode: 'light',
+            colors: {
+                primary: '#1e9d6f',
+                primaryDark: '#197f5b',
+                primaryLight: '#32b785',
+                secondary: '#3f8c7a',
+                accent: '#1e9d6f',
+                background: '#f7fcf9',
+                surface: '#ffffff',
+                surfaceHover: '#e7f4ed',
+                textPrimary: '#0f172a',
+                textSecondary: '#3f8c7a',
+                textTertiary: '#4b5563',
+                border: '#ddebe3',
+                borderLight: '#e7f4ed',
+                success: '#16a34a',
+                warning: '#d97706',
+                error: '#dc2626',
+                info: '#0ea5e9'
+            },
+            shadows: {
+                sm: '0 1px 2px rgba(25,127,91,0.08)',
+                md: '0 4px 10px rgba(25,127,91,0.08)',
+                lg: '0 10px 30px rgba(25,127,91,0.08)'
+            }
+        },
+        {
+            id: 'dark-admin',
+            name: 'Dark Admin',
+            mode: 'dark',
+            colors: {
+                primary: '#66b1ff',
+                primaryDark: '#4a90e2',
+                primaryLight: '#8cc6ff',
+                secondary: '#8ba3c7',
+                accent: '#66b1ff',
+                background: '#0f172a',
+                surface: '#111827',
+                surfaceHover: '#1f2937',
+                textPrimary: '#e5e7eb',
+                textSecondary: '#9ca3af',
+                textTertiary: '#8ba3c7',
+                border: '#1f2937',
+                borderLight: '#273449',
+                success: '#22c55e',
+                warning: '#f59e0b',
+                error: '#f87171',
+                info: '#38bdf8'
+            },
+            shadows: {
+                sm: '0 1px 2px rgba(0,0,0,0.35)',
+                md: '0 4px 10px rgba(0,0,0,0.35)',
+                lg: '0 10px 30px rgba(0,0,0,0.35)'
+            }
+        },
+        {
             id: 'retro-light',
             name: 'Retro Light',
             mode: 'light',

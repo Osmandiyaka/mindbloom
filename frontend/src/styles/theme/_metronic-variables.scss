@@ -1,0 +1,61 @@
+// Metronic-inspired theme tokens with WCAG-aware palettes
+:root {
+    --font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+    --radius-card: 14px;
+    --radius-pill: 999px;
+    --transition: 160ms ease;
+}
+
+:root[data-theme-id="enterprise-blue"] {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface-elevated: #f1f5f9;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --primary: #2b6cb0;
+    --primary-strong: #245a90;
+    --secondary: #556987;
+    --success: #16a34a;
+    --warning: #d97706;
+    --error: #dc2626;
+    --info: #0ea5e9;
+    --table-row-hover: #eef2f6;
+    --card-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme-id="education-green"] {
+    --bg: #f7fcf9;
+    --surface: #ffffff;
+    --surface-elevated: #eef7f2;
+    --border: #ddebe3;
+    --text: #0f172a;
+    --text-muted: #3f8c7a;
+    --primary: #1e9d6f;
+    --primary-strong: #197f5b;
+    --secondary: #3f8c7a;
+    --success: #16a34a;
+    --warning: #d97706;
+    --error: #dc2626;
+    --info: #0ea5e9;
+    --table-row-hover: #e7f4ed;
+    --card-shadow: 0 10px 30px rgba(25, 127, 91, 0.08);
+}
+
+:root[data-theme-id="dark-admin"] {
+    --bg: #0f172a;
+    --surface: #111827;
+    --surface-elevated: #1f2937;
+    --border: #1f2937;
+    --text: #e5e7eb;
+    --text-muted: #9ca3af;
+    --primary: #66b1ff;
+    --primary-strong: #4a90e2;
+    --secondary: #8ba3c7;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --error: #f87171;
+    --info: #38bdf8;
+    --table-row-hover: #1f2937;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}

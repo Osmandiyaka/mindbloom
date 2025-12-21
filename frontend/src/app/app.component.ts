@@ -4,6 +4,7 @@ import { LoginOverlayComponent } from './modules/auth/components/login-overlay/l
 import { AuthService } from './core/auth/auth.service';
 import { TenantService } from './core/services/tenant.service';
 import { ThemeService } from './core/services/theme.service';
+import { ThemeSwitcherComponent } from './shared/components/theme-switcher/theme-switcher.component';
 import { environment } from '../environments/environment';
 import { filter } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -11,9 +12,12 @@ import { CommonModule } from '@angular/common';
 @Component({
     selector: 'app-root',
     standalone: true,
-    imports: [RouterOutlet, LoginOverlayComponent, CommonModule],
+    imports: [RouterOutlet, LoginOverlayComponent, CommonModule, ThemeSwitcherComponent],
     template: `
         <div class="app-root" [class.dimmed]="authService.status() === 'authenticated' && authRoute">
+            <div class="theme-switcher-shell" *ngIf="!authRoute">
+                <app-theme-switcher />
+            </div>
             <!-- Auth resolving gate: show minimal loading while unresolved -->
             @if (authService.status() === 'unresolved') {
                 <div class="auth-loading-gate">
@@ -61,6 +65,13 @@ import { CommonModule } from '@angular/common';
             margin-top: 1rem;
             color: var(--color-text-secondary, #666);
             font-size: 0.875rem;
+        }
+
+        .theme-switcher-shell {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 20;
         }
     `]
 })
