@@ -230,6 +230,33 @@ To add a new theme, edit `theme.service.ts`:
 
 Add the theme object to the `themes` array in ThemeService.
 
+---
+
+## Retro Noir (Refinement notes)
+
+`Retro Noir` is our premium dark theme tuned for Host / enterprise surfaces. Key design goals:
+
+- Warm, premium surfaces with high depth and subtle glow on CTAs
+- Clear contrast for body and headings to ensure readability across large admin screens
+- Accented CTAs (cyan / gold) for instant visual hierarchy
+
+Tokens you can rely on (automatically derived by ThemeService):
+
+- `--host-surface-elevated` — elevated card/background surface (derived from `--color-surface`)
+- `--host-surface-muted` — subtle surface used for hover/alternate rows
+- `--host-text-color` / `--host-heading-color` — text colors optimized for readability on surfaces
+- `--host-muted-color` — computed using `color-mix(in srgb, var(--color-text-primary) 68%, var(--color-surface) 32%)` to ensure legibility
+- `--host-border-subtle` — border color tuned per theme mode (slightly stronger on dark themes for clarity)
+- `--host-primary-glow` — soft glow for primary CTAs (reduced opacity for dark themes)
+- `--btn-primary-text` — automatically chosen (white or dark) based on best contrast against primary
+
+Design guidance:
+- Use `var(--host-accent)` for tabs, active states and minor highlights.
+- Prefer `--host-surface-elevated` for cards and `--host-surface-muted` for table hover/rows.
+- Prefer `--host-muted-color` for secondary metadata; it always maintains sufficient contrast against surfaces.
+
+If anything reads poorly in specific components, tag the component and I’ll adjust tokens or micro-adjust contrast there for the best combination.
+
 ## Storage Keys
 
 - `mindbloom_theme`: Stores selected theme ID

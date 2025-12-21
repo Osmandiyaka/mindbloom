@@ -2,10 +2,10 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'ui-button',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'ui-button',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <button
       [attr.type]="type"
       [disabled]="disabledState"
@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
       <ng-content></ng-content>
     </button>
   `,
-    styles: [`
+  styles: [`
     :host { display: inline-block; }
     button {
       display: inline-flex;
@@ -35,9 +35,17 @@ import { CommonModule } from '@angular/common';
     button.btn-lg { padding: var(--btn-padding-lg, 0.75rem 1.25rem); }
 
     button.btn-primary {
-      background: var(--btn-primary-bg, var(--color-primary));
+      background: linear-gradient(180deg, var(--btn-primary-bg, var(--color-primary)) 0%, color-mix(in srgb, var(--btn-primary-bg, var(--color-primary)) 88%, #000 12%) 100%);
       color: var(--btn-primary-text, #fff);
       border-color: var(--btn-primary-border, var(--color-primary));
+      box-shadow: var(--host-primary-glow, rgba(0,0,0,0.04));
+    }
+
+    button.btn-danger {
+      background: color-mix(in srgb, var(--color-error, #ef4444) 8%, transparent 92%);
+      border-color: var(--color-error, #ef4444);
+      color: var(--color-error, #ef4444);
+      box-shadow: none;
     }
 
     button.btn-ghost {
@@ -58,26 +66,26 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class UiButtonComponent {
-    @Input() variant: 'primary' | 'secondary' | 'ghost' | 'danger' = 'primary';
-    @Input() size: 'sm' | 'md' | 'lg' = 'md';
-    // Accept boolean OR empty string (bare attribute) for template convenience
-    @Input() disabled: boolean | '' | string = false;
-    @Input() type: 'button' | 'submit' | 'reset' = 'button';
+  @Input() variant: 'primary' | 'secondary' | 'ghost' | 'danger' = 'primary';
+  @Input() size: 'sm' | 'md' | 'lg' = 'md';
+  // Accept boolean OR empty string (bare attribute) for template convenience
+  @Input() disabled: boolean | '' | string = false;
+  @Input() type: 'button' | 'submit' | 'reset' = 'button';
 
-    get classes(): string {
-        const cls = ['btn'];
-        if (this.variant === 'primary') cls.push('btn-primary');
-        if (this.variant === 'ghost') cls.push('btn-ghost');
-        if (this.variant === 'danger') cls.push('btn-danger');
-        if (this.size === 'sm') cls.push('btn-sm');
-        if (this.size === 'lg') cls.push('btn-lg');
-        return cls.join(' ');
-    }
+  get classes(): string {
+    const cls = ['btn'];
+    if (this.variant === 'primary') cls.push('btn-primary');
+    if (this.variant === 'ghost') cls.push('btn-ghost');
+    if (this.variant === 'danger') cls.push('btn-danger');
+    if (this.size === 'sm') cls.push('btn-sm');
+    if (this.size === 'lg') cls.push('btn-lg');
+    return cls.join(' ');
+  }
 
-    // Coerce various input shapes to a boolean for binding
-    get disabledState(): boolean {
-        if (this.disabled === '') return true; // bare attribute
-        if (this.disabled === true) return true;
-        if (this.disabled === 'true') return true;
-        if (typeof this.disabled === 'string') return this.disabled.length > 0 && this.disabled !== 'false';
-        return false;
+  // Coerce various input shapes to a boolean for binding
+  get disabledState(): boolean {
+    if (this.disabled === '') return true; // bare attribute
+    if (this.disabled === true) return true;
+    if (this.disabled === 'true') return true;
+    if (typeof this.disabled === 'string') return this.disabled.length > 0 && this.disabled !== 'false';
+    return false;

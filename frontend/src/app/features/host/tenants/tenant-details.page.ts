@@ -254,15 +254,16 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
 
     /* Tabs */
     .tabs { display:flex; gap:8px; margin: 14px 0; }
-    .tab { background: transparent; border: none; padding: 10px 14px; border-radius: 10px; cursor: pointer; color: #6b7280; }
-    .tab.active { background: #0ea5e9; color: #fff; }
+    .tab { background: transparent; border: 1px solid var(--host-border-subtle); padding: 10px 14px; border-radius: 10px; cursor: pointer; color: var(--host-tab-text, var(--host-muted-color)); font-weight: 600; transition: background .12s, color .12s, box-shadow .12s; }
+    .tab:hover { background: var(--host-tab-bg-hover, color-mix(in srgb, var(--host-surface-muted) 80%, transparent 20%)); color: var(--host-text-color); }
+    .tab.active { background: var(--host-accent); color: var(--host-accent-text, var(--btn-primary-text)); box-shadow: var(--host-primary-glow, none); border-color: color-mix(in srgb, var(--host-accent) 40%, transparent 60%); }
 
-    .card-header { display:flex; align-items:center; gap:12px; padding: 12px; border-bottom: 1px solid #f1f5f9; }
-    .card-header .search { flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e7eb; }
+    .card-header { display:flex; align-items:center; gap:12px; padding: 12px; border-bottom: 1px solid var(--host-border-subtle); }
+    .card-header .search { flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--host-border-subtle); background: var(--host-surface-elevated); }
     .spacer { flex: 1; }
 
     .pager { display:flex; gap:12px; align-items:center; padding: 12px; }
-    .card.detail { margin:12px; padding:12px; background:#fff; border-radius:10px; }
+    .card.detail { margin:12px; padding:12px; background: var(--host-surface-elevated); border-radius:10px; box-shadow: var(--shadow-sm); }
 
 
     .overview { display: grid; gap: 14px; }
@@ -322,10 +323,11 @@ import { ToastService } from '../../../core/ui/toast/toast.service';
     }
 
     .card {
-      border: 1px solid #e5e7eb;
-      background: #fff;
+      border: 1px solid var(--host-border-subtle);
+      background: var(--host-surface-elevated);
       border-radius: 14px;
       overflow: hidden;
+      box-shadow: var(--host-shadow, 0 6px 18px rgba(0,0,0,0.06));
     }
 
     /* Table (consistent with Tenants list) */

@@ -133,7 +133,7 @@ import { Router } from '@angular/router';
       border-radius: 14px;
       overflow: hidden;
       background: var(--host-surface-elevated);
-      box-shadow: 0 10px 30px rgba(2,6,23,0.06);
+      box-shadow: var(--host-shadow, 0 10px 30px rgba(2,6,23,0.06));
       font-family: var(--host-font-family);
       color: var(--host-text-color);
     }
@@ -141,7 +141,7 @@ import { Router } from '@angular/router';
     /* Table */
     .table { width: 100%; border-collapse: collapse; font-size: var(--host-font-size); line-height: 1.45; color: var(--host-text-color); }
     th, td { padding: 14px 12px; border-bottom: 1px solid var(--host-border-subtle); text-align: left; vertical-align: top; }
-    th { font-size: 12px; color: var(--host-heading-color); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; background: rgba(15,23,42,0.02); }
+    th { font-size: 12px; color: var(--host-heading-color); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; background: color-mix(in srgb, var(--host-surface-elevated, #fff) 96%, transparent 4%); }
     td { color: var(--host-text-color); font-size: var(--host-font-size); }
 
     .right { text-align: right; }
@@ -158,13 +158,22 @@ import { Router } from '@angular/router';
       padding: 6px 12px;
       border-radius: 999px;
       font-size: 12px;
-      border: 1px solid rgba(15,23,42,0.06);
-      background: var(--host-surface-muted);
+      border: 1px solid color-mix(in srgb, var(--host-border-subtle, rgba(0,0,0,0.06)) 80%, transparent 20%);
+      background: color-mix(in srgb, var(--host-surface-muted, #f8fafc) 86%, transparent 14%);
       color: var(--host-text-color);
       font-weight: 700;
+      box-shadow: none;
     }
-    .pill.suspended { border-color: #fca5a5; background: #fff1f2; color: #7f1d1d; }
-    .pill.trial { border-color: #3b82f6; background: #eff6ff; color: #1e3a8a; }
+    .pill.suspended {
+      border-color: color-mix(in srgb, var(--color-error, #ef4444) 40%, transparent 60%);
+      background: color-mix(in srgb, var(--color-error, #ef4444) 8%, var(--host-surface-elevated) 92%);
+      color: var(--color-error, #ef4444);
+    }
+    .pill.trial {
+      border-color: color-mix(in srgb, var(--host-accent, #54D6E8) 40%, transparent 60%);
+      background: color-mix(in srgb, var(--host-accent, #54D6E8) 8%, var(--host-surface-elevated) 92%);
+      color: var(--host-accent, #54D6E8);
+    }
 
     /* Buttons */
     .btn {
@@ -175,9 +184,19 @@ import { Router } from '@angular/router';
       cursor: pointer;
       color: var(--host-text-color);
     }
-    .btn.primary { background: #0b1220; color: #fff; border-color: #0b1220; }
+    .btn.primary {
+      background: linear-gradient(180deg, var(--btn-primary-bg, var(--color-primary)) 0%, color-mix(in srgb, var(--btn-primary-bg, var(--color-primary)) 85%, #000 15%) 100%);
+      color: var(--btn-primary-text, #fff);
+      border-color: var(--btn-primary-border, var(--color-primary));
+      box-shadow: var(--host-primary-glow, none);
+    }
     .btn.small { padding: 7px 10px; border-radius: 10px; font-size: 13px; }
-    .btn.danger { border-color: #fca5a5; color: #7f1d1d; background: transparent; }
+    .btn.danger {
+      border-color: var(--color-error, #ef4444);
+      color: var(--color-error, #ef4444);
+      background: color-mix(in srgb, var(--color-error, #ef4444) 8%, transparent 92%);
+      box-shadow: none;
+    }
     .btn:disabled { opacity: .55; cursor: not-allowed; }
 
     /* Inputs */
@@ -188,7 +207,7 @@ import { Router } from '@angular/router';
       outline: none;
       min-width: 220px;
       color: var(--host-text-color);
-      background: #fff;
+      background: var(--host-surface-elevated);
     }
     .input.small { min-width: unset; padding: 7px 10px; }
 

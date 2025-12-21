@@ -74,31 +74,31 @@ export class ThemeService {
         // Retro Dark (Brown and Gradient focused) - FINAL REFINEMENT
         {
             id: 'retro-dark',
-            name: 'Retro Dark',
+            name: 'Retro Noir',
             mode: 'dark',
             colors: {
-                primary: '#E8BE14',
-                primaryDark: '#BF9532',
-                primaryLight: '#F5DF68',
-                secondary: '#CD8223',
-                accent: '#70C6E1', // Enhanced: Brighter, more saturated accent for pop
-                background: 'linear-gradient(to bottom right, #1C120C 0%, #6B4E2F 50%, #1C120C 100%)',
-                surface: '#4F3A29', // Refined: Slightly lighter surface for better separation
-                surfaceHover: '#634D3B', // Refined: More distinct hover state
-                textPrimary: '#FFFFFF', // Enhanced: Pure white for maximum clarity and contrast
-                textSecondary: '#E0D5C9', // Enhanced: Lighter secondary text for readability
-                textTertiary: '#AB9F95',
-                border: '#7A6F65',
-                borderLight: '#8C6D5E',
-                success: '#70AD47',
-                warning: '#F39C12',
+                primary: '#E6B422',
+                primaryDark: '#B98E17',
+                primaryLight: '#FFD95A',
+                secondary: '#CD7A2E',
+                accent: '#54D6E8', // Bright cyan accent for contrast and CTAs
+                background: 'linear-gradient(135deg, #0F0A07 0%, #3B2214 60%, #0F0A07 100%)',
+                surface: '#2F2218', // Warm, polished surface
+                surfaceHover: '#3C2A20',
+                textPrimary: '#FFF8E6', // Warm near-white for elegance
+                textSecondary: '#E2D6C3',
+                textTertiary: '#BFAF9B',
+                border: '#6B5546',
+                borderLight: '#4A372B',
+                success: '#5FB075',
+                warning: '#F0A500',
                 error: '#E74C3C',
-                info: '#5EB5D7'
+                info: '#54D6E8'
             },
             shadows: {
-                sm: '5px 5px 10px rgba(0, 0, 0, 0.7), -3px -3px 6px rgba(255, 255, 255, 0.08)',
-                md: '10px 10px 20px rgba(0, 0, 0, 0.7), -6px -6px 12px rgba(255, 255, 255, 0.07)',
-                lg: '15px 15px 30px rgba(0, 0, 0, 0.7), -9px -9px 18px rgba(255, 255, 255, 0.06)'
+                sm: '0 6px 18px rgba(0,0,0,0.72), inset 0 -1px 0 rgba(255,255,255,0.02)',
+                md: '0 10px 30px rgba(0,0,0,0.76), inset 0 -2px 0 rgba(255,255,255,0.02)',
+                lg: '0 20px 48px rgba(0,0,0,0.82)'
             }
         },
         // Charcoal Dark (Clean, Wow-level, Modern Dark Mode)
@@ -448,9 +448,55 @@ export class ThemeService {
         root.style.setProperty('--color-warning-rgb', this.hexToRgb(colors.warning));
         root.style.setProperty('--color-info-rgb', this.hexToRgb(colors.info));
 
+        // Button token aliases (allow finer control in CSS if needed)
+        root.style.setProperty('--btn-primary-bg', colors.primary);
+        root.style.setProperty('--btn-primary-border', colors.primaryDark || colors.primary);
+        // Ensure a readable text color for primary buttons
+        root.style.setProperty('--btn-primary-text', this.getContrastText(colors.primary));
+
         root.style.setProperty('--shadow-sm', shadows.sm);
         root.style.setProperty('--shadow-md', shadows.md);
         root.style.setProperty('--shadow-lg', shadows.lg);
+
+        // Host-specific variables (used by host/admin pages like Tenants)
+        // Provide sensible defaults derived from the active theme so host pages get a polished, cohesive look
+        const borderRgb = colors.border && colors.border.startsWith('#') ? this.hexToRgb(colors.border) : null;
+
+        // Ensure text on surfaces is high contrast. Use CSS color-mix expressions where appropriate so
+        // designers can tweak values in CSS too. For muted, mix the text color into the surface to get
+        // a readable but subdued label color.
+        root.style.setProperty('--host-heading-color', colors.textPrimary);
+        root.style.setProperty('--host-text-color', colors.textPrimary);
+        root.style.setProperty('--host-muted-color', `color-mix(in srgb, var(--color-text-primary) 68%, var(--color-surface) 32%)`);
+
+        // Borders: slightly more visible on dark themes for clarity
+        const borderAlpha = theme.mode === 'dark' ? 0.12 : 0.08;
+        root.style.setProperty('--host-border-subtle', borderRgb ? `rgba(${borderRgb}, ${borderAlpha})` : (colors.border || `rgba(255,255,255,${borderAlpha})`));
+
+        // Surface variants tuned for depth and separation
+        root.style.setProperty('--host-surface-elevated', `color-mix(in srgb, var(--color-surface) 94%, var(--color-background) 6%)`);
+        root.style.setProperty('--host-surface-muted', `color-mix(in srgb, var(--color-surface-hover) 86%, var(--color-surface) 14%)`);
+
+        root.style.setProperty('--host-shadow', shadows.md);
+        root.style.setProperty('--host-accent', colors.accent);
+
+        // Host tab tokens (provide dedicated tokens for tab text, hover bg and accent contrast)
+        // These ensure all tab-like UI can be themed consistently and remain accessible.
+        root.style.setProperty('--host-tab-text', `color-mix(in srgb, var(--color-text-secondary) 72%, var(--color-surface) 28%)`);
+        root.style.setProperty('--host-tab-bg-hover', `color-mix(in srgb, var(--host-surface-muted) 80%, transparent 20%)`);
+        // Ensure readable text color on accent backgrounds (used by active tabs / pills)
+        root.style.setProperty('--host-accent-text', this.getContrastText(colors.accent));
+
+        // CTA glow and contrast: compute a readable CTA text color and use a softer glow for dark themes
+        const primaryRgb = colors.primary && colors.primary.startsWith('#') ? this.hexToRgb(colors.primary) : null;
+        const primaryText = this.getContrastText(colors.primary);
+        root.style.setProperty('--btn-primary-text', primaryText);
+
+        if (theme.mode === 'dark') {
+            root.style.setProperty('--host-primary-glow', primaryRgb ? `0 6px 18px rgba(${primaryRgb}, 0.16)` : `0 6px 18px rgba(255,255,255,0.06)`);
+        } else {
+            root.style.setProperty('--host-primary-glow', '0 6px 18px rgba(102,126,234,0.08)');
+        }
     }
 
     private hexToRgb(hex: string): string {
@@ -465,5 +511,44 @@ export class ThemeService {
         const b = int & 255;
 
         return `${r}, ${g}, ${b}`;
+    }
+
+    // Compute relative luminance (WCAG) for a hex color and return contrast-friendly text color
+    private relativeLuminance(hex: string): number {
+        const normalized = hex.replace('#', '');
+        const value = normalized.length === 3
+            ? normalized.split('').map(char => char + char).join('')
+            : normalized;
+        const int = parseInt(value, 16);
+        const r = (int >> 16) & 255;
+        const g = (int >> 8) & 255;
+        const b = int & 255;
+
+        const srgb = [r, g, b].map(c => {
+            const v = c / 255;
+            return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        });
+
+        return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+    }
+
+    private contrastRatio(hexA: string, hexB: string): number {
+        const l1 = this.relativeLuminance(hexA);
+        const l2 = this.relativeLuminance(hexB);
+        const lighter = Math.max(l1, l2);
+        const darker = Math.min(l1, l2);
+        return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    private getContrastText(hex: string): string {
+        try {
+            // Compare contrast against white and dark body text and pick the better
+            const contrastWithWhite = this.contrastRatio(hex, '#ffffff');
+            const contrastWithDark = this.contrastRatio(hex, '#0b1220');
+            // Prefer the higher contrast. If both are low, prefer white for dark themes.
+            return contrastWithWhite >= contrastWithDark ? '#ffffff' : '#0b1220';
+        } catch {
+            return '#ffffff';
+        }
     }
 }
