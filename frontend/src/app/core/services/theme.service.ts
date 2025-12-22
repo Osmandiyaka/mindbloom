@@ -516,9 +516,13 @@ export class ThemeService {
         root.style.setProperty('--color-surface', colors.surface);
         root.style.setProperty('--color-surface-hover', colors.surfaceHover);
 
+        // Text tokens (also mirrored to legacy names used by shared components)
         root.style.setProperty('--color-text-primary', colors.textPrimary);
         root.style.setProperty('--color-text-secondary', colors.textSecondary);
         root.style.setProperty('--color-text-tertiary', colors.textTertiary);
+        root.style.setProperty('--text-primary', colors.textPrimary);
+        root.style.setProperty('--text-secondary', colors.textSecondary);
+        root.style.setProperty('--text-tertiary', colors.textTertiary);
 
         root.style.setProperty('--color-border', colors.border);
         root.style.setProperty('--color-border-light', colors.borderLight);
@@ -540,6 +544,12 @@ export class ThemeService {
         root.style.setProperty('--btn-primary-border', colors.primaryDark || colors.primary);
         // Ensure a readable text color for primary buttons
         root.style.setProperty('--btn-primary-text', this.getContrastText(colors.primary));
+        root.style.setProperty('--btn-border', colors.textPrimary);
+        root.style.setProperty('--btn-text', colors.textPrimary);
+        root.style.setProperty('--btn-ghost-border', colors.textPrimary);
+        root.style.setProperty('--btn-ghost-text', colors.textPrimary);
+        root.style.setProperty('--btn-danger-border', colors.error);
+        root.style.setProperty('--btn-danger-text', colors.error);
 
         root.style.setProperty('--shadow-sm', shadows.sm);
         root.style.setProperty('--shadow-md', shadows.md);
@@ -554,7 +564,7 @@ export class ThemeService {
         // a readable but subdued label color.
         root.style.setProperty('--host-heading-color', colors.textPrimary);
         root.style.setProperty('--host-text-color', colors.textPrimary);
-        root.style.setProperty('--host-muted-color', `color-mix(in srgb, var(--color-text-primary) 68%, var(--color-surface) 32%)`);
+        root.style.setProperty('--host-muted-color', colors.textSecondary);
 
         // Borders: slightly more visible on dark themes for clarity
         const borderAlpha = theme.mode === 'dark' ? 0.12 : 0.08;
@@ -578,6 +588,7 @@ export class ThemeService {
         const primaryRgb = colors.primary && colors.primary.startsWith('#') ? this.hexToRgb(colors.primary) : null;
         const primaryText = this.getContrastText(colors.primary);
         root.style.setProperty('--btn-primary-text', primaryText);
+        root.style.setProperty('--focus-ring-color', primaryRgb ? `rgba(${primaryRgb}, 0.22)` : 'rgba(102,126,234,0.22)');
 
         if (theme.mode === 'dark') {
             root.style.setProperty('--host-primary-glow', primaryRgb ? `0 6px 18px rgba(${primaryRgb}, 0.16)` : `0 6px 18px rgba(255,255,255,0.06)`);

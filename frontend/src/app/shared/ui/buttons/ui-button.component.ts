@@ -21,11 +21,11 @@ import { CommonModule } from '@angular/common';
       gap: 0.5rem;
       border-radius: var(--btn-radius, 10px);
       padding: var(--btn-padding-md, 0.6rem 1rem);
-      border: 1px solid var(--border-default, rgba(0,0,0,0.08));
+      border: 1px solid var(--btn-border, var(--color-text-primary));
       background: var(--btn-bg, var(--color-surface));
-      color: var(--color-text-primary);
+      color: var(--btn-text, var(--color-text-primary));
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
       transition: all 0.12s ease;
     }
 
@@ -42,23 +42,17 @@ import { CommonModule } from '@angular/common';
     }
 
     button.btn-danger {
-      background: color-mix(in srgb, var(--color-error, #ef4444) 8%, transparent 92%);
-      border-color: var(--color-error, #ef4444);
-      color: var(--color-error, #ef4444);
+      background: var(--btn-danger-bg, transparent);
+      border-color: var(--btn-danger-border, var(--color-error, #ef4444));
+      color: var(--btn-danger-text, var(--color-error, #ef4444));
+      font-weight: 700;
       box-shadow: none;
     }
 
     button.btn-ghost {
-      background: transparent;
-      border-color: transparent;
-      color: var(--color-text-primary);
-    }
-
-    button.btn-danger {
-      background: transparent;
-      border-color: var(--color-error, #ef4444);
-      color: var(--color-error, #ef4444);
-      font-weight: 700;
+      background: var(--btn-ghost-bg, #fff);
+      border-color: var(--btn-ghost-border, var(--color-text-primary));
+      color: var(--btn-ghost-text, var(--color-text-primary));
     }
 
     button:disabled {
@@ -68,7 +62,7 @@ import { CommonModule } from '@angular/common';
 
     button:focus {
       outline: none;
-      box-shadow: 0 0 0 3px var(--focus-ring-color, rgba(102,126,234,0.16));
+      box-shadow: 0 0 0 3px var(--focus-ring-color, rgba(102,126,234,0.22));
     }
   `]
 })
