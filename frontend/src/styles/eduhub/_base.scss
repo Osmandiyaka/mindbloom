@@ -1,0 +1,123 @@
+// Base Reset & Typography
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+body {
+    margin: 0;
+    font-family: var(--edu-font-family);
+    font-size: var(--edu-font-size-base);
+    font-weight: var(--edu-font-weight-normal);
+    line-height: var(--edu-line-height-normal);
+    color: var(--edu-text-primary);
+    background-color: var(--edu-surface-ground);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0 0 var(--edu-space-4);
+    font-weight: var(--edu-font-weight-semibold);
+    line-height: var(--edu-line-height-tight);
+    color: var(--edu-text-primary);
+}
+
+.edu-h1,
+h1 {
+    font-size: var(--edu-font-size-4xl);
+    letter-spacing: -0.025em;
+}
+
+.edu-h2,
+h2 {
+    font-size: var(--edu-font-size-3xl);
+    letter-spacing: -0.02em;
+}
+
+.edu-h3,
+h3 {
+    font-size: var(--edu-font-size-2xl);
+}
+
+.edu-h4,
+h4 {
+    font-size: var(--edu-font-size-xl);
+}
+
+.edu-h5,
+h5 {
+    font-size: var(--edu-font-size-lg);
+}
+
+.edu-h6,
+h6 {
+    font-size: var(--edu-font-size-base);
+    font-weight: var(--edu-font-weight-medium);
+}
+
+p {
+    margin: 0 0 var(--edu-space-4);
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.edu-text-xs {
+    font-size: var(--edu-font-size-xs);
+}
+
+.edu-text-sm {
+    font-size: var(--edu-font-size-sm);
+}
+
+.edu-text-base {
+    font-size: var(--edu-font-size-base);
+}
+
+.edu-text-lg {
+    font-size: var(--edu-font-size-lg);
+}
+
+.edu-text-xl {
+    font-size: var(--edu-font-size-xl);
+}
+
+.edu-text-muted {
+    color: var(--edu-text-secondary);
+}
+
+.edu-text-hint {
+    color: var(--edu-text-tertiary);
+    font-size: var(--edu-font-size-sm);
+}
+
+.edu-link {
+    color: var(--edu-text-link);
+    text-decoration: none;
+    transition: color var(--edu-transition-fast);
+
+    &:hover {
+        color: var(--edu-text-link-hover);
+        text-decoration: underline;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--edu-primary);
+        outline-offset: 2px;
+        border-radius: var(--edu-radius-sm);
+    }
+}

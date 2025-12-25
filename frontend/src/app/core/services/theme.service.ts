@@ -375,7 +375,67 @@ export class ThemeService {
                 md: '0 8px 20px rgba(0, 0, 0, 0.55)',
                 lg: '0 16px 32px rgba(0, 0, 0, 0.6)'
             }
-        }
+        },
+        // EduHub Light
+        {
+            id: 'eduhub-light',
+            name: 'EduHub Light',
+            mode: 'light',
+            colors: {
+                primary: '#3b9eed',
+                primaryDark: '#2d7fd0',
+                primaryLight: '#c5e3fa',
+                secondary: '#f4bb40',
+                accent: '#41b2e8',
+                background: '#f9fafb',
+                surface: '#ffffff',
+                surfaceHover: '#f3f4f6',
+                textPrimary: '#111827',
+                textSecondary: '#4b5563',
+                textTertiary: '#6b7280',
+                border: '#e5e7eb',
+                borderLight: '#f3f4f6',
+                success: '#32bc6d',
+                warning: '#ffc331',
+                error: '#f05252',
+                info: '#41b2e8'
+            },
+            shadows: {
+                sm: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
+                md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
+                lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)'
+            }
+        },
+        // EduHub Dark
+        {
+            id: 'eduhub-dark',
+            name: 'EduHub Dark',
+            mode: 'dark',
+            colors: {
+                primary: '#59adf0',
+                primaryDark: '#3b9eed',
+                primaryLight: '#1a52a4',
+                secondary: '#f6c55d',
+                accent: '#5dbeeb',
+                background: '#030712',
+                surface: '#111827',
+                surfaceHover: '#1f2937',
+                textPrimary: '#f9fafb',
+                textSecondary: '#d1d5db',
+                textTertiary: '#9ca3af',
+                border: '#374151',
+                borderLight: '#4b5563',
+                success: '#51c683',
+                warning: '#ffcc50',
+                error: '#f26c6c',
+                info: '#5dbeeb'
+            },
+            shadows: {
+                sm: '0 1px 3px 0 rgba(0, 0, 0, 0.4)',
+                md: '0 4px 6px -1px rgba(0, 0, 0, 0.4)',
+                lg: '0 10px 15px -3px rgba(0, 0, 0, 0.4)'
+            }
+        },
     ];
 
     // Current theme and mode
