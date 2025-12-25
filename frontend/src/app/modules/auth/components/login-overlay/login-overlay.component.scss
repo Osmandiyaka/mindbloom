@@ -143,12 +143,11 @@
 /* mode switch pills */
 .mode-switch {
     display: inline-flex;
-    align-items: center;
-    background: color-mix(in srgb, var(--login-surface) 92%, var(--color-background, #0f172a) 8%);
-    border: 1px solid var(--login-border);
-    border-radius: var(--login-radius-md);
-    padding: 4px;
-    gap: 4px;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--color-border, #e0e0e0) 60%, transparent);
+    background: color-mix(in srgb, var(--login-surface) 90%, var(--color-background, #0f172a) 10%);
     margin-bottom: var(--login-space-4);
 }
 
@@ -156,21 +155,20 @@
     border: none;
     background: transparent;
     color: var(--login-text-muted);
-    padding: 8px 14px;
-    border-radius: calc(var(--login-radius-md) - 2px);
-    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 999px;
     cursor: pointer;
+    font-weight: 700;
     transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
 }
 
 .mode-pill.active {
-    background: color-mix(in srgb, var(--login-accent) 12%, var(--login-surface) 88%);
+    background: color-mix(in srgb, var(--login-primary) 16%, var(--login-surface));
     color: var(--login-text);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .mode-pill:focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--login-accent) 30%, transparent);
+    outline: 3px solid color-mix(in srgb, var(--login-primary) 30%, transparent);
     outline-offset: 2px;
 }
 
@@ -182,14 +180,15 @@
 
 // FORM GROUPS
 .form-group {
-    margin-bottom: 22px;
+    margin-bottom: 18px;
 }
 
-.label-row {
+.form-label-row {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
     gap: 12px;
+    margin-bottom: 6px;
 }
 
 .form-label {
@@ -198,6 +197,10 @@
     font-weight: 500;
     color: var(--login-text);
     margin-bottom: 6px;
+}
+
+.form-label-row .form-label {
+    margin-bottom: 0;
 }
 
 // INPUT FIELDS
@@ -213,11 +216,11 @@
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
 
     &:focus-within {
-        border-color: var(--login-accent);
-        box-shadow: 0 0 0 2px color-mix(in srgb, var(--login-accent) 20%, transparent);
+        border-color: var(--login-primary);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--login-primary) 20%, transparent);
 
         .input-icon {
-            color: var(--login-accent);
+            color: var(--login-primary);
         }
 
         @supports (backdrop-filter: blur(4px)) {
@@ -319,18 +322,18 @@
 .form-help {
     font-size: 12px;
     color: var(--login-text-muted);
-    margin: 6px 0 0 0;
+    margin: 4px 0 0 0;
     line-height: 1.4;
 }
 
 .register-link {
-    color: var(--login-accent);
+    color: var(--login-primary);
     text-decoration: none;
-    font-weight: 500;
-    transition: all 0.2s ease;
+    font-weight: 600;
+    transition: color 0.2s ease;
 
     &:hover {
-        color: color-mix(in srgb, var(--login-accent) 80%, #a60f26);
+        color: color-mix(in srgb, var(--login-primary) 85%, var(--login-text) 15%);
         text-decoration: underline;
     }
 }
@@ -391,21 +394,19 @@
 }
 
 .tenant-context {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 10px 12px;
-    border: 1px solid var(--login-border);
+    border: 1px solid color-mix(in srgb, var(--color-border, #e0e0e0) 60%, transparent);
+    background: color-mix(in srgb, var(--color-surface, #ffffff) 92%, var(--color-background, #0f172a) 8%);
     border-radius: var(--login-radius-md);
-    background: color-mix(in srgb, var(--login-surface) 92%, var(--color-background, #0f172a) 8%);
-    margin-bottom: var(--login-space-3);
+    padding: 12px 14px;
+    margin-bottom: 18px;
 }
 
 .tenant-context__label {
-    font-size: 12px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
     color: var(--login-text-muted);
+    margin-bottom: 8px;
 }
 
 .tenant-context__row {
@@ -417,12 +418,13 @@
 .tenant-chip {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
+    gap: 10px;
+    padding: 8px 10px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--login-accent) 10%, var(--login-surface) 90%);
+    border: 1px solid color-mix(in srgb, var(--color-border, #e0e0e0) 60%, transparent);
+    background: color-mix(in srgb, var(--color-surface, #ffffff) 88%, var(--color-background, #0f172a) 12%);
     color: var(--login-text);
-    font-weight: 700;
+    font-weight: 650;
 }
 
 .tenant-chip__icon {
@@ -434,21 +436,22 @@
 }
 
 .tenant-context__change {
+    margin-left: 6px;
     border: none;
     background: transparent;
-    color: var(--login-accent);
-    font-weight: 700;
+    color: var(--login-primary);
+    font-weight: 650;
     cursor: pointer;
     padding: 6px 8px;
-    border-radius: 8px;
+    border-radius: 10px;
     transition: background 160ms ease, color 160ms ease;
 
     &:hover {
-        background: color-mix(in srgb, var(--login-accent) 10%, transparent);
+        background: color-mix(in srgb, var(--login-primary) 12%, transparent);
     }
 
     &:focus-visible {
-        outline: 2px solid color-mix(in srgb, var(--login-accent) 30%, transparent);
+        outline: 2px solid color-mix(in srgb, var(--login-primary) 30%, transparent);
         outline-offset: 2px;
     }
 }
@@ -458,41 +461,13 @@
 }
 
 .tenant-edit-input {
-    border-color: var(--login-accent) !important;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--login-accent) 26%, transparent) !important;
+    border-color: var(--login-primary) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--login-primary) 26%, transparent) !important;
     background: white !important;
 }
 
 .change-btn {
-    height: 34px;
-    padding: 0 14px;
-    background: color-mix(in srgb, var(--login-surface) 92%, transparent);
-    border: 1.5px solid color-mix(in srgb, var(--login-border) 78%, transparent);
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--login-text-muted);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-
-    svg {
-        width: 14px;
-        height: 14px;
-    }
-
-    &:hover {
-        background: color-mix(in srgb, var(--login-accent) 8%, var(--login-surface));
-        color: var(--login-text);
-        border-color: color-mix(in srgb, var(--login-accent) 26%, var(--login-border));
-    }
-
-    &:active {
-        transform: scale(0.98);
-    }
+    display: none;
 }
 
 .action-btn {
@@ -601,13 +576,13 @@
         align-items: center;
         justify-content: center;
         border-radius: 50%;
-        background: color-mix(in srgb, var(--login-accent) 12%, transparent);
-        color: var(--login-accent);
+        background: color-mix(in srgb, var(--login-primary) 12%, transparent);
+        color: var(--login-primary);
     }
 
     &:has(.checkbox-input:checked) {
-        border-color: var(--login-accent);
-        background: color-mix(in srgb, var(--login-accent) 8%, var(--login-surface));
+        border-color: var(--login-primary);
+        background: color-mix(in srgb, var(--login-primary) 8%, var(--login-surface));
         box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
         transform: translateY(-1px);
         transition: transform 0.1s ease, box-shadow 0.1s ease;
@@ -619,7 +594,7 @@
     background: none;
     border: none;
     padding: 0;
-    color: color-mix(in srgb, var(--login-accent) 72%, var(--login-text) 28%);
+    color: color-mix(in srgb, var(--login-primary) 85%, var(--login-text) 15%);
     cursor: pointer;
     font-weight: 600;
     font-size: 13px;
@@ -638,8 +613,8 @@
     }
 
     &:hover {
-        color: color-mix(in srgb, var(--login-accent) 85%, var(--login-text) 15%);
-        text-shadow: 0 0 6px color-mix(in srgb, var(--login-accent) 50%, transparent);
+        color: color-mix(in srgb, var(--login-primary) 92%, var(--login-text) 8%);
+        text-shadow: 0 0 6px color-mix(in srgb, var(--login-primary) 40%, transparent);
     }
 
     &:hover::after {
@@ -647,7 +622,7 @@
     }
 
     &:focus-visible {
-        outline: 2px solid color-mix(in srgb, var(--login-accent) 30%, transparent);
+        outline: 2px solid color-mix(in srgb, var(--login-primary) 30%, transparent);
         outline-offset: 2px;
     }
 }
@@ -658,7 +633,7 @@
     min-width: 140px;
     height: 46px;
     padding: 0 24px;
-    background: linear-gradient(180deg, color-mix(in srgb, var(--login-accent) 92%, transparent), color-mix(in srgb, var(--login-primary) 45%, var(--login-accent) 55%));
+    background: linear-gradient(180deg, color-mix(in srgb, var(--login-primary) 95%, transparent), color-mix(in srgb, var(--login-primary) 78%, var(--login-accent) 22%));
     border: none;
     border-radius: 12px;
     font-size: 15px;
@@ -666,11 +641,11 @@
     color: white;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 8px 18px rgba(219, 20, 48, 0.24);
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--login-primary) 24%, transparent);
 
     &:hover:not(:disabled) {
         transform: translateY(-1px);
-        box-shadow: 0 10px 20px rgba(219, 20, 48, 0.3);
+        box-shadow: 0 10px 20px color-mix(in srgb, var(--login-primary) 30%, transparent);
     }
 
     &:active:not(:disabled) {

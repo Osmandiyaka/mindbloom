@@ -45,7 +45,7 @@
 
             <!-- School Code -->
             @if (loginMode() === 'tenant') {
-            @if (currentTenant && !isEditingTenant()) {
+            @if (!isEditingTenant()) {
             <div class="tenant-context" aria-live="polite">
                 <div class="tenant-context__label">Signing in to</div>
                 <div class="tenant-context__row">
@@ -56,31 +56,10 @@
                     <button type="button" class="tenant-context__change" (click)="onChangeTenant()">Change</button>
                 </div>
             </div>
-            }
+            } @else {
             <div class="form-group">
                 <label class="form-label">School Code</label>
                 <div class="tenant-field">
-                    @if (!isEditingTenant()) {
-                    <!-- VIEW MODE -->
-                    <div class="input-wrapper">
-                        <svg class="input-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path
-                                d="M2 6L8 2L14 6V13C14 13.5304 13.7893 14.0391 13.4142 14.4142C13.0391 14.7893 12.5304 15 12 15H4C3.46957 15 2.96086 14.7893 2.58579 14.4142C2.21071 14.0391 2 13.5304 2 13V6Z"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                        <input type="text" class="form-input" [value]="currentTenant" readonly />
-                    </div>
-                    <button type="button" class="change-btn" (click)="onChangeTenant()">
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                            <path
-                                d="M11.3333 2.00004C11.5084 1.82494 11.7163 1.68605 11.9451 1.59129C12.1738 1.49653 12.4191 1.44775 12.6667 1.44775C12.9142 1.44775 13.1595 1.49653 13.3883 1.59129C13.617 1.68605 13.8249 1.82494 14 2.00004C14.1751 2.17513 14.314 2.383 14.4088 2.61178C14.5036 2.84055 14.5523 3.08584 14.5523 3.33337C14.5523 3.58091 14.5036 3.8262 14.4088 4.05497C14.314 4.28375 14.1751 4.49162 14 4.66671L5 13.6667L1.33334 14.6667L2.33334 11L11.3333 2.00004Z"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                        Change
-                    </button>
-                    } @else {
                     <!-- EDIT MODE -->
                     <div class="input-wrapper tenant-edit-wrapper">
                         <svg class="input-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -117,16 +96,16 @@
                                 stroke-linejoin="round" />
                         </svg>
                     </button>
-                    }
                 </div>
                 @if (tenantErrorMessage()) {
                 <p class="tenant-error">{{ tenantErrorMessage() }}</p>
                 }
                 <p class="form-help">
-                    This is your tenancy name (school code).
+                    Enter your school code to continue.
                     <a href="#" class="register-link" (click)="onRegisterTenant($event)">Register new school</a>
                 </p>
             </div>
+            }
             } @else {
             <div class="form-group">
                 <label class="form-label">Host login</label>
@@ -150,7 +129,7 @@
 
             <!-- Password -->
             <div class="form-group">
-                <div class="label-row">
+                <div class="form-label-row">
                     <label class="form-label">Password</label>
                     <a class="link-btn" routerLink="/auth/forgot">Forgot password</a>
                 </div>
