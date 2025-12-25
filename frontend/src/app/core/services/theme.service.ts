@@ -51,7 +51,7 @@ export class ThemeService {
                 primaryDark: '#2d7fd0',
                 primaryLight: '#c5e3fa',
                 secondary: '#f4bb40',
-                accent: '#41b2e8',
+                accent: '#db1430',
                 background: '#f9fafb',
                 surface: '#ffffff',
                 surfaceHover: '#f3f4f6',

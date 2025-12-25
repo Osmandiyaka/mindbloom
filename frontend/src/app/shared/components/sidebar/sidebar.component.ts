@@ -238,9 +238,9 @@ interface NavSection {
     }
 
     .nav-link.active {
-      background: transparent;
-      color: var(--text-primary);
-      font-weight: 500;
+      background: var(--color-accent, var(--accent-primary));
+      color: #fff;
+      font-weight: 600;
     }
 
     .nav-link.active::before {
@@ -264,7 +264,7 @@ interface NavSection {
     .nav-link-icon svg { width: 18px; height: 18px; stroke-width: 1.75; stroke: currentColor; }
 
     .nav-link:hover .nav-link-icon { color: var(--text-primary); opacity: 1; transform: translateX(1px); }
-    .nav-link.active .nav-link-icon { color: var(--accent-primary); opacity: 1; }
+    .nav-link.active .nav-link-icon { color: #fff; opacity: 1; }
 
     .nav-link-text { font-weight: 400; letter-spacing: 0.01em; font-size: 14px; line-height: 1.15; }
 
