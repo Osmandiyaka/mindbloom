@@ -1,0 +1,305 @@
+// =============================================================================
+// EDUHUB ACTIVE/SELECTED STATES
+// File: src/styles/eduhub/_active-states.scss
+// 
+// Uses --color-accent (#db1430) for all selected/active states
+// =============================================================================
+
+// -------------------------------------------------------------------------
+// SIDEBAR / ASIDE MENU
+// -------------------------------------------------------------------------
+.edu-sidenav-item {
+
+    &--active,
+    &.active {
+        background-color: var(--color-accent);
+        color: #fff;
+        font-weight: var(--font-weight-medium);
+        transition: color 0.2s ease, background-color 0.2s ease;
+
+        &:hover {
+            background-color: var(--color-accent);
+            color: #fff;
+        }
+
+        .edu-sidenav-item__icon {
+            color: #fff;
+        }
+    }
+}
+
+// Generic menu link active state (ASP.NET Zero compatible)
+.aside-menu .menu-item .menu-link.active,
+.menu-item .menu-link.active,
+.nav-link.active {
+    transition: color 0.2s ease, background-color 0.2s ease;
+    background-color: var(--color-accent);
+    color: #fff;
+
+    .menu-icon,
+    .nav-icon,
+    i {
+        color: #fff;
+    }
+}
+
+// -------------------------------------------------------------------------
+// TABS - Active State
+// -------------------------------------------------------------------------
+.edu-tab {
+
+    &--active,
+    &.active {
+        color: #fff;
+        background-color: var(--color-accent);
+        border-color: var(--color-accent);
+        border-bottom-color: var(--color-accent);
+
+        &:hover {
+            color: #fff;
+            background-color: var(--color-accent);
+        }
+    }
+}
+
+// Pills variant active
+.edu-tabs--pills .edu-tab {
+
+    &--active,
+    &.active {
+        background-color: var(--color-accent);
+        color: #fff;
+        box-shadow: none;
+
+        &:hover {
+            background-color: var(--color-accent);
+        }
+    }
+}
+
+// -------------------------------------------------------------------------
+// PAGINATION - Active State
+// -------------------------------------------------------------------------
+.edu-pagination__btn {
+
+    &--active,
+    &.active {
+        color: #fff;
+        background-color: var(--color-accent);
+        border-color: var(--color-accent);
+
+        &:hover:not(:disabled) {
+            background-color: var(--color-accent);
+            border-color: var(--color-accent);
+        }
+    }
+}
+
+// -------------------------------------------------------------------------
+// DROPDOWN MENU - Active Item
+// -------------------------------------------------------------------------
+.edu-dropdown__item {
+
+    &--active,
+    &.active {
+        background-color: var(--color-accent);
+        color: #fff;
+
+        &:hover {
+            background-color: var(--color-accent);
+            color: #fff;
+        }
+
+        .edu-dropdown__item-icon {
+            color: #fff;
+        }
+    }
+}
+
+// -------------------------------------------------------------------------
+// LIST GROUP - Active Item
+// -------------------------------------------------------------------------
+.edu-list-item {
+
+    &--active,
+    &.active {
+        background-color: var(--color-accent);
+        color: #fff;
+        border-color: var(--color-accent);
+
+        &:hover {
+            background-color: var(--color-accent);
+        }
+    }
+}
+
+// -------------------------------------------------------------------------
+// BUTTON GROUP - Active Button
+// -------------------------------------------------------------------------
+.edu-btn-group .edu-btn {
+
+    &--active,
+    &.active {
+        background-color: var(--color-accent);
+        border-color: var(--color-accent);
+        color: #fff;
+        z-index: 1;
+
+        &:hover:not(:disabled) {
+            background-color: var(--color-accent);
+            border-color: var(--color-accent);
+        }
+    }
+}
+
+// -------------------------------------------------------------------------
+// BREADCRUMB - Active/Current Item
+// -------------------------------------------------------------------------
+.edu-breadcrumb__item {
+
+    &--active,
+    &.active,
+    &:last-child {
+        color: var(--color-accent);
+        font-weight: var(--font-weight-medium);
+    }
+}
+
+// -------------------------------------------------------------------------
+// CHIP / TAG - Selected State
+// -------------------------------------------------------------------------
+.edu-chip,
+.edu-tag {
+
+    &--selected,
+    &.selected {
+        background-color: var(--color-accent);
+        color: #fff;
+        border-color: var(--color-accent);
+    }
+}
+
+// -------------------------------------------------------------------------
+// STEPPER - Active Step
+// -------------------------------------------------------------------------
+.edu-stepper__step {
+
+    &--active,
+    &.active {
+        .edu-stepper__circle {
+            background-color: var(--color-accent);
+            border-color: var(--color-accent);
+            color: #fff;
+        }
+
+        .edu-stepper__label {
+            color: var(--color-accent);
+            font-weight: var(--font-weight-semibold);
+        }
+    }
+
+    &--completed {
+        .edu-stepper__circle {
+            background-color: var(--color-accent);
+            border-color: var(--color-accent);
+            color: #fff;
+        }
+    }
+}
+
+// -------------------------------------------------------------------------
+// SEGMENTED CONTROL - Active Segment
+// -------------------------------------------------------------------------
+.edu-segmented-control__item {
+
+    &--active,
+    &.active {
+        background-color: var(--color-accent);
+        color: #fff;
+
+        &:hover {
+            background-color: var(--color-accent);
+        }
+    }
+}
+
+// -------------------------------------------------------------------------
+// TABLE ROW - Selected State
+// -------------------------------------------------------------------------
+.edu-table tbody tr {
+
+    &.edu-table__row--selected,
+    &.selected {
+        background-color: rgba(219, 20, 48, 0.1); // Subtle accent background
+
+        &:hover {
+            background-color: rgba(219, 20, 48, 0.15);
+        }
+    }
+}
+
+// -------------------------------------------------------------------------
+// CARD - Selected State
+// -------------------------------------------------------------------------
+.edu-card {
+
+    &--selected,
+    &.selected {
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 2px rgba(219, 20, 48, 0.2);
+    }
+}
+
+// -------------------------------------------------------------------------
+// RADIO/CHECKBOX - Accent Color Option
+// Use .edu-checkbox--accent or .edu-radio--accent for accent colored checks
+// -------------------------------------------------------------------------
+.edu-checkbox--accent {
+    .edu-checkbox__input:checked+.edu-checkbox__box {
+        background-color: var(--color-accent);
+        border-color: var(--color-accent);
+    }
+}
+
+.edu-radio--accent {
+    .edu-radio__input:checked+.edu-radio__circle {
+        border-color: var(--color-accent);
+
+        &::after {
+            background-color: var(--color-accent);
+        }
+    }
+}
+
+// -------------------------------------------------------------------------
+// TOGGLE - Accent Color Option
+// -------------------------------------------------------------------------
+.edu-toggle--accent {
+    .edu-toggle__input:checked+.edu-toggle__track {
+        background-color: var(--color-accent);
+    }
+}
+
+// -------------------------------------------------------------------------
+// UTILITY CLASSES FOR ACCENT COLOR
+// -------------------------------------------------------------------------
+.edu-bg-accent {
+    background-color: var(--color-accent) !important;
+}
+
+.edu-text-accent {
+    color: var(--color-accent) !important;
+}
+
+.edu-border-accent {
+    border-color: var(--color-accent) !important;
+}
+
+// -------------------------------------------------------------------------
+// FOCUS RING - Accent Variant
+// -------------------------------------------------------------------------
+.edu-focus-accent:focus,
+.edu-focus-accent:focus-visible {
+    box-shadow: 0 0 0 3px rgba(219, 20, 48, 0.25);
+    border-color: var(--color-accent);
+}

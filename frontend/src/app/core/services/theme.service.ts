@@ -80,7 +80,7 @@ export class ThemeService {
                 primaryDark: '#3b9eed',
                 primaryLight: '#1a52a4',
                 secondary: '#f6c55d',
-                accent: '#5dbeeb',
+                accent: '#db1430',
                 background: '#030712',
                 surface: '#111827',
                 surfaceHover: '#1f2937',
