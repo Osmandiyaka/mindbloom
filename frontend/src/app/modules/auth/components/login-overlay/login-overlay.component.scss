@@ -92,6 +92,19 @@
         filter: blur(0px);
         pointer-events: none;
     }
+
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0, rgba(255, 255, 255, 0.04) 1px, transparent 1px, transparent 24px),
+            repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0, rgba(255, 255, 255, 0.04) 1px, transparent 1px, transparent 24px),
+            repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0px, rgba(255, 255, 255, 0.05) 0.5px, transparent 0.5px, transparent 28px);
+        opacity: 0.35;
+        mix-blend-mode: soft-light;
+        pointer-events: none;
+    }
 }
 
 .brand-content {
@@ -132,10 +145,11 @@
 }
 
 .brand-trust {
-    font-size: 11px;
+    font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
+    font-size: 10px;
     font-weight: 600;
     color: color-mix(in srgb, #94a3b8 85%, #0b1224 15%);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
     margin: auto 0 0 0;
     padding-top: 10px;
 }
@@ -336,6 +350,7 @@
     justify-content: space-between;
     gap: 12px;
     margin-bottom: 8px;
+    width: 100%;
 }
 
 .form-label {
@@ -358,16 +373,18 @@
     position: relative;
     display: flex;
     align-items: center;
-    border: 1px solid #2D3748;
+    border: 1px solid transparent;
     border-radius: 6px;
     padding: 2px 2px 2px 0;
     transition: all 0.2s ease;
-    background: var(--login-input-bg);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+    background:
+        linear-gradient(var(--login-input-bg), var(--login-input-bg)) padding-box,
+        linear-gradient(135deg, #334155, #1E293B) border-box;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 
     &:focus-within {
-        border-color: #2D3748;
-        box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.2);
+        border-color: transparent;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05), 0 0 0 2px rgba(49, 130, 206, 0.2);
 
         .input-icon {
             color: var(--login-primary);
@@ -382,9 +399,12 @@
 .input-icon {
     position: absolute;
     left: 12px;
+    width: 16px;
+    height: 16px;
     pointer-events: none;
     z-index: 1;
     color: var(--login-text-muted);
+    opacity: 0.5;
     transition: color 0.2s ease;
 
     path {
@@ -431,8 +451,10 @@
 }
 
 .login-card .input-wrapper {
-    background: var(--login-input-bg) !important;
-    border-color: var(--color-border, #e0e0e0) !important;
+    background:
+        linear-gradient(var(--login-input-bg), var(--login-input-bg)) padding-box,
+        linear-gradient(135deg, #334155, #1E293B) border-box !important;
+    border-color: transparent !important;
 }
 
 .login-card input.form-input:-webkit-autofill,
@@ -714,7 +736,7 @@
 .checkbox-chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
     padding: 0.4rem 0.65rem;
     border: 1px solid color-mix(in srgb, var(--color-border, #d1d5db) 80%, transparent);
     border-radius: 999px;
@@ -724,6 +746,7 @@
     color: var(--color-text-primary, #1f2937);
     transition: all 0.2s ease;
     user-select: none;
+    position: relative;
 
     .checkbox-input {
         display: none;
@@ -731,13 +754,15 @@
 
     .chip-icon {
         display: inline-flex;
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
         align-items: center;
         justify-content: center;
-        border-radius: 50%;
-        background: color-mix(in srgb, var(--login-primary) 12%, transparent);
+        border-radius: 5px;
+        background: color-mix(in srgb, var(--login-primary) 8%, transparent);
         color: var(--login-primary);
+        border: 1px solid color-mix(in srgb, var(--login-primary) 45%, transparent);
+        transition: transform 200ms ease, background-color 200ms ease, border-color 200ms ease, color 200ms ease;
     }
 
     &:has(.checkbox-input:checked) {
@@ -746,6 +771,13 @@
         box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
         transform: translateY(-1px);
         transition: transform 0.1s ease, box-shadow 0.1s ease;
+
+        .chip-icon {
+            background: #3B82F6;
+            border-color: #3B82F6;
+            color: white;
+            transform: scale(1.05);
+        }
     }
 }
 
@@ -806,11 +838,15 @@
     align-items: center;
     justify-content: center;
     letter-spacing: 0.01em;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 10px 20px rgba(15, 61, 118, 0.28);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    background-size: 200% 100%;
+    background-image: linear-gradient(180deg, #1E90FF 0%, #0F3D76 100%), linear-gradient(120deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.4) 100%);
 
     &:hover:not(:disabled) {
         transform: scale(1.02);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 12px 28px rgba(15, 61, 118, 0.36);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border-top: 1px solid #60A5FA;
+        background-position: 120% 0;
     }
 
     &:active:not(:disabled) {
