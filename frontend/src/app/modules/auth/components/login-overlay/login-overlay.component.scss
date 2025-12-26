@@ -149,45 +149,49 @@
         -webkit-font-smoothing: antialiased;
     }
 
+    .school-os {
+        filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--os-core) 12%, transparent));
+    }
+
     .core-node {
-        fill: var(--os-core);
-        stroke: color-mix(in srgb, var(--os-core) 60%, transparent);
-        stroke-width: 4;
+        fill: color-mix(in srgb, var(--os-core) 82%, var(--login-surface) 18%);
+        stroke: color-mix(in srgb, var(--os-core) 48%, transparent);
+        stroke-width: 3.2;
     }
 
     .core-ring {
         fill: none;
-        stroke: color-mix(in srgb, var(--os-core) 35%, transparent);
-        stroke-width: 2.2;
+        stroke: color-mix(in srgb, var(--os-core) 34%, transparent);
+        stroke-width: 2.4;
     }
 
     .core-glow {
         fill: var(--os-glow);
-        filter: blur(18px);
-        opacity: 0.22;
+        filter: blur(20px);
+        opacity: 0.26;
     }
 
     .connector {
-        stroke: color-mix(in srgb, var(--os-line) 85%, transparent);
-        stroke-width: 1.5;
+        stroke: color-mix(in srgb, var(--os-line) 100%, transparent);
+        stroke-width: 1.6;
         stroke-linecap: round;
     }
 
     .module-card {
-        fill: var(--os-surface);
-        stroke: color-mix(in srgb, var(--os-line) 70%, transparent);
-        stroke-width: 1.3;
+        fill: color-mix(in srgb, var(--os-surface) 85%, var(--login-surface) 15%);
+        stroke: color-mix(in srgb, var(--os-line) 65%, var(--os-core) 15%);
+        stroke-width: 1.4;
     }
 
     .module-icon {
-        fill: var(--os-core);
+        fill: color-mix(in srgb, var(--os-core) 92%, transparent);
     }
 
     .module-label {
-        fill: color-mix(in srgb, var(--os-module) 92%, transparent);
+        fill: color-mix(in srgb, var(--os-module) 96%, transparent);
         font-size: 11px;
         font-weight: 600;
-        letter-spacing: 0.01em;
+        letter-spacing: 0.02em;
         dominant-baseline: central;
         font-family: inherit;
     }
