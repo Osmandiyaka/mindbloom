@@ -54,11 +54,11 @@
     --brand-muted: color-mix(in srgb, var(--color-text-primary, #dbeafe) 38%, transparent);
     --brand-glow: color-mix(in srgb, var(--color-primary, #3b82f6) 32%, transparent);
     --brand-surface: color-mix(in srgb, var(--color-background, #0b1224) 65%, var(--color-surface, #0f172a) 35%);
-    --os-core: var(--brand-accent);
-    --os-line: color-mix(in srgb, var(--login-border) 60%, var(--login-surface) 40%);
-    --os-module: color-mix(in srgb, var(--color-text-primary, #e2e8f0) 70%, var(--login-surface) 30%);
-    --os-surface: color-mix(in srgb, var(--brand-surface) 70%, var(--login-surface) 30%);
-    --os-glow: color-mix(in srgb, var(--brand-accent) 32%, transparent);
+    --os-core: color-mix(in srgb, var(--brand-accent) 92%, #3b82f6 8%);
+    --os-stroke: color-mix(in srgb, #9fb7ff 92%, transparent);
+    --os-module: color-mix(in srgb, var(--color-text-primary, #e2e8f0) 78%, var(--login-surface) 22%);
+    --os-surface: color-mix(in srgb, var(--brand-surface) 74%, var(--login-surface) 26%);
+    --os-glow: color-mix(in srgb, var(--brand-accent) 26%, transparent);
 
     background:
         radial-gradient(35% 40% at 20% 18%, color-mix(in srgb, #0f1a3a 72%, #111827 28%) 0%, transparent 55%),
@@ -68,7 +68,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 36px 24px;
+    padding: 36px 10%;
     border-radius: var(--login-radius-lg) 0 0 var(--login-radius-lg);
     position: relative;
     overflow: hidden;
@@ -98,17 +98,18 @@
         position: absolute;
         inset: 0;
         background:
-            repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0, rgba(255, 255, 255, 0.04) 1px, transparent 1px, transparent 24px),
-            repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0, rgba(255, 255, 255, 0.04) 1px, transparent 1px, transparent 24px),
-            repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0px, rgba(255, 255, 255, 0.05) 0.5px, transparent 0.5px, transparent 28px);
-        opacity: 0.35;
+            repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0, rgba(255, 255, 255, 0.025) 1px, transparent 1px, transparent 24px),
+            repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0, rgba(255, 255, 255, 0.025) 1px, transparent 1px, transparent 24px),
+            repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 0px, rgba(255, 255, 255, 0.04) 0.5px, transparent 0.5px, transparent 28px);
+        opacity: 0.18;
         mix-blend-mode: soft-light;
         pointer-events: none;
+        filter: blur(0.4px);
     }
 }
 
 .brand-content {
-    text-align: center;
+    text-align: left;
     color: white;
     position: relative;
     z-index: 1;
@@ -118,6 +119,25 @@
     max-width: 260px;
     height: 100%;
     justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #e2e8f0;
+    background: color-mix(in srgb, rgba(255, 255, 255, 0.14) 80%, transparent);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    margin-bottom: 8px;
 }
 
 .brand-title {
@@ -155,10 +175,10 @@
 }
 
 .brand-illustration {
-    width: 220px;
-    height: 180px;
-    margin: 18px auto 14px;
-    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.18));
+    width: 210px;
+    height: 170px;
+    margin: 22px auto 14px;
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.12));
 
     svg {
         width: 100%;
@@ -169,19 +189,19 @@
     }
 
     .school-os {
-        filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--os-core) 12%, transparent));
+        filter: drop-shadow(0 6px 12px color-mix(in srgb, var(--os-core) 12%, transparent));
     }
 
     .core-node {
-        fill: color-mix(in srgb, var(--os-core) 82%, var(--login-surface) 18%);
-        stroke: color-mix(in srgb, var(--os-core) 48%, transparent);
-        stroke-width: 3.2;
+        fill: color-mix(in srgb, var(--os-core) 88%, var(--login-surface) 12%);
+        stroke: color-mix(in srgb, var(--os-stroke) 55%, transparent);
+        stroke-width: 2.4;
     }
 
     .core-ring {
         fill: none;
-        stroke: color-mix(in srgb, var(--os-core) 34%, transparent);
-        stroke-width: 2.4;
+        stroke: color-mix(in srgb, var(--os-stroke) 80%, transparent);
+        stroke-width: 1.4;
     }
 
     .core-glow {
@@ -191,15 +211,15 @@
     }
 
     .connector {
-        stroke: color-mix(in srgb, var(--os-line) 100%, transparent);
-        stroke-width: 1.6;
+        stroke: color-mix(in srgb, var(--os-stroke) 85%, transparent);
+        stroke-width: 1.1;
         stroke-linecap: round;
     }
 
     .module-card {
-        fill: color-mix(in srgb, var(--os-surface) 85%, var(--login-surface) 15%);
-        stroke: color-mix(in srgb, var(--os-line) 65%, var(--os-core) 15%);
-        stroke-width: 1.4;
+        fill: color-mix(in srgb, var(--os-surface) 82%, var(--login-surface) 18%);
+        stroke: color-mix(in srgb, var(--os-stroke) 70%, transparent);
+        stroke-width: 1.2;
     }
 
     .module-icon {
@@ -207,10 +227,10 @@
     }
 
     .module-label {
-        fill: color-mix(in srgb, var(--os-module) 96%, transparent);
+        fill: color-mix(in srgb, var(--os-module) 90%, transparent);
         font-size: 11px;
         font-weight: 600;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.04em;
         dominant-baseline: central;
         font-family: inherit;
     }
