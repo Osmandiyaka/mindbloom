@@ -132,12 +132,14 @@
     text-transform: uppercase;
     color: #e2e8f0;
     background: color-mix(in srgb, rgba(255, 255, 255, 0.14) 80%, transparent);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 999px;
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    margin-bottom: 8px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    position: absolute;
+    top: 32px;
+    left: 32px;
 }
 
 .brand-title {
@@ -175,8 +177,8 @@
 }
 
 .brand-illustration {
-    width: 210px;
-    height: 170px;
+    width: 220px;
+    height: 180px;
     margin: 22px auto 14px;
     filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.12));
 
@@ -188,74 +190,33 @@
         -webkit-font-smoothing: antialiased;
     }
 
-    .school-os {
-        filter: drop-shadow(0 6px 12px color-mix(in srgb, var(--os-core) 12%, transparent));
+
+    .stack-frames {
+        transform: rotateX(20deg) rotateY(-20deg);
+        transform-style: preserve-3d;
+        filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.18));
     }
 
-    .core-node {
-        fill: color-mix(in srgb, var(--os-core) 88%, var(--login-surface) 12%);
-        stroke: color-mix(in srgb, var(--os-stroke) 55%, transparent);
-        stroke-width: 2.4;
+    .frame {
+        fill: url(#frameGradient);
+        stroke: rgba(255, 255, 255, 0.1);
+        stroke-width: 1px;
+        shape-rendering: geometricPrecision;
+        filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.16));
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
     }
 
-    .core-ring {
-        fill: none;
-        stroke: color-mix(in srgb, var(--os-stroke) 80%, transparent);
-        stroke-width: 1.4;
+    .frame--1 {
+        transform: translateZ(6px);
     }
 
-    .core-glow {
-        fill: var(--os-glow);
-        filter: blur(20px);
-        opacity: 0.26;
+    .frame--2 {
+        transform: translateZ(12px);
     }
 
-    .connector {
-        stroke: color-mix(in srgb, var(--os-stroke) 85%, transparent);
-        stroke-width: 1.1;
-        stroke-linecap: round;
-    }
-
-    .module-card {
-        fill: color-mix(in srgb, var(--os-surface) 82%, var(--login-surface) 18%);
-        stroke: color-mix(in srgb, var(--os-stroke) 70%, transparent);
-        stroke-width: 1.2;
-    }
-
-    .module-icon {
-        fill: color-mix(in srgb, var(--os-core) 92%, transparent);
-    }
-
-    .module-label {
-        fill: color-mix(in srgb, var(--os-module) 90%, transparent);
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.04em;
-        dominant-baseline: central;
-        font-family: inherit;
-    }
-
-    .module.admissions {
-        animation: moduleFloat 8s ease-in-out infinite 0s;
-    }
-
-    .module.academics {
-        animation: moduleFloat 8.8s ease-in-out infinite 0.2s;
-    }
-
-    .module.finance {
-        animation: moduleFloat 9.4s ease-in-out infinite 0.4s;
-    }
-
-    .module.admin {
-        animation: moduleFloat 9.8s ease-in-out infinite 0.6s;
-        backdrop-filter: blur(10px);
-        filter: drop-shadow(0 6px 16px rgba(255, 255, 255, 0.08));
-
-        .module-card {
-            fill: color-mix(in srgb, rgba(255, 255, 255, 0.14) 60%, var(--os-surface) 40%);
-            stroke: rgba(255, 255, 255, 0.1);
-        }
+    .frame--3 {
+        transform: translateZ(18px);
     }
 }
 

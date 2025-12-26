@@ -9,45 +9,16 @@
 
             <div class="brand-illustration" aria-hidden="true">
                 <svg viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg">
-                    <g class="school-os">
-                        <g class="core">
-                            <circle cx="120" cy="102" r="20" class="core-node" />
-                            <circle cx="120" cy="102" r="28" class="core-ring" />
-                            <circle cx="120" cy="102" r="46" class="core-glow" />
-                        </g>
-
-                        <g class="connectors">
-                            <path d="M120 78 L120 48" class="connector" />
-                            <path d="M120 126 L120 156" class="connector" />
-                            <path d="M104 92 L62 70" class="connector" />
-                            <path d="M136 92 L178 68" class="connector" />
-                            <path d="M104 118 L62 140" class="connector" />
-                            <path d="M136 118 L178 142" class="connector" />
-                        </g>
-
-                        <g class="module admissions" transform="translate(60 36)">
-                            <rect width="82" height="36" rx="12" class="module-card" />
-                            <circle cx="18" cy="18" r="7" class="module-icon" />
-                            <text x="34" y="22" class="module-label">Admissions</text>
-                        </g>
-
-                        <g class="module academics" transform="translate(136 26)">
-                            <rect width="82" height="36" rx="12" class="module-card" />
-                            <circle cx="18" cy="18" r="7" class="module-icon" />
-                            <text x="34" y="22" class="module-label">Academics</text>
-                        </g>
-
-                        <g class="module finance" transform="translate(50 136)">
-                            <rect width="84" height="36" rx="12" class="module-card" />
-                            <circle cx="18" cy="18" r="7" class="module-icon" />
-                            <text x="34" y="22" class="module-label">Finance</text>
-                        </g>
-
-                        <g class="module admin" transform="translate(146 136)">
-                            <rect width="86" height="36" rx="12" class="module-card" />
-                            <circle cx="18" cy="18" r="7" class="module-icon" />
-                            <text x="34" y="22" class="module-label">Admin</text>
-                        </g>
+                    <defs>
+                        <linearGradient id="frameGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="rgba(255,255,255,0.05)" />
+                            <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+                        </linearGradient>
+                    </defs>
+                    <g class="stack-frames" transform="translate(20 12)">
+                        <rect class="frame frame--1" x="16" y="24" width="204" height="124" rx="14" />
+                        <rect class="frame frame--2" x="32" y="38" width="180" height="112" rx="12" />
+                        <rect class="frame frame--3" x="50" y="54" width="154" height="98" rx="10" />
                     </g>
                 </svg>
             </div>
