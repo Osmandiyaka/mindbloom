@@ -54,6 +54,11 @@
     --brand-muted: color-mix(in srgb, var(--color-text-primary, #dbeafe) 38%, transparent);
     --brand-glow: color-mix(in srgb, var(--color-primary, #3b82f6) 32%, transparent);
     --brand-surface: color-mix(in srgb, var(--color-background, #0b1224) 65%, var(--color-surface, #0f172a) 35%);
+    --os-core: var(--brand-accent);
+    --os-line: color-mix(in srgb, var(--login-border) 60%, var(--login-surface) 40%);
+    --os-module: color-mix(in srgb, var(--color-text-primary, #e2e8f0) 70%, var(--login-surface) 30%);
+    --os-surface: color-mix(in srgb, var(--brand-surface) 70%, var(--login-surface) 30%);
+    --os-glow: color-mix(in srgb, var(--brand-accent) 32%, transparent);
 
     background: radial-gradient(circle at 16% 18%, color-mix(in srgb, var(--brand-glow) 40%, transparent) 0%, transparent 48%), radial-gradient(circle at 82% 26%, color-mix(in srgb, var(--brand-glow) 45%, transparent) 0%, transparent 52%), linear-gradient(165deg, color-mix(in srgb, var(--brand-surface) 80%, transparent), color-mix(in srgb, var(--brand-accent) 28%, var(--brand-surface) 72%));
     display: flex;
@@ -118,6 +123,13 @@
     line-height: 1.5;
 }
 
+.brand-trust {
+    font-size: 12px;
+    color: color-mix(in srgb, #ffffff 72%, transparent);
+    letter-spacing: 0.04em;
+    margin: 6px 0 0 0;
+}
+
 .brand-illustration {
     width: 220px;
     height: 180px;
@@ -130,78 +142,65 @@
         opacity: 0.98;
     }
 
-    .core {
-        fill: var(--brand-accent);
-        stroke: color-mix(in srgb, var(--brand-accent) 60%, transparent);
+    .core-node {
+        fill: var(--os-core);
+        stroke: color-mix(in srgb, var(--os-core) 60%, transparent);
         stroke-width: 4;
     }
 
     .core-ring {
         fill: none;
-        stroke: color-mix(in srgb, var(--brand-accent) 40%, transparent);
-        stroke-width: 2.5;
+        stroke: color-mix(in srgb, var(--os-core) 35%, transparent);
+        stroke-width: 2.2;
     }
 
-    .halo {
-        filter: blur(16px);
+    .core-glow {
+        fill: var(--os-glow);
+        filter: blur(18px);
+        opacity: 0.22;
     }
 
     .connector {
-        stroke: color-mix(in srgb, var(--brand-muted) 78%, transparent);
+        stroke: var(--os-line);
         stroke-width: 1.5;
         stroke-linecap: round;
     }
 
     .module-card {
-        fill: color-mix(in srgb, var(--brand-surface) 70%, var(--login-surface) 30%);
-        stroke: color-mix(in srgb, var(--brand-muted) 70%, transparent);
-        stroke-width: 1.4;
-    }
-
-    .module-icon {
-        fill: var(--brand-accent);
-    }
-
-    .module-bar {
-        fill: color-mix(in srgb, var(--brand-accent) 40%, var(--brand-muted) 60%);
-    }
-
-    .trust-pill {
-        fill: color-mix(in srgb, var(--brand-surface) 72%, var(--login-surface) 28%);
-        stroke: color-mix(in srgb, var(--brand-muted) 65%, transparent);
+        fill: var(--os-surface);
+        stroke: color-mix(in srgb, var(--os-line) 70%, transparent);
         stroke-width: 1.3;
     }
 
-    .trust-dot {
-        fill: var(--brand-accent);
+    .module-icon {
+        fill: var(--os-core);
     }
 
-    .trust-bar {
-        fill: color-mix(in srgb, var(--brand-accent) 32%, var(--brand-muted) 68%);
+    .module-label {
+        fill: var(--os-module);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
     }
 
-    .float-a {
-        animation: slowFloat 8s ease-in-out infinite;
+    .module.admissions {
+        animation: moduleFloat 8s ease-in-out infinite 0s;
     }
 
-    .float-b {
-        animation: slowFloat 9.2s ease-in-out infinite 0.3s;
+    .module.academics {
+        animation: moduleFloat 8.8s ease-in-out infinite 0.2s;
     }
 
-    .float-c {
-        animation: slowFloat 8.6s ease-in-out infinite 0.5s;
+    .module.finance {
+        animation: moduleFloat 9.4s ease-in-out infinite 0.4s;
     }
 
-    .float-d {
-        animation: slowFloat 9.6s ease-in-out infinite 0.7s;
-    }
-
-    .float-core {
-        animation: slowFloat 10s ease-in-out infinite 1s;
+    .module.admin {
+        animation: moduleFloat 9.8s ease-in-out infinite 0.6s;
     }
 }
 
-@keyframes slowFloat {
+@keyframes moduleFloat {
 
     0%,
     100% {
@@ -209,7 +208,7 @@
     }
 
     50% {
-        transform: translateY(-6px);
+        transform: translateY(-4px);
     }
 }
 
