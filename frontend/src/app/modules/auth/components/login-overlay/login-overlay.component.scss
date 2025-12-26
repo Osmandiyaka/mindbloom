@@ -129,7 +129,7 @@
 
 .brand-trust {
     font-size: 11.5px;
-    color: color-mix(in srgb, #ffffff 62%, transparent);
+    color: color-mix(in srgb, #ffffff 78%, transparent);
     letter-spacing: 0.08em;
     margin: auto 0 0 0;
     padding-top: 10px;
@@ -223,7 +223,7 @@
 
 // RIGHT LOGIN PANEL
 .login-panel {
-    padding: 48px 56px;
+    padding: 40px 56px;
     display: flex;
     flex-direction: column;
     background: var(--login-surface);
@@ -252,7 +252,7 @@
     border-radius: 999px;
     border: 1px solid color-mix(in srgb, var(--color-border, #e0e0e0) 60%, transparent);
     background: color-mix(in srgb, var(--login-surface) 90%, var(--color-background, #0f172a) 10%);
-    margin-bottom: var(--login-space-4);
+    margin-bottom: 12px;
 }
 
 .mode-pill {
@@ -292,7 +292,7 @@
     align-items: baseline;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .form-label {
@@ -702,6 +702,7 @@
     cursor: pointer;
     font-weight: 600;
     font-size: 13px;
+    line-height: 1.4;
     transition: color 0.2s ease;
     text-decoration: none;
 
@@ -737,7 +738,7 @@
     min-width: 140px;
     height: 46px;
     padding: 0 24px;
-    background: linear-gradient(180deg, color-mix(in srgb, var(--login-primary) 95%, transparent), color-mix(in srgb, var(--login-primary) 78%, var(--login-accent) 22%));
+    background: linear-gradient(180deg, color-mix(in srgb, var(--login-primary) 92%, transparent), color-mix(in srgb, var(--login-primary) 82%, transparent));
     border: none;
     border-radius: 12px;
     font-size: 15px;
@@ -745,11 +746,11 @@
     color: white;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 8px 18px color-mix(in srgb, var(--login-primary) 24%, transparent);
+    box-shadow: 0 6px 14px color-mix(in srgb, var(--login-primary) 18%, transparent);
 
     &:hover:not(:disabled) {
         transform: translateY(-1px);
-        box-shadow: 0 10px 20px color-mix(in srgb, var(--login-primary) 30%, transparent);
+        box-shadow: 0 8px 18px color-mix(in srgb, var(--login-primary) 26%, transparent);
     }
 
     &:active:not(:disabled) {
