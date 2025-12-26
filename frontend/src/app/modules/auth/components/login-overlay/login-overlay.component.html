@@ -1,67 +1,121 @@
 <div class="login-card">
-    <!-- Left Brand Panel -->
-    <div class="brand-panel">
-        <div class="brand-content">
-            <span class="status-pill">Admin</span>
-            <h1 class="brand-title">MindBloom</h1>
-            <p class="brand-subtitle">The operating system for modern schools.</p>
-            <p class="brand-meta">Admissions, academics, finance, and administration — unified.</p>
-
-            <div class="brand-illustration" aria-hidden="true">
-                <svg viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- Left Hero Panel -->
+    <div class="hero-panel">
+        <div class="brand-row">
+            <div class="logo-badge" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#gradLogo)" />
+                    <path
+                        d="M18 28.5 32 22l14 6.5v11.2c0 2.9-2.2 5.9-6.7 8.8-1.2.8-2.7 1.3-4.3 1.3-1.6 0-3.1-.4-4.3-1.3-4.5-2.9-6.7-5.9-6.7-8.8V28.5Z"
+                        stroke="white" stroke-width="3" stroke-linejoin="round" fill="none" />
+                    <path d="M24.5 33.5 31 39l8.5-8.5" stroke="white" stroke-width="3" stroke-linecap="round"
+                        stroke-linejoin="round" />
                     <defs>
-                        <linearGradient id="frameGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="rgba(255,255,255,0.05)" />
-                            <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+                        <linearGradient id="gradLogo" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#6D5CFF" />
+                            <stop offset="1" stop-color="#2B6CF6" />
                         </linearGradient>
                     </defs>
-                    <g class="stack-frames" transform="translate(20 12)">
-                        <rect class="frame frame--1" x="16" y="24" width="204" height="124" rx="14" />
-                        <rect class="frame frame--2" x="32" y="38" width="180" height="112" rx="12" />
-                        <rect class="frame frame--3" x="50" y="54" width="154" height="98" rx="10" />
-                    </g>
                 </svg>
             </div>
+            <div class="brand-text">
+                <div class="brand-name">MindBloom</div>
+                <span class="badge-pill">ADMIN</span>
+            </div>
+        </div>
 
-            <p class="brand-trust">Secure • Multi-tenant • Role-based access</p>
+        <h1 class="hero-title">The operating system for <span>modern schools</span></h1>
+        <p class="hero-subtitle">Admissions, academics, finance, and administration — unified.</p>
+
+        <div class="feature-list" aria-label="Key capabilities">
+            <div class="feature-card">
+                <div class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                        <rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M8 12.5 11 15l5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <div class="feature-copy">
+                    <div class="feature-title">Secure & Reliable</div>
+                    <div class="feature-sub">Enterprise-grade security</div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                        <rect x="5" y="7" width="14" height="10" rx="2.5" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M9 7V5h6v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <div class="feature-copy">
+                    <div class="feature-title">Multi-tenant Architecture</div>
+                    <div class="feature-sub">Isolated tenant environments</div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                        <path d="M12 4v16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                        <path d="m7 10 5-6 5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <div class="feature-copy">
+                    <div class="feature-title">Role-based Access</div>
+                    <div class="feature-sub">Granular permission control</div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                        <path d="M6 12h6l6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M6 16h6l6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <div class="feature-copy">
+                    <div class="feature-title">Lightning Fast</div>
+                    <div class="feature-sub">Optimized performance</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Right Login Panel -->
-    <div class="login-panel">
-        <h2 class="welcome-title">Welcome to MindBloom</h2>
+    <!-- Right Auth Panel -->
+    <div class="auth-panel">
+        <div class="login-shell">
+            <h2 class="welcome-title">Welcome back</h2>
+            <p class="welcome-subtitle">Sign in to access your dashboard</p>
 
-        <form (ngSubmit)="onSubmit()" class="login-form">
             <div class="mode-switch" role="tablist" aria-label="Login mode" [attr.data-active]="loginMode()">
-                <span class="mode-switch__slider" aria-hidden="true"></span>
-                <button type="button" class="mode-pill" [class.active]="loginMode() === 'tenant'"
+                <button type="button" class="mode-btn" [class.active]="loginMode() === 'tenant'"
                     (click)="setMode('tenant')" role="tab" [attr.aria-selected]="loginMode() === 'tenant'">
-                    School admin
+                    School Admin
                 </button>
-                <button type="button" class="mode-pill" [class.active]="loginMode() === 'host'"
-                    (click)="setMode('host')" role="tab" [attr.aria-selected]="loginMode() === 'host'">
+                <button type="button" class="mode-btn" [class.active]="loginMode() === 'host'" (click)="setMode('host')"
+                    role="tab" [attr.aria-selected]="loginMode() === 'host'">
                     Host
                 </button>
             </div>
 
-            <!-- School Code -->
             @if (loginMode() === 'tenant') {
             @if (!isEditingTenant()) {
             <div class="tenant-card" aria-live="polite">
-                <div class="tenant-card__icon" aria-hidden="true">
-                    <svg viewBox="0 0 20 20" width="18" height="18" focusable="false">
-                        <path d="M10 2.5 4 4.6v4.9c0 3.1 2.45 5.82 6 6.9 3.55-1.08 6-3.8 6-6.9V4.6L10 2.5Z"
-                            stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round" />
-                        <path d="M6.6 10.2 9 12.6 13.4 8.2" stroke="currentColor" stroke-width="1.6" fill="none"
-                            stroke-linecap="round" stroke-linejoin="round" />
+                <div class="tenant-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                        <rect x="5" y="7" width="14" height="11" rx="3" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M9 7V5h6v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                     </svg>
                 </div>
-                <div class="tenant-card__body">
-                    <div class="tenant-card__label">SIGNING IN TO</div>
-                    <div class="tenant-card__name">{{ currentTenant }}</div>
+                <div class="tenant-info">
+                    <div class="tenant-label">SIGNING IN TO</div>
+                    <div class="tenant-name">{{ currentTenant }}</div>
+                    <div class="tenant-meta">Tenant Code: {{ currentTenantCode }}</div>
                 </div>
-                <button type="button" class="tenant-card__change" (click)="onChangeTenant()">
-                    <span>Change</span>
+                <button type="button" class="tenant-change" (click)="onChangeTenant()">
+                    Change
                     <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
                         <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" stroke-width="1.6" fill="none"
                             stroke-linecap="round" stroke-linejoin="round" />
@@ -72,7 +126,6 @@
             <div class="form-group">
                 <label class="form-label">School Code</label>
                 <div class="tenant-field">
-                    <!-- EDIT MODE -->
                     <div class="input-wrapper tenant-edit-wrapper">
                         <svg class="input-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
                             <path
@@ -119,94 +172,110 @@
             </div>
             }
             } @else {
-            <div class="form-group">
-                <label class="form-label">Host login</label>
-                <p class="form-help">Host admins can sign in without selecting a school.</p>
-            </div>
+            <div class="host-hint">Host admins can sign in without selecting a school.</div>
             }
 
-            <!-- Username -->
-            <div class="form-group">
-                <label class="form-label">Email or username</label>
-                <div class="input-wrapper">
-                    <svg class="input-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path
-                            d="M13 14V12.6667C13 11.9594 12.719 11.2811 12.219 10.781C11.7189 10.281 11.0406 10 10.3333 10H5.66667C4.95942 10 4.28115 10.281 3.78105 10.781C3.28095 11.2811 3 11.9594 3 12.6667V14M10.6667 4.66667C10.6667 6.13943 9.47276 7.33333 8 7.33333C6.52724 7.33333 5.33333 6.13943 5.33333 4.66667C5.33333 3.19391 6.52724 2 8 2C9.47276 2 10.6667 3.19391 10.6667 4.66667Z"
-                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <input type="text" class="form-input" placeholder="admin" [value]="username()"
-                        (input)="username.set($any($event.target).value)" required />
-                </div>
-            </div>
-
-            <!-- Password -->
-            <div class="form-group">
-                <div class="form-label-row">
-                    <label class="form-label">Password</label>
-                    <a class="link-btn" routerLink="/auth/forgot">Forgot password</a>
-                </div>
-                <div class="input-wrapper">
-                    <svg class="input-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path
-                            d="M12.6667 7.33333H3.33333C2.59695 7.33333 2 7.93029 2 8.66667V13.3333C2 14.0697 2.59695 14.6667 3.33333 14.6667H12.6667C13.403 14.6667 14 14.0697 14 13.3333V8.66667C14 7.93029 13.403 7.33333 12.6667 7.33333Z"
-                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                        <path
-                            d="M4.66675 7.33333V4.66667C4.66675 3.78261 5.01794 2.93477 5.64306 2.30964C6.26818 1.68452 7.11603 1.33333 8.00008 1.33333C8.88414 1.33333 9.73198 1.68452 10.3571 2.30964C10.9822 2.93477 11.3334 3.78261 11.3334 4.66667V7.33333"
-                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <input [type]="showPassword() ? 'text' : 'password'" class="form-input" [value]="password()"
-                        (input)="password.set($any($event.target).value)" required />
-                    <button type="button" class="input-toggle" (click)="togglePassword()"
-                        aria-label="Toggle password visibility">
-                        <svg *ngIf="!showPassword()" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <form (ngSubmit)="onSubmit()" class="login-form">
+                <div class="form-group">
+                    <label class="form-label">Email or username</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
                             <path
-                                d="M1.333 8c1.4-2.8 3.733-4.333 6.667-4.333S13.267 5.2 14.667 8c-1.4 2.8-3.733 4.333-6.667 4.333S2.733 10.8 1.333 8Z"
-                                stroke="currentColor" stroke-width="1.2" />
-                            <circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.2" />
+                                d="M13 14V12.6667C13 11.9594 12.719 11.2811 12.219 10.781C11.7189 10.281 11.0406 10 10.3333 10H5.66667C4.95942 10 4.28115 10.281 3.78105 10.781C3.28095 11.2811 3 11.9594 3 12.6667V14M10.6667 4.66667C10.6667 6.13943 9.47276 7.33333 8 7.33333C6.52724 7.33333 5.33333 6.13943 5.33333 4.66667C5.33333 3.19391 6.52724 2 8 2C9.47276 2 10.6667 3.19391 10.6667 4.66667Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
                         </svg>
-                        <svg *ngIf="showPassword()" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M2 2l12 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-                            <path
-                                d="M3.2 4.1C1.9 5.2 1.067 6.6 1.333 8c1.4 2.8 3.733 4.333 6.667 4.333 1.06 0 2.04-.2 2.94-.6"
-                                stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-                            <path d="M6.233 6.233A2.333 2.333 0 0 1 9.8 9.8" stroke="currentColor" stroke-width="1.2" />
-                        </svg>
-                    </button>
+                        <input type="text" class="form-input" placeholder="admin@greenfield.com" [value]="username()"
+                            (input)="username.set($any($event.target).value)" required />
+                    </div>
                 </div>
-            </div>
 
-            <!-- Error Message -->
-            @if (errorMessage()) {
-            <div class="error-message">{{ errorMessage() }}</div>
-            }
-            @if (resetSuccess()) {
-            <div class="success-message">Password reset successfully. Please sign in.</div>
-            }
-
-            <!-- Remember Me -->
-            <div class="form-group remember-group">
-                <label class="checkbox-chip">
-                    <input type="checkbox" class="checkbox-input" [checked]="rememberMe()"
-                        (change)="rememberMe.set($any($event.target).checked)" />
-                    <span class="chip-icon" aria-hidden="true">
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                            <path d="M13.3333 4L6 11.3333L2.66666 8" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" />
+                <div class="form-group">
+                    <div class="form-label-row">
+                        <label class="form-label">Password</label>
+                        <a class="link-btn" routerLink="/auth/forgot">Forgot password?</a>
+                    </div>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path
+                                d="M12.6667 7.33333H3.33333C2.59695 7.33333 2 7.93029 2 8.66667V13.3333C2 14.0697 2.59695 14.6667 3.33333 14.6667H12.6667C13.403 14.6667 14 14.0697 14 13.3333V8.66667C14 7.93029 13.403 7.33333 12.6667 7.33333Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path
+                                d="M4.66675 7.33333V4.66667C4.66675 3.78261 5.01794 2.93477 5.64306 2.30964C6.26818 1.68452 7.11603 1.33333 8.00008 1.33333C8.88414 1.33333 9.73198 1.68452 10.3571 2.30964C10.9822 2.93477 11.3334 3.78261 11.3334 4.66667V7.33333"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
                         </svg>
-                    </span>
-                    <span class="checkbox-text">Remember me</span>
-                </label>
-            </div>
+                        <input [type]="showPassword() ? 'text' : 'password'" class="form-input" [value]="password()"
+                            (input)="password.set($any($event.target).value)" required />
+                        <button type="button" class="input-toggle" (click)="togglePassword()"
+                            aria-label="Toggle password visibility">
+                            <svg *ngIf="!showPassword()" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path
+                                    d="M1.333 8c1.4-2.8 3.733-4.333 6.667-4.333S13.267 5.2 14.667 8c-1.4 2.8-3.733 4.333-6.667 4.333S2.733 10.8 1.333 8Z"
+                                    stroke="currentColor" stroke-width="1.2" />
+                                <circle cx="8" cy="8" r="2.2" stroke="currentColor" stroke-width="1.2" />
+                            </svg>
+                            <svg *ngIf="showPassword()" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M2 2l12 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                                <path
+                                    d="M3.2 4.1C1.9 5.2 1.067 6.6 1.333 8c1.4 2.8 3.733 4.333 6.667 4.333 1.06 0 2.04-.2 2.94-.6"
+                                    stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                                <path d="M6.233 6.233A2.333 2.333 0 0 1 9.8 9.8" stroke="currentColor"
+                                    stroke-width="1.2" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
-            <!-- Sign In Button -->
-            <button type="submit" class="signin-btn" [disabled]="isLoading()">
-                {{ isLoading() ? 'Signing in...' : 'Sign in' }}
-            </button>
-        </form>
+                @if (errorMessage()) {
+                <div class="error-message">{{ errorMessage() }}</div>
+                }
+                @if (resetSuccess()) {
+                <div class="success-message">Password reset successfully. Please sign in.</div>
+                }
+
+                <div class="form-group remember-group">
+                    <label class="checkbox-chip">
+                        <input type="checkbox" class="checkbox-input" [checked]="rememberMe()"
+                            (change)="rememberMe.set($any($event.target).checked)" />
+                        <span class="chip-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                                <path d="M13.3333 4L6 11.3333L2.66666 8" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <span class="checkbox-text">Remember me</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="signin-btn" [disabled]="isLoading()">
+                    {{ isLoading() ? 'Signing in...' : 'Sign in' }}
+                    <span class="signin-arrow" aria-hidden="true">›</span>
+                </button>
+
+                <div class="divider">
+                    <span>New to MindBloom?</span>
+                </div>
+
+                <button type="button" class="cta-card" (click)="onRegisterTenant($event)">
+                    <div class="cta-icon" aria-hidden="true">
+                        <svg viewBox="0 0 20 20" width="16" height="16" fill="none">
+                            <path d="M10 3v14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                            <path d="M3 10h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <div class="cta-text">
+                        <div class="cta-title">Create New Tenant</div>
+                        <div class="cta-sub">Provision a new school workspace</div>
+                    </div>
+                    <span class="cta-arrow" aria-hidden="true">›</span>
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 
-<!-- Tenant Registration Modal -->
 @if (showRegistration()) {
 <app-tenant-registration (cancelled)="onRegistrationCancelled()"
     (registered)="onRegistrationCompleted($event)"></app-tenant-registration>

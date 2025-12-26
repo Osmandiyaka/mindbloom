@@ -36,6 +36,11 @@ export class LoginOverlayComponent {
     private readonly defaultReturnUrl = '/dashboard';
     private targetAfterLogin = this.defaultReturnUrl;
 
+    get currentTenantCode(): string {
+        const tenant: any = this.tenantService.getCurrentTenantValue();
+        return tenant?.subdomain || tenant?.code || '—';
+    }
+
     constructor(
         private authService: AuthService,
         private tenantService: TenantService,
