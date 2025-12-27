@@ -47,13 +47,9 @@ export class LoginOverlayComponent {
     isLoading = signal(false);
     errorMessage = signal('');
     resetSuccess = signal(false);
-    loginMode = signal<'tenant' | 'host'>('tenant');
     tenantStep = signal<'select' | 'login'>('select');
     schoolCode = signal('');
 
-    // Tenant editing state
-    isEditingTenant = signal(false);
-    tenantEditValue = signal('');
     isValidatingTenant = signal(false);
     tenantErrorMessage = signal('');
 
@@ -83,48 +79,15 @@ export class LoginOverlayComponent {
             );
         });
 
-        const hasTenant = !!this.tenantService.getCurrentTenantValue();
-        this.tenantStep.set(hasTenant ? 'login' : 'select');
     }
 
     get currentTenant(): string {
-        if (this.loginMode() === 'host') {
-            return 'Host context';
-        }
         const tenant = this.tenantService.getCurrentTenantValue();
         return tenant?.name || 'No Tenant Selected';
     }
 
-    setMode(mode: 'tenant' | 'host'): void {
-        this.loginMode.set(mode);
-        if (mode === 'host') {
-            this.isEditingTenant.set(false);
-            this.tenantErrorMessage.set('');
-            this.tenantStep.set('login');
-        } else if (!this.tenantService.getCurrentTenantValue()) {
-            this.tenantStep.set('select');
-        }
-    }
-
     onChangeTenant(): void {
-        if (this.loginMode() === 'host') {
-            return;
-        }
-        // Clear any previous tenant error
-        this.tenantErrorMessage.set('');
-
-        // Enter edit mode - prefill with current tenant code when available
-        const tenantCode = this.currentTenantCode;
-        this.tenantEditValue.set(tenantCode === '—' ? '' : tenantCode);
-        this.isEditingTenant.set(true);
-
-        // Focus the input after a short delay to allow the DOM to update
-        setTimeout(() => {
-            const input = document.querySelector('.tenant-edit-input') as HTMLInputElement;
-            if (input) {
-                input.focus();
-            }
-        }, 50);
+        this.tenantStep.set('select');
     }
 
     onConfirmTenant(): void {
@@ -136,42 +99,14 @@ export class LoginOverlayComponent {
 
         this.validateTenantCode(tenantCode, () => {
             this.tenantStep.set('login');
-            this.schoolCode.set('');
+            this.schoolCode.set(tenantCode);
         });
-    }
-
-    onSaveTenant(): void {
-        const tenantCode = this.tenantEditValue().trim();
-        if (!tenantCode) {
-            this.tenantErrorMessage.set('Please enter a school code');
-            return;
-        }
-
-        this.validateTenantCode(tenantCode, () => {
-            this.isEditingTenant.set(false);
-            this.tenantEditValue.set('');
-        });
-    }
-
-    onCancelTenantEdit(): void {
-        this.isEditingTenant.set(false);
-        this.tenantEditValue.set('');
     }
 
     onSchoolCodeKeyDown(event: KeyboardEvent): void {
         if (event.key === 'Enter') {
             event.preventDefault();
             this.onConfirmTenant();
-        }
-    }
-
-    onTenantKeyDown(event: KeyboardEvent): void {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            this.onSaveTenant();
-        } else if (event.key === 'Escape') {
-            event.preventDefault();
-            this.onCancelTenantEdit();
         }
     }
 
@@ -187,8 +122,6 @@ export class LoginOverlayComponent {
     onRegistrationCompleted(data: { tenantId: string; subdomain: string }): void {
         this.showRegistration.set(false);
         // Tenant is already set by the service, just show success message
-        this.isEditingTenant.set(false);
-        this.tenantEditValue.set('');
         this.tenantStep.set('login');
     }
 
@@ -209,10 +142,9 @@ export class LoginOverlayComponent {
         this.isLoading.set(true);
         this.errorMessage.set('');
 
-        // If tenant mode is selected, include the selected tenantId
         const selectedTenant = this.tenantService.getCurrentTenantValue();
         // Tenant model uses `id` (not tenantId) — send selected tenant id when in tenant mode
-        const tenantId = this.loginMode() === 'tenant' ? selectedTenant?.id ?? undefined : undefined;
+        const tenantId = selectedTenant?.id ?? undefined;
 
         this.authService.login(this.username(), this.password(), tenantId).subscribe({
             next: async (response) => {
