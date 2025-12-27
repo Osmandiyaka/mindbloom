@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TenantService } from '../../../../core/services/tenant.service';
 import { TenantPostLoginRouter } from '../../../../core/tenant/tenant-post-login-router.service';
@@ -13,7 +14,30 @@ import { sanitizeReturnUrl } from '../../../../core/auth/return-url.util';
     standalone: true,
     imports: [CommonModule, FormsModule, RouterModule, TenantRegistrationComponent],
     templateUrl: './login-overlay.component.html',
-    styleUrls: ['./login-overlay.component.scss']
+    styleUrls: ['./login-overlay.component.scss'],
+    animations: [
+        trigger('stepFadeUp', [
+            transition(':enter', [
+                style({ opacity: 0, transform: 'translateY(18px)' }),
+                animate('420ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+            ]),
+            transition(':leave', [
+                animate('240ms ease-in', style({ opacity: 0, transform: 'translateY(12px)' }))
+            ])
+        ]),
+        trigger('heroStagger', [
+            transition(':enter', [
+                query(
+                    '.hero-animate',
+                    [
+                        style({ opacity: 0, transform: 'translateX(-24px)' }),
+                        stagger(140, animate('600ms ease-out', style({ opacity: 1, transform: 'translateX(0)' })))
+                    ],
+                    { optional: true }
+                )
+            ])
+        ])
+    ]
 })
 export class LoginOverlayComponent {
     username = signal('');
@@ -24,6 +48,8 @@ export class LoginOverlayComponent {
     errorMessage = signal('');
     resetSuccess = signal(false);
     loginMode = signal<'tenant' | 'host'>('tenant');
+    tenantStep = signal<'select' | 'login'>('select');
+    schoolCode = signal('');
 
     // Tenant editing state
     isEditingTenant = signal(false);
@@ -56,6 +82,9 @@ export class LoginOverlayComponent {
                 this.defaultReturnUrl
             );
         });
+
+        const hasTenant = !!this.tenantService.getCurrentTenantValue();
+        this.tenantStep.set(hasTenant ? 'login' : 'select');
     }
 
     get currentTenant(): string {
@@ -71,6 +100,9 @@ export class LoginOverlayComponent {
         if (mode === 'host') {
             this.isEditingTenant.set(false);
             this.tenantErrorMessage.set('');
+            this.tenantStep.set('login');
+        } else if (!this.tenantService.getCurrentTenantValue()) {
+            this.tenantStep.set('select');
         }
     }
 
@@ -81,8 +113,9 @@ export class LoginOverlayComponent {
         // Clear any previous tenant error
         this.tenantErrorMessage.set('');
 
-        // Enter edit mode - clear the field for new input
-        this.tenantEditValue.set('');
+        // Enter edit mode - prefill with current tenant code when available
+        const tenantCode = this.currentTenantCode;
+        this.tenantEditValue.set(tenantCode === '—' ? '' : tenantCode);
         this.isEditingTenant.set(true);
 
         // Focus the input after a short delay to allow the DOM to update
@@ -94,6 +127,19 @@ export class LoginOverlayComponent {
         }, 50);
     }
 
+    onConfirmTenant(): void {
+        const tenantCode = this.schoolCode().trim();
+        if (!tenantCode) {
+            this.tenantErrorMessage.set('Please enter a school code');
+            return;
+        }
+
+        this.validateTenantCode(tenantCode, () => {
+            this.tenantStep.set('login');
+            this.schoolCode.set('');
+        });
+    }
+
     onSaveTenant(): void {
         const tenantCode = this.tenantEditValue().trim();
         if (!tenantCode) {
@@ -101,31 +147,22 @@ export class LoginOverlayComponent {
             return;
         }
 
-        // Validate tenant from backend
-        this.isValidatingTenant.set(true);
-        this.tenantErrorMessage.set('');
-
-        this.tenantService.getTenantByCode(tenantCode).subscribe({
-            next: (tenant) => {
-                this.isValidatingTenant.set(false);
-                if (tenant) {
-                    // Tenant found and automatically set by the service
-                    this.isEditingTenant.set(false);
-                    this.tenantEditValue.set('');
-                } else {
-                    this.tenantErrorMessage.set('School code not found');
-                }
-            },
-            error: (error) => {
-                this.isValidatingTenant.set(false);
-                this.tenantErrorMessage.set('School code not found. Please check and try again.');
-            }
+        this.validateTenantCode(tenantCode, () => {
+            this.isEditingTenant.set(false);
+            this.tenantEditValue.set('');
         });
     }
 
     onCancelTenantEdit(): void {
         this.isEditingTenant.set(false);
         this.tenantEditValue.set('');
+    }
+
+    onSchoolCodeKeyDown(event: KeyboardEvent): void {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            this.onConfirmTenant();
+        }
     }
 
     onTenantKeyDown(event: KeyboardEvent): void {
@@ -152,6 +189,7 @@ export class LoginOverlayComponent {
         // Tenant is already set by the service, just show success message
         this.isEditingTenant.set(false);
         this.tenantEditValue.set('');
+        this.tenantStep.set('login');
     }
 
     togglePassword() {
@@ -198,6 +236,26 @@ export class LoginOverlayComponent {
             error: (error) => {
                 this.isLoading.set(false);
                 this.errorMessage.set(error?.error?.message || 'Invalid username or password');
+            }
+        });
+    }
+
+    private validateTenantCode(tenantCode: string, onSuccess: () => void): void {
+        this.isValidatingTenant.set(true);
+        this.tenantErrorMessage.set('');
+
+        this.tenantService.getTenantByCode(tenantCode).subscribe({
+            next: (tenant) => {
+                this.isValidatingTenant.set(false);
+                if (tenant) {
+                    onSuccess();
+                } else {
+                    this.tenantErrorMessage.set('School code not found');
+                }
+            },
+            error: () => {
+                this.isValidatingTenant.set(false);
+                this.tenantErrorMessage.set('School code not found. Please check and try again.');
             }
         });
     }
