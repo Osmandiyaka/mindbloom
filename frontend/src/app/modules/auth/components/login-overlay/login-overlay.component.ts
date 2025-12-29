@@ -47,7 +47,7 @@ export class LoginOverlayComponent {
     isLoading = signal(false);
     errorMessage = signal('');
     resetSuccess = signal(false);
-    tenantStep = signal<'select' | 'login'>('select');
+    tenantStep = signal<'select' | 'login'>('login');
     schoolCode = signal('');
 
     isValidatingTenant = signal(false);
@@ -57,6 +57,52 @@ export class LoginOverlayComponent {
     showRegistration = signal(false);
     private readonly defaultReturnUrl = '/dashboard';
     private targetAfterLogin = this.defaultReturnUrl;
+
+    isEditingTenant = signal(false);
+    tempSchoolCode = signal('');
+    tenantName = signal('');
+
+    // Add these new methods
+
+    // onChangeTenant() {
+    //   this.tempSchoolCode.set(this.schoolCode());
+    //   this.isEditingTenant.set(true);
+    // }
+
+    onConfirmTenantEdit() {
+        if (this.tempSchoolCode().trim()) {
+            // Call your existing tenant validation logic
+            this.schoolCode.set(this.tempSchoolCode());
+            this.onConfirmTenant(); // Call your existing method
+        }
+    }
+
+    onCancelTenantEdit() {
+        this.tempSchoolCode.set('');
+        this.isEditingTenant.set(false);
+    }
+
+    onSchoolCodeEditKeyDown(event: KeyboardEvent) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            this.onConfirmTenantEdit();
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            this.onCancelTenantEdit();
+        }
+    }
+
+    // Modify your existing onConfirmTenant to also update tenantName and reset edit mode
+    // Example (adjust based on your existing implementation):
+    /*
+    async onConfirmTenant() {
+      // Your existing validation logic...
+      // After successful validation:
+      this.tenantName.set(response.schoolName || `${this.schoolCode()} School`);
+      this.isEditingTenant.set(false);
+      this.tenantStep.set('login');
+    }
+    */
 
     get currentTenantCode(): string {
         const tenant: any = this.tenantService.getCurrentTenantValue();
