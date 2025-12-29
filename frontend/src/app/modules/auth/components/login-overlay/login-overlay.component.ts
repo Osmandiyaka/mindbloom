@@ -63,8 +63,9 @@ export class LoginOverlayComponent {
     isLoading = signal(false);
     errorMessage = signal('');
     resetSuccess = signal(false);
-    tenantStep = signal<'select' | 'login'>('login');
+    tenantStep = signal<'select' | 'login'>('select');
     schoolCode = signal('');
+    private readonly tenantStorageKey = 'mb_tenant_selection';
 
     isValidatingTenant = signal(false);
     tenantErrorMessage = signal('');
@@ -141,6 +142,13 @@ export class LoginOverlayComponent {
             );
         });
 
+        const storedTenant = this.loadStoredTenant();
+        if (storedTenant?.code) {
+            this.schoolCode.set(storedTenant.code);
+            this.tenantName.set(storedTenant.name || '');
+            this.tenantStep.set('login');
+        }
+
     }
 
     get currentTenant(): string {
@@ -150,6 +158,7 @@ export class LoginOverlayComponent {
 
     onChangeTenant(): void {
         this.tenantStep.set('select');
+        this.clearStoredTenantSelection();
     }
 
     onConfirmTenant(): void {
@@ -159,9 +168,12 @@ export class LoginOverlayComponent {
             return;
         }
 
-        this.validateTenantCode(tenantCode, () => {
+        this.validateTenantCode(tenantCode, (tenant) => {
+            const name = tenant?.name || tenant?.label || '';
             this.tenantStep.set('login');
             this.schoolCode.set(tenantCode);
+            this.tenantName.set(name);
+            this.storeTenantSelection(tenantCode, name);
         });
     }
 
@@ -213,6 +225,13 @@ export class LoginOverlayComponent {
                 this.isLoading.set(false);
 
                 const session = this.authService.session();
+                if (selectedTenant) {
+                    const storedCode = selectedTenant.subdomain || this.schoolCode().trim();
+                    const storedName = selectedTenant.name || this.tenantName();
+                    if (storedCode) {
+                        this.storeTenantSelection(storedCode, storedName);
+                    }
+                }
 
                 if (session?.mode === 'host') {
                     await this.router.navigateByUrl('/host');
@@ -234,7 +253,7 @@ export class LoginOverlayComponent {
         });
     }
 
-    private validateTenantCode(tenantCode: string, onSuccess: () => void): void {
+    private validateTenantCode(tenantCode: string, onSuccess: (tenant: any) => void): void {
         this.isValidatingTenant.set(true);
         this.tenantErrorMessage.set('');
 
@@ -242,7 +261,7 @@ export class LoginOverlayComponent {
             next: (tenant) => {
                 this.isValidatingTenant.set(false);
                 if (tenant) {
-                    onSuccess();
+                    onSuccess(tenant);
                 } else {
                     this.tenantErrorMessage.set('School code not found');
                 }
@@ -252,5 +271,31 @@ export class LoginOverlayComponent {
                 this.tenantErrorMessage.set('School code not found. Please check and try again.');
             }
         });
+    }
+
+    private storeTenantSelection(code: string, name?: string) {
+        try {
+            localStorage.setItem(this.tenantStorageKey, JSON.stringify({ code, name }));
+        } catch (err) {
+            console.warn('Failed to store tenant selection', err);
+        }
+    }
+
+    private loadStoredTenant(): { code: string; name?: string } | null {
+        try {
+            const raw = localStorage.getItem(this.tenantStorageKey);
+            return raw ? JSON.parse(raw) : null;
+        } catch (err) {
+            console.warn('Failed to load stored tenant selection', err);
+            return null;
+        }
+    }
+
+    clearStoredTenantSelection() {
+        try {
+            localStorage.removeItem(this.tenantStorageKey);
+        } catch (err) {
+            console.warn('Failed to clear stored tenant selection', err);
+        }
     }
 }

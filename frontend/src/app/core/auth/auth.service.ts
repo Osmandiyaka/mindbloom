@@ -120,6 +120,7 @@ export class AuthService {
     private readonly editionFeatures = inject(EditionFeaturesService);
     private readonly router = inject(Router);
     private readonly API_URL = environment.apiUrl;
+    private readonly tenantSelectionKey = 'mb_tenant_selection';
 
     // Signals
     session = signal<AuthSession | null>(null);
@@ -222,6 +223,9 @@ export class AuthService {
      * Optionally sends logout signal to backend.
      */
     logout(reason?: string): void {
+        this.tenantService.clearTenant();
+        this.clearTenantSelection();
+
         // Try to signal backend (best effort)
         this.http
             .post(`${this.API_URL}/auth/logout`, {}, { withCredentials: true })
@@ -240,6 +244,14 @@ export class AuthService {
         // Also clear locally immediately
         this.clearSession();
         this.router.navigate(['/login']);
+    }
+
+    private clearTenantSelection(): void {
+        try {
+            localStorage.removeItem(this.tenantSelectionKey);
+        } catch (err) {
+            console.warn('[AuthService] Failed to clear tenant selection', err);
+        }
     }
 
     /**
