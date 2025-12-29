@@ -8,9 +8,43 @@
     align-items: center;
     justify-content: center;
     padding: 48px 24px;
-    background: linear-gradient(135deg, #312e81 0%, #4c1d95 50%, #9d174d 100%);
+    --login-bg: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-background) 70%, var(--color-primary) 30%) 0%,
+        color-mix(in srgb, var(--color-background) 65%, var(--color-accent) 35%) 50%,
+        color-mix(in srgb, var(--color-background) 60%, var(--color-secondary) 40%) 100%
+    );
+    --login-text: var(--color-text-primary);
+    --login-text-muted: color-mix(in srgb, var(--color-text-primary) 70%, transparent);
+    --login-text-subtle: color-mix(in srgb, var(--color-text-primary) 55%, transparent);
+    --login-text-faint: color-mix(in srgb, var(--color-text-primary) 40%, transparent);
+    --login-surface: color-mix(in srgb, var(--color-surface) 18%, transparent);
+    --login-surface-strong: color-mix(in srgb, var(--color-surface) 28%, transparent);
+    --login-surface-soft: color-mix(in srgb, var(--color-surface) 12%, transparent);
+    --login-border: color-mix(in srgb, var(--color-border) 70%, transparent);
+    --login-border-strong: color-mix(in srgb, var(--color-border) 90%, transparent);
+    --login-border-faint: color-mix(in srgb, var(--color-border) 45%, transparent);
+    --login-shadow-hero: 0 30px 80px color-mix(in srgb, var(--color-background) 30%, transparent);
+    --login-shadow-strong: 0 24px 60px color-mix(in srgb, var(--color-background) 35%, transparent);
+    --login-focus-ring: rgba(var(--color-primary-rgb), 0.32);
+    --login-logo-gradient: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    --login-logo-shadow: 0 16px 40px rgba(var(--color-accent-rgb), 0.35);
+    --login-primary-gradient: linear-gradient(180deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    --login-ghost-text: color-mix(in srgb, var(--color-text-primary) 85%, transparent);
+    --login-chip-gradient: linear-gradient(140deg, var(--color-primary), var(--color-accent));
+    --login-signin-gradient: linear-gradient(90deg, var(--color-primary), var(--color-accent), var(--color-primary));
+    --login-success-gradient: linear-gradient(
+        150deg,
+        var(--color-success),
+        color-mix(in srgb, var(--color-success) 70%, var(--color-primary) 30%)
+    );
+    --login-success-soft: color-mix(in srgb, var(--color-success) 18%, transparent);
+    --login-success-border: color-mix(in srgb, var(--color-success) 45%, transparent);
+    --login-error-soft: color-mix(in srgb, var(--color-error) 18%, transparent);
+    --login-error-border: color-mix(in srgb, var(--color-error) 45%, transparent);
+    background: var(--login-bg);
     overflow: auto;
-    color: #fefbff;
+    color: var(--login-text);
     font-family: 'Sora', 'Space Grotesk', 'Segoe UI', sans-serif;
 }
 
@@ -41,7 +75,7 @@
 .orb-1 {
     width: 260px;
     height: 260px;
-    background: rgba(168, 85, 247, 0.55);
+    background: color-mix(in srgb, var(--color-primary) 55%, transparent);
     top: 6%;
     left: 5%;
 }
@@ -49,7 +83,7 @@
 .orb-2 {
     width: 220px;
     height: 220px;
-    background: rgba(236, 72, 153, 0.5);
+    background: color-mix(in srgb, var(--color-accent) 50%, transparent);
     top: 16%;
     right: 8%;
     animation-duration: 10s;
@@ -58,7 +92,7 @@
 .orb-3 {
     width: 200px;
     height: 200px;
-    background: rgba(59, 130, 246, 0.45);
+    background: color-mix(in srgb, var(--color-info) 45%, transparent);
     bottom: 18%;
     left: 18%;
     animation-duration: 8.5s;
@@ -67,7 +101,7 @@
 .orb-4 {
     width: 160px;
     height: 160px;
-    background: rgba(192, 132, 252, 0.5);
+    background: color-mix(in srgb, var(--color-secondary) 50%, transparent);
     bottom: 6%;
     right: 20%;
     animation-duration: 11s;
@@ -75,7 +109,7 @@
 
 .shape {
     position: absolute;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--login-border-faint);
     opacity: 0.5;
     animation: shapeSpin 18s linear infinite;
 }
@@ -143,11 +177,11 @@
 }
 
 .hero-panel {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--login-surface);
     border-radius: 28px;
     padding: 42px 46px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 30px 80px rgba(12, 8, 35, 0.4);
+    border: 1px solid var(--login-border);
+    box-shadow: var(--login-shadow-hero);
     backdrop-filter: blur(18px);
     display: flex;
     flex-direction: column;
@@ -160,7 +194,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.16), transparent 40%);
+    background: radial-gradient(circle at 15% 20%, var(--login-surface-strong), transparent 40%);
     pointer-events: none;
 }
 
@@ -179,8 +213,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.9), rgba(236, 72, 153, 0.9));
-    box-shadow: 0 16px 40px rgba(236, 72, 153, 0.35);
+    background: var(--login-logo-gradient);
+    box-shadow: var(--login-logo-shadow);
 }
 
 .brand-text {
@@ -199,7 +233,7 @@
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--login-text-muted);
 }
 
 .hero-title {
@@ -213,7 +247,7 @@
 }
 
 .hero-title span {
-    background: linear-gradient(90deg, #c084fc, #f472b6);
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -223,7 +257,7 @@
     font-size: 16px;
     line-height: 1.6;
     margin: 0;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--login-text-subtle);
     max-width: 480px;
     position: relative;
     z-index: 1;
@@ -241,16 +275,16 @@
 .stat-card {
     padding: 16px;
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--login-surface-strong);
+    border: 1px solid var(--login-border);
     text-align: left;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 0 var(--login-surface-soft);
 }
 
 .stat-value {
     font-size: 20px;
     font-weight: 700;
-    background: linear-gradient(90deg, #c084fc, #f472b6);
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -258,7 +292,7 @@
 
 .stat-label {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--login-text-muted);
 }
 
 .auth-panel {
@@ -271,25 +305,25 @@
     width: 100%;
     padding: 34px;
     border-radius: 28px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: var(--login-surface-strong);
+    border: 1px solid var(--login-border-strong);
     backdrop-filter: blur(24px);
-    box-shadow: 0 24px 60px rgba(10, 8, 28, 0.45);
+    box-shadow: var(--login-shadow-strong);
     display: flex;
     flex-direction: column;
     gap: 16px;
-    --color-background: rgba(255, 255, 255, 0.08);
-    --content-background-solid: rgba(255, 255, 255, 0.08);
-    --color-border: rgba(255, 255, 255, 0.24);
-    --color-text-primary: #ffffff;
-    --color-primary: #c084fc;
-    --focus-ring-color: rgba(192, 132, 252, 0.32);
-    --btn-primary-bg: linear-gradient(180deg, #c084fc 0%, #a855f7 100%);
-    --btn-primary-border: rgba(255, 255, 255, 0.85);
-    --btn-primary-text: #ffffff;
+    --color-background: var(--login-surface-soft);
+    --content-background-solid: var(--login-surface-soft);
+    --color-border: var(--login-border);
+    --color-text-primary: var(--color-text-primary);
+    --color-primary: var(--color-primary);
+    --focus-ring-color: var(--login-focus-ring);
+    --btn-primary-bg: var(--login-primary-gradient);
+    --btn-primary-border: var(--login-border-strong);
+    --btn-primary-text: var(--color-text-primary);
     --btn-ghost-bg: transparent;
-    --btn-ghost-border: rgba(255, 255, 255, 0.3);
-    --btn-ghost-text: #e0d4ff;
+    --btn-ghost-border: var(--login-border);
+    --btn-ghost-text: var(--login-ghost-text);
 }
 
 .shell-header {
@@ -306,7 +340,7 @@
 
 .welcome-subtitle {
     margin: 0;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--login-text-muted);
     font-size: 14px;
 }
 
@@ -321,8 +355,8 @@
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--login-surface);
+    border: 1px solid var(--login-border);
     border-radius: 16px;
 }
 
@@ -330,11 +364,11 @@
     width: 42px;
     height: 42px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--login-surface-strong);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #e0d4ff;
+    color: var(--login-ghost-text);
 }
 
 .tenant-info {
@@ -347,7 +381,7 @@
     font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(216, 180, 254, 0.9);
+    color: color-mix(in srgb, var(--color-primary) 80%, var(--login-text-muted) 20%);
     font-weight: 700;
 }
 
@@ -358,7 +392,7 @@
 
 .tenant-meta {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--login-text-muted);
 }
 
 .tenant-change {
@@ -368,7 +402,7 @@
     gap: 6px;
     background: none;
     border: none;
-    color: #d8b4fe;
+    color: var(--color-primary);
     font-weight: 700;
     cursor: pointer;
 }
@@ -384,21 +418,21 @@
 }
 
 .login-shell ui-form-field .ui-form-field__control {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--login-surface-strong);
+    border: 1px solid var(--login-border);
     border-radius: 14px;
     padding: 6px 12px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 1px 0 var(--login-surface-soft);
 }
 
 .login-shell ui-form-field .ui-form-field__control:focus-within {
-    border-color: rgba(255, 255, 255, 0.38);
-    box-shadow: 0 0 0 3px var(--focus-ring-color, rgba(192, 132, 252, 0.32));
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--focus-ring-color);
 }
 
 .login-shell ui-form-field [uiPrefix],
 .login-shell ui-form-field [uiSuffix] {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--login-text-subtle);
 }
 
 .login-shell ui-form-field .ui-input,
@@ -407,7 +441,7 @@
     background: transparent;
     border: none;
     padding: 0;
-    color: #ffffff;
+    color: var(--color-text-primary);
 }
 
 .login-form ui-button[type="submit"] button {
@@ -426,7 +460,7 @@
 .form-label {
     font-size: 13px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--login-text);
 }
 
 .input-wrapper {
@@ -434,9 +468,9 @@
     display: flex;
     align-items: center;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    background: var(--login-surface-strong);
+    border: 1px solid var(--login-border);
+    box-shadow: inset 0 1px 0 var(--login-surface-soft);
     padding: 6px 12px 6px 40px;
 }
 
@@ -447,7 +481,7 @@
 .input-icon {
     position: absolute;
     left: 14px;
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--login-text-faint);
 }
 
 .form-input {
@@ -455,12 +489,12 @@
     height: 42px;
     border: none;
     background: transparent;
-    color: #fff;
+    color: var(--color-text-primary);
     font-size: 14px;
 }
 
 .form-input::placeholder {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--login-text-faint);
 }
 
 .form-input:focus {
@@ -472,13 +506,13 @@
     right: 12px;
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--login-text-muted);
     cursor: pointer;
     transition: color 0.2s ease;
 }
 
 .input-toggle:hover {
-    color: #fff;
+    color: var(--login-text);
 }
 
 .input-action-btn {
@@ -487,9 +521,9 @@
     width: 32px;
     height: 32px;
     border-radius: 10px;
-    border: 1px solid rgba(16, 185, 129, 0.6);
-    background: linear-gradient(150deg, #10b981, #059669);
-    color: #fff;
+    border: 1px solid var(--login-success-border);
+    background: var(--login-success-gradient);
+    color: var(--color-text-primary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -505,16 +539,16 @@
 .form-help,
 .tenant-error {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--login-text-muted);
     margin: 0;
 }
 
 .tenant-error {
-    color: #fca5a5;
+    color: var(--color-error);
 }
 
 .register-link {
-    color: #ffffff;
+    color: var(--login-text);
     text-decoration: none;
     font-weight: 700;
 }
@@ -533,23 +567,23 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    border: 1px solid var(--login-border);
+    background: var(--login-surface-strong);
+    color: var(--color-text-primary);
     cursor: pointer;
 }
 
 .save-btn {
-    background: linear-gradient(150deg, #10b981, #059669);
-    border-color: rgba(16, 185, 129, 0.6);
+    background: var(--login-success-gradient);
+    border-color: var(--login-success-border);
 }
 
 .cancel-btn {
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--login-text-muted);
 }
 
 .link-btn {
-    color: #fbcfe8;
+    color: var(--color-accent);
     text-decoration: none;
     font-weight: 600;
 }
@@ -570,11 +604,11 @@
     gap: 8px;
     padding: 8px 10px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--login-border);
+    background: var(--login-surface-soft);
     cursor: pointer;
     font-weight: 600;
-    color: #fff;
+    color: var(--color-text-primary);
 }
 
 .checkbox-input {
@@ -585,12 +619,12 @@
     width: 18px;
     height: 18px;
     border-radius: 6px;
-    background: rgba(168, 85, 247, 0.2);
-    border: 1px solid rgba(168, 85, 247, 0.5);
+    background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 50%, transparent);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #f5d0fe;
+    color: var(--color-primary);
 }
 
 .checkbox-text {
@@ -598,22 +632,22 @@
 }
 
 .checkbox-chip:has(.checkbox-input:checked) {
-    border-color: rgba(168, 85, 247, 0.7);
-    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+    border-color: color-mix(in srgb, var(--color-primary) 70%, transparent);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
 }
 
 .checkbox-chip:has(.checkbox-input:checked) .chip-icon {
-    background: linear-gradient(140deg, #c084fc, #f472b6);
+    background: var(--login-chip-gradient);
     border-color: transparent;
-    color: #fff;
+    color: var(--color-text-primary);
 }
 
 .signin-btn {
     height: 50px;
     border: none;
     border-radius: 14px;
-    background: linear-gradient(90deg, #7c3aed, #ec4899, #7c3aed);
-    color: #fff;
+    background: var(--login-signin-gradient);
+    color: var(--color-text-primary);
     font-weight: 700;
     font-size: 15px;
     cursor: pointer;
@@ -621,13 +655,13 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    box-shadow: 0 16px 40px rgba(124, 58, 237, 0.4);
+    box-shadow: 0 16px 40px rgba(var(--color-primary-rgb), 0.4);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .signin-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 20px 50px rgba(124, 58, 237, 0.45);
+    box-shadow: 0 20px 50px rgba(var(--color-primary-rgb), 0.45);
 }
 
 .signin-chevron {
@@ -641,7 +675,7 @@
 .form-footer {
     margin: 0;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--login-text-muted);
     text-align: center;
 }
 
@@ -650,11 +684,11 @@
     justify-content: center;
     gap: 8px;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--login-text-faint);
 }
 
 .legal-row a {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--login-text-muted);
     text-decoration: none;
 }
 
@@ -666,15 +700,15 @@
 }
 
 .error-message {
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.35);
-    color: #fecdd3;
+    background: var(--login-error-soft);
+    border: 1px solid var(--login-error-border);
+    color: var(--color-error);
 }
 
 .success-message {
-    background: rgba(34, 197, 94, 0.15);
-    border: 1px solid rgba(34, 197, 94, 0.35);
-    color: #bbf7d0;
+    background: var(--login-success-soft);
+    border: 1px solid var(--login-success-border);
+    color: var(--color-success);
 }
 
 .spinner {
@@ -750,8 +784,8 @@
     flex-direction: column;
     gap: 12px;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--login-surface-soft);
+    border: 1px solid var(--login-border);
     border-radius: 16px;
     margin-bottom: 20px;
 }
@@ -760,7 +794,7 @@
     font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(216, 180, 254, 0.9);
+    color: color-mix(in srgb, var(--color-primary) 80%, var(--login-text-muted) 20%);
     font-weight: 600;
     margin: 0;
 }
@@ -789,11 +823,11 @@
     width: 40px;
     height: 40px;
     border-radius: 10px;
-    background: rgba(168, 85, 247, 0.2);
+    background: color-mix(in srgb, var(--color-primary) 20%, transparent);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #c084fc;
+    color: var(--color-primary);
     flex-shrink: 0;
 }
 
@@ -807,12 +841,12 @@
 .tenant-name {
     font-size: 15px;
     font-weight: 700;
-    color: #fff;
+    color: var(--color-text-primary);
 }
 
 .tenant-meta {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--login-text-muted);
 }
 
 .tenant-change {
@@ -822,7 +856,7 @@
     gap: 4px;
     background: transparent;
     border: none;
-    color: #60a5fa;
+    color: var(--color-info);
     font-weight: 600;
     font-size: 13px;
     cursor: pointer;
@@ -831,8 +865,8 @@
     transition: all 0.2s ease;
 
     &:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: #93c5fd;
+        background: var(--login-surface-strong);
+        color: color-mix(in srgb, var(--color-info) 70%, var(--color-text-primary) 30%);
 
         svg {
             transform: translateX(2px);
@@ -858,9 +892,9 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    border: 1px solid var(--login-border);
+    background: var(--login-surface-strong);
+    color: var(--color-text-primary);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -869,7 +903,7 @@
     flex-shrink: 0;
 
     &:hover:not(:disabled) {
-        background: rgba(255, 255, 255, 0.15);
+        background: var(--login-surface);
     }
 
     &:disabled {
@@ -879,10 +913,10 @@
 }
 
 .cancel-btn {
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--login-text-muted);
 
     &:hover:not(:disabled) {
-        color: #fff;
+        color: var(--login-text);
     }
 }
 
