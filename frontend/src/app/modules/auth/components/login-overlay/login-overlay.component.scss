@@ -278,6 +278,18 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+    --color-background: rgba(255, 255, 255, 0.08);
+    --content-background-solid: rgba(255, 255, 255, 0.08);
+    --color-border: rgba(255, 255, 255, 0.24);
+    --color-text-primary: #ffffff;
+    --color-primary: #c084fc;
+    --focus-ring-color: rgba(192, 132, 252, 0.32);
+    --btn-primary-bg: linear-gradient(180deg, #c084fc 0%, #a855f7 100%);
+    --btn-primary-border: rgba(255, 255, 255, 0.85);
+    --btn-primary-text: #ffffff;
+    --btn-ghost-bg: transparent;
+    --btn-ghost-border: rgba(255, 255, 255, 0.3);
+    --btn-ghost-text: #e0d4ff;
 }
 
 .shell-header {
@@ -365,6 +377,43 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+.login-shell ui-form-field {
+    width: 100%;
+}
+
+.login-shell ui-form-field .ui-form-field__control {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    padding: 6px 12px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.login-shell ui-form-field .ui-form-field__control:focus-within {
+    border-color: rgba(255, 255, 255, 0.38);
+    box-shadow: 0 0 0 3px var(--focus-ring-color, rgba(192, 132, 252, 0.32));
+}
+
+.login-shell ui-form-field [uiPrefix],
+.login-shell ui-form-field [uiSuffix] {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.login-shell ui-form-field .ui-input,
+.login-shell ui-form-field .ui-select,
+.login-shell ui-form-field .ui-textarea {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: #ffffff;
+}
+
+.login-form ui-button[type="submit"] button {
+    width: 100%;
+    justify-content: center;
+    font-weight: 700;
 }
 
 .form-label-row {

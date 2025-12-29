@@ -8,11 +8,27 @@ import { TenantService } from '../../../../core/services/tenant.service';
 import { TenantPostLoginRouter } from '../../../../core/tenant/tenant-post-login-router.service';
 import { TenantRegistrationComponent } from '../tenant-registration/tenant-registration.component';
 import { sanitizeReturnUrl } from '../../../../core/auth/return-url.util';
+import { UiFormFieldComponent, UiInputComponent, UiFormHintComponent, UiCheckboxComponent } from '../../../../shared/ui/forms';
+import { UiButtonComponent } from '../../../../shared/ui/buttons';
+import { UiInlineIconComponent } from '../../../../shared/ui/icons';
+import { UiSpinnerComponent } from '../../../../shared/ui/feedback';
 
 @Component({
     selector: 'app-login-overlay',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule, TenantRegistrationComponent],
+    imports: [
+        CommonModule,
+        FormsModule,
+        RouterModule,
+        TenantRegistrationComponent,
+        UiFormFieldComponent,
+        UiFormHintComponent,
+        UiInputComponent,
+        UiCheckboxComponent,
+        UiButtonComponent,
+        UiInlineIconComponent,
+        UiSpinnerComponent
+    ],
     templateUrl: './login-overlay.component.html',
     styleUrls: ['./login-overlay.component.scss'],
     animations: [
