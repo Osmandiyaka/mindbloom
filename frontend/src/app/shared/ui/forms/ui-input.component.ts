@@ -2,10 +2,10 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'ui-input',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'ui-input',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <input
       class="ui-input"
       [attr.type]="type"
@@ -15,7 +15,7 @@ import { CommonModule } from '@angular/common';
       (input)="onInput($event)"
     />
   `,
-    styles: [`
+  styles: [`
     :host { display: block; }
     .ui-input {
       width: 100%;
@@ -39,27 +39,55 @@ import { CommonModule } from '@angular/common';
     }
 
     .ui-input:disabled { opacity: 0.7; }
+
+    input.ui-input:-webkit-autofill,
+    input.ui-input:-webkit-autofill:hover,
+    input.ui-input:-webkit-autofill:focus,
+    input.ui-input:-webkit-autofill:active {
+      color: var(--color-text-primary) !important;
+      -webkit-text-fill-color: var(--color-text-primary) !important;
+      caret-color: var(--color-text-primary);
+      box-shadow: 0 0 0 1000px var(--content-background-solid, var(--color-background)) inset !important;
+      -webkit-box-shadow: 0 0 0 1000px var(--content-background-solid, var(--color-background)) inset !important;
+      transition: background-color 9999s ease-in-out 0s;
+    }
+
+    input.ui-input:-webkit-autofill::first-line {
+      color: var(--color-text-primary);
+    }
+
+    input.ui-input:autofill {
+      color: var(--color-text-primary);
+      box-shadow: 0 0 0 1000px var(--content-background-solid, var(--color-background)) inset;
+    }
+
+    input.ui-input:-moz-autofill,
+    input.ui-input:-moz-autofill:hover,
+    input.ui-input:-moz-autofill:focus {
+      color: var(--color-text-primary);
+      box-shadow: 0 0 0 1000px var(--content-background-solid, var(--color-background)) inset;
+    }
   `]
 })
 export class UiInputComponent {
-    @Input() value = '';
-    @Output() valueChange = new EventEmitter<string>();
+  @Input() value = '';
+  @Output() valueChange = new EventEmitter<string>();
 
-    @Input() placeholder = '';
-    @Input() disabled: boolean | '' | string = false;
-    @Input() type: 'text' | 'number' | 'password' | 'email' = 'text';
+  @Input() placeholder = '';
+  @Input() disabled: boolean | '' | string = false;
+  @Input() type: 'text' | 'number' | 'password' | 'email' = 'text';
 
-    get disabledState(): boolean {
-        if (this.disabled === '') return true;
-        if (this.disabled === true) return true;
-        if (this.disabled === 'true') return true;
-        if (typeof this.disabled === 'string') return this.disabled.length > 0 && this.disabled !== 'false';
-        return false;
-    }
+  get disabledState(): boolean {
+    if (this.disabled === '') return true;
+    if (this.disabled === true) return true;
+    if (this.disabled === 'true') return true;
+    if (typeof this.disabled === 'string') return this.disabled.length > 0 && this.disabled !== 'false';
+    return false;
+  }
 
-    onInput(event: Event) {
-        const v = (event.target as HTMLInputElement).value;
-        this.value = v;
-        this.valueChange.emit(v);
-    }
+  onInput(event: Event) {
+    const v = (event.target as HTMLInputElement).value;
+    this.value = v;
+    this.valueChange.emit(v);
+  }
 }
