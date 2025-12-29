@@ -20,7 +20,11 @@ import { CommonModule } from '@angular/common';
     .ui-input {
       width: 100%;
       border-radius: 10px;
-      padding: 0.55rem 0.65rem;
+      --ui-input-padding-y: 0.55rem;
+      --ui-input-padding-x: 0.65rem;
+      padding: var(--ui-input-padding, var(--ui-input-padding-y) var(--ui-input-padding-x));
+      padding-left: var(--ui-input-padding-left, var(--ui-input-padding-x));
+      padding-right: var(--ui-input-padding-right, var(--ui-input-padding-x));
       border: 1px solid var(--border-default, var(--color-border));
       background: var(--content-background-solid, var(--color-background));
       color: var(--color-text-primary);

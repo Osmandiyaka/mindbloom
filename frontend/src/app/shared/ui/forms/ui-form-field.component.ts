@@ -26,21 +26,42 @@ import { UiLabelComponent } from './ui-label.component';
     :host { display: block; }
     .ui-form-field { display: flex; flex-direction: column; gap: 0.35rem; }
     .ui-form-field__control {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
+      position: relative;
+      display: block;
       width: 100%;
+      --ui-input-padding-left: 0.65rem;
+      --ui-input-padding-right: 0.65rem;
+    }
+
+    .ui-form-field__control:has([uiPrefix]) {
+      --ui-input-padding-left: 2.25rem;
+    }
+
+    .ui-form-field__control:has([uiSuffix]) {
+      --ui-input-padding-right: 3rem;
     }
 
     .ui-form-field__control > [uiPrefix],
     .ui-form-field__control > [uiSuffix] {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
       display: inline-flex;
       align-items: center;
       color: var(--color-text-secondary, #6b7280);
     }
 
+    .ui-form-field__control > [uiPrefix] {
+      left: 0.75rem;
+      pointer-events: none;
+    }
+
+    .ui-form-field__control > [uiSuffix] {
+      right: 0.5rem;
+    }
+
     .ui-form-field__control > *:not([uiPrefix]):not([uiSuffix]) {
-      flex: 1 1 auto;
+      display: block;
       width: 100%;
     }
 
