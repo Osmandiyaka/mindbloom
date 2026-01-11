@@ -13,7 +13,7 @@
         <div class="mb-auth-container">
             <section class="mb-auth-hero">
                 <p class="hero-eyebrow">MindBloom Secure Access</p>
-                <h2>Confident sign-in for every campus.</h2>
+                <h2 class="hero-title">Confident sign-in for every campus.</h2>
                 <p class="hero-body">
                     Tenant-aware authentication, SSO readiness, and audit-friendly access logs in one unified flow.
                 </p>
@@ -22,11 +22,11 @@
                     <div>SSO-ready (SAML/OIDC)</div>
                     <div>Audit-friendly access logs</div>
                 </div>
-                <div class="hero-chips">
-                    <span>Encrypted sessions</span>
-                    <span>Secure recovery</span>
-                    <span>Role-based controls</span>
-                </div>
+                <ul class="hero-list">
+                    <li>Encrypted sessions</li>
+                    <li>Secure account recovery</li>
+                    <li>Role-based access control</li>
+                </ul>
             </section>
 
             <section class="auth-panel">
@@ -110,11 +110,11 @@
 
                     @if (tenantStep() === 'login') {
                     <div class="auth-section">
-                        <div class="tenant-pill">
+                        <div class="mb-org-context">
                             <div>
-                                <p class="tenant-pill__label">Organization</p>
-                                <p class="tenant-pill__name">{{ tenantName() || tenantCode() }}</p>
-                                <p class="tenant-pill__meta">{{ tenantCode() }}</p>
+                                <p class="mb-org-context__label">Organization</p>
+                                <p class="mb-org-context__name">{{ tenantName() || tenantCode() }}</p>
+                                <p class="mb-org-context__meta">{{ tenantCode() }}</p>
                             </div>
                             <button class="auth-text-button" type="button" (click)="onChangeTenant()" [disabled]="tenantLocked()">
                                 Switch organization
