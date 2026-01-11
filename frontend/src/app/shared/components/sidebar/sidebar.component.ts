@@ -64,7 +64,7 @@ interface NavSection {
             <div class="tenant-name">
               <span>{{ tenantName || 'MindBloom' }}</span>
             </div>
-            <div class="tenant-subtitle">Administrative Workspace</div>
+            <div class="tenant-subtitle">School Administration</div>
           </div>
 
           <div class="tenant-text" *ngIf="!collapsed && isHostSidebar">
@@ -155,7 +155,7 @@ interface NavSection {
       border-bottom: 1px solid var(--border-subtle);
       cursor: pointer;
       transition: background-color 0.18s ease;
-      background: color-mix(in srgb, var(--surface-sidebar) 96%, var(--accent-primary));
+      background: color-mix(in srgb, var(--surface-sidebar) 97%, var(--accent-primary));
     }
 
     .tenant-header::before {
@@ -165,28 +165,28 @@ interface NavSection {
       top: 12px;
       bottom: 12px;
       width: 2px;
-      background: color-mix(in srgb, var(--accent-primary) 55%, transparent);
+      background: color-mix(in srgb, var(--accent-primary) 60%, transparent);
       border-radius: 2px;
     }
 
-    .tenant-header:hover { background: color-mix(in srgb, var(--surface-sidebar) 92%, var(--accent-primary)); }
+    .tenant-header:hover { background: color-mix(in srgb, var(--surface-sidebar) 94%, var(--accent-primary)); }
     .tenant-header:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: -2px; }
 
     .tenant-identity {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.55rem;
+      gap: 0.45rem;
       padding: 0.1rem 0;
     }
 
     .tenant-logo {
       width: 44px;
       height: 44px;
-      border-radius: 10px;
+      border-radius: 8px;
       display: grid;
       place-items: center;
-      background: color-mix(in srgb, var(--accent-primary) 12%, var(--surface-elevated));
+      background: color-mix(in srgb, var(--accent-primary) 16%, var(--surface-elevated));
       color: var(--text-primary);
     }
     .tenant-monogram {
@@ -200,7 +200,7 @@ interface NavSection {
     .host-brand-mark { --mb-logo-height: 22px; color: var(--text-primary); }
     .tenant-text { display: flex; flex-direction: column; min-width: 0; gap: 4px; }
     .tenant-name { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; color: var(--text-primary); }
-    .tenant-subtitle { font-size: 11px; color: var(--text-muted); line-height: 1.2; letter-spacing: 0.04em; text-transform: none; }
+    .tenant-subtitle { font-size: 11px; font-weight: 400; color: var(--text-muted); line-height: 1.2; letter-spacing: 0.04em; text-transform: none; }
 
     .sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; padding: 0.25rem 0.15rem 1rem; scroll-behavior: smooth; }
 
