@@ -9,6 +9,7 @@ import { IconRegistryService } from '../../services/icon-registry.service';
 import { TenantService, Tenant } from '../../../core/services/tenant.service';
 import { SchoolSettingsService } from '../../../core/services/school-settings.service';
 import { CanDirective } from '../../security/can.directive';
+import { MbLogoComponent } from '@mindbloom/ui';
 import { PERMISSIONS } from '../../../core/rbac/permission.constants';
 import { NavFilterService } from '../../services/nav-filter.service';
 
@@ -30,7 +31,7 @@ interface NavSection {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule, CanDirective],
+  imports: [CommonModule, RouterModule, CanDirective, MbLogoComponent],
   template: `
     <aside
       class="sidebar"
@@ -60,12 +61,18 @@ interface NavSection {
 
           <!-- For host navs do not display tenant name; show generic platform label -->
           <div class="tenant-text" *ngIf="!collapsed && !isHostSidebar">
-            <div class="tenant-name">{{ tenantName || 'MindBloom' }}</div>
+            <div class="tenant-name">
+              <mb-logo class="tenant-brand-anchor" variant="icon" size="sm" [decorative]="true"></mb-logo>
+              <span>{{ tenantName || 'MindBloom' }}</span>
+            </div>
             <div class="tenant-subtitle">Administrator workspace</div>
           </div>
 
           <div class="tenant-text" *ngIf="!collapsed && isHostSidebar">
-            <div class="tenant-name">MindBloom</div>
+            <div class="tenant-name">
+              <mb-logo class="tenant-brand-anchor" variant="icon" size="sm" [decorative]="true"></mb-logo>
+              <span>MindBloom</span>
+            </div>
             <div class="tenant-subtitle">Platform workspace</div>
           </div>
         </div>
@@ -170,9 +177,10 @@ interface NavSection {
       background: var(--surface-elevated);
     }
     .logo-img { width: 24px; height: 24px; object-fit: contain; border-radius: 6px; }
-    .tenant-text { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
-    .tenant-name { font-size: 14px; font-weight: 500; line-height: 1.2; letter-spacing: -0.005em; color: var(--text-primary); }
-    .tenant-subtitle { font-size: 12px; color: var(--text-muted); line-height: 1.2; letter-spacing: 0; }
+    .tenant-text { display: flex; flex-direction: column; min-width: 0; gap: 4px; }
+    .tenant-name { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; line-height: 1.2; letter-spacing: -0.005em; color: var(--text-primary); }
+    .tenant-brand-anchor { --mb-logo-height: 16px; opacity: 0.45; color: var(--text-secondary); }
+    .tenant-subtitle { font-size: 11px; color: var(--text-muted); line-height: 1.2; letter-spacing: 0.01em; }
 
     .sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; padding: 0.25rem 0.15rem 1rem; scroll-behavior: smooth; }
 

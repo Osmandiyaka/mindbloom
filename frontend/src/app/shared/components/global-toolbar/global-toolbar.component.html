@@ -24,6 +24,7 @@
             <button type="button" class="tenant-button" (click)="toggleTenantMenu()" [appTooltip]="'Switch school'"
                 tooltipPosition="bottom" [attr.aria-expanded]="tenantMenuOpen()">
                 <span class="context-dot" aria-hidden="true"></span>
+                <span class="context-prefix">School ·</span>
                 <span class="context-text">{{ tenantName() }}</span>
                 <span class="chevron-down" aria-hidden="true">▼</span>
             </button>
@@ -51,6 +52,7 @@
         } @else {
         <div class="context-label hide-xs" [attr.title]="tenantName()">
             <span class="context-dot" aria-hidden="true"></span>
+            <span class="context-prefix">School ·</span>
             <span class="context-text">{{ tenantName() }}</span>
         </div>
         }

@@ -124,6 +124,12 @@
     white-space: nowrap;
 }
 
+.context-prefix {
+    color: var(--text-secondary, var(--color-text-secondary));
+    font-size: 12px;
+    letter-spacing: 0.01em;
+}
+
 .context-dot {
     width: 8px;
     height: 8px;
@@ -195,8 +201,8 @@ app-theme-selector {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 0 10px 0 4px;
-    height: 36px;
+    padding: 0 8px 0 4px;
+    height: 34px;
     border: 1px solid var(--border-subtle, var(--color-border));
     border-radius: 10px;
     background: var(--surface-elevated, transparent);

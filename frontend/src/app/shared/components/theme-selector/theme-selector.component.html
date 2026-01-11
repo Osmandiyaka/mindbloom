@@ -2,7 +2,7 @@
     <button class="theme-toggle" (click)="toggleDropdown()" [attr.aria-label]="'Current theme: ' + currentTheme().name"
         [class.active]="isOpen()">
         <span class="icon">{{ getCurrentIcon() }}</span>
-        <span class="theme-name">{{ isAutoMode() ? 'Auto' : currentTheme().name }}</span>
+        <span class="theme-name">{{ getCurrentLabel() }}</span>
         <span class="chevron" [class.open]="isOpen()">▼</span>
     </button>
 

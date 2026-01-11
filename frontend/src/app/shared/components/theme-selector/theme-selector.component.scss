@@ -6,16 +6,16 @@
 .theme-toggle {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
+    gap: 6px;
+    padding: 6px 10px;
     background: var(--mb-color-surface);
     border: 1px solid var(--mb-color-border);
     border-radius: 8px;
     color: var(--mb-color-text);
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 14px;
-    min-width: 160px;
+    font-size: 13px;
+    min-width: 110px;
 
     &:hover {
         background: var(--mb-color-surface-2);
@@ -36,6 +36,7 @@
         flex: 1;
         text-align: left;
         font-weight: 500;
+        color: var(--mb-color-text-muted);
     }
 
     .chevron {

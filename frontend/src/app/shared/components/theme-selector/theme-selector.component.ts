@@ -56,4 +56,11 @@ export class ThemeSelectorComponent {
         }
         return this.getThemeIcon(this.currentTheme());
     }
+
+    getCurrentLabel(): string {
+        if (this.isAutoMode()) {
+            return 'Auto';
+        }
+        return this.currentTheme().mode === 'dark' ? 'Dark' : 'Light';
+    }
 }
