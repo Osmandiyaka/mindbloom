@@ -58,7 +58,7 @@ export class LoginOverlayComponent {
         if (!value) {
             return 'Email is required.';
         }
-        const valid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value);
+        const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
         return valid ? '' : 'Enter a valid email address.';
     });
 
