@@ -6,6 +6,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import { TenantService } from '../../../core/services/tenant.service';
 import { TenantContextService, TenantMembership } from '../../../core/tenant/tenant-context.service';
 import { TenantBootstrapService } from '../../../core/tenant/tenant-bootstrap.service';
+import { SchoolContextService } from '../../../core/school/school-context.service';
+import { School } from '../../../core/school/school.models';
 import { ThemeSelectorComponent } from '../theme-selector/theme-selector.component';
 import { TooltipDirective } from '../../directives/tooltip.directive';
 import { ClickOutsideDirective } from '../../directives/click-outside.directive';
@@ -27,7 +29,21 @@ export class GlobalToolbarComponent {
     @Output() sidebarToggle = new EventEmitter<void>();
     searchQuery: string = '';
     searchExpanded = false;
-    tenantName = computed(() => this.tenantContextService.activeTenantSignal()?.tenantName || 'School');
+    tenantName = computed(() => this.tenantContextService.activeTenantSignal()?.tenantName || 'Organization');
+    schoolName = computed(() => {
+        const active = this.schoolContext.activeSchool();
+        if (active?.name) {
+            return active.name;
+        }
+        const list = this.schoolContext.schools();
+        if (list.length === 1) {
+            return list[0]?.name || 'School';
+        }
+        if (!list.length) {
+            return 'Unassigned';
+        }
+        return 'Select school';
+    });
 
     // Tenant switcher state
     tenantMenuOpen = signal(false);
@@ -35,7 +51,10 @@ export class GlobalToolbarComponent {
         const session = this.authService.session();
         return session?.memberships || [];
     });
+    availableSchools = computed(() => this.schoolContext.schools());
     isSwitchingTenant = signal(false);
+    schoolMenuOpen = signal(false);
+    isSchoolLoading = computed(() => this.schoolContext.isLoading());
 
     constructor(
         private authService: AuthService,
@@ -43,7 +62,8 @@ export class GlobalToolbarComponent {
         private tenantContextService: TenantContextService,
         private tenantBootstrap: TenantBootstrapService,
         private router: Router,
-        private icons: IconRegistryService
+        private icons: IconRegistryService,
+        private schoolContext: SchoolContextService
     ) { }
 
     icon(name: string) {
@@ -98,6 +118,14 @@ export class GlobalToolbarComponent {
         this.tenantMenuOpen.set(false);
     }
 
+    toggleSchoolMenu() {
+        this.schoolMenuOpen.update(v => !v);
+    }
+
+    closeSchoolMenu() {
+        this.schoolMenuOpen.set(false);
+    }
+
     async switchTenant(tenant: TenantMembership): Promise<void> {
         // Don't switch if already active
         const current = this.tenantContextService.activeTenant();
@@ -131,8 +159,23 @@ export class GlobalToolbarComponent {
         }
     }
 
+    switchSchool(school: School): void {
+        const current = this.schoolContext.activeSchool();
+        if (current?.id === school.id) {
+            this.closeSchoolMenu();
+            return;
+        }
+
+        this.schoolContext.setActiveSchool(school);
+        this.closeSchoolMenu();
+    }
+
     isActiveTenant(tenantId: string): boolean {
         return this.tenantContextService.activeTenant()?.tenantId === tenantId;
+    }
+
+    isActiveSchool(schoolId: string): boolean {
+        return this.schoolContext.activeSchool()?.id === schoolId;
     }
 
     onLogout() {

@@ -316,11 +316,13 @@ app-theme-selector {
 }
 
 /* Tenant Switcher Styles */
-.tenant-switcher {
+.tenant-switcher,
+.school-switcher {
     position: relative;
 }
 
-.tenant-button {
+.tenant-button,
+.school-button {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -354,7 +356,8 @@ app-theme-selector {
     }
 }
 
-.tenant-menu {
+.tenant-menu,
+.school-menu {
     position: absolute;
     top: calc(100% + 8px);
     left: 0;
@@ -367,7 +370,8 @@ app-theme-selector {
     overflow: hidden;
 }
 
-.tenant-menu-header {
+.tenant-menu-header,
+.school-menu-header {
     padding: 12px 16px;
     font-size: 12px;
     font-weight: 600;
@@ -377,12 +381,14 @@ app-theme-selector {
     border-bottom: 1px solid var(--border-subtle, var(--color-border));
 }
 
-.tenant-menu-list {
+.tenant-menu-list,
+.school-menu-list {
     max-height: 400px;
     overflow-y: auto;
 }
 
-.tenant-menu-item {
+.tenant-menu-item,
+.school-menu-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -408,12 +414,14 @@ app-theme-selector {
     }
 }
 
-.tenant-item-content {
+.tenant-item-content,
+.school-item-content {
     flex: 1;
     min-width: 0;
 }
 
-.tenant-item-name {
+.tenant-item-name,
+.school-item-name {
     font-size: 14px;
     font-weight: 500;
     color: var(--text-primary, var(--color-text-primary));
@@ -423,7 +431,8 @@ app-theme-selector {
     margin-bottom: 2px;
 }
 
-.tenant-item-slug {
+.tenant-item-slug,
+.school-item-slug {
     font-size: 12px;
     color: var(--text-secondary, var(--color-text-secondary));
     white-space: nowrap;

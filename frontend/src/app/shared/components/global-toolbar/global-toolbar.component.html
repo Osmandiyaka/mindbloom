@@ -21,17 +21,17 @@
         <!-- Tenant Switcher -->
         @if (availableTenants().length > 1) {
         <div class="tenant-switcher hide-xs" appClickOutside (clickOutside)="closeTenantMenu()">
-            <button type="button" class="tenant-button" (click)="toggleTenantMenu()" [appTooltip]="'Switch school'"
+            <button type="button" class="tenant-button" (click)="toggleTenantMenu()" [appTooltip]="'Switch organization'"
                 tooltipPosition="bottom" [attr.aria-expanded]="tenantMenuOpen()">
                 <span class="context-dot" aria-hidden="true"></span>
-                <span class="context-prefix">School ·</span>
+                <span class="context-prefix">Organization ·</span>
                 <span class="context-text">{{ tenantName() }}</span>
                 <span class="chevron-down" aria-hidden="true">▼</span>
             </button>
 
             @if (tenantMenuOpen()) {
             <div class="tenant-menu" (click)="$event.stopPropagation()">
-                <div class="tenant-menu-header">Switch School</div>
+                <div class="tenant-menu-header">Switch Organization</div>
                 <div class="tenant-menu-list">
                     @for (tenant of availableTenants(); track tenant.tenantId) {
                     <button type="button" class="tenant-menu-item" [class.active]="isActiveTenant(tenant.tenantId)"
@@ -52,8 +52,49 @@
         } @else {
         <div class="context-label hide-xs" [attr.title]="tenantName()">
             <span class="context-dot" aria-hidden="true"></span>
-            <span class="context-prefix">School ·</span>
+            <span class="context-prefix">Organization ·</span>
             <span class="context-text">{{ tenantName() }}</span>
+        </div>
+        }
+
+        <!-- School Selector -->
+        @if (availableSchools().length > 1) {
+        <div class="school-switcher hide-xs" appClickOutside (clickOutside)="closeSchoolMenu()">
+            <button type="button" class="school-button" (click)="toggleSchoolMenu()" [appTooltip]="'Switch school'"
+                tooltipPosition="bottom" [attr.aria-expanded]="schoolMenuOpen()">
+                <span class="context-dot" aria-hidden="true"></span>
+                <span class="context-prefix">School ·</span>
+                <span class="context-text">{{ schoolName() }}</span>
+                <span class="chevron-down" aria-hidden="true">▼</span>
+            </button>
+
+            @if (schoolMenuOpen()) {
+            <div class="school-menu" (click)="$event.stopPropagation()">
+                <div class="school-menu-header">Switch School</div>
+                <div class="school-menu-list">
+                    @for (school of availableSchools(); track school.id) {
+                    <button type="button" class="school-menu-item" [class.active]="isActiveSchool(school.id)"
+                        [disabled]="isSchoolLoading()" (click)="switchSchool(school)">
+                        <div class="school-item-content">
+                            <div class="school-item-name">{{ school.name }}</div>
+                            @if (school.code || school.domain) {
+                            <div class="school-item-slug">{{ school.code || school.domain }}</div>
+                            }
+                        </div>
+                        @if (isActiveSchool(school.id)) {
+                        <span class="check-icon">✓</span>
+                        }
+                    </button>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+        } @else {
+        <div class="context-label hide-xs" [attr.title]="schoolName()">
+            <span class="context-dot" aria-hidden="true"></span>
+            <span class="context-prefix">School ·</span>
+            <span class="context-text">{{ schoolName() }}</span>
         </div>
         }
     </div>
