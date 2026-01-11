@@ -19,7 +19,7 @@
                 }
 
                 <form class="auth-form" (ngSubmit)="onSubmit()">
-                    <mb-form-field label="Email" [controlId]="'login-email'">
+                    <mb-form-field label="Email" [controlId]="'login-email'" [error]="emailError()">
                         <mb-input
                             #firstFieldRef
                             type="email"
@@ -27,6 +27,7 @@
                             autocomplete="email"
                             [value]="username()"
                             (valueChange)="username.set($event); errorMessage.set('')"
+                            (focusout)="onEmailBlur()"
                             ariaLabel="Email"
                             [autofocus]="true"
                             [disabled]="isLoading()"
@@ -37,13 +38,14 @@
                         <label class="auth-label" for="login-password">Password</label>
                         <a class="auth-link auth-link--muted" routerLink="/auth/forgot">Forgot password?</a>
                     </div>
-                    <mb-form-field [controlId]="'login-password'">
+                    <mb-form-field [controlId]="'login-password'" [error]="passwordError()">
                         <mb-input
                             [type]="showPassword() ? 'text' : 'password'"
                             id="login-password"
                             autocomplete="current-password"
                             [value]="password()"
                             (valueChange)="password.set($event); errorMessage.set('')"
+                            (focusout)="onPasswordBlur()"
                             (keydown)="handleCapsLock($event)"
                             ariaLabel="Password"
                             [disabled]="isLoading()"
@@ -79,7 +81,14 @@
                         </mb-checkbox>
                     </div>
 
-                    <mb-button type="submit" variant="primary" [fullWidth]="true" [loading]="isLoading()" [hideLabelOnLoading]="false" [disabled]="isLoading()">
+                    <mb-button
+                        type="submit"
+                        variant="primary"
+                        [fullWidth]="true"
+                        [loading]="isLoading()"
+                        [hideLabelOnLoading]="false"
+                        [disabled]="isLoading() || !isFormValid()"
+                    >
                         {{ isLoading() ? 'Signing in...' : 'Sign in' }}
                     </mb-button>
 

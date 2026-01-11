@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -46,6 +46,30 @@ export class LoginOverlayComponent {
     isLoading = signal(false);
     errorMessage = signal('');
     resetSuccess = signal(false);
+    emailTouched = signal(false);
+    passwordTouched = signal(false);
+    submitAttempted = signal(false);
+
+    emailError = computed(() => {
+        if (!this.shouldShowValidation()) {
+            return '';
+        }
+        const value = this.username().trim();
+        if (!value) {
+            return 'Email is required.';
+        }
+        const valid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value);
+        return valid ? '' : 'Enter a valid email address.';
+    });
+
+    passwordError = computed(() => {
+        if (!this.shouldShowValidation()) {
+            return '';
+        }
+        return this.password().trim() ? '' : 'Password is required.';
+    });
+
+    isFormValid = computed(() => !this.emailError() && !this.passwordError());
 
     showRegistration = signal(false);
     private readonly defaultReturnUrl = '/dashboard';
@@ -86,14 +110,26 @@ export class LoginOverlayComponent {
         this.showPassword.update(v => !v);
     }
 
+    onEmailBlur(): void {
+        this.emailTouched.set(true);
+    }
+
+    onPasswordBlur(): void {
+        this.passwordTouched.set(true);
+    }
+
     handleCapsLock(event: KeyboardEvent): void {
         this.capsLockOn.set(event.getModifierState?.('CapsLock') ?? false);
     }
 
     onSubmit(): void {
+        this.submitAttempted.set(true);
         if (!this.username().trim() || !this.password()) {
             this.errorMessage.set('We couldn’t sign you in. Check your details and try again.');
             this.focusAlert();
+            return;
+        }
+        if (!this.isFormValid()) {
             return;
         }
 
@@ -126,6 +162,10 @@ export class LoginOverlayComponent {
 
     private focusAlert(): void {
         setTimeout(() => this.alertRef?.nativeElement?.focus(), 0);
+    }
+
+    private shouldShowValidation(): boolean {
+        return this.submitAttempted() || this.emailTouched() || this.passwordTouched();
     }
 
 }

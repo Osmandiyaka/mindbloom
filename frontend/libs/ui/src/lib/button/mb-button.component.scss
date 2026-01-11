@@ -37,6 +37,12 @@
     box-shadow: none;
 }
 
+.mb-button--primary:disabled {
+    background: var(--mb-color-primary-subtle);
+    color: var(--mb-color-text);
+    border-color: transparent;
+}
+
 .mb-button:not(:disabled):hover {
     background: var(--mb-color-primary-hover);
 }

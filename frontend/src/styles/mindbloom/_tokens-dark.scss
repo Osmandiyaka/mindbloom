@@ -19,6 +19,7 @@
     --mb-color-primary: #2dd4bf;
     --mb-color-primary-hover: #14b8a6;
     --mb-color-primary-active: #0f766e;
+    --mb-color-primary-subtle: color-mix(in srgb, var(--mb-color-primary) 18%, var(--mb-color-bg));
     --mb-color-on-primary: #0b1220;
 
     --mb-color-success: #22c55e;
