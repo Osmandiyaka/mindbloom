@@ -8,6 +8,9 @@ type MbButtonSize = 'sm' | 'md' | 'lg';
     selector: 'mb-button',
     standalone: true,
     imports: [CommonModule],
+    host: {
+        '[class.mb-button-host--full]': 'fullWidth'
+    },
     template: `
         <button
             class="mb-button"
@@ -17,6 +20,7 @@ type MbButtonSize = 'sm' | 'md' | 'lg';
             [class.mb-button--danger]="variant === 'danger'"
             [class.mb-button--sm]="size === 'sm'"
             [class.mb-button--lg]="size === 'lg'"
+            [class.mb-button--full]="fullWidth"
             [class.mb-button--loading]="loading"
             [disabled]="disabled || loading"
             [attr.type]="type"
@@ -38,6 +42,7 @@ export class MbButtonComponent {
     @Input() variant: MbButtonVariant = 'primary';
     @Input() size: MbButtonSize = 'md';
     @Input() type: 'button' | 'submit' | 'reset' = 'button';
+    @Input() fullWidth = false;
     @Input() disabled = false;
     @Input() loading = false;
     @Input() ariaLabel?: string;

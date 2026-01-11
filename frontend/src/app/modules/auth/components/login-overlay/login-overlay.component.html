@@ -82,7 +82,7 @@
                         </mb-checkbox>
                     </div>
 
-                    <mb-button type="submit" size="lg" variant="primary" [disabled]="isLoading()">
+                    <mb-button type="submit" variant="primary" [fullWidth]="true" [disabled]="isLoading()">
                         {{ isLoading() ? 'Signing in...' : 'Sign in' }}
                     </mb-button>
 
