@@ -86,7 +86,7 @@
 .auth-card__header {
     margin-bottom: var(--mb-space-6);
     display: grid;
-    gap: var(--mb-space-3);
+    gap: var(--mb-space-2);
 }
 
 .auth-card__header--center {
@@ -110,6 +110,10 @@
     font-weight: var(--mb-font-weight-regular);
 }
 
+.auth-card__header--center h1 + p {
+    margin-top: var(--mb-space-2);
+}
+
 .auth-alert {
     outline: none;
     margin-bottom: var(--mb-space-5);
@@ -121,7 +125,7 @@
 }
 
 .auth-form > mb-button {
-    margin-top: var(--mb-space-4);
+    margin-top: var(--mb-space-5);
     width: 100%;
 }
 
@@ -186,7 +190,7 @@
     gap: var(--mb-space-3);
     font-size: var(--mb-font-size-sm);
     line-height: var(--mb-line-height-normal);
-    margin-top: var(--mb-space-2);
+    margin-top: var(--mb-space-3);
 }
 
 .auth-links--stack {
