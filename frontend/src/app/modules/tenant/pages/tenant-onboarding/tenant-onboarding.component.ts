@@ -58,6 +58,7 @@ export class TenantOnboardingComponent implements OnInit {
     isLoading = signal(true);
     isSaving = signal(false);
     errorMessage = signal('');
+    submitAttempted = signal(false);
 
     tenantName = signal('');
     tenantCode = signal('');
@@ -68,6 +69,10 @@ export class TenantOnboardingComponent implements OnInit {
 
     orgCountry = signal('');
     orgContactEmail = signal('');
+    orgNameTouched = signal(false);
+    workspaceUrlTouched = signal(false);
+    countryTouched = signal(false);
+    contactEmailTouched = signal(false);
     countryOptions: MbComboBoxOption[] = [
         { label: 'Afghanistan', value: 'Afghanistan' },
         { label: 'Albania', value: 'Albania' },
@@ -331,6 +336,11 @@ export class TenantOnboardingComponent implements OnInit {
     adminEmail = signal('');
     adminPassword = signal('');
     adminPasswordConfirm = signal('');
+    adminFirstTouched = signal(false);
+    adminLastTouched = signal(false);
+    adminEmailTouched = signal(false);
+    adminPasswordTouched = signal(false);
+    adminPasswordConfirmTouched = signal(false);
     acceptTerms = signal(false);
     showAdminPassword = signal(false);
     showAdminConfirm = signal(false);
@@ -381,6 +391,9 @@ export class TenantOnboardingComponent implements OnInit {
         }
     });
     readonly codeError = computed(() => {
+        if (!this.shouldShowFieldError('workspaceUrl')) {
+            return '';
+        }
         const code = this.tenantCode().trim();
         if (!code.length) {
             return 'Please choose a valid workspace URL.';
@@ -397,9 +410,15 @@ export class TenantOnboardingComponent implements OnInit {
         return '';
     });
     readonly orgNameError = computed(() => {
+        if (!this.shouldShowFieldError('orgName')) {
+            return '';
+        }
         return this.tenantName().trim().length ? '' : 'Organization name is required.';
     });
     readonly countryError = computed(() => {
+        if (!this.shouldShowFieldError('country')) {
+            return '';
+        }
         const value = this.orgCountry().trim();
         if (!value.length) {
             return 'Please select a country or region.';
@@ -416,6 +435,9 @@ export class TenantOnboardingComponent implements OnInit {
         return 'This is the web address your team will use to sign in. Use lowercase letters, numbers, and hyphens only.';
     });
     readonly contactEmailError = computed(() => {
+        if (!this.shouldShowFieldError('contactEmail')) {
+            return '';
+        }
         const email = this.orgContactEmail().trim();
         if (!email.length) {
             return 'Email address is required.';
@@ -428,16 +450,24 @@ export class TenantOnboardingComponent implements OnInit {
         const errors: string[] = [];
         if (this.isRegistrationMode()) {
             if (step === 1) {
-                if (this.orgNameError()) errors.push(this.orgNameError());
-                if (this.codeError()) errors.push(this.codeError());
-                if (this.countryError()) errors.push(this.countryError());
-                if (this.contactEmailError()) errors.push(this.contactEmailError());
+                if (this.shouldShowFieldError('orgName') && this.orgNameError()) errors.push(this.orgNameError());
+                if (this.shouldShowFieldError('workspaceUrl') && this.codeError()) errors.push(this.codeError());
+                if (this.shouldShowFieldError('country') && this.countryError()) errors.push(this.countryError());
+                if (this.shouldShowFieldError('contactEmail') && this.contactEmailError()) errors.push(this.contactEmailError());
             } else if (step === 2) {
-                if (!this.adminFirstName().trim()) errors.push('Administrator first name is required.');
-                if (!this.adminLastName().trim()) errors.push('Administrator last name is required.');
-                if (!this.adminEmail().trim()) errors.push('Administrator email is required.');
-                if (this.adminPassword().trim().length < 8) errors.push('Administrator password must be at least 8 characters.');
-                if (this.adminPassword().trim() !== this.adminPasswordConfirm().trim()) {
+                if (this.shouldShowFieldError('adminFirst') && !this.adminFirstName().trim()) {
+                    errors.push('Administrator first name is required.');
+                }
+                if (this.shouldShowFieldError('adminLast') && !this.adminLastName().trim()) {
+                    errors.push('Administrator last name is required.');
+                }
+                if (this.shouldShowFieldError('adminEmail') && !this.adminEmail().trim()) {
+                    errors.push('Administrator email is required.');
+                }
+                if (this.shouldShowFieldError('adminPassword') && this.adminPassword().trim().length < 8) {
+                    errors.push('Administrator password must be at least 8 characters.');
+                }
+                if (this.shouldShowFieldError('adminPasswordConfirm') && this.adminPassword().trim() !== this.adminPasswordConfirm().trim()) {
                     errors.push('Administrator passwords must match.');
                 }
             } else if (step === 3) {
@@ -522,6 +552,9 @@ export class TenantOnboardingComponent implements OnInit {
         }
         return false;
     });
+    readonly showValidationSummary = computed(() => {
+        return this.validationSummary().length > 1 && (this.submitAttempted() || this.anyTouchedInStep());
+    });
     private persistTimer: number | null = null;
 
     isRegistrationMode(): boolean {
@@ -538,9 +571,11 @@ export class TenantOnboardingComponent implements OnInit {
 
     onCountryInput(value: string): void {
         this.orgCountry.set(value);
+        this.countryTouched.set(true);
     }
 
     onCountryBlur(): void {
+        this.countryTouched.set(true);
         const value = this.orgCountry().trim();
         if (!value.length) {
             return;
@@ -560,6 +595,7 @@ export class TenantOnboardingComponent implements OnInit {
             this.orgContactEmail();
             this.adminPasswordConfirm();
             this.acceptTerms();
+            this.submitAttempted();
             this.schoolMode();
             this.schoolRows();
             this.selectedEditionId();
@@ -698,6 +734,7 @@ export class TenantOnboardingComponent implements OnInit {
     onTenantCodeInput(value: string): void {
         const normalized = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
         this.tenantCode.set(normalized);
+        this.workspaceUrlTouched.set(true);
         this.codeStatus.set('idle');
         this.codeStatusMessage.set('');
 
@@ -745,11 +782,13 @@ export class TenantOnboardingComponent implements OnInit {
         const current = this.step();
         if (current > 1) {
             this.step.set((current - 1) as 1 | 2 | 3 | 4);
+            this.submitAttempted.set(false);
             this.persistState();
         }
     }
 
     async next(): Promise<void> {
+        this.submitAttempted.set(true);
         this.errorMessage.set('');
         const current = this.step();
 
@@ -763,6 +802,7 @@ export class TenantOnboardingComponent implements OnInit {
             }
             if (current < 3) {
                 this.step.set((current + 1) as 1 | 2 | 3);
+                this.submitAttempted.set(false);
             }
             return;
         }
@@ -786,6 +826,7 @@ export class TenantOnboardingComponent implements OnInit {
 
         if (current < 4) {
             this.step.set((current + 1) as 1 | 2 | 3 | 4);
+            this.submitAttempted.set(false);
             this.persistState();
         }
     }
@@ -805,6 +846,95 @@ export class TenantOnboardingComponent implements OnInit {
 
     toggleAdminConfirm(): void {
         this.showAdminConfirm.update(value => !value);
+    }
+
+    onOrgNameInput(value: string): void {
+        this.tenantName.set(value);
+        this.orgNameTouched.set(true);
+    }
+
+    onWorkspaceUrlBlur(): void {
+        this.workspaceUrlTouched.set(true);
+    }
+
+    onContactEmailInput(value: string): void {
+        this.orgContactEmail.set(value);
+        this.contactEmailTouched.set(true);
+    }
+
+    onAdminFirstNameInput(value: string): void {
+        this.adminFirstName.set(value);
+        this.adminFirstTouched.set(true);
+    }
+
+    onAdminLastNameInput(value: string): void {
+        this.adminLastName.set(value);
+        this.adminLastTouched.set(true);
+    }
+
+    onAdminEmailInput(value: string): void {
+        this.adminEmail.set(value);
+        this.adminEmailTouched.set(true);
+    }
+
+    onAdminPasswordInput(value: string): void {
+        this.adminPassword.set(value);
+        this.adminPasswordTouched.set(true);
+    }
+
+    onAdminPasswordConfirmInput(value: string): void {
+        this.adminPasswordConfirm.set(value);
+        this.adminPasswordConfirmTouched.set(true);
+    }
+
+    private anyTouchedInStep(): boolean {
+        const step = this.step();
+        if (this.isRegistrationMode()) {
+            if (step === 1) {
+                return this.orgNameTouched() || this.workspaceUrlTouched()
+                    || this.countryTouched() || this.contactEmailTouched();
+            }
+            if (step === 2) {
+                return this.adminFirstTouched() || this.adminLastTouched()
+                    || this.adminEmailTouched() || this.adminPasswordTouched()
+                    || this.adminPasswordConfirmTouched();
+            }
+            return false;
+        }
+        if (step === 1) {
+            return this.orgNameTouched() || this.workspaceUrlTouched()
+                || this.countryTouched() || this.contactEmailTouched();
+        }
+        return false;
+    }
+
+    private shouldShowFieldError(field: 'orgName' | 'workspaceUrl' | 'country' | 'contactEmail'
+        | 'adminFirst' | 'adminLast' | 'adminEmail' | 'adminPassword' | 'adminPasswordConfirm'): boolean {
+        if (this.submitAttempted()) {
+            return true;
+        }
+        switch (field) {
+            case 'orgName':
+                return this.orgNameTouched();
+            case 'workspaceUrl':
+                return this.workspaceUrlTouched();
+            case 'country':
+                return this.countryTouched();
+            case 'contactEmail':
+                return this.contactEmailTouched();
+            case 'adminFirst':
+                return this.adminFirstTouched();
+            case 'adminLast':
+                return this.adminLastTouched();
+            case 'adminEmail':
+                return this.adminEmailTouched();
+            case 'adminPassword':
+                return this.adminPasswordTouched();
+            case 'adminPasswordConfirm':
+                return this.adminPasswordConfirmTouched();
+            default:
+                return false;
+        }
     }
 
     private async registerTenant(): Promise<void> {

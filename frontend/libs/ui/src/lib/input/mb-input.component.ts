@@ -62,6 +62,7 @@ export class MbInputComponent implements ControlValueAccessor {
     @Input() clearLabel = 'Clear value';
     @Input() value = '';
     @Output() valueChange = new EventEmitter<string>();
+    @Output() blurEvent = new EventEmitter<void>();
 
     private onChange: (value: string) => void = () => {};
     private onTouched: () => void = () => {};
@@ -97,5 +98,6 @@ export class MbInputComponent implements ControlValueAccessor {
 
     handleBlur(): void {
         this.onTouched();
+        this.blurEvent.emit();
     }
 }
