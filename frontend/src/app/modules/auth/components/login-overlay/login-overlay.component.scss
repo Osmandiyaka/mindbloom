@@ -78,6 +78,13 @@
     text-decoration: none;
 }
 
+.auth-password-row .auth-link--muted {
+    margin-left: auto;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+}
+
 .auth-link--secondary:hover,
 .auth-link--muted:hover {
     color: var(--mb-color-text);
@@ -154,10 +161,12 @@
 .auth-password-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: baseline;
+    flex-wrap: wrap;
     font-size: var(--mb-font-size-sm);
     color: var(--mb-color-text);
     line-height: var(--mb-line-height-normal);
+    gap: var(--mb-space-2);
 }
 
 .auth-label {
