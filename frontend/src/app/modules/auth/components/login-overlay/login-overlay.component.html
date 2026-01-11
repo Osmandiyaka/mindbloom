@@ -61,14 +61,13 @@
 
                     @if (tenantStep() === 'select') {
                     <div class="auth-section">
-                        <mb-form-field label="Organization" [controlId]="'tenant-org'" [error]="tenantErrorMessage()" hint="Search by school, district, or tenant code.">
+                        <mb-form-field label="Organization" [controlId]="'tenant-org'" [error]="tenantErrorMessage()" hint="Search by school or district name.">
                             <mb-input
                                 #firstFieldRef
                                 id="tenant-org"
                                 [value]="organizationQuery()"
                                 (valueChange)="organizationQuery.set($event); tenantErrorMessage.set('')"
                                 (keydown)="onTenantKeyDown($event, 'org')"
-                                placeholder="School or district name"
                                 ariaLabel="Organization"
                                 [disabled]="isValidatingTenant()"
                             ></mb-input>
@@ -77,6 +76,7 @@
                         <mb-button size="lg" variant="primary" [disabled]="isValidatingTenant() || !organizationQuery().trim()" (click)="onConfirmTenant()">
                             {{ isValidatingTenant() ? 'Checking...' : 'Next' }}
                         </mb-button>
+                        <p class="auth-note auth-note--context">You'll be prompted to sign in after selecting your organization.</p>
 
                         <div class="auth-links">
                             <a href="#" (click)="onRegisterTenant($event)">Create an organization</a>
