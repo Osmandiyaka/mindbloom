@@ -45,16 +45,16 @@ interface NavSection {
       <div class="sidebar-header tenant-header" role="button" aria-label="Open tenant or host settings" (click)="goToTenantSettings($event)" tabindex="0" (keydown.enter)="goToTenantSettings($event)" (keydown.space)="goToTenantSettings($event)">
         <div class="tenant-identity">
           <div class="tenant-logo">
-            <!-- If this is a host nav, show a neutral/platform icon instead of tenant logo -->
+            <!-- If this is a host nav, show a platform mark instead of tenant logo -->
             <ng-container *ngIf="isHostSidebar; else tenantLogoTemplate">
-              <span class="nav-icon" [innerHTML]="icon('shield')"></span>
+              <mb-logo class="host-brand-mark" variant="icon" size="md" [decorative]="true"></mb-logo>
             </ng-container>
             <ng-template #tenantLogoTemplate>
-              <ng-container *ngIf="tenantLogo; else defaultLogo">
+              <ng-container *ngIf="tenantLogo; else monogramLogo">
                 <img [src]="tenantLogo" alt="Tenant logo" class="logo-img" loading="lazy" />
               </ng-container>
-              <ng-template #defaultLogo>
-                <span class="nav-icon" [innerHTML]="icon('dashboard')"></span>
+              <ng-template #monogramLogo>
+                <span class="tenant-monogram">{{ getTenantInitials() }}</span>
               </ng-template>
             </ng-template>
           </div>
@@ -62,18 +62,16 @@ interface NavSection {
           <!-- For host navs do not display tenant name; show generic platform label -->
           <div class="tenant-text" *ngIf="!collapsed && !isHostSidebar">
             <div class="tenant-name">
-              <mb-logo class="tenant-brand-anchor" variant="icon" size="sm" [decorative]="true"></mb-logo>
               <span>{{ tenantName || 'MindBloom' }}</span>
             </div>
-            <div class="tenant-subtitle">Administrator workspace</div>
+            <div class="tenant-subtitle">Administrative Workspace</div>
           </div>
 
           <div class="tenant-text" *ngIf="!collapsed && isHostSidebar">
             <div class="tenant-name">
-              <mb-logo class="tenant-brand-anchor" variant="icon" size="sm" [decorative]="true"></mb-logo>
               <span>MindBloom</span>
             </div>
-            <div class="tenant-subtitle">Platform workspace</div>
+            <div class="tenant-subtitle">Platform Workspace</div>
           </div>
         </div>
       </div>
@@ -152,35 +150,57 @@ interface NavSection {
     }
 
     .tenant-header {
-      padding: 16px 16px 12px;
+      position: relative;
+      padding: 18px 16px 14px;
       border-bottom: 1px solid var(--border-subtle);
       cursor: pointer;
       transition: background-color 0.18s ease;
+      background: color-mix(in srgb, var(--surface-sidebar) 96%, var(--accent-primary));
     }
 
-    .tenant-header:hover { background: var(--surface-hover); }
+    .tenant-header::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 12px;
+      bottom: 12px;
+      width: 2px;
+      background: color-mix(in srgb, var(--accent-primary) 55%, transparent);
+      border-radius: 2px;
+    }
+
+    .tenant-header:hover { background: color-mix(in srgb, var(--surface-sidebar) 92%, var(--accent-primary)); }
     .tenant-header:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: -2px; }
 
     .tenant-identity {
       display: flex;
-      align-items: center;
-      gap: 0.6rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.55rem;
       padding: 0.1rem 0;
     }
 
     .tenant-logo {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
       display: grid;
       place-items: center;
-      background: var(--surface-elevated);
+      background: color-mix(in srgb, var(--accent-primary) 12%, var(--surface-elevated));
+      color: var(--text-primary);
     }
-    .logo-img { width: 24px; height: 24px; object-fit: contain; border-radius: 6px; }
+    .tenant-monogram {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+    }
+    .logo-img { width: 30px; height: 30px; object-fit: contain; border-radius: 6px; }
+    .host-brand-mark { --mb-logo-height: 22px; color: var(--text-primary); }
     .tenant-text { display: flex; flex-direction: column; min-width: 0; gap: 4px; }
-    .tenant-name { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; line-height: 1.2; letter-spacing: -0.005em; color: var(--text-primary); }
-    .tenant-brand-anchor { --mb-logo-height: 16px; opacity: 0.45; color: var(--text-secondary); }
-    .tenant-subtitle { font-size: 11px; color: var(--text-muted); line-height: 1.2; letter-spacing: 0.01em; }
+    .tenant-name { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; color: var(--text-primary); }
+    .tenant-subtitle { font-size: 11px; color: var(--text-muted); line-height: 1.2; letter-spacing: 0.04em; text-transform: none; }
 
     .sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; padding: 0.25rem 0.15rem 1rem; scroll-behavior: smooth; }
 
@@ -549,6 +569,20 @@ export class SidebarComponent implements OnInit {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  }
+
+  getTenantInitials(): string {
+    const name = (this.tenantName || 'MindBloom').trim();
+    if (!name) return 'MB';
+    const parts = name.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return parts
+      .slice(0, 2)
+      .map(part => part[0])
+      .join('')
+      .toUpperCase();
   }
 
   logout(): void {
