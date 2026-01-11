@@ -61,12 +61,12 @@ interface NavSection {
           <!-- For host navs do not display tenant name; show generic platform label -->
           <div class="tenant-text" *ngIf="!collapsed && !isHostSidebar">
             <div class="tenant-name">{{ tenantName || 'MindBloom' }}</div>
-            <div class="tenant-subtitle">School OS</div>
+            <div class="tenant-subtitle">Administrator workspace</div>
           </div>
 
           <div class="tenant-text" *ngIf="!collapsed && isHostSidebar">
             <div class="tenant-name">MindBloom</div>
-            <div class="tenant-subtitle">Host Console</div>
+            <div class="tenant-subtitle">Platform workspace</div>
           </div>
         </div>
       </div>
@@ -112,14 +112,14 @@ interface NavSection {
   styles: [`
     :host { display: block; height: 100%; }
     .sidebar {
-      --accent-primary: var(--color-primary, #8bc6ff);
-      --surface-sidebar: var(--color-surface, #0f172a);
-      --surface-hover: color-mix(in srgb, var(--color-surface-hover, rgba(255,255,255,0.04)) 90%, transparent);
-      --surface-elevated: color-mix(in srgb, var(--color-surface, #0f172a) 82%, #ffffff 8%);
-      --text-primary: var(--color-text-primary, #e5e7eb);
-      --text-secondary: var(--color-text-secondary, #9ca3af);
-      --text-muted: color-mix(in srgb, var(--color-text-secondary, #9ca3af) 75%, transparent);
-      --border-subtle: var(--color-border, rgba(255,255,255,0.08));
+      --accent-primary: var(--mb-color-primary);
+      --surface-sidebar: var(--mb-color-surface);
+      --surface-hover: color-mix(in srgb, var(--mb-color-surface) 92%, var(--mb-color-primary));
+      --surface-elevated: var(--mb-color-surface-2);
+      --text-primary: var(--mb-color-text);
+      --text-secondary: var(--mb-color-text-muted);
+      --text-muted: var(--mb-color-text-subtle);
+      --border-subtle: var(--mb-color-border-subtle);
       position: sticky;
       top: 0;
       height: 100vh;
@@ -183,11 +183,11 @@ interface NavSection {
       font-size: 11px;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: var(--text-secondary);
       padding: 0 0.9rem;
       margin-top: 1rem;
       margin-bottom: 0.35rem;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .nav-card {
@@ -238,8 +238,8 @@ interface NavSection {
     }
 
     .nav-link.active {
-      background: var(--color-accent, var(--accent-primary));
-      color: #fff;
+      background: var(--surface-hover);
+      color: var(--text-primary);
       font-weight: 600;
     }
 
@@ -257,14 +257,14 @@ interface NavSection {
       justify-content: center;
       position: relative;
       top: 0.5px;
-      color: var(--text-secondary);
-      opacity: 0.78;
+      color: var(--text-muted);
+      opacity: 0.65;
       transition: color 0.2s ease, opacity 0.2s ease, transform 0.12s ease;
     }
     .nav-link-icon svg { width: 18px; height: 18px; stroke-width: 1.75; stroke: currentColor; }
 
     .nav-link:hover .nav-link-icon { color: var(--text-primary); opacity: 1; transform: translateX(1px); }
-    .nav-link.active .nav-link-icon { color: #fff; opacity: 1; }
+    .nav-link.active .nav-link-icon { color: var(--accent-primary); opacity: 1; }
 
     .nav-link-text { font-weight: 400; letter-spacing: 0.01em; font-size: 14px; line-height: 1.15; }
 

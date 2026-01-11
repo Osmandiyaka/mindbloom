@@ -4,8 +4,8 @@
     left: 0;
     right: 0;
     width: 100%;
-    height: 56px;
-    padding: 0 16px;
+    height: 52px;
+    padding: 0 14px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -43,12 +43,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     padding: 0;
     border: none;
     background: transparent;
-    color: var(--icon-muted, var(--text-secondary, var(--color-text-secondary)));
+    color: var(--text-secondary, var(--color-text-secondary));
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.2s ease, color 0.2s ease;
@@ -157,7 +157,7 @@
 }
 
 .search-shell:not(.collapsed) .search-container {
-    width: clamp(280px, 40vw, 640px);
+    width: clamp(320px, 48vw, 720px);
     max-width: 100%;
 }
 
@@ -174,7 +174,7 @@
 }
 
 .toolbar-right {
-    gap: 10px;
+    gap: 8px;
 }
 
 .toolbar-divider {
@@ -187,7 +187,8 @@ app-theme-selector {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 36px;
+    height: 32px;
+    opacity: 0.8;
 }
 
 .user-chip {

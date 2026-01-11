@@ -23,12 +23,12 @@
             <defs>
                 <marker id="arrowHead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6"
                     orient="auto-start-reverse">
-                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#B0B8C3"></path>
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
                 </marker>
             </defs>
 
             <g *ngFor="let edge of edges">
-                <path [attr.d]="buildPath(edge)" stroke="#B0B8C3" stroke-width="2" fill="none"
+                <path [attr.d]="buildPath(edge)" stroke="currentColor" stroke-width="2" fill="none"
                     marker-end="url(#arrowHead)" />
             </g>
         </svg>
