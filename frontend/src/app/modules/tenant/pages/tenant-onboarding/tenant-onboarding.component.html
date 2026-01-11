@@ -48,7 +48,7 @@
                 <mb-form-field label="Workspace URL" [controlId]="'org-code'" [hint]="codeHint()" [error]="codeError()">
                     <mb-input id="org-code" [value]="tenantCode()" (valueChange)="onTenantCodeInput($event)"
                         (blurEvent)="onWorkspaceUrlBlur()"></mb-input>
-                    <div class="tenant-url-preview">https://[your-name].mindbloom.app</div>
+                    <div class="tenant-url-preview">.mindbloom.app</div>
                 </mb-form-field>
 
                 <mb-form-field label="Country or region" [controlId]="'org-country'"
@@ -61,7 +61,8 @@
                 <mb-form-field label="Primary contact email" [controlId]="'org-contact-email'"
                     [hint]="'We’ll use this email for important account notifications.'" [error]="contactEmailError()">
                     <mb-input id="org-contact-email" type="email" [value]="orgContactEmail()"
-                        (valueChange)="onContactEmailInput($event)" (blurEvent)="contactEmailTouched.set(true)"></mb-input>
+                        (valueChange)="onContactEmailInput($event)"
+                        (blurEvent)="contactEmailTouched.set(true)"></mb-input>
                 </mb-form-field>
             </div>
             }
@@ -184,15 +185,18 @@
                 <div class="admin-form">
                     <mb-form-field label="First name" [controlId]="'admin-first-name'">
                         <mb-input id="admin-first-name" [value]="adminFirstName()"
-                            (valueChange)="onAdminFirstNameInput($event)" (blurEvent)="adminFirstTouched.set(true)"></mb-input>
+                            (valueChange)="onAdminFirstNameInput($event)"
+                            (blurEvent)="adminFirstTouched.set(true)"></mb-input>
                     </mb-form-field>
                     <mb-form-field label="Last name" [controlId]="'admin-last-name'">
                         <mb-input id="admin-last-name" [value]="adminLastName()"
-                            (valueChange)="onAdminLastNameInput($event)" (blurEvent)="adminLastTouched.set(true)"></mb-input>
+                            (valueChange)="onAdminLastNameInput($event)"
+                            (blurEvent)="adminLastTouched.set(true)"></mb-input>
                     </mb-form-field>
                     <mb-form-field label="Admin email" [controlId]="'admin-email'">
                         <mb-input id="admin-email" type="email" [value]="adminEmail()"
-                            (valueChange)="onAdminEmailInput($event)" (blurEvent)="adminEmailTouched.set(true)"></mb-input>
+                            (valueChange)="onAdminEmailInput($event)"
+                            (blurEvent)="adminEmailTouched.set(true)"></mb-input>
                     </mb-form-field>
                     <mb-form-field label="Password" [controlId]="'admin-password'">
                         <mb-input id="admin-password" [type]="showAdminPassword() ? 'text' : 'password'"
@@ -224,7 +228,8 @@
                     We’ll send a verification email to {{ adminEmail() || 'your admin email' }} to confirm ownership.
                 </mb-alert>
 
-                <mb-checkbox [checked]="acceptTerms()" (checkedChange)="acceptTerms.set($event); submitAttempted.set(false)">
+                <mb-checkbox [checked]="acceptTerms()"
+                    (checkedChange)="acceptTerms.set($event); submitAttempted.set(false)">
                     I agree to the Terms and Privacy Policy.
                 </mb-checkbox>
             </div>
