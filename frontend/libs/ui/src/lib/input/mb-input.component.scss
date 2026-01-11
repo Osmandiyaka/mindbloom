@@ -1,8 +1,14 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
 .mb-input-shell {
     position: relative;
     display: flex;
     align-items: center;
     width: 100%;
+    flex: 1;
 }
 
 .mb-input {
