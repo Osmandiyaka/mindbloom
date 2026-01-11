@@ -1,0 +1,21 @@
+[data-density='comfortable'],
+.mb-root[data-density='comfortable'] {
+    --mb-control-height-sm: 32px;
+    --mb-control-height: 40px;
+    --mb-control-height-lg: 48px;
+    --mb-control-padding-x: 14px;
+    --mb-control-padding-y: 8px;
+    --mb-card-padding: 20px;
+    --mb-table-row-height: 44px;
+}
+
+[data-density='compact'],
+.mb-root[data-density='compact'] {
+    --mb-control-height-sm: 28px;
+    --mb-control-height: 34px;
+    --mb-control-height-lg: 42px;
+    --mb-control-padding-x: 12px;
+    --mb-control-padding-y: 6px;
+    --mb-card-padding: 16px;
+    --mb-table-row-height: 36px;
+}

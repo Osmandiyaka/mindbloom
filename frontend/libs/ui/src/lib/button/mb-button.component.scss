@@ -1,0 +1,106 @@
+.mb-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--mb-space-2);
+    height: var(--mb-control-height);
+    padding: 0 var(--mb-control-padding-x);
+    border-radius: var(--mb-control-radius);
+    border: 1px solid transparent;
+    background: var(--mb-color-primary);
+    color: var(--mb-color-on-primary);
+    font-weight: var(--mb-font-weight-medium);
+    font-size: var(--mb-font-size-md);
+    cursor: pointer;
+    transition: background var(--mb-motion-base) var(--mb-motion-ease),
+        color var(--mb-motion-base) var(--mb-motion-ease),
+        border-color var(--mb-motion-base) var(--mb-motion-ease),
+        box-shadow var(--mb-motion-base) var(--mb-motion-ease),
+        transform var(--mb-motion-fast) var(--mb-motion-ease);
+}
+
+.mb-button:disabled {
+    background: var(--mb-color-disabled-bg);
+    color: var(--mb-color-disabled-text);
+    border-color: var(--mb-color-disabled-border);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.mb-button:not(:disabled):hover {
+    background: var(--mb-color-primary-hover);
+}
+
+.mb-button:not(:disabled):active {
+    background: var(--mb-color-primary-active);
+    transform: translateY(1px);
+}
+
+.mb-button--secondary {
+    background: var(--mb-color-surface);
+    color: var(--mb-color-text);
+    border-color: var(--mb-color-border);
+}
+
+.mb-button--secondary:not(:disabled):hover {
+    background: var(--mb-color-surface-2);
+}
+
+.mb-button--tertiary {
+    background: transparent;
+    color: var(--mb-color-text);
+    border-color: transparent;
+}
+
+.mb-button--tertiary:not(:disabled):hover {
+    background: var(--mb-color-surface-2);
+}
+
+.mb-button--danger {
+    background: var(--mb-color-danger);
+    color: var(--mb-color-on-danger);
+}
+
+.mb-button--danger:not(:disabled):hover {
+    background: color-mix(in srgb, var(--mb-color-danger) 88%, #000000);
+}
+
+.mb-button--sm {
+    height: var(--mb-control-height-sm);
+    font-size: var(--mb-font-size-sm);
+}
+
+.mb-button--lg {
+    height: var(--mb-control-height-lg);
+    font-size: var(--mb-font-size-lg);
+}
+
+.mb-button__content {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--mb-space-2);
+}
+
+.mb-button__spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid color-mix(in srgb, currentColor 35%, transparent);
+    border-top-color: currentColor;
+    animation: mb-spin 0.8s linear infinite;
+}
+
+.mb-button__label--hidden {
+    opacity: 0;
+}
+
+.mb-button--loading {
+    pointer-events: none;
+}
+
+@keyframes mb-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

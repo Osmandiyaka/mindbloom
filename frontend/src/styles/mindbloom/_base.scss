@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono:wght@400;500&display=swap');
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: var(--mb-font-family-sans);
+    font-size: var(--mb-font-size-md);
+    line-height: var(--mb-line-height-normal);
+    color: var(--mb-color-text);
+    background: var(--mb-color-bg);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+    color-scheme: light;
+}
+
+[data-theme='dark'] {
+    color-scheme: dark;
+}
+
+a {
+    color: var(--mb-color-link);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+img,
+svg {
+    display: block;
+    max-width: 100%;
+}
+
+:focus-visible {
+    outline: 2px solid var(--mb-color-focus);
+    outline-offset: 2px;
+}
+
+::selection {
+    background: var(--mb-color-selection);
+    color: var(--mb-color-on-selection);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 1ms !important;
+        scroll-behavior: auto !important;
+    }
+}

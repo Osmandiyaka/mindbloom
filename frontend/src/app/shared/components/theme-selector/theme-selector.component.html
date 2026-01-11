@@ -27,7 +27,7 @@
             <div class="section-header">☀️ Light Themes</div>
             @for (theme of lightThemes; track theme.id) {
             <button class="theme-option" [class.active]="isActiveTheme(theme)" (click)="selectTheme(theme)">
-                <span class="color-preview" [style.background]="theme.colors.primary"></span>
+                <span class="icon">{{ getThemeIcon(theme) }}</span>
                 <span class="label">
                     <span class="name">{{ theme.name }}</span>
                 </span>
@@ -43,7 +43,7 @@
             <div class="section-header">🌙 Dark Themes</div>
             @for (theme of darkThemes; track theme.id) {
             <button class="theme-option" [class.active]="isActiveTheme(theme)" (click)="selectTheme(theme)">
-                <span class="color-preview" [style.background]="theme.colors.primary"></span>
+                <span class="icon">{{ getThemeIcon(theme) }}</span>
                 <span class="label">
                     <span class="name">{{ theme.name }}</span>
                 </span>

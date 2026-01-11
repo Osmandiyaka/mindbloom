@@ -1,0 +1,39 @@
+[data-theme='dark'],
+.mb-root[data-theme='dark'] {
+    --mb-color-bg: #0b1220;
+    --mb-color-surface: #111827;
+    --mb-color-surface-2: #151f2e;
+    --mb-color-surface-inverse: #f8fafc;
+
+    --mb-color-text: #e2e8f0;
+    --mb-color-text-muted: #cbd5e1;
+    --mb-color-text-subtle: #94a3b8;
+    --mb-color-text-inverse: #0b1220;
+    --mb-color-link: #60a5fa;
+
+    --mb-color-border: #273347;
+    --mb-color-border-subtle: #1f2937;
+    --mb-color-border-strong: #334155;
+    --mb-color-focus: #60a5fa;
+
+    --mb-color-primary: #60a5fa;
+    --mb-color-primary-hover: #3b82f6;
+    --mb-color-primary-active: #2563eb;
+    --mb-color-on-primary: #0b1220;
+
+    --mb-color-success: #22c55e;
+    --mb-color-on-success: #0b1220;
+    --mb-color-warning: #fbbf24;
+    --mb-color-on-warning: #0b1220;
+    --mb-color-danger: #f87171;
+    --mb-color-on-danger: #0b1220;
+    --mb-color-info: #38bdf8;
+    --mb-color-on-info: #0b1220;
+
+    --mb-color-selection: #1e3a8a;
+    --mb-color-on-selection: #e2e8f0;
+
+    --mb-color-disabled-bg: #1f2937;
+    --mb-color-disabled-text: #64748b;
+    --mb-color-disabled-border: #334155;
+}

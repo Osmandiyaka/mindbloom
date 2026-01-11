@@ -1,0 +1,71 @@
+.mb-table {
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--mb-radius-lg);
+    border: 1px solid var(--mb-color-border);
+    background: var(--mb-color-surface);
+}
+
+.mb-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mb-table thead th {
+    text-align: left;
+    font-size: var(--mb-font-size-sm);
+    font-weight: var(--mb-font-weight-semibold);
+    color: var(--mb-color-text-muted);
+    padding: var(--mb-space-3) var(--mb-space-4);
+    background: var(--mb-color-surface-2);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.mb-table tbody td {
+    padding: var(--mb-space-3) var(--mb-space-4);
+    border-top: 1px solid var(--mb-color-border-subtle);
+    font-size: var(--mb-font-size-sm);
+    color: var(--mb-color-text);
+}
+
+.mb-table tbody tr:hover {
+    background: color-mix(in srgb, var(--mb-color-surface-2) 65%, transparent);
+}
+
+.mb-table__checkbox {
+    width: 40px;
+}
+
+.mb-table__sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.mb-table__sorted {
+    color: var(--mb-color-text);
+}
+
+.mb-table__sort-indicator {
+    margin-left: var(--mb-space-2);
+    font-size: 12px;
+}
+
+.mb-table__align-center {
+    text-align: center;
+}
+
+.mb-table__align-end {
+    text-align: right;
+}
+
+.mb-table__actions {
+    text-align: right;
+}
+
+.mb-table__empty {
+    padding: var(--mb-space-6);
+    text-align: center;
+    color: var(--mb-color-text-subtle);
+}

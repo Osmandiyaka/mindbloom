@@ -37,14 +37,9 @@
                             "src/assets"
                         ],
                         "styles": [
-                            "src/assets/metronic/plugins/global/plugins.bundle.css",
-                            "src/assets/metronic/css/style.bundle.css",
-                            "src/styles.scss"
+                            "./src/styles.scss"
                         ],
-                        "scripts": [
-                            "src/assets/metronic/plugins/global/plugins.bundle.js",
-                            "src/assets/metronic/js/scripts.bundle.js"
-                        ]
+                        "scripts": []
                     },
                     "configurations": {
                         "production": {
@@ -105,14 +100,9 @@
                             "src/assets"
                         ],
                         "styles": [
-                            "src/assets/metronic/plugins/global/plugins.bundle.css",
-                            "src/assets/metronic/css/style.bundle.css",
-                            "src/styles.scss"
+                            "./src/styles.scss"
                         ],
-                        "scripts": [
-                            "src/assets/metronic/plugins/global/plugins.bundle.js",
-                            "src/assets/metronic/js/scripts.bundle.js"
-                        ]
+                        "scripts": []
                     }
                 }
             }

@@ -1,0 +1,19 @@
+.mb-textarea {
+    width: 100%;
+    min-height: calc(var(--mb-control-height) * 2);
+    padding: var(--mb-control-padding-y) var(--mb-control-padding-x);
+    border: none;
+    background: transparent;
+    color: var(--mb-color-text);
+    font-size: var(--mb-font-size-md);
+    resize: vertical;
+}
+
+.mb-textarea::placeholder {
+    color: var(--mb-color-text-subtle);
+}
+
+.mb-textarea:disabled {
+    color: var(--mb-color-disabled-text);
+    cursor: not-allowed;
+}

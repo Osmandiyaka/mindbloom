@@ -1,0 +1,20 @@
+.mb-combobox-shell {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.mb-combobox {
+    width: 100%;
+    height: var(--mb-control-height);
+    padding: 0 var(--mb-control-padding-x);
+    border: none;
+    background: transparent;
+    color: var(--mb-color-text);
+    font-size: var(--mb-font-size-md);
+}
+
+.mb-combobox:disabled {
+    color: var(--mb-color-disabled-text);
+    cursor: not-allowed;
+}

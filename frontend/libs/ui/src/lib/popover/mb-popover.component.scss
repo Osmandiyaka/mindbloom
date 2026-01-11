@@ -1,0 +1,12 @@
+.mb-popover {
+    min-width: 200px;
+    padding: var(--mb-space-4);
+    border-radius: var(--mb-radius-md);
+    background: var(--mb-color-surface);
+    border: 1px solid var(--mb-color-border);
+    box-shadow: var(--mb-shadow-2);
+}
+
+.mb-popover-backdrop {
+    background: transparent;
+}

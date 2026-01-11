@@ -1,0 +1,13 @@
+.mb-tooltip {
+    padding: 6px 10px;
+    background: var(--mb-color-surface-inverse);
+    color: var(--mb-color-text-inverse);
+    border-radius: var(--mb-radius-sm);
+    font-size: var(--mb-font-size-sm);
+    box-shadow: var(--mb-shadow-2);
+    max-width: 240px;
+}
+
+.mb-tooltip-panel {
+    pointer-events: none;
+}

@@ -1,0 +1,124 @@
+:root,
+.mb-root {
+    /* Token naming: --mb-[category]-[name] */
+    --mb-font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    --mb-font-family-mono: 'Roboto Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+
+    --mb-font-size-xs: 12px;
+    --mb-font-size-sm: 13px;
+    --mb-font-size-md: 14px;
+    --mb-font-size-lg: 16px;
+    --mb-font-size-xl: 20px;
+    --mb-font-size-2xl: 24px;
+
+    --mb-line-height-tight: 1.25;
+    --mb-line-height-normal: 1.5;
+    --mb-line-height-relaxed: 1.65;
+
+    --mb-font-weight-regular: 400;
+    --mb-font-weight-medium: 500;
+    --mb-font-weight-semibold: 600;
+
+    --mb-space-0: 0px;
+    --mb-space-1: 4px;
+    --mb-space-2: 8px;
+    --mb-space-3: 12px;
+    --mb-space-4: 16px;
+    --mb-space-5: 20px;
+    --mb-space-6: 24px;
+    --mb-space-8: 32px;
+    --mb-space-10: 40px;
+    --mb-space-12: 48px;
+    --mb-space-16: 64px;
+
+    --mb-radius-sm: 6px;
+    --mb-radius-md: 10px;
+    --mb-radius-lg: 14px;
+    --mb-radius-pill: 999px;
+
+    --mb-shadow-0: none;
+    --mb-shadow-1: 0 1px 2px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.08);
+    --mb-shadow-2: 0 8px 18px rgba(15, 23, 42, 0.14);
+    --mb-shadow-3: 0 24px 48px rgba(15, 23, 42, 0.18);
+
+    --mb-motion-fast: 120ms;
+    --mb-motion-base: 180ms;
+    --mb-motion-slow: 240ms;
+    --mb-motion-ease: cubic-bezier(0.2, 0, 0, 1);
+
+    /* Semantic tokens - Light */
+    --mb-color-bg: #f7f8fb;
+    --mb-color-surface: #ffffff;
+    --mb-color-surface-2: #f1f4f9;
+    --mb-color-surface-inverse: #0b1220;
+
+    --mb-color-text: #0b1220;
+    --mb-color-text-muted: #475569;
+    --mb-color-text-subtle: #64748b;
+    --mb-color-text-inverse: #f8fafc;
+    --mb-color-link: #1d4ed8;
+
+    --mb-color-border: #e2e8f0;
+    --mb-color-border-subtle: #edf2f7;
+    --mb-color-border-strong: #cbd5e1;
+    --mb-color-focus: #2563eb;
+
+    --mb-color-primary: #2563eb;
+    --mb-color-primary-hover: #1d4ed8;
+    --mb-color-primary-active: #1e40af;
+    --mb-color-on-primary: #ffffff;
+
+    --mb-color-success: #16a34a;
+    --mb-color-on-success: #ffffff;
+    --mb-color-warning: #f59e0b;
+    --mb-color-on-warning: #111827;
+    --mb-color-danger: #dc2626;
+    --mb-color-on-danger: #ffffff;
+    --mb-color-info: #0ea5e9;
+    --mb-color-on-info: #ffffff;
+
+    --mb-color-selection: #dbeafe;
+    --mb-color-on-selection: #0b1220;
+
+    --mb-color-disabled-bg: #f1f5f9;
+    --mb-color-disabled-text: #94a3b8;
+    --mb-color-disabled-border: #e2e8f0;
+
+    --mb-control-height-sm: 32px;
+    --mb-control-height: 40px;
+    --mb-control-height-lg: 48px;
+    --mb-control-padding-x: 14px;
+    --mb-control-padding-y: 8px;
+    --mb-control-radius: var(--mb-radius-md);
+
+    --mb-card-padding: 20px;
+    --mb-card-radius: var(--mb-radius-lg);
+    --mb-layer-popover: 1000;
+    --mb-layer-modal: 1100;
+    --mb-layer-toast: 1200;
+    --mb-table-row-height: 44px;
+
+    /* Compatibility aliases for legacy app styles */
+    --color-primary: var(--mb-color-primary);
+    --color-primary-light: color-mix(in srgb, var(--mb-color-primary) 18%, #ffffff);
+    --color-primary-dark: color-mix(in srgb, var(--mb-color-primary) 85%, #000000);
+    --color-background: var(--mb-color-bg);
+    --color-surface: var(--mb-color-surface);
+    --color-surface-hover: var(--mb-color-surface-2);
+    --color-text-primary: var(--mb-color-text);
+    --color-text-secondary: var(--mb-color-text-muted);
+    --color-text-tertiary: var(--mb-color-text-subtle);
+    --color-border: var(--mb-color-border);
+    --color-border-light: var(--mb-color-border-subtle);
+    --color-success: var(--mb-color-success);
+    --color-warning: var(--mb-color-warning);
+    --color-error: var(--mb-color-danger);
+    --color-info: var(--mb-color-info);
+    --shadow-sm: var(--mb-shadow-1);
+    --shadow-md: var(--mb-shadow-2);
+    --shadow-lg: var(--mb-shadow-3);
+    --surface-app: var(--mb-color-bg);
+    --surface-header: var(--mb-color-surface);
+    --content-background: var(--mb-color-bg);
+    --content-background-solid: var(--mb-color-bg);
+}

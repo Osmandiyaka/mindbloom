@@ -1,0 +1,30 @@
+.mb-select-shell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.mb-select {
+    width: 100%;
+    height: var(--mb-control-height);
+    padding: 0 calc(var(--mb-control-padding-x) + 16px) 0 var(--mb-control-padding-x);
+    border: none;
+    background: transparent;
+    color: var(--mb-color-text);
+    font-size: var(--mb-font-size-md);
+    appearance: none;
+}
+
+.mb-select:disabled {
+    color: var(--mb-color-disabled-text);
+    cursor: not-allowed;
+}
+
+.mb-select__chevron {
+    position: absolute;
+    right: var(--mb-space-3);
+    color: var(--mb-color-text-subtle);
+    pointer-events: none;
+    font-size: 12px;
+}

@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ThemeService, ThemeDefinition, ThemeMode } from '../../../core/services/theme.service';
+import { MbThemeDefinition, MbThemeService } from '@mindbloom/ui';
 import { ClickOutsideDirective } from '../../directives/click-outside.directive';
 
 @Component({
@@ -11,14 +11,14 @@ import { ClickOutsideDirective } from '../../directives/click-outside.directive'
     styleUrls: ['./theme-selector.component.scss']
 })
 export class ThemeSelectorComponent {
-    private themeService = inject(ThemeService);
+    private themeService = inject(MbThemeService);
 
     isOpen = signal(false);
     currentTheme = this.themeService.currentTheme;
-    currentMode = this.themeService.currentMode;
+    currentMode = this.themeService.mode;
 
-    lightThemes = this.themeService.getThemesByMode('light');
-    darkThemes = this.themeService.getThemesByMode('dark');
+    lightThemes = this.themeService.themes.filter(theme => theme.mode === 'light');
+    darkThemes = this.themeService.themes.filter(theme => theme.mode === 'dark');
 
     toggleDropdown(): void {
         this.isOpen.update(v => !v);
@@ -28,7 +28,7 @@ export class ThemeSelectorComponent {
         this.isOpen.set(false);
     }
 
-    selectTheme(theme: ThemeDefinition): void {
+    selectTheme(theme: MbThemeDefinition): void {
         this.themeService.setTheme(theme.id);
         this.closeDropdown();
     }
@@ -42,11 +42,11 @@ export class ThemeSelectorComponent {
         return this.currentMode() === 'auto';
     }
 
-    isActiveTheme(theme: ThemeDefinition): boolean {
+    isActiveTheme(theme: MbThemeDefinition): boolean {
         return this.currentTheme().id === theme.id && !this.isAutoMode();
     }
 
-    getThemeIcon(theme: ThemeDefinition): string {
+    getThemeIcon(theme: MbThemeDefinition): string {
         return theme.mode === 'light' ? '☀️' : '🌙';
     }
 
