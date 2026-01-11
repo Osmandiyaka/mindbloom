@@ -9,6 +9,7 @@
     width: 100%;
     flex: 1 1 auto;
     min-width: 0;
+    position: relative;
 }
 
 .mb-combobox {
@@ -16,7 +17,7 @@
     flex: 1 1 auto;
     min-width: 0;
     height: var(--mb-control-height);
-    padding: 0 var(--mb-control-padding-x);
+    padding: 0 calc(var(--mb-control-padding-x) + 18px) 0 var(--mb-control-padding-x);
     border: none;
     background: transparent;
     color: var(--mb-color-text);
@@ -28,4 +29,14 @@
 .mb-combobox:disabled {
     color: var(--mb-color-disabled-text);
     cursor: not-allowed;
+}
+
+.mb-combobox__chevron {
+    position: absolute;
+    right: var(--mb-control-padding-x);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--mb-color-text-subtle);
+    font-size: 12px;
+    pointer-events: none;
 }

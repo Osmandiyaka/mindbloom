@@ -29,6 +29,7 @@ export interface MbComboBoxOption {
             <datalist [id]="listId">
                 <option *ngFor="let option of options" [value]="option.value">{{ option.label }}</option>
             </datalist>
+            <span class="mb-combobox__chevron" aria-hidden="true">▾</span>
         </div>
     `,
     styleUrls: ['./mb-combobox.component.scss'],
