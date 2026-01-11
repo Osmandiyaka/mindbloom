@@ -82,6 +82,23 @@ export class AppComponent implements OnInit {
     private tenantService = inject(TenantService);
     private themeService = inject(MbThemeService);
     private router = inject(Router);
+    private readonly tenantBrandingEffect = effect(
+        () => {
+            const tenant = this.tenantService.currentTenant();
+            if (!tenant) {
+                this.themeService.setTenantBranding(undefined);
+                return;
+            }
+            const primary = tenant.customization?.primaryColor || '#2563eb';
+            const logoUrl = tenant.customization?.logo;
+            this.themeService.setTenantBranding({
+                tenantId: tenant.id,
+                primary,
+                logoUrl
+            });
+        },
+        { allowSignalWrites: true }
+    );
 
     ngOnInit(): void {
         this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {
@@ -102,19 +119,5 @@ export class AppComponent implements OnInit {
             console.log('Development tenant initialized:', devTenant);
         }
 
-        effect(() => {
-            const tenant = this.tenantService.currentTenant();
-            if (!tenant) {
-                this.themeService.setTenantBranding(undefined);
-                return;
-            }
-            const primary = tenant.customization?.primaryColor || '#2563eb';
-            const logoUrl = tenant.customization?.logo;
-            this.themeService.setTenantBranding({
-                tenantId: tenant.id,
-                primary,
-                logoUrl
-            });
-        });
     }
 }

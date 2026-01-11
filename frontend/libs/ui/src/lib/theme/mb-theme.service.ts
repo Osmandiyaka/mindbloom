@@ -22,7 +22,8 @@ export class MbThemeService {
     constructor() {
         this.applyThemeAttributes();
 
-        effect(() => {
+        effect(
+            () => {
             const mode = this.mode();
             localStorage.setItem(this.THEME_KEY, mode);
             if (mode === 'auto') {
@@ -33,7 +34,9 @@ export class MbThemeService {
                     this.currentTheme.set(match);
                 }
             }
-        });
+            },
+            { allowSignalWrites: true }
+        );
 
         effect(() => {
             const theme = this.currentTheme();

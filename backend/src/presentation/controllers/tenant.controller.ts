@@ -15,7 +15,9 @@ import { TenantListItemDto, TenantListResponseDto } from '../dtos/responses/tena
 import { Permissions } from '../../common/decorators/permissions.decorator';
 import { PermissionGuard } from '../../common/guards/permission.guard';
 import { TenantEditionResponseDto } from '../dtos/responses/tenant/tenant-edition.response.dto';
-import { Tenant } from '../../domain/tenant/entities/tenant.entity';
+import { Tenant, TenantStatus } from '../../domain/tenant/entities/tenant.entity';
+import { PublicTenantLookupQueryDto } from '../dtos/requests/tenant/public-tenant-lookup.query.dto';
+import { PublicTenantLookupItemDto } from '../dtos/responses/tenant/public-tenant-lookup.response.dto';
 
 @ApiTags('Tenants')
 @Controller('tenants')
@@ -44,6 +46,37 @@ export class TenantController {
         }
 
         return TenantResponseDto.fromDomain(tenant);
+    }
+
+    @Public()
+    @Get('lookup')
+    @ApiOperation({ summary: 'Search public tenant directory' })
+    @ApiResponse({ status: 200, description: 'List of matching tenants', type: [PublicTenantLookupItemDto] })
+    async lookupTenants(@Query() query: PublicTenantLookupQueryDto): Promise<PublicTenantLookupItemDto[]> {
+        const search = query.search?.trim();
+        if (!search || search.length < 2) {
+            return [];
+        }
+
+        const pageSize = Math.min(query.limit ?? 6, 10);
+        const result = await this.listTenantsUseCase.execute({
+            search,
+            statuses: [TenantStatus.ACTIVE],
+            page: 1,
+            pageSize,
+            sortBy: 'name',
+            sortDirection: 'asc',
+        });
+
+        const normalized = search.toLowerCase();
+        const filtered = result.data.filter((tenant) => {
+            const nameMatch = tenant.name?.toLowerCase().includes(normalized);
+            const subdomainMatch = tenant.subdomain?.toLowerCase().includes(normalized);
+            const domainMatch = tenant.customization?.customDomain?.toLowerCase().includes(normalized);
+            return nameMatch || subdomainMatch || domainMatch;
+        });
+
+        return filtered.map((tenant) => PublicTenantLookupItemDto.fromDomain(tenant));
     }
 
     @Public()

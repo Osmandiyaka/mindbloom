@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -64,6 +64,13 @@ export interface Tenant {
     };
 }
 
+export interface TenantLookup {
+    id: string;
+    name: string;
+    subdomain: string;
+    customDomain?: string | null;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -89,6 +96,13 @@ export class TenantService {
 
     getTenantBySubdomain(subdomain: string): Observable<Tenant> {
         return this.http.get<Tenant>(`${this.API_URL}/tenants/subdomain/${subdomain}`);
+    }
+
+    searchTenants(search: string, limit = 6): Observable<TenantLookup[]> {
+        const params = new HttpParams()
+            .set('search', search)
+            .set('limit', String(limit));
+        return this.http.get<TenantLookup[]>(`${this.API_URL}/tenants/lookup`, { params });
     }
 
     getTenantByCode(code: string): Observable<Tenant> {
