@@ -1,6 +1,6 @@
 .mb-auth-page {
     min-height: 100vh;
-    background: color-mix(in srgb, var(--mb-color-bg) 96%, #e8f2ec);
+    background: color-mix(in srgb, var(--mb-color-bg) 96%, var(--mb-color-primary));
     display: flex;
     flex-direction: column;
 }
@@ -42,8 +42,8 @@
 }
 
 .auth-logo__mark {
-    width: 52px;
-    height: 52px;
+    width: 56px;
+    height: 56px;
     border-radius: 12px;
     background: var(--mb-color-primary);
     box-shadow: 0 10px 16px color-mix(in srgb, var(--mb-color-primary) 18%, transparent);
@@ -111,7 +111,7 @@
 .auth-card__header {
     margin-bottom: var(--mb-space-6);
     display: grid;
-    gap: var(--mb-space-2);
+    gap: var(--mb-space-3);
 }
 
 .auth-card__header--center {
