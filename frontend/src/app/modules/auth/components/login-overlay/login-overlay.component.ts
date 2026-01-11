@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TenantPostLoginRouter } from '../../../../core/tenant/tenant-post-login-router.service';
-import { TenantRegistrationComponent } from '../tenant-registration/tenant-registration.component';
+import { TenantOnboardingComponent } from '../../../tenant/pages/tenant-onboarding/tenant-onboarding.component';
 import { sanitizeReturnUrl } from '../../../../core/auth/return-url.util';
 import {
     MbAlertComponent,
@@ -23,7 +23,7 @@ import {
         CommonModule,
         FormsModule,
         RouterModule,
-        TenantRegistrationComponent,
+        TenantOnboardingComponent,
         MbFormFieldComponent,
         MbInputComponent,
         MbCheckboxComponent,

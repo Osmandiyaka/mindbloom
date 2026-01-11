@@ -115,5 +115,6 @@
 </div>
 
 @if (showRegistration()) {
-<app-tenant-registration (cancelled)="onRegistrationCancelled()" (registered)="onRegistrationCompleted($event)"></app-tenant-registration>
+<app-tenant-onboarding mode="registration" (cancelled)="onRegistrationCancelled()"
+    (registered)="onRegistrationCompleted($event)"></app-tenant-onboarding>
 }

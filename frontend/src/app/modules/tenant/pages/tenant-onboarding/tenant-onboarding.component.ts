@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -49,6 +49,10 @@ export class TenantOnboardingComponent implements OnInit {
     private readonly userService = inject(UserService);
     private readonly authService = inject(AuthService);
     private readonly router = inject(Router);
+
+    @Input() mode: 'onboarding' | 'registration' = 'onboarding';
+    @Output() cancelled = new EventEmitter<void>();
+    @Output() registered = new EventEmitter<{ tenantId: string; subdomain: string }>();
 
     step = signal<1 | 2 | 3 | 4>(1);
     isLoading = signal(true);
@@ -326,9 +330,23 @@ export class TenantOnboardingComponent implements OnInit {
     adminLastName = signal('');
     adminEmail = signal('');
     adminPassword = signal('');
+    adminPasswordConfirm = signal('');
+    acceptTerms = signal(false);
+    showAdminPassword = signal(false);
+    showAdminConfirm = signal(false);
 
     readonly reviewSchools = computed(() => this.schoolRows().map(row => row.name).filter(Boolean));
     readonly stepTitle = computed(() => {
+        if (this.isRegistrationMode()) {
+            switch (this.step()) {
+                case 1:
+                    return 'Create your organization';
+                case 2:
+                    return 'Administrator details';
+                default:
+                    return 'Verification';
+            }
+        }
         switch (this.step()) {
             case 1:
                 return 'Create your organization';
@@ -341,6 +359,16 @@ export class TenantOnboardingComponent implements OnInit {
         }
     });
     readonly stepSubtitle = computed(() => {
+        if (this.isRegistrationMode()) {
+            switch (this.step()) {
+                case 1:
+                    return 'Set up your MindBloom workspace. You can update these details later in settings.';
+                case 2:
+                    return 'Set the primary administrator account for this workspace.';
+                default:
+                    return 'Confirm ownership to finish setting up your organization.';
+            }
+        }
         switch (this.step()) {
             case 1:
                 return 'Set up your MindBloom workspace. You can update these details later in settings.';
@@ -398,6 +426,26 @@ export class TenantOnboardingComponent implements OnInit {
     readonly validationSummary = computed(() => {
         const step = this.step();
         const errors: string[] = [];
+        if (this.isRegistrationMode()) {
+            if (step === 1) {
+                if (this.orgNameError()) errors.push(this.orgNameError());
+                if (this.codeError()) errors.push(this.codeError());
+                if (this.countryError()) errors.push(this.countryError());
+                if (this.contactEmailError()) errors.push(this.contactEmailError());
+            } else if (step === 2) {
+                if (!this.adminFirstName().trim()) errors.push('Administrator first name is required.');
+                if (!this.adminLastName().trim()) errors.push('Administrator last name is required.');
+                if (!this.adminEmail().trim()) errors.push('Administrator email is required.');
+                if (this.adminPassword().trim().length < 8) errors.push('Administrator password must be at least 8 characters.');
+                if (this.adminPassword().trim() !== this.adminPasswordConfirm().trim()) {
+                    errors.push('Administrator passwords must match.');
+                }
+            } else if (step === 3) {
+                if (!this.acceptTerms()) errors.push('Accept the terms to continue.');
+            }
+            return errors;
+        }
+
         if (step === 1) {
             if (this.orgNameError()) errors.push(this.orgNameError());
             if (this.codeError()) errors.push(this.codeError());
@@ -421,6 +469,29 @@ export class TenantOnboardingComponent implements OnInit {
     });
     readonly canContinue = computed(() => {
         const step = this.step();
+        if (this.isRegistrationMode()) {
+            if (step === 1) {
+                if (this.codeStatus() === 'checking') return false;
+                return !!this.tenantName().trim()
+                    && !!this.tenantCode().trim()
+                    && !!this.orgCountry().trim()
+                    && !!this.orgContactEmail().trim()
+                    && !this.codeError()
+                    && !this.countryError()
+                    && !this.contactEmailError();
+            }
+            if (step === 2) {
+                return !!this.adminFirstName().trim()
+                    && !!this.adminLastName().trim()
+                    && !!this.adminEmail().trim()
+                    && this.adminPassword().trim().length >= 8
+                    && this.adminPassword().trim() === this.adminPasswordConfirm().trim();
+            }
+            if (step === 3) {
+                return this.acceptTerms();
+            }
+            return false;
+        }
         if (step === 1) {
             if (this.codeStatus() === 'checking') return false;
             return !!this.tenantName().trim()
@@ -453,6 +524,18 @@ export class TenantOnboardingComponent implements OnInit {
     });
     private persistTimer: number | null = null;
 
+    isRegistrationMode(): boolean {
+        return this.mode === 'registration';
+    }
+
+    isAdminStepActive(): boolean {
+        return this.isRegistrationMode() ? this.step() === 2 : this.step() === 2 || this.step() === 3;
+    }
+
+    isVerificationStepActive(): boolean {
+        return this.isRegistrationMode() ? this.step() === 3 : this.step() === 4;
+    }
+
     onCountryInput(value: string): void {
         this.orgCountry.set(value);
     }
@@ -475,6 +558,8 @@ export class TenantOnboardingComponent implements OnInit {
             this.step();
             this.orgCountry();
             this.orgContactEmail();
+            this.adminPasswordConfirm();
+            this.acceptTerms();
             this.schoolMode();
             this.schoolRows();
             this.selectedEditionId();
@@ -483,6 +568,7 @@ export class TenantOnboardingComponent implements OnInit {
             this.adminFirstName();
             this.adminLastName();
             this.adminEmail();
+            this.adminPassword();
 
             if (this.isLoading()) {
                 return;
@@ -493,6 +579,11 @@ export class TenantOnboardingComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        if (this.isRegistrationMode()) {
+            this.isLoading.set(false);
+            this.step.set(1);
+            return;
+        }
         this.loadInitialState();
     }
 
@@ -662,6 +753,20 @@ export class TenantOnboardingComponent implements OnInit {
         this.errorMessage.set('');
         const current = this.step();
 
+        if (this.isRegistrationMode()) {
+            if (!this.canContinue()) {
+                return;
+            }
+            if (current === 3) {
+                await this.registerTenant();
+                return;
+            }
+            if (current < 3) {
+                this.step.set((current + 1) as 1 | 2 | 3);
+            }
+            return;
+        }
+
         if (current === 1) {
             const ok = await this.saveOrganization();
             if (!ok) return;
@@ -688,6 +793,50 @@ export class TenantOnboardingComponent implements OnInit {
     saveAndExit(): void {
         this.persistState();
         this.router.navigateByUrl('/dashboard');
+    }
+
+    cancelRegistration(): void {
+        this.cancelled.emit();
+    }
+
+    toggleAdminPassword(): void {
+        this.showAdminPassword.update(value => !value);
+    }
+
+    toggleAdminConfirm(): void {
+        this.showAdminConfirm.update(value => !value);
+    }
+
+    private async registerTenant(): Promise<void> {
+        if (!this.acceptTerms()) {
+            this.errorMessage.set('Please accept the terms to continue.');
+            return;
+        }
+        this.isSaving.set(true);
+        this.errorMessage.set('');
+        try {
+            const fullName = `${this.adminFirstName().trim()} ${this.adminLastName().trim()}`.trim();
+            const tenant = await firstValueFrom(this.tenantService.createTenant({
+                name: this.tenantName().trim(),
+                subdomain: this.tenantCode().trim(),
+                contactEmail: this.orgContactEmail().trim(),
+                adminName: fullName,
+                adminEmail: this.adminEmail().trim(),
+                adminPassword: this.adminPassword().trim(),
+                edition: 'trial',
+                plan: 'trial',
+                address: {
+                    country: this.orgCountry().trim()
+                }
+            }));
+            this.registered.emit({ tenantId: tenant.id, subdomain: tenant.subdomain });
+        } catch (error: any) {
+            this.errorMessage.set(
+                error?.error?.message || 'Registration failed. This workspace URL may already be in use.'
+            );
+        } finally {
+            this.isSaving.set(false);
+        }
     }
 
     private async saveOrganization(): Promise<boolean> {

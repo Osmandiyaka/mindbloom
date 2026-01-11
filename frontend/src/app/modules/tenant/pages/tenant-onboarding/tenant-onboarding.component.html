@@ -1,4 +1,4 @@
-<div class="onboarding-page">
+<div class="onboarding-page" [class.onboarding-page--modal]="isRegistrationMode()">
     <mb-card class="onboarding-card">
         <div class="onboarding-header">
             <h1>{{ stepTitle() }}</h1>
@@ -10,11 +10,11 @@
                 <span class="step-dot" aria-hidden="true"></span>
                 <span class="step-label">Organization</span>
             </div>
-            <div class="step" [class.active]="step() === 2 || step() === 3" role="listitem">
+            <div class="step" [class.active]="isAdminStepActive()" role="listitem">
                 <span class="step-dot" aria-hidden="true"></span>
                 <span class="step-label">Administrator</span>
             </div>
-            <div class="step" [class.active]="step() === 4" role="listitem">
+            <div class="step" [class.active]="isVerificationStepActive()" role="listitem">
                 <span class="step-dot" aria-hidden="true"></span>
                 <span class="step-label">Verification</span>
             </div>
@@ -64,7 +64,7 @@
             </div>
             }
 
-            @if (step() === 2) {
+            @if (!isRegistrationMode() && step() === 2) {
             <div class="step-section">
                 <div class="mode-selector">
                     <button type="button" class="mode-card" [class.active]="schoolMode() === 'single'"
@@ -106,7 +106,7 @@
             </div>
             }
 
-            @if (step() === 3) {
+            @if (!isRegistrationMode() && step() === 3) {
             <div class="step-section">
                 <div class="edition-grid">
                     @for (edition of editions(); track edition.id) {
@@ -128,7 +128,7 @@
             </div>
             }
 
-            @if (step() === 4) {
+            @if (!isRegistrationMode() && step() === 4) {
             <div class="step-section">
                 <div class="review-grid">
                     <div class="review-card">
@@ -176,9 +176,60 @@
                 }
             </div>
             }
+
+            @if (isRegistrationMode() && step() === 2) {
+            <div class="step-section">
+                <div class="admin-form">
+                    <mb-form-field label="First name" [controlId]="'admin-first-name'">
+                        <mb-input id="admin-first-name" [value]="adminFirstName()"
+                            (valueChange)="adminFirstName.set($event)"></mb-input>
+                    </mb-form-field>
+                    <mb-form-field label="Last name" [controlId]="'admin-last-name'">
+                        <mb-input id="admin-last-name" [value]="adminLastName()"
+                            (valueChange)="adminLastName.set($event)"></mb-input>
+                    </mb-form-field>
+                    <mb-form-field label="Admin email" [controlId]="'admin-email'">
+                        <mb-input id="admin-email" type="email" [value]="adminEmail()"
+                            (valueChange)="adminEmail.set($event)"></mb-input>
+                    </mb-form-field>
+                    <mb-form-field label="Password" [controlId]="'admin-password'">
+                        <mb-input id="admin-password" [type]="showAdminPassword() ? 'text' : 'password'"
+                            [value]="adminPassword()" (valueChange)="adminPassword.set($event)"></mb-input>
+                        <span mbSuffix>
+                            <button class="inline-button" type="button" (click)="toggleAdminPassword()">
+                                {{ showAdminPassword() ? 'Hide' : 'Show' }}
+                            </button>
+                        </span>
+                    </mb-form-field>
+                    <mb-form-field label="Confirm password" [controlId]="'admin-password-confirm'">
+                        <mb-input id="admin-password-confirm" [type]="showAdminConfirm() ? 'text' : 'password'"
+                            [value]="adminPasswordConfirm()"
+                            (valueChange)="adminPasswordConfirm.set($event)"></mb-input>
+                        <span mbSuffix>
+                            <button class="inline-button" type="button" (click)="toggleAdminConfirm()">
+                                {{ showAdminConfirm() ? 'Hide' : 'Show' }}
+                            </button>
+                        </span>
+                    </mb-form-field>
+                </div>
+            </div>
+            }
+
+            @if (isRegistrationMode() && step() === 3) {
+            <div class="step-section">
+                <mb-alert variant="info">
+                    We’ll send a verification email to {{ adminEmail() || 'your admin email' }} to confirm ownership.
+                </mb-alert>
+
+                <mb-checkbox [checked]="acceptTerms()" (checkedChange)="acceptTerms.set($event)">
+                    I agree to the Terms and Privacy Policy.
+                </mb-checkbox>
+            </div>
+            }
         </div>
         }
 
+        @if (!isRegistrationMode()) {
         <div class="onboarding-actions">
             <mb-button variant="tertiary" (click)="back()" [disabled]="step() === 1 || isSaving()">Back</mb-button>
             <mb-button variant="tertiary" (click)="saveAndExit()" [disabled]="isSaving()">Save &amp; exit</mb-button>
@@ -187,5 +238,20 @@
                 {{ step() === 4 ? 'Create organization' : 'Continue' }}
             </mb-button>
         </div>
+        } @else {
+        <div class="onboarding-actions">
+            <mb-button variant="tertiary" type="button" (click)="cancelRegistration()" [disabled]="isSaving()">
+                Cancel
+            </mb-button>
+            @if (step() > 1) {
+            <mb-button variant="secondary" type="button" (click)="back()" [disabled]="isSaving()">Back</mb-button>
+            }
+            <mb-button variant="primary" type="button" [loading]="isSaving()" [disabled]="!canContinue()"
+                [fullWidth]="true" [attr.title]="!canContinue() ? 'Complete all required fields to continue.' : null"
+                (click)="next()">
+                {{ step() === 3 ? 'Create organization' : 'Continue' }}
+            </mb-button>
+        </div>
+        }
     </mb-card>
 </div>
