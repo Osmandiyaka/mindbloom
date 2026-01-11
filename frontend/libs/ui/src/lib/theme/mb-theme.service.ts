@@ -101,7 +101,7 @@ export class MbThemeService {
         const mode = this.mode();
         const theme = this.currentTheme();
 
-        root.setAttribute('data-theme', theme.mode);
+        root.setAttribute('data-theme', theme.id);
         root.setAttribute('data-theme-id', theme.id);
         root.setAttribute('data-density', this.density());
 

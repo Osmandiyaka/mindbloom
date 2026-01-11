@@ -1,0 +1,72 @@
+.mb-logo {
+    display: inline-flex;
+    align-items: center;
+    color: currentColor;
+    line-height: 1;
+}
+
+.mb-logo svg {
+    display: block;
+    height: 100%;
+    width: auto;
+}
+
+.mb-logo--sm {
+    height: 20px;
+}
+
+.mb-logo--md {
+    height: 28px;
+}
+
+.mb-logo--lg {
+    height: 40px;
+}
+.mb-logo {
+    --mb-logo-height: 28px;
+    --mb-logo-ratio: 4.5833;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: currentColor;
+    line-height: 1;
+    height: var(--mb-logo-height);
+    width: calc(var(--mb-logo-height) * var(--mb-logo-ratio));
+}
+
+.mb-logo--icon {
+    --mb-logo-ratio: 1;
+}
+
+.mb-logo--stacked {
+    --mb-logo-ratio: 1.4583;
+}
+
+.mb-logo--horizontal {
+    --mb-logo-ratio: 4.5833;
+}
+
+.mb-logo__asset {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: currentColor;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+}
+
+.mb-logo--sm {
+    --mb-logo-height: 20px;
+}
+
+.mb-logo--md {
+    --mb-logo-height: 28px;
+}
+
+.mb-logo--lg {
+    --mb-logo-height: 40px;
+}

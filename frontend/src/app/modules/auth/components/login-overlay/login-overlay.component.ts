@@ -12,7 +12,8 @@ import {
     MbCheckboxComponent,
     MbCardComponent,
     MbFormFieldComponent,
-    MbInputComponent
+    MbInputComponent,
+    MbLogoComponent
 } from '@mindbloom/ui';
 
 @Component({
@@ -26,6 +27,7 @@ import {
         MbFormFieldComponent,
         MbInputComponent,
         MbCheckboxComponent,
+        MbLogoComponent,
         MbButtonComponent,
         MbCardComponent,
         MbAlertComponent

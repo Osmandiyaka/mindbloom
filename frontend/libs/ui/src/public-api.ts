@@ -7,6 +7,7 @@ export * from './lib/form-field/mb-form-field.component';
 export * from './lib/input/mb-input.component';
 export * from './lib/input/mb-textarea.component';
 export * from './lib/checkbox/mb-checkbox.component';
+export * from './lib/logo/mb-logo.component';
 export * from './lib/select/mb-select.component';
 export * from './lib/select/mb-combobox.component';
 export * from './lib/card/mb-card.component';

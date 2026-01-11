@@ -29,28 +29,8 @@
 }
 
 .auth-logo {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--mb-space-2);
-    font-weight: var(--mb-font-weight-semibold);
-    color: var(--mb-color-text);
-}
-
-.auth-logo--stack {
-    flex-direction: column;
-    gap: var(--mb-space-2);
-}
-
-.auth-logo__mark {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
-    background: var(--mb-color-primary);
-    box-shadow: 0 10px 16px color-mix(in srgb, var(--mb-color-primary) 18%, transparent);
-}
-
-.auth-logo__text {
-    font-size: var(--mb-font-size-xl);
+    color: var(--mb-color-primary);
+    margin-bottom: var(--mb-space-1);
 }
 
 .auth-link {

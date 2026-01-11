@@ -1230,7 +1230,7 @@ app-modal ::ng-deep .modal-header h3 {
 }
 
 // Dark theme refinements to remove bright surfaces and improve contrast
-[data-theme="dark"] {
+[data-theme="mindbloom-dark"] {
     .students-page {
         color: var(--color-text-primary);
     }

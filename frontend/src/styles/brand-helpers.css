@@ -1,0 +1,17 @@
+.mb-text-primary {
+    color: var(--mb-color-primary);
+}
+
+.mb-bg {
+    background: var(--mb-color-bg);
+}
+
+.mb-surface {
+    background: var(--mb-color-surface);
+    border: 1px solid var(--mb-color-border-subtle);
+}
+
+.mb-focus-ring:focus-visible {
+    outline: 2px solid var(--mb-color-focus);
+    outline-offset: 2px;
+}

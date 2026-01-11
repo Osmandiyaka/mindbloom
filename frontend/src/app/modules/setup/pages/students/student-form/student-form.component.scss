@@ -161,7 +161,7 @@
 }
 
 // Explicit modal overrides to avoid soft-glass tint in dark mode
-:host-context([data-theme="dark"]) {
+:host-context([data-theme="mindbloom-dark"]) {
     .modal,
     .modal-content,
     .modal-dialog,
@@ -392,7 +392,7 @@
 // ========================================
 // DARK THEME OVERRIDES
 // ========================================
-[data-theme="dark"] {
+[data-theme="mindbloom-dark"] {
     .wizard-container {
         background: var(--content-background);
         color: var(--color-text-primary);

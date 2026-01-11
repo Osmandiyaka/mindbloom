@@ -1,5 +1,5 @@
 // Dark soft UI overrides for neumorphic-tinted surfaces
-:root[data-theme="dark"] {
+:root[data-theme="mindbloom-dark"] {
     --soft-bg: #12141b;
     --soft-surface: #1e2130;
     --soft-surface-alt: #2a2d3f;
@@ -18,7 +18,7 @@
     --soft-speed: 240ms;
 }
 
-[data-theme="dark"] {
+[data-theme="mindbloom-dark"] {
     color: var(--soft-text);
 
     // Tinted canvas + scrollbars
