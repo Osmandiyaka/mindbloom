@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 type MbLogoVariant = 'icon' | 'horizontal' | 'stacked';
-type MbLogoSize = 'sm' | 'md' | 'lg';
+type MbLogoSize = 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
 
 @Component({
     selector: 'mb-logo',
@@ -14,6 +14,8 @@ type MbLogoSize = 'sm' | 'md' | 'lg';
             [class.mb-logo--sm]="size === 'sm'"
             [class.mb-logo--md]="size === 'md'"
             [class.mb-logo--lg]="size === 'lg'"
+            [class.mb-logo--xl]="size === 'xl'"
+            [class.mb-logo--xxl]="size === 'xxl'"
             [class.mb-logo--icon]="variant === 'icon'"
             [class.mb-logo--stacked]="variant === 'stacked'"
             [class.mb-logo--horizontal]="variant === 'horizontal'"
