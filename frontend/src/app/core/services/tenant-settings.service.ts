@@ -11,6 +11,7 @@ export interface TenantSettingsUpdate {
         primaryColor?: string;
         secondaryColor?: string;
         accentColor?: string;
+        customDomain?: string;
     };
     locale?: string;
     timezone?: string;
@@ -32,6 +33,7 @@ export interface TenantSettingsUpdate {
         sampleSection?: string;
         resetPerClass?: boolean;
     };
+    extras?: Record<string, any>;
 }
 
 @Injectable({
@@ -52,9 +54,11 @@ export class TenantSettingsService {
             secondaryColor: payload.customization?.secondaryColor,
             accentColor: payload.customization?.accentColor,
             logo: payload.customization?.logo,
+            customDomain: payload.customization?.customDomain,
             academicYearStart: payload.academicYear?.start ? new Date(payload.academicYear.start) : undefined,
             academicYearEnd: payload.academicYear?.end ? new Date(payload.academicYear.end) : undefined,
             idTemplates: payload.idTemplates,
+            extras: payload.extras,
         };
         delete body.customization;
         delete body.academicYear;

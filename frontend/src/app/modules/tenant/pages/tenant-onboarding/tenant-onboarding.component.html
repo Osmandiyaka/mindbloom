@@ -1,0 +1,185 @@
+<div class="onboarding-page">
+    <mb-card class="onboarding-card">
+        <div class="onboarding-header">
+            <h1>Tenant onboarding</h1>
+            <p>Set up your organization, schools, and administrator access.</p>
+        </div>
+
+        <div class="onboarding-steps" role="list">
+            <div class="step" [class.active]="step() === 1" role="listitem">
+                <span class="step-dot" aria-hidden="true"></span>
+                <span class="step-label">Organization</span>
+            </div>
+            <div class="step" [class.active]="step() === 2" role="listitem">
+                <span class="step-dot" aria-hidden="true"></span>
+                <span class="step-label">Schools</span>
+            </div>
+            <div class="step" [class.active]="step() === 3" role="listitem">
+                <span class="step-dot" aria-hidden="true"></span>
+                <span class="step-label">Edition</span>
+            </div>
+            <div class="step" [class.active]="step() === 4" role="listitem">
+                <span class="step-dot" aria-hidden="true"></span>
+                <span class="step-label">Review</span>
+            </div>
+        </div>
+
+        <mb-alert *ngIf="errorMessage()" variant="danger">{{ errorMessage() }}</mb-alert>
+
+        @if (isLoading()) {
+        <div class="onboarding-loading">Loading onboarding details…</div>
+        } @else {
+        <div class="onboarding-body">
+            @if (step() === 1) {
+            <div class="step-section">
+                <mb-form-field label="Organization name" [controlId]="'org-name'">
+                    <mb-input id="org-name" [value]="tenantName()" [disabled]="true"></mb-input>
+                </mb-form-field>
+
+                <mb-form-field label="Tenant code" [controlId]="'org-code'">
+                    <mb-input id="org-code" [value]="tenantCode()" [disabled]="true"></mb-input>
+                </mb-form-field>
+
+                <mb-form-field label="Primary domain (optional)" [controlId]="'org-domain'">
+                    <mb-input id="org-domain" [value]="orgDomain()" (valueChange)="orgDomain.set($event)"></mb-input>
+                </mb-form-field>
+
+                <div class="two-col">
+                    <mb-form-field label="Country" [controlId]="'org-country'">
+                        <mb-input id="org-country" [value]="orgCountry()" (valueChange)="orgCountry.set($event)"></mb-input>
+                    </mb-form-field>
+
+                    <mb-form-field label="City" [controlId]="'org-city'">
+                        <mb-input id="org-city" [value]="orgCity()" (valueChange)="orgCity.set($event)"></mb-input>
+                    </mb-form-field>
+                </div>
+
+                <mb-form-field label="Address line" [controlId]="'org-address'">
+                    <mb-input id="org-address" [value]="orgAddress()" (valueChange)="orgAddress.set($event)"></mb-input>
+                </mb-form-field>
+
+                <div class="two-col">
+                    <mb-form-field label="Timezone" [controlId]="'org-timezone'">
+                        <mb-input id="org-timezone" [value]="orgTimezone()" (valueChange)="orgTimezone.set($event)"></mb-input>
+                    </mb-form-field>
+
+                    <mb-form-field label="Locale" [controlId]="'org-locale'">
+                        <mb-input id="org-locale" [value]="orgLocale()" (valueChange)="orgLocale.set($event)"></mb-input>
+                    </mb-form-field>
+                </div>
+            </div>
+            }
+
+            @if (step() === 2) {
+            <div class="step-section">
+                <div class="mode-selector">
+                    <button type="button" class="mode-card" [class.active]="schoolMode() === 'single'"
+                        (click)="setSchoolMode('single')">
+                        <div class="mode-title">Single school</div>
+                        <div class="mode-subtitle">One school operating under this organization.</div>
+                    </button>
+                    <button type="button" class="mode-card" [class.active]="schoolMode() === 'multi'"
+                        (click)="setSchoolMode('multi')">
+                        <div class="mode-title">Multiple schools</div>
+                        <div class="mode-subtitle">Districts or groups managing more than one school.</div>
+                    </button>
+                </div>
+
+                <div class="school-list">
+                    @for (row of schoolRows(); track $index) {
+                    <div class="school-row" [class.readonly]="row.existing">
+                        <mb-form-field label="School name" [controlId]="'school-name-' + $index">
+                            <mb-input [id]="'school-name-' + $index"
+                                [value]="row.name"
+                                [disabled]="!!row.existing"
+                                (valueChange)="updateSchoolName($index, $event)">
+                            </mb-input>
+                        </mb-form-field>
+
+                        <mb-form-field label="School code (optional)" [controlId]="'school-code-' + $index">
+                            <mb-input [id]="'school-code-' + $index"
+                                [value]="row.code || ''"
+                                [disabled]="!!row.existing"
+                                (valueChange)="updateSchoolCode($index, $event)">
+                            </mb-input>
+                        </mb-form-field>
+
+                        <button type="button" class="remove-row" *ngIf="!row.existing && schoolRows().length > 1"
+                            (click)="removeSchoolRow($index)">
+                            Remove
+                        </button>
+                    </div>
+                    }
+                </div>
+
+                <button type="button" class="add-row" (click)="addSchoolRow()">Add another school</button>
+            </div>
+            }
+
+            @if (step() === 3) {
+            <div class="step-section">
+                <div class="edition-grid">
+                    @for (edition of editions(); track edition.id) {
+                    <button type="button" class="edition-card"
+                        [class.selected]="selectedEditionId() === edition.id"
+                        (click)="selectEdition(edition)">
+                        <div class="edition-title">{{ edition.displayName || edition.name }}</div>
+                        <div class="edition-description">{{ edition.description || 'Configured for your organization.' }}</div>
+                    </button>
+                    }
+                </div>
+            </div>
+            }
+
+            @if (step() === 4) {
+            <div class="step-section">
+                <div class="review-grid">
+                    <div class="review-card">
+                        <div class="review-title">Organization</div>
+                        <div class="review-item">{{ tenantName() }}</div>
+                        <div class="review-sub">{{ tenantCode() }}</div>
+                    </div>
+                    <div class="review-card">
+                        <div class="review-title">Schools</div>
+                        @for (name of reviewSchools(); track name) {
+                        <div class="review-item">{{ name }}</div>
+                        }
+                    </div>
+                    <div class="review-card">
+                        <div class="review-title">Edition</div>
+                        <div class="review-item">{{ selectedEditionName() || 'Not selected' }}</div>
+                    </div>
+                </div>
+
+                <mb-checkbox [checked]="createExtraAdmin()" (checkedChange)="createExtraAdmin.set($event)">
+                    Add another administrator
+                </mb-checkbox>
+
+                @if (createExtraAdmin()) {
+                <div class="admin-form">
+                    <mb-form-field label="Admin name" [controlId]="'admin-name'">
+                        <mb-input id="admin-name" [value]="adminName()" (valueChange)="adminName.set($event)"></mb-input>
+                    </mb-form-field>
+                    <mb-form-field label="Admin email" [controlId]="'admin-email'">
+                        <mb-input id="admin-email" type="email" [value]="adminEmail()" (valueChange)="adminEmail.set($event)"></mb-input>
+                    </mb-form-field>
+                    <mb-form-field label="Temporary password" [controlId]="'admin-password'">
+                        <mb-input id="admin-password" type="password" [value]="adminPassword()"
+                            (valueChange)="adminPassword.set($event)">
+                        </mb-input>
+                    </mb-form-field>
+                </div>
+                }
+            </div>
+            }
+        </div>
+        }
+
+        <div class="onboarding-actions">
+            <mb-button variant="tertiary" (click)="back()" [disabled]="step() === 1 || isSaving()">Back</mb-button>
+            <mb-button variant="primary" [loading]="isSaving()" [fullWidth]="true" (click)="next()">
+                {{ step() === 4 ? 'Create organization' : 'Continue' }}
+            </mb-button>
+        </div>
+    </mb-card>
+</div>

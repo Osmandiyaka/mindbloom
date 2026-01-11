@@ -34,6 +34,11 @@ export const routes: Routes = [
         canActivate: [authGuard] // Auth required, but NOT tenant guard
     },
     {
+        path: 'onboarding',
+        loadComponent: () => import('./modules/tenant/pages/tenant-onboarding/tenant-onboarding.component').then(m => m.TenantOnboardingComponent),
+        canActivate: [authGuard, tenantGuard]
+    },
+    {
         path: 'host',
         component: HostLayoutComponent,
         canActivate: [authGuard],

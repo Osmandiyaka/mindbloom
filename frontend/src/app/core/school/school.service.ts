@@ -14,4 +14,8 @@ export class SchoolService {
     listSchools(): Observable<School[]> {
         return this.http.get<School[]>(this.apiUrl);
     }
+
+    createSchool(input: { name: string; code?: string; type?: string; status?: string; domain?: string }): Observable<School> {
+        return this.http.post<School>(this.apiUrl, input);
+    }
 }
