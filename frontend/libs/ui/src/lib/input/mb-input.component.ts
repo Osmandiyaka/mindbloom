@@ -19,6 +19,7 @@ type MbInputSize = 'sm' | 'md';
                 [attr.autocomplete]="autocomplete || null"
                 [attr.aria-label]="ariaLabel || null"
                 [attr.aria-invalid]="invalid || null"
+                [attr.autofocus]="autofocus ? '' : null"
                 [disabled]="disabled"
                 [readonly]="readonly"
                 [value]="value"
@@ -52,6 +53,7 @@ export class MbInputComponent implements ControlValueAccessor {
     @Input() placeholder?: string;
     @Input() autocomplete?: string;
     @Input() ariaLabel?: string;
+    @Input() autofocus = false;
     @Input() size: MbInputSize = 'md';
     @Input() disabled = false;
     @Input() readonly = false;

@@ -1,6 +1,6 @@
 .mb-auth-page {
     min-height: 100vh;
-    background: var(--mb-color-bg);
+    background: color-mix(in srgb, var(--mb-color-bg) 96%, #e8f2ec);
     display: flex;
     flex-direction: column;
 }
@@ -42,15 +42,15 @@
 }
 
 .auth-logo__mark {
-    width: 44px;
-    height: 44px;
+    width: 52px;
+    height: 52px;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--mb-color-primary), color-mix(in srgb, var(--mb-color-primary) 55%, var(--mb-color-info)));
-    box-shadow: 0 12px 20px color-mix(in srgb, var(--mb-color-primary) 20%, transparent);
+    background: var(--mb-color-primary);
+    box-shadow: 0 10px 16px color-mix(in srgb, var(--mb-color-primary) 18%, transparent);
 }
 
 .auth-logo__text {
-    font-size: var(--mb-font-size-lg);
+    font-size: var(--mb-font-size-xl);
 }
 
 .auth-link {
@@ -63,6 +63,11 @@
     color: var(--mb-color-text);
 }
 
+.auth-link--muted {
+    color: var(--mb-color-text-subtle);
+    font-size: var(--mb-font-size-xs);
+}
+
 .mb-auth-card {
     max-width: 440px;
     width: 100%;
@@ -70,6 +75,7 @@
     box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
     border: 1px solid var(--mb-color-border-subtle);
     --mb-card-padding: 32px;
+    --mb-control-height: 44px;
 }
 
 .auth-card__header {
@@ -111,6 +117,7 @@
 
 .auth-form > mb-button {
     margin-top: var(--mb-space-4);
+    width: 100%;
 }
 
 .auth-form .mb-form-field {
@@ -133,9 +140,25 @@
 .icon-button {
     border: none;
     background: none;
-    color: var(--mb-color-link);
+    color: var(--mb-color-text-muted);
     font-size: var(--mb-font-size-sm);
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--mb-radius-pill);
+}
+
+.icon-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.icon-button:hover {
+    color: var(--mb-color-text);
+    background: var(--mb-color-surface-2);
 }
 
 .auth-inline {
@@ -175,6 +198,14 @@
 .auth-links .auth-link--muted {
     color: var(--mb-color-text-subtle);
     font-size: var(--mb-font-size-xs);
+}
+
+.auth-links--stack a {
+    color: var(--mb-color-text-muted);
+}
+
+.auth-links a:not(.auth-link--muted) {
+    font-weight: var(--mb-font-weight-medium);
 }
 
 .auth-links a:hover {
