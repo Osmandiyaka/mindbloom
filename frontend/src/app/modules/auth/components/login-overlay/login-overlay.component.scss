@@ -30,7 +30,7 @@
 
 .auth-logo {
     color: var(--mb-color-primary);
-    margin-bottom: var(--mb-space-3);
+    margin-bottom: var(--mb-space-2);
 }
 
 .auth-link {
@@ -117,6 +117,14 @@
 
 .auth-card__header--center h1 + p {
     margin-top: var(--mb-space-2);
+}
+
+.auth-form .mb-form-field__control {
+    background: var(--mb-color-surface);
+}
+
+.auth-form .mb-form-field__control:focus-within {
+    background: var(--mb-color-primary-subtle);
 }
 
 .auth-alert {
