@@ -3,10 +3,10 @@
 // ========================================
 
 // Primary Accent Colors
-$accent-blue: #3B82F6; // Primary brand blue
-$accent-blue-dark: #2563EB; // Darker blue for hover states
-$accent-blue-light: #60A5FA; // Lighter blue for backgrounds
-$accent-blue-ultralight: #DBEAFE; // Very light blue for subtle backgrounds
+$accent-blue: #1F6F63; // Primary brand evergreen
+$accent-blue-dark: #195E54; // Darker evergreen for hover states
+$accent-blue-light: #4FA39A; // Soft teal for backgrounds
+$accent-blue-ultralight: #E3F1EE; // Very light evergreen tint
 
 // Dark Accent
 $accent-dark: #1E293B; // Dark slate for headers/sidebar
@@ -31,8 +31,8 @@ $warning: #F59E0B; // Orange for warnings
 $warning-light: #FEF3C7;
 $error: #EF4444; // Red for errors
 $error-light: #FEE2E2;
-$info: #3B82F6; // Blue for info
-$info-light: #DBEAFE;
+$info: #4FA39A; // Teal for info
+$info-light: #E3F1EE;
 
 // Text Colors
 $text-primary: $slate-8;
@@ -52,8 +52,8 @@ $border-medium: $slate-3;
 $border-dark: $slate-4;
 
 // Button Gradients
-$gradient-blue: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-$gradient-blue-hover: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+$gradient-blue: linear-gradient(135deg, #1F6F63 0%, #195E54 100%);
+$gradient-blue-hover: linear-gradient(135deg, #195E54 0%, #134B44 100%);
 $gradient-dark: linear-gradient(135deg, #334155 0%, #1E293B 100%);
 
 // Overlay

@@ -3,17 +3,17 @@
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    border: 1px solid #e0e5ed;
+    border: 1px solid var(--mb-color-border-subtle);
     border-radius: 6px;
-    background: #ffffff;
+    background: var(--mb-color-surface);
     min-width: 120px;
     max-width: 160px;
     cursor: pointer;
     transition: all 0.2s ease;
 
     &:hover {
-        border-color: #1EA7FF;
-        box-shadow: 0 1px 4px rgba(30, 167, 255, 0.12);
+        border-color: var(--mb-color-border-strong);
+        background: var(--mb-color-surface-2);
     }
 
     .block-icon {
@@ -23,6 +23,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        color: var(--mb-color-text-muted);
 
         svg {
             width: 18px;
@@ -38,14 +39,18 @@
     .block-title {
         font-weight: 600;
         font-size: 12px;
-        color: #1A1E27;
+        color: var(--mb-color-text);
         line-height: 1.2;
         margin-bottom: 2px;
     }
 
     .block-subtitle {
         font-size: 10px;
-        color: #8B95A5;
+        color: var(--mb-color-text-muted);
         line-height: 1.2;
     }
+}
+
+.workflow-block:hover .block-icon {
+    color: var(--mb-color-primary);
 }

@@ -5,21 +5,21 @@
     --mb-color-surface-2: #151f2e;
     --mb-color-surface-inverse: #f8fafc;
 
-    --mb-color-text: #e2e8f0;
+    --mb-color-text: #e2eceb;
     --mb-color-text-muted: #cbd5e1;
     --mb-color-text-subtle: #94a3b8;
     --mb-color-text-inverse: #0b1220;
-    --mb-color-link: #60a5fa;
+    --mb-color-link: #4fa39a;
 
     --mb-color-border: #273347;
     --mb-color-border-subtle: #1f2937;
     --mb-color-border-strong: #334155;
-    --mb-color-focus: #2dd4bf;
+    --mb-color-focus: #4fa39a;
 
-    --mb-color-primary: #2dd4bf;
-    --mb-color-primary-hover: #14b8a6;
-    --mb-color-primary-active: #0f766e;
-    --mb-color-primary-subtle: color-mix(in srgb, var(--mb-color-primary) 18%, var(--mb-color-bg));
+    --mb-color-primary: #4fa39a;
+    --mb-color-primary-hover: #3f8e84;
+    --mb-color-primary-active: #2f6f68;
+    --mb-color-primary-subtle: color-mix(in srgb, #4fa39a 22%, var(--mb-color-bg));
     --mb-color-on-primary: #0b1220;
 
     --mb-color-success: #22c55e;

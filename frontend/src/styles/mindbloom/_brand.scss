@@ -2,22 +2,23 @@
 :root[data-theme-id='mindbloom-light'],
 .mb-root[data-theme='mindbloom-light'],
 .mb-root[data-theme-id='mindbloom-light'] {
-    --mb-color-bg: #f7f8f5;
+    --mb-color-bg: #f2f6f4;
     --mb-color-surface: #ffffff;
-    --mb-color-surface-elevated: #f2f6f4;
+    --mb-color-surface-elevated: #f4f7f6;
 
-    --mb-color-text: #0b1220;
+    --mb-color-text: #0f172a;
     --mb-color-text-muted: #475569;
     --mb-color-text-subtle: #64748b;
 
     --mb-color-border: #e2e8e4;
     --mb-color-border-subtle: #edf2ef;
 
-    --mb-color-primary: #0f766e;
-    --mb-color-primary-hover: #0d625b;
-    --mb-color-primary-active: #0b4f4a;
-    --mb-color-primary-subtle: color-mix(in srgb, var(--mb-color-primary) 12%, var(--mb-color-bg));
-    --mb-color-focus: #0f766e;
+    --mb-color-primary: #1f6f63;
+    --mb-color-primary-hover: #195e54;
+    --mb-color-primary-active: #134b44;
+    --mb-color-secondary: #4fa39a;
+    --mb-color-primary-subtle: color-mix(in srgb, var(--mb-color-secondary) 30%, var(--mb-color-bg));
+    --mb-color-focus: #4fa39a;
     --mb-color-on-primary: #ffffff;
     --mb-color-link: var(--mb-color-primary);
 }
@@ -26,9 +27,9 @@
 :root[data-theme-id='mindbloom-dark'],
 .mb-root[data-theme='mindbloom-dark'],
 .mb-root[data-theme-id='mindbloom-dark'] {
-    --mb-color-bg: #0b1214;
-    --mb-color-surface: #0f1a1b;
-    --mb-color-surface-elevated: #152223;
+    --mb-color-bg: #0b1211;
+    --mb-color-surface: #0f1918;
+    --mb-color-surface-elevated: #132120;
 
     --mb-color-text: #e2eceb;
     --mb-color-text-muted: #c3d1d0;
@@ -37,11 +38,12 @@
     --mb-color-border: #1f2f2e;
     --mb-color-border-subtle: #1a2627;
 
-    --mb-color-primary: #2dd4bf;
-    --mb-color-primary-hover: #14b8a6;
-    --mb-color-primary-active: #0f766e;
-    --mb-color-primary-subtle: color-mix(in srgb, var(--mb-color-primary) 18%, var(--mb-color-bg));
-    --mb-color-focus: #2dd4bf;
+    --mb-color-primary: #4fa39a;
+    --mb-color-primary-hover: #3f8e84;
+    --mb-color-primary-active: #2f6f68;
+    --mb-color-secondary: #4fa39a;
+    --mb-color-primary-subtle: color-mix(in srgb, var(--mb-color-secondary) 26%, var(--mb-color-bg));
+    --mb-color-focus: #4fa39a;
     --mb-color-on-primary: #0b1220;
     --mb-color-link: var(--mb-color-primary);
 }

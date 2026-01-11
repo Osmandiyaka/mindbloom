@@ -52,21 +52,21 @@
     --mb-color-surface-2: #f1f4f9;
     --mb-color-surface-inverse: #0b1220;
 
-    --mb-color-text: #0b1220;
+    --mb-color-text: #0f172a;
     --mb-color-text-muted: #475569;
     --mb-color-text-subtle: #64748b;
     --mb-color-text-inverse: #f8fafc;
-    --mb-color-link: #1d4ed8;
+    --mb-color-link: #1f6f63;
 
     --mb-color-border: #e2e8f0;
     --mb-color-border-subtle: #edf2f7;
     --mb-color-border-strong: #cbd5e1;
-    --mb-color-focus: #0f766e;
+    --mb-color-focus: #4fa39a;
 
-    --mb-color-primary: #0f766e;
-    --mb-color-primary-hover: #0d625b;
-    --mb-color-primary-active: #0b4f4a;
-    --mb-color-primary-subtle: color-mix(in srgb, var(--mb-color-primary) 12%, var(--mb-color-bg));
+    --mb-color-primary: #1f6f63;
+    --mb-color-primary-hover: #195e54;
+    --mb-color-primary-active: #134b44;
+    --mb-color-primary-subtle: color-mix(in srgb, #4fa39a 30%, var(--mb-color-bg));
     --mb-color-on-primary: #ffffff;
 
     --mb-color-success: #16a34a;

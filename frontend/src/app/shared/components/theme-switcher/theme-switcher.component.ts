@@ -33,8 +33,8 @@ export class ThemeSwitcherComponent {
     private readonly theme = inject(MbThemeService);
 
     options: Array<{ id: 'light' | 'dark' | 'auto'; label: string; swatch: string }> = [
-      { id: 'light', label: 'Light', swatch: '#2563eb' },
-      { id: 'dark', label: 'Dark', swatch: '#60a5fa' },
+      { id: 'light', label: 'Light', swatch: '#1f6f63' },
+      { id: 'dark', label: 'Dark', swatch: '#4fa39a' },
       { id: 'auto', label: 'Auto', swatch: '#94a3b8' },
     ];
 

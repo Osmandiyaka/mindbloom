@@ -89,7 +89,7 @@ export class AppComponent implements OnInit {
                 this.themeService.setTenantBranding(undefined);
                 return;
             }
-            const primary = tenant.customization?.primaryColor || '#2563eb';
+            const primary = tenant.customization?.primaryColor || '#1f6f63';
             const logoUrl = tenant.customization?.logo;
             this.themeService.setTenantBranding({
                 tenantId: tenant.id,
