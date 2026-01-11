@@ -335,15 +335,14 @@ export class TenantOnboardingComponent implements OnInit {
     adminLastName = signal('');
     adminEmail = signal('');
     adminPassword = signal('');
-    adminPasswordConfirm = signal('');
     adminFirstTouched = signal(false);
     adminLastTouched = signal(false);
     adminEmailTouched = signal(false);
     adminPasswordTouched = signal(false);
-    adminPasswordConfirmTouched = signal(false);
+    adminPasswordFocused = signal(false);
     acceptTerms = signal(false);
     showAdminPassword = signal(false);
-    showAdminConfirm = signal(false);
+    adminEmailLocked = signal(false);
 
     readonly reviewSchools = computed(() => this.schoolRows().map(row => row.name).filter(Boolean));
     readonly stepTitle = computed(() => {
@@ -374,7 +373,7 @@ export class TenantOnboardingComponent implements OnInit {
                 case 1:
                     return 'Set up your MindBloom workspace. You can update these details later in settings.';
                 case 2:
-                    return 'Set the primary administrator account for this workspace.';
+                    return 'Set up the primary administrator account for this workspace.';
                 default:
                     return 'Confirm ownership to finish setting up your organization.';
             }
@@ -445,6 +444,48 @@ export class TenantOnboardingComponent implements OnInit {
         const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         return valid ? '' : 'Enter a valid email address.';
     });
+    readonly contactEmailValid = computed(() => {
+        const email = this.orgContactEmail().trim();
+        return !!email.length && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    });
+    readonly adminEmailError = computed(() => {
+        if (!this.shouldShowFieldError('adminEmail')) {
+            return '';
+        }
+        const email = this.adminEmail().trim();
+        if (!email.length) {
+            return 'Administrator email is required.';
+        }
+        const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        return valid ? '' : 'Enter a valid email address.';
+    });
+    readonly adminEmailValid = computed(() => {
+        const email = this.adminEmail().trim();
+        return !!email.length && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    });
+    readonly adminPasswordMeetsLength = computed(() => this.adminPassword().trim().length >= 8);
+    readonly adminPasswordMeetsNumberOrSymbol = computed(() => /[0-9]|[^A-Za-z0-9]/.test(this.adminPassword()));
+    readonly adminPasswordError = computed(() => {
+        if (!this.shouldShowFieldError('adminPassword')) {
+            return '';
+        }
+        if (!this.adminPassword().trim()) {
+            return 'Password is required.';
+        }
+        if (!this.adminPasswordMeetsLength() || !this.adminPasswordMeetsNumberOrSymbol()) {
+            return 'Password does not meet requirements.';
+        }
+        return '';
+    });
+    readonly adminPasswordShowRules = computed(() => {
+        if (this.adminPasswordFocused()) {
+            return true;
+        }
+        if (!this.adminPasswordTouched()) {
+            return false;
+        }
+        return !this.adminPasswordMeetsLength() || !this.adminPasswordMeetsNumberOrSymbol();
+    });
     readonly validationSummary = computed(() => {
         const step = this.step();
         const errors: string[] = [];
@@ -461,14 +502,11 @@ export class TenantOnboardingComponent implements OnInit {
                 if (this.shouldShowFieldError('adminLast') && !this.adminLastName().trim()) {
                     errors.push('Administrator last name is required.');
                 }
-                if (this.shouldShowFieldError('adminEmail') && !this.adminEmail().trim()) {
-                    errors.push('Administrator email is required.');
+                if (this.adminEmailError()) {
+                    errors.push(this.adminEmailError());
                 }
-                if (this.shouldShowFieldError('adminPassword') && this.adminPassword().trim().length < 8) {
-                    errors.push('Administrator password must be at least 8 characters.');
-                }
-                if (this.shouldShowFieldError('adminPasswordConfirm') && this.adminPassword().trim() !== this.adminPasswordConfirm().trim()) {
-                    errors.push('Administrator passwords must match.');
+                if (this.adminPasswordError()) {
+                    errors.push(this.adminPasswordError());
                 }
             } else if (step === 3) {
                 if (!this.acceptTerms()) errors.push('Accept the terms to continue.');
@@ -505,7 +543,7 @@ export class TenantOnboardingComponent implements OnInit {
                 return !!this.tenantName().trim()
                     && !!this.tenantCode().trim()
                     && !!this.orgCountry().trim()
-                    && !!this.orgContactEmail().trim()
+                    && this.contactEmailValid()
                     && !this.codeError()
                     && !this.countryError()
                     && !this.contactEmailError();
@@ -513,9 +551,9 @@ export class TenantOnboardingComponent implements OnInit {
             if (step === 2) {
                 return !!this.adminFirstName().trim()
                     && !!this.adminLastName().trim()
-                    && !!this.adminEmail().trim()
-                    && this.adminPassword().trim().length >= 8
-                    && this.adminPassword().trim() === this.adminPasswordConfirm().trim();
+                    && this.adminEmailValid()
+                    && this.adminPasswordMeetsLength()
+                    && this.adminPasswordMeetsNumberOrSymbol();
             }
             if (step === 3) {
                 return this.acceptTerms();
@@ -593,7 +631,6 @@ export class TenantOnboardingComponent implements OnInit {
             this.step();
             this.orgCountry();
             this.orgContactEmail();
-            this.adminPasswordConfirm();
             this.acceptTerms();
             this.submitAttempted();
             this.schoolMode();
@@ -844,10 +881,6 @@ export class TenantOnboardingComponent implements OnInit {
         this.showAdminPassword.update(value => !value);
     }
 
-    toggleAdminConfirm(): void {
-        this.showAdminConfirm.update(value => !value);
-    }
-
     onOrgNameInput(value: string): void {
         this.tenantName.set(value);
         this.orgNameTouched.set(true);
@@ -875,6 +908,14 @@ export class TenantOnboardingComponent implements OnInit {
     onAdminEmailInput(value: string): void {
         this.adminEmail.set(value);
         this.adminEmailTouched.set(true);
+        this.adminEmailLocked.set(false);
+    }
+
+    onAdminEmailBlur(): void {
+        this.adminEmailTouched.set(true);
+        if (this.adminEmail().trim()) {
+            this.adminEmailLocked.set(true);
+        }
     }
 
     onAdminPasswordInput(value: string): void {
@@ -882,9 +923,13 @@ export class TenantOnboardingComponent implements OnInit {
         this.adminPasswordTouched.set(true);
     }
 
-    onAdminPasswordConfirmInput(value: string): void {
-        this.adminPasswordConfirm.set(value);
-        this.adminPasswordConfirmTouched.set(true);
+    onAdminPasswordFocus(): void {
+        this.adminPasswordFocused.set(true);
+    }
+
+    onAdminPasswordBlur(): void {
+        this.adminPasswordFocused.set(false);
+        this.adminPasswordTouched.set(true);
     }
 
     private anyTouchedInStep(): boolean {
@@ -896,8 +941,7 @@ export class TenantOnboardingComponent implements OnInit {
             }
             if (step === 2) {
                 return this.adminFirstTouched() || this.adminLastTouched()
-                    || this.adminEmailTouched() || this.adminPasswordTouched()
-                    || this.adminPasswordConfirmTouched();
+                    || this.adminEmailTouched() || this.adminPasswordTouched();
             }
             return false;
         }
@@ -909,7 +953,7 @@ export class TenantOnboardingComponent implements OnInit {
     }
 
     private shouldShowFieldError(field: 'orgName' | 'workspaceUrl' | 'country' | 'contactEmail'
-        | 'adminFirst' | 'adminLast' | 'adminEmail' | 'adminPassword' | 'adminPasswordConfirm'): boolean {
+        | 'adminFirst' | 'adminLast' | 'adminEmail' | 'adminPassword'): boolean {
         if (this.submitAttempted()) {
             return true;
         }
@@ -930,8 +974,6 @@ export class TenantOnboardingComponent implements OnInit {
                 return this.adminEmailTouched();
             case 'adminPassword':
                 return this.adminPasswordTouched();
-            case 'adminPasswordConfirm':
-                return this.adminPasswordConfirmTouched();
             default:
                 return false;
         }

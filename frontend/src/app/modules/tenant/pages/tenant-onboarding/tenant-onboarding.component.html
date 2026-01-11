@@ -194,31 +194,46 @@
                             (valueChange)="onAdminLastNameInput($event)"
                             (blurEvent)="adminLastTouched.set(true)"></mb-input>
                     </mb-form-field>
-                    <mb-form-field label="Admin email" [controlId]="'admin-email'">
-                        <mb-input id="admin-email" type="email" [value]="adminEmail()"
-                            (valueChange)="onAdminEmailInput($event)"
-                            (blurEvent)="adminEmailTouched.set(true)"></mb-input>
+                    <mb-form-field
+                        label="Admin email"
+                        [controlId]="'admin-email'"
+                        [hint]="adminEmailTouched() ? '' : 'This account will own the workspace.'"
+                        [error]="adminEmailError()"
+                    >
+                        <mb-input id="admin-email" type="email" [value]="adminEmail()" [readonly]="adminEmailLocked()"
+                            (valueChange)="onAdminEmailInput($event)" (blurEvent)="onAdminEmailBlur()"></mb-input>
+                        <span mbSuffix *ngIf="adminEmailLocked()">
+                            <button class="inline-button" type="button" (click)="adminEmailLocked.set(false)">
+                                Change
+                            </button>
+                        </span>
                     </mb-form-field>
-                    <mb-form-field label="Password" [controlId]="'admin-password'">
+                    <mb-form-field label="Password" [controlId]="'admin-password'" [error]="adminPasswordError()">
                         <mb-input id="admin-password" [type]="showAdminPassword() ? 'text' : 'password'"
                             [value]="adminPassword()" (valueChange)="onAdminPasswordInput($event)"
-                            (blurEvent)="adminPasswordTouched.set(true)"></mb-input>
+                            (focusEvent)="onAdminPasswordFocus()" (blurEvent)="onAdminPasswordBlur()"></mb-input>
                         <span mbSuffix>
                             <button class="inline-button" type="button" (click)="toggleAdminPassword()">
                                 {{ showAdminPassword() ? 'Hide' : 'Show' }}
                             </button>
                         </span>
                     </mb-form-field>
-                    <mb-form-field label="Confirm password" [controlId]="'admin-password-confirm'">
-                        <mb-input id="admin-password-confirm" [type]="showAdminConfirm() ? 'text' : 'password'"
-                            [value]="adminPasswordConfirm()" (valueChange)="onAdminPasswordConfirmInput($event)"
-                            (blurEvent)="adminPasswordConfirmTouched.set(true)"></mb-input>
-                        <span mbSuffix>
-                            <button class="inline-button" type="button" (click)="toggleAdminConfirm()">
-                                {{ showAdminConfirm() ? 'Hide' : 'Show' }}
-                            </button>
-                        </span>
-                    </mb-form-field>
+                    @if (!adminPasswordShowRules()) {
+                    <div class="password-requirements-toggle">
+                        Password requirements
+                        <button class="password-info" type="button"
+                            aria-label="Password security information"
+                            title="Passwords are securely encrypted and never stored in plain text.">
+                            i
+                        </button>
+                    </div>
+                    }
+                    @if (adminPasswordShowRules()) {
+                    <ul class="password-requirements">
+                        <li [class.pass]="adminPasswordMeetsLength()">At least 8 characters</li>
+                        <li [class.pass]="adminPasswordMeetsNumberOrSymbol()">Includes a number or symbol</li>
+                    </ul>
+                    }
                 </div>
             </div>
             }
@@ -249,7 +264,13 @@
         </div>
         } @else {
         <div class="onboarding-actions">
-            <mb-button variant="tertiary" type="button" (click)="cancelRegistration()" [disabled]="isSaving()">
+            <mb-button
+                class="onboarding-cancel"
+                variant="tertiary"
+                type="button"
+                (click)="cancelRegistration()"
+                [disabled]="isSaving()"
+            >
                 Cancel
             </mb-button>
             @if (step() > 1) {

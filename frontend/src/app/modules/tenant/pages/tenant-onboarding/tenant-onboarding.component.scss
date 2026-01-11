@@ -119,6 +119,64 @@
     border-radius: 6px;
 }
 
+.password-requirements {
+    margin: -6px 0 0;
+    padding-left: 16px;
+    font-size: var(--mb-font-size-sm);
+    color: var(--mb-color-text-muted);
+}
+
+.password-requirements li {
+    margin-bottom: 4px;
+}
+
+.password-requirements li:last-child {
+    margin-bottom: 0;
+}
+
+.password-requirements li.pass {
+    color: var(--mb-color-text);
+}
+
+.password-requirements-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: -6px;
+    font-size: var(--mb-font-size-sm);
+    color: var(--mb-color-text-muted);
+}
+
+.password-info {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    border: 1px solid var(--mb-color-border-subtle);
+    background: transparent;
+    color: var(--mb-color-text-subtle);
+    font-size: 11px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    padding: 0;
+}
+
+.password-info:focus-visible {
+    outline: 2px solid var(--mb-color-focus);
+    outline-offset: 2px;
+}
+
+.onboarding-cancel {
+    color: var(--mb-color-text-muted);
+}
+
+.onboarding-cancel:hover {
+    color: var(--mb-color-text);
+    background: transparent;
+}
+
 .mode-selector {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));

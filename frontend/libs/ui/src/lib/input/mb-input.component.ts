@@ -24,6 +24,7 @@ type MbInputSize = 'sm' | 'md';
                 [readonly]="readonly"
                 [value]="value"
                 (input)="onInput($event)"
+                (focus)="handleFocus()"
                 (blur)="handleBlur()"
             />
             <button
@@ -63,6 +64,7 @@ export class MbInputComponent implements ControlValueAccessor {
     @Input() value = '';
     @Output() valueChange = new EventEmitter<string>();
     @Output() blurEvent = new EventEmitter<void>();
+    @Output() focusEvent = new EventEmitter<void>();
 
     private onChange: (value: string) => void = () => {};
     private onTouched: () => void = () => {};
@@ -99,5 +101,9 @@ export class MbInputComponent implements ControlValueAccessor {
     handleBlur(): void {
         this.onTouched();
         this.blurEvent.emit();
+    }
+
+    handleFocus(): void {
+        this.focusEvent.emit();
     }
 }
