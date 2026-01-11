@@ -132,6 +132,19 @@
     margin-bottom: var(--mb-space-5);
 }
 
+.auth-alert .mb-alert--danger {
+    border-color: color-mix(in srgb, var(--mb-color-danger) 18%, transparent);
+    background: color-mix(in srgb, var(--mb-color-danger) 6%, var(--mb-color-surface));
+}
+
+.auth-alert .mb-alert--danger .mb-alert__icon {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    background: color-mix(in srgb, var(--mb-color-danger) 45%, transparent);
+    color: var(--mb-color-on-danger);
+}
+
 .auth-form {
     display: grid;
     gap: 12px;

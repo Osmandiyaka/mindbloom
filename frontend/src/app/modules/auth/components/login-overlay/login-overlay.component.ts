@@ -155,13 +155,23 @@ export class LoginOverlayComponent {
             error: (error) => {
                 this.isLoading.set(false);
                 this.errorMessage.set(error?.error?.message || 'We couldn’t sign you in. Check your details and try again.');
+                this.password.set('');
+                this.passwordTouched.set(false);
                 this.focusAlert();
+                setTimeout(() => this.focusPassword(), 0);
             }
         });
     }
 
     private focusAlert(): void {
         setTimeout(() => this.alertRef?.nativeElement?.focus(), 0);
+    }
+
+    private focusPassword(): void {
+        const input = document.getElementById('login-password') as HTMLInputElement | null;
+        if (input) {
+            input.focus();
+        }
     }
 
     private shouldShowValidation(): boolean {
