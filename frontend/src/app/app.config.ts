@@ -5,6 +5,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/auth/auth.interceptor';
 import { tenantContextInterceptor } from './core/interceptors/tenant-context.interceptor';
+import { schoolContextInterceptor } from './core/interceptors/school-context.interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -12,7 +13,7 @@ export const appConfig: ApplicationConfig = {
         provideAnimations(),
         provideRouter(routes),
         provideHttpClient(
-            withInterceptors([authInterceptor, tenantContextInterceptor])
+            withInterceptors([authInterceptor, tenantContextInterceptor, schoolContextInterceptor])
         )
     ]
 };

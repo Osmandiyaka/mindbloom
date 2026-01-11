@@ -316,12 +316,10 @@ app-theme-selector {
 }
 
 /* Tenant Switcher Styles */
-.tenant-switcher,
 .school-switcher {
     position: relative;
 }
 
-.tenant-button,
 .school-button {
     display: inline-flex;
     align-items: center;
@@ -356,7 +354,6 @@ app-theme-selector {
     }
 }
 
-.tenant-menu,
 .school-menu {
     position: absolute;
     top: calc(100% + 8px);
@@ -370,7 +367,6 @@ app-theme-selector {
     overflow: hidden;
 }
 
-.tenant-menu-header,
 .school-menu-header {
     padding: 12px 16px;
     font-size: 12px;
@@ -381,13 +377,45 @@ app-theme-selector {
     border-bottom: 1px solid var(--border-subtle, var(--color-border));
 }
 
-.tenant-menu-list,
+.school-menu-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-subtle, var(--color-border));
+}
+
+.school-menu-search .search-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--text-secondary, var(--color-text-secondary));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.school-search-input {
+    flex: 1;
+    border: 1px solid var(--border-subtle, var(--color-border));
+    background: var(--surface-elevated, var(--color-surface));
+    border-radius: 8px;
+    height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+    color: var(--text-primary, var(--color-text-primary));
+}
+
+.school-search-input:focus {
+    outline: none;
+    border-color: var(--accent-primary, var(--color-primary));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-primary, var(--color-primary)) 40%, transparent);
+}
+
 .school-menu-list {
     max-height: 400px;
     overflow-y: auto;
 }
 
-.tenant-menu-item,
 .school-menu-item {
     display: flex;
     align-items: center;
@@ -414,13 +442,11 @@ app-theme-selector {
     }
 }
 
-.tenant-item-content,
 .school-item-content {
     flex: 1;
     min-width: 0;
 }
 
-.tenant-item-name,
 .school-item-name {
     font-size: 14px;
     font-weight: 500;
@@ -431,13 +457,36 @@ app-theme-selector {
     margin-bottom: 2px;
 }
 
-.tenant-item-slug,
 .school-item-slug {
     font-size: 12px;
     color: var(--text-secondary, var(--color-text-secondary));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.school-menu-empty {
+    padding: 16px;
+    font-size: 12px;
+    color: var(--text-secondary, var(--color-text-secondary));
+}
+
+.school-menu-footer {
+    padding: 10px 12px;
+    border-top: 1px solid var(--border-subtle, var(--color-border));
+    display: flex;
+    justify-content: flex-end;
+}
+
+.school-manage-link {
+    font-size: 12px;
+    color: var(--text-secondary, var(--color-text-secondary));
+    text-decoration: none;
+}
+
+.school-manage-link:hover,
+.school-manage-link:focus-visible {
+    color: var(--text-primary, var(--color-text-primary));
 }
 
 .check-icon {

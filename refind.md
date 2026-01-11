@@ -13,3 +13,6 @@ Backend
 Frontend
 - School selector now consumes `GET /schools` via `frontend/src/app/core/school/school.service.ts` and persists active school state in `frontend/src/app/core/school/school-context.service.ts`.
 - Top bar shows the active school (single school case) or a dropdown when multiple schools exist in `frontend/src/app/shared/components/global-toolbar/global-toolbar.component.html`.
+- Added school context header injection with `X-School-Id` in `frontend/src/app/core/interceptors/school-context.interceptor.ts` and wired it in `frontend/src/app/app.config.ts`.
+- School switching now includes search/filter, empty state, and a Manage Schools link in `frontend/src/app/shared/components/global-toolbar/global-toolbar.component.html` and `frontend/src/app/shared/components/global-toolbar/global-toolbar.component.scss`.
+- School context publishes change events for data refresh consumers in `frontend/src/app/core/school/school-context.service.ts`.

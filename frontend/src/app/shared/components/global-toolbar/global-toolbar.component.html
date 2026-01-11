@@ -18,45 +18,6 @@
             </button>
         </ng-template>
 
-        <!-- Tenant Switcher -->
-        @if (availableTenants().length > 1) {
-        <div class="tenant-switcher hide-xs" appClickOutside (clickOutside)="closeTenantMenu()">
-            <button type="button" class="tenant-button" (click)="toggleTenantMenu()" [appTooltip]="'Switch organization'"
-                tooltipPosition="bottom" [attr.aria-expanded]="tenantMenuOpen()">
-                <span class="context-dot" aria-hidden="true"></span>
-                <span class="context-prefix">Organization ·</span>
-                <span class="context-text">{{ tenantName() }}</span>
-                <span class="chevron-down" aria-hidden="true">▼</span>
-            </button>
-
-            @if (tenantMenuOpen()) {
-            <div class="tenant-menu" (click)="$event.stopPropagation()">
-                <div class="tenant-menu-header">Switch Organization</div>
-                <div class="tenant-menu-list">
-                    @for (tenant of availableTenants(); track tenant.tenantId) {
-                    <button type="button" class="tenant-menu-item" [class.active]="isActiveTenant(tenant.tenantId)"
-                        [disabled]="isSwitchingTenant()" (click)="switchTenant(tenant)">
-                        <div class="tenant-item-content">
-                            <div class="tenant-item-name">{{ tenant.tenantName }}</div>
-                            <div class="tenant-item-slug">{{ tenant.tenantSlug }}</div>
-                        </div>
-                        @if (isActiveTenant(tenant.tenantId)) {
-                        <span class="check-icon">✓</span>
-                        }
-                    </button>
-                    }
-                </div>
-            </div>
-            }
-        </div>
-        } @else {
-        <div class="context-label hide-xs" [attr.title]="tenantName()">
-            <span class="context-dot" aria-hidden="true"></span>
-            <span class="context-prefix">Organization ·</span>
-            <span class="context-text">{{ tenantName() }}</span>
-        </div>
-        }
-
         <!-- School Selector -->
         @if (availableSchools().length > 1) {
         <div class="school-switcher hide-xs" appClickOutside (clickOutside)="closeSchoolMenu()">
@@ -71,8 +32,13 @@
             @if (schoolMenuOpen()) {
             <div class="school-menu" (click)="$event.stopPropagation()">
                 <div class="school-menu-header">Switch School</div>
+                <div class="school-menu-search">
+                    <span class="search-icon" aria-hidden="true" [innerHTML]="icon('search')"></span>
+                    <input type="search" class="school-search-input" placeholder="Search schools..."
+                        [ngModel]="schoolSearch()" (ngModelChange)="schoolSearch.set($event)" />
+                </div>
                 <div class="school-menu-list">
-                    @for (school of availableSchools(); track school.id) {
+                    @for (school of filteredSchools(); track school.id) {
                     <button type="button" class="school-menu-item" [class.active]="isActiveSchool(school.id)"
                         [disabled]="isSchoolLoading()" (click)="switchSchool(school)">
                         <div class="school-item-content">
@@ -85,6 +51,14 @@
                         <span class="check-icon">✓</span>
                         }
                     </button>
+                    }
+                    @if (!filteredSchools().length) {
+                    <div class="school-menu-empty">No schools match your search.</div>
+                    }
+                </div>
+                <div class="school-menu-footer">
+                    @if (canManageSchools()) {
+                    <a class="school-manage-link" routerLink="/setup/school-settings">Manage schools</a>
                     }
                 </div>
             </div>

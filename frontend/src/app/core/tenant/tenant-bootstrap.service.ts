@@ -7,6 +7,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Observable, forkJoin, of } from 'rxjs';
 import { map, tap, catchError, finalize } from 'rxjs/operators';
 import { TenantContextService, TenantMembership } from './tenant-context.service';
+import { SchoolContextService } from '../school/school-context.service';
 
 export type BootstrapStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -15,6 +16,7 @@ export type BootstrapStatus = 'idle' | 'loading' | 'ready' | 'error';
 })
 export class TenantBootstrapService {
     private readonly tenantContext = inject(TenantContextService);
+    private readonly schoolContext = inject(SchoolContextService);
 
     // Bootstrap loading state
     readonly status = signal<BootstrapStatus>('idle');
@@ -31,6 +33,7 @@ export class TenantBootstrapService {
 
         // Set active tenant first
         this.tenantContext.setActiveTenant(tenant);
+        this.schoolContext.refreshSchools();
 
         // Reload tenant-scoped services
         return forkJoin({
