@@ -1,4 +1,4 @@
-<div class="mb-auth-page">
+<div class="mb-auth-page" [class.mb-auth-page--tenant]="tenantStep() === 'login'">
     <header class="mb-auth-header">
         <div class="mb-auth-container">
             <div class="auth-logo">
@@ -13,12 +13,19 @@
         <div class="mb-auth-container">
             <section class="mb-auth-hero">
                 <p class="hero-eyebrow">Secure Access</p>
+                @if (tenantStep() === 'login' && tenantName()) {
+                <h2 class="hero-title">Access {{ tenantName() }} in MindBloom.</h2>
+                <p class="hero-body">
+                    Use your staff credentials to continue to your organization’s workspace.
+                </p>
+                } @else {
                 <h2 class="hero-title">Sign in to your school’s MindBloom workspace.</h2>
                 <p class="hero-body">
                     MindBloom provides a secure and reliable way for staff and administrators
                     to access academic, operational, and student information.
                 </p>
                 <p class="hero-trustline">Trusted by schools to manage sensitive data.</p>
+                }
             </section>
 
             <section class="auth-panel">

@@ -14,7 +14,7 @@
 .mb-auth-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: var(--mb-space-8);
+    padding: 32px;
 }
 
 .mb-auth-header .mb-auth-container {
@@ -114,6 +114,11 @@
     border-radius: 12px;
     box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
     border: 1px solid var(--mb-color-border-subtle);
+    --mb-card-padding: 32px;
+}
+
+.auth-card__header {
+    margin-bottom: var(--mb-space-4);
 }
 
 .auth-card__header h1 {
@@ -131,7 +136,7 @@
 
 .auth-section {
     display: grid;
-    gap: var(--mb-space-4);
+    gap: 16px;
 }
 
 .auth-alert {
@@ -207,7 +212,7 @@
 
 .auth-form {
     display: grid;
-    gap: var(--mb-space-3);
+    gap: 12px;
 }
 
 .auth-password-row {
@@ -254,7 +259,20 @@
     gap: var(--mb-space-2);
     font-size: 12px;
     color: var(--mb-color-text-subtle);
-    padding-bottom: var(--mb-space-6);
+    padding-bottom: 24px;
+}
+
+.mb-auth-page--tenant .mb-auth-main .mb-auth-container {
+    align-items: start;
+    padding-top: 40px;
+}
+
+.mb-auth-page--tenant .mb-auth-hero {
+    padding: 36px;
+}
+
+.mb-auth-page--tenant .hero-body {
+    max-width: 360px;
 }
 
 .mb-auth-footer a {
@@ -279,7 +297,7 @@
 
 @media (max-width: 767px) {
     .mb-auth-container {
-        padding: var(--mb-space-6);
+        padding: 24px;
     }
 
     .mb-auth-main .mb-auth-container {
