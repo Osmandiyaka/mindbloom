@@ -27,6 +27,7 @@
                             #firstFieldRef
                             type="email"
                             id="login-email"
+                            autocomplete="email"
                             [value]="username()"
                             (valueChange)="username.set($event); errorMessage.set('')"
                             ariaLabel="Email"
@@ -43,6 +44,7 @@
                         <mb-input
                             [type]="showPassword() ? 'text' : 'password'"
                             id="login-password"
+                            autocomplete="current-password"
                             [value]="password()"
                             (valueChange)="password.set($event); errorMessage.set('')"
                             (keydown)="handleCapsLock($event)"
@@ -85,7 +87,7 @@
                     </mb-button>
 
                     <div class="auth-links auth-links--stack">
-                        <a href="#" (click)="onRegisterTenant($event)">New to MindBloom? Create an organization</a>
+                        <a class="auth-link--secondary" href="#" (click)="onRegisterTenant($event)">New to MindBloom? Create an organization</a>
                         <a class="auth-link--muted" href="mailto:support@mindbloom.com">Need help signing in?</a>
                     </div>
                 </form>

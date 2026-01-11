@@ -68,6 +68,11 @@
     font-size: var(--mb-font-size-xs);
 }
 
+.auth-link--secondary {
+    color: var(--mb-color-text-muted);
+    font-size: var(--mb-font-size-sm);
+}
+
 .mb-auth-card {
     max-width: 440px;
     width: 100%;
@@ -198,10 +203,6 @@
 .auth-links .auth-link--muted {
     color: var(--mb-color-text-subtle);
     font-size: var(--mb-font-size-xs);
-}
-
-.auth-links--stack a {
-    color: var(--mb-color-text-muted);
 }
 
 .auth-links a:not(.auth-link--muted) {
