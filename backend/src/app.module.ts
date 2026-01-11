@@ -31,6 +31,7 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
 import { TenantSupportModule } from './common/tenant/tenant.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { SubscriptionJobsModule } from './modules/subscription/subscription-jobs.module';
+import { SchoolsModule } from './modules/schools/schools.module';
 
 @Module({
     imports: [
@@ -63,6 +64,7 @@ import { SubscriptionJobsModule } from './modules/subscription/subscription-jobs
         SetupModule,
         AdmissionsModule,
         TasksModule,
+        SchoolsModule,
         TenantSupportModule,
     ],
     controllers: [HostAuditController, AppAuditController],
