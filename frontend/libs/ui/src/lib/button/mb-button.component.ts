@@ -30,7 +30,7 @@ type MbButtonSize = 'sm' | 'md' | 'lg';
         >
             <span class="mb-button__content">
                 <span class="mb-button__spinner" *ngIf="loading" aria-hidden="true"></span>
-                <span class="mb-button__label" [class.mb-button__label--hidden]="loading">
+                <span class="mb-button__label" [class.mb-button__label--hidden]="loading && hideLabelOnLoading">
                     <ng-content></ng-content>
                 </span>
             </span>
@@ -43,6 +43,7 @@ export class MbButtonComponent {
     @Input() size: MbButtonSize = 'md';
     @Input() type: 'button' | 'submit' | 'reset' = 'button';
     @Input() fullWidth = false;
+    @Input() hideLabelOnLoading = true;
     @Input() disabled = false;
     @Input() loading = false;
     @Input() ariaLabel?: string;
