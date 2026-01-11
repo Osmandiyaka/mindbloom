@@ -73,6 +73,24 @@
     font-size: var(--mb-font-size-sm);
 }
 
+.auth-link--secondary,
+.auth-link--muted {
+    text-decoration: none;
+}
+
+.auth-link--secondary:hover,
+.auth-link--muted:hover {
+    color: var(--mb-color-text);
+    text-decoration: underline;
+}
+
+.auth-link--secondary:focus-visible,
+.auth-link--muted:focus-visible {
+    outline: 2px solid var(--mb-color-focus);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
 .mb-auth-card {
     max-width: 440px;
     width: 100%;
