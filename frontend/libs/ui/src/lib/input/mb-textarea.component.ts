@@ -40,9 +40,9 @@ export class MbTextareaComponent implements ControlValueAccessor {
     @Input() disabled = false;
     @Input() readonly = false;
     @Input() invalid = false;
+    @Input() value = '';
     @Output() valueChange = new EventEmitter<string>();
 
-    value = '';
     private onChange: (value: string) => void = () => {};
     private onTouched: () => void = () => {};
 

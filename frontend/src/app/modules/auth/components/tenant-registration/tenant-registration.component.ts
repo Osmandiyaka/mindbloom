@@ -1,14 +1,30 @@
 import { Component, signal, output } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TenantService, Tenant, TenantEdition, TenantPlan } from '../../../../core/services/tenant.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { TenantService, Tenant, TenantEdition, TenantPlan } from '../../../../core/services/tenant.service';
+import {
+    MbAlertComponent,
+    MbButtonComponent,
+    MbCheckboxComponent,
+    MbFormFieldComponent,
+    MbInputComponent,
+    MbSelectComponent
+} from '@mindbloom/ui';
 
 @Component({
     selector: 'app-tenant-registration',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [
+        CommonModule,
+        FormsModule,
+        MbFormFieldComponent,
+        MbInputComponent,
+        MbSelectComponent,
+        MbCheckboxComponent,
+        MbButtonComponent,
+        MbAlertComponent
+    ],
     templateUrl: './tenant-registration.component.html',
     styleUrls: ['./tenant-registration.component.scss']
 })
@@ -16,118 +32,66 @@ export class TenantRegistrationComponent {
     currentStep = signal(1);
     schoolName = signal('');
     schoolCode = signal('');
-    contactPerson = signal('');
+    country = signal('');
+    timezone = signal(this.defaultTimeZone());
+    schoolType = signal('');
     email = signal('');
     adminName = signal('');
     adminEmail = signal('');
     adminPassword = signal('');
     adminPasswordConfirm = signal('');
-    phone = signal('');
-    selectedEdition = signal<TenantEdition>('trial');
-    editions = signal<Array<{ id: string; name: string; displayName: string; description?: string | null; features: Record<string, string>; monthlyPrice?: number | null; annualPrice?: number | null; perStudentMonthly?: number | null; annualPriceNotes?: string | null; isActive?: boolean }>>([]);
-    loadingEditions = signal(false);
-    editionLoadError = signal('');
     acceptTerms = signal(false);
     codeStatus = signal<'idle' | 'checking' | 'available' | 'taken' | 'error'>('idle');
     codeStatusMessage = signal('');
+    showAdminPassword = signal(false);
+    showAdminConfirm = signal(false);
 
     isRegistering = signal(false);
     errorMessage = signal('');
     private codeCheckTimer: any = null;
     private codeSuggestionCounter = 0;
 
-    // Output event when registration is cancelled or completed
+    schoolTypeOptions = [
+        { label: 'Select school type', value: '' },
+        { label: 'K-12', value: 'k12' },
+        { label: 'College', value: 'college' },
+        { label: 'Training', value: 'training' },
+        { label: 'Other', value: 'other' }
+    ];
+
     cancelled = output<void>();
     registered = output<{ tenantId: string; subdomain: string }>();
 
-    constructor(private tenantService: TenantService) {
-        this.loadEditions();
-    }
-
-    async loadEditions(): Promise<void> {
-        this.loadingEditions.set(true);
-        this.editionLoadError.set('');
-        try {
-            const eds = await firstValueFrom(this.tenantService.listPublicEditions());
-            this.editions.set(eds.filter(e => e.isActive));
-            // pick default edition if trial
-            if (!eds.length) return;
-            this.selectedEdition.set(eds[0].name as TenantEdition || 'trial');
-        } catch (err: any) {
-            this.editionLoadError.set('Failed to load available editions');
-        } finally {
-            this.loadingEditions.set(false);
-        }
-    }
+    constructor(private tenantService: TenantService) {}
 
     onCancel(): void {
         this.cancelled.emit();
     }
 
-    onSubmit(): void {
-        const password = this.adminPassword().trim();
-
-        if (!this.acceptTerms()) {
-            this.errorMessage.set('Please accept the terms to continue');
-            return;
-        }
-
-        this.isRegistering.set(true);
-        this.errorMessage.set('');
-
-        // Create tenant
-        const tenantData = {
-            name: this.schoolName(),
-            subdomain: this.schoolCode(),
-            contactEmail: this.email(),
-            adminName: this.adminName(),
-            adminEmail: this.adminEmail(),
-            adminPassword: password,
-            edition: this.selectedEdition(),
-            // plan is accepted as a deprecated fallback
-            plan: this.selectedEdition() as TenantPlan,
-        };
-
-        this.tenantService.createTenant(tenantData).subscribe({
-            next: (tenant: Tenant) => {
-                this.isRegistering.set(false);
-                this.registered.emit({
-                    tenantId: tenant.id,
-                    subdomain: tenant.subdomain
-                });
-            },
-            error: (error: any) => {
-                this.isRegistering.set(false);
-                this.errorMessage.set(
-                    error.error?.message || 'Registration failed. This school code may already be taken.'
-                );
-            }
-        });
+    toggleAdminPassword(): void {
+        this.showAdminPassword.update(value => !value);
     }
 
-    selectEdition(edition: string | TenantEdition): void {
-        this.selectedEdition.set(edition as TenantEdition);
+    toggleAdminConfirm(): void {
+        this.showAdminConfirm.update(value => !value);
     }
 
-    featureKeys(features: Record<string, string>): string[] {
-        return Object.keys(features || {});
-    }
-
-    // Step navigation with validation
     nextStep(): void {
         this.errorMessage.set('');
         const step = this.currentStep();
         if (step === 1) {
-            if (!this.schoolName().trim()) return this.errorMessage.set('Please enter school name');
-            if (!this.schoolCode().trim()) return this.errorMessage.set('Please enter school code');
+            if (!this.schoolName().trim()) return this.errorMessage.set('Please enter an organization name');
+            if (!this.country().trim()) return this.errorMessage.set('Please enter a country or region');
+            if (!this.timezone().trim()) return this.errorMessage.set('Please enter a time zone');
+            if (!this.schoolCode().trim()) return this.errorMessage.set('Please enter a tenant URL');
             const codeRegex = /^[a-z0-9-]+$/;
-            if (!codeRegex.test(this.schoolCode())) return this.errorMessage.set('Use lowercase letters, numbers, and hyphens only');
-            if (this.codeStatus() === 'taken') return this.errorMessage.set('School code is already in use');
-            if (!this.email().trim()) return this.errorMessage.set('Please enter contact email');
+            if (!codeRegex.test(this.schoolCode())) return this.errorMessage.set('Tenant URL should use lowercase letters, numbers, and hyphens');
+            if (!this.email().trim()) return this.errorMessage.set('Please enter a contact email');
+            if (this.codeStatus() === 'taken') return this.errorMessage.set('Tenant URL is already in use');
         }
         if (step === 2) {
-            if (!this.adminName().trim()) return this.errorMessage.set('Please enter admin full name');
-            if (!this.adminEmail().trim()) return this.errorMessage.set('Please enter admin email');
+            if (!this.adminName().trim()) return this.errorMessage.set('Please enter the admin name');
+            if (!this.adminEmail().trim()) return this.errorMessage.set('Please enter the admin email');
             const pwd = this.adminPassword().trim();
             if (pwd.length < 8) return this.errorMessage.set('Admin password must be at least 8 characters');
             if (pwd !== this.adminPasswordConfirm().trim()) return this.errorMessage.set('Admin passwords do not match');
@@ -142,6 +106,50 @@ export class TenantRegistrationComponent {
         if (this.currentStep() > 1) {
             this.currentStep.set(this.currentStep() - 1);
         }
+    }
+
+    onSubmit(): void {
+        if (!this.acceptTerms()) {
+            this.errorMessage.set('Please accept the terms to continue');
+            return;
+        }
+
+        this.isRegistering.set(true);
+        this.errorMessage.set('');
+
+        const tenantData = {
+            name: this.schoolName(),
+            subdomain: this.schoolCode(),
+            contactEmail: this.email(),
+            adminName: this.adminName(),
+            adminEmail: this.adminEmail(),
+            adminPassword: this.adminPassword().trim(),
+            edition: 'trial' as TenantEdition,
+            plan: 'trial' as TenantPlan,
+            address: {
+                country: this.country().trim()
+            },
+            timezone: this.timezone().trim(),
+            metadata: {
+                schoolType: this.schoolType()
+            }
+        };
+
+        this.tenantService.createTenant(tenantData).subscribe({
+            next: (tenant: Tenant) => {
+                this.isRegistering.set(false);
+                this.registered.emit({
+                    tenantId: tenant.id,
+                    subdomain: tenant.subdomain
+                });
+            },
+            error: (error: any) => {
+                this.isRegistering.set(false);
+                this.errorMessage.set(
+                    error.error?.message || 'Registration failed. This tenant URL may already be taken.'
+                );
+            }
+        });
     }
 
     generateSchoolCode(): void {
@@ -178,23 +186,30 @@ export class TenantRegistrationComponent {
             this.tenantService.getTenantBySubdomain(normalized).subscribe({
                 next: () => {
                     this.codeStatus.set('taken');
-                    this.codeStatusMessage.set('Code is already taken');
+                    this.codeStatusMessage.set('Tenant URL is already taken');
                 },
                 error: (err: HttpErrorResponse) => {
                     if (err.status === 404) {
                         this.codeStatus.set('available');
-                        this.codeStatusMessage.set('Code is available');
+                        this.codeStatusMessage.set('Tenant URL is available');
                     } else {
                         this.codeStatus.set('error');
-                        this.codeStatusMessage.set('Could not verify code');
+                        this.codeStatusMessage.set('Could not verify tenant URL');
                     }
                 }
             });
         }, 350);
     }
 
-    // Password strength helpers
     meetsLength(): boolean { return this.adminPassword().trim().length >= 8; }
     meetsUpper(): boolean { return /[A-Z]/.test(this.adminPassword()); }
     meetsNumberOrSymbol(): boolean { return /[0-9]|[^A-Za-z0-9]/.test(this.adminPassword()); }
+
+    private defaultTimeZone(): string {
+        try {
+            return Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        } catch {
+            return '';
+        }
+    }
 }

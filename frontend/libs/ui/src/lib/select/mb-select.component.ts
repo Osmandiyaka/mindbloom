@@ -59,9 +59,9 @@ export class MbSelectComponent implements ControlValueAccessor {
     @Input() disabled = false;
     @Input() invalid = false;
     @Input() options: MbSelectOption[] = [];
+    @Input() value = '';
     @Output() valueChange = new EventEmitter<string>();
 
-    value = '';
     private onChange: (value: string) => void = () => {};
     private onTouched: () => void = () => {};
 

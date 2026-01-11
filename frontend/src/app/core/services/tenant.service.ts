@@ -112,6 +112,15 @@ export class TenantService {
         edition?: TenantEdition;
         // plan is accepted as a deprecated fallback
         plan?: TenantPlan;
+        address?: {
+            street?: string;
+            city?: string;
+            state?: string;
+            postalCode?: string;
+            country?: string;
+        };
+        timezone?: string;
+        metadata?: Record<string, any>;
     }): Observable<Tenant> {
         return this.http.post<Tenant>(`${this.API_URL}/tenants`, data).pipe(
             tap(tenant => {

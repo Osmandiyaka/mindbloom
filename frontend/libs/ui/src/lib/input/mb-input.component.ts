@@ -58,9 +58,9 @@ export class MbInputComponent implements ControlValueAccessor {
     @Input() invalid = false;
     @Input() clearable = false;
     @Input() clearLabel = 'Clear value';
+    @Input() value = '';
     @Output() valueChange = new EventEmitter<string>();
 
-    value = '';
     private onChange: (value: string) => void = () => {};
     private onTouched: () => void = () => {};
 

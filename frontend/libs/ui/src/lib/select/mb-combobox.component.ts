@@ -48,9 +48,9 @@ export class MbComboBoxComponent implements ControlValueAccessor {
     @Input() disabled = false;
     @Input() invalid = false;
     @Input() options: MbComboBoxOption[] = [];
+    @Input() value = '';
     @Output() valueChange = new EventEmitter<string>();
 
-    value = '';
     listId = `mb-combobox-${Math.random().toString(36).slice(2, 9)}`;
     private onChange: (value: string) => void = () => {};
     private onTouched: () => void = () => {};

@@ -1,17 +1,23 @@
-import { Component, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TenantService } from '../../../../core/services/tenant.service';
 import { TenantPostLoginRouter } from '../../../../core/tenant/tenant-post-login-router.service';
 import { TenantRegistrationComponent } from '../tenant-registration/tenant-registration.component';
 import { sanitizeReturnUrl } from '../../../../core/auth/return-url.util';
-import { UiFormFieldComponent, UiInputComponent, UiFormHintComponent, UiCheckboxComponent } from '../../../../shared/ui/forms';
-import { UiButtonComponent } from '../../../../shared/ui/buttons';
-import { UiInlineIconComponent } from '../../../../shared/ui/icons';
-import { UiSpinnerComponent } from '../../../../shared/ui/feedback';
+import {
+    MbAlertComponent,
+    MbButtonComponent,
+    MbCheckboxComponent,
+    MbCardComponent,
+    MbFormFieldComponent,
+    MbInputComponent
+} from '@mindbloom/ui';
+
+type TenantStep = 'select' | 'login';
+type SsoMode = 'password' | 'password+sso' | 'sso-only';
 
 @Component({
     selector: 'app-login-overlay',
@@ -21,110 +27,42 @@ import { UiSpinnerComponent } from '../../../../shared/ui/feedback';
         FormsModule,
         RouterModule,
         TenantRegistrationComponent,
-        UiFormFieldComponent,
-        UiFormHintComponent,
-        UiInputComponent,
-        UiCheckboxComponent,
-        UiButtonComponent,
-        UiInlineIconComponent,
-        UiSpinnerComponent
+        MbFormFieldComponent,
+        MbInputComponent,
+        MbCheckboxComponent,
+        MbButtonComponent,
+        MbCardComponent,
+        MbAlertComponent
     ],
     templateUrl: './login-overlay.component.html',
-    styleUrls: ['./login-overlay.component.scss'],
-    animations: [
-        trigger('stepFadeUp', [
-            transition(':enter', [
-                style({ opacity: 0, transform: 'translateY(18px)' }),
-                animate('420ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-            ]),
-            transition(':leave', [
-                animate('240ms ease-in', style({ opacity: 0, transform: 'translateY(12px)' }))
-            ])
-        ]),
-        trigger('heroStagger', [
-            transition(':enter', [
-                query(
-                    '.hero-animate',
-                    [
-                        style({ opacity: 0, transform: 'translateX(-24px)' }),
-                        stagger(140, animate('600ms ease-out', style({ opacity: 1, transform: 'translateX(0)' })))
-                    ],
-                    { optional: true }
-                )
-            ])
-        ])
-    ]
+    styleUrls: ['./login-overlay.component.scss']
 })
 export class LoginOverlayComponent {
+    @ViewChild('alertRef') alertRef?: ElementRef<HTMLDivElement>;
+    @ViewChild('firstFieldRef', { read: ElementRef }) firstFieldRef?: ElementRef<HTMLElement>;
+
     username = signal('');
     password = signal('');
     showPassword = signal(false);
     rememberMe = signal(false);
+    capsLockOn = signal(false);
     isLoading = signal(false);
     errorMessage = signal('');
     resetSuccess = signal(false);
-    tenantStep = signal<'select' | 'login'>('select');
-    schoolCode = signal('');
-    private readonly tenantStorageKey = 'mb_tenant_selection';
-
+    tenantStep = signal<TenantStep>('select');
+    organizationQuery = signal('');
+    tenantCode = signal('');
+    showTenantCode = signal(false);
     isValidatingTenant = signal(false);
     tenantErrorMessage = signal('');
+    tenantName = signal('');
+    tenantLocked = signal(false);
+    ssoMode = signal<SsoMode>('password');
 
-    // Registration state
     showRegistration = signal(false);
+    private readonly tenantStorageKey = 'mb_tenant_selection';
     private readonly defaultReturnUrl = '/dashboard';
     private targetAfterLogin = this.defaultReturnUrl;
-
-    isEditingTenant = signal(false);
-    tempSchoolCode = signal('');
-    tenantName = signal('');
-
-    // Add these new methods
-
-    // onChangeTenant() {
-    //   this.tempSchoolCode.set(this.schoolCode());
-    //   this.isEditingTenant.set(true);
-    // }
-
-    onConfirmTenantEdit() {
-        if (this.tempSchoolCode().trim()) {
-            // Call your existing tenant validation logic
-            this.schoolCode.set(this.tempSchoolCode());
-            this.onConfirmTenant(); // Call your existing method
-        }
-    }
-
-    onCancelTenantEdit() {
-        this.tempSchoolCode.set('');
-        this.isEditingTenant.set(false);
-    }
-
-    onSchoolCodeEditKeyDown(event: KeyboardEvent) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            this.onConfirmTenantEdit();
-        } else if (event.key === 'Escape') {
-            event.preventDefault();
-            this.onCancelTenantEdit();
-        }
-    }
-
-    // Modify your existing onConfirmTenant to also update tenantName and reset edit mode
-    // Example (adjust based on your existing implementation):
-    /*
-    async onConfirmTenant() {
-      // Your existing validation logic...
-      // After successful validation:
-      this.tenantName.set(response.schoolName || `${this.schoolCode()} School`);
-      this.isEditingTenant.set(false);
-      this.tenantStep.set('login');
-    }
-    */
-
-    get currentTenantCode(): string {
-        const tenant: any = this.tenantService.getCurrentTenantValue();
-        return tenant?.subdomain || tenant?.code || '—';
-    }
 
     constructor(
         private authService: AuthService,
@@ -143,45 +81,65 @@ export class LoginOverlayComponent {
         });
 
         const storedTenant = this.loadStoredTenant();
-        if (storedTenant?.code) {
-            this.schoolCode.set(storedTenant.code);
-            this.tenantName.set(storedTenant.name || '');
+        const activeTenant = this.tenantService.getCurrentTenantValue();
+
+        if (activeTenant?.subdomain) {
             this.tenantStep.set('login');
+            this.tenantCode.set(activeTenant.subdomain);
+            this.tenantName.set(activeTenant.name || activeTenant.subdomain);
+            this.tenantLocked.set(!storedTenant);
+        } else if (storedTenant?.code) {
+            this.tenantStep.set('login');
+            this.tenantCode.set(storedTenant.code);
+            this.tenantName.set(storedTenant.name || storedTenant.code);
         }
-
-    }
-
-    get currentTenant(): string {
-        const tenant = this.tenantService.getCurrentTenantValue();
-        return tenant?.name || 'No Tenant Selected';
-    }
-
-    onChangeTenant(): void {
-        this.tenantStep.set('select');
-        this.clearStoredTenantSelection();
     }
 
     onConfirmTenant(): void {
-        const tenantCode = this.schoolCode().trim();
-        if (!tenantCode) {
-            this.tenantErrorMessage.set('Please enter a school code');
+        const query = this.organizationQuery().trim();
+        if (!query) {
+            this.tenantErrorMessage.set('Enter your organization or tenant code.');
+            this.focusAlert();
             return;
         }
-
-        this.validateTenantCode(tenantCode, (tenant) => {
-            const name = tenant?.name || tenant?.label || '';
-            this.tenantStep.set('login');
-            this.schoolCode.set(tenantCode);
-            this.tenantName.set(name);
-            this.storeTenantSelection(tenantCode, name);
-        });
+        this.resolveTenant(query);
     }
 
-    onSchoolCodeKeyDown(event: KeyboardEvent): void {
+    onConfirmTenantCode(): void {
+        const code = this.tenantCode().trim();
+        if (!code) {
+            this.tenantErrorMessage.set('Enter your tenant URL or code.');
+            this.focusAlert();
+            return;
+        }
+        this.resolveTenant(code);
+    }
+
+    onTenantKeyDown(event: KeyboardEvent, type: 'org' | 'code'): void {
         if (event.key === 'Enter') {
             event.preventDefault();
-            this.onConfirmTenant();
+            if (type === 'org') {
+                this.onConfirmTenant();
+            } else {
+                this.onConfirmTenantCode();
+            }
         }
+    }
+
+    onChangeTenant(): void {
+        if (this.tenantLocked()) {
+            return;
+        }
+        this.tenantStep.set('select');
+        this.tenantErrorMessage.set('');
+        this.clearStoredTenantSelection();
+        setTimeout(() => this.focusFirstField(), 0);
+    }
+
+    toggleTenantCode(): void {
+        this.showTenantCode.update(value => !value);
+        this.tenantErrorMessage.set('');
+        setTimeout(() => this.focusFirstField(), 0);
     }
 
     onRegisterTenant(event: Event): void {
@@ -195,21 +153,26 @@ export class LoginOverlayComponent {
 
     onRegistrationCompleted(data: { tenantId: string; subdomain: string }): void {
         this.showRegistration.set(false);
-        // Tenant is already set by the service, just show success message
         this.tenantStep.set('login');
+        this.tenantCode.set(data.subdomain);
+        this.tenantLocked.set(true);
     }
 
-    togglePassword() {
+    togglePassword(): void {
         this.showPassword.update(v => !v);
     }
 
-    goToForgot() {
-        this.router.navigateByUrl('/auth/forgot');
+    handleCapsLock(event: KeyboardEvent): void {
+        this.capsLockOn.set(event.getModifierState?.('CapsLock') ?? false);
     }
 
     onSubmit(): void {
-        if (!this.username() || !this.password()) {
-            this.errorMessage.set('Please enter username and password');
+        if (this.ssoMode() === 'sso-only') {
+            return;
+        }
+        if (!this.username().trim() || !this.password()) {
+            this.errorMessage.set('We couldn’t sign you in. Check your details and try again.');
+            this.focusAlert();
             return;
         }
 
@@ -217,43 +180,45 @@ export class LoginOverlayComponent {
         this.errorMessage.set('');
 
         const selectedTenant = this.tenantService.getCurrentTenantValue();
-        // Tenant model uses `id` (not tenantId) — send selected tenant id when in tenant mode
         const tenantId = selectedTenant?.id ?? undefined;
 
         this.authService.login(this.username(), this.password(), tenantId).subscribe({
-            next: async (response) => {
+            next: async () => {
                 this.isLoading.set(false);
-
-                const session = this.authService.session();
                 if (selectedTenant) {
-                    const storedCode = selectedTenant.subdomain || this.schoolCode().trim();
+                    const storedCode = selectedTenant.subdomain || this.tenantCode().trim();
                     const storedName = selectedTenant.name || this.tenantName();
                     if (storedCode) {
                         this.storeTenantSelection(storedCode, storedName);
                     }
                 }
 
+                const session = this.authService.session();
                 if (session?.mode === 'host') {
                     await this.router.navigateByUrl('/host');
                     return;
                 }
 
-                // Use tenant post-login router to handle routing based on memberships
                 if (session?.memberships) {
                     await this.tenantPostLoginRouter.route(session.memberships, this.targetAfterLogin);
                 } else {
-                    // Fallback to default behavior
                     this.router.navigateByUrl(this.targetAfterLogin);
                 }
             },
             error: (error) => {
                 this.isLoading.set(false);
-                this.errorMessage.set(error?.error?.message || 'Invalid username or password');
+                this.errorMessage.set(error?.error?.message || 'We couldn’t sign you in. Check your details and try again.');
+                this.focusAlert();
             }
         });
     }
 
-    private validateTenantCode(tenantCode: string, onSuccess: (tenant: any) => void): void {
+    onSsoContinue(): void {
+        this.errorMessage.set('SSO has not been configured for this tenant yet.');
+        this.focusAlert();
+    }
+
+    private resolveTenant(tenantCode: string): void {
         this.isValidatingTenant.set(true);
         this.tenantErrorMessage.set('');
 
@@ -261,19 +226,26 @@ export class LoginOverlayComponent {
             next: (tenant) => {
                 this.isValidatingTenant.set(false);
                 if (tenant) {
-                    onSuccess(tenant);
+                    this.tenantStep.set('login');
+                    this.tenantCode.set(tenantCode);
+                    this.tenantName.set(tenant?.name || tenantCode);
+                    this.tenantLocked.set(false);
+                    this.storeTenantSelection(tenantCode, this.tenantName());
+                    setTimeout(() => this.focusFirstField(), 0);
                 } else {
-                    this.tenantErrorMessage.set('School code not found');
+                    this.tenantErrorMessage.set('We couldn’t find that organization.');
+                    this.focusAlert();
                 }
             },
             error: () => {
                 this.isValidatingTenant.set(false);
-                this.tenantErrorMessage.set('School code not found. Please check and try again.');
+                this.tenantErrorMessage.set('We couldn’t find that organization. Try again or use your tenant URL.');
+                this.focusAlert();
             }
         });
     }
 
-    private storeTenantSelection(code: string, name?: string) {
+    private storeTenantSelection(code: string, name?: string): void {
         try {
             localStorage.setItem(this.tenantStorageKey, JSON.stringify({ code, name }));
         } catch (err) {
@@ -291,11 +263,23 @@ export class LoginOverlayComponent {
         }
     }
 
-    clearStoredTenantSelection() {
+    private clearStoredTenantSelection(): void {
         try {
             localStorage.removeItem(this.tenantStorageKey);
         } catch (err) {
             console.warn('Failed to clear stored tenant selection', err);
+        }
+    }
+
+    private focusAlert(): void {
+        setTimeout(() => this.alertRef?.nativeElement?.focus(), 0);
+    }
+
+    private focusFirstField(): void {
+        const host = this.firstFieldRef?.nativeElement;
+        const input = host?.querySelector('input') as HTMLInputElement | null;
+        if (input) {
+            input.focus();
         }
     }
 }
