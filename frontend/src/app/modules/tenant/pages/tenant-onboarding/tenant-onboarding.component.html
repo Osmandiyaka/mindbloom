@@ -1,8 +1,8 @@
 <div class="onboarding-page">
     <mb-card class="onboarding-card">
         <div class="onboarding-header">
-            <h1>Tenant onboarding</h1>
-            <p>Set up your organization, schools, and administrator access.</p>
+            <h1>{{ stepTitle() }}</h1>
+            <p>{{ stepSubtitle() }}</p>
         </div>
 
         <div class="onboarding-steps" role="list">
@@ -33,15 +33,18 @@
             @if (step() === 1) {
             <div class="step-section">
                 <mb-form-field label="Organization name" [controlId]="'org-name'">
-                    <mb-input id="org-name" [value]="tenantName()" [disabled]="true"></mb-input>
+                    <mb-input id="org-name" [value]="tenantName()" (valueChange)="tenantName.set($event)"
+                        placeholder="Greenfield Education Group"></mb-input>
                 </mb-form-field>
 
-                <mb-form-field label="Tenant code" [controlId]="'org-code'">
-                    <mb-input id="org-code" [value]="tenantCode()" [disabled]="true"></mb-input>
+                <mb-form-field label="Tenant code" [controlId]="'org-code'" [hint]="codeHint()" [error]="codeError()">
+                    <mb-input id="org-code" [value]="tenantCode()" (valueChange)="onTenantCodeInput($event)"
+                        placeholder="greenfield-edu"></mb-input>
                 </mb-form-field>
 
                 <mb-form-field label="Primary domain (optional)" [controlId]="'org-domain'">
-                    <mb-input id="org-domain" [value]="orgDomain()" (valueChange)="orgDomain.set($event)"></mb-input>
+                    <mb-input id="org-domain" [value]="orgDomain()" (valueChange)="orgDomain.set($event)"
+                        placeholder="greenfield.edu"></mb-input>
                 </mb-form-field>
 
                 <div class="two-col">
@@ -125,6 +128,13 @@
                         (click)="selectEdition(edition)">
                         <div class="edition-title">{{ edition.displayName || edition.name }}</div>
                         <div class="edition-description">{{ edition.description || 'Configured for your organization.' }}</div>
+                        @if (editionFeatures(edition).length) {
+                        <ul class="edition-features">
+                            @for (feature of editionFeatures(edition); track feature) {
+                            <li>{{ feature }}</li>
+                            }
+                        </ul>
+                        }
                     </button>
                     }
                 </div>
@@ -157,8 +167,13 @@
 
                 @if (createExtraAdmin()) {
                 <div class="admin-form">
-                    <mb-form-field label="Admin name" [controlId]="'admin-name'">
-                        <mb-input id="admin-name" [value]="adminName()" (valueChange)="adminName.set($event)"></mb-input>
+                    <mb-form-field label="First name" [controlId]="'admin-first-name'">
+                        <mb-input id="admin-first-name" [value]="adminFirstName()"
+                            (valueChange)="adminFirstName.set($event)"></mb-input>
+                    </mb-form-field>
+                    <mb-form-field label="Last name" [controlId]="'admin-last-name'">
+                        <mb-input id="admin-last-name" [value]="adminLastName()"
+                            (valueChange)="adminLastName.set($event)"></mb-input>
                     </mb-form-field>
                     <mb-form-field label="Admin email" [controlId]="'admin-email'">
                         <mb-input id="admin-email" type="email" [value]="adminEmail()" (valueChange)="adminEmail.set($event)"></mb-input>
@@ -177,7 +192,9 @@
 
         <div class="onboarding-actions">
             <mb-button variant="tertiary" (click)="back()" [disabled]="step() === 1 || isSaving()">Back</mb-button>
-            <mb-button variant="primary" [loading]="isSaving()" [fullWidth]="true" (click)="next()">
+            <mb-button variant="tertiary" (click)="saveAndExit()" [disabled]="isSaving()">Save &amp; exit</mb-button>
+            <mb-button variant="primary" [loading]="isSaving()" [fullWidth]="true" [disabled]="!canContinue()"
+                (click)="next()">
                 {{ step() === 4 ? 'Create organization' : 'Continue' }}
             </mb-button>
         </div>

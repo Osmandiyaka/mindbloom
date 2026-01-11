@@ -54,6 +54,10 @@ export class TenantOnboardingComponent implements OnInit {
 
     tenantName = signal('');
     tenantCode = signal('');
+    private readonly originalTenantCode = signal('');
+    codeStatus = signal<'idle' | 'checking' | 'available' | 'taken' | 'error'>('idle');
+    codeStatusMessage = signal('');
+    private codeCheckTimer: number | null = null;
 
     orgCountry = signal('');
     orgCity = signal('');
@@ -71,11 +75,86 @@ export class TenantOnboardingComponent implements OnInit {
     selectedEditionName = signal<string>('');
 
     createExtraAdmin = signal(false);
-    adminName = signal('');
+    adminFirstName = signal('');
+    adminLastName = signal('');
     adminEmail = signal('');
     adminPassword = signal('');
 
     readonly reviewSchools = computed(() => this.schoolRows().map(row => row.name).filter(Boolean));
+    readonly stepTitle = computed(() => {
+        switch (this.step()) {
+            case 1:
+                return 'Organization details';
+            case 2:
+                return 'School structure';
+            case 3:
+                return 'Platform edition';
+            default:
+                return 'Administrator & review';
+        }
+    });
+    readonly stepSubtitle = computed(() => {
+        switch (this.step()) {
+            case 1:
+                return 'Tell us about the organization that will manage this workspace.';
+            case 2:
+                return 'How is your organization structured?';
+            case 3:
+                return 'Choose the MindBloom edition that fits your organization.';
+            default:
+                return 'Review your setup and confirm the administrator access.';
+        }
+    });
+    readonly codeError = computed(() => {
+        const code = this.tenantCode().trim();
+        if (!code.length) {
+            return 'Tenant code is required.';
+        }
+        if (!/^[a-z0-9-]+$/.test(code)) {
+            return 'Use lowercase letters, numbers, and hyphens only.';
+        }
+        if (this.codeStatus() === 'taken') {
+            return 'Tenant code is already in use.';
+        }
+        if (this.codeStatus() === 'error') {
+            return 'Unable to verify tenant code. Try again.';
+        }
+        return '';
+    });
+    readonly codeHint = computed(() => {
+        const status = this.codeStatus();
+        if (status === 'checking') return 'Checking availability…';
+        if (status === 'available') return 'Tenant code is available.';
+        if (status === 'taken') return 'Tenant code is already taken.';
+        if (status === 'error') return 'Could not verify tenant code.';
+        return 'Used for internal references and URLs.';
+    });
+    readonly canContinue = computed(() => {
+        const step = this.step();
+        if (step === 1) {
+            if (this.codeStatus() === 'checking') return false;
+            return !!this.tenantName().trim() && !this.codeError();
+        }
+        if (step === 2) {
+            const rows = this.schoolRows().filter(row => row.name.trim().length);
+            if (!rows.length) return false;
+            if (this.schoolMode() === 'multi') {
+                return rows.length === this.schoolRows().length;
+            }
+            return true;
+        }
+        if (step === 3) {
+            return !!this.selectedEditionId();
+        }
+        if (step === 4) {
+            if (!this.createExtraAdmin()) return true;
+            return !!this.adminFirstName().trim()
+                && !!this.adminLastName().trim()
+                && !!this.adminEmail().trim()
+                && this.adminPassword().trim().length >= 8;
+        }
+        return false;
+    });
     private persistTimer: number | null = null;
 
     constructor() {
@@ -92,7 +171,8 @@ export class TenantOnboardingComponent implements OnInit {
             this.selectedEditionId();
             this.selectedEditionName();
             this.createExtraAdmin();
-            this.adminName();
+            this.adminFirstName();
+            this.adminLastName();
             this.adminEmail();
 
             if (this.isLoading()) {
@@ -115,6 +195,7 @@ export class TenantOnboardingComponent implements OnInit {
             next: (tenant) => {
                 this.tenantName.set(tenant.name || 'Organization');
                 this.tenantCode.set(tenant.subdomain || '');
+                this.originalTenantCode.set(tenant.subdomain || '');
                 this.orgDomain.set(tenant.customization?.customDomain || '');
                 this.orgLocale.set(tenant.locale || 'en-US');
                 this.orgTimezone.set(tenant.timezone || this.defaultTimeZone());
@@ -183,7 +264,9 @@ export class TenantOnboardingComponent implements OnInit {
     private prefillAdmin(): void {
         const user = this.authService.getCurrentUser();
         if (user) {
-            this.adminName.set(user.name || '');
+            const parts = (user.name || '').trim().split(/\s+/).filter(Boolean);
+            this.adminFirstName.set(parts[0] || '');
+            this.adminLastName.set(parts.slice(1).join(' ') || '');
             this.adminEmail.set(user.email || '');
         }
     }
@@ -213,9 +296,50 @@ export class TenantOnboardingComponent implements OnInit {
         this.schoolRows.update(rows => rows.map((row, idx) => idx === index ? { ...row, code: value } : row));
     }
 
+    onTenantCodeInput(value: string): void {
+        const normalized = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+        this.tenantCode.set(normalized);
+        this.codeStatus.set('idle');
+        this.codeStatusMessage.set('');
+
+        if (!normalized) {
+            return;
+        }
+
+        if (normalized === this.originalTenantCode()) {
+            this.codeStatus.set('available');
+            return;
+        }
+
+        if (this.codeCheckTimer) {
+            window.clearTimeout(this.codeCheckTimer);
+        }
+
+        this.codeStatus.set('checking');
+        this.codeCheckTimer = window.setTimeout(() => {
+            this.tenantService.getTenantBySubdomain(normalized).subscribe({
+                next: () => {
+                    this.codeStatus.set('taken');
+                },
+                error: (err) => {
+                    if (err?.status === 404) {
+                        this.codeStatus.set('available');
+                    } else {
+                        this.codeStatus.set('error');
+                    }
+                }
+            });
+        }, 350);
+    }
+
     selectEdition(edition: { id: string; displayName?: string; name: string }): void {
         this.selectedEditionId.set(edition.id);
         this.selectedEditionName.set(edition.displayName || edition.name);
+    }
+
+    editionFeatures(edition: { features?: Record<string, string> }): string[] {
+        const entries = edition.features ? Object.values(edition.features) : [];
+        return entries.filter(Boolean).slice(0, 4);
     }
 
     back(): void {
@@ -253,6 +377,11 @@ export class TenantOnboardingComponent implements OnInit {
         }
     }
 
+    saveAndExit(): void {
+        this.persistState();
+        this.router.navigateByUrl('/dashboard');
+    }
+
     private async saveOrganization(): Promise<boolean> {
         this.isSaving.set(true);
         try {
@@ -264,6 +393,8 @@ export class TenantOnboardingComponent implements OnInit {
                 timezone: this.orgTimezone().trim() || undefined,
                 extras: {
                     onboarding: {
+                        orgName: this.tenantName().trim() || undefined,
+                        tenantCode: this.tenantCode().trim() || undefined,
                         country: this.orgCountry().trim() || undefined,
                         city: this.orgCity().trim() || undefined,
                         address: this.orgAddress().trim() || undefined,
@@ -336,13 +467,17 @@ export class TenantOnboardingComponent implements OnInit {
         this.isSaving.set(true);
         try {
             if (this.createExtraAdmin()) {
-                if (!this.adminName().trim() || !this.adminEmail().trim() || this.adminPassword().trim().length < 8) {
+                if (!this.adminFirstName().trim()
+                    || !this.adminLastName().trim()
+                    || !this.adminEmail().trim()
+                    || this.adminPassword().trim().length < 8) {
                     this.errorMessage.set('Please provide admin name, email, and a valid password.');
                     this.isSaving.set(false);
                     return;
                 }
+                const fullName = `${this.adminFirstName().trim()} ${this.adminLastName().trim()}`.trim();
                 await firstValueFrom(this.userService.createUser({
-                    name: this.adminName().trim(),
+                    name: fullName,
                     email: this.adminEmail().trim(),
                     password: this.adminPassword().trim()
                 }));
@@ -365,7 +500,7 @@ export class TenantOnboardingComponent implements OnInit {
                     edition: { id: this.selectedEditionId(), name: this.selectedEditionName() },
                     admin: {
                         createExtraAdmin: this.createExtraAdmin(),
-                        name: this.adminName(),
+                        name: `${this.adminFirstName()} ${this.adminLastName()}`.trim(),
                         email: this.adminEmail(),
                     }
                 });
@@ -380,6 +515,8 @@ export class TenantOnboardingComponent implements OnInit {
 
     private applySavedState(saved: TenantOnboardingState): void {
         this.step.set(saved.step);
+        if (saved.org.name) this.tenantName.set(saved.org.name);
+        if (saved.org.code) this.tenantCode.set(saved.org.code);
         this.orgCountry.set(saved.org.country || '');
         this.orgCity.set(saved.org.city || '');
         this.orgAddress.set(saved.org.addressLine || '');
@@ -395,7 +532,11 @@ export class TenantOnboardingComponent implements OnInit {
             this.selectedEditionName.set(saved.edition.name || '');
         }
         this.createExtraAdmin.set(saved.admin.createExtraAdmin);
-        if (saved.admin.name) this.adminName.set(saved.admin.name);
+        if (saved.admin.name) {
+            const parts = saved.admin.name.trim().split(/\s+/).filter(Boolean);
+            this.adminFirstName.set(parts[0] || '');
+            this.adminLastName.set(parts.slice(1).join(' ') || '');
+        }
         if (saved.admin.email) this.adminEmail.set(saved.admin.email);
     }
 
@@ -406,6 +547,8 @@ export class TenantOnboardingComponent implements OnInit {
             step: this.step(),
             completed: false,
             org: {
+                name: this.tenantName(),
+                code: this.tenantCode(),
                 country: this.orgCountry(),
                 city: this.orgCity(),
                 addressLine: this.orgAddress(),
@@ -423,7 +566,7 @@ export class TenantOnboardingComponent implements OnInit {
             },
             admin: {
                 createExtraAdmin: this.createExtraAdmin(),
-                name: this.adminName(),
+                name: `${this.adminFirstName()} ${this.adminLastName()}`.trim(),
                 email: this.adminEmail(),
             }
         };

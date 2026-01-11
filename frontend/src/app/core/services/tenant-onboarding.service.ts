@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 export type OnboardingStep = 1 | 2 | 3 | 4;
 
 export interface OnboardingOrgState {
+    name?: string;
+    code?: string;
     country?: string;
     city?: string;
     addressLine?: string;
