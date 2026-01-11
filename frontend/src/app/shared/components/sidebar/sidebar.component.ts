@@ -201,7 +201,7 @@ interface NavSection {
       display: flex;
       align-items: center;
       gap: 12px;
-      height: 42px;
+      height: 38px;
       padding: 0 0.9rem;
       border-radius: 8px;
       color: var(--text-secondary);

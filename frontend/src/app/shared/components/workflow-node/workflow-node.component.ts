@@ -12,6 +12,7 @@ export class WorkflowNodeComponent {
     @Input() title!: string;
     @Input() subtitle!: string;
     @Input() icon!: string;
+    @Input() tone: 'primary' | 'secondary' = 'primary';
     @Output() select = new EventEmitter<void>();
 
     onClick() {

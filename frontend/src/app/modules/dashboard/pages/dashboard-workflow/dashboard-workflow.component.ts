@@ -9,6 +9,7 @@ interface WorkflowNode {
     title: string;
     subtitle: string;
     icon: string;
+    tone?: 'primary' | 'secondary';
     x: number;
     y: number;
 }
@@ -41,7 +42,7 @@ export class DashboardWorkflowComponent {
         { id: 'pay', section: 'Finance', title: 'Receive Payments', subtitle: 'Process payments', icon: 'card', x: 920, y: 70 },
 
         // === FINANCE (bottom row) ===
-        { id: 'dep', section: 'Finance', title: 'Deposits', subtitle: 'Bank deposits', icon: 'bank', x: 750, y: 175 },
+        { id: 'dep', section: 'Finance', title: 'Deposits', subtitle: 'Bank deposits', icon: 'bank', tone: 'secondary', x: 750, y: 175 },
 
         // === ACADEMICS (top row) ===
         { id: 'catalog', section: 'Academics', title: 'Course Catalog', subtitle: 'Manage courses', icon: 'book', x: 60, y: 290 },
@@ -50,7 +51,7 @@ export class DashboardWorkflowComponent {
         { id: 'reports', section: 'Academics', title: 'Report Cards', subtitle: 'Generate reports', icon: 'chart', x: 570, y: 290 },
 
         // === ACADEMICS (bottom row) ===
-        { id: 'att', section: 'Academics', title: 'Attendance', subtitle: 'Take attendance', icon: 'clipboard', x: 400, y: 395 },
+        { id: 'att', section: 'Academics', title: 'Attendance', subtitle: 'Take attendance', icon: 'clipboard', tone: 'secondary', x: 400, y: 395 },
 
         // === HR/PAYROLL ===
         { id: 'emp', section: 'HR', title: 'Employees', subtitle: 'Manage staff', icon: 'people', x: 750, y: 290 },

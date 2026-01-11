@@ -35,7 +35,7 @@
 
         <!-- Workflow Nodes -->
         <div *ngFor="let node of nodes" class="workflow-node" [style.left.px]="node.x" [style.top.px]="node.y">
-            <app-workflow-node [title]="node.title" [subtitle]="node.subtitle" [icon]="node.icon"
+            <app-workflow-node [title]="node.title" [subtitle]="node.subtitle" [icon]="node.icon" [tone]="node.tone || 'primary'"
                 (select)="onNodeClick(node)">
             </app-workflow-node>
         </div>
