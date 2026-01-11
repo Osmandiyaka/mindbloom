@@ -12,21 +12,13 @@
     <main class="mb-auth-main">
         <div class="mb-auth-container">
             <section class="mb-auth-hero">
-                <p class="hero-eyebrow">MindBloom Secure Access</p>
-                <h2 class="hero-title">Confident sign-in for every campus.</h2>
+                <p class="hero-eyebrow">Secure Access</p>
+                <h2 class="hero-title">Sign in to your school’s MindBloom workspace.</h2>
                 <p class="hero-body">
-                    Tenant-aware authentication, SSO readiness, and audit-friendly access logs in one unified flow.
+                    MindBloom provides a secure and reliable way for staff and administrators
+                    to access academic, operational, and student information.
                 </p>
-                <div class="hero-trust">
-                    <div>Tenant-aware authentication</div>
-                    <div>SSO-ready (SAML/OIDC)</div>
-                    <div>Audit-friendly access logs</div>
-                </div>
-                <ul class="hero-list">
-                    <li>Encrypted sessions</li>
-                    <li>Secure account recovery</li>
-                    <li>Role-based access control</li>
-                </ul>
+                <p class="hero-trustline">Trusted by schools to manage sensitive data.</p>
             </section>
 
             <section class="auth-panel">
@@ -44,7 +36,7 @@
                                 @if (tenantStep() === 'login') {
                                 Use your work email to continue.
                                 } @else {
-                                Find your organization to continue.
+                                Select your organization to continue.
                                 }
                             </p>
                         </div>
@@ -69,41 +61,19 @@
                                 [value]="organizationQuery()"
                                 (valueChange)="organizationQuery.set($event); tenantErrorMessage.set('')"
                                 (keydown)="onTenantKeyDown($event, 'org')"
-                                placeholder="Enter your organization"
+                                placeholder="School or district name"
                                 ariaLabel="Organization"
                                 [disabled]="isValidatingTenant()"
                             ></mb-input>
                         </mb-form-field>
 
                         <mb-button size="lg" variant="primary" [disabled]="isValidatingTenant() || !organizationQuery().trim()" (click)="onConfirmTenant()">
-                            {{ isValidatingTenant() ? 'Checking...' : 'Continue' }}
+                            {{ isValidatingTenant() ? 'Checking...' : 'Next' }}
                         </mb-button>
-
-                        <button class="auth-text-button" type="button" (click)="toggleTenantCode()">
-                            {{ showTenantCode() ? 'Hide tenant URL' : 'I have a tenant URL instead' }}
-                        </button>
-
-                        @if (showTenantCode()) {
-                        <mb-form-field label="Tenant URL" [controlId]="'tenant-code'" hint="This is the subdomain of your MindBloom URL.">
-                            <mb-input
-                                id="tenant-code"
-                                [value]="tenantCode()"
-                                (valueChange)="tenantCode.set($event); tenantErrorMessage.set('')"
-                                (keydown)="onTenantKeyDown($event, 'code')"
-                                placeholder="your-school"
-                                ariaLabel="Tenant URL"
-                                [disabled]="isValidatingTenant()"
-                            ></mb-input>
-                        </mb-form-field>
-
-                        <mb-button size="lg" variant="secondary" [disabled]="isValidatingTenant() || !tenantCode().trim()" (click)="onConfirmTenantCode()">
-                            Continue with tenant URL
-                        </mb-button>
-                        }
 
                         <div class="auth-links">
                             <a href="#" (click)="onRegisterTenant($event)">Create an organization</a>
-                            <a href="mailto:support@mindbloom.com">Need help signing in?</a>
+                            <a class="auth-link--muted" href="mailto:support@mindbloom.com">Need help signing in?</a>
                         </div>
                     </div>
                     }

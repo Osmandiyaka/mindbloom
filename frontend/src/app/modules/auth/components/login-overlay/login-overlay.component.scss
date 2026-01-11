@@ -67,11 +67,11 @@
 }
 
 .mb-auth-hero {
-    padding: 48px;
+    padding: 40px;
     display: grid;
     gap: var(--mb-space-4);
     color: var(--mb-color-text);
-    background: color-mix(in srgb, var(--mb-color-primary) 3%, var(--mb-color-bg));
+    background: color-mix(in srgb, var(--mb-color-primary) 2%, var(--mb-color-bg));
     border-radius: var(--mb-radius-lg);
 }
 
@@ -97,27 +97,8 @@
     line-height: 1.6;
 }
 
-.hero-trust {
-    display: grid;
-    gap: var(--mb-space-2);
-    font-size: var(--mb-font-size-sm);
-    color: var(--mb-color-text);
-}
-
-.hero-trust div {
-    display: flex;
-    align-items: center;
-    gap: var(--mb-space-2);
-    padding: var(--mb-space-2) var(--mb-space-3);
-    border-radius: var(--mb-radius-md);
-    background: color-mix(in srgb, var(--mb-color-border-subtle) 35%, transparent);
-}
-
-.hero-list {
+.hero-trustline {
     margin: 0;
-    padding-left: 18px;
-    display: grid;
-    gap: var(--mb-space-2);
     font-size: var(--mb-font-size-sm);
     color: var(--mb-color-text-muted);
 }
@@ -182,6 +163,11 @@
 .auth-links a {
     color: var(--mb-color-link);
     text-decoration: none;
+}
+
+.auth-links .auth-link--muted {
+    color: var(--mb-color-text-subtle);
+    font-size: var(--mb-font-size-xs);
 }
 
 .auth-links a:hover {
