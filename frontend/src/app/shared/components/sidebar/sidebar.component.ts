@@ -151,11 +151,11 @@ interface NavSection {
 
     .tenant-header {
       position: relative;
-      padding: 18px 16px 14px;
+      padding: var(--mb-identity-padding-y) var(--mb-identity-padding-x);
       border-bottom: 1px solid var(--border-subtle);
       cursor: pointer;
-      transition: background-color 0.18s ease;
-      background: color-mix(in srgb, var(--surface-sidebar) 97%, var(--accent-primary));
+      transition: var(--mb-identity-hover-transition);
+      background: var(--mb-identity-bg);
     }
 
     .tenant-header::before {
@@ -164,43 +164,63 @@ interface NavSection {
       left: 0;
       top: 12px;
       bottom: 12px;
-      width: 2px;
-      background: color-mix(in srgb, var(--accent-primary) 60%, transparent);
+      width: var(--mb-identity-accent-width);
+      background: var(--mb-identity-accent-color);
       border-radius: 2px;
+      opacity: 0.4;
     }
 
-    .tenant-header:hover { background: color-mix(in srgb, var(--surface-sidebar) 94%, var(--accent-primary)); }
+    .tenant-header:hover { background: var(--mb-identity-bg-hover); }
     .tenant-header:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: -2px; }
 
     .tenant-identity {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.45rem;
+      gap: var(--mb-identity-gap);
       padding: 0.1rem 0;
     }
 
     .tenant-logo {
-      width: 44px;
-      height: 44px;
-      border-radius: 8px;
+      width: var(--mb-identity-avatar-size);
+      height: var(--mb-identity-avatar-size);
+      border-radius: var(--mb-identity-avatar-radius);
       display: grid;
       place-items: center;
-      background: color-mix(in srgb, var(--accent-primary) 16%, var(--surface-elevated));
+      background: var(--mb-identity-avatar-bg);
+      border: var(--mb-identity-avatar-border);
       color: var(--text-primary);
     }
     .tenant-monogram {
-      font-size: 14px;
-      font-weight: 600;
+      font-size: var(--mb-identity-avatar-font-size);
+      font-weight: var(--mb-identity-avatar-font-weight);
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--text-primary);
+      color: var(--mb-identity-avatar-color);
     }
     .logo-img { width: 30px; height: 30px; object-fit: contain; border-radius: 6px; }
     .host-brand-mark { --mb-logo-height: 22px; color: var(--text-primary); }
-    .tenant-text { display: flex; flex-direction: column; min-width: 0; gap: 4px; }
-    .tenant-name { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; color: var(--text-primary); }
-    .tenant-subtitle { font-size: 11px; font-weight: 400; color: var(--text-muted); line-height: 1.2; letter-spacing: 0.04em; text-transform: none; }
+    .tenant-text { display: flex; flex-direction: column; min-width: 0; gap: var(--mb-identity-title-to-subtitle-gap); }
+    .tenant-name {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mb-identity-title-font-family);
+      font-size: var(--mb-identity-title-font-size);
+      font-weight: var(--mb-identity-title-font-weight);
+      line-height: var(--mb-identity-title-line-height);
+      letter-spacing: var(--mb-identity-title-letter-spacing);
+      color: var(--mb-identity-title-color);
+    }
+    .tenant-subtitle {
+      font-size: var(--mb-identity-subtitle-font-size);
+      font-weight: var(--mb-identity-subtitle-font-weight);
+      color: var(--mb-identity-subtitle-color);
+      opacity: var(--mb-identity-subtitle-opacity);
+      line-height: 1.2;
+      letter-spacing: var(--mb-identity-subtitle-letter-spacing);
+      text-transform: var(--mb-identity-subtitle-text-transform);
+    }
 
     .sidebar-nav { flex: 1; min-height: 0; overflow-y: auto; padding: 0.25rem 0.15rem 1rem; scroll-behavior: smooth; }
 

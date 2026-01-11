@@ -21,6 +21,40 @@
     --mb-color-focus: #4fa39a;
     --mb-color-on-primary: #ffffff;
     --mb-color-link: var(--mb-color-primary);
+
+    --mb-identity-title-font-family: var(--mb-font-sans);
+    --mb-identity-title-font-size: 0.95rem;
+    --mb-identity-title-font-weight: 600;
+    --mb-identity-title-line-height: 1.2;
+    --mb-identity-title-letter-spacing: -0.01em;
+    --mb-identity-title-color: var(--mb-color-text);
+
+    --mb-identity-subtitle-font-size: 0.75rem;
+    --mb-identity-subtitle-font-weight: 400;
+    --mb-identity-subtitle-letter-spacing: 0.04em;
+    --mb-identity-subtitle-text-transform: none;
+    --mb-identity-subtitle-color: var(--mb-color-text-muted);
+    --mb-identity-subtitle-opacity: 0.7;
+
+    --mb-identity-avatar-size: 36px;
+    --mb-identity-avatar-radius: 8px;
+    --mb-identity-avatar-bg: color-mix(in srgb, var(--mb-color-primary) 12%, var(--mb-color-surface-elevated));
+    --mb-identity-avatar-border: none;
+    --mb-identity-avatar-font-size: 0.8rem;
+    --mb-identity-avatar-font-weight: 600;
+    --mb-identity-avatar-color: var(--mb-color-primary);
+
+    --mb-identity-padding-x: 16px;
+    --mb-identity-padding-y: 12px;
+    --mb-identity-gap: 10px;
+    --mb-identity-border-radius: 10px;
+    --mb-identity-title-to-subtitle-gap: 2px;
+
+    --mb-identity-bg: color-mix(in srgb, var(--mb-color-surface) 98%, var(--mb-color-text));
+    --mb-identity-bg-hover: color-mix(in srgb, var(--mb-color-surface) 96%, var(--mb-color-text));
+    --mb-identity-accent-width: 2px;
+    --mb-identity-accent-color: var(--mb-color-primary);
+    --mb-identity-hover-transition: background-color 120ms ease-out;
 }
 
 :root[data-theme='mindbloom-dark'],
@@ -46,4 +80,38 @@
     --mb-color-focus: #4fa39a;
     --mb-color-on-primary: #0b1220;
     --mb-color-link: var(--mb-color-primary);
+
+    --mb-identity-title-font-family: var(--mb-font-sans);
+    --mb-identity-title-font-size: 0.95rem;
+    --mb-identity-title-font-weight: 600;
+    --mb-identity-title-line-height: 1.2;
+    --mb-identity-title-letter-spacing: -0.01em;
+    --mb-identity-title-color: var(--mb-color-text);
+
+    --mb-identity-subtitle-font-size: 0.75rem;
+    --mb-identity-subtitle-font-weight: 400;
+    --mb-identity-subtitle-letter-spacing: 0.04em;
+    --mb-identity-subtitle-text-transform: none;
+    --mb-identity-subtitle-color: var(--mb-color-text-muted);
+    --mb-identity-subtitle-opacity: 0.7;
+
+    --mb-identity-avatar-size: 36px;
+    --mb-identity-avatar-radius: 8px;
+    --mb-identity-avatar-bg: color-mix(in srgb, var(--mb-color-primary) 14%, var(--mb-color-surface-elevated));
+    --mb-identity-avatar-border: none;
+    --mb-identity-avatar-font-size: 0.8rem;
+    --mb-identity-avatar-font-weight: 600;
+    --mb-identity-avatar-color: var(--mb-color-primary);
+
+    --mb-identity-padding-x: 16px;
+    --mb-identity-padding-y: 12px;
+    --mb-identity-gap: 10px;
+    --mb-identity-border-radius: 10px;
+    --mb-identity-title-to-subtitle-gap: 2px;
+
+    --mb-identity-bg: color-mix(in srgb, var(--mb-color-surface) 94%, #000000);
+    --mb-identity-bg-hover: color-mix(in srgb, var(--mb-color-surface) 92%, #000000);
+    --mb-identity-accent-width: 2px;
+    --mb-identity-accent-color: var(--mb-color-primary);
+    --mb-identity-hover-transition: background-color 120ms ease-out;
 }
