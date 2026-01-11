@@ -13,6 +13,14 @@
     background: transparent;
     color: var(--mb-color-text);
     font-size: var(--mb-font-size-md);
+    outline: none;
+    box-shadow: none;
+}
+
+.mb-input:focus,
+.mb-input:focus-visible {
+    outline: none;
+    box-shadow: none;
 }
 
 .mb-input::placeholder {
