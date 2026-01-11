@@ -58,19 +58,36 @@
 .onboarding-body {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
 }
 
 .step-section {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
 }
 
-.two-col {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
+.onboarding-alert {
+    margin-top: 8px;
+}
+
+.onboarding-alert .alert-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.onboarding-alert .alert-list {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--mb-color-text-muted);
+    font-size: var(--mb-font-size-sm);
+}
+
+.tenant-url-preview {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--mb-color-text-subtle);
 }
 
 .mode-selector {

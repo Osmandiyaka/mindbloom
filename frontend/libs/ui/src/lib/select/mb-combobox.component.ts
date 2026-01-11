@@ -50,6 +50,7 @@ export class MbComboBoxComponent implements ControlValueAccessor {
     @Input() options: MbComboBoxOption[] = [];
     @Input() value = '';
     @Output() valueChange = new EventEmitter<string>();
+    @Output() blurEvent = new EventEmitter<void>();
 
     listId = `mb-combobox-${Math.random().toString(36).slice(2, 9)}`;
     private onChange: (value: string) => void = () => {};
@@ -80,5 +81,6 @@ export class MbComboBoxComponent implements ControlValueAccessor {
 
     handleBlur(): void {
         this.onTouched();
+        this.blurEvent.emit();
     }
 }

@@ -10,19 +10,26 @@
                 <span class="step-dot" aria-hidden="true"></span>
                 <span class="step-label">Organization</span>
             </div>
-            <div class="step" [class.active]="step() === 2" role="listitem">
+            <div class="step" [class.active]="step() === 2 || step() === 3" role="listitem">
                 <span class="step-dot" aria-hidden="true"></span>
-                <span class="step-label">Schools</span>
-            </div>
-            <div class="step" [class.active]="step() === 3" role="listitem">
-                <span class="step-dot" aria-hidden="true"></span>
-                <span class="step-label">Edition</span>
+                <span class="step-label">Administrator</span>
             </div>
             <div class="step" [class.active]="step() === 4" role="listitem">
                 <span class="step-dot" aria-hidden="true"></span>
-                <span class="step-label">Review</span>
+                <span class="step-label">Verification</span>
             </div>
         </div>
+
+        @if (validationSummary().length > 1) {
+        <mb-alert variant="warning" class="onboarding-alert">
+            <div class="alert-title">Please review the information below</div>
+            <ul class="alert-list">
+                @for (message of validationSummary(); track message) {
+                <li>{{ message }}</li>
+                }
+            </ul>
+        </mb-alert>
+        }
 
         <mb-alert *ngIf="errorMessage()" variant="danger">{{ errorMessage() }}</mb-alert>
 
@@ -32,44 +39,28 @@
         <div class="onboarding-body">
             @if (step() === 1) {
             <div class="step-section">
-                <mb-form-field label="Organization name" [controlId]="'org-name'">
-                    <mb-input id="org-name" [value]="tenantName()" (valueChange)="tenantName.set($event)"
-                        placeholder="Greenfield Education Group"></mb-input>
+                <mb-form-field label="Organization name" [controlId]="'org-name'"
+                    [hint]="'This will be the primary name of your MindBloom workspace.'" [error]="orgNameError()">
+                    <mb-input id="org-name" [value]="tenantName()" (valueChange)="tenantName.set($event)"></mb-input>
                 </mb-form-field>
 
-                <mb-form-field label="Tenant code" [controlId]="'org-code'" [hint]="codeHint()" [error]="codeError()">
-                    <mb-input id="org-code" [value]="tenantCode()" (valueChange)="onTenantCodeInput($event)"
-                        placeholder="greenfield-edu"></mb-input>
+                <mb-form-field label="Workspace URL" [controlId]="'org-code'" [hint]="codeHint()" [error]="codeError()">
+                    <mb-input id="org-code" [value]="tenantCode()" (valueChange)="onTenantCodeInput($event)"></mb-input>
+                    <div class="tenant-url-preview">https://[your-name].mindbloom.app</div>
                 </mb-form-field>
 
-                <mb-form-field label="Primary domain (optional)" [controlId]="'org-domain'">
-                    <mb-input id="org-domain" [value]="orgDomain()" (valueChange)="orgDomain.set($event)"
-                        placeholder="greenfield.edu"></mb-input>
+                <mb-form-field label="Country or region" [controlId]="'org-country'"
+                    [hint]="'Used for regional settings and compliance.'" [error]="countryError()">
+                    <mb-combobox id="org-country" [options]="countryOptions" [value]="orgCountry()"
+                        placeholder="Select a country or region" (valueChange)="onCountryInput($event)"
+                        (blurEvent)="onCountryBlur()"></mb-combobox>
                 </mb-form-field>
 
-                <div class="two-col">
-                    <mb-form-field label="Country" [controlId]="'org-country'">
-                        <mb-input id="org-country" [value]="orgCountry()" (valueChange)="orgCountry.set($event)"></mb-input>
-                    </mb-form-field>
-
-                    <mb-form-field label="City" [controlId]="'org-city'">
-                        <mb-input id="org-city" [value]="orgCity()" (valueChange)="orgCity.set($event)"></mb-input>
-                    </mb-form-field>
-                </div>
-
-                <mb-form-field label="Address line" [controlId]="'org-address'">
-                    <mb-input id="org-address" [value]="orgAddress()" (valueChange)="orgAddress.set($event)"></mb-input>
+                <mb-form-field label="Primary contact email" [controlId]="'org-contact-email'"
+                    [hint]="'We’ll use this email for important account notifications.'" [error]="contactEmailError()">
+                    <mb-input id="org-contact-email" type="email" [value]="orgContactEmail()"
+                        (valueChange)="orgContactEmail.set($event)"></mb-input>
                 </mb-form-field>
-
-                <div class="two-col">
-                    <mb-form-field label="Timezone" [controlId]="'org-timezone'">
-                        <mb-input id="org-timezone" [value]="orgTimezone()" (valueChange)="orgTimezone.set($event)"></mb-input>
-                    </mb-form-field>
-
-                    <mb-form-field label="Locale" [controlId]="'org-locale'">
-                        <mb-input id="org-locale" [value]="orgLocale()" (valueChange)="orgLocale.set($event)"></mb-input>
-                    </mb-form-field>
-                </div>
             </div>
             }
 
@@ -92,18 +83,14 @@
                     @for (row of schoolRows(); track $index) {
                     <div class="school-row" [class.readonly]="row.existing">
                         <mb-form-field label="School name" [controlId]="'school-name-' + $index">
-                            <mb-input [id]="'school-name-' + $index"
-                                [value]="row.name"
-                                [disabled]="!!row.existing"
+                            <mb-input [id]="'school-name-' + $index" [value]="row.name" [disabled]="!!row.existing"
                                 (valueChange)="updateSchoolName($index, $event)">
                             </mb-input>
                         </mb-form-field>
 
                         <mb-form-field label="School code (optional)" [controlId]="'school-code-' + $index">
-                            <mb-input [id]="'school-code-' + $index"
-                                [value]="row.code || ''"
-                                [disabled]="!!row.existing"
-                                (valueChange)="updateSchoolCode($index, $event)">
+                            <mb-input [id]="'school-code-' + $index" [value]="row.code || ''"
+                                [disabled]="!!row.existing" (valueChange)="updateSchoolCode($index, $event)">
                             </mb-input>
                         </mb-form-field>
 
@@ -123,11 +110,11 @@
             <div class="step-section">
                 <div class="edition-grid">
                     @for (edition of editions(); track edition.id) {
-                    <button type="button" class="edition-card"
-                        [class.selected]="selectedEditionId() === edition.id"
+                    <button type="button" class="edition-card" [class.selected]="selectedEditionId() === edition.id"
                         (click)="selectEdition(edition)">
                         <div class="edition-title">{{ edition.displayName || edition.name }}</div>
-                        <div class="edition-description">{{ edition.description || 'Configured for your organization.' }}</div>
+                        <div class="edition-description">{{ edition.description || 'Configured for your organization.'
+                            }}</div>
                         @if (editionFeatures(edition).length) {
                         <ul class="edition-features">
                             @for (feature of editionFeatures(edition); track feature) {
@@ -148,6 +135,7 @@
                         <div class="review-title">Organization</div>
                         <div class="review-item">{{ tenantName() }}</div>
                         <div class="review-sub">{{ tenantCode() }}</div>
+                        <div class="review-sub" *ngIf="orgContactEmail()">{{ orgContactEmail() }}</div>
                     </div>
                     <div class="review-card">
                         <div class="review-title">Schools</div>
@@ -176,7 +164,8 @@
                             (valueChange)="adminLastName.set($event)"></mb-input>
                     </mb-form-field>
                     <mb-form-field label="Admin email" [controlId]="'admin-email'">
-                        <mb-input id="admin-email" type="email" [value]="adminEmail()" (valueChange)="adminEmail.set($event)"></mb-input>
+                        <mb-input id="admin-email" type="email" [value]="adminEmail()"
+                            (valueChange)="adminEmail.set($event)"></mb-input>
                     </mb-form-field>
                     <mb-form-field label="Temporary password" [controlId]="'admin-password'">
                         <mb-input id="admin-password" type="password" [value]="adminPassword()"
@@ -194,7 +183,7 @@
             <mb-button variant="tertiary" (click)="back()" [disabled]="step() === 1 || isSaving()">Back</mb-button>
             <mb-button variant="tertiary" (click)="saveAndExit()" [disabled]="isSaving()">Save &amp; exit</mb-button>
             <mb-button variant="primary" [loading]="isSaving()" [fullWidth]="true" [disabled]="!canContinue()"
-                (click)="next()">
+                [attr.title]="!canContinue() ? 'Complete all required fields to continue.' : null" (click)="next()">
                 {{ step() === 4 ? 'Create organization' : 'Continue' }}
             </mb-button>
         </div>

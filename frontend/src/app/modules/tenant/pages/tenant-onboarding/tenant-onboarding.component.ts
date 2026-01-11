@@ -10,6 +10,8 @@ import {
     MbCheckboxComponent,
     MbFormFieldComponent,
     MbInputComponent,
+    MbComboBoxComponent,
+    MbComboBoxOption,
 } from '@mindbloom/ui';
 import { TenantSettingsService } from '../../../../core/services/tenant-settings.service';
 import { TenantService } from '../../../../core/services/tenant.service';
@@ -30,6 +32,7 @@ type SchoolMode = 'single' | 'multi';
         MbCardComponent,
         MbFormFieldComponent,
         MbInputComponent,
+        MbComboBoxComponent,
         MbCheckboxComponent,
         MbButtonComponent,
         MbAlertComponent,
@@ -60,11 +63,255 @@ export class TenantOnboardingComponent implements OnInit {
     private codeCheckTimer: number | null = null;
 
     orgCountry = signal('');
-    orgCity = signal('');
-    orgAddress = signal('');
-    orgDomain = signal('');
-    orgTimezone = signal(this.defaultTimeZone());
-    orgLocale = signal('en-US');
+    orgContactEmail = signal('');
+    countryOptions: MbComboBoxOption[] = [
+        { label: 'Afghanistan', value: 'Afghanistan' },
+        { label: 'Albania', value: 'Albania' },
+        { label: 'Algeria', value: 'Algeria' },
+        { label: 'American Samoa', value: 'American Samoa' },
+        { label: 'Andorra', value: 'Andorra' },
+        { label: 'Angola', value: 'Angola' },
+        { label: 'Anguilla', value: 'Anguilla' },
+        { label: 'Antarctica', value: 'Antarctica' },
+        { label: 'Antigua and Barbuda', value: 'Antigua and Barbuda' },
+        { label: 'Argentina', value: 'Argentina' },
+        { label: 'Armenia', value: 'Armenia' },
+        { label: 'Aruba', value: 'Aruba' },
+        { label: 'Australia', value: 'Australia' },
+        { label: 'Austria', value: 'Austria' },
+        { label: 'Azerbaijan', value: 'Azerbaijan' },
+        { label: 'Bahamas', value: 'Bahamas' },
+        { label: 'Bahrain', value: 'Bahrain' },
+        { label: 'Bangladesh', value: 'Bangladesh' },
+        { label: 'Barbados', value: 'Barbados' },
+        { label: 'Belarus', value: 'Belarus' },
+        { label: 'Belgium', value: 'Belgium' },
+        { label: 'Belize', value: 'Belize' },
+        { label: 'Benin', value: 'Benin' },
+        { label: 'Bermuda', value: 'Bermuda' },
+        { label: 'Bhutan', value: 'Bhutan' },
+        { label: 'Bolivia', value: 'Bolivia' },
+        { label: 'Bonaire, Sint Eustatius and Saba', value: 'Bonaire, Sint Eustatius and Saba' },
+        { label: 'Bosnia and Herzegovina', value: 'Bosnia and Herzegovina' },
+        { label: 'Botswana', value: 'Botswana' },
+        { label: 'Bouvet Island', value: 'Bouvet Island' },
+        { label: 'Brazil', value: 'Brazil' },
+        { label: 'British Indian Ocean Territory', value: 'British Indian Ocean Territory' },
+        { label: 'Brunei Darussalam', value: 'Brunei Darussalam' },
+        { label: 'Bulgaria', value: 'Bulgaria' },
+        { label: 'Burkina Faso', value: 'Burkina Faso' },
+        { label: 'Burundi', value: 'Burundi' },
+        { label: 'Cambodia', value: 'Cambodia' },
+        { label: 'Cameroon', value: 'Cameroon' },
+        { label: 'Canada', value: 'Canada' },
+        { label: 'Cape Verde', value: 'Cape Verde' },
+        { label: 'Cayman Islands', value: 'Cayman Islands' },
+        { label: 'Central African Republic', value: 'Central African Republic' },
+        { label: 'Chad', value: 'Chad' },
+        { label: 'Chile', value: 'Chile' },
+        { label: 'China', value: 'China' },
+        { label: 'Christmas Island', value: 'Christmas Island' },
+        { label: 'Cocos (Keeling) Islands', value: 'Cocos (Keeling) Islands' },
+        { label: 'Colombia', value: 'Colombia' },
+        { label: 'Comoros', value: 'Comoros' },
+        { label: 'Congo', value: 'Congo' },
+        { label: 'Congo, Democratic Republic of the', value: 'Congo, Democratic Republic of the' },
+        { label: 'Cook Islands', value: 'Cook Islands' },
+        { label: 'Costa Rica', value: 'Costa Rica' },
+        { label: 'Cote dIvoire', value: 'Cote dIvoire' },
+        { label: 'Croatia', value: 'Croatia' },
+        { label: 'Cuba', value: 'Cuba' },
+        { label: 'Curacao', value: 'Curacao' },
+        { label: 'Cyprus', value: 'Cyprus' },
+        { label: 'Czechia', value: 'Czechia' },
+        { label: 'Denmark', value: 'Denmark' },
+        { label: 'Djibouti', value: 'Djibouti' },
+        { label: 'Dominica', value: 'Dominica' },
+        { label: 'Dominican Republic', value: 'Dominican Republic' },
+        { label: 'Ecuador', value: 'Ecuador' },
+        { label: 'Egypt', value: 'Egypt' },
+        { label: 'El Salvador', value: 'El Salvador' },
+        { label: 'Equatorial Guinea', value: 'Equatorial Guinea' },
+        { label: 'Eritrea', value: 'Eritrea' },
+        { label: 'Estonia', value: 'Estonia' },
+        { label: 'Eswatini', value: 'Eswatini' },
+        { label: 'Ethiopia', value: 'Ethiopia' },
+        { label: 'Falkland Islands (Malvinas)', value: 'Falkland Islands (Malvinas)' },
+        { label: 'Faroe Islands', value: 'Faroe Islands' },
+        { label: 'Fiji', value: 'Fiji' },
+        { label: 'Finland', value: 'Finland' },
+        { label: 'France', value: 'France' },
+        { label: 'French Guiana', value: 'French Guiana' },
+        { label: 'French Polynesia', value: 'French Polynesia' },
+        { label: 'French Southern Territories', value: 'French Southern Territories' },
+        { label: 'Gabon', value: 'Gabon' },
+        { label: 'Gambia', value: 'Gambia' },
+        { label: 'Georgia', value: 'Georgia' },
+        { label: 'Germany', value: 'Germany' },
+        { label: 'Ghana', value: 'Ghana' },
+        { label: 'Gibraltar', value: 'Gibraltar' },
+        { label: 'Greece', value: 'Greece' },
+        { label: 'Greenland', value: 'Greenland' },
+        { label: 'Grenada', value: 'Grenada' },
+        { label: 'Guadeloupe', value: 'Guadeloupe' },
+        { label: 'Guam', value: 'Guam' },
+        { label: 'Guatemala', value: 'Guatemala' },
+        { label: 'Guernsey', value: 'Guernsey' },
+        { label: 'Guinea', value: 'Guinea' },
+        { label: 'Guinea-Bissau', value: 'Guinea-Bissau' },
+        { label: 'Guyana', value: 'Guyana' },
+        { label: 'Haiti', value: 'Haiti' },
+        { label: 'Heard Island and McDonald Islands', value: 'Heard Island and McDonald Islands' },
+        { label: 'Holy See', value: 'Holy See' },
+        { label: 'Honduras', value: 'Honduras' },
+        { label: 'Hong Kong', value: 'Hong Kong' },
+        { label: 'Hungary', value: 'Hungary' },
+        { label: 'Iceland', value: 'Iceland' },
+        { label: 'India', value: 'India' },
+        { label: 'Indonesia', value: 'Indonesia' },
+        { label: 'Iran', value: 'Iran' },
+        { label: 'Iraq', value: 'Iraq' },
+        { label: 'Ireland', value: 'Ireland' },
+        { label: 'Isle of Man', value: 'Isle of Man' },
+        { label: 'Israel', value: 'Israel' },
+        { label: 'Italy', value: 'Italy' },
+        { label: 'Jamaica', value: 'Jamaica' },
+        { label: 'Japan', value: 'Japan' },
+        { label: 'Jersey', value: 'Jersey' },
+        { label: 'Jordan', value: 'Jordan' },
+        { label: 'Kazakhstan', value: 'Kazakhstan' },
+        { label: 'Kenya', value: 'Kenya' },
+        { label: 'Kiribati', value: 'Kiribati' },
+        { label: 'Korea, Democratic Peoples Republic of', value: 'Korea, Democratic Peoples Republic of' },
+        { label: 'Korea, Republic of', value: 'Korea, Republic of' },
+        { label: 'Kuwait', value: 'Kuwait' },
+        { label: 'Kyrgyzstan', value: 'Kyrgyzstan' },
+        { label: 'Lao Peoples Democratic Republic', value: 'Lao Peoples Democratic Republic' },
+        { label: 'Latvia', value: 'Latvia' },
+        { label: 'Lebanon', value: 'Lebanon' },
+        { label: 'Lesotho', value: 'Lesotho' },
+        { label: 'Liberia', value: 'Liberia' },
+        { label: 'Libya', value: 'Libya' },
+        { label: 'Liechtenstein', value: 'Liechtenstein' },
+        { label: 'Lithuania', value: 'Lithuania' },
+        { label: 'Luxembourg', value: 'Luxembourg' },
+        { label: 'Macao', value: 'Macao' },
+        { label: 'Madagascar', value: 'Madagascar' },
+        { label: 'Malawi', value: 'Malawi' },
+        { label: 'Malaysia', value: 'Malaysia' },
+        { label: 'Maldives', value: 'Maldives' },
+        { label: 'Mali', value: 'Mali' },
+        { label: 'Malta', value: 'Malta' },
+        { label: 'Marshall Islands', value: 'Marshall Islands' },
+        { label: 'Martinique', value: 'Martinique' },
+        { label: 'Mauritania', value: 'Mauritania' },
+        { label: 'Mauritius', value: 'Mauritius' },
+        { label: 'Mayotte', value: 'Mayotte' },
+        { label: 'Mexico', value: 'Mexico' },
+        { label: 'Micronesia', value: 'Micronesia' },
+        { label: 'Moldova', value: 'Moldova' },
+        { label: 'Monaco', value: 'Monaco' },
+        { label: 'Mongolia', value: 'Mongolia' },
+        { label: 'Montenegro', value: 'Montenegro' },
+        { label: 'Montserrat', value: 'Montserrat' },
+        { label: 'Morocco', value: 'Morocco' },
+        { label: 'Mozambique', value: 'Mozambique' },
+        { label: 'Myanmar', value: 'Myanmar' },
+        { label: 'Namibia', value: 'Namibia' },
+        { label: 'Nauru', value: 'Nauru' },
+        { label: 'Nepal', value: 'Nepal' },
+        { label: 'Netherlands', value: 'Netherlands' },
+        { label: 'New Caledonia', value: 'New Caledonia' },
+        { label: 'New Zealand', value: 'New Zealand' },
+        { label: 'Nicaragua', value: 'Nicaragua' },
+        { label: 'Niger', value: 'Niger' },
+        { label: 'Nigeria', value: 'Nigeria' },
+        { label: 'North Macedonia', value: 'North Macedonia' },
+        { label: 'Northern Mariana Islands', value: 'Northern Mariana Islands' },
+        { label: 'Norway', value: 'Norway' },
+        { label: 'Oman', value: 'Oman' },
+        { label: 'Pakistan', value: 'Pakistan' },
+        { label: 'Palau', value: 'Palau' },
+        { label: 'Palestine, State of', value: 'Palestine, State of' },
+        { label: 'Panama', value: 'Panama' },
+        { label: 'Papua New Guinea', value: 'Papua New Guinea' },
+        { label: 'Paraguay', value: 'Paraguay' },
+        { label: 'Peru', value: 'Peru' },
+        { label: 'Philippines', value: 'Philippines' },
+        { label: 'Pitcairn', value: 'Pitcairn' },
+        { label: 'Poland', value: 'Poland' },
+        { label: 'Portugal', value: 'Portugal' },
+        { label: 'Puerto Rico', value: 'Puerto Rico' },
+        { label: 'Qatar', value: 'Qatar' },
+        { label: 'Reunion', value: 'Reunion' },
+        { label: 'Romania', value: 'Romania' },
+        { label: 'Russian Federation', value: 'Russian Federation' },
+        { label: 'Rwanda', value: 'Rwanda' },
+        { label: 'Saint Barthelemy', value: 'Saint Barthelemy' },
+        { label: 'Saint Helena, Ascension and Tristan da Cunha', value: 'Saint Helena, Ascension and Tristan da Cunha' },
+        { label: 'Saint Kitts and Nevis', value: 'Saint Kitts and Nevis' },
+        { label: 'Saint Lucia', value: 'Saint Lucia' },
+        { label: 'Saint Martin (French part)', value: 'Saint Martin (French part)' },
+        { label: 'Saint Pierre and Miquelon', value: 'Saint Pierre and Miquelon' },
+        { label: 'Saint Vincent and the Grenadines', value: 'Saint Vincent and the Grenadines' },
+        { label: 'Samoa', value: 'Samoa' },
+        { label: 'San Marino', value: 'San Marino' },
+        { label: 'Sao Tome and Principe', value: 'Sao Tome and Principe' },
+        { label: 'Saudi Arabia', value: 'Saudi Arabia' },
+        { label: 'Senegal', value: 'Senegal' },
+        { label: 'Serbia', value: 'Serbia' },
+        { label: 'Seychelles', value: 'Seychelles' },
+        { label: 'Sierra Leone', value: 'Sierra Leone' },
+        { label: 'Singapore', value: 'Singapore' },
+        { label: 'Sint Maarten (Dutch part)', value: 'Sint Maarten (Dutch part)' },
+        { label: 'Slovakia', value: 'Slovakia' },
+        { label: 'Slovenia', value: 'Slovenia' },
+        { label: 'Solomon Islands', value: 'Solomon Islands' },
+        { label: 'Somalia', value: 'Somalia' },
+        { label: 'South Africa', value: 'South Africa' },
+        { label: 'South Georgia and the South Sandwich Islands', value: 'South Georgia and the South Sandwich Islands' },
+        { label: 'South Sudan', value: 'South Sudan' },
+        { label: 'Spain', value: 'Spain' },
+        { label: 'Sri Lanka', value: 'Sri Lanka' },
+        { label: 'Sudan', value: 'Sudan' },
+        { label: 'Suriname', value: 'Suriname' },
+        { label: 'Svalbard and Jan Mayen', value: 'Svalbard and Jan Mayen' },
+        { label: 'Sweden', value: 'Sweden' },
+        { label: 'Switzerland', value: 'Switzerland' },
+        { label: 'Syrian Arab Republic', value: 'Syrian Arab Republic' },
+        { label: 'Taiwan', value: 'Taiwan' },
+        { label: 'Tajikistan', value: 'Tajikistan' },
+        { label: 'Tanzania, United Republic of', value: 'Tanzania, United Republic of' },
+        { label: 'Thailand', value: 'Thailand' },
+        { label: 'Timor-Leste', value: 'Timor-Leste' },
+        { label: 'Togo', value: 'Togo' },
+        { label: 'Tokelau', value: 'Tokelau' },
+        { label: 'Tonga', value: 'Tonga' },
+        { label: 'Trinidad and Tobago', value: 'Trinidad and Tobago' },
+        { label: 'Tunisia', value: 'Tunisia' },
+        { label: 'Turkey', value: 'Turkey' },
+        { label: 'Turkmenistan', value: 'Turkmenistan' },
+        { label: 'Turks and Caicos Islands', value: 'Turks and Caicos Islands' },
+        { label: 'Tuvalu', value: 'Tuvalu' },
+        { label: 'Uganda', value: 'Uganda' },
+        { label: 'Ukraine', value: 'Ukraine' },
+        { label: 'United Arab Emirates', value: 'United Arab Emirates' },
+        { label: 'United Kingdom', value: 'United Kingdom' },
+        { label: 'United States', value: 'United States' },
+        { label: 'United States Minor Outlying Islands', value: 'United States Minor Outlying Islands' },
+        { label: 'Uruguay', value: 'Uruguay' },
+        { label: 'Uzbekistan', value: 'Uzbekistan' },
+        { label: 'Vanuatu', value: 'Vanuatu' },
+        { label: 'Venezuela', value: 'Venezuela' },
+        { label: 'Viet Nam', value: 'Viet Nam' },
+        { label: 'Virgin Islands, British', value: 'Virgin Islands, British' },
+        { label: 'Virgin Islands, U.S.', value: 'Virgin Islands, U.S.' },
+        { label: 'Wallis and Futuna', value: 'Wallis and Futuna' },
+        { label: 'Western Sahara', value: 'Western Sahara' },
+        { label: 'Yemen', value: 'Yemen' },
+        { label: 'Zambia', value: 'Zambia' },
+        { label: 'Zimbabwe', value: 'Zimbabwe' },
+    ];
 
     schoolMode = signal<SchoolMode>('single');
     schoolRows = signal<OnboardingSchoolRow[]>([]);
@@ -84,7 +331,7 @@ export class TenantOnboardingComponent implements OnInit {
     readonly stepTitle = computed(() => {
         switch (this.step()) {
             case 1:
-                return 'Organization details';
+                return 'Create your organization';
             case 2:
                 return 'School structure';
             case 3:
@@ -96,7 +343,7 @@ export class TenantOnboardingComponent implements OnInit {
     readonly stepSubtitle = computed(() => {
         switch (this.step()) {
             case 1:
-                return 'Tell us about the organization that will manage this workspace.';
+                return 'Set up your MindBloom workspace. You can update these details later in settings.';
             case 2:
                 return 'How is your organization structured?';
             case 3:
@@ -108,32 +355,81 @@ export class TenantOnboardingComponent implements OnInit {
     readonly codeError = computed(() => {
         const code = this.tenantCode().trim();
         if (!code.length) {
-            return 'Tenant code is required.';
+            return 'Please choose a valid workspace URL.';
         }
         if (!/^[a-z0-9-]+$/.test(code)) {
-            return 'Use lowercase letters, numbers, and hyphens only.';
+            return 'Please choose a valid workspace URL.';
         }
         if (this.codeStatus() === 'taken') {
-            return 'Tenant code is already in use.';
+            return '';
         }
         if (this.codeStatus() === 'error') {
-            return 'Unable to verify tenant code. Try again.';
+            return 'Please choose a valid workspace URL.';
         }
         return '';
+    });
+    readonly orgNameError = computed(() => {
+        return this.tenantName().trim().length ? '' : 'Organization name is required.';
+    });
+    readonly countryError = computed(() => {
+        const value = this.orgCountry().trim();
+        if (!value.length) {
+            return 'Please select a country or region.';
+        }
+        const match = this.countryOptions.some(option => option.value.toLowerCase() === value.toLowerCase());
+        return match ? '' : 'Please select a country or region.';
     });
     readonly codeHint = computed(() => {
         const status = this.codeStatus();
         if (status === 'checking') return 'Checking availability…';
-        if (status === 'available') return 'Tenant code is available.';
-        if (status === 'taken') return 'Tenant code is already taken.';
-        if (status === 'error') return 'Could not verify tenant code.';
-        return 'Used for internal references and URLs.';
+        if (status === 'available') return 'This URL is available.';
+        if (status === 'taken') return 'This URL is already in use.';
+        if (status === 'error') return 'Could not verify workspace URL.';
+        return 'This is the web address your team will use to sign in. Use lowercase letters, numbers, and hyphens only.';
+    });
+    readonly contactEmailError = computed(() => {
+        const email = this.orgContactEmail().trim();
+        if (!email.length) {
+            return 'Email address is required.';
+        }
+        const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        return valid ? '' : 'Enter a valid email address.';
+    });
+    readonly validationSummary = computed(() => {
+        const step = this.step();
+        const errors: string[] = [];
+        if (step === 1) {
+            if (this.orgNameError()) errors.push(this.orgNameError());
+            if (this.codeError()) errors.push(this.codeError());
+            if (this.countryError()) errors.push(this.countryError());
+            if (this.contactEmailError()) errors.push(this.contactEmailError());
+        } else if (step === 2) {
+            const rows = this.schoolRows().filter(row => row.name.trim().length);
+            if (!rows.length) errors.push('Add at least one school.');
+            if (this.schoolMode() === 'multi' && rows.length !== this.schoolRows().length) {
+                errors.push('Complete all school rows before continuing.');
+            }
+        } else if (step === 3) {
+            if (!this.selectedEditionId()) errors.push('Select a MindBloom edition to continue.');
+        } else if (step === 4 && this.createExtraAdmin()) {
+            if (!this.adminFirstName().trim()) errors.push('Administrator first name is required.');
+            if (!this.adminLastName().trim()) errors.push('Administrator last name is required.');
+            if (!this.adminEmail().trim()) errors.push('Administrator email is required.');
+            if (this.adminPassword().trim().length < 8) errors.push('Administrator password must be at least 8 characters.');
+        }
+        return errors;
     });
     readonly canContinue = computed(() => {
         const step = this.step();
         if (step === 1) {
             if (this.codeStatus() === 'checking') return false;
-            return !!this.tenantName().trim() && !this.codeError();
+            return !!this.tenantName().trim()
+                && !!this.tenantCode().trim()
+                && !!this.orgCountry().trim()
+                && !!this.orgContactEmail().trim()
+                && !this.codeError()
+                && !this.countryError()
+                && !this.contactEmailError();
         }
         if (step === 2) {
             const rows = this.schoolRows().filter(row => row.name.trim().length);
@@ -157,15 +453,28 @@ export class TenantOnboardingComponent implements OnInit {
     });
     private persistTimer: number | null = null;
 
+    onCountryInput(value: string): void {
+        this.orgCountry.set(value);
+    }
+
+    onCountryBlur(): void {
+        const value = this.orgCountry().trim();
+        if (!value.length) {
+            return;
+        }
+        const match = this.countryOptions.find(option => option.value.toLowerCase() === value.toLowerCase());
+        if (match) {
+            this.orgCountry.set(match.value);
+        } else {
+            this.orgCountry.set('');
+        }
+    }
+
     constructor() {
         effect(() => {
             this.step();
             this.orgCountry();
-            this.orgCity();
-            this.orgAddress();
-            this.orgDomain();
-            this.orgTimezone();
-            this.orgLocale();
+            this.orgContactEmail();
             this.schoolMode();
             this.schoolRows();
             this.selectedEditionId();
@@ -196,9 +505,8 @@ export class TenantOnboardingComponent implements OnInit {
                 this.tenantName.set(tenant.name || 'Organization');
                 this.tenantCode.set(tenant.subdomain || '');
                 this.originalTenantCode.set(tenant.subdomain || '');
-                this.orgDomain.set(tenant.customization?.customDomain || '');
-                this.orgLocale.set(tenant.locale || 'en-US');
-                this.orgTimezone.set(tenant.timezone || this.defaultTimeZone());
+                this.orgCountry.set(tenant.contactInfo?.address?.country || '');
+                this.orgContactEmail.set(tenant.contactInfo?.email || '');
 
                 const tenantId = tenant.id || this.tenantService.getTenantId();
                 if (tenantId) {
@@ -386,18 +694,12 @@ export class TenantOnboardingComponent implements OnInit {
         this.isSaving.set(true);
         try {
             await firstValueFrom(this.tenantSettings.updateSettings({
-                customization: {
-                    customDomain: this.orgDomain().trim() || undefined
-                },
-                locale: this.orgLocale().trim() || undefined,
-                timezone: this.orgTimezone().trim() || undefined,
                 extras: {
                     onboarding: {
                         orgName: this.tenantName().trim() || undefined,
                         tenantCode: this.tenantCode().trim() || undefined,
                         country: this.orgCountry().trim() || undefined,
-                        city: this.orgCity().trim() || undefined,
-                        address: this.orgAddress().trim() || undefined,
+                        contactEmail: this.orgContactEmail().trim() || undefined,
                     }
                 }
             }));
@@ -490,11 +792,7 @@ export class TenantOnboardingComponent implements OnInit {
                     completed: true,
                     org: {
                         country: this.orgCountry(),
-                        city: this.orgCity(),
-                        addressLine: this.orgAddress(),
-                        domain: this.orgDomain(),
-                        timezone: this.orgTimezone(),
-                        locale: this.orgLocale(),
+                        contactEmail: this.orgContactEmail(),
                     },
                     schools: { mode: this.schoolMode(), rows: this.schoolRows() },
                     edition: { id: this.selectedEditionId(), name: this.selectedEditionName() },
@@ -518,11 +816,7 @@ export class TenantOnboardingComponent implements OnInit {
         if (saved.org.name) this.tenantName.set(saved.org.name);
         if (saved.org.code) this.tenantCode.set(saved.org.code);
         this.orgCountry.set(saved.org.country || '');
-        this.orgCity.set(saved.org.city || '');
-        this.orgAddress.set(saved.org.addressLine || '');
-        this.orgDomain.set(saved.org.domain || '');
-        this.orgTimezone.set(saved.org.timezone || this.defaultTimeZone());
-        this.orgLocale.set(saved.org.locale || 'en-US');
+        this.orgContactEmail.set(saved.org.contactEmail || '');
         this.schoolMode.set(saved.schools.mode || 'single');
         if (saved.schools.rows?.length) {
             this.schoolRows.set(saved.schools.rows);
@@ -550,11 +844,7 @@ export class TenantOnboardingComponent implements OnInit {
                 name: this.tenantName(),
                 code: this.tenantCode(),
                 country: this.orgCountry(),
-                city: this.orgCity(),
-                addressLine: this.orgAddress(),
-                domain: this.orgDomain(),
-                timezone: this.orgTimezone(),
-                locale: this.orgLocale(),
+                contactEmail: this.orgContactEmail(),
             },
             schools: {
                 mode: this.schoolMode(),
@@ -580,11 +870,4 @@ export class TenantOnboardingComponent implements OnInit {
         this.persistTimer = window.setTimeout(() => this.persistState(), 300);
     }
 
-    private defaultTimeZone(): string {
-        try {
-            return Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-        } catch {
-            return '';
-        }
-    }
 }

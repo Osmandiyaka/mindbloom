@@ -6,11 +6,7 @@ export interface OnboardingOrgState {
     name?: string;
     code?: string;
     country?: string;
-    city?: string;
-    addressLine?: string;
-    domain?: string;
-    timezone?: string;
-    locale?: string;
+    contactEmail?: string;
 }
 
 export interface OnboardingSchoolRow {
