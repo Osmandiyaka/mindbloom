@@ -40,7 +40,8 @@
             @if (step() === 1) {
             <div class="step-section">
                 <mb-form-field label="Organization name" [controlId]="'org-name'"
-                    [hint]="'This will be the primary name of your MindBloom workspace.'" [error]="orgNameError()">
+                    [hint]="'This will be the primary name shown across your MindBloom workspace.'"
+                    [error]="orgNameError()">
                     <mb-input id="org-name" [value]="tenantName()" (valueChange)="onOrgNameInput($event)"
                         (blurEvent)="orgNameTouched.set(true)"></mb-input>
                 </mb-form-field>
