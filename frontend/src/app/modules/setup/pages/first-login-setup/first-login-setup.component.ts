@@ -100,19 +100,24 @@ export class FirstLoginSetupComponent implements OnInit {
     invites = signal<InviteRow[]>([{ email: '', role: 'Teacher' }]);
 
     readonly stepLabels = [
-        'Schools',
-        'School details',
-        'Departments',
-        'Academic levels',
-        'Classes & sections',
+        'Organization & schools',
+        'Academic structure',
+        'Staff and users',
         'Grading system',
-        'Invite users',
-        'Review'
+        'Time zones & calendars',
+        'Classes & sections',
+        'Roles & permissions',
+        'Review & activate'
     ];
 
     readonly progressIndex = computed(() => {
         if (this.step() <= 0) return -1;
         return Math.min(this.step() - 1, this.stepLabels.length - 1);
+    });
+
+    readonly progressPercent = computed(() => {
+        if (this.progressIndex() < 0) return 0;
+        return ((this.progressIndex() + 1) / this.stepLabels.length) * 100;
     });
 
     readonly isReviewStep = computed(() => this.step() === 8);
@@ -208,6 +213,25 @@ export class FirstLoginSetupComponent implements OnInit {
         this.step.set(target);
         this.attemptedContinue.set(false);
         this.persistState('in_progress');
+    }
+
+    continueFromPanel(): void {
+        const current = Math.max(this.step(), 1);
+        const target = Math.min(current, 8);
+        this.step.set(target);
+        this.attemptedContinue.set(false);
+        this.scrollToCurrent();
+    }
+
+    private scrollToCurrent(): void {
+        try {
+            const el = document.getElementById('setup-step-content');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        } catch {
+            // No-op
+        }
     }
 
     addSchoolRow(): void {
