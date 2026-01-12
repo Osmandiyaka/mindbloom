@@ -69,22 +69,114 @@
 
                         <div class="setup-body" id="setup-step-content" *ngIf="step() === 1">
                             <div class="setup-section">
-                                <h2>School model</h2>
-                                <p>This determines how schools, users, and reporting are structured in your workspace.</p>
-                                <div class="choice-grid">
-                                    <button type="button" class="choice-card" [class.active]="schoolMode() === 'single'"
-                                        (click)="schoolMode.set('single')">
-                                        <span class="choice-check" aria-hidden="true">✓</span>
-                                        <div class="choice-title">Single school</div>
-                                        <div class="choice-recommend">Recommended for most institutions</div>
-                                        <div class="choice-text">One school operating under this organization.</div>
-                                    </button>
-                                    <button type="button" class="choice-card" [class.active]="schoolMode() === 'multi'"
-                                        (click)="schoolMode.set('multi')">
-                                        <span class="choice-check" aria-hidden="true">✓</span>
-                                        <div class="choice-title">Multiple schools</div>
-                                        <div class="choice-text">Districts or groups managing more than one school.</div>
-                                    </button>
+                                <h2>Schools</h2>
+                                <p>Manage the schools under your organization. You can add, edit, or deactivate schools at any time.</p>
+
+                                <div class="schools-grid" [class.schools-grid--panel]="isSchoolPanelOpen()">
+                                    <div class="schools-table-wrap">
+                                        <div class="schools-toolbar">
+                                            <div class="schools-toolbar__spacer"></div>
+                                            <mb-button variant="primary" (click)="openAddSchool()">Add school</mb-button>
+                                        </div>
+
+                                        <div class="schools-table" *ngIf="schoolRows().length; else emptySchools">
+                                            <div class="schools-table__header">
+                                                <div>School name</div>
+                                                <div>Code</div>
+                                                <div>Location</div>
+                                                <div>Time zone</div>
+                                                <div>Status</div>
+                                                <div>Actions</div>
+                                            </div>
+                                            <div class="schools-table__row" *ngFor="let row of schoolRows(); let i = index">
+                                                <div class="schools-table__cell">
+                                                    <div class="schools-table__name">{{ row.name }}</div>
+                                                </div>
+                                                <div class="schools-table__cell">{{ row.code }}</div>
+                                                <div class="schools-table__cell">
+                                                    {{ row.city ? (row.city + ', ' + row.country) : (row.country || '—') }}
+                                                </div>
+                                                <div class="schools-table__cell">{{ row.timezone }}</div>
+                                                <div class="schools-table__cell">
+                                                    <span class="schools-status" [class.is-inactive]="row.status === 'Inactive'">
+                                                        {{ row.status }}
+                                                    </span>
+                                                </div>
+                                                <div class="schools-table__cell schools-table__actions">
+                                                    <button type="button" class="schools-action" (click)="openEditSchool(i)">Edit</button>
+                                                    <button type="button" class="schools-action"
+                                                        (click)="toggleSchoolStatus(i)">
+                                                        {{ row.status === 'Active' ? 'Deactivate' : 'Activate' }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <ng-template #emptySchools>
+                                            <div class="schools-empty">
+                                                <div class="schools-empty__title">No schools added yet</div>
+                                                <div class="schools-empty__text">
+                                                    Add your first school to start configuring academic structure and users.
+                                                </div>
+                                                <mb-button variant="primary" (click)="openAddSchool()">Add school</mb-button>
+                                            </div>
+                                        </ng-template>
+                                    </div>
+
+                                    <div class="schools-panel" *ngIf="isSchoolPanelOpen()">
+                                        <div class="schools-panel__header">
+                                            <div>
+                                                <div class="schools-panel__title">
+                                                    {{ editingSchoolIndex() === null ? 'Add school' : 'Edit school' }}
+                                                </div>
+                                                <div class="schools-panel__subtitle">Required details only.</div>
+                                            </div>
+                                            <button type="button" class="schools-panel__close" (click)="closeSchoolPanel()">×</button>
+                                        </div>
+                                        <div class="schools-panel__body">
+                                            <mb-form-field label="School name" [controlId]="'school-form-name'"
+                                                [error]="schoolFormTouched() && !schoolFormName().trim() ? 'School name is required.' : ''">
+                                                <mb-input id="school-form-name" [value]="schoolFormName()"
+                                                    (valueChange)="schoolFormName.set($event)"></mb-input>
+                                            </mb-form-field>
+
+                                            <mb-form-field label="School code" [controlId]="'school-form-code'"
+                                                hint="Short identifier used internally."
+                                                [error]="schoolFormTouched() && !schoolFormCode().trim() ? 'School code is required.' : ''">
+                                                <mb-input id="school-form-code" [value]="schoolFormCode()"
+                                                    (valueChange)="schoolFormCode.set($event)"></mb-input>
+                                            </mb-form-field>
+
+                                            <mb-form-field label="Country or region" [controlId]="'school-form-country'"
+                                                [error]="schoolFormTouched() && !schoolFormCountry().trim() ? 'Select a country or region.' : ''">
+                                                <mb-select id="school-form-country" [value]="schoolFormCountry()"
+                                                    (valueChange)="schoolFormCountry.set($event)">
+                                                    <option value="">Select a country or region</option>
+                                                    <option *ngFor="let option of countryOptions()" [value]="option.label">
+                                                        {{ option.label }}
+                                                    </option>
+                                                </mb-select>
+                                            </mb-form-field>
+
+                                            <mb-form-field label="City (optional)" [controlId]="'school-form-city'">
+                                                <mb-input id="school-form-city" [value]="schoolFormCity()"
+                                                    (valueChange)="schoolFormCity.set($event)"></mb-input>
+                                            </mb-form-field>
+
+                                            <mb-form-field label="Time zone" [controlId]="'school-form-timezone'"
+                                                [error]="schoolFormTouched() && !schoolFormTimezone().trim() ? 'Select a time zone.' : ''">
+                                                <mb-select id="school-form-timezone" [value]="schoolFormTimezone()"
+                                                    (valueChange)="schoolFormTimezone.set($event)">
+                                                    <option value="">Select a time zone</option>
+                                                    <option *ngFor="let tz of timezones()" [value]="tz">{{ tz }}</option>
+                                                </mb-select>
+                                            </mb-form-field>
+                                        </div>
+                                        <div class="schools-panel__actions">
+                                            <mb-button variant="secondary" (click)="closeSchoolPanel()">Cancel</mb-button>
+                                            <mb-button variant="primary" [disabled]="!canSaveSchool()" (click)="saveSchool()">Save school</mb-button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="setup-footer">
@@ -101,40 +193,9 @@
                         </div>
 
             <div class="setup-body" *ngIf="step() === 2">
-                <div class="setup-section" *ngIf="schoolMode() === 'single'">
-                    <h2>Primary school</h2>
-                    <p>Confirm the details for the primary school in this workspace.</p>
-
-                    <mb-form-field label="School name" [controlId]="'single-school-name'"
-                        [error]="singleSchoolNameError()">
-                        <mb-input id="single-school-name" [value]="singleSchoolName()"
-                            (valueChange)="singleSchoolName.set($event)"></mb-input>
-                    </mb-form-field>
-
-                    <mb-form-field label="School code (optional)" [controlId]="'single-school-code'"
-                        hint="Short identifier used in reports and references.">
-                        <mb-input id="single-school-code" [value]="singleSchoolCode()"
-                            (valueChange)="singleSchoolCode.set($event)"></mb-input>
-                    </mb-form-field>
-
-                    <mb-form-field label="Country or region" [controlId]="'single-school-country'"
-                        hint="Inherited from organization settings.">
-                        <mb-input id="single-school-country" [value]="country()" [disabled]="true"></mb-input>
-                    </mb-form-field>
-
-                    <mb-form-field label="Time zone" [controlId]="'single-school-timezone'"
-                        hint="Used for schedules and attendance.">
-                        <mb-select id="single-school-timezone" placeholder="Select a time zone"
-                            [value]="singleSchoolTimezone()"
-                            (valueChange)="singleSchoolTimezone.set($event)">
-                            <option *ngFor="let tz of timezones()" [value]="tz">{{ tz }}</option>
-                        </mb-select>
-                    </mb-form-field>
-                </div>
-
-                <div class="setup-section" *ngIf="schoolMode() === 'multi'">
-                    <h2>Schools</h2>
-                    <p>Add the schools that belong to this organization.</p>
+                <div class="setup-section">
+                    <h2>School details</h2>
+                    <p>Review and adjust details for each school in your workspace.</p>
 
                     <div class="list-stack">
                         <div class="list-row" *ngFor="let row of schoolRows(); let i = index">
@@ -144,16 +205,33 @@
                                     (valueChange)="updateSchoolRow(i, 'name', $event)"></mb-input>
                             </mb-form-field>
 
-                            <mb-form-field label="School code (optional)" [controlId]="'school-code-' + i"
-                                hint="Short identifier used in reports and references.">
-                                <mb-input [id]="'school-code-' + i" [value]="row.code || ''"
+                            <mb-form-field label="School code" [controlId]="'school-code-' + i"
+                                [error]="showErrors() && !row.code.trim() ? 'School code is required.' : ''">
+                                <mb-input [id]="'school-code-' + i" [value]="row.code"
                                     (valueChange)="updateSchoolRow(i, 'code', $event)"></mb-input>
                             </mb-form-field>
 
-                            <mb-form-field label="Time zone" [controlId]="'school-timezone-' + i">
-                                <mb-select [id]="'school-timezone-' + i" placeholder="Select a time zone"
-                                    [value]="row.timezone || defaultTimezone()"
+                            <mb-form-field label="Country or region" [controlId]="'school-country-' + i"
+                                [error]="showErrors() && !row.country.trim() ? 'Select a country or region.' : ''">
+                                <mb-select [id]="'school-country-' + i" [value]="row.country"
+                                    (valueChange)="updateSchoolRow(i, 'country', $event)">
+                                    <option value="">Select a country or region</option>
+                                    <option *ngFor="let option of countryOptions()" [value]="option.label">
+                                        {{ option.label }}
+                                    </option>
+                                </mb-select>
+                            </mb-form-field>
+
+                            <mb-form-field label="City (optional)" [controlId]="'school-city-' + i">
+                                <mb-input [id]="'school-city-' + i" [value]="row.city || ''"
+                                    (valueChange)="updateSchoolRow(i, 'city', $event)"></mb-input>
+                            </mb-form-field>
+
+                            <mb-form-field label="Time zone" [controlId]="'school-timezone-' + i"
+                                [error]="showErrors() && !row.timezone.trim() ? 'Select a time zone.' : ''">
+                                <mb-select [id]="'school-timezone-' + i" [value]="row.timezone"
                                     (valueChange)="updateSchoolRow(i, 'timezone', $event)">
+                                    <option value="">Select a time zone</option>
                                     <option *ngFor="let tz of timezones()" [value]="tz">{{ tz }}</option>
                                 </mb-select>
                             </mb-form-field>
@@ -407,11 +485,11 @@
                     <div class="review-grid">
                         <div class="review-card">
                             <div class="review-title">Schools</div>
-                            <div class="review-value" *ngIf="schoolMode() === 'single'">{{ singleSchoolName() }}</div>
-                            <ul *ngIf="schoolMode() === 'multi'">
+                            <div class="review-value">{{ schoolRows().length }} school(s)</div>
+                            <ul>
                                 <li *ngFor="let row of schoolRows()">{{ row.name }}</li>
                             </ul>
-                            <button type="button" class="review-link" (click)="goToStep(2)">Edit</button>
+                            <button type="button" class="review-link" (click)="goToStep(1)">Edit</button>
                         </div>
                         <div class="review-card">
                             <div class="review-title">Academic levels</div>

@@ -19,8 +19,11 @@ import { FirstLoginSetupService, FirstLoginSetupState } from '../../../../core/s
 
 interface SchoolRow {
     name: string;
-    code?: string;
-    timezone?: string;
+    code: string;
+    country: string;
+    city?: string;
+    timezone: string;
+    status: 'Active' | 'Inactive';
 }
 
 interface InviteRow {
@@ -29,10 +32,6 @@ interface InviteRow {
 }
 
 interface FirstLoginSetupData {
-    schoolMode?: 'single' | 'multi';
-    singleSchoolName?: string;
-    singleSchoolCode?: string;
-    singleSchoolTimezone?: string;
     schoolRows?: SchoolRow[];
     departments?: string[];
     levelsTemplate?: 'k12' | 'primary_secondary' | 'custom';
@@ -81,11 +80,15 @@ export class FirstLoginSetupComponent implements OnInit {
     country = signal<string>('');
     defaultTimezone = signal<string>('');
 
-    schoolMode = signal<'single' | 'multi'>('single');
-    singleSchoolName = signal('');
-    singleSchoolCode = signal('');
-    singleSchoolTimezone = signal('');
-    schoolRows = signal<SchoolRow[]>([{ name: '' }]);
+    schoolRows = signal<SchoolRow[]>([]);
+    isSchoolPanelOpen = signal(false);
+    editingSchoolIndex = signal<number | null>(null);
+    schoolFormName = signal('');
+    schoolFormCode = signal('');
+    schoolFormCountry = signal('');
+    schoolFormCity = signal('');
+    schoolFormTimezone = signal('');
+    schoolFormTouched = signal(false);
 
     departments = signal<string[]>(['Academics', 'Administration', 'Finance']);
     levelsTemplate = signal<'k12' | 'primary_secondary' | 'custom'>('k12');
@@ -125,11 +128,6 @@ export class FirstLoginSetupComponent implements OnInit {
     readonly showErrors = computed(() => this.attemptedContinue());
     readonly inviteCount = computed(() => this.invites().filter(row => row.email.trim()).length);
 
-    readonly singleSchoolNameError = computed(() => {
-        if (!this.showErrors()) return '';
-        return this.singleSchoolName().trim() ? '' : 'School name is required.';
-    });
-
     readonly levelsError = computed(() => {
         if (!this.showErrors() || this.step() !== 4) return '';
         return this.levels().some(level => level.trim()) ? '' : 'Add at least one level.';
@@ -142,15 +140,25 @@ export class FirstLoginSetupComponent implements OnInit {
         return this.isValidEmail(email) ? '' : 'Enter a valid email.';
     }
 
+    readonly schoolsValid = computed(() => {
+        const rows = this.schoolRows().filter(row => row.status === 'Active');
+        if (!rows.length) return false;
+        return rows.every(row => !!row.name.trim() && !!row.code.trim() && !!row.country.trim() && !!row.timezone.trim());
+    });
+
+    readonly canSaveSchool = computed(() => {
+        return !!this.schoolFormName().trim()
+            && !!this.schoolFormCode().trim()
+            && !!this.schoolFormCountry().trim()
+            && !!this.schoolFormTimezone().trim();
+    });
+
     readonly canContinue = computed(() => {
         switch (this.step()) {
             case 1:
-                return !!this.schoolMode();
+                return this.schoolsValid();
             case 2:
-                if (this.schoolMode() === 'single') {
-                    return !!this.singleSchoolName().trim();
-                }
-                return this.schoolRows().every(row => !!row.name.trim());
+                return this.schoolsValid();
             case 4:
                 return this.levels().length > 0;
             case 5:
@@ -168,6 +176,19 @@ export class FirstLoginSetupComponent implements OnInit {
             return list.length ? list : this.fallbackTimezones();
         } catch {
             return this.fallbackTimezones();
+        }
+    });
+
+    readonly countryOptions = computed(() => {
+        try {
+            const regions = (Intl as any).supportedValuesOf?.('region') || [];
+            const display = new Intl.DisplayNames(['en'], { type: 'region' });
+            return regions.map((code: string) => ({
+                code,
+                label: display.of(code) || code
+            }));
+        } catch {
+            return [{ code: 'US', label: 'United States' }];
         }
     });
 
@@ -235,7 +256,8 @@ export class FirstLoginSetupComponent implements OnInit {
     }
 
     addSchoolRow(): void {
-        this.schoolRows.update(rows => [...rows, { name: '' }]);
+        const name = '';
+        this.schoolRows.update(rows => [...rows, this.defaultSchoolRow(name)]);
     }
 
     removeSchoolRow(index: number): void {
@@ -244,6 +266,66 @@ export class FirstLoginSetupComponent implements OnInit {
 
     updateSchoolRow(index: number, field: keyof SchoolRow, value: string): void {
         this.schoolRows.update(rows => rows.map((row, i) => i === index ? { ...row, [field]: value } : row));
+    }
+
+    openAddSchool(): void {
+        this.editingSchoolIndex.set(null);
+        this.schoolFormName.set('');
+        this.schoolFormCode.set('');
+        this.schoolFormCountry.set(this.country());
+        this.schoolFormCity.set('');
+        this.schoolFormTimezone.set(this.defaultTimezone());
+        this.schoolFormTouched.set(false);
+        this.isSchoolPanelOpen.set(true);
+    }
+
+    openEditSchool(index: number): void {
+        const row = this.schoolRows()[index];
+        if (!row) return;
+        this.editingSchoolIndex.set(index);
+        this.schoolFormName.set(row.name);
+        this.schoolFormCode.set(row.code);
+        this.schoolFormCountry.set(row.country);
+        this.schoolFormCity.set(row.city || '');
+        this.schoolFormTimezone.set(row.timezone);
+        this.schoolFormTouched.set(false);
+        this.isSchoolPanelOpen.set(true);
+    }
+
+    closeSchoolPanel(): void {
+        this.isSchoolPanelOpen.set(false);
+        this.editingSchoolIndex.set(null);
+        this.schoolFormTouched.set(false);
+    }
+
+    saveSchool(): void {
+        if (!this.canSaveSchool()) {
+            this.schoolFormTouched.set(true);
+            return;
+        }
+        const nextRow: SchoolRow = {
+            name: this.schoolFormName().trim(),
+            code: this.schoolFormCode().trim(),
+            country: this.schoolFormCountry().trim(),
+            city: this.schoolFormCity().trim() || undefined,
+            timezone: this.schoolFormTimezone().trim(),
+            status: 'Active',
+        };
+        const editIndex = this.editingSchoolIndex();
+        if (editIndex === null) {
+            this.schoolRows.update(rows => [...rows, nextRow]);
+        } else {
+            this.schoolRows.update(rows => rows.map((row, i) => i === editIndex ? { ...row, ...nextRow } : row));
+        }
+        this.closeSchoolPanel();
+    }
+
+    toggleSchoolStatus(index: number): void {
+        this.schoolRows.update(rows => rows.map((row, i) => {
+            if (i !== index) return row;
+            const status = row.status === 'Active' ? 'Inactive' : 'Active';
+            return { ...row, status };
+        }));
     }
 
     addDepartment(): void {
@@ -306,9 +388,12 @@ export class FirstLoginSetupComponent implements OnInit {
     private async completeSetup(): Promise<void> {
         this.isSaving.set(true);
         try {
-            const schools = this.schoolMode() === 'single'
-                ? [{ name: this.singleSchoolName().trim(), code: this.singleSchoolCode().trim() || undefined }]
-                : this.schoolRows().map(row => ({ name: row.name.trim(), code: row.code?.trim() || undefined }));
+            const schools = this.schoolRows()
+                .filter(row => row.status === 'Active')
+                .map(row => ({
+                    name: row.name.trim(),
+                    code: row.code.trim() || undefined
+                }));
 
             for (const school of schools) {
                 if (!school.name) continue;
@@ -333,8 +418,10 @@ export class FirstLoginSetupComponent implements OnInit {
                 this.tenantName.set(tenant.name || '');
                 this.country.set(tenant.contactInfo?.address?.country || '');
                 this.defaultTimezone.set(tenant.timezone || this.defaultTimeZone());
-                this.singleSchoolName.set(tenant.name || '');
-                this.singleSchoolTimezone.set(tenant.timezone || this.defaultTimeZone());
+                if (!this.schoolRows().length) {
+                    const defaultName = tenant.name || 'School';
+                    this.schoolRows.set([this.defaultSchoolRow(defaultName)]);
+                }
 
                 const serverState = tenant.extras?.setupProgram as FirstLoginSetupState | undefined;
                 const localState = tenantId ? this.setupStore.load(tenantId) : null;
@@ -361,10 +448,6 @@ export class FirstLoginSetupComponent implements OnInit {
         runInInjectionContext(this.injector, () => {
             effect(() => {
                 this.step();
-                this.schoolMode();
-                this.singleSchoolName();
-                this.singleSchoolCode();
-                this.singleSchoolTimezone();
                 this.schoolRows();
                 this.departments();
                 this.levels();
@@ -384,11 +467,9 @@ export class FirstLoginSetupComponent implements OnInit {
         if (!state.data) return;
         const data = state.data as FirstLoginSetupData;
         this.step.set(state.step || 1);
-        this.schoolMode.set(data.schoolMode || 'single');
-        this.singleSchoolName.set(data.singleSchoolName || this.tenantName());
-        this.singleSchoolCode.set(data.singleSchoolCode || '');
-        this.singleSchoolTimezone.set(data.singleSchoolTimezone || this.defaultTimezone());
-        this.schoolRows.set(data.schoolRows?.length ? data.schoolRows : this.schoolRows());
+        if (data.schoolRows?.length) {
+            this.schoolRows.set(data.schoolRows.map(row => this.normalizeSchoolRow(row)));
+        }
         this.departments.set(data.departments?.length ? data.departments : this.departments());
         this.levelsTemplate.set(data.levelsTemplate || 'k12');
         this.levels.set(data.levels?.length ? data.levels : this.defaultLevels(this.levelsTemplate()));
@@ -408,10 +489,6 @@ export class FirstLoginSetupComponent implements OnInit {
             skippedAt: status === 'skipped' ? new Date().toISOString() : undefined,
             completedAt: status === 'completed' ? new Date().toISOString() : undefined,
             data: {
-                schoolMode: this.schoolMode(),
-                singleSchoolName: this.singleSchoolName(),
-                singleSchoolCode: this.singleSchoolCode(),
-                singleSchoolTimezone: this.singleSchoolTimezone(),
                 schoolRows: this.schoolRows(),
                 departments: this.departments(),
                 levelsTemplate: this.levelsTemplate(),
@@ -428,6 +505,40 @@ export class FirstLoginSetupComponent implements OnInit {
                 setupProgram: payload
             }
         }).subscribe();
+    }
+
+    private defaultSchoolRow(name: string): SchoolRow {
+        const code = this.generateSchoolCode(name);
+        return {
+            name,
+            code,
+            country: this.country(),
+            city: '',
+            timezone: this.defaultTimezone(),
+            status: 'Active'
+        };
+    }
+
+    private normalizeSchoolRow(row: Partial<SchoolRow>): SchoolRow {
+        return {
+            name: row.name?.trim() || '',
+            code: row.code?.trim() || '',
+            country: row.country?.trim() || this.country(),
+            city: row.city?.trim() || '',
+            timezone: row.timezone?.trim() || this.defaultTimezone(),
+            status: row.status || 'Active'
+        };
+    }
+
+    private generateSchoolCode(name: string): string {
+        const trimmed = name.trim();
+        if (!trimmed) return '';
+        const letters = trimmed
+            .split(/\s+/)
+            .map(part => part[0])
+            .join('')
+            .toUpperCase();
+        return letters.slice(0, 6);
     }
 
     private defaultLevels(template: 'k12' | 'primary_secondary' | 'custom'): string[] {
