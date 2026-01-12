@@ -3,9 +3,27 @@
         <div class="setup-loading" *ngIf="isLoading()">Loading workspace setup…</div>
 
         <ng-container *ngIf="!isLoading()">
-            <div class="setup-header" *ngIf="step() === 0">
-                <h1>Set up your workspace</h1>
-                <p>Complete these steps now or anytime later from Settings.</p>
+            <div class="setup-entry" *ngIf="step() === 0">
+                <div class="setup-header">
+                    <div class="setup-entry-title">
+                        <span class="setup-icon" aria-hidden="true">✓</span>
+                        <h1>Finish setting up your workspace</h1>
+                    </div>
+                    <p class="setup-entry-body">
+                        Set up your schools, academic structure, and staff so your team can start working right away.
+                    </p>
+                    <p class="setup-entry-meta">Takes about 5–10 minutes · You can pause and continue anytime from Settings.</p>
+                </div>
+
+                <div class="setup-body">
+                    <div class="setup-actions setup-entry-actions">
+                        <mb-button variant="primary" (click)="startSetup()">Start setup</mb-button>
+                        <div class="setup-skip-block">
+                            <mb-button variant="tertiary" (click)="skipSetup()">Skip for now</mb-button>
+                            <p class="setup-skip-hint">Resume later from Settings → Workspace setup.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="setup-header" *ngIf="step() > 0 && !isDoneStep()">
@@ -22,16 +40,6 @@
             </div>
 
             <mb-alert *ngIf="errorMessage()" variant="danger">{{ errorMessage() }}</mb-alert>
-
-            <div class="setup-body" *ngIf="step() === 0">
-                <p class="setup-intro">
-                    Configure schools, academic structure, and users. You can pause and continue later.
-                </p>
-                <div class="setup-actions">
-                    <mb-button variant="primary" (click)="startSetup()">Start setup</mb-button>
-                    <mb-button variant="tertiary" (click)="skipSetup()">Skip for now</mb-button>
-                </div>
-            </div>
 
             <div class="setup-body" *ngIf="step() === 1">
                 <div class="setup-section">
