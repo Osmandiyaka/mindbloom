@@ -33,7 +33,7 @@
                             <div class="setup-progress__header">
                                 <div class="setup-progress__kicker">Workspace configuration</div>
                                 <h2>Setup progress</h2>
-                                <p>Complete setup to configure your workspace. You can finish later from Settings.</p>
+                                <p>Complete the setup to enable all features. You can return at any time from Settings.</p>
                             </div>
                             <div class="setup-progress__meta">{{ progressIndex() < 0 ? 0 : progressIndex() + 1 }} of {{ stepLabels.length }} completed</div>
                             <div class="setup-progress__bar" aria-hidden="true">
@@ -48,7 +48,7 @@
                                   [class.is-current]="i === progressIndex()"
                                   (click)="goToStep(i + 1)"
                                 >
-                                  <span class="setup-progress__icon" aria-hidden="true">{{ i < progressIndex() ? '✓' : '○' }}</span>
+                                  <span class="setup-progress__icon" aria-hidden="true">{{ i < progressIndex() ? '✓' : (i === progressIndex() ? '●' : '○') }}</span>
                                   <span class="setup-progress__label">{{ label }}</span>
                                 </button>
                             </div>
@@ -97,7 +97,7 @@
                                     <div class="setup-footer__hint">You can change this later from Settings.</div>
                                 </div>
                             </div>
-                            <div class="setup-auto-save">Configuration changes are saved automatically.</div>
+                            <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
                         </div>
 
             <div class="setup-body" *ngIf="step() === 2">
@@ -175,7 +175,7 @@
                         <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
                     </div>
                 </div>
-                <div class="setup-auto-save">Configuration changes are saved automatically.</div>
+                <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
             </div>
 
             <div class="setup-body" *ngIf="step() === 3">
@@ -206,7 +206,7 @@
                         <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
                     </div>
                 </div>
-                <div class="setup-auto-save">Configuration changes are saved automatically.</div>
+                <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
             </div>
 
             <div class="setup-body" *ngIf="step() === 4">
@@ -258,7 +258,7 @@
                         <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
                     </div>
                 </div>
-                <div class="setup-auto-save">Configuration changes are saved automatically.</div>
+                <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
             </div>
 
             <div class="setup-body" *ngIf="step() === 5">
@@ -306,7 +306,7 @@
                         <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
                     </div>
                 </div>
-                <div class="setup-auto-save">Configuration changes are saved automatically.</div>
+                <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
             </div>
 
             <div class="setup-body" *ngIf="step() === 6">
@@ -354,7 +354,7 @@
                         <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
                     </div>
                 </div>
-                <div class="setup-auto-save">Configuration changes are saved automatically.</div>
+                <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
             </div>
 
             <div class="setup-body" *ngIf="step() === 7">
@@ -396,7 +396,7 @@
                         <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
                     </div>
                 </div>
-                <div class="setup-auto-save">Configuration changes are saved automatically.</div>
+                <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
             </div>
 
             <div class="setup-body" *ngIf="step() === 8">

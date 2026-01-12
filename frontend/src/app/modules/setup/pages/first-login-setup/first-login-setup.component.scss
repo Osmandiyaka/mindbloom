@@ -24,12 +24,27 @@
     max-width: 100%;
     margin: 0 auto;
     padding: 32px 24px;
+    position: relative;
 }
 
 .workspace-setup-nav {
     align-self: start;
     position: sticky;
     top: 16px;
+}
+
+.workspace-setup-content {
+    position: relative;
+}
+
+.workspace-setup-content::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: color-mix(in srgb, var(--mb-color-primary) 20%, transparent);
 }
 
 .setup-nav-card,
@@ -159,10 +174,11 @@
 
 .setup-progress__kicker {
     font-size: 12px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-transform: none;
     color: var(--mb-color-text-muted);
     margin-bottom: 6px;
+    opacity: 0.6;
 }
 
 .setup-progress__header h2 {
@@ -184,13 +200,21 @@
     height: 8px;
     border-radius: 999px;
     background: var(--mb-color-border-subtle);
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent 0,
+        transparent calc(12.5% - 1px),
+        color-mix(in srgb, var(--mb-color-border) 35%, transparent) calc(12.5% - 1px),
+        color-mix(in srgb, var(--mb-color-border) 35%, transparent) 12.5%
+    );
     overflow: hidden;
 }
 
 .setup-progress__bar-fill {
     height: 100%;
     background: var(--mb-color-primary);
-    opacity: 0.4;
+    opacity: 0.8;
+    transition: width 200ms ease-out;
 }
 
 .setup-progress__meta {
@@ -213,27 +237,28 @@
     padding: 0 12px;
     height: 44px;
     width: 100%;
-    color: var(--mb-color-text);
+    color: var(--mb-color-text-muted);
     font-size: 14px;
     text-align: left;
     cursor: pointer;
     position: relative;
     border-radius: 10px;
+    font-weight: 450;
 }
 
 .setup-progress__item.is-complete {
     color: var(--mb-color-text-muted);
-    font-weight: 450;
 }
 
 .setup-progress__item.is-current {
     font-weight: 600;
     background: color-mix(in srgb, var(--mb-color-primary) 8%, transparent);
+    color: var(--mb-color-text);
 }
 
 .setup-progress__icon {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -244,8 +269,15 @@
 }
 
 .setup-progress__item.is-complete .setup-progress__icon {
-    color: var(--mb-color-text);
-    border-color: var(--mb-color-border);
+    color: color-mix(in srgb, var(--mb-color-primary) 70%, var(--mb-color-text-muted));
+    border-color: color-mix(in srgb, var(--mb-color-primary) 45%, var(--mb-color-border));
+    background: color-mix(in srgb, var(--mb-color-primary) 10%, transparent);
+}
+
+.setup-progress__item.is-current .setup-progress__icon {
+    background: var(--mb-color-primary);
+    border-color: var(--mb-color-primary);
+    color: var(--mb-color-surface);
 }
 
 .setup-progress__item.is-current::before {
@@ -289,8 +321,8 @@
 .setup-progress__dismiss {
     border: none;
     background: transparent;
-    color: var(--mb-color-text-muted);
-    font-size: 13px;
+    color: var(--mb-color-text-subtle);
+    font-size: 12px;
     cursor: pointer;
     padding: 0;
 }
@@ -368,8 +400,8 @@
 }
 
 .choice-card.active {
-    border-color: var(--mb-color-primary);
-    background: color-mix(in srgb, var(--mb-color-primary) 4%, var(--mb-color-surface));
+    border-color: color-mix(in srgb, var(--mb-color-primary) 70%, var(--mb-color-border-subtle));
+    background: color-mix(in srgb, var(--mb-color-primary) 3%, var(--mb-color-surface));
     box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
 
@@ -404,20 +436,20 @@
     position: absolute;
     top: 12px;
     right: 12px;
-    width: 18px;
-    height: 18px;
+    width: 14px;
+    height: 14px;
     border-radius: 999px;
     border: 1px solid var(--mb-color-border-subtle);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: 9px;
     color: transparent;
     background: var(--mb-color-surface);
 }
 
 .choice-card.active .choice-check {
-    border-color: var(--mb-color-primary);
+    border-color: color-mix(in srgb, var(--mb-color-primary) 70%, var(--mb-color-border-subtle));
     color: var(--mb-color-surface);
     background: var(--mb-color-primary);
 }
@@ -433,7 +465,7 @@
 
 .setup-footer__actions {
     display: flex;
-    gap: 12px;
+    gap: 16px;
 }
 
 .setup-footer__aside {
@@ -446,8 +478,8 @@
 .setup-skip-link {
     border: none;
     background: transparent;
-    color: var(--mb-color-text-muted);
-    font-size: 13px;
+    color: var(--mb-color-text-subtle);
+    font-size: 12px;
     cursor: pointer;
     padding: 0;
 }
