@@ -431,16 +431,23 @@
                     </div>
 
                     <div class="users-utility">
-                        <mb-form-field label="Search" [controlId]="'user-search'">
+                        <mb-form-field *ngIf="users().length >= 5" label="Search" [controlId]="'user-search'">
                             <mb-input
                                 id="user-search"
                                 [value]="userSearch()"
+                                [placeholder]="'Search by name or email'"
                                 (valueChange)="userSearch.set($event)"
                             ></mb-input>
                         </mb-form-field>
                         <div class="users-utility__actions">
-                            <button type="button" class="users-link" (click)="triggerCsvImport(csvInput)">Import CSV</button>
-                            <mb-button variant="primary" (click)="openInviteModal()">Invite users</mb-button>
+                            <mb-split-button
+                                label="Add users"
+                                variant="primary"
+                                size="md"
+                                [items]="addUsersMenuItems()"
+                                (primaryClick)="openInviteModal()"
+                                (itemSelect)="handleAddUsersAction($event, csvInput)"
+                            ></mb-split-button>
                         </div>
                         <input #csvInput type="file" class="users-csv-input" accept=".csv"
                             (change)="handleCsvImport($event)" />
@@ -485,24 +492,42 @@
 
                         <ng-template #emptyUsers>
                             <div class="users-empty">
-                                <div class="users-empty__title">No users added yet</div>
-                                <div class="users-empty__text">Invite staff to start using your workspace.</div>
-                                <div class="users-empty__actions">
-                                    <mb-button variant="primary" (click)="openInviteModal()">Invite users</mb-button>
-                                    <button type="button" class="users-link" (click)="triggerCsvImport(csvInput)">Import CSV</button>
-                                </div>
+                            <div class="users-empty__title">No staff or users yet</div>
+                            <div class="users-empty__text">
+                                Add users who will access this workspace. You can invite them by email or create accounts manually.
                             </div>
-                        </ng-template>
+                            <div class="users-empty__headers">
+                                <span>Name</span>
+                                <span>Email</span>
+                                <span>Role</span>
+                                <span>School access</span>
+                                <span>Status</span>
+                                <span>Actions</span>
+                            </div>
+                            <div class="users-empty__actions">
+                                <mb-split-button
+                                    label="Add users"
+                                    variant="primary"
+                                    size="md"
+                                    [items]="addUsersMenuItems()"
+                                    (primaryClick)="openInviteModal()"
+                                    (itemSelect)="handleAddUsersAction($event, csvInput)"
+                                ></mb-split-button>
+                                <button type="button" class="users-link" (click)="triggerCsvImport(csvInput)">Bulk import (CSV)</button>
+                            </div>
+                        </div>
+                    </ng-template>
                     </div>
                 </div>
 
                 <div class="setup-footer">
                     <div class="setup-footer__actions">
                         <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                        <mb-button variant="primary" (click)="next()">Continue</mb-button>
+                        <mb-button variant="primary" [disabled]="!canContinueUsersStep()" (click)="next()">Continue</mb-button>
                     </div>
                     <div class="setup-footer__aside">
-                        <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
+                        <button type="button" class="setup-skip-link" (click)="skipUsersStep()">Skip for now</button>
+                        <div class="setup-footer__hint">You can continue setup without adding users.</div>
                         <div class="setup-footer__hint">You can resume later from Settings → Workspace setup.</div>
                     </div>
                 </div>
@@ -707,6 +732,91 @@
                                 <mb-button variant="secondary" (click)="closeViewUser()">Close</mb-button>
                                 <mb-button variant="primary" (click)="openEditUser(getUserRowIndex(user)); closeViewUser()">
                                     Edit
+                                </mb-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="users-modal" *ngIf="isCreateUserModalOpen()" role="presentation">
+                    <div class="users-modal__backdrop"></div>
+                    <div class="users-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="create-user-title"
+                        tabindex="0" (keydown.escape)="closeCreateUserModal()">
+                        <div class="users-modal__header">
+                            <div>
+                                <div id="create-user-title" class="users-modal__title">Create user</div>
+                                <div class="users-modal__subtitle">Create an account manually for this workspace.</div>
+                            </div>
+                            <button type="button" class="users-modal__close" (click)="closeCreateUserModal()"
+                                aria-label="Close dialog">×</button>
+                        </div>
+                        <div class="users-modal__body">
+                            <mb-form-field label="Full name" [controlId]="'create-user-name'"
+                                [error]="createTouched() && !createName().trim() ? 'Name is required.' : ''">
+                                <mb-input id="create-user-name" [value]="createName()"
+                                    (valueChange)="createName.set($event)"
+                                    (blur)="createTouched.set(true)"></mb-input>
+                            </mb-form-field>
+                            <mb-form-field label="Email" [controlId]="'create-user-email'"
+                                [error]="createEmailError()">
+                                <mb-input id="create-user-email" [value]="createEmail()"
+                                    (valueChange)="createEmail.set($event)"
+                                    (blur)="createTouched.set(true)"></mb-input>
+                            </mb-form-field>
+                            <mb-form-field label="Role" [controlId]="'create-user-role'">
+                                <mb-select id="create-user-role" [value]="createRole()"
+                                    (valueChange)="setCreateRole($event)">
+                                    <option value="Owner">Owner</option>
+                                    <option value="Administrator">Administrator</option>
+                                    <option value="Staff">Staff</option>
+                                    <option value="Teacher">Teacher</option>
+                                </mb-select>
+                            </mb-form-field>
+
+                            <div class="users-modal__section">
+                                <div class="users-modal__section-title">School access</div>
+                                <label class="users-radio">
+                                    <input type="radio" name="create-access" [checked]="createSchoolAccess() === 'all'"
+                                        (change)="createSchoolAccess.set('all')" />
+                                    <span>All schools</span>
+                                </label>
+                                <label class="users-radio">
+                                    <input type="radio" name="create-access" [checked]="createSchoolAccess() === 'selected'"
+                                        (change)="createSchoolAccess.set('selected')" />
+                                    <span>Selected schools</span>
+                                </label>
+                                <div class="users-school-list" *ngIf="createSchoolAccess() === 'selected'">
+                                    <mb-checkbox
+                                        *ngFor="let name of activeSchoolNames()"
+                                        [checked]="createSelectedSchools().includes(name)"
+                                        (checkedChange)="toggleCreateSchoolSelection(name, $event)"
+                                    >{{ name }}</mb-checkbox>
+                                </div>
+                            </div>
+
+                            <div class="users-modal__section">
+                                <div class="users-modal__section-title">Employment details</div>
+                                <mb-form-field label="Job title" [controlId]="'create-user-job'">
+                                    <mb-input id="create-user-job" [value]="createJobTitle()"
+                                        (valueChange)="createJobTitle.set($event)"></mb-input>
+                                </mb-form-field>
+                                <mb-form-field label="Department" [controlId]="'create-user-dept'">
+                                    <mb-input id="create-user-dept" [value]="createDepartment()"
+                                        (valueChange)="createDepartment.set($event)"></mb-input>
+                                </mb-form-field>
+                                <mb-form-field label="Staff ID (optional)" [controlId]="'create-user-staff-id'">
+                                    <mb-input id="create-user-staff-id" [value]="createStaffId()"
+                                        (valueChange)="createStaffId.set($event)"></mb-input>
+                                </mb-form-field>
+                            </div>
+                        </div>
+                        <div class="users-modal__footer">
+                            <div class="users-modal__actions">
+                                <mb-button variant="secondary" (click)="closeCreateUserModal()">Cancel</mb-button>
+                                <mb-button variant="primary"
+                                    [disabled]="!createCanSubmit()"
+                                    (click)="saveCreateUser()">
+                                    Create user
                                 </mb-button>
                             </div>
                         </div>

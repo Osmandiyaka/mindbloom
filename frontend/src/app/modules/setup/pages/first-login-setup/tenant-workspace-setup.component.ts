@@ -11,6 +11,7 @@ import {
     MbFormFieldComponent,
     MbInputComponent,
     MbSelectComponent,
+    MbSplitButtonComponent,
     MbTableActionsDirective,
     MbTableComponent,
     MbTableColumn,
@@ -58,6 +59,7 @@ interface FirstLoginSetupData {
     classes?: Array<{ name: string; level: string; sections: string }>;
     gradingModel?: 'letter' | 'numeric' | 'gpa' | 'custom';
     users?: UserRow[];
+    usersStepSkipped?: boolean;
 }
 
 @Component({
@@ -72,6 +74,7 @@ interface FirstLoginSetupData {
         MbFormFieldComponent,
         MbInputComponent,
         MbSelectComponent,
+        MbSplitButtonComponent,
         MbAlertComponent,
         MbTableComponent,
         MbTableActionsDirective,
@@ -129,6 +132,8 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     users = signal<UserRow[]>([]);
     userSearch = signal('');
+    usersStepSkipped = signal(false);
+    canCreateUsers = signal(true);
 
     isInviteModalOpen = signal(false);
     inviteEmails = signal('');
@@ -151,10 +156,33 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     editStaffId = signal('');
     editTouched = signal(false);
 
+    isCreateUserModalOpen = signal(false);
+    createName = signal('');
+    createEmail = signal('');
+    createRole = signal<UserRole>('Staff');
+    createSchoolAccess = signal<'all' | 'selected'>('all');
+    createSelectedSchools = signal<string[]>([]);
+    createJobTitle = signal('');
+    createDepartment = signal('');
+    createStaffId = signal('');
+    createTouched = signal(false);
+
     isViewUserModalOpen = signal(false);
     viewUser = signal<UserRow | null>(null);
 
     private userCounter = 0;
+
+    readonly addUsersMenuItems = computed(() => ([
+        { label: 'Invite by email', value: 'invite' },
+        {
+            label: 'Create user manually',
+            value: 'create',
+            disabled: !this.canCreateUsers(),
+            description: this.canCreateUsers() ? undefined : 'Only workspace owners can create users.',
+        },
+        { type: 'divider' as const },
+        { label: 'Bulk import (CSV)', value: 'import' },
+    ]));
 
     readonly schoolTableColumns: MbTableColumn<SchoolRow>[] = [
         {
@@ -185,7 +213,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     ];
 
     readonly stepLabels = [
-        'Organization & schools',
+        'Schools',
         'Staff & users',
         'Organizational units',
         'Academic structure',
@@ -256,6 +284,8 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         return true;
     });
 
+    readonly canContinueUsersStep = computed(() => this.users().length > 0 || this.usersStepSkipped());
+
     readonly userTableColumns: MbTableColumn<UserRow>[] = [
         {
             key: 'name',
@@ -305,6 +335,8 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         switch (this.step()) {
             case 1:
                 return this.schoolsValid();
+            case 2:
+                return this.canContinueUsersStep();
             case 4:
                 return this.levels().length > 0;
             case 5:
@@ -602,6 +634,24 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.inviteTouched.set(false);
     }
 
+    openCreateUserModal(): void {
+        this.createName.set('');
+        this.createEmail.set('');
+        this.createRole.set('Staff');
+        this.createSchoolAccess.set('all');
+        this.createSelectedSchools.set([]);
+        this.createJobTitle.set('');
+        this.createDepartment.set('');
+        this.createStaffId.set('');
+        this.createTouched.set(false);
+        this.isCreateUserModalOpen.set(true);
+    }
+
+    closeCreateUserModal(): void {
+        this.isCreateUserModalOpen.set(false);
+        this.createTouched.set(false);
+    }
+
     toggleInviteMessage(): void {
         this.inviteMessageOpen.set(!this.inviteMessageOpen());
     }
@@ -635,6 +685,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             }));
         if (newUsers.length) {
             this.users.update(items => [...items, ...newUsers]);
+            this.usersStepSkipped.set(false);
         }
         this.closeInviteModal();
     }
@@ -684,6 +735,13 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         });
     }
 
+    toggleCreateSchoolSelection(name: string, checked: boolean): void {
+        this.createSelectedSchools.update(items => {
+            if (checked) return [...items, name];
+            return items.filter(item => item !== name);
+        });
+    }
+
     saveUserEdits(): void {
         this.editTouched.set(true);
         const index = this.editUserIndex();
@@ -712,6 +770,54 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     setEditRole(value: string): void {
         this.editRole.set(this.normalizeRole(value));
     }
+
+    setCreateRole(value: string): void {
+        this.createRole.set(this.normalizeRole(value));
+    }
+
+    saveCreateUser(): void {
+        this.createTouched.set(true);
+        const name = this.createName().trim();
+        const email = this.createEmail().trim();
+        if (!name || !email || !this.isValidEmail(email)) return;
+        const schoolAccess = this.createSchoolAccess() === 'all'
+            ? 'all'
+            : [...this.createSelectedSchools()];
+        this.users.update(items => [
+            ...items,
+            {
+                id: this.nextUserId(),
+                name,
+                email,
+                role: this.createRole(),
+                schoolAccess,
+                status: 'Active',
+                jobTitle: this.createJobTitle().trim() || undefined,
+                department: this.createDepartment().trim() || undefined,
+                staffId: this.createStaffId().trim() || undefined,
+                createdAt: new Date().toISOString(),
+            }
+        ]);
+        this.usersStepSkipped.set(false);
+        this.closeCreateUserModal();
+    }
+
+    createEmailError(): string {
+        if (!this.createTouched()) return '';
+        const email = this.createEmail().trim();
+        if (!email) return 'Email is required.';
+        if (!this.isValidEmail(email)) return 'Enter a valid email address.';
+        return '';
+    }
+
+    readonly createCanSubmit = computed(() => {
+        const name = this.createName().trim();
+        const email = this.createEmail().trim();
+        if (!name || !email) return false;
+        if (!this.isValidEmail(email)) return false;
+        if (this.createSchoolAccess() === 'selected' && this.createSelectedSchools().length === 0) return false;
+        return true;
+    });
 
     resendInvite(index: number): void {
         this.users.update(items => items.map((user, i) => i === index ? { ...user } : user));
@@ -743,10 +849,35 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             const rows = this.parseCsvUsers(text);
             if (rows.length) {
                 this.users.update(items => [...items, ...rows]);
+                this.usersStepSkipped.set(false);
             }
             input.value = '';
         };
         reader.readAsText(file);
+    }
+
+    handleAddUsersAction(action: string, csvInput: HTMLInputElement): void {
+        switch (action) {
+            case 'invite':
+                this.openInviteModal();
+                break;
+            case 'create':
+                if (this.canCreateUsers()) {
+                    this.openCreateUserModal();
+                }
+                break;
+            case 'import':
+                this.triggerCsvImport(csvInput);
+                break;
+            default:
+                break;
+        }
+    }
+
+    skipUsersStep(): void {
+        this.usersStepSkipped.set(true);
+        this.attemptedContinue.set(false);
+        this.next();
     }
 
     finish(): void {
@@ -857,6 +988,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.classes.set(data.classes?.length ? data.classes : this.classes());
         this.gradingModel.set(data.gradingModel || 'letter');
         this.users.set(data.users?.length ? data.users : this.users());
+        this.usersStepSkipped.set(!!data.usersStepSkipped);
     }
 
     private persistState(status: 'in_progress' | 'skipped' | 'completed'): void {
@@ -877,6 +1009,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
                 classes: this.classes(),
                 gradingModel: this.gradingModel(),
                 users: this.users(),
+                usersStepSkipped: this.usersStepSkipped(),
             }
         };
 
@@ -972,7 +1105,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         return ['Kindergarten', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'];
     }
 
-    private buildGradingScale(model: 'letter' | 'numeric' | 'gpa' | 'custom'): Array<{ label: string; value: string }>{
+    private buildGradingScale(model: 'letter' | 'numeric' | 'gpa' | 'custom'): Array<{ label: string; value: string }> {
         if (model === 'numeric') {
             return [
                 { label: '90–100', value: 'A' },
@@ -1028,7 +1161,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         }
     }
 
-    private isValidEmail(email: string): boolean {
+    isValidEmail(email: string): boolean {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 

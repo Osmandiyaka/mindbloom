@@ -678,6 +678,17 @@
     margin-top: 12px;
 }
 
+.users-empty__headers {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+    font-size: 11px;
+    color: var(--mb-color-text-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
 .users-modal {
     position: fixed;
     inset: 0;

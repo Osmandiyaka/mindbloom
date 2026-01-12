@@ -23,6 +23,7 @@ export * from './lib/tooltip/mb-tooltip.component';
 export * from './lib/tooltip/mb-tooltip.directive';
 export * from './lib/popover/mb-popover.component';
 export * from './lib/popover/mb-popover.directive';
+export * from './lib/split-button/mb-split-button.component';
 export * from './lib/table/mb-table.component';
 export * from './lib/table/mb-table-actions.directive';
 export * from './lib/nav/mb-nav.component';

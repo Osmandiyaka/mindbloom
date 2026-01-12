@@ -1,0 +1,205 @@
+.mb-split-button {
+    display: inline-flex;
+    align-items: stretch;
+    position: relative;
+    white-space: nowrap;
+}
+
+.mb-split-button:focus-within {
+    outline: 2px solid color-mix(in srgb, var(--mb-color-focus) 40%, transparent);
+    outline-offset: 2px;
+    border-radius: 12px;
+}
+
+.mb-split-button--disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.mb-split-button__primary,
+.mb-split-button__toggle {
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.mb-split-button__primary {
+    padding: 0 16px;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    min-width: 120px;
+}
+
+.mb-split-button__toggle {
+    padding: 0 12px;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    min-width: 40px;
+    position: relative;
+}
+
+.mb-split-button__toggle::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.mb-split-button--secondary .mb-split-button__toggle::before,
+.mb-split-button--ghost .mb-split-button__toggle::before {
+    background: var(--mb-color-border-subtle);
+}
+
+.mb-split-button__label--hidden {
+    visibility: hidden;
+}
+
+.mb-split-button__spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: rgba(255, 255, 255, 0.9);
+    animation: mb-split-spin 0.8s linear infinite;
+}
+
+.mb-split-button__chevron {
+    width: 16px;
+    height: 16px;
+    transition: transform 120ms ease-out;
+}
+
+.mb-split-button--open .mb-split-button__chevron {
+    transform: rotate(180deg);
+}
+
+.mb-split-button__overlay {
+    z-index: 1300;
+}
+
+.mb-split-button__menu {
+    background: var(--mb-color-surface);
+    border: 1px solid var(--mb-color-border-subtle);
+    border-radius: 12px;
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+    padding: 6px;
+}
+
+.mb-split-button__item {
+    width: 100%;
+    border: none;
+    background: none;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--mb-color-text);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mb-split-button__item:hover,
+.mb-split-button__item:focus-visible {
+    background: color-mix(in srgb, var(--mb-color-border) 35%, transparent);
+}
+
+.mb-split-button__item--danger:hover,
+.mb-split-button__item--danger:focus-visible {
+    background: color-mix(in srgb, var(--mb-color-danger) 10%, transparent);
+    color: var(--mb-color-danger);
+}
+
+.mb-split-button__item:disabled {
+    cursor: not-allowed;
+    color: var(--mb-color-text-muted);
+    background: transparent;
+}
+
+.mb-split-button__item-desc {
+    font-size: 12px;
+    color: var(--mb-color-text-muted);
+}
+
+.mb-split-button__divider {
+    height: 1px;
+    background: var(--mb-color-border-subtle);
+    margin: 6px 4px;
+}
+
+.mb-split-button--primary .mb-split-button__primary,
+.mb-split-button--primary .mb-split-button__toggle {
+    background: var(--mb-color-primary);
+    color: var(--mb-color-on-primary);
+}
+
+.mb-split-button--primary .mb-split-button__primary:hover,
+.mb-split-button--primary .mb-split-button__toggle:hover {
+    background: var(--mb-color-primary-hover);
+}
+
+.mb-split-button--primary .mb-split-button__primary:active,
+.mb-split-button--primary .mb-split-button__toggle:active {
+    background: var(--mb-color-primary-active);
+}
+
+.mb-split-button--secondary .mb-split-button__primary,
+.mb-split-button--secondary .mb-split-button__toggle {
+    background: var(--mb-color-surface);
+    color: var(--mb-color-text);
+    border: 1px solid var(--mb-color-border-subtle);
+}
+
+.mb-split-button--secondary .mb-split-button__toggle {
+    border-left: none;
+}
+
+.mb-split-button--ghost .mb-split-button__primary,
+.mb-split-button--ghost .mb-split-button__toggle {
+    background: transparent;
+    color: var(--mb-color-text);
+}
+
+.mb-split-button--sm .mb-split-button__primary,
+.mb-split-button--sm .mb-split-button__toggle {
+    height: 36px;
+}
+
+.mb-split-button--md .mb-split-button__primary,
+.mb-split-button--md .mb-split-button__toggle {
+    height: 40px;
+}
+
+.mb-split-button--lg .mb-split-button__primary,
+.mb-split-button--lg .mb-split-button__toggle {
+    height: 44px;
+}
+
+.mb-split-button--md .mb-split-button__primary,
+.mb-split-button--md .mb-split-button__toggle {
+    font-size: 14px;
+}
+
+.mb-split-button--disabled .mb-split-button__primary,
+.mb-split-button--disabled .mb-split-button__toggle {
+    cursor: not-allowed;
+}
+
+@keyframes mb-split-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
