@@ -181,7 +181,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             description: this.canCreateUsers() ? undefined : 'Only workspace owners can create users.',
         },
         { type: 'divider' as const },
-        { label: 'Bulk import (CSV)', value: 'import' },
+        { label: 'Import CSV', value: 'import' },
     ]));
 
     readonly schoolTableColumns: MbTableColumn<SchoolRow>[] = [

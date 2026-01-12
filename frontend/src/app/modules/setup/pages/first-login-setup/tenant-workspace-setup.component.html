@@ -429,8 +429,10 @@
                             <p>Add staff who will access the workspace. You can invite now and assign roles later.</p>
                         </div>
                     </div>
+                    <input #csvInput type="file" class="users-csv-input" accept=".csv"
+                        (change)="handleCsvImport($event)" />
 
-                    <div class="users-utility">
+                    <div class="users-utility" *ngIf="users().length">
                         <mb-form-field *ngIf="users().length >= 5" label="Search" [controlId]="'user-search'">
                             <mb-input
                                 id="user-search"
@@ -441,7 +443,7 @@
                         </mb-form-field>
                         <div class="users-utility__actions">
                             <mb-split-button
-                                label="Add users"
+                                label="Add users ▼"
                                 variant="primary"
                                 size="md"
                                 [items]="addUsersMenuItems()"
@@ -449,14 +451,11 @@
                                 (itemSelect)="handleAddUsersAction($event, csvInput)"
                             ></mb-split-button>
                         </div>
-                        <input #csvInput type="file" class="users-csv-input" accept=".csv"
-                            (change)="handleCsvImport($event)" />
                     </div>
 
-                    <div class="users-table-wrap">
+                    <div class="users-table-wrap" *ngIf="users().length; else emptyUsers">
                         <mb-table
                             class="users-table"
-                            *ngIf="filteredUsers().length; else emptyUsers"
                             [columns]="userTableColumns"
                             [rows]="filteredUsers()"
                             (cellClick)="handleUserCellClick($event)"
@@ -490,34 +489,31 @@
                             </ng-template>
                         </mb-table>
 
-                        <ng-template #emptyUsers>
-                            <div class="users-empty">
+                    </div>
+                    <ng-template #emptyUsers>
+                        <div class="users-empty">
+                            <div class="users-empty__icon" aria-hidden="true">
+                                <svg viewBox="0 0 48 48" fill="none">
+                                    <circle cx="24" cy="16" r="8" stroke="currentColor" stroke-width="2"></circle>
+                                    <path d="M10 40c0-7.2 6.3-13 14-13s14 5.8 14 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                </svg>
+                            </div>
                             <div class="users-empty__title">No staff or users yet</div>
                             <div class="users-empty__text">
-                                Add users who will access this workspace. You can invite them by email or create accounts manually.
-                            </div>
-                            <div class="users-empty__headers">
-                                <span>Name</span>
-                                <span>Email</span>
-                                <span>Role</span>
-                                <span>School access</span>
-                                <span>Status</span>
-                                <span>Actions</span>
+                                Add users to give your team access to the workspace.
                             </div>
                             <div class="users-empty__actions">
                                 <mb-split-button
-                                    label="Add users"
+                                    label="Add users ▼"
                                     variant="primary"
                                     size="md"
                                     [items]="addUsersMenuItems()"
                                     (primaryClick)="openInviteModal()"
                                     (itemSelect)="handleAddUsersAction($event, csvInput)"
                                 ></mb-split-button>
-                                <button type="button" class="users-link" (click)="triggerCsvImport(csvInput)">Bulk import (CSV)</button>
                             </div>
                         </div>
                     </ng-template>
-                    </div>
                 </div>
 
                 <div class="setup-footer">
