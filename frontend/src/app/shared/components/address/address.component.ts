@@ -27,7 +27,7 @@ export interface AddressValue {
                     <mb-form-field label="Street address" [controlId]="controlPrefix + '-street'">
                         <mb-input
                             [id]="controlPrefix + '-street'"
-                            [value]="value?.street || ''"
+                            [value]="value.street || ''"
                             (valueChange)="updateField('street', $event)"
                         ></mb-input>
                     </mb-form-field>
@@ -37,7 +37,7 @@ export interface AddressValue {
                     <mb-form-field label="Address line 2 (optional)" [controlId]="controlPrefix + '-line2'">
                         <mb-input
                             [id]="controlPrefix + '-line2'"
-                            [value]="value?.line2 || ''"
+                            [value]="value.line2 || ''"
                             (valueChange)="updateField('line2', $event)"
                         ></mb-input>
                     </mb-form-field>
@@ -47,7 +47,7 @@ export interface AddressValue {
                     <mb-form-field label="City" [controlId]="controlPrefix + '-city'">
                         <mb-input
                             [id]="controlPrefix + '-city'"
-                            [value]="value?.city || ''"
+                            [value]="value.city || ''"
                             (valueChange)="updateField('city', $event)"
                         ></mb-input>
                     </mb-form-field>
@@ -57,7 +57,7 @@ export interface AddressValue {
                     <mb-form-field label="State / Province" [controlId]="controlPrefix + '-state'">
                         <mb-input
                             [id]="controlPrefix + '-state'"
-                            [value]="value?.state || ''"
+                            [value]="value.state || ''"
                             (valueChange)="updateField('state', $event)"
                         ></mb-input>
                     </mb-form-field>
@@ -67,7 +67,7 @@ export interface AddressValue {
                     <mb-form-field label="Postal code" [controlId]="controlPrefix + '-postal'">
                         <mb-input
                             [id]="controlPrefix + '-postal'"
-                            [value]="value?.postalCode || ''"
+                            [value]="value.postalCode || ''"
                             (valueChange)="updateField('postalCode', $event)"
                         ></mb-input>
                     </mb-form-field>
