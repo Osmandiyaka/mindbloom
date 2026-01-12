@@ -31,13 +31,14 @@
                     <mb-card class="setup-nav-card">
                         <div class="setup-progress__content">
                             <div class="setup-progress__header">
-                                <h2>Workspace setup</h2>
-                                <p>Complete the steps below to enable all features for your institution.</p>
-                            </div>
-                            <div class="setup-progress__bar">
-                                <div class="setup-progress__bar-fill" [style.width.%]="progressPercent()"></div>
+                                <div class="setup-progress__kicker">Workspace configuration</div>
+                                <h2>Setup progress</h2>
+                                <p>Complete setup to configure your workspace. You can finish later from Settings.</p>
                             </div>
                             <div class="setup-progress__meta">{{ progressIndex() < 0 ? 0 : progressIndex() + 1 }} of {{ stepLabels.length }} completed</div>
+                            <div class="setup-progress__bar" aria-hidden="true">
+                                <div class="setup-progress__bar-fill" [style.width.%]="progressPercent()"></div>
+                            </div>
                             <div class="setup-progress__list">
                                 <button
                                   type="button"
@@ -54,8 +55,11 @@
                             <div class="setup-progress__actions">
                                 <mb-button variant="primary" (click)="continueFromPanel()">Continue setup</mb-button>
                                 <button type="button" class="setup-progress__dismiss" (click)="skipSetup()">Dismiss for now</button>
+                                <span class="setup-progress__hint">
+                                    You can resume anytime from Settings → Workspace setup.
+                                    <span class="setup-progress__info" aria-hidden="true" title="Setup is saved automatically.">i</span>
+                                </span>
                             </div>
-                            <div class="setup-progress__hint">You can pause setup at any time and resume later from Settings.</div>
                         </div>
                     </mb-card>
                 </div>
@@ -64,28 +68,37 @@
                         <mb-alert *ngIf="errorMessage()" variant="danger">{{ errorMessage() }}</mb-alert>
 
                         <div class="setup-body" id="setup-step-content" *ngIf="step() === 1">
-                <div class="setup-section">
-                    <h2>School model</h2>
-                    <p>Choose how your organization is structured.</p>
-                    <div class="choice-grid">
-                        <button type="button" class="choice-card" [class.active]="schoolMode() === 'single'"
-                            (click)="schoolMode.set('single')">
-                            <div class="choice-title">Single school</div>
-                            <div class="choice-text">One school operating under this organization.</div>
-                        </button>
-                        <button type="button" class="choice-card" [class.active]="schoolMode() === 'multi'"
-                            (click)="schoolMode.set('multi')">
-                            <div class="choice-title">Multiple schools</div>
-                            <div class="choice-text">Districts or groups managing more than one school.</div>
-                        </button>
-                    </div>
-                </div>
-                <div class="setup-actions">
-                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                    <mb-button variant="primary" (click)="next()">Continue</mb-button>
-                </div>
-                <button type="button" class="setup-skip" (click)="skipSetup()">Skip for now</button>
-            </div>
+                            <div class="setup-section">
+                                <h2>School model</h2>
+                                <p>This determines how schools, users, and reporting are structured in your workspace.</p>
+                                <div class="choice-grid">
+                                    <button type="button" class="choice-card" [class.active]="schoolMode() === 'single'"
+                                        (click)="schoolMode.set('single')">
+                                        <span class="choice-check" aria-hidden="true">✓</span>
+                                        <div class="choice-title">Single school</div>
+                                        <div class="choice-recommend">Recommended for most institutions</div>
+                                        <div class="choice-text">One school operating under this organization.</div>
+                                    </button>
+                                    <button type="button" class="choice-card" [class.active]="schoolMode() === 'multi'"
+                                        (click)="schoolMode.set('multi')">
+                                        <span class="choice-check" aria-hidden="true">✓</span>
+                                        <div class="choice-title">Multiple schools</div>
+                                        <div class="choice-text">Districts or groups managing more than one school.</div>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="setup-footer">
+                                <div class="setup-footer__actions">
+                                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                                    <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                                </div>
+                                <div class="setup-footer__aside">
+                                    <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
+                                    <div class="setup-footer__hint">You can change this later from Settings.</div>
+                                </div>
+                            </div>
+                            <div class="setup-auto-save">Configuration changes are saved automatically.</div>
+                        </div>
 
             <div class="setup-body" *ngIf="step() === 2">
                 <div class="setup-section" *ngIf="schoolMode() === 'single'">
@@ -153,11 +166,16 @@
                     <button type="button" class="list-add" (click)="addSchoolRow()">Add another school</button>
                 </div>
 
-                <div class="setup-actions">
-                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                    <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                <div class="setup-footer">
+                    <div class="setup-footer__actions">
+                        <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                        <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                    </div>
+                    <div class="setup-footer__aside">
+                        <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
+                    </div>
                 </div>
-                <button type="button" class="setup-skip" (click)="skipSetup()">Skip for now</button>
+                <div class="setup-auto-save">Configuration changes are saved automatically.</div>
             </div>
 
             <div class="setup-body" *ngIf="step() === 3">
@@ -179,11 +197,16 @@
                     <button type="button" class="list-add" (click)="addDepartment()">Add department</button>
                 </div>
 
-                <div class="setup-actions">
-                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                    <mb-button variant="primary" (click)="next()">Continue</mb-button>
+                <div class="setup-footer">
+                    <div class="setup-footer__actions">
+                        <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                        <mb-button variant="primary" (click)="next()">Continue</mb-button>
+                    </div>
+                    <div class="setup-footer__aside">
+                        <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
+                    </div>
                 </div>
-                <button type="button" class="setup-skip" (click)="skipSetup()">Skip for now</button>
+                <div class="setup-auto-save">Configuration changes are saved automatically.</div>
             </div>
 
             <div class="setup-body" *ngIf="step() === 4">
@@ -226,11 +249,16 @@
                     <button type="button" class="list-add" (click)="addLevel()">Add level</button>
                 </div>
 
-                <div class="setup-actions">
-                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                    <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                <div class="setup-footer">
+                    <div class="setup-footer__actions">
+                        <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                        <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                    </div>
+                    <div class="setup-footer__aside">
+                        <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
+                    </div>
                 </div>
-                <button type="button" class="setup-skip" (click)="skipSetup()">Skip for now</button>
+                <div class="setup-auto-save">Configuration changes are saved automatically.</div>
             </div>
 
             <div class="setup-body" *ngIf="step() === 5">
@@ -269,11 +297,16 @@
                     <button type="button" class="list-add" (click)="addClassRow()">Add class</button>
                 </div>
 
-                <div class="setup-actions">
-                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                    <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                <div class="setup-footer">
+                    <div class="setup-footer__actions">
+                        <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                        <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                    </div>
+                    <div class="setup-footer__aside">
+                        <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
+                    </div>
                 </div>
-                <button type="button" class="setup-skip" (click)="skipSetup()">Skip for now</button>
+                <div class="setup-auto-save">Configuration changes are saved automatically.</div>
             </div>
 
             <div class="setup-body" *ngIf="step() === 6">
@@ -312,11 +345,16 @@
                     </div>
                 </div>
 
-                <div class="setup-actions">
-                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                    <mb-button variant="primary" (click)="next()">Continue</mb-button>
+                <div class="setup-footer">
+                    <div class="setup-footer__actions">
+                        <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                        <mb-button variant="primary" (click)="next()">Continue</mb-button>
+                    </div>
+                    <div class="setup-footer__aside">
+                        <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
+                    </div>
                 </div>
-                <button type="button" class="setup-skip" (click)="skipSetup()">Skip for now</button>
+                <div class="setup-auto-save">Configuration changes are saved automatically.</div>
             </div>
 
             <div class="setup-body" *ngIf="step() === 7">
@@ -349,11 +387,16 @@
                     <button type="button" class="list-add" (click)="addInviteRow()">Add another user</button>
                 </div>
 
-                <div class="setup-actions">
-                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                    <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                <div class="setup-footer">
+                    <div class="setup-footer__actions">
+                        <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                        <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                    </div>
+                    <div class="setup-footer__aside">
+                        <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
+                    </div>
                 </div>
-                <button type="button" class="setup-skip" (click)="skipSetup()">Skip for now</button>
+                <div class="setup-auto-save">Configuration changes are saved automatically.</div>
             </div>
 
             <div class="setup-body" *ngIf="step() === 8">
