@@ -12,6 +12,7 @@ import {
     MbInputComponent,
     MbSelectComponent,
 } from '@mindbloom/ui';
+import { AddressComponent, AddressValue } from '../../../../shared/components/address/address.component';
 import { TenantSettingsService } from '../../../../core/services/tenant-settings.service';
 import { TenantService } from '../../../../core/services/tenant.service';
 import { SchoolService } from '../../../../core/school/school.service';
@@ -21,9 +22,9 @@ interface SchoolRow {
     name: string;
     code: string;
     country: string;
-    city?: string;
     timezone: string;
     status: 'Active' | 'Inactive';
+    address?: AddressValue;
 }
 
 interface InviteRow {
@@ -55,6 +56,7 @@ interface FirstLoginSetupData {
         MbSelectComponent,
         MbComboBoxComponent,
         MbAlertComponent,
+        AddressComponent,
     ],
     templateUrl: './first-login-setup.component.html',
     styleUrls: ['./first-login-setup.component.scss']
@@ -79,6 +81,7 @@ export class FirstLoginSetupComponent implements OnInit {
     tenantName = signal<string>('');
     country = signal<string>('');
     defaultTimezone = signal<string>('');
+    tenantAddress = signal<AddressValue | null>(null);
 
     schoolRows = signal<SchoolRow[]>([]);
     isSchoolModalOpen = signal(false);
@@ -86,10 +89,10 @@ export class FirstLoginSetupComponent implements OnInit {
     schoolFormName = signal('');
     schoolFormCode = signal('');
     schoolFormCountry = signal('');
-    schoolFormCity = signal('');
     schoolFormTimezone = signal('');
     schoolFormTouched = signal(false);
     schoolFormCodeTouched = signal(false);
+    schoolFormAddress = signal<AddressValue>({});
 
     departments = signal<string[]>(['Academics', 'Administration', 'Finance']);
     levelsTemplate = signal<'k12' | 'primary_secondary' | 'custom'>('k12');
@@ -284,13 +287,27 @@ export class FirstLoginSetupComponent implements OnInit {
         this.schoolRows.update(rows => rows.map((row, i) => i === index ? { ...row, [field]: value } : row));
     }
 
+    updateSchoolAddressField(index: number, field: keyof AddressValue, value: string): void {
+        this.schoolRows.update(rows => rows.map((row, i) => {
+            if (i !== index) return row;
+            return {
+                ...row,
+                address: { ...(row.address || {}), [field]: value }
+            };
+        }));
+    }
+
+    updateSchoolAddress(index: number, value: AddressValue): void {
+        this.schoolRows.update(rows => rows.map((row, i) => i === index ? { ...row, address: value } : row));
+    }
+
     openAddSchool(): void {
         this.editingSchoolIndex.set(null);
         this.schoolFormName.set('');
         this.schoolFormCode.set('');
         this.schoolFormCountry.set(this.country());
-        this.schoolFormCity.set('');
         this.schoolFormTimezone.set(this.defaultTimezone());
+        this.schoolFormAddress.set({});
         this.schoolFormTouched.set(false);
         this.schoolFormCodeTouched.set(false);
         this.isSchoolModalOpen.set(true);
@@ -303,8 +320,8 @@ export class FirstLoginSetupComponent implements OnInit {
         this.schoolFormName.set(row.name);
         this.schoolFormCode.set(row.code);
         this.schoolFormCountry.set(row.country);
-        this.schoolFormCity.set(row.city || '');
         this.schoolFormTimezone.set(row.timezone);
+        this.schoolFormAddress.set(row.address || {});
         this.schoolFormTouched.set(false);
         this.schoolFormCodeTouched.set(true);
         this.isSchoolModalOpen.set(true);
@@ -326,9 +343,9 @@ export class FirstLoginSetupComponent implements OnInit {
             name: this.schoolFormName().trim(),
             code: this.schoolFormCode().trim(),
             country: this.schoolFormCountry().trim(),
-            city: this.schoolFormCity().trim() || undefined,
             timezone: this.schoolFormTimezone().trim(),
             status: 'Active',
+            address: this.schoolFormAddress(),
         };
         const editIndex = this.editingSchoolIndex();
         if (editIndex === null) {
@@ -365,6 +382,15 @@ export class FirstLoginSetupComponent implements OnInit {
             .replace(/-+/g, '-')
             .replace(/^-|-$/g, '');
         this.schoolFormCode.set(normalized);
+    }
+
+    copySchoolAddressFromTenant(): void {
+        const tenantAddress = this.tenantAddress();
+        if (!tenantAddress) return;
+        this.schoolFormAddress.set({ ...tenantAddress });
+        if (!this.schoolFormCountry().trim() && this.country().trim()) {
+            this.schoolFormCountry.set(this.country());
+        }
     }
 
     markSchoolFormTouched(): void {
@@ -466,7 +492,20 @@ export class FirstLoginSetupComponent implements OnInit {
                 const tenantId = tenant.id || this.tenantService.getTenantId() || '';
                 this.tenantId.set(tenantId);
                 this.tenantName.set(tenant.name || '');
-                this.country.set(tenant.contactInfo?.address?.country || '');
+                const tenantAddress = tenant.contactInfo?.address || {};
+                this.country.set(tenantAddress.country || '');
+                const hasTenantAddress = !!(
+                    tenantAddress.street ||
+                    tenantAddress.city ||
+                    tenantAddress.state ||
+                    tenantAddress.postalCode
+                );
+                this.tenantAddress.set(hasTenantAddress ? {
+                    street: tenantAddress.street || '',
+                    city: tenantAddress.city || '',
+                    state: tenantAddress.state || '',
+                    postalCode: tenantAddress.postalCode || '',
+                } : null);
                 this.defaultTimezone.set(tenant.timezone || this.defaultTimeZone());
                 if (!this.schoolRows().length) {
                     const defaultName = tenant.name || 'School';
@@ -563,9 +602,10 @@ export class FirstLoginSetupComponent implements OnInit {
             name,
             code,
             country: this.country(),
-            city: '',
             timezone: this.defaultTimezone(),
             status: 'Active'
+            ,
+            address: {},
         };
     }
 
@@ -574,9 +614,10 @@ export class FirstLoginSetupComponent implements OnInit {
             name: row.name?.trim() || '',
             code: row.code?.trim() || '',
             country: row.country?.trim() || this.country(),
-            city: row.city?.trim() || '',
             timezone: row.timezone?.trim() || this.defaultTimezone(),
             status: row.status || 'Active'
+            ,
+            address: row.address || {},
         };
     }
 

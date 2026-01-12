@@ -1,0 +1,35 @@
+.address-block {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.address-block__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.address-block__title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--mb-color-text-subtle);
+}
+
+.address-block__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.address-block__field--full {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 720px) {
+    .address-block__grid {
+        grid-template-columns: 1fr;
+    }
+}

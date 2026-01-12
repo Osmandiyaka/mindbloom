@@ -93,7 +93,7 @@
                                                 </div>
                                                 <div class="schools-table__cell">{{ row.code }}</div>
                                                 <div class="schools-table__cell">
-                                                    {{ row.city ? (row.city + ', ' + row.country) : (row.country || '—') }}
+                                                    {{ row.address?.city ? (row.address?.city + ', ' + row.country) : (row.country || '—') }}
                                                 </div>
                                                 <div class="schools-table__cell">{{ row.timezone }}</div>
                                                 <div class="schools-table__cell">
@@ -178,10 +178,15 @@
                                                     </mb-combobox>
                                                 </mb-form-field>
 
-                                                <mb-form-field label="City (optional)" [controlId]="'school-form-city'">
-                                                    <mb-input id="school-form-city" [value]="schoolFormCity()"
-                                                        (valueChange)="schoolFormCity.set($event)"></mb-input>
-                                                </mb-form-field>
+                                                <app-address
+                                                    [value]="schoolFormAddress()"
+                                                    [showCopy]="!!tenantAddress()"
+                                                    [copyLabel]="'Copy from organization'"
+                                                    [title]="'Address'"
+                                                    [controlPrefix]="'school-form-address'"
+                                                    (valueChange)="schoolFormAddress.set($event)"
+                                                    (copyFromTenant)="copySchoolAddressFromTenant()"
+                                                ></app-address>
 
                                                 <mb-form-field label="Time zone" [controlId]="'school-form-timezone'"
                                                     hint="Used for schedules, attendance, and reports."
@@ -250,10 +255,11 @@
                                 </mb-select>
                             </mb-form-field>
 
-                            <mb-form-field label="City (optional)" [controlId]="'school-city-' + i">
-                                <mb-input [id]="'school-city-' + i" [value]="row.city || ''"
-                                    (valueChange)="updateSchoolRow(i, 'city', $event)"></mb-input>
-                            </mb-form-field>
+                            <app-address
+                                [value]="row.address || {}"
+                                [showTitle]="false"
+                                (valueChange)="updateSchoolAddress(i, $event)"
+                            ></app-address>
 
                             <mb-form-field label="Time zone" [controlId]="'school-timezone-' + i"
                                 [error]="showErrors() && !row.timezone.trim() ? 'Select a time zone.' : ''">
