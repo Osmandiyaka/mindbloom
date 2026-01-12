@@ -203,7 +203,8 @@ export class MbTableComponent<T extends Record<string, any>> {
     }
 
     isInactiveStatus(row: T): boolean {
-        return row['status' as keyof T] === 'Inactive';
+        const status = row['status' as keyof T];
+        return status === 'Inactive' || status === 'Suspended';
     }
 
     isNameColumn(column: MbTableColumn<T>): boolean {

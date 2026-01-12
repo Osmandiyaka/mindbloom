@@ -488,44 +488,295 @@
 
             <div class="setup-body" *ngIf="step() === 7">
                 <div class="setup-section">
-                    <h2>Invite core users</h2>
-                    <p>Invite colleagues who should have early access.</p>
-
-                    <div class="list-stack">
-                        <div class="list-row" *ngFor="let row of invites(); let i = index">
-                            <mb-form-field label="Email" [controlId]="'invite-email-' + i"
-                                [error]="inviteEmailError(row)">
-                                <mb-input [id]="'invite-email-' + i" [value]="row.email"
-                                    (valueChange)="updateInviteRow(i, 'email', $event)"></mb-input>
-                            </mb-form-field>
-
-                            <mb-form-field label="Role" [controlId]="'invite-role-' + i">
-                                <mb-select [id]="'invite-role-' + i" [value]="row.role"
-                                    (valueChange)="updateInviteRow(i, 'role', $event)">
-                                    <option value="Administrator">Administrator</option>
-                                    <option value="Teacher">Teacher</option>
-                                    <option value="Staff">Staff</option>
-                                </mb-select>
-                            </mb-form-field>
-
-                            <button type="button" class="list-remove" *ngIf="invites().length > 1"
-                                (click)="removeInviteRow(i)">Remove</button>
+                    <div class="users-header">
+                        <div>
+                            <h2>Staff & users</h2>
+                            <p>Add staff who will access the workspace. You can invite now and assign roles later.</p>
                         </div>
                     </div>
 
-                    <button type="button" class="list-add" (click)="addInviteRow()">Add another user</button>
+                    <div class="users-utility">
+                        <mb-form-field label="Search" [controlId]="'user-search'">
+                            <mb-input
+                                id="user-search"
+                                [value]="userSearch()"
+                                (valueChange)="userSearch.set($event)"
+                            ></mb-input>
+                        </mb-form-field>
+                        <div class="users-utility__actions">
+                            <button type="button" class="users-link" (click)="triggerCsvImport(csvInput)">Import CSV</button>
+                            <mb-button variant="primary" (click)="openInviteModal()">Invite users</mb-button>
+                        </div>
+                        <input #csvInput type="file" class="users-csv-input" accept=".csv"
+                            (change)="handleCsvImport($event)" />
+                    </div>
+
+                    <div class="users-table-wrap">
+                        <mb-table
+                            class="users-table"
+                            *ngIf="filteredUsers().length; else emptyUsers"
+                            [columns]="userTableColumns"
+                            [rows]="filteredUsers()"
+                            (cellClick)="handleUserCellClick($event)"
+                        >
+                            <ng-template mbTableActions let-row>
+                                <div class="users-table__actions">
+                                    <details class="users-menu" #userMenu>
+                                        <summary class="users-menu__toggle" aria-label="Actions">⋯</summary>
+                                        <div class="users-menu__panel">
+                                            <button type="button" class="users-menu__item"
+                                                (click)="openEditUser(getUserRowIndex(row)); userMenu.open = false">
+                                                Edit details
+                                            </button>
+                                            <button type="button" class="users-menu__item"
+                                                *ngIf="row.status === 'Invited'"
+                                                (click)="resendInvite(getUserRowIndex(row)); userMenu.open = false">
+                                                Resend invite
+                                            </button>
+                                            <button type="button" class="users-menu__item"
+                                                *ngIf="row.status !== 'Invited'"
+                                                (click)="toggleUserStatus(getUserRowIndex(row)); userMenu.open = false">
+                                                {{ row.status === 'Suspended' ? 'Activate user' : 'Suspend user' }}
+                                            </button>
+                                            <button type="button" class="users-menu__item users-menu__item--danger"
+                                                (click)="removeUser(getUserRowIndex(row)); userMenu.open = false">
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </details>
+                                </div>
+                            </ng-template>
+                        </mb-table>
+
+                        <ng-template #emptyUsers>
+                            <div class="users-empty">
+                                <div class="users-empty__title">No users added yet</div>
+                                <div class="users-empty__text">Invite staff to start using your workspace.</div>
+                                <div class="users-empty__actions">
+                                    <mb-button variant="primary" (click)="openInviteModal()">Invite users</mb-button>
+                                    <button type="button" class="users-link" (click)="triggerCsvImport(csvInput)">Import CSV</button>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </div>
                 </div>
 
                 <div class="setup-footer">
                     <div class="setup-footer__actions">
                         <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                        <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                        <mb-button variant="primary" (click)="next()">Continue</mb-button>
                     </div>
                     <div class="setup-footer__aside">
                         <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
+                        <div class="setup-footer__hint">You can resume later from Settings → Workspace setup.</div>
                     </div>
                 </div>
                 <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
+
+                <div class="users-modal" *ngIf="isInviteModalOpen()" role="presentation">
+                    <div class="users-modal__backdrop"></div>
+                    <div class="users-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="invite-modal-title"
+                        tabindex="0" (keydown.escape)="closeInviteModal()">
+                        <div class="users-modal__header">
+                            <div>
+                                <div id="invite-modal-title" class="users-modal__title">Invite users</div>
+                                <div class="users-modal__subtitle">They’ll receive an email to set their password.</div>
+                            </div>
+                            <button type="button" class="users-modal__close" (click)="closeInviteModal()"
+                                aria-label="Close dialog">×</button>
+                        </div>
+                        <div class="users-modal__body">
+                            <mb-form-field label="Email addresses" [controlId]="'invite-emails'"
+                                [error]="inviteTouched() && inviteEmailList().length === 0 ? 'Add at least one email.' : (inviteInvalidEmails().length ? 'Remove invalid email addresses.' : (inviteDuplicateEmails().length ? 'Remove duplicate email addresses.' : ''))"
+                                hint="Paste one per line or separate with commas.">
+                                <mb-textarea id="invite-emails" [value]="inviteEmails()"
+                                    (valueChange)="inviteEmails.set($event)"
+                                    (blur)="inviteTouched.set(true)"></mb-textarea>
+                            </mb-form-field>
+
+                            <mb-form-field label="Default role" [controlId]="'invite-role'" hint="You can change roles later.">
+                                <mb-select id="invite-role" [value]="inviteRole()"
+                                    (valueChange)="setInviteRole($event)">
+                                    <option value="Owner">Owner</option>
+                                    <option value="Administrator">Administrator</option>
+                                    <option value="Staff">Staff</option>
+                                    <option value="Teacher">Teacher</option>
+                                </mb-select>
+                            </mb-form-field>
+
+                            <div class="users-modal__section">
+                                <div class="users-modal__section-title">School access</div>
+                                <label class="users-radio">
+                                    <input type="radio" name="invite-access" [checked]="inviteSchoolAccess() === 'all'"
+                                        (change)="inviteSchoolAccess.set('all')" />
+                                    <span>All schools</span>
+                                </label>
+                                <label class="users-radio">
+                                    <input type="radio" name="invite-access" [checked]="inviteSchoolAccess() === 'selected'"
+                                        (change)="inviteSchoolAccess.set('selected')" />
+                                    <span>Selected schools</span>
+                                </label>
+                                <div class="users-school-list" *ngIf="inviteSchoolAccess() === 'selected'">
+                                    <mb-checkbox
+                                        *ngFor="let name of activeSchoolNames()"
+                                        [checked]="inviteSelectedSchools().includes(name)"
+                                        (checkedChange)="toggleInviteSchoolSelection(name, $event)"
+                                    >{{ name }}</mb-checkbox>
+                                </div>
+                                <div class="users-inline-error" *ngIf="inviteTouched() && inviteSchoolAccess() === 'selected' && inviteSelectedSchools().length === 0">
+                                    Select at least one school.
+                                </div>
+                            </div>
+
+                            <button type="button" class="users-link" (click)="toggleInviteMessage()">
+                                {{ inviteMessageOpen() ? 'Hide message' : 'Add a message' }}
+                            </button>
+                            <mb-form-field *ngIf="inviteMessageOpen()" label="Message" [controlId]="'invite-message'">
+                                <mb-textarea id="invite-message" [value]="inviteMessage()"
+                                    (valueChange)="inviteMessage.set($event)"></mb-textarea>
+                            </mb-form-field>
+                        </div>
+                        <div class="users-modal__footer">
+                            <div class="users-modal__hint">Invites can be resent anytime.</div>
+                            <div class="users-modal__actions">
+                                <mb-button variant="secondary" (click)="closeInviteModal()">Cancel</mb-button>
+                                <mb-button variant="primary" [disabled]="!inviteCanSubmit()" (click)="sendInvites()">
+                                    Send invites
+                                </mb-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="users-modal" *ngIf="isEditUserModalOpen()" role="presentation">
+                    <div class="users-modal__backdrop"></div>
+                    <div class="users-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="edit-user-title"
+                        tabindex="0" (keydown.escape)="closeEditUser()">
+                        <div class="users-modal__header">
+                            <div>
+                                <div id="edit-user-title" class="users-modal__title">Edit user</div>
+                                <div class="users-modal__subtitle">Update role, access, and employment details.</div>
+                            </div>
+                            <button type="button" class="users-modal__close" (click)="closeEditUser()"
+                                aria-label="Close dialog">×</button>
+                        </div>
+                        <div class="users-modal__body">
+                            <mb-form-field label="Full name" [controlId]="'edit-user-name'"
+                                [error]="editTouched() && !editName().trim() ? 'Name is required.' : ''">
+                                <mb-input id="edit-user-name" [value]="editName()"
+                                    (valueChange)="editName.set($event)"
+                                    (blur)="editTouched.set(true)"></mb-input>
+                            </mb-form-field>
+                            <mb-form-field label="Email" [controlId]="'edit-user-email'">
+                                <mb-input id="edit-user-email" [value]="editEmail()" [disabled]="true"></mb-input>
+                            </mb-form-field>
+                            <mb-form-field label="Role" [controlId]="'edit-user-role'">
+                                <mb-select id="edit-user-role" [value]="editRole()"
+                                    (valueChange)="setEditRole($event)">
+                                    <option value="Owner">Owner</option>
+                                    <option value="Administrator">Administrator</option>
+                                    <option value="Staff">Staff</option>
+                                    <option value="Teacher">Teacher</option>
+                                </mb-select>
+                            </mb-form-field>
+
+                            <div class="users-modal__section">
+                                <div class="users-modal__section-title">School access</div>
+                                <label class="users-radio">
+                                    <input type="radio" name="edit-access" [checked]="editSchoolAccess() === 'all'"
+                                        (change)="editSchoolAccess.set('all')" />
+                                    <span>All schools</span>
+                                </label>
+                                <label class="users-radio">
+                                    <input type="radio" name="edit-access" [checked]="editSchoolAccess() === 'selected'"
+                                        (change)="editSchoolAccess.set('selected')" />
+                                    <span>Selected schools</span>
+                                </label>
+                                <div class="users-school-list" *ngIf="editSchoolAccess() === 'selected'">
+                                    <mb-checkbox
+                                        *ngFor="let name of activeSchoolNames()"
+                                        [checked]="editSelectedSchools().includes(name)"
+                                        (checkedChange)="toggleEditSchoolSelection(name, $event)"
+                                    >{{ name }}</mb-checkbox>
+                                </div>
+                            </div>
+
+                            <div class="users-modal__section">
+                                <div class="users-modal__section-title">Employment details</div>
+                                <mb-form-field label="Job title" [controlId]="'edit-user-job'">
+                                    <mb-input id="edit-user-job" [value]="editJobTitle()"
+                                        (valueChange)="editJobTitle.set($event)"></mb-input>
+                                </mb-form-field>
+                                <mb-form-field label="Department" [controlId]="'edit-user-dept'">
+                                    <mb-input id="edit-user-dept" [value]="editDepartment()"
+                                        (valueChange)="editDepartment.set($event)"></mb-input>
+                                </mb-form-field>
+                                <mb-form-field label="Staff ID (optional)" [controlId]="'edit-user-staff-id'">
+                                    <mb-input id="edit-user-staff-id" [value]="editStaffId()"
+                                        (valueChange)="editStaffId.set($event)"></mb-input>
+                                </mb-form-field>
+                            </div>
+                        </div>
+                        <div class="users-modal__footer">
+                            <div class="users-modal__hint">Changes are saved immediately.</div>
+                            <div class="users-modal__actions">
+                                <mb-button variant="secondary" (click)="closeEditUser()">Cancel</mb-button>
+                                <mb-button variant="primary" [disabled]="editTouched() && !editName().trim()" (click)="saveUserEdits()">
+                                    Save changes
+                                </mb-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="users-modal" *ngIf="isViewUserModalOpen()" role="presentation">
+                    <div class="users-modal__backdrop"></div>
+                    <div class="users-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="view-user-title"
+                        tabindex="0" (keydown.escape)="closeViewUser()">
+                        <div class="users-modal__header">
+                            <div>
+                                <div id="view-user-title" class="users-modal__title">User details</div>
+                                <div class="users-modal__subtitle">Review identity, access, and status.</div>
+                            </div>
+                            <button type="button" class="users-modal__close" (click)="closeViewUser()"
+                                aria-label="Close dialog">×</button>
+                        </div>
+                        <div class="users-modal__body" *ngIf="viewUser() as user">
+                            <div class="users-view">
+                                <div class="users-view__name">{{ user.name || 'Pending name' }}</div>
+                                <div class="users-view__email">{{ user.email }}</div>
+                                <div class="users-view__row">
+                                    <div class="users-view__label">Role</div>
+                                    <div class="users-view__value">{{ user.role }}</div>
+                                </div>
+                                <div class="users-view__row">
+                                    <div class="users-view__label">School access</div>
+                                    <div class="users-view__value">{{ schoolAccessLabel(user) }}</div>
+                                </div>
+                                <div class="users-view__row">
+                                    <div class="users-view__label">Status</div>
+                                    <div class="users-view__value">{{ user.status }}</div>
+                                </div>
+                                <div class="users-view__row" *ngIf="user.lastLogin">
+                                    <div class="users-view__label">Last login</div>
+                                    <div class="users-view__value">{{ user.lastLogin }}</div>
+                                </div>
+                                <div class="users-view__row" *ngIf="user.createdAt">
+                                    <div class="users-view__label">Created</div>
+                                    <div class="users-view__value">{{ user.createdAt | date:'mediumDate' }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="users-modal__footer" *ngIf="viewUser() as user">
+                            <div class="users-modal__actions">
+                                <mb-button variant="secondary" (click)="closeViewUser()">Close</mb-button>
+                                <mb-button variant="primary" (click)="openEditUser(getUserRowIndex(user)); closeViewUser()">
+                                    Edit
+                                </mb-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="setup-body" *ngIf="step() === 8">
@@ -553,8 +804,8 @@
                             <button type="button" class="review-link" (click)="goToStep(6)">Edit</button>
                         </div>
                         <div class="review-card">
-                            <div class="review-title">Invitations</div>
-                            <div class="review-value">{{ inviteCount() }} invite(s)</div>
+                            <div class="review-title">Users</div>
+                            <div class="review-value">{{ userCount() }} user(s)</div>
                             <button type="button" class="review-link" (click)="goToStep(7)">Edit</button>
                         </div>
                     </div>

@@ -508,6 +508,327 @@
     background: color-mix(in srgb, var(--mb-color-border) 70%, transparent);
 }
 
+.users-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.users-utility {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.users-utility mb-form-field {
+    flex: 1;
+}
+
+.users-utility__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.users-link {
+    border: none;
+    background: none;
+    color: var(--mb-color-text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.users-link:hover {
+    color: var(--mb-color-text);
+}
+
+.users-csv-input {
+    display: none;
+}
+
+.users-table-wrap {
+    position: relative;
+}
+
+.users-table {
+    display: block;
+}
+
+.users-table .mb-table {
+    overflow: visible;
+    position: relative;
+    z-index: 1;
+    padding: 8px;
+}
+
+.users-table .mb-table table {
+    width: 100%;
+}
+
+.users-table .mb-table thead th {
+    background: var(--mb-color-surface);
+    color: var(--mb-color-text-subtle);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.01em;
+}
+
+.users-table .mb-table tbody td {
+    color: var(--mb-color-text-muted);
+    font-size: 13px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+:host ::ng-deep .users-table .mb-table__cell[data-col='name'] {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 15px;
+    cursor: pointer;
+}
+
+:host ::ng-deep .users-table .mb-table__cell[data-col='name']:hover {
+    text-decoration: underline;
+}
+
+.users-table__actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.users-menu {
+    position: relative;
+    z-index: 6;
+}
+
+.users-menu__toggle {
+    list-style: none;
+    cursor: pointer;
+    color: var(--mb-color-text-muted);
+    font-size: 12px;
+    border: none;
+    background: none;
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.users-menu__toggle:hover,
+.users-menu__toggle:focus-visible {
+    background: color-mix(in srgb, var(--mb-color-border) 40%, transparent);
+    color: var(--mb-color-text);
+}
+
+.users-menu__panel {
+    position: absolute;
+    right: 0;
+    top: 28px;
+    background: var(--mb-color-surface);
+    border: 1px solid var(--mb-color-border-subtle);
+    border-radius: 10px;
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+    min-width: 180px;
+    padding: 6px;
+    z-index: 10;
+}
+
+.users-menu__item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: none;
+    padding: 8px 10px;
+    font-size: 13px;
+    color: var(--mb-color-text);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.users-menu__item:hover {
+    background: color-mix(in srgb, var(--mb-color-border) 35%, transparent);
+}
+
+.users-menu__item--danger {
+    color: var(--mb-color-danger);
+}
+
+.users-empty {
+    padding: 20px;
+    border: 1px dashed var(--mb-color-border-subtle);
+    border-radius: 12px;
+    text-align: center;
+    color: var(--mb-color-text-muted);
+}
+
+.users-empty__title {
+    font-weight: 600;
+    color: var(--mb-color-text);
+    margin-bottom: 6px;
+}
+
+.users-empty__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.users-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.users-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(3px);
+}
+
+.users-modal__dialog {
+    position: relative;
+    margin-top: 72px;
+    width: min(640px, 92vw);
+    max-height: calc(100vh - 96px);
+    background: var(--mb-color-surface);
+    border-radius: 12px;
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: schools-modal-in 140ms ease-out;
+}
+
+.users-modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.users-modal__title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--mb-color-text);
+}
+
+.users-modal__subtitle {
+    font-size: 14px;
+    color: var(--mb-color-text-muted);
+    margin-top: 4px;
+}
+
+.users-modal__close {
+    border: none;
+    background: none;
+    font-size: 20px;
+    color: var(--mb-color-text-muted);
+    cursor: pointer;
+    padding: 0;
+}
+
+.users-modal__body {
+    overflow-y: auto;
+    max-height: calc(100vh - 220px);
+    padding-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.users-modal__section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.users-modal__section-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--mb-color-text-subtle);
+    text-transform: uppercase;
+}
+
+.users-radio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--mb-color-text);
+}
+
+.users-school-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px 16px;
+    margin-top: 8px;
+}
+
+.users-inline-error {
+    font-size: 12px;
+    color: var(--mb-color-danger);
+}
+
+.users-modal__footer {
+    border-top: 1px solid var(--mb-color-border-subtle);
+    padding-top: 16px;
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.users-modal__hint {
+    font-size: 12px;
+    color: var(--mb-color-text-muted);
+}
+
+.users-modal__actions {
+    display: flex;
+    gap: 12px;
+}
+
+.users-view__name {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--mb-color-text);
+}
+
+.users-view__email {
+    font-size: 13px;
+    color: var(--mb-color-text-muted);
+    margin-bottom: 12px;
+}
+
+.users-view__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    font-size: 13px;
+}
+
+.users-view__label {
+    color: var(--mb-color-text-subtle);
+}
+
+.users-view__value {
+    color: var(--mb-color-text);
+}
+
 .schools-menu {
     position: relative;
     z-index: 5;

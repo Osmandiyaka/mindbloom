@@ -7,12 +7,14 @@ import {
     MbAlertComponent,
     MbButtonComponent,
     MbCardComponent,
+    MbCheckboxComponent,
     MbFormFieldComponent,
     MbInputComponent,
     MbSelectComponent,
     MbTableActionsDirective,
     MbTableComponent,
     MbTableColumn,
+    MbTextareaComponent,
 } from '@mindbloom/ui';
 import { AddressComponent, AddressValue } from '../../../../shared/components/address/address.component';
 import { COUNTRY_OPTIONS, CountrySelectComponent } from '../../../../shared/components/country-select/country-select.component';
@@ -31,9 +33,21 @@ interface SchoolRow {
     address?: AddressValue;
 }
 
-interface InviteRow {
+type UserRole = 'Owner' | 'Administrator' | 'Staff' | 'Teacher';
+type UserStatus = 'Invited' | 'Active' | 'Suspended';
+
+interface UserRow {
+    id: string;
+    name: string;
     email: string;
-    role: 'Administrator' | 'Teacher' | 'Staff';
+    role: UserRole;
+    schoolAccess: 'all' | string[];
+    status: UserStatus;
+    jobTitle?: string;
+    department?: string;
+    staffId?: string;
+    lastLogin?: string;
+    createdAt?: string;
 }
 
 interface FirstLoginSetupData {
@@ -43,7 +57,7 @@ interface FirstLoginSetupData {
     levels?: string[];
     classes?: Array<{ name: string; level: string; sections: string }>;
     gradingModel?: 'letter' | 'numeric' | 'gpa' | 'custom';
-    invites?: InviteRow[];
+    users?: UserRow[];
 }
 
 @Component({
@@ -61,6 +75,8 @@ interface FirstLoginSetupData {
         MbAlertComponent,
         MbTableComponent,
         MbTableActionsDirective,
+        MbTextareaComponent,
+        MbCheckboxComponent,
         AddressComponent,
         CountrySelectComponent,
         TimezoneSelectComponent,
@@ -111,7 +127,34 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     gradingModel = signal<'letter' | 'numeric' | 'gpa' | 'custom'>('letter');
     gradingScale = computed(() => this.buildGradingScale(this.gradingModel()));
 
-    invites = signal<InviteRow[]>([{ email: '', role: 'Teacher' }]);
+    users = signal<UserRow[]>([]);
+    userSearch = signal('');
+
+    isInviteModalOpen = signal(false);
+    inviteEmails = signal('');
+    inviteRole = signal<UserRole>('Staff');
+    inviteSchoolAccess = signal<'all' | 'selected'>('all');
+    inviteSelectedSchools = signal<string[]>([]);
+    inviteMessage = signal('');
+    inviteMessageOpen = signal(false);
+    inviteTouched = signal(false);
+
+    isEditUserModalOpen = signal(false);
+    editUserIndex = signal<number | null>(null);
+    editName = signal('');
+    editEmail = signal('');
+    editRole = signal<UserRole>('Staff');
+    editSchoolAccess = signal<'all' | 'selected'>('all');
+    editSelectedSchools = signal<string[]>([]);
+    editJobTitle = signal('');
+    editDepartment = signal('');
+    editStaffId = signal('');
+    editTouched = signal(false);
+
+    isViewUserModalOpen = signal(false);
+    viewUser = signal<UserRow | null>(null);
+
+    private userCounter = 0;
 
     readonly schoolTableColumns: MbTableColumn<SchoolRow>[] = [
         {
@@ -143,12 +186,12 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     readonly stepLabels = [
         'Organization & schools',
+        'School details',
+        'Organizational units',
         'Academic structure',
-        'Staff and users',
-        'Grading system',
-        'Time zones & calendars',
         'Classes & sections',
-        'Roles & permissions',
+        'Grading system',
+        'Staff & users',
         'Review & activate'
     ];
 
@@ -165,19 +208,82 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     readonly isReviewStep = computed(() => this.step() === 8);
     readonly isDoneStep = computed(() => this.step() === 9);
     readonly showErrors = computed(() => this.attemptedContinue());
-    readonly inviteCount = computed(() => this.invites().filter(row => row.email.trim()).length);
+    readonly userCount = computed(() => this.users().length);
 
     readonly levelsError = computed(() => {
         if (!this.showErrors() || this.step() !== 4) return '';
         return this.levels().some(level => level.trim()) ? '' : 'Add at least one level.';
     });
 
-    inviteEmailError(row: InviteRow): string {
-        if (!this.showErrors()) return '';
-        const email = row.email.trim();
-        if (!email) return '';
-        return this.isValidEmail(email) ? '' : 'Enter a valid email.';
-    }
+    readonly filteredUsers = computed(() => {
+        const query = this.userSearch().trim().toLowerCase();
+        if (!query) return this.users();
+        return this.users().filter(user =>
+            user.name.toLowerCase().includes(query) ||
+            user.email.toLowerCase().includes(query)
+        );
+    });
+
+    readonly activeSchoolNames = computed(() => this.schoolRows()
+        .filter(row => row.status === 'Active')
+        .map(row => row.name)
+    );
+
+    readonly inviteEmailList = computed(() => this.parseEmailList(this.inviteEmails()));
+    readonly inviteInvalidEmails = computed(() => this.inviteEmailList().filter(email => !this.isValidEmail(email)));
+    readonly inviteDuplicateEmails = computed(() => {
+        const seen = new Set<string>();
+        return this.inviteEmailList().filter(email => {
+            if (seen.has(email)) return true;
+            seen.add(email);
+            return false;
+        });
+    });
+
+    readonly inviteHasErrors = computed(() => {
+        if (!this.inviteTouched()) return false;
+        if (!this.inviteEmailList().length) return true;
+        if (this.inviteInvalidEmails().length > 0) return true;
+        if (this.inviteDuplicateEmails().length > 0) return true;
+        if (this.inviteSchoolAccess() === 'selected' && this.inviteSelectedSchools().length === 0) return true;
+        return false;
+    });
+
+    readonly inviteCanSubmit = computed(() => {
+        if (!this.inviteEmailList().length) return false;
+        if (this.inviteInvalidEmails().length > 0) return false;
+        if (this.inviteDuplicateEmails().length > 0) return false;
+        if (this.inviteSchoolAccess() === 'selected' && this.inviteSelectedSchools().length === 0) return false;
+        return true;
+    });
+
+    readonly userTableColumns: MbTableColumn<UserRow>[] = [
+        {
+            key: 'name',
+            label: 'Name',
+            cell: row => row.name
+        },
+        {
+            key: 'email',
+            label: 'Email',
+            cell: row => row.email
+        },
+        {
+            key: 'role',
+            label: 'Role',
+            cell: row => row.role
+        },
+        {
+            key: 'schoolAccess',
+            label: 'School access',
+            cell: row => this.schoolAccessLabel(row)
+        },
+        {
+            key: 'status',
+            label: 'Status',
+            cell: row => row.status
+        }
+    ];
 
     readonly schoolsValid = computed(() => {
         const rows = this.schoolRows().filter(row => row.status === 'Active');
@@ -206,8 +312,6 @@ export class TenantWorkspaceSetupComponent implements OnInit {
                 return this.levels().length > 0;
             case 5:
                 return this.classes().every(row => !!row.name.trim() && !!row.level.trim());
-            case 7:
-                return this.invites().every(row => !row.email.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.email.trim()));
             default:
                 return true;
         }
@@ -396,6 +500,17 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.openEditSchool(index);
     }
 
+    getUserRowIndex(row: UserRow): number {
+        return this.users().indexOf(row);
+    }
+
+    handleUserCellClick(event: { row: UserRow; column: MbTableColumn<UserRow> }): void {
+        if (String(event.column.key) !== 'name') return;
+        const index = this.getUserRowIndex(event.row);
+        if (index < 0) return;
+        this.openViewUser(index);
+    }
+
     onSchoolFormNameChange(value: string): void {
         this.schoolFormName.set(value);
         if (this.editingSchoolIndex() !== null) return;
@@ -474,16 +589,167 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.classes.update(items => items.filter((_, i) => i !== index));
     }
 
-    addInviteRow(): void {
-        this.invites.update(items => [...items, { email: '', role: 'Teacher' }]);
+    openInviteModal(): void {
+        this.inviteEmails.set('');
+        this.inviteRole.set('Staff');
+        this.inviteSchoolAccess.set('all');
+        this.inviteSelectedSchools.set([]);
+        this.inviteMessage.set('');
+        this.inviteMessageOpen.set(false);
+        this.inviteTouched.set(false);
+        this.isInviteModalOpen.set(true);
     }
 
-    updateInviteRow(index: number, field: 'email' | 'role', value: string): void {
-        this.invites.update(items => items.map((row, i) => i === index ? { ...row, [field]: value as any } : row));
+    closeInviteModal(): void {
+        this.isInviteModalOpen.set(false);
+        this.inviteTouched.set(false);
     }
 
-    removeInviteRow(index: number): void {
-        this.invites.update(items => items.filter((_, i) => i !== index));
+    toggleInviteMessage(): void {
+        this.inviteMessageOpen.set(!this.inviteMessageOpen());
+    }
+
+    toggleInviteSchoolSelection(name: string, checked: boolean): void {
+        this.inviteSelectedSchools.update(items => {
+            if (checked) return [...items, name];
+            return items.filter(item => item !== name);
+        });
+    }
+
+    sendInvites(): void {
+        this.inviteTouched.set(true);
+        if (this.inviteHasErrors()) return;
+        const emails = this.inviteEmailList();
+        const existingEmails = new Set(this.users().map(user => user.email.toLowerCase()));
+        const schoolAccess = this.inviteSchoolAccess() === 'all'
+            ? 'all'
+            : [...this.inviteSelectedSchools()];
+        const role = this.inviteRole();
+        const newUsers: UserRow[] = emails
+            .filter(email => !existingEmails.has(email.toLowerCase()))
+            .map(email => ({
+                id: this.nextUserId(),
+                name: '',
+                email,
+                role,
+                schoolAccess,
+                status: 'Invited',
+                createdAt: new Date().toISOString(),
+            }));
+        if (newUsers.length) {
+            this.users.update(items => [...items, ...newUsers]);
+        }
+        this.closeInviteModal();
+    }
+
+    setInviteRole(value: string): void {
+        this.inviteRole.set(this.normalizeRole(value));
+    }
+
+    openViewUser(index: number): void {
+        const user = this.users()[index];
+        if (!user) return;
+        this.viewUser.set(user);
+        this.isViewUserModalOpen.set(true);
+    }
+
+    closeViewUser(): void {
+        this.viewUser.set(null);
+        this.isViewUserModalOpen.set(false);
+    }
+
+    openEditUser(index: number): void {
+        const user = this.users()[index];
+        if (!user) return;
+        this.editUserIndex.set(index);
+        this.editName.set(user.name);
+        this.editEmail.set(user.email);
+        this.editRole.set(user.role);
+        this.editSchoolAccess.set(user.schoolAccess === 'all' ? 'all' : 'selected');
+        this.editSelectedSchools.set(Array.isArray(user.schoolAccess) ? [...user.schoolAccess] : []);
+        this.editJobTitle.set(user.jobTitle || '');
+        this.editDepartment.set(user.department || '');
+        this.editStaffId.set(user.staffId || '');
+        this.editTouched.set(false);
+        this.isEditUserModalOpen.set(true);
+    }
+
+    closeEditUser(): void {
+        this.isEditUserModalOpen.set(false);
+        this.editTouched.set(false);
+        this.editUserIndex.set(null);
+    }
+
+    toggleEditSchoolSelection(name: string, checked: boolean): void {
+        this.editSelectedSchools.update(items => {
+            if (checked) return [...items, name];
+            return items.filter(item => item !== name);
+        });
+    }
+
+    saveUserEdits(): void {
+        this.editTouched.set(true);
+        const index = this.editUserIndex();
+        if (index === null) return;
+        const name = this.editName().trim();
+        const role = this.editRole();
+        if (!name || !role) return;
+        const schoolAccess = this.editSchoolAccess() === 'all'
+            ? 'all'
+            : [...this.editSelectedSchools()];
+        this.users.update(items => items.map((user, i) => {
+            if (i !== index) return user;
+            return {
+                ...user,
+                name,
+                role,
+                schoolAccess,
+                jobTitle: this.editJobTitle().trim() || undefined,
+                department: this.editDepartment().trim() || undefined,
+                staffId: this.editStaffId().trim() || undefined,
+            };
+        }));
+        this.closeEditUser();
+    }
+
+    setEditRole(value: string): void {
+        this.editRole.set(this.normalizeRole(value));
+    }
+
+    resendInvite(index: number): void {
+        this.users.update(items => items.map((user, i) => i === index ? { ...user } : user));
+    }
+
+    toggleUserStatus(index: number): void {
+        this.users.update(items => items.map((user, i) => {
+            if (i !== index) return user;
+            const status: UserStatus = user.status === 'Suspended' ? 'Active' : 'Suspended';
+            return { ...user, status };
+        }));
+    }
+
+    removeUser(index: number): void {
+        this.users.update(items => items.filter((_, i) => i !== index));
+    }
+
+    triggerCsvImport(fileInput: HTMLInputElement): void {
+        fileInput.click();
+    }
+
+    handleCsvImport(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const text = String(reader.result || '');
+            const rows = this.parseCsvUsers(text);
+            if (rows.length) {
+                this.users.update(items => [...items, ...rows]);
+            }
+            input.value = '';
+        };
+        reader.readAsText(file);
     }
 
     finish(): void {
@@ -572,7 +838,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
                 this.levelsTemplate();
                 this.classes();
                 this.gradingModel();
-                this.invites();
+                this.users();
 
                 if (!this.isLoading()) {
                     this.persistState('in_progress');
@@ -593,7 +859,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.levels.set(data.levels?.length ? data.levels : this.defaultLevels(this.levelsTemplate()));
         this.classes.set(data.classes?.length ? data.classes : this.classes());
         this.gradingModel.set(data.gradingModel || 'letter');
-        this.invites.set(data.invites?.length ? data.invites : this.invites());
+        this.users.set(data.users?.length ? data.users : this.users());
     }
 
     private persistState(status: 'in_progress' | 'skipped' | 'completed'): void {
@@ -613,7 +879,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
                 levels: this.levels(),
                 classes: this.classes(),
                 gradingModel: this.gradingModel(),
-                invites: this.invites(),
+                users: this.users(),
             }
         };
 
@@ -767,5 +1033,51 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     private isValidEmail(email: string): boolean {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    private parseEmailList(input: string): string[] {
+        return input
+            .split(/[\n,;]/g)
+            .map(value => value.trim())
+            .filter(value => value.length > 0);
+    }
+
+    private parseCsvUsers(text: string): UserRow[] {
+        const rows = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+        if (!rows.length) return [];
+        const parsed: UserRow[] = [];
+        for (const line of rows) {
+            const [name, email, role] = line.split(',').map(value => value?.trim() || '');
+            if (!email || !this.isValidEmail(email)) continue;
+            parsed.push({
+                id: this.nextUserId(),
+                name,
+                email,
+                role: this.normalizeRole(role),
+                schoolAccess: 'all',
+                status: 'Invited',
+                createdAt: new Date().toISOString(),
+            });
+        }
+        return parsed;
+    }
+
+    private normalizeRole(role: string): UserRole {
+        const normalized = role.toLowerCase();
+        if (normalized === 'owner') return 'Owner';
+        if (normalized === 'administrator' || normalized === 'admin') return 'Administrator';
+        if (normalized === 'teacher') return 'Teacher';
+        return 'Staff';
+    }
+
+    private nextUserId(): string {
+        this.userCounter += 1;
+        return `user-${this.userCounter}`;
+    }
+
+    schoolAccessLabel(user: UserRow): string {
+        if (user.schoolAccess === 'all') return 'All schools';
+        const count = user.schoolAccess.length;
+        return count === 1 ? '1 school' : `${count} schools`;
     }
 }
