@@ -63,7 +63,13 @@ export interface MbTableColumn<T> {
                             [class.mb-table__align-center]="column.align === 'center'"
                             [class.mb-table__align-end]="column.align === 'end'"
                         >
-                            {{ getCellValue(row, column) }}
+                            <span
+                                class="mb-table__cell"
+                                [class.mb-table__cell--status]="isStatusColumn(column)"
+                                [class.is-inactive]="isStatusColumn(column) && isInactiveStatus(row)"
+                            >
+                                {{ getCellValue(row, column) }}
+                            </span>
                         </td>
                         <td *ngIf="actionsTemplate" class="mb-table__actions">
                             <ng-container *ngTemplateOutlet="actionsTemplate.template; context: { $implicit: row }"></ng-container>
@@ -182,5 +188,13 @@ export class MbTableComponent<T extends Record<string, any>> {
         const key = column.key as keyof T;
         const value = row[key];
         return value === undefined || value === null ? '' : String(value);
+    }
+
+    isStatusColumn(column: MbTableColumn<T>): boolean {
+        return String(column.key) === 'status';
+    }
+
+    isInactiveStatus(row: T): boolean {
+        return row['status' as keyof T] === 'Inactive';
     }
 }

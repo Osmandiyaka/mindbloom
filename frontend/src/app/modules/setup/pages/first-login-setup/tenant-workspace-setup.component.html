@@ -86,17 +86,16 @@
                                         >
                                             <ng-template mbTableActions let-row>
                                                 <div class="schools-table__actions">
-                                                    <button
-                                                        type="button"
-                                                        class="schools-action schools-action--icon"
-                                                        aria-label="Edit school"
-                                                        (click)="openEditSchool(getSchoolRowIndex(row))"
-                                                    >
-                                                        ✎
-                                                    </button>
                                                     <details class="schools-menu" #menu>
                                                         <summary class="schools-menu__toggle" aria-label="More actions">⋯</summary>
                                                         <div class="schools-menu__panel">
+                                                            <button
+                                                                type="button"
+                                                                class="schools-menu__item"
+                                                                (click)="openEditSchool(getSchoolRowIndex(row)); menu.open = false"
+                                                            >
+                                                                Edit school
+                                                            </button>
                                                             <button
                                                                 type="button"
                                                                 class="schools-menu__item"
