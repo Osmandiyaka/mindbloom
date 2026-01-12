@@ -1,7 +1,19 @@
+:host {
+    display: inline-flex;
+    align-items: stretch;
+}
+
+.mb-split-button__wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: stretch;
+    width: max-content;
+    overflow: visible;
+}
+
 .mb-split-button {
     display: inline-flex;
     align-items: stretch;
-    position: relative;
     white-space: nowrap;
 }
 
@@ -82,11 +94,20 @@
     transform: rotate(180deg);
 }
 
-.mb-split-button__overlay {
+:host ::ng-deep .mb-split-button__overlay {
     z-index: 1300;
 }
 
+:host ::ng-deep .mb-split-button__backdrop {
+    background: transparent;
+}
+
 .mb-split-button__menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: auto;
+    z-index: 9999;
     background: var(--mb-color-surface);
     border: 1px solid var(--mb-color-border-subtle);
     border-radius: 12px;
