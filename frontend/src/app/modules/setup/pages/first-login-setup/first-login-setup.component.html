@@ -170,12 +170,12 @@
                                                 <div class="schools-modal__section-title">Location & time</div>
                                                 <mb-form-field label="Country or region" [controlId]="'school-form-country'"
                                                     [error]="schoolFormCountryError()">
-                                                    <mb-combobox id="school-form-country"
+                                                    <app-country-select
+                                                        id="school-form-country"
                                                         [value]="schoolFormCountry()"
-                                                        [options]="countryComboOptions()"
                                                         (valueChange)="onSchoolFormCountryChange($event)"
-                                                        (blurEvent)="markSchoolFormTouched()">
-                                                    </mb-combobox>
+                                                        (blurEvent)="markSchoolFormTouched()"
+                                                    ></app-country-select>
                                                 </mb-form-field>
 
                                                 <app-address
@@ -191,12 +191,12 @@
                                                 <mb-form-field label="Time zone" [controlId]="'school-form-timezone'"
                                                     hint="Used for schedules, attendance, and reports."
                                                     [error]="schoolFormTimezoneError()">
-                                                    <mb-combobox id="school-form-timezone"
+                                                    <app-timezone-select
+                                                        id="school-form-timezone"
                                                         [value]="schoolFormTimezone()"
-                                                        [options]="timezoneComboOptions()"
                                                         (valueChange)="schoolFormTimezone.set($event)"
-                                                        (blurEvent)="markSchoolFormTouched()">
-                                                    </mb-combobox>
+                                                        (blurEvent)="markSchoolFormTouched()"
+                                                    ></app-timezone-select>
                                                 </mb-form-field>
                                             </div>
                                         </div>

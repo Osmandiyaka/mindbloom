@@ -13,6 +13,8 @@ import {
     MbSelectComponent,
 } from '@mindbloom/ui';
 import { AddressComponent, AddressValue } from '../../../../shared/components/address/address.component';
+import { CountrySelectComponent } from '../../../../shared/components/country-select/country-select.component';
+import { TimezoneSelectComponent } from '../../../../shared/components/timezone-select/timezone-select.component';
 import { TenantSettingsService } from '../../../../core/services/tenant-settings.service';
 import { TenantService } from '../../../../core/services/tenant.service';
 import { SchoolService } from '../../../../core/school/school.service';
@@ -57,6 +59,8 @@ interface FirstLoginSetupData {
         MbComboBoxComponent,
         MbAlertComponent,
         AddressComponent,
+        CountrySelectComponent,
+        TimezoneSelectComponent,
     ],
     templateUrl: './first-login-setup.component.html',
     styleUrls: ['./first-login-setup.component.scss']
@@ -200,16 +204,6 @@ export class FirstLoginSetupComponent implements OnInit {
         }
     });
 
-    readonly countryComboOptions = computed(() =>
-        this.countryOptions().map((option: { label: string; code: string }) => ({
-            label: option.label,
-            value: option.label
-        }))
-    );
-
-    readonly timezoneComboOptions = computed(() =>
-        this.timezones().map((tz: string) => ({ label: tz, value: tz }))
-    );
 
     ngOnInit(): void {
         this.loadInitialState();
