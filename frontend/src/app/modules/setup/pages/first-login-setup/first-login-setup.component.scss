@@ -558,10 +558,7 @@
     position: fixed;
     inset: 0;
     z-index: 60;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 88px 24px 24px;
+    display: block;
 }
 
 .schools-modal__backdrop {
@@ -572,10 +569,12 @@
 }
 
 .schools-modal__dialog {
-    position: relative;
+    position: fixed;
+    top: 72px;
+    left: 50%;
     z-index: 1;
     width: min(600px, 90vw);
-    max-height: calc(100vh - 120px);
+    max-height: calc(100vh - 96px);
     background: var(--mb-color-surface);
     border-radius: 12px;
     padding: 24px;
@@ -584,7 +583,7 @@
     flex-direction: column;
     gap: 20px;
     outline: none;
-    transform: scale(1);
+    transform: translateX(-50%) scale(1);
     animation: schools-modal-in 140ms ease-out;
     overflow: hidden;
 }
@@ -624,7 +623,19 @@
     flex-direction: column;
     gap: 24px;
     overflow-y: auto;
+    max-height: calc(100vh - 220px);
+    padding-top: 4px;
     padding-right: 4px;
+}
+
+.schools-modal__body::before {
+    content: '';
+    position: sticky;
+    top: 0;
+    display: block;
+    height: 12px;
+    background: linear-gradient(var(--mb-color-surface), transparent);
+    pointer-events: none;
 }
 
 .schools-modal__section {
@@ -662,11 +673,11 @@
 @keyframes schools-modal-in {
     from {
         opacity: 0;
-        transform: scale(0.98);
+        transform: translateX(-50%) scale(0.98);
     }
     to {
         opacity: 1;
-        transform: scale(1);
+        transform: translateX(-50%) scale(1);
     }
 }
 
@@ -987,5 +998,7 @@
 
     .schools-modal__dialog {
         width: 100%;
+        left: 50%;
+        max-height: calc(100vh - 96px);
     }
 }
