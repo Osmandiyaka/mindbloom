@@ -65,8 +65,11 @@ export interface MbTableColumn<T> {
                         >
                             <span
                                 class="mb-table__cell"
+                                [attr.data-col]="getColumnKey(column)"
                                 [class.mb-table__cell--status]="isStatusColumn(column)"
+                                [class.mb-table__cell--link]="isNameColumn(column)"
                                 [class.is-inactive]="isStatusColumn(column) && isInactiveStatus(row)"
+                                (click)="handleCellClick($event, row, column)"
                             >
                                 {{ getCellValue(row, column) }}
                             </span>
@@ -93,6 +96,7 @@ export class MbTableComponent<T extends Record<string, any>> {
     @Input() rowKey?: (row: T) => string;
     @Output() selectionChange = new EventEmitter<T[]>();
     @Output() sortChange = new EventEmitter<{ key: string; direction: MbSortDirection }>();
+    @Output() cellClick = new EventEmitter<{ row: T; column: MbTableColumn<T> }>();
 
     @ContentChild(MbTableActionsDirective) actionsTemplate?: MbTableActionsDirective;
 
@@ -190,11 +194,25 @@ export class MbTableComponent<T extends Record<string, any>> {
         return value === undefined || value === null ? '' : String(value);
     }
 
+    getColumnKey(column: MbTableColumn<T>): string {
+        return String(column.key);
+    }
+
     isStatusColumn(column: MbTableColumn<T>): boolean {
         return String(column.key) === 'status';
     }
 
     isInactiveStatus(row: T): boolean {
         return row['status' as keyof T] === 'Inactive';
+    }
+
+    isNameColumn(column: MbTableColumn<T>): boolean {
+        return String(column.key) === 'name';
+    }
+
+    handleCellClick(event: Event, row: T, column: MbTableColumn<T>): void {
+        if (!this.isNameColumn(column)) return;
+        event.stopPropagation();
+        this.cellClick.emit({ row, column });
     }
 }

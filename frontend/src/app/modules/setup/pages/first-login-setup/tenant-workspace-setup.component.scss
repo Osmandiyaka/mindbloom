@@ -436,10 +436,18 @@
     padding-bottom: 12px;
 }
 
-.schools-table .mb-table tbody td:first-child {
+:host ::ng-deep .schools-table .mb-table__cell[data-col='name'] {
     font-weight: 600;
-    color: var(--mb-color-text);
-    font-size: 14px;
+    color: var(--text-primary);
+    font-size: 15px;
+    cursor: pointer;
+}
+
+:host ::ng-deep .schools-table .mb-table__cell[data-col='name']:hover {
+    text-decoration: underline;
+}
+
+.schools-table .mb-table tbody td:first-child {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -708,6 +716,7 @@
         opacity: 0;
         transform: translateX(-50%) scale(0.98);
     }
+
     to {
         opacity: 1;
         transform: translateX(-50%) scale(1);

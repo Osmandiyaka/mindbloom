@@ -389,6 +389,13 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         return this.schoolRows().indexOf(row);
     }
 
+    handleSchoolCellClick(event: { row: SchoolRow; column: MbTableColumn<SchoolRow> }): void {
+        if (String(event.column.key) !== 'name') return;
+        const index = this.getSchoolRowIndex(event.row);
+        if (index < 0) return;
+        this.openEditSchool(index);
+    }
+
     onSchoolFormNameChange(value: string): void {
         this.schoolFormName.set(value);
         if (this.editingSchoolIndex() !== null) return;

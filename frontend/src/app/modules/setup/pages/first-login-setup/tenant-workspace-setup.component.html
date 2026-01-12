@@ -83,6 +83,7 @@
                                             *ngIf="schoolRows().length; else emptySchools"
                                             [columns]="schoolTableColumns"
                                             [rows]="schoolRows()"
+                                            (cellClick)="handleSchoolCellClick($event)"
                                         >
                                             <ng-template mbTableActions let-row>
                                                 <div class="schools-table__actions">
