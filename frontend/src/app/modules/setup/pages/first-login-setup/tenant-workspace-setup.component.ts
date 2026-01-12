@@ -186,12 +186,11 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     readonly stepLabels = [
         'Organization & schools',
-        'School details',
+        'Staff & users',
         'Organizational units',
         'Academic structure',
         'Classes & sections',
         'Grading system',
-        'Staff & users',
         'Review & activate'
     ];
 
@@ -205,8 +204,8 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         return ((this.progressIndex() + 1) / this.stepLabels.length) * 100;
     });
 
-    readonly isReviewStep = computed(() => this.step() === 8);
-    readonly isDoneStep = computed(() => this.step() === 9);
+    readonly isReviewStep = computed(() => this.step() === 7);
+    readonly isDoneStep = computed(() => this.step() === 8);
     readonly showErrors = computed(() => this.attemptedContinue());
     readonly userCount = computed(() => this.users().length);
 
@@ -306,8 +305,6 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         switch (this.step()) {
             case 1:
                 return this.schoolsValid();
-            case 2:
-                return this.schoolsValid();
             case 4:
                 return this.levels().length > 0;
             case 5:
@@ -350,7 +347,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             this.attemptedContinue.set(true);
             return;
         }
-        if (this.step() < 8) {
+        if (this.step() < 7) {
             this.step.set(this.step() + 1);
             this.attemptedContinue.set(false);
             this.persistState('in_progress');
@@ -360,7 +357,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     }
 
     goToStep(index: number): void {
-        const target = Math.min(Math.max(index, 1), 8);
+        const target = Math.min(Math.max(index, 1), 7);
         this.step.set(target);
         this.attemptedContinue.set(false);
         this.persistState('in_progress');
@@ -368,7 +365,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     continueFromPanel(): void {
         const current = Math.max(this.step(), 1);
-        const target = Math.min(current, 8);
+        const target = Math.min(current, 7);
         this.step.set(target);
         this.attemptedContinue.set(false);
         this.scrollToCurrent();
@@ -772,7 +769,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             }
 
             this.persistState('completed');
-            this.step.set(9);
+            this.step.set(8);
         } catch {
             this.errorMessage.set('Unable to complete setup. Please try again.');
         } finally {

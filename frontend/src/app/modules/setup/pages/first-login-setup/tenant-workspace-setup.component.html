@@ -242,71 +242,6 @@
                             <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
                         </div>
 
-            <div class="setup-body" *ngIf="step() === 2">
-                <div class="setup-section">
-                    <h2>School details</h2>
-                    <p>Review and adjust details for each school in your workspace.</p>
-
-                    <div class="list-stack">
-                        <div class="list-row" *ngFor="let row of schoolRows(); let i = index">
-                            <mb-form-field label="School name" [controlId]="'school-name-' + i"
-                                [error]="showErrors() && !row.name.trim() ? 'School name is required.' : ''">
-                                <mb-input [id]="'school-name-' + i" [value]="row.name"
-                                    (valueChange)="updateSchoolRow(i, 'name', $event)"></mb-input>
-                            </mb-form-field>
-
-                            <mb-form-field label="School code" [controlId]="'school-code-' + i"
-                                [error]="showErrors() && !row.code.trim() ? 'School code is required.' : ''">
-                                <mb-input [id]="'school-code-' + i" [value]="row.code"
-                                    (valueChange)="updateSchoolRow(i, 'code', $event)"></mb-input>
-                            </mb-form-field>
-
-                            <mb-form-field label="Country or region" [controlId]="'school-country-' + i"
-                                [error]="showErrors() && !row.country.trim() ? 'Select a country or region.' : ''">
-                                <mb-select [id]="'school-country-' + i" [value]="row.country"
-                                    (valueChange)="updateSchoolRow(i, 'country', $event)">
-                                    <option value="">Select a country or region</option>
-                                    <option *ngFor="let option of countryOptions()" [value]="option.label">
-                                        {{ option.label }}
-                                    </option>
-                                </mb-select>
-                            </mb-form-field>
-
-                            <app-address
-                                [value]="row.address || {}"
-                                [showTitle]="false"
-                                (valueChange)="updateSchoolAddress(i, $event)"
-                            ></app-address>
-
-                            <mb-form-field label="Time zone" [controlId]="'school-timezone-' + i"
-                                [error]="showErrors() && !row.timezone.trim() ? 'Select a time zone.' : ''">
-                                <mb-select [id]="'school-timezone-' + i" [value]="row.timezone"
-                                    (valueChange)="updateSchoolRow(i, 'timezone', $event)">
-                                    <option value="">Select a time zone</option>
-                                    <option *ngFor="let tz of timezones()" [value]="tz">{{ tz }}</option>
-                                </mb-select>
-                            </mb-form-field>
-
-                            <button type="button" class="list-remove" *ngIf="schoolRows().length > 1"
-                                (click)="removeSchoolRow(i)">Remove</button>
-                        </div>
-                    </div>
-
-                    <button type="button" class="list-add" (click)="addSchoolRow()">Add another school</button>
-                </div>
-
-                <div class="setup-footer">
-                    <div class="setup-footer__actions">
-                        <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                        <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
-                    </div>
-                    <div class="setup-footer__aside">
-                        <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
-                    </div>
-                </div>
-                <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
-            </div>
-
             <div class="setup-body" *ngIf="step() === 3">
                 <div class="setup-section">
                     <h2>Organizational units</h2>
@@ -486,7 +421,7 @@
                 <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
             </div>
 
-            <div class="setup-body" *ngIf="step() === 7">
+            <div class="setup-body" *ngIf="step() === 2">
                 <div class="setup-section">
                     <div class="users-header">
                         <div>
@@ -779,7 +714,7 @@
                 </div>
             </div>
 
-            <div class="setup-body" *ngIf="step() === 8">
+            <div class="setup-body" *ngIf="step() === 7">
                 <div class="setup-section">
                     <h2>Review and activate</h2>
                     <p>Confirm these details before finishing setup.</p>
@@ -806,7 +741,7 @@
                         <div class="review-card">
                             <div class="review-title">Users</div>
                             <div class="review-value">{{ userCount() }} user(s)</div>
-                            <button type="button" class="review-link" (click)="goToStep(7)">Edit</button>
+                            <button type="button" class="review-link" (click)="goToStep(2)">Edit</button>
                         </div>
                     </div>
                 </div>
@@ -821,7 +756,7 @@
                 </div>
             </div>
 
-            <div class="setup-body" *ngIf="step() === 9">
+            <div class="setup-body" *ngIf="step() === 8">
                 <div class="setup-section setup-complete">
                     <h2>Workspace ready</h2>
                     <p>Your workspace is configured. You can continue in the dashboard or update details later.</p>
