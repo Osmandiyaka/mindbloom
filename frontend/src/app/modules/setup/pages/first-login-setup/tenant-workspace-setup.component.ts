@@ -10,10 +10,13 @@ import {
     MbFormFieldComponent,
     MbInputComponent,
     MbSelectComponent,
+    MbTableActionsDirective,
+    MbTableComponent,
+    MbTableColumn,
 } from '@mindbloom/ui';
 import { AddressComponent, AddressValue } from '../../../../shared/components/address/address.component';
-import { CountrySelectComponent } from '../../../../shared/components/country-select/country-select.component';
-import { TimezoneSelectComponent } from '../../../../shared/components/timezone-select/timezone-select.component';
+import { COUNTRY_OPTIONS, CountrySelectComponent } from '../../../../shared/components/country-select/country-select.component';
+import { TIMEZONE_OPTIONS, TimezoneSelectComponent } from '../../../../shared/components/timezone-select/timezone-select.component';
 import { TenantSettingsService } from '../../../../core/services/tenant-settings.service';
 import { TenantService } from '../../../../core/services/tenant.service';
 import { SchoolService } from '../../../../core/school/school.service';
@@ -44,7 +47,7 @@ interface FirstLoginSetupData {
 }
 
 @Component({
-    selector: 'app-first-login-setup',
+    selector: 'app-tenant-workspace-setup',
     standalone: true,
     imports: [
         CommonModule,
@@ -56,14 +59,16 @@ interface FirstLoginSetupData {
         MbInputComponent,
         MbSelectComponent,
         MbAlertComponent,
+        MbTableComponent,
+        MbTableActionsDirective,
         AddressComponent,
         CountrySelectComponent,
         TimezoneSelectComponent,
     ],
-    templateUrl: './first-login-setup.component.html',
-    styleUrls: ['./first-login-setup.component.scss']
+    templateUrl: './tenant-workspace-setup.component.html',
+    styleUrls: ['./tenant-workspace-setup.component.scss']
 })
-export class FirstLoginSetupComponent implements OnInit {
+export class TenantWorkspaceSetupComponent implements OnInit {
     private readonly tenantSettings = inject(TenantSettingsService);
     private readonly tenantService = inject(TenantService);
     private readonly schoolService = inject(SchoolService);
@@ -107,6 +112,34 @@ export class FirstLoginSetupComponent implements OnInit {
     gradingScale = computed(() => this.buildGradingScale(this.gradingModel()));
 
     invites = signal<InviteRow[]>([{ email: '', role: 'Teacher' }]);
+
+    readonly schoolTableColumns: MbTableColumn<SchoolRow>[] = [
+        {
+            key: 'name',
+            label: 'School name',
+            cell: row => row.name
+        },
+        {
+            key: 'code',
+            label: 'Code',
+            cell: row => row.code
+        },
+        {
+            key: 'location',
+            label: 'Location',
+            cell: row => this.formatSchoolLocation(row)
+        },
+        {
+            key: 'timezone',
+            label: 'Time zone',
+            cell: row => row.timezone
+        },
+        {
+            key: 'status',
+            label: 'Status',
+            cell: row => row.status
+        }
+    ];
 
     readonly stepLabels = [
         'Organization & schools',
@@ -180,27 +213,9 @@ export class FirstLoginSetupComponent implements OnInit {
         }
     });
 
-    readonly timezones = computed(() => {
-        try {
-            const list = (Intl as any).supportedValuesOf?.('timeZone') || [];
-            return list.length ? list : this.fallbackTimezones();
-        } catch {
-            return this.fallbackTimezones();
-        }
-    });
+    readonly timezones = computed(() => TIMEZONE_OPTIONS.map(option => option.value));
 
-    readonly countryOptions = computed(() => {
-        try {
-            const regions = (Intl as any).supportedValuesOf?.('region') || [];
-            const display = new Intl.DisplayNames(['en'], { type: 'region' });
-            return regions.map((code: string) => ({
-                code,
-                label: display.of(code) || code
-            }));
-        } catch {
-            return [{ code: 'US', label: 'United States' }];
-        }
-    });
+    readonly countryOptions = computed(() => COUNTRY_OPTIONS);
 
 
     ngOnInit(): void {
@@ -357,6 +372,21 @@ export class FirstLoginSetupComponent implements OnInit {
             const status = row.status === 'Active' ? 'Inactive' : 'Active';
             return { ...row, status };
         }));
+    }
+
+    deleteSchool(index: number): void {
+        this.schoolRows.update(rows => rows.filter((_, i) => i !== index));
+    }
+
+    formatSchoolLocation(row: SchoolRow): string {
+        if (row.address?.city) {
+            return `${row.address.city}, ${row.country || '—'}`;
+        }
+        return row.country || '—';
+    }
+
+    getSchoolRowIndex(row: SchoolRow): number {
+        return this.schoolRows().indexOf(row);
     }
 
     onSchoolFormNameChange(value: string): void {
@@ -627,9 +657,7 @@ export class FirstLoginSetupComponent implements OnInit {
     isValidCountry(value: string): boolean {
         const trimmed = value.trim().toLowerCase();
         if (!trimmed) return false;
-        return this.countryOptions().some((option: { label: string; code: string }) =>
-            option.label.toLowerCase() === trimmed
-        );
+        return this.countryOptions().some(option => option.label.toLowerCase() === trimmed);
     }
 
     isValidTimezone(value: string): boolean {

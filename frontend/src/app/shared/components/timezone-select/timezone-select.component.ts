@@ -1,7 +1,40 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
-type ComboOption = { label: string; value: string };
+export type ComboOption = { label: string; value: string };
+
+export const TIMEZONE_OPTIONS: ComboOption[] = [
+    { label: 'UTC', value: 'UTC' },
+    { label: 'Africa/Accra', value: 'Africa/Accra' },
+    { label: 'Africa/Cairo', value: 'Africa/Cairo' },
+    { label: 'Africa/Johannesburg', value: 'Africa/Johannesburg' },
+    { label: 'Africa/Lagos', value: 'Africa/Lagos' },
+    { label: 'Africa/Nairobi', value: 'Africa/Nairobi' },
+    { label: 'America/Chicago', value: 'America/Chicago' },
+    { label: 'America/Denver', value: 'America/Denver' },
+    { label: 'America/Los_Angeles', value: 'America/Los_Angeles' },
+    { label: 'America/Mexico_City', value: 'America/Mexico_City' },
+    { label: 'America/New_York', value: 'America/New_York' },
+    { label: 'America/Sao_Paulo', value: 'America/Sao_Paulo' },
+    { label: 'Asia/Dubai', value: 'Asia/Dubai' },
+    { label: 'Asia/Hong_Kong', value: 'Asia/Hong_Kong' },
+    { label: 'Asia/Jakarta', value: 'Asia/Jakarta' },
+    { label: 'Asia/Kolkata', value: 'Asia/Kolkata' },
+    { label: 'Asia/Seoul', value: 'Asia/Seoul' },
+    { label: 'Asia/Singapore', value: 'Asia/Singapore' },
+    { label: 'Asia/Tokyo', value: 'Asia/Tokyo' },
+    { label: 'Asia/Manila', value: 'Asia/Manila' },
+    { label: 'Australia/Melbourne', value: 'Australia/Melbourne' },
+    { label: 'Australia/Sydney', value: 'Australia/Sydney' },
+    { label: 'Europe/Amsterdam', value: 'Europe/Amsterdam' },
+    { label: 'Europe/Berlin', value: 'Europe/Berlin' },
+    { label: 'Europe/London', value: 'Europe/London' },
+    { label: 'Europe/Madrid', value: 'Europe/Madrid' },
+    { label: 'Europe/Paris', value: 'Europe/Paris' },
+    { label: 'Europe/Rome', value: 'Europe/Rome' },
+    { label: 'Europe/Stockholm', value: 'Europe/Stockholm' },
+    { label: 'Europe/Zurich', value: 'Europe/Zurich' }
+];
 
 @Component({
     selector: 'app-timezone-select',
@@ -107,37 +140,6 @@ export class TimezoneSelectComponent {
     }
 
     private buildOptions(): ComboOption[] {
-        return [
-            { label: 'UTC', value: 'UTC' },
-            { label: 'Africa/Accra', value: 'Africa/Accra' },
-            { label: 'Africa/Cairo', value: 'Africa/Cairo' },
-            { label: 'Africa/Johannesburg', value: 'Africa/Johannesburg' },
-            { label: 'Africa/Lagos', value: 'Africa/Lagos' },
-            { label: 'Africa/Nairobi', value: 'Africa/Nairobi' },
-            { label: 'America/Chicago', value: 'America/Chicago' },
-            { label: 'America/Denver', value: 'America/Denver' },
-            { label: 'America/Los_Angeles', value: 'America/Los_Angeles' },
-            { label: 'America/Mexico_City', value: 'America/Mexico_City' },
-            { label: 'America/New_York', value: 'America/New_York' },
-            { label: 'America/Sao_Paulo', value: 'America/Sao_Paulo' },
-            { label: 'Asia/Dubai', value: 'Asia/Dubai' },
-            { label: 'Asia/Hong_Kong', value: 'Asia/Hong_Kong' },
-            { label: 'Asia/Jakarta', value: 'Asia/Jakarta' },
-            { label: 'Asia/Kolkata', value: 'Asia/Kolkata' },
-            { label: 'Asia/Seoul', value: 'Asia/Seoul' },
-            { label: 'Asia/Singapore', value: 'Asia/Singapore' },
-            { label: 'Asia/Tokyo', value: 'Asia/Tokyo' },
-            { label: 'Asia/Manila', value: 'Asia/Manila' },
-            { label: 'Australia/Melbourne', value: 'Australia/Melbourne' },
-            { label: 'Australia/Sydney', value: 'Australia/Sydney' },
-            { label: 'Europe/Amsterdam', value: 'Europe/Amsterdam' },
-            { label: 'Europe/Berlin', value: 'Europe/Berlin' },
-            { label: 'Europe/London', value: 'Europe/London' },
-            { label: 'Europe/Madrid', value: 'Europe/Madrid' },
-            { label: 'Europe/Paris', value: 'Europe/Paris' },
-            { label: 'Europe/Rome', value: 'Europe/Rome' },
-            { label: 'Europe/Stockholm', value: 'Europe/Stockholm' },
-            { label: 'Europe/Zurich', value: 'Europe/Zurich' }
-        ];
+        return TIMEZONE_OPTIONS;
     }
 }

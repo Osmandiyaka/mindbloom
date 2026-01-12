@@ -78,45 +78,44 @@
                                             <div class="schools-table__title">Schools</div>
                                             <mb-button variant="primary" (click)="openAddSchool()">+ Add school</mb-button>
                                         </div>
-                                        <div class="schools-table" *ngIf="schoolRows().length; else emptySchools">
-                                            <div class="schools-table__header">
-                                                <div>School name</div>
-                                                <div>Code</div>
-                                                <div>Location</div>
-                                                <div>Time zone</div>
-                                                <div>Status</div>
-                                                <div>Actions</div>
-                                            </div>
-                                            <div class="schools-table__row" *ngFor="let row of schoolRows(); let i = index">
-                                                <div class="schools-table__cell">
-                                                    <div class="schools-table__name">{{ row.name }}</div>
-                                                </div>
-                                                <div class="schools-table__cell">{{ row.code }}</div>
-                                                <div class="schools-table__cell">
-                                                    {{ row.address?.city ? (row.address?.city + ', ' + row.country) : (row.country || '—') }}
-                                                </div>
-                                                <div class="schools-table__cell">{{ row.timezone }}</div>
-                                                <div class="schools-table__cell">
-                                                    <span class="schools-status" [class.is-inactive]="row.status === 'Inactive'">
-                                                        <span class="schools-status__dot" aria-hidden="true"></span>
-                                                        {{ row.status }}
-                                                    </span>
-                                                </div>
-                                                <div class="schools-table__cell schools-table__actions">
-                                                    <button type="button" class="schools-action schools-action--icon"
-                                                        aria-label="Edit school" (click)="openEditSchool(i)">✎</button>
-                                                    <details class="schools-menu">
+                                        <mb-table
+                                            class="schools-table"
+                                            *ngIf="schoolRows().length; else emptySchools"
+                                            [columns]="schoolTableColumns"
+                                            [rows]="schoolRows()"
+                                        >
+                                            <ng-template mbTableActions let-row>
+                                                <div class="schools-table__actions">
+                                                    <button
+                                                        type="button"
+                                                        class="schools-action schools-action--icon"
+                                                        aria-label="Edit school"
+                                                        (click)="openEditSchool(getSchoolRowIndex(row))"
+                                                    >
+                                                        ✎
+                                                    </button>
+                                                    <details class="schools-menu" #menu>
                                                         <summary class="schools-menu__toggle" aria-label="More actions">⋯</summary>
                                                         <div class="schools-menu__panel">
-                                                            <button type="button" class="schools-menu__item"
-                                                                (click)="toggleSchoolStatus(i)">
+                                                            <button
+                                                                type="button"
+                                                                class="schools-menu__item"
+                                                                (click)="toggleSchoolStatus(getSchoolRowIndex(row)); menu.open = false"
+                                                            >
                                                                 {{ row.status === 'Active' ? 'Deactivate school' : 'Activate school' }}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                class="schools-menu__item"
+                                                                (click)="deleteSchool(getSchoolRowIndex(row)); menu.open = false"
+                                                            >
+                                                                Delete school
                                                             </button>
                                                         </div>
                                                     </details>
                                                 </div>
-                                            </div>
-                                        </div>
+                                            </ng-template>
+                                        </mb-table>
 
                                         <ng-template #emptySchools>
                                             <div class="schools-empty">

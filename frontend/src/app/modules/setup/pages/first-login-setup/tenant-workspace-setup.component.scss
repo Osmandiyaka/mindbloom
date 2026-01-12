@@ -399,39 +399,22 @@
 }
 
 .schools-table {
-    border: 1px solid var(--mb-color-border-subtle);
-    border-radius: 12px;
-    overflow: hidden;
-    background: var(--mb-color-surface);
+    display: block;
 }
 
-.schools-table__header,
-.schools-table__row {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1.4fr 1.5fr 0.9fr 1.1fr;
-    gap: 12px;
-    align-items: center;
-    padding: 12px 16px;
+.schools-table .mb-table {
+    overflow: visible;
 }
 
-.schools-table__header {
-    font-size: 12px;
-    color: var(--mb-color-text-muted);
-    font-weight: 600;
-    background: var(--mb-color-surface);
-}
-
-.schools-table__row {
-    border-top: 1px solid var(--mb-color-border-subtle);
-    font-size: 14px;
-    color: var(--mb-color-text);
-}
-
-.schools-table__name {
+.schools-table .mb-table tbody td:first-child {
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.schools-table .mb-table tbody td:nth-child(3) {
+    white-space: nowrap;
 }
 
 .schools-table__actions {
