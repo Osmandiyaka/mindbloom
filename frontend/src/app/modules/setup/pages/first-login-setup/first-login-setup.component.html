@@ -35,7 +35,7 @@
                                 <h2>Setup progress</h2>
                                 <p>Complete the setup to enable all features. You can return at any time from Settings.</p>
                             </div>
-                            <div class="setup-progress__meta">{{ progressIndex() < 0 ? 0 : progressIndex() + 1 }} of {{ stepLabels.length }} completed</div>
+                            <div class="setup-progress__meta">Step {{ progressIndex() < 0 ? 0 : progressIndex() + 1 }} of {{ stepLabels.length }}</div>
                             <div class="setup-progress__bar" aria-hidden="true">
                                 <div class="setup-progress__bar-fill" [style.width.%]="progressPercent()"></div>
                             </div>
@@ -76,7 +76,7 @@
                                     <div class="schools-table-wrap">
                                         <div class="schools-toolbar">
                                             <div class="schools-toolbar__spacer"></div>
-                                            <mb-button variant="primary" (click)="openAddSchool()">Add school</mb-button>
+                                            <mb-button variant="primary" (click)="openAddSchool()">+ Add school</mb-button>
                                         </div>
 
                                         <div class="schools-table" *ngIf="schoolRows().length; else emptySchools">
@@ -104,10 +104,15 @@
                                                 </div>
                                                 <div class="schools-table__cell schools-table__actions">
                                                     <button type="button" class="schools-action" (click)="openEditSchool(i)">Edit</button>
-                                                    <button type="button" class="schools-action"
-                                                        (click)="toggleSchoolStatus(i)">
-                                                        {{ row.status === 'Active' ? 'Deactivate' : 'Activate' }}
-                                                    </button>
+                                                    <details class="schools-menu">
+                                                        <summary class="schools-menu__toggle">More</summary>
+                                                        <div class="schools-menu__panel">
+                                                            <button type="button" class="schools-menu__item"
+                                                                (click)="toggleSchoolStatus(i)">
+                                                                {{ row.status === 'Active' ? 'Deactivate school' : 'Activate school' }}
+                                                            </button>
+                                                        </div>
+                                                    </details>
                                                 </div>
                                             </div>
                                         </div>
@@ -118,7 +123,7 @@
                                                 <div class="schools-empty__text">
                                                     Add your first school to start configuring academic structure and users.
                                                 </div>
-                                                <mb-button variant="primary" (click)="openAddSchool()">Add school</mb-button>
+                                                <mb-button variant="primary" (click)="openAddSchool()">+ Add school</mb-button>
                                             </div>
                                         </ng-template>
                                     </div>

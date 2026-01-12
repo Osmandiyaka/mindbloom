@@ -435,6 +435,7 @@
 .schools-table__actions {
     display: flex;
     gap: 10px;
+    align-items: center;
 }
 
 .schools-action {
@@ -451,12 +452,67 @@
 }
 
 .schools-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
     font-size: 12px;
-    color: var(--mb-color-text-muted);
+    color: var(--mb-color-text);
+    background: color-mix(in srgb, var(--mb-color-primary) 8%, transparent);
 }
 
 .schools-status.is-inactive {
-    color: var(--mb-color-text-subtle);
+    color: var(--mb-color-text-muted);
+    background: color-mix(in srgb, var(--mb-color-border) 35%, transparent);
+}
+
+.schools-menu {
+    position: relative;
+}
+
+.schools-menu__toggle {
+    list-style: none;
+    cursor: pointer;
+    color: var(--mb-color-text-muted);
+    font-size: 12px;
+    padding: 0;
+}
+
+.schools-menu__toggle::-webkit-details-marker {
+    display: none;
+}
+
+.schools-menu[open] .schools-menu__toggle {
+    color: var(--mb-color-text);
+}
+
+.schools-menu__panel {
+    position: absolute;
+    right: 0;
+    top: 22px;
+    min-width: 160px;
+    background: var(--mb-color-surface);
+    border: 1px solid var(--mb-color-border-subtle);
+    border-radius: 10px;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+    padding: 6px;
+    z-index: 5;
+}
+
+.schools-menu__item {
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--mb-color-text);
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.schools-menu__item:hover {
+    background: color-mix(in srgb, var(--mb-color-border) 30%, transparent);
 }
 
 .schools-empty {
