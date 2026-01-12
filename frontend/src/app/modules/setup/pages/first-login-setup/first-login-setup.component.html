@@ -1,0 +1,378 @@
+<div class="setup-page">
+    <mb-card class="setup-card">
+        <div class="setup-loading" *ngIf="isLoading()">Loading workspace setup…</div>
+
+        <ng-container *ngIf="!isLoading()">
+            <div class="setup-header" *ngIf="step() === 0">
+                <h1>Set up your workspace</h1>
+                <p>Complete these steps now or anytime later from Settings.</p>
+            </div>
+
+            <div class="setup-header" *ngIf="step() > 0 && !isDoneStep()">
+                <h1>Workspace setup</h1>
+                <p>Complete these steps now or anytime later from Settings.</p>
+            </div>
+
+            <div class="setup-steps" *ngIf="step() > 0 && !isDoneStep()">
+                <button type="button" class="setup-step" *ngFor="let label of stepLabels; let i = index"
+                    [class.active]="progressIndex() === i" (click)="goToStep(i + 1)">
+                    <span class="step-dot" aria-hidden="true"></span>
+                    <span class="step-label">{{ label }}</span>
+                </button>
+            </div>
+
+            <mb-alert *ngIf="errorMessage()" variant="danger">{{ errorMessage() }}</mb-alert>
+
+            <div class="setup-body" *ngIf="step() === 0">
+                <p class="setup-intro">
+                    Configure schools, academic structure, and users. You can pause and continue later.
+                </p>
+                <div class="setup-actions">
+                    <mb-button variant="primary" (click)="startSetup()">Start setup</mb-button>
+                    <mb-button variant="tertiary" (click)="skipSetup()">Skip for now</mb-button>
+                </div>
+            </div>
+
+            <div class="setup-body" *ngIf="step() === 1">
+                <div class="setup-section">
+                    <h2>School model</h2>
+                    <p>Choose how your organization is structured.</p>
+                    <div class="choice-grid">
+                        <button type="button" class="choice-card" [class.active]="schoolMode() === 'single'"
+                            (click)="schoolMode.set('single')">
+                            <div class="choice-title">Single school</div>
+                            <div class="choice-text">One school operating under this organization.</div>
+                        </button>
+                        <button type="button" class="choice-card" [class.active]="schoolMode() === 'multi'"
+                            (click)="schoolMode.set('multi')">
+                            <div class="choice-title">Multiple schools</div>
+                            <div class="choice-text">Districts or groups managing more than one school.</div>
+                        </button>
+                    </div>
+                </div>
+                <div class="setup-actions">
+                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                    <mb-button variant="primary" (click)="next()">Continue</mb-button>
+                </div>
+                <button type="button" class="setup-skip" (click)="skipSetup()">Skip for now</button>
+            </div>
+
+            <div class="setup-body" *ngIf="step() === 2">
+                <div class="setup-section" *ngIf="schoolMode() === 'single'">
+                    <h2>Primary school</h2>
+                    <p>Confirm the details for the primary school in this workspace.</p>
+
+                    <mb-form-field label="School name" [controlId]="'single-school-name'"
+                        [error]="singleSchoolNameError()">
+                        <mb-input id="single-school-name" [value]="singleSchoolName()"
+                            (valueChange)="singleSchoolName.set($event)"></mb-input>
+                    </mb-form-field>
+
+                    <mb-form-field label="School code (optional)" [controlId]="'single-school-code'"
+                        hint="Short identifier used in reports and references.">
+                        <mb-input id="single-school-code" [value]="singleSchoolCode()"
+                            (valueChange)="singleSchoolCode.set($event)"></mb-input>
+                    </mb-form-field>
+
+                    <mb-form-field label="Country or region" [controlId]="'single-school-country'"
+                        hint="Inherited from organization settings.">
+                        <mb-input id="single-school-country" [value]="country()" [disabled]="true"></mb-input>
+                    </mb-form-field>
+
+                    <mb-form-field label="Time zone" [controlId]="'single-school-timezone'"
+                        hint="Used for schedules and attendance.">
+                        <mb-select id="single-school-timezone" placeholder="Select a time zone"
+                            [value]="singleSchoolTimezone()"
+                            (valueChange)="singleSchoolTimezone.set($event)">
+                            <option *ngFor="let tz of timezones()" [value]="tz">{{ tz }}</option>
+                        </mb-select>
+                    </mb-form-field>
+                </div>
+
+                <div class="setup-section" *ngIf="schoolMode() === 'multi'">
+                    <h2>Schools</h2>
+                    <p>Add the schools that belong to this organization.</p>
+
+                    <div class="list-stack">
+                        <div class="list-row" *ngFor="let row of schoolRows(); let i = index">
+                            <mb-form-field label="School name" [controlId]="'school-name-' + i"
+                                [error]="showErrors() && !row.name.trim() ? 'School name is required.' : ''">
+                                <mb-input [id]="'school-name-' + i" [value]="row.name"
+                                    (valueChange)="updateSchoolRow(i, 'name', $event)"></mb-input>
+                            </mb-form-field>
+
+                            <mb-form-field label="School code (optional)" [controlId]="'school-code-' + i"
+                                hint="Short identifier used in reports and references.">
+                                <mb-input [id]="'school-code-' + i" [value]="row.code || ''"
+                                    (valueChange)="updateSchoolRow(i, 'code', $event)"></mb-input>
+                            </mb-form-field>
+
+                            <mb-form-field label="Time zone" [controlId]="'school-timezone-' + i">
+                                <mb-select [id]="'school-timezone-' + i" placeholder="Select a time zone"
+                                    [value]="row.timezone || defaultTimezone()"
+                                    (valueChange)="updateSchoolRow(i, 'timezone', $event)">
+                                    <option *ngFor="let tz of timezones()" [value]="tz">{{ tz }}</option>
+                                </mb-select>
+                            </mb-form-field>
+
+                            <button type="button" class="list-remove" *ngIf="schoolRows().length > 1"
+                                (click)="removeSchoolRow(i)">Remove</button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="list-add" (click)="addSchoolRow()">Add another school</button>
+                </div>
+
+                <div class="setup-actions">
+                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                    <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                </div>
+                <button type="button" class="setup-skip" (click)="skipSetup()">Skip for now</button>
+            </div>
+
+            <div class="setup-body" *ngIf="step() === 3">
+                <div class="setup-section">
+                    <h2>Organizational units</h2>
+                    <p>Define departments or divisions for reporting and access.</p>
+
+                    <div class="list-stack">
+                        <div class="list-row" *ngFor="let department of departments(); let i = index">
+                            <mb-form-field label="Department" [controlId]="'department-' + i">
+                                <mb-input [id]="'department-' + i" [value]="department"
+                                    (valueChange)="updateDepartment(i, $event)"></mb-input>
+                            </mb-form-field>
+                            <button type="button" class="list-remove" *ngIf="departments().length > 1"
+                                (click)="removeDepartment(i)">Remove</button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="list-add" (click)="addDepartment()">Add department</button>
+                </div>
+
+                <div class="setup-actions">
+                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                    <mb-button variant="primary" (click)="next()">Continue</mb-button>
+                </div>
+                <button type="button" class="setup-skip" (click)="skipSetup()">Skip for now</button>
+            </div>
+
+            <div class="setup-body" *ngIf="step() === 4">
+                <div class="setup-section">
+                    <h2>Academic levels</h2>
+                    <p>Choose a template, then adjust the list to match your structure.</p>
+
+                    <div class="choice-grid">
+                        <button type="button" class="choice-card" [class.active]="levelsTemplate() === 'k12'"
+                            (click)="setLevelsTemplate('k12')">
+                            <div class="choice-title">K–12</div>
+                            <div class="choice-text">Kindergarten through Grade 12.</div>
+                        </button>
+                        <button type="button" class="choice-card"
+                            [class.active]="levelsTemplate() === 'primary_secondary'"
+                            (click)="setLevelsTemplate('primary_secondary')">
+                            <div class="choice-title">Primary / Secondary</div>
+                            <div class="choice-text">Split primary and secondary levels.</div>
+                        </button>
+                        <button type="button" class="choice-card" [class.active]="levelsTemplate() === 'custom'"
+                            (click)="setLevelsTemplate('custom')">
+                            <div class="choice-title">Custom</div>
+                            <div class="choice-text">Build your own list of levels.</div>
+                        </button>
+                    </div>
+
+                    <div class="list-stack">
+                        <div class="list-row" *ngFor="let level of levels(); let i = index">
+                            <mb-form-field label="Level" [controlId]="'level-' + i">
+                                <mb-input [id]="'level-' + i" [value]="level"
+                                    (valueChange)="updateLevel(i, $event)"></mb-input>
+                            </mb-form-field>
+                            <button type="button" class="list-remove" *ngIf="levels().length > 1"
+                                (click)="removeLevel(i)">Remove</button>
+                        </div>
+                    </div>
+
+                    <div class="setup-error" *ngIf="levelsError()">{{ levelsError() }}</div>
+
+                    <button type="button" class="list-add" (click)="addLevel()">Add level</button>
+                </div>
+
+                <div class="setup-actions">
+                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                    <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                </div>
+                <button type="button" class="setup-skip" (click)="skipSetup()">Skip for now</button>
+            </div>
+
+            <div class="setup-body" *ngIf="step() === 5">
+                <div class="setup-section">
+                    <h2>Classes and sections</h2>
+                    <p>Define your classes and assign them to academic levels.</p>
+
+                    <div class="list-stack">
+                        <div class="list-row" *ngFor="let row of classes(); let i = index">
+                            <mb-form-field label="Class name" [controlId]="'class-name-' + i"
+                                [error]="showErrors() && !row.name.trim() ? 'Class name is required.' : ''">
+                                <mb-input [id]="'class-name-' + i" [value]="row.name"
+                                    (valueChange)="updateClassRow(i, 'name', $event)"></mb-input>
+                            </mb-form-field>
+
+                            <mb-form-field label="Level" [controlId]="'class-level-' + i"
+                                [error]="showErrors() && !row.level.trim() ? 'Select a level.' : ''">
+                                <mb-select [id]="'class-level-' + i" placeholder="Select a level"
+                                    [value]="row.level"
+                                    (valueChange)="updateClassRow(i, 'level', $event)">
+                                    <option *ngFor="let level of levels()" [value]="level">{{ level }}</option>
+                                </mb-select>
+                            </mb-form-field>
+
+                            <mb-form-field label="Sections (optional)" [controlId]="'class-sections-' + i"
+                                hint="Use commas to separate sections, e.g. A, B, C.">
+                                <mb-input [id]="'class-sections-' + i" [value]="row.sections"
+                                    (valueChange)="updateClassRow(i, 'sections', $event)"></mb-input>
+                            </mb-form-field>
+
+                            <button type="button" class="list-remove" *ngIf="classes().length > 1"
+                                (click)="removeClassRow(i)">Remove</button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="list-add" (click)="addClassRow()">Add class</button>
+                </div>
+
+                <div class="setup-actions">
+                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                    <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                </div>
+                <button type="button" class="setup-skip" (click)="skipSetup()">Skip for now</button>
+            </div>
+
+            <div class="setup-body" *ngIf="step() === 6">
+                <div class="setup-section">
+                    <h2>Grading system</h2>
+                    <p>Select the grading model used across your schools.</p>
+
+                    <div class="choice-grid">
+                        <button type="button" class="choice-card" [class.active]="gradingModel() === 'letter'"
+                            (click)="gradingModel.set('letter')">
+                            <div class="choice-title">Letter grades</div>
+                            <div class="choice-text">A–F scale with descriptors.</div>
+                        </button>
+                        <button type="button" class="choice-card" [class.active]="gradingModel() === 'numeric'"
+                            (click)="gradingModel.set('numeric')">
+                            <div class="choice-title">Numeric</div>
+                            <div class="choice-text">Percentage-based scores.</div>
+                        </button>
+                        <button type="button" class="choice-card" [class.active]="gradingModel() === 'gpa'"
+                            (click)="gradingModel.set('gpa')">
+                            <div class="choice-title">GPA</div>
+                            <div class="choice-text">GPA scale for reporting.</div>
+                        </button>
+                        <button type="button" class="choice-card" [class.active]="gradingModel() === 'custom'"
+                            (click)="gradingModel.set('custom')">
+                            <div class="choice-title">Custom</div>
+                            <div class="choice-text">Configure your own scale later.</div>
+                        </button>
+                    </div>
+
+                    <div class="scale-preview">
+                        <div class="scale-title">Scale preview</div>
+                        <ul>
+                            <li *ngFor="let row of gradingScale()">{{ row.label }} — {{ row.value }}</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="setup-actions">
+                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                    <mb-button variant="primary" (click)="next()">Continue</mb-button>
+                </div>
+                <button type="button" class="setup-skip" (click)="skipSetup()">Skip for now</button>
+            </div>
+
+            <div class="setup-body" *ngIf="step() === 7">
+                <div class="setup-section">
+                    <h2>Invite core users</h2>
+                    <p>Invite colleagues who should have early access.</p>
+
+                    <div class="list-stack">
+                        <div class="list-row" *ngFor="let row of invites(); let i = index">
+                            <mb-form-field label="Email" [controlId]="'invite-email-' + i"
+                                [error]="inviteEmailError(row)">
+                                <mb-input [id]="'invite-email-' + i" [value]="row.email"
+                                    (valueChange)="updateInviteRow(i, 'email', $event)"></mb-input>
+                            </mb-form-field>
+
+                            <mb-form-field label="Role" [controlId]="'invite-role-' + i">
+                                <mb-select [id]="'invite-role-' + i" [value]="row.role"
+                                    (valueChange)="updateInviteRow(i, 'role', $event)">
+                                    <option value="Administrator">Administrator</option>
+                                    <option value="Teacher">Teacher</option>
+                                    <option value="Staff">Staff</option>
+                                </mb-select>
+                            </mb-form-field>
+
+                            <button type="button" class="list-remove" *ngIf="invites().length > 1"
+                                (click)="removeInviteRow(i)">Remove</button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="list-add" (click)="addInviteRow()">Add another user</button>
+                </div>
+
+                <div class="setup-actions">
+                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                    <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                </div>
+                <button type="button" class="setup-skip" (click)="skipSetup()">Skip for now</button>
+            </div>
+
+            <div class="setup-body" *ngIf="step() === 8">
+                <div class="setup-section">
+                    <h2>Review and activate</h2>
+                    <p>Confirm these details before finishing setup.</p>
+
+                    <div class="review-grid">
+                        <div class="review-card">
+                            <div class="review-title">Schools</div>
+                            <div class="review-value" *ngIf="schoolMode() === 'single'">{{ singleSchoolName() }}</div>
+                            <ul *ngIf="schoolMode() === 'multi'">
+                                <li *ngFor="let row of schoolRows()">{{ row.name }}</li>
+                            </ul>
+                            <button type="button" class="review-link" (click)="goToStep(2)">Edit</button>
+                        </div>
+                        <div class="review-card">
+                            <div class="review-title">Academic levels</div>
+                            <div class="review-value">{{ levels().length }} levels</div>
+                            <button type="button" class="review-link" (click)="goToStep(4)">Edit</button>
+                        </div>
+                        <div class="review-card">
+                            <div class="review-title">Grading model</div>
+                            <div class="review-value">{{ gradingModel() | titlecase }}</div>
+                            <button type="button" class="review-link" (click)="goToStep(6)">Edit</button>
+                        </div>
+                        <div class="review-card">
+                            <div class="review-title">Invitations</div>
+                            <div class="review-value">{{ inviteCount() }} invite(s)</div>
+                            <button type="button" class="review-link" (click)="goToStep(7)">Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setup-actions">
+                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                    <mb-button variant="primary" [loading]="isSaving()" (click)="next()">Finish setup</mb-button>
+                </div>
+            </div>
+
+            <div class="setup-body" *ngIf="step() === 9">
+                <div class="setup-section setup-complete">
+                    <h2>Workspace ready</h2>
+                    <p>Your workspace is configured. You can continue in the dashboard or update details later.</p>
+                </div>
+                <div class="setup-actions">
+                    <mb-button variant="primary" (click)="finish()">Go to dashboard</mb-button>
+                </div>
+            </div>
+        </ng-container>
+    </mb-card>
+</div>

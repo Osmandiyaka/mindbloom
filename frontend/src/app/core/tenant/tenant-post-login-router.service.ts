@@ -10,6 +10,7 @@ import { TenantBootstrapService } from './tenant-bootstrap.service';
 import { TenantMembership } from '../auth/auth.models';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
+import { TenantSettingsService } from '../services/tenant-settings.service';
 
 @Injectable({
     providedIn: 'root'
@@ -19,6 +20,7 @@ export class TenantPostLoginRouter {
     private readonly tenantBootstrap = inject(TenantBootstrapService);
     private readonly router = inject(Router);
     private readonly authService = inject(AuthService);
+    private readonly tenantSettings = inject(TenantSettingsService);
 
     /**
      * Route user after successful login based on their memberships
@@ -52,7 +54,7 @@ export class TenantPostLoginRouter {
             const success = await firstValueFrom(this.tenantBootstrap.switchTenant(tenant));
 
             if (success) {
-                await this.router.navigateByUrl(safeReturnUrl);
+                await this.routeAfterBootstrap(tenant, safeReturnUrl);
             } else {
                 // Bootstrap failed, send user to their target without blocking
                 await this.router.navigateByUrl(safeReturnUrl);
@@ -71,7 +73,7 @@ export class TenantPostLoginRouter {
             const success = await firstValueFrom(this.tenantBootstrap.switchTenant(tenant!));
 
             if (success) {
-                await this.router.navigateByUrl(safeReturnUrl);
+                await this.routeAfterBootstrap(tenant!, safeReturnUrl);
                 return;
             }
         }
@@ -81,7 +83,7 @@ export class TenantPostLoginRouter {
         for (const tenant of memberships) {
             const success = await firstValueFrom(this.tenantBootstrap.switchTenant(tenant));
             if (success) {
-                await this.router.navigateByUrl(safeReturnUrl);
+                await this.routeAfterBootstrap(tenant, safeReturnUrl);
                 return;
             }
         }
@@ -119,5 +121,38 @@ export class TenantPostLoginRouter {
         }
 
         return url;
+    }
+
+    private async routeAfterBootstrap(tenant: TenantMembership, safeReturnUrl: string): Promise<void> {
+        if (!this.isTenantAdmin(tenant)) {
+            await this.router.navigateByUrl(safeReturnUrl);
+            return;
+        }
+
+        try {
+            const settings = await firstValueFrom(this.tenantSettings.getSettings());
+            const setupProgram = (settings as any)?.extras?.['setupProgram'] as {
+                status?: string;
+                completedAt?: string;
+                skippedAt?: string;
+            } | undefined;
+
+            const isComplete = setupProgram?.status === 'completed' || !!setupProgram?.completedAt;
+            const isSkipped = setupProgram?.status === 'skipped' || !!setupProgram?.skippedAt;
+
+            if (!isComplete && !isSkipped) {
+                await this.router.navigateByUrl('/setup/first-login');
+                return;
+            }
+        } catch {
+            // If settings lookup fails, still route to the requested destination.
+        }
+
+        await this.router.navigateByUrl(safeReturnUrl);
+    }
+
+    private isTenantAdmin(tenant: TenantMembership): boolean {
+        const roles = (tenant.roles || []).map(role => role.toLowerCase());
+        return roles.includes('tenant admin') || roles.includes('tenantadmin');
     }
 }

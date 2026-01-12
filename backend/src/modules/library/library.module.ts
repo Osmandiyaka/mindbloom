@@ -7,7 +7,6 @@ import { LibraryBookTitleSchema } from '../../plugins/library-management/schemas
 import { LibraryBookCopySchema } from '../../plugins/library-management/schemas/book-copy.schema';
 import { TitlesService } from '../../plugins/library-management/services/titles.service';
 import { CopiesService } from '../../plugins/library-management/services/copies.service';
-import { TenantContext } from '../../common/tenant/tenant.context';
 
 @Module({
     imports: [
@@ -17,7 +16,6 @@ import { TenantContext } from '../../common/tenant/tenant.context';
         ]),
     ],
     controllers: [IsbnLookupController, TitlesController, CopiesController],
-    providers: [TitlesService, CopiesService, TenantContext],
+    providers: [TitlesService, CopiesService],
 })
 export class LibraryModule { }
-

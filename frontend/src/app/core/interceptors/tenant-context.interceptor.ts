@@ -9,6 +9,8 @@ import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { TenantResolverService } from '../tenant/tenant.service';
+import { TenantContextService } from '../tenant/tenant-context.service';
+import { AuthService } from '../auth/auth.service';
 
 /**
  * URLs that don't require tenant context (auth, public, etc.)
@@ -35,10 +37,41 @@ function isPublicEndpoint(url: string): boolean {
 
 export const tenantContextInterceptor: HttpInterceptorFn = (req, next) => {
     const tenantService = inject(TenantResolverService);
+    const tenantContext = inject(TenantContextService);
+    const authService = inject(AuthService);
     const router = inject(Router);
 
     // Allow public endpoints to bypass tenant check
     if (isPublicEndpoint(req.url)) {
+        return next(req);
+    }
+
+    const activeTenant = tenantContext.activeTenant();
+    if (activeTenant?.tenantId) {
+        req = req.clone({
+            setHeaders: {
+                'X-Tenant-Id': activeTenant.tenantId,
+                'X-Tenant-Slug': activeTenant.tenantSlug,
+                'X-Tenant-Context': JSON.stringify({
+                    tenantId: activeTenant.tenantId,
+                    tenantSlug: activeTenant.tenantSlug
+                })
+            }
+        });
+        return next(req);
+    }
+
+    const session = authService.session();
+    const membership = session?.memberships?.find(m => m.tenantId === session.activeTenantId)
+        || session?.memberships?.[0];
+
+    if (membership?.tenantId) {
+        req = req.clone({
+            setHeaders: {
+                'X-Tenant-Id': membership.tenantId,
+                ...(membership.tenantSlug ? { 'X-Tenant-Slug': membership.tenantSlug } : {})
+            }
+        });
         return next(req);
     }
 

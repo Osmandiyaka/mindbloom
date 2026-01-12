@@ -62,6 +62,7 @@ export interface Tenant {
         sampleSection?: string;
         resetPerClass?: boolean;
     };
+    extras?: Record<string, any>;
 }
 
 export interface TenantLookup {

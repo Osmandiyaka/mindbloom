@@ -2,6 +2,10 @@ import { Routes } from '@angular/router';
 
 export const SETUP_ROUTES: Routes = [
     {
+        path: 'first-login',
+        loadComponent: () => import('./pages/first-login-setup/first-login-setup.component').then(m => m.FirstLoginSetupComponent)
+    },
+    {
         path: '',
         loadComponent: () => import('./pages/setup-overview/setup-overview.component').then(m => m.SetupOverviewComponent)
     },

@@ -31,7 +31,6 @@ import { ReservationsService } from './services/reservations.service';
 import { FinesService } from './services/fines.service';
 import { SettingsService } from './services/settings.service';
 
-import { TenantContext } from '../../common/tenant/tenant.context';
 
 @Module({
     imports: [
@@ -59,7 +58,6 @@ import { TenantContext } from '../../common/tenant/tenant.context';
     providers: [
         LibraryManagementPlugin,
         LibraryService,
-        TenantContext,
         // New services
         TitlesService,
         CopiesService,
@@ -72,4 +70,3 @@ import { TenantContext } from '../../common/tenant/tenant.context';
     exports: [LibraryManagementPlugin],
 })
 export class LibraryManagementModule { }
-

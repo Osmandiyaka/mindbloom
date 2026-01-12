@@ -80,21 +80,6 @@ export class TenantController {
     }
 
     @Public()
-    @Get(':id')
-    @ApiOperation({ summary: 'Get tenant by ID' })
-    @ApiResponse({ status: 200, description: 'Tenant found', type: TenantResponseDto })
-    @ApiResponse({ status: 404, description: 'Tenant not found' })
-    async getTenantById(@Param('id') id: string): Promise<TenantResponseDto | null> {
-        const tenant = await this.getTenantByIdUseCase.execute(id);
-
-        if (!tenant) {
-            return null;
-        }
-
-        return TenantResponseDto.fromDomain(tenant);
-    }
-
-    @Public()
     @Post()
     @ApiOperation({ summary: 'Create a new tenant' })
     @ApiResponse({ status: 201, description: 'Tenant created successfully', type: TenantResponseDto })
@@ -226,5 +211,20 @@ export class TenantController {
             ...dto.extras,
         });
         return await this.updateTenantSettingsUseCase.execute(command);
+    }
+
+    @Public()
+    @Get(':id')
+    @ApiOperation({ summary: 'Get tenant by ID' })
+    @ApiResponse({ status: 200, description: 'Tenant found', type: TenantResponseDto })
+    @ApiResponse({ status: 404, description: 'Tenant not found' })
+    async getTenantById(@Param('id') id: string): Promise<TenantResponseDto | null> {
+        const tenant = await this.getTenantByIdUseCase.execute(id);
+
+        if (!tenant) {
+            return null;
+        }
+
+        return TenantResponseDto.fromDomain(tenant);
     }
 }

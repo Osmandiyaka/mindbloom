@@ -20,7 +20,6 @@ import { EditionManager } from '../../application/services/subscription/edition-
 import { TenantFeatureOverrideSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/tenant-feature-override.schema';
 import { MongooseTenantFeatureOverrideRepository } from '../../infrastructure/adapters/persistence/mongoose/tenant-feature-override.repository';
 import { EffectiveFeatureResolver } from '../../application/services/features/effective-feature-resolver.service';
-import { TenantContext } from '../../common/tenant/tenant.context';
 import { FeatureValidationService } from '../../application/services/features/feature-validation.service';
 import { SubscriptionLifecycleService } from '../../application/services/subscription/subscription-lifecycle.service';
 import { PluginsModule } from '../plugins/plugins.module';
@@ -87,7 +86,6 @@ class EditionsInitializer implements OnApplicationBootstrap {
         TenantPlanMailer,
         PermissionGuard,
         HostContextGuard,
-        TenantContext,
         // Edition initializer machinery
         InitializeGlobalEditionsUseCase,
         EditionsInitializer,
@@ -113,7 +111,6 @@ class EditionsInitializer implements OnApplicationBootstrap {
         SubscriptionLifecycleService,
         FeatureValidationService,
         EffectiveFeatureResolver,
-        TenantContext,
         InitializeGlobalEditionsUseCase,
     ],
 })
