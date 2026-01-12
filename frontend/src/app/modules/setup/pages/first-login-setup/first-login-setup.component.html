@@ -72,13 +72,12 @@
                                 <h2>Schools</h2>
                                 <p>Manage the schools under your organization. You can add, edit, or deactivate schools at any time.</p>
 
-                                <div class="schools-grid" [class.schools-grid--panel]="isSchoolPanelOpen()">
+                                <div class="schools-grid">
                                     <div class="schools-table-wrap">
-                                        <div class="schools-toolbar">
-                                            <div class="schools-toolbar__spacer"></div>
+                                        <div class="schools-table__titlebar">
+                                            <div class="schools-table__title">Schools</div>
                                             <mb-button variant="primary" (click)="openAddSchool()">+ Add school</mb-button>
                                         </div>
-
                                         <div class="schools-table" *ngIf="schoolRows().length; else emptySchools">
                                             <div class="schools-table__header">
                                                 <div>School name</div>
@@ -99,13 +98,15 @@
                                                 <div class="schools-table__cell">{{ row.timezone }}</div>
                                                 <div class="schools-table__cell">
                                                     <span class="schools-status" [class.is-inactive]="row.status === 'Inactive'">
+                                                        <span class="schools-status__dot" aria-hidden="true"></span>
                                                         {{ row.status }}
                                                     </span>
                                                 </div>
                                                 <div class="schools-table__cell schools-table__actions">
-                                                    <button type="button" class="schools-action" (click)="openEditSchool(i)">Edit</button>
+                                                    <button type="button" class="schools-action schools-action--icon"
+                                                        aria-label="Edit school" (click)="openEditSchool(i)">✎</button>
                                                     <details class="schools-menu">
-                                                        <summary class="schools-menu__toggle">More</summary>
+                                                        <summary class="schools-menu__toggle" aria-label="More actions">⋯</summary>
                                                         <div class="schools-menu__panel">
                                                             <button type="button" class="schools-menu__item"
                                                                 (click)="toggleSchoolStatus(i)">
@@ -127,59 +128,81 @@
                                             </div>
                                         </ng-template>
                                     </div>
-
-                                    <div class="schools-panel" *ngIf="isSchoolPanelOpen()">
-                                        <div class="schools-panel__header">
+                                </div>
+                                <div class="schools-modal" *ngIf="isSchoolModalOpen()" role="presentation">
+                                    <div class="schools-modal__backdrop"></div>
+                                    <div class="schools-modal__dialog" role="dialog" aria-modal="true"
+                                        aria-labelledby="school-modal-title" tabindex="0"
+                                        (keydown.escape)="closeSchoolModal()">
+                                        <div class="schools-modal__header">
                                             <div>
-                                                <div class="schools-panel__title">
+                                                <div id="school-modal-title" class="schools-modal__title">
                                                     {{ editingSchoolIndex() === null ? 'Add school' : 'Edit school' }}
                                                 </div>
-                                                <div class="schools-panel__subtitle">Required details only.</div>
+                                                <div class="schools-modal__subtitle">
+                                                    Add a school to your organization. You can update details later.
+                                                </div>
                                             </div>
-                                            <button type="button" class="schools-panel__close" (click)="closeSchoolPanel()">×</button>
+                                            <button type="button" class="schools-modal__close" (click)="closeSchoolModal()"
+                                                aria-label="Close dialog">×</button>
                                         </div>
-                                        <div class="schools-panel__body">
-                                            <mb-form-field label="School name" [controlId]="'school-form-name'"
-                                                [error]="schoolFormTouched() && !schoolFormName().trim() ? 'School name is required.' : ''">
-                                                <mb-input id="school-form-name" [value]="schoolFormName()"
-                                                    (valueChange)="schoolFormName.set($event)"></mb-input>
-                                            </mb-form-field>
+                                        <div class="schools-modal__body">
+                                            <div class="schools-modal__section">
+                                                <div class="schools-modal__section-title">Identity</div>
+                                                <mb-form-field label="School name" [controlId]="'school-form-name'"
+                                                    hint="This is the name shown across the platform."
+                                                    [error]="schoolFormTouched() && !schoolFormName().trim() ? 'School name is required.' : ''">
+                                                    <mb-input id="school-form-name" [value]="schoolFormName()"
+                                                        (valueChange)="onSchoolFormNameChange($event)"
+                                                        (blur)="markSchoolFormTouched()"></mb-input>
+                                                </mb-form-field>
 
-                                            <mb-form-field label="School code" [controlId]="'school-form-code'"
-                                                hint="Short identifier used internally."
-                                                [error]="schoolFormTouched() && !schoolFormCode().trim() ? 'School code is required.' : ''">
-                                                <mb-input id="school-form-code" [value]="schoolFormCode()"
-                                                    (valueChange)="schoolFormCode.set($event)"></mb-input>
-                                            </mb-form-field>
+                                                <mb-form-field label="School code" [controlId]="'school-form-code'"
+                                                    hint="Used internally for identifiers and integrations."
+                                                    [error]="schoolFormCodeError()">
+                                                    <mb-input id="school-form-code" [value]="schoolFormCode()"
+                                                        (valueChange)="onSchoolFormCodeChange($event)"
+                                                        (blur)="markSchoolFormTouched()"></mb-input>
+                                                </mb-form-field>
+                                            </div>
 
-                                            <mb-form-field label="Country or region" [controlId]="'school-form-country'"
-                                                [error]="schoolFormTouched() && !schoolFormCountry().trim() ? 'Select a country or region.' : ''">
-                                                <mb-select id="school-form-country" [value]="schoolFormCountry()"
-                                                    (valueChange)="schoolFormCountry.set($event)">
-                                                    <option value="">Select a country or region</option>
-                                                    <option *ngFor="let option of countryOptions()" [value]="option.label">
-                                                        {{ option.label }}
-                                                    </option>
-                                                </mb-select>
-                                            </mb-form-field>
+                                            <div class="schools-modal__section">
+                                                <div class="schools-modal__section-title">Location & time</div>
+                                                <mb-form-field label="Country or region" [controlId]="'school-form-country'"
+                                                    [error]="schoolFormCountryError()">
+                                                    <mb-combobox id="school-form-country"
+                                                        [value]="schoolFormCountry()"
+                                                        [options]="countryComboOptions()"
+                                                        (valueChange)="onSchoolFormCountryChange($event)"
+                                                        (blurEvent)="markSchoolFormTouched()">
+                                                    </mb-combobox>
+                                                </mb-form-field>
 
-                                            <mb-form-field label="City (optional)" [controlId]="'school-form-city'">
-                                                <mb-input id="school-form-city" [value]="schoolFormCity()"
-                                                    (valueChange)="schoolFormCity.set($event)"></mb-input>
-                                            </mb-form-field>
+                                                <mb-form-field label="City (optional)" [controlId]="'school-form-city'">
+                                                    <mb-input id="school-form-city" [value]="schoolFormCity()"
+                                                        (valueChange)="schoolFormCity.set($event)"></mb-input>
+                                                </mb-form-field>
 
-                                            <mb-form-field label="Time zone" [controlId]="'school-form-timezone'"
-                                                [error]="schoolFormTouched() && !schoolFormTimezone().trim() ? 'Select a time zone.' : ''">
-                                                <mb-select id="school-form-timezone" [value]="schoolFormTimezone()"
-                                                    (valueChange)="schoolFormTimezone.set($event)">
-                                                    <option value="">Select a time zone</option>
-                                                    <option *ngFor="let tz of timezones()" [value]="tz">{{ tz }}</option>
-                                                </mb-select>
-                                            </mb-form-field>
+                                                <mb-form-field label="Time zone" [controlId]="'school-form-timezone'"
+                                                    hint="Used for schedules, attendance, and reports."
+                                                    [error]="schoolFormTimezoneError()">
+                                                    <mb-combobox id="school-form-timezone"
+                                                        [value]="schoolFormTimezone()"
+                                                        [options]="timezoneComboOptions()"
+                                                        (valueChange)="schoolFormTimezone.set($event)"
+                                                        (blurEvent)="markSchoolFormTouched()">
+                                                    </mb-combobox>
+                                                </mb-form-field>
+                                            </div>
                                         </div>
-                                        <div class="schools-panel__actions">
-                                            <mb-button variant="secondary" (click)="closeSchoolPanel()">Cancel</mb-button>
-                                            <mb-button variant="primary" [disabled]="!canSaveSchool()" (click)="saveSchool()">Save school</mb-button>
+                                        <div class="schools-modal__footer">
+                                            <div class="schools-modal__hint">Configuration changes are saved automatically.</div>
+                                            <div class="schools-modal__actions">
+                                                <mb-button variant="secondary" (click)="closeSchoolModal()">Cancel</mb-button>
+                                                <mb-button variant="primary" [disabled]="!canSaveSchool()" (click)="saveSchool()">
+                                                    {{ editingSchoolIndex() === null ? 'Add school' : 'Save changes' }}
+                                                </mb-button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

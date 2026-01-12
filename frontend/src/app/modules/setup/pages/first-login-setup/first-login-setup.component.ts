@@ -81,7 +81,7 @@ export class FirstLoginSetupComponent implements OnInit {
     defaultTimezone = signal<string>('');
 
     schoolRows = signal<SchoolRow[]>([]);
-    isSchoolPanelOpen = signal(false);
+    isSchoolModalOpen = signal(false);
     editingSchoolIndex = signal<number | null>(null);
     schoolFormName = signal('');
     schoolFormCode = signal('');
@@ -89,6 +89,7 @@ export class FirstLoginSetupComponent implements OnInit {
     schoolFormCity = signal('');
     schoolFormTimezone = signal('');
     schoolFormTouched = signal(false);
+    schoolFormCodeTouched = signal(false);
 
     departments = signal<string[]>(['Academics', 'Administration', 'Finance']);
     levelsTemplate = signal<'k12' | 'primary_secondary' | 'custom'>('k12');
@@ -147,10 +148,14 @@ export class FirstLoginSetupComponent implements OnInit {
     });
 
     readonly canSaveSchool = computed(() => {
+        const code = this.schoolFormCode().trim();
         return !!this.schoolFormName().trim()
-            && !!this.schoolFormCode().trim()
+            && !!code
+            && /^[a-z0-9-]+$/.test(code)
             && !!this.schoolFormCountry().trim()
-            && !!this.schoolFormTimezone().trim();
+            && this.isValidCountry(this.schoolFormCountry())
+            && !!this.schoolFormTimezone().trim()
+            && this.isValidTimezone(this.schoolFormTimezone());
     });
 
     readonly canContinue = computed(() => {
@@ -191,6 +196,17 @@ export class FirstLoginSetupComponent implements OnInit {
             return [{ code: 'US', label: 'United States' }];
         }
     });
+
+    readonly countryComboOptions = computed(() =>
+        this.countryOptions().map((option: { label: string; code: string }) => ({
+            label: option.label,
+            value: option.label
+        }))
+    );
+
+    readonly timezoneComboOptions = computed(() =>
+        this.timezones().map((tz: string) => ({ label: tz, value: tz }))
+    );
 
     ngOnInit(): void {
         this.loadInitialState();
@@ -276,7 +292,8 @@ export class FirstLoginSetupComponent implements OnInit {
         this.schoolFormCity.set('');
         this.schoolFormTimezone.set(this.defaultTimezone());
         this.schoolFormTouched.set(false);
-        this.isSchoolPanelOpen.set(true);
+        this.schoolFormCodeTouched.set(false);
+        this.isSchoolModalOpen.set(true);
     }
 
     openEditSchool(index: number): void {
@@ -289,13 +306,15 @@ export class FirstLoginSetupComponent implements OnInit {
         this.schoolFormCity.set(row.city || '');
         this.schoolFormTimezone.set(row.timezone);
         this.schoolFormTouched.set(false);
-        this.isSchoolPanelOpen.set(true);
+        this.schoolFormCodeTouched.set(true);
+        this.isSchoolModalOpen.set(true);
     }
 
-    closeSchoolPanel(): void {
-        this.isSchoolPanelOpen.set(false);
+    closeSchoolModal(): void {
+        this.isSchoolModalOpen.set(false);
         this.editingSchoolIndex.set(null);
         this.schoolFormTouched.set(false);
+        this.schoolFormCodeTouched.set(false);
     }
 
     saveSchool(): void {
@@ -317,7 +336,10 @@ export class FirstLoginSetupComponent implements OnInit {
         } else {
             this.schoolRows.update(rows => rows.map((row, i) => i === editIndex ? { ...row, ...nextRow } : row));
         }
-        this.closeSchoolPanel();
+        this.isSchoolModalOpen.set(false);
+        this.editingSchoolIndex.set(null);
+        this.schoolFormTouched.set(false);
+        this.schoolFormCodeTouched.set(false);
     }
 
     toggleSchoolStatus(index: number): void {
@@ -326,6 +348,34 @@ export class FirstLoginSetupComponent implements OnInit {
             const status = row.status === 'Active' ? 'Inactive' : 'Active';
             return { ...row, status };
         }));
+    }
+
+    onSchoolFormNameChange(value: string): void {
+        this.schoolFormName.set(value);
+        if (this.editingSchoolIndex() !== null) return;
+        if (this.schoolFormCodeTouched()) return;
+        this.schoolFormCode.set(this.generateSchoolCode(value));
+    }
+
+    onSchoolFormCodeChange(value: string): void {
+        this.schoolFormCodeTouched.set(true);
+        const normalized = value
+            .toLowerCase()
+            .replace(/[^a-z0-9-]/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+        this.schoolFormCode.set(normalized);
+    }
+
+    markSchoolFormTouched(): void {
+        this.schoolFormTouched.set(true);
+    }
+
+    onSchoolFormCountryChange(value: string): void {
+        this.schoolFormCountry.set(value);
+        if (!this.schoolFormTimezone().trim()) {
+            this.schoolFormTimezone.set(this.defaultTimezone());
+        }
     }
 
     addDepartment(): void {
@@ -531,14 +581,54 @@ export class FirstLoginSetupComponent implements OnInit {
     }
 
     private generateSchoolCode(name: string): string {
-        const trimmed = name.trim();
+        const trimmed = name.trim().toLowerCase();
         if (!trimmed) return '';
-        const letters = trimmed
-            .split(/\s+/)
-            .map(part => part[0])
-            .join('')
-            .toUpperCase();
-        return letters.slice(0, 6);
+        return trimmed
+            .replace(/[^a-z0-9\s-]/g, '')
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .slice(0, 32);
+    }
+
+    isValidCountry(value: string): boolean {
+        const trimmed = value.trim().toLowerCase();
+        if (!trimmed) return false;
+        return this.countryOptions().some((option: { label: string; code: string }) =>
+            option.label.toLowerCase() === trimmed
+        );
+    }
+
+    isValidTimezone(value: string): boolean {
+        const trimmed = value.trim();
+        if (!trimmed) return false;
+        return this.timezones().includes(trimmed);
+    }
+
+    schoolFormCodeError(): string {
+        if (!this.schoolFormTouched()) return '';
+        const code = this.schoolFormCode().trim();
+        if (!code) return 'School code is required.';
+        if (!/^[a-z0-9-]+$/.test(code)) {
+            return 'Use lowercase letters, numbers, and hyphens.';
+        }
+        return '';
+    }
+
+    schoolFormCountryError(): string {
+        if (!this.schoolFormTouched()) return '';
+        const value = this.schoolFormCountry().trim();
+        if (!value) return 'Select a country or region.';
+        if (!this.isValidCountry(value)) return 'Select a valid country or region.';
+        return '';
+    }
+
+    schoolFormTimezoneError(): string {
+        if (!this.schoolFormTouched()) return '';
+        const value = this.schoolFormTimezone().trim();
+        if (!value) return 'Select a time zone.';
+        if (!this.isValidTimezone(value)) return 'Select a valid time zone.';
+        return '';
     }
 
     private defaultLevels(template: 'k12' | 'primary_secondary' | 'custom'): string[] {

@@ -19,7 +19,7 @@
 
 .workspace-setup-grid {
     display: grid;
-    grid-template-columns: 360px 1fr;
+    grid-template-columns: 300px 1fr;
     gap: 24px;
     max-width: 100%;
     margin: 0 auto;
@@ -200,13 +200,11 @@
     height: 8px;
     border-radius: 999px;
     background: var(--mb-color-border-subtle);
-    background-image: repeating-linear-gradient(
-        90deg,
-        transparent 0,
-        transparent calc(12.5% - 1px),
-        color-mix(in srgb, var(--mb-color-border) 35%, transparent) calc(12.5% - 1px),
-        color-mix(in srgb, var(--mb-color-border) 35%, transparent) 12.5%
-    );
+    background-image: repeating-linear-gradient(90deg,
+            transparent 0,
+            transparent calc(12.5% - 1px),
+            color-mix(in srgb, var(--mb-color-border) 35%, transparent) calc(12.5% - 1px),
+            color-mix(in srgb, var(--mb-color-border) 35%, transparent) 12.5%);
     overflow: hidden;
 }
 
@@ -384,19 +382,20 @@
     gap: 16px;
 }
 
-.schools-grid--panel {
-    grid-template-columns: minmax(0, 1fr) 320px;
-    align-items: start;
-}
-
 .schools-table-wrap {
     min-width: 0;
 }
 
-.schools-toolbar {
+.schools-table__titlebar {
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 12px;
+}
+
+.schools-table__title {
+    font-weight: 650;
+    color: var(--mb-color-text);
 }
 
 .schools-table {
@@ -430,6 +429,9 @@
 
 .schools-table__name {
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .schools-table__actions {
@@ -447,6 +449,11 @@
     padding: 0;
 }
 
+.schools-action--icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
 .schools-action:hover {
     color: var(--mb-color-text);
 }
@@ -459,11 +466,23 @@
     font-size: 12px;
     color: var(--mb-color-text);
     background: color-mix(in srgb, var(--mb-color-primary) 8%, transparent);
+    gap: 6px;
 }
 
 .schools-status.is-inactive {
     color: var(--mb-color-text-muted);
     background: color-mix(in srgb, var(--mb-color-border) 35%, transparent);
+}
+
+.schools-status__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--mb-color-primary) 60%, transparent);
+}
+
+.schools-status.is-inactive .schools-status__dot {
+    background: color-mix(in srgb, var(--mb-color-border) 70%, transparent);
 }
 
 .schools-menu {
@@ -535,55 +554,116 @@
     color: var(--mb-color-text-muted);
 }
 
-.schools-panel {
-    border: 1px solid var(--mb-color-border-subtle);
-    border-radius: 12px;
-    background: var(--mb-color-surface);
-    padding: 16px;
-    position: sticky;
-    top: 16px;
+.schools-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
 }
 
-.schools-panel__header {
+.schools-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(3px);
+}
+
+.schools-modal__dialog {
+    position: relative;
+    z-index: 1;
+    width: min(600px, 90vw);
+    background: var(--mb-color-surface);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.16);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    outline: none;
+    transform: scale(1);
+    animation: schools-modal-in 140ms ease-out;
+}
+
+.schools-modal__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 16px;
 }
 
-.schools-panel__title {
-    font-weight: 650;
+.schools-modal__title {
+    font-size: 20px;
+    font-weight: 600;
     color: var(--mb-color-text);
 }
 
-.schools-panel__subtitle {
-    font-size: 12px;
+.schools-modal__subtitle {
+    margin-top: 4px;
+    font-size: 14px;
+    font-weight: 400;
     color: var(--mb-color-text-muted);
-    margin-top: 2px;
 }
 
-.schools-panel__close {
+.schools-modal__close {
     border: none;
     background: transparent;
     color: var(--mb-color-text-subtle);
-    font-size: 18px;
+    font-size: 20px;
     cursor: pointer;
     line-height: 1;
     padding: 0;
 }
 
-.schools-panel__body {
+.schools-modal__body {
     display: flex;
     flex-direction: column;
+    gap: 24px;
+}
+
+.schools-modal__section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.schools-modal__section-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--mb-color-text-subtle);
+}
+
+.schools-modal__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-top: 1px solid var(--mb-color-border-subtle);
+    padding-top: 16px;
+}
+
+.schools-modal__hint {
+    font-size: 12px;
+    color: var(--mb-color-text-muted);
+}
+
+.schools-modal__actions {
+    display: flex;
     gap: 12px;
 }
 
-.schools-panel__actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 16px;
+@keyframes schools-modal-in {
+    from {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .choice-grid {
@@ -901,11 +981,7 @@
         width: 100%;
     }
 
-    .schools-grid--panel {
-        grid-template-columns: 1fr;
-    }
-
-    .schools-panel {
-        position: static;
+    .schools-modal__dialog {
+        width: 100%;
     }
 }
