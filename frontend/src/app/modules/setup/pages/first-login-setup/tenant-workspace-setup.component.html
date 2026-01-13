@@ -290,10 +290,14 @@
                                                                 (click)="openRenameOrgUnit(); ouActionsMenu.open = false">
                                                                 Rename unit
                                                             </button>
-                                                            <button type="button" class="ou-actions-menu__item" disabled>
+                                                            <button type="button" class="ou-actions-menu__item"
+                                                                [disabled]="!selectedOrgUnit()"
+                                                                (click)="openMoveOrgUnit(); ouActionsMenu.open = false">
                                                                 Move unit
                                                             </button>
-                                                            <button type="button" class="ou-actions-menu__item" disabled>
+                                                            <button type="button" class="ou-actions-menu__item"
+                                                                [disabled]="!selectedOrgUnit()"
+                                                                (click)="openChangeParentOrgUnit(); ouActionsMenu.open = false">
                                                                 Change parent
                                                             </button>
                                                             <button type="button" class="ou-actions-menu__item" disabled>
@@ -665,6 +669,70 @@
                                             [disabled]="orgUnitRenameSubmitting()">Cancel</mb-button>
                                         <mb-button variant="primary" [loading]="orgUnitRenameSubmitting()"
                                             (click)="saveRenameOrgUnit()">
+                                            Save changes
+                                        </mb-button>
+                                    </div>
+                                </mb-modal>
+
+                                <mb-modal [open]="isOrgUnitMoveOpen()" title="Move organizational unit" size="sm"
+                                    [hasFooter]="true" [closeable]="!orgUnitMoveSubmitting()"
+                                    [closeOnBackdrop]="!orgUnitMoveSubmitting()"
+                                    (closed)="requestCloseMoveOrgUnit()">
+                                    <div class="ou-move">
+                                        <div class="ou-move__subtitle">
+                                            Choose a new parent for this unit.
+                                        </div>
+                                        <mb-alert *ngIf="orgUnitMoveError()" variant="danger">
+                                            {{ orgUnitMoveError() }}
+                                        </mb-alert>
+                                        <mb-form-field label="Parent unit" [controlId]="'ou-move-parent'">
+                                            <mb-select id="ou-move-parent" [value]="orgUnitMoveParentId() || ''"
+                                                (valueChange)="setOrgUnitMoveParent($event)">
+                                                <option *ngFor="let option of orgUnitParentOptions()"
+                                                    [value]="option.id || ''">
+                                                    {{ option.label }}
+                                                </option>
+                                            </mb-select>
+                                        </mb-form-field>
+                                    </div>
+
+                                    <div mbModalFooter class="ou-move__footer">
+                                        <mb-button variant="secondary" (click)="requestCloseMoveOrgUnit()"
+                                            [disabled]="orgUnitMoveSubmitting()">Cancel</mb-button>
+                                        <mb-button variant="primary" [loading]="orgUnitMoveSubmitting()"
+                                            (click)="saveMoveOrgUnit()">
+                                            Move unit
+                                        </mb-button>
+                                    </div>
+                                </mb-modal>
+
+                                <mb-modal [open]="isOrgUnitChangeParentOpen()" title="Change parent" size="sm"
+                                    [hasFooter]="true" [closeable]="!orgUnitMoveSubmitting()"
+                                    [closeOnBackdrop]="!orgUnitMoveSubmitting()"
+                                    (closed)="requestCloseChangeParentOrgUnit()">
+                                    <div class="ou-move">
+                                        <div class="ou-move__subtitle">
+                                            Update the parent for this unit.
+                                        </div>
+                                        <mb-alert *ngIf="orgUnitMoveError()" variant="danger">
+                                            {{ orgUnitMoveError() }}
+                                        </mb-alert>
+                                        <mb-form-field label="Parent unit" [controlId]="'ou-change-parent'">
+                                            <mb-select id="ou-change-parent" [value]="orgUnitMoveParentId() || ''"
+                                                (valueChange)="setOrgUnitMoveParent($event)">
+                                                <option *ngFor="let option of orgUnitParentOptions()"
+                                                    [value]="option.id || ''">
+                                                    {{ option.label }}
+                                                </option>
+                                            </mb-select>
+                                        </mb-form-field>
+                                    </div>
+
+                                    <div mbModalFooter class="ou-move__footer">
+                                        <mb-button variant="secondary" (click)="requestCloseChangeParentOrgUnit()"
+                                            [disabled]="orgUnitMoveSubmitting()">Cancel</mb-button>
+                                        <mb-button variant="primary" [loading]="orgUnitMoveSubmitting()"
+                                            (click)="saveChangeParentOrgUnit()">
                                             Save changes
                                         </mb-button>
                                     </div>

@@ -190,6 +190,12 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     orgUnitRenameName = signal('');
     orgUnitRenameError = signal('');
     orgUnitRenameSubmitting = signal(false);
+    isOrgUnitMoveOpen = signal(false);
+    isOrgUnitChangeParentOpen = signal(false);
+    orgUnitMoveTarget = signal<OrgUnit | null>(null);
+    orgUnitMoveParentId = signal<string | null>(null);
+    orgUnitMoveError = signal('');
+    orgUnitMoveSubmitting = signal(false);
 
     levelsTemplate = signal<'k12' | 'primary_secondary' | 'custom'>('k12');
     levels = signal<string[]>(this.defaultLevels('k12'));
@@ -855,6 +861,110 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.orgUnits.update(items => items.map(unit => unit.id === target.id ? { ...unit, name: nextName } : unit));
         this.toast.success(`Organizational unit renamed to "${nextName}".`);
         this.requestCloseRenameOrgUnit();
+    }
+
+    openMoveOrgUnit(): void {
+        const target = this.selectedOrgUnit();
+        if (!target) return;
+        this.orgUnitMoveTarget.set(target);
+        this.orgUnitMoveParentId.set(target.parentId ?? null);
+        this.orgUnitMoveError.set('');
+        this.orgUnitMoveSubmitting.set(false);
+        this.isOrgUnitMoveOpen.set(true);
+    }
+
+    requestCloseMoveOrgUnit(): void {
+        if (this.orgUnitMoveSubmitting()) return;
+        this.isOrgUnitMoveOpen.set(false);
+        this.orgUnitMoveTarget.set(null);
+        this.orgUnitMoveParentId.set(null);
+        this.orgUnitMoveError.set('');
+    }
+
+    openChangeParentOrgUnit(): void {
+        const target = this.selectedOrgUnit();
+        if (!target) return;
+        this.orgUnitMoveTarget.set(target);
+        this.orgUnitMoveParentId.set(target.parentId ?? null);
+        this.orgUnitMoveError.set('');
+        this.orgUnitMoveSubmitting.set(false);
+        this.isOrgUnitChangeParentOpen.set(true);
+    }
+
+    requestCloseChangeParentOrgUnit(): void {
+        if (this.orgUnitMoveSubmitting()) return;
+        this.isOrgUnitChangeParentOpen.set(false);
+        this.orgUnitMoveTarget.set(null);
+        this.orgUnitMoveParentId.set(null);
+        this.orgUnitMoveError.set('');
+    }
+
+    setOrgUnitMoveParent(value: string): void {
+        this.orgUnitMoveParentId.set(value ? value : null);
+    }
+
+    saveMoveOrgUnit(): void {
+        this.commitOrgUnitParentChange('moved');
+    }
+
+    saveChangeParentOrgUnit(): void {
+        this.commitOrgUnitParentChange('updated');
+    }
+
+    orgUnitParentOptions(): Array<{ id: string | null; label: string }> {
+        const target = this.orgUnitMoveTarget();
+        if (!target) return [{ id: null, label: 'Organization (root)' }];
+        const excluded = new Set(this.collectOrgUnitDescendantIds(target.id));
+        excluded.add(target.id);
+        const options = this.orgUnits()
+            .filter(unit => !excluded.has(unit.id))
+            .map(unit => ({
+                id: unit.id,
+                label: this.buildOrgUnitPath(unit.id)
+            }))
+            .sort((a, b) => a.label.localeCompare(b.label));
+        return [{ id: null, label: 'Organization (root)' }, ...options];
+    }
+
+    private commitOrgUnitParentChange(action: 'moved' | 'updated'): void {
+        const target = this.orgUnitMoveTarget();
+        if (!target || this.orgUnitMoveSubmitting()) return;
+        const nextParentId = this.orgUnitMoveParentId();
+        if (!this.isOrgUnitParentAllowed(target.id, nextParentId)) {
+            this.orgUnitMoveError.set('Select a valid parent unit.');
+            return;
+        }
+        if ((nextParentId ?? null) === (target.parentId ?? null)) {
+            this.closeOrgUnitMoveModal();
+            return;
+        }
+        this.orgUnitMoveSubmitting.set(true);
+        this.orgUnits.update(items => items.map(unit => unit.id === target.id
+            ? { ...unit, parentId: nextParentId ?? undefined }
+            : unit));
+        if (nextParentId) {
+            this.expandedOrgUnitIds.update(items => items.includes(nextParentId)
+                ? items
+                : [...items, nextParentId]);
+        }
+        this.toast.success(`Organizational unit "${target.name}" ${action}.`);
+        this.closeOrgUnitMoveModal();
+    }
+
+    private closeOrgUnitMoveModal(): void {
+        this.orgUnitMoveSubmitting.set(false);
+        if (this.isOrgUnitMoveOpen()) {
+            this.requestCloseMoveOrgUnit();
+            return;
+        }
+        this.requestCloseChangeParentOrgUnit();
+    }
+
+    private isOrgUnitParentAllowed(targetId: string, parentId: string | null): boolean {
+        if (!parentId) return true;
+        if (parentId === targetId) return false;
+        const descendants = new Set(this.collectOrgUnitDescendantIds(targetId));
+        return !descendants.has(parentId);
     }
 
     canDeleteSelectedOrgUnit(): boolean {
