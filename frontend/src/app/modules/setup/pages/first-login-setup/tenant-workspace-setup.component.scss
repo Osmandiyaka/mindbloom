@@ -744,7 +744,9 @@
     justify-content: space-between;
     align-items: flex-start;
     gap: 16px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .users-modal__title {
@@ -783,12 +785,27 @@
     gap: 12px;
 }
 
+.users-modal__section--spaced {
+    margin-top: 16px;
+}
+
 .users-modal__section-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.02em;
-    color: var(--mb-color-text-subtle);
+    letter-spacing: 0.08em;
+    color: rgba(15, 23, 42, 0.65);
     text-transform: uppercase;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.users-radio-group {
+    background: rgba(15, 23, 42, 0.02);
+    padding: 12px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .users-radio {
@@ -814,7 +831,7 @@
 .users-modal__footer {
     border-top: 1px solid var(--mb-color-border-subtle);
     padding-top: 16px;
-    margin-top: 16px;
+    margin-top: 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;

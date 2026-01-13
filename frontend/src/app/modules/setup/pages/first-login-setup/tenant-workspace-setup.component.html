@@ -990,26 +990,29 @@
                                                 (valueChange)="createEmail.set($event)"
                                                 (blur)="createTouched.set(true)"></mb-input>
                                         </mb-form-field>
-                                        <mb-form-field label="Role" [controlId]="'create-user-role'">
+                                        <mb-form-field label="Role" [controlId]="'create-user-role'"
+                                            hint="Determines what this user can view and manage.">
                                             <mb-role-selector [value]="createRoleIds()" [label]="''"
                                                 [placeholder]="'Select role…'" [multiple]="true" [maxVisibleChips]="3"
                                                 (change)="handleCreateRoleChange($event)"></mb-role-selector>
                                         </mb-form-field>
 
-                                        <div class="users-modal__section">
+                                        <div class="users-modal__section users-modal__section--spaced">
                                             <div class="users-modal__section-title">School access</div>
-                                            <label class="users-radio">
+                                            <div class="users-radio-group">
+                                                <label class="users-radio">
                                                 <input type="radio" name="create-access"
                                                     [checked]="createSchoolAccess() === 'all'"
                                                     (change)="createSchoolAccess.set('all')" />
-                                                <span>All schools</span>
-                                            </label>
-                                            <label class="users-radio">
+                                                <span>Access all schools</span>
+                                                </label>
+                                                <label class="users-radio">
                                                 <input type="radio" name="create-access"
                                                     [checked]="createSchoolAccess() === 'selected'"
                                                     (change)="createSchoolAccess.set('selected')" />
-                                                <span>Selected schools</span>
-                                            </label>
+                                                <span>Limit to selected schools</span>
+                                                </label>
+                                            </div>
                                             <div class="users-school-list" *ngIf="createSchoolAccess() === 'selected'">
                                                 <mb-checkbox *ngFor="let name of activeSchoolNames()"
                                                     [checked]="createSelectedSchools().includes(name)"
@@ -1018,7 +1021,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="users-modal__section">
+                                        <div class="users-modal__section users-modal__section--spaced">
                                             <div class="users-modal__section-title">Employment details</div>
                                             <mb-form-field label="Job title" [controlId]="'create-user-job'">
                                                 <mb-input id="create-user-job" [value]="createJobTitle()"
@@ -1037,7 +1040,7 @@
                                     </div>
                                     <div class="users-modal__footer">
                                         <div class="users-modal__actions">
-                                            <mb-button variant="secondary"
+                                            <mb-button variant="tertiary"
                                                 (click)="closeCreateUserModal()">Cancel</mb-button>
                                             <mb-button variant="primary" [disabled]="!createCanSubmit()"
                                                 (click)="saveCreateUser()">
