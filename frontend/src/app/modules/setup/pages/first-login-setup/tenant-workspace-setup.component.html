@@ -232,20 +232,144 @@
                         <div class="setup-body" *ngIf="step() === 3">
                             <div class="setup-section">
                                 <h2>Organizational units</h2>
-                                <p>Define departments or divisions for reporting and access.</p>
+                                <p>Build a hierarchy of schools, divisions, and departments for access and reporting.</p>
 
-                                <div class="list-stack">
-                                    <div class="list-row" *ngFor="let department of departments(); let i = index">
-                                        <mb-form-field label="Department" [controlId]="'department-' + i">
-                                            <mb-input [id]="'department-' + i" [value]="department"
-                                                (valueChange)="updateDepartment(i, $event)"></mb-input>
-                                        </mb-form-field>
-                                        <button type="button" class="list-remove" *ngIf="departments().length > 1"
-                                            (click)="removeDepartment(i)">Remove</button>
+                                <div class="ou-layout">
+                                    <div class="ou-panel ou-panel--tree">
+                                        <div class="ou-panel__header">
+                                            <div>
+                                                <div class="ou-panel__kicker">Organization tree</div>
+                                                <div class="ou-panel__title">Units</div>
+                                                <p class="ou-panel__subtitle">Add root units, then nest divisions and teams.</p>
+                                            </div>
+                                            <mb-button variant="secondary">+ Add root unit</mb-button>
+                                        </div>
+
+                                        <div class="ou-tree" role="tree">
+                                            <button type="button" class="ou-tree__node is-active" role="treeitem" aria-expanded="true">
+                                                <span class="ou-tree__caret">▾</span>
+                                                <span class="ou-tree__label">District Office</span>
+                                                <span class="ou-tree__meta">3 schools</span>
+                                            </button>
+                                            <div class="ou-tree__children" role="group">
+                                                <button type="button" class="ou-tree__node" role="treeitem" aria-expanded="true">
+                                                    <span class="ou-tree__caret">▾</span>
+                                                    <span class="ou-tree__label">School A</span>
+                                                    <span class="ou-tree__meta">5 units</span>
+                                                </button>
+                                                <div class="ou-tree__children" role="group">
+                                                    <button type="button" class="ou-tree__node" role="treeitem">
+                                                        <span class="ou-tree__spacer"></span>
+                                                        <span class="ou-tree__label">Academics</span>
+                                                    </button>
+                                                    <button type="button" class="ou-tree__node" role="treeitem">
+                                                        <span class="ou-tree__spacer"></span>
+                                                        <span class="ou-tree__label">Student Services</span>
+                                                    </button>
+                                                    <button type="button" class="ou-tree__node" role="treeitem">
+                                                        <span class="ou-tree__spacer"></span>
+                                                        <span class="ou-tree__label">Finance</span>
+                                                    </button>
+                                                </div>
+
+                                                <button type="button" class="ou-tree__node" role="treeitem" aria-expanded="false">
+                                                    <span class="ou-tree__caret">▸</span>
+                                                    <span class="ou-tree__label">School B</span>
+                                                    <span class="ou-tree__meta">2 units</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="ou-tree__footer">
+                                            <span class="ou-tree__hint">Select a unit to manage members and roles.</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="ou-panel ou-panel--detail">
+                                        <div class="ou-panel__header ou-panel__header--detail">
+                                            <div>
+                                                <div class="ou-breadcrumb">District Office / School A</div>
+                                                <div class="ou-panel__title">Academics</div>
+                                                <div class="ou-panel__subtitle">Department · Active</div>
+                                            </div>
+                                            <div class="ou-panel__actions">
+                                                <mb-button variant="secondary">Add child unit</mb-button>
+                                                <button type="button" class="ou-ghost-button">More actions</button>
+                                            </div>
+                                        </div>
+
+                                        <div class="ou-tabs" role="tablist">
+                                            <button type="button" class="ou-tab is-active" role="tab" aria-selected="true">
+                                                Members
+                                            </button>
+                                            <button type="button" class="ou-tab" role="tab" aria-selected="false">
+                                                Roles
+                                            </button>
+                                        </div>
+
+                                        <div class="ou-toolbar">
+                                            <div class="ou-search">
+                                                <input type="text" class="ou-input" placeholder="Search members" />
+                                            </div>
+                                            <mb-button variant="primary">Add members</mb-button>
+                                        </div>
+
+                                        <div class="ou-table">
+                                            <div class="ou-table__header">
+                                                <div>Name</div>
+                                                <div>Role</div>
+                                                <div>Status</div>
+                                                <div class="ou-table__actions">Actions</div>
+                                            </div>
+                                            <div class="ou-table__row">
+                                                <div class="ou-person">
+                                                    <div class="ou-avatar">AL</div>
+                                                    <div>
+                                                        <div class="ou-person__name">Avery Lawson</div>
+                                                        <div class="ou-person__meta">avery.lawson&#64;mindbloom.edu</div>
+                                                    </div>
+                                                </div>
+                                                <div><span class="ou-pill">Head of Department</span></div>
+                                                <div class="ou-status ou-status--active">Active</div>
+                                                <div class="ou-table__actions">
+                                                    <button type="button" class="ou-row-action">...</button>
+                                                </div>
+                                            </div>
+                                            <div class="ou-table__row">
+                                                <div class="ou-person">
+                                                    <div class="ou-avatar">MS</div>
+                                                    <div>
+                                                        <div class="ou-person__name">Maya Singh</div>
+                                                        <div class="ou-person__meta">maya.singh&#64;mindbloom.edu</div>
+                                                    </div>
+                                                </div>
+                                                <div><span class="ou-pill">Teacher</span></div>
+                                                <div class="ou-status ou-status--active">Active</div>
+                                                <div class="ou-table__actions">
+                                                    <button type="button" class="ou-row-action">...</button>
+                                                </div>
+                                            </div>
+                                            <div class="ou-table__row">
+                                                <div class="ou-person">
+                                                    <div class="ou-avatar">RJ</div>
+                                                    <div>
+                                                        <div class="ou-person__name">Riley Jones</div>
+                                                        <div class="ou-person__meta">riley.jones&#64;mindbloom.edu</div>
+                                                    </div>
+                                                </div>
+                                                <div><span class="ou-pill">Staff</span></div>
+                                                <div class="ou-status ou-status--muted">Invited</div>
+                                                <div class="ou-table__actions">
+                                                    <button type="button" class="ou-row-action">...</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="ou-helper">
+                                            Roles assigned here inherit to child units. Switch to the Roles tab to manage them.
+                                        </div>
                                     </div>
                                 </div>
-
-                                <button type="button" class="list-add" (click)="addDepartment()">Add department</button>
                             </div>
 
                             <div class="setup-footer">

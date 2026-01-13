@@ -23,6 +23,7 @@
     box-shadow: none;
 }
 
-.mb-popover-backdrop {
+.cdk-overlay-backdrop.mb-popover-backdrop {
     background: transparent;
+    backdrop-filter: none;
 }
