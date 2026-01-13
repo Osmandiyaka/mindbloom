@@ -916,7 +916,8 @@
                                         <button type="button" class="users-link" (click)="toggleInviteMessage()">
                                             {{ inviteMessageOpen() ? 'Hide message' : '+ Add optional message' }}
                                         </button>
-                                        <mb-form-field *ngIf="inviteMessageOpen()" label="Optional message"
+                                        <mb-form-field *ngIf="inviteMessageOpen()" class="users-textarea-field"
+                                            label="Optional message"
                                             [controlId]="'invite-message'">
                                             <mb-textarea id="invite-message" [value]="inviteMessage()"
                                                 (valueChange)="inviteMessage.set($event)"
