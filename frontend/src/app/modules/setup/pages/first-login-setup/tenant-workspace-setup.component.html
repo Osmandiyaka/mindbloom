@@ -875,30 +875,12 @@
                                     </div>
                                     <div class="classes-header__actions">
                                         <mb-button variant="primary" (click)="openAddClass()">Add class</mb-button>
-                                        <details class="classes-menu" #classesMenu>
-                                            <summary class="classes-menu__toggle" aria-label="More actions"
-                                                title="More actions">⋯</summary>
-                                            <div class="classes-menu__panel">
-                                                <button type="button" class="classes-menu__item"
-                                                    (click)="openImportModal('classes'); classesMenu.open = false">
-                                                    Import CSV
-                                                </button>
-                                                <button type="button" class="classes-menu__item"
-                                                    (click)="downloadImportTemplate('classes'); classesMenu.open = false">
-                                                    Download template
-                                                </button>
-                                                <div class="classes-menu__divider"></div>
-                                                <button type="button" class="classes-menu__item"
-                                                    (click)="exportCsv('classes'); classesMenu.open = false">
-                                                    Export CSV
-                                                </button>
-                                            </div>
-                                        </details>
                                     </div>
                                 </div>
 
-                                <div class="classes-split">
-                                    <div class="classes-panel classes-panel--list">
+                                <div class="classes-shell">
+                                    <div class="classes-split">
+                                        <div class="classes-panel classes-panel--list">
                                         <div class="classes-panel__header">
                                             <div class="classes-panel__title">Classes</div>
                                             <mb-input [value]="classSearch()" (valueChange)="classSearch.set($event)"
@@ -972,9 +954,9 @@
                                                 <mb-button variant="primary" (click)="openAddClass()">Add class</mb-button>
                                             </div>
                                         </ng-template>
-                                    </div>
+                                        </div>
 
-                                    <div class="classes-panel classes-panel--detail">
+                                        <div class="classes-panel classes-panel--detail">
                                         <ng-container *ngIf="selectedClass() as selected; else emptySectionState">
                                             <div class="sections-header">
                                                 <div>
@@ -986,12 +968,25 @@
                                                     </div>
                                                 </div>
                                                 <div class="sections-header__actions">
-                                                    <mb-button variant="primary" (click)="openAddSection(selected)">Add
+                                                    <mb-button variant="secondary" (click)="openAddSection(selected)">Add
                                                         section</mb-button>
                                                     <details class="sections-menu" #sectionsMenu>
                                                         <summary class="sections-menu__toggle"
                                                             aria-label="More actions" title="More actions">⋯</summary>
                                                         <div class="sections-menu__panel">
+                                                            <button type="button" class="sections-menu__item"
+                                                                (click)="openImportModal('classes'); sectionsMenu.open = false">
+                                                                Import CSV
+                                                            </button>
+                                                            <button type="button" class="sections-menu__item"
+                                                                (click)="downloadImportTemplate('classes'); sectionsMenu.open = false">
+                                                                Download template
+                                                            </button>
+                                                            <button type="button" class="sections-menu__item"
+                                                                (click)="exportCsv('classes'); sectionsMenu.open = false">
+                                                                Export CSV
+                                                            </button>
+                                                            <div class="sections-menu__divider"></div>
                                                             <button type="button" class="sections-menu__item"
                                                                 (click)="openSectionGenerator(); sectionsMenu.open = false">
                                                                 Create multiple sections
@@ -1097,6 +1092,7 @@
                                                 </div>
                                             </div>
                                         </ng-template>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
