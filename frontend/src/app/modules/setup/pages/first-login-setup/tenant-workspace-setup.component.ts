@@ -106,6 +106,39 @@ interface OrgUnitNode extends OrgUnit {
     children: OrgUnitNode[];
 }
 
+type GradingScaleType = 'Letter' | 'Percent' | 'GPA' | 'Rubric';
+type GradingScaleStatus = 'Active' | 'Draft' | 'Archived';
+
+type GradingBand = {
+    id: string;
+    label: string;
+    min: number;
+    max: number;
+    pass: boolean;
+    gpa?: number | null;
+};
+
+type GradingScaleSettings = {
+    passMark: number | null;
+    allowDecimals: boolean;
+    preventOverlap: boolean;
+    calculationMethod: 'Average' | 'Highest' | 'Lowest' | 'Weighted';
+    rounding: 'Nearest' | 'Up' | 'Down';
+    showGpa: boolean;
+    showPercent: boolean;
+    transcriptFormat: 'Letter' | 'Letter + Percent' | 'Percent';
+};
+
+type GradingScale = {
+    id: string;
+    name: string;
+    type: GradingScaleType;
+    status: GradingScaleStatus;
+    schoolIds: string[] | null;
+    bands: GradingBand[];
+    settings: GradingScaleSettings;
+};
+
 type OrgUnitDeleteImpact = {
     childUnits: number;
     members: number;
@@ -123,6 +156,7 @@ interface FirstLoginSetupData {
     classes?: ClassRow[] | Array<{ name: string; level: string; sections: string }>;
     sections?: SectionRow[];
     gradingModel?: 'letter' | 'numeric' | 'gpa' | 'custom';
+    gradingScales?: GradingScale[];
     users?: UserRow[];
     usersStepSkipped?: boolean;
 }
@@ -297,6 +331,32 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     gradingModel = signal<'letter' | 'numeric' | 'gpa' | 'custom'>('letter');
     gradingScale = computed(() => this.buildGradingScale(this.gradingModel()));
+    gradingScales = signal<GradingScale[]>([]);
+    gradingSchoolFilter = signal<string>('all');
+    gradingSelectedScaleId = signal<string | null>(null);
+    gradingActiveTab = signal<'bands' | 'settings'>('bands');
+    gradingHeaderMenuOpen = signal(false);
+    gradingScaleMenuOpen = signal(false);
+    gradingBandMenuOpenId = signal<string | null>(null);
+    gradingScaleFormOpen = signal(false);
+    gradingScaleFormMode = signal<'add' | 'edit'>('add');
+    gradingScaleFormId = signal<string | null>(null);
+    gradingScaleFormName = signal('');
+    gradingScaleFormTemplate = signal<string>('');
+    gradingScaleFormType = signal<GradingScaleType>('Letter');
+    gradingScaleFormSchoolScope = signal<'all' | 'specific'>('all');
+    gradingScaleFormSchoolIds = signal<string[]>([]);
+    gradingScaleFormPassMark = signal('');
+    gradingScaleFormError = signal('');
+    gradingBandFormOpen = signal(false);
+    gradingBandFormMode = signal<'add' | 'edit'>('add');
+    gradingBandFormId = signal<string | null>(null);
+    gradingBandFormLabel = signal('');
+    gradingBandFormMin = signal('');
+    gradingBandFormMax = signal('');
+    gradingBandFormPass = signal(true);
+    gradingBandFormGpa = signal('');
+    gradingBandFormError = signal('');
 
     users = signal<UserRow[]>([]);
     userSearch = signal('');
@@ -470,6 +530,28 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             role: user.role,
         }))
         .sort((a, b) => a.name.localeCompare(b.name)));
+    readonly gradingScaleList = computed(() => {
+        const filter = this.gradingSchoolFilter();
+        const scales = this.gradingScales();
+        if (filter === 'all') return scales;
+        return scales.filter(scale => scale.schoolIds?.includes(filter));
+    });
+    readonly selectedGradingScale = computed(() => {
+        const id = this.gradingSelectedScaleId();
+        return id ? this.gradingScales().find(scale => scale.id === id) || null : null;
+    });
+    readonly gradingScaleUsageLabel = computed(() => {
+        const scale = this.selectedGradingScale();
+        if (!scale) return 'All schools';
+        if (!scale.schoolIds || !scale.schoolIds.length) return 'All schools';
+        return `${scale.schoolIds.length} school${scale.schoolIds.length === 1 ? '' : 's'}`;
+    });
+    readonly gradingTemplateOptions = computed(() => this.gradingScaleTemplates());
+    readonly selectedGradingBands = computed(() => {
+        const scale = this.selectedGradingScale();
+        if (!scale) return [];
+        return [...scale.bands].sort((a, b) => b.max - a.max);
+    });
     readonly orgUnitDeleteRequiresConfirm = computed(() => {
         const impact = this.orgUnitDeleteImpact();
         return !!impact && impact.childUnits > 0;
@@ -1901,6 +1983,322 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.requestCloseSectionGenerator();
     }
 
+    openNewGradingScale(): void {
+        this.gradingScaleFormMode.set('add');
+        this.gradingScaleFormId.set(null);
+        this.gradingScaleFormName.set('');
+        this.gradingScaleFormTemplate.set('');
+        this.gradingScaleFormType.set('Letter');
+        this.gradingScaleFormSchoolScope.set('all');
+        this.gradingScaleFormSchoolIds.set([]);
+        this.gradingScaleFormPassMark.set('');
+        this.gradingScaleFormError.set('');
+        this.gradingScaleFormOpen.set(true);
+    }
+
+    openEditGradingScale(scale: GradingScale): void {
+        this.gradingScaleFormMode.set('edit');
+        this.gradingScaleFormId.set(scale.id);
+        this.gradingScaleFormName.set(scale.name);
+        this.gradingScaleFormTemplate.set('');
+        this.gradingScaleFormType.set(scale.type);
+        this.gradingScaleFormSchoolScope.set(scale.schoolIds && scale.schoolIds.length ? 'specific' : 'all');
+        this.gradingScaleFormSchoolIds.set(scale.schoolIds ? [...scale.schoolIds] : []);
+        this.gradingScaleFormPassMark.set(scale.settings.passMark?.toString() || '');
+        this.gradingScaleFormError.set('');
+        this.gradingScaleFormOpen.set(true);
+    }
+
+    requestCloseGradingScaleForm(): void {
+        this.gradingScaleFormOpen.set(false);
+        this.gradingScaleFormError.set('');
+    }
+
+    saveGradingScale(): void {
+        const name = this.gradingScaleFormName().trim();
+        if (!name) {
+            this.gradingScaleFormError.set('Scale name is required.');
+            return;
+        }
+        const type = this.gradingScaleFormType();
+        const schoolScope = this.gradingScaleFormSchoolScope();
+        const schoolIds = schoolScope === 'specific' ? [...this.gradingScaleFormSchoolIds()] : null;
+        if (schoolScope === 'specific' && (!schoolIds || !schoolIds.length)) {
+            this.gradingScaleFormError.set('Select at least one school.');
+            return;
+        }
+        const passMarkValue = this.gradingScaleFormPassMark().trim();
+        const passMarkNumber = passMarkValue ? Number(passMarkValue) : null;
+        if (passMarkValue && (passMarkNumber === null || !Number.isFinite(passMarkNumber) || passMarkNumber < 0)) {
+            this.gradingScaleFormError.set('Pass mark must be a valid number.');
+            return;
+        }
+        const templateId = this.gradingScaleFormTemplate();
+        const template = templateId ? this.gradingScaleTemplates().find(item => item.id === templateId) : null;
+        const settings = this.buildDefaultGradingSettings(passMarkNumber);
+        const bands = template ? template.bands.map(band => ({ ...band })) : this.defaultBandsForType(type);
+        if (this.gradingScaleFormMode() === 'edit' && this.gradingScaleFormId()) {
+            const id = this.gradingScaleFormId()!;
+            this.gradingScales.update(items => items.map(scale => scale.id === id
+                ? {
+                    ...scale,
+                    name,
+                    type,
+                    schoolIds,
+                    settings: {
+                        ...scale.settings,
+                        passMark: passMarkNumber
+                    },
+                    bands: template ? bands : scale.bands
+                }
+                : scale));
+            this.toast.success(`Grading scale "${name}" updated.`);
+        } else {
+            const id = this.nextGradingScaleId();
+            const newScale: GradingScale = {
+                id,
+                name,
+                type,
+                status: 'Active',
+                schoolIds,
+                bands,
+                settings
+            };
+            this.gradingScales.update(items => [...items, newScale]);
+            this.gradingSelectedScaleId.set(id);
+            this.toast.success(`Grading scale "${name}" created.`);
+        }
+        this.gradingScaleFormOpen.set(false);
+    }
+
+    toggleGradingScaleMenu(): void {
+        const next = !this.gradingScaleMenuOpen();
+        this.gradingScaleMenuOpen.set(next);
+    }
+
+    closeGradingScaleMenu(): void {
+        this.gradingScaleMenuOpen.set(false);
+    }
+
+    toggleGradingHeaderMenu(): void {
+        this.gradingHeaderMenuOpen.update(open => !open);
+    }
+
+    closeGradingHeaderMenu(): void {
+        this.gradingHeaderMenuOpen.set(false);
+    }
+
+    selectGradingScale(scale: GradingScale): void {
+        this.gradingSelectedScaleId.set(scale.id);
+        this.gradingActiveTab.set('bands');
+        this.closeGradingScaleMenu();
+    }
+
+    duplicateGradingScale(): void {
+        const scale = this.selectedGradingScale();
+        if (!scale) return;
+        const id = this.nextGradingScaleId();
+        const newScale: GradingScale = {
+            ...scale,
+            id,
+            name: `${scale.name} copy`,
+            status: 'Draft',
+            bands: scale.bands.map(band => ({ ...band, id: this.nextGradingBandId() })),
+            settings: { ...scale.settings }
+        };
+        this.gradingScales.update(items => [...items, newScale]);
+        this.gradingSelectedScaleId.set(id);
+        this.toast.success('Grading scale duplicated.');
+        this.closeGradingScaleMenu();
+    }
+
+    archiveGradingScale(): void {
+        const scale = this.selectedGradingScale();
+        if (!scale) return;
+        this.gradingScales.update(items => items.map(item => item.id === scale.id
+            ? { ...item, status: item.status === 'Archived' ? 'Active' : 'Archived' }
+            : item));
+        this.toast.success(`Grading scale "${scale.name}" ${scale.status === 'Archived' ? 'restored' : 'archived'}.`);
+        this.closeGradingScaleMenu();
+    }
+
+    openAddGradeBand(): void {
+        if (!this.selectedGradingScale()) {
+            this.toast.warning('Select a grading scale first.');
+            return;
+        }
+        this.gradingBandFormMode.set('add');
+        this.gradingBandFormId.set(null);
+        this.gradingBandFormLabel.set('');
+        this.gradingBandFormMin.set('');
+        this.gradingBandFormMax.set('');
+        this.gradingBandFormPass.set(true);
+        this.gradingBandFormGpa.set('');
+        this.gradingBandFormError.set('');
+        this.gradingBandFormOpen.set(true);
+    }
+
+    openEditGradeBand(band: GradingBand): void {
+        this.gradingBandFormMode.set('edit');
+        this.gradingBandFormId.set(band.id);
+        this.gradingBandFormLabel.set(band.label);
+        this.gradingBandFormMin.set(band.min.toString());
+        this.gradingBandFormMax.set(band.max.toString());
+        this.gradingBandFormPass.set(band.pass);
+        this.gradingBandFormGpa.set(band.gpa?.toString() || '');
+        this.gradingBandFormError.set('');
+        this.gradingBandFormOpen.set(true);
+    }
+
+    requestCloseGradeBandForm(): void {
+        this.gradingBandFormOpen.set(false);
+        this.gradingBandFormError.set('');
+    }
+
+    saveGradeBand(): void {
+        const scale = this.selectedGradingScale();
+        if (!scale) return;
+        const label = this.gradingBandFormLabel().trim();
+        if (!label) {
+            this.gradingBandFormError.set('Grade label is required.');
+            return;
+        }
+        const minValue = Number(this.gradingBandFormMin().trim());
+        const maxValue = Number(this.gradingBandFormMax().trim());
+        if (!Number.isFinite(minValue) || !Number.isFinite(maxValue) || minValue >= maxValue) {
+            this.gradingBandFormError.set('Min score must be less than max score.');
+            return;
+        }
+        const gpaValueRaw = this.gradingBandFormGpa().trim();
+        const gpaValue = gpaValueRaw ? Number(gpaValueRaw) : null;
+        if (gpaValueRaw && (gpaValue === null || !Number.isFinite(gpaValue) || gpaValue < 0)) {
+            this.gradingBandFormError.set('GPA must be a valid number.');
+            return;
+        }
+        const nextBand: GradingBand = {
+            id: this.gradingBandFormId() || this.nextGradingBandId(),
+            label,
+            min: minValue,
+            max: maxValue,
+            pass: this.gradingBandFormPass(),
+            gpa: gpaValue
+        };
+        const conflict = scale.settings.preventOverlap
+            && scale.bands.some(band => {
+                if (band.id === nextBand.id) return false;
+                return nextBand.min < band.max && nextBand.max > band.min;
+            });
+        if (conflict) {
+            this.gradingBandFormError.set('Grade band ranges cannot overlap.');
+            return;
+        }
+        this.gradingScales.update(items => items.map(item => {
+            if (item.id !== scale.id) return item;
+            const bands = item.bands.filter(band => band.id !== nextBand.id);
+            bands.push(nextBand);
+            return {
+                ...item,
+                bands: bands.sort((a, b) => b.max - a.max)
+            };
+        }));
+        this.toast.success(`Grade band "${label}" saved.`);
+        this.gradingBandFormOpen.set(false);
+    }
+
+    resetGradingDefaults(): void {
+        const type = this.gradingModel() === 'numeric'
+            ? 'Percent'
+            : (this.gradingModel() === 'gpa' ? 'GPA' : 'Letter');
+        const defaultScale: GradingScale = {
+            id: this.nextGradingScaleId(),
+            name: 'Default scale',
+            type,
+            status: 'Active',
+            schoolIds: null,
+            bands: this.defaultBandsForType(type),
+            settings: this.buildDefaultGradingSettings(null)
+        };
+        this.gradingScales.set([defaultScale]);
+        this.gradingSelectedScaleId.set(defaultScale.id);
+        this.toast.success('Grading scales reset to defaults.');
+    }
+
+    importGradingTemplate(): void {
+        this.openNewGradingScale();
+        const template = this.gradingScaleTemplates()[0];
+        if (template) {
+            this.selectGradingTemplate(template.id);
+        }
+    }
+
+    selectGradingTemplate(templateId: string): void {
+        this.gradingScaleFormTemplate.set(templateId);
+        if (!templateId) return;
+        const template = this.gradingScaleTemplates().find(option => option.id === templateId);
+        if (template) {
+            this.gradingScaleFormType.set(template.type);
+        }
+    }
+
+    toggleGradingScaleSchool(name: string, checked: boolean): void {
+        this.gradingScaleFormSchoolIds.update(items => {
+            if (checked) return items.includes(name) ? items : [...items, name];
+            return items.filter(item => item !== name);
+        });
+    }
+
+    setGradingPassMark(value: string): void {
+        const trimmed = value.trim();
+        const number = trimmed ? Number(trimmed) : null;
+        if (trimmed && (number === null || !Number.isFinite(number) || number < 0)) {
+            return;
+        }
+        this.updateSelectedScaleSettings({ passMark: number });
+    }
+
+    setGradingCalculationMethod(value: string): void {
+        if (!value) return;
+        this.updateSelectedScaleSettings({ calculationMethod: value as GradingScaleSettings['calculationMethod'] });
+    }
+
+    setGradingRounding(value: string): void {
+        if (!value) return;
+        this.updateSelectedScaleSettings({ rounding: value as GradingScaleSettings['rounding'] });
+    }
+
+    setGradingTranscriptFormat(value: string): void {
+        if (!value) return;
+        this.updateSelectedScaleSettings({ transcriptFormat: value as GradingScaleSettings['transcriptFormat'] });
+    }
+
+    deleteGradeBand(band: GradingBand): void {
+        const scale = this.selectedGradingScale();
+        if (!scale) return;
+        this.gradingScales.update(items => items.map(item => item.id === scale.id
+            ? { ...item, bands: item.bands.filter(existing => existing.id !== band.id) }
+            : item));
+        this.toast.success(`Grade band "${band.label}" deleted.`);
+        this.gradingBandMenuOpenId.set(null);
+    }
+
+    toggleGradingBandMenu(id: string, event?: MouseEvent): void {
+        event?.stopPropagation();
+        const next = this.gradingBandMenuOpenId() === id ? null : id;
+        this.gradingBandMenuOpenId.set(next);
+    }
+
+    closeGradingBandMenu(): void {
+        this.gradingBandMenuOpenId.set(null);
+    }
+
+    updateSelectedScaleSettings(patch: Partial<GradingScaleSettings>): void {
+        const scale = this.selectedGradingScale();
+        if (!scale) return;
+        this.gradingScales.update(items => items.map(item => item.id === scale.id
+            ? { ...item, settings: { ...item.settings, ...patch } }
+            : item));
+    }
+
     selectClass(row: ClassRow): void {
         this.closeAllActionMenus();
         this.selectedClassId.set(row.id);
@@ -2612,6 +3010,25 @@ export class TenantWorkspaceSetupComponent implements OnInit {
                     this.step.set(state.step || 1);
                 }
 
+                if (!this.gradingScales().length) {
+                    const type = this.gradingModel() === 'numeric'
+                        ? 'Percent'
+                        : (this.gradingModel() === 'gpa' ? 'GPA' : 'Letter');
+                    const defaultScale: GradingScale = {
+                        id: this.nextGradingScaleId(),
+                        name: 'Default scale',
+                        type,
+                        status: 'Active',
+                        schoolIds: null,
+                        bands: this.defaultBandsForType(type),
+                        settings: this.buildDefaultGradingSettings(null)
+                    };
+                    this.gradingScales.set([defaultScale]);
+                }
+                if (!this.gradingSelectedScaleId() && this.gradingScales().length) {
+                    this.gradingSelectedScaleId.set(this.gradingScales()[0].id);
+                }
+
                 this.isLoading.set(false);
             },
             error: () => {
@@ -2637,6 +3054,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
                 this.classRows();
                 this.sectionRows();
                 this.gradingModel();
+                this.gradingScales();
                 this.users();
 
                 if (!this.isLoading()) {
@@ -2679,12 +3097,29 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             this.sectionRows.set(data.sections);
         }
         this.gradingModel.set(data.gradingModel || 'letter');
+        if (data.gradingScales?.length) {
+            this.gradingScales.set(data.gradingScales);
+        } else {
+            const defaultScale: GradingScale = {
+                id: this.nextGradingScaleId(),
+                name: 'Default scale',
+                type: this.gradingModel() === 'numeric' ? 'Percent' : (this.gradingModel() === 'gpa' ? 'GPA' : 'Letter'),
+                status: 'Active',
+                schoolIds: null,
+                bands: this.defaultBandsForType(this.gradingModel() === 'numeric' ? 'Percent' : (this.gradingModel() === 'gpa' ? 'GPA' : 'Letter')),
+                settings: this.buildDefaultGradingSettings(null)
+            };
+            this.gradingScales.set([defaultScale]);
+        }
         this.users.set(data.users?.length ? data.users : this.users());
         this.usersStepSkipped.set(!!data.usersStepSkipped);
         this.syncClassCounter();
         this.syncSectionCounter();
         if (!this.selectedClassId() && this.classRows().length) {
             this.selectedClassId.set(this.classRows()[0].id);
+        }
+        if (!this.gradingSelectedScaleId() && this.gradingScales().length) {
+            this.gradingSelectedScaleId.set(this.gradingScales()[0].id);
         }
     }
 
@@ -2708,6 +3143,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
                 classes: this.classRows(),
                 sections: this.sectionRows(),
                 gradingModel: this.gradingModel(),
+                gradingScales: this.gradingScales(),
                 users: this.users(),
                 usersStepSkipped: this.usersStepSkipped(),
             }
@@ -2835,6 +3271,83 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             { label: 'D', value: 'Needs improvement' },
             { label: 'F', value: 'Unsatisfactory' }
         ];
+    }
+
+    private buildDefaultGradingSettings(passMark: number | null): GradingScaleSettings {
+        return {
+            passMark,
+            allowDecimals: false,
+            preventOverlap: true,
+            calculationMethod: 'Average',
+            rounding: 'Nearest',
+            showGpa: true,
+            showPercent: true,
+            transcriptFormat: 'Letter'
+        };
+    }
+
+    private defaultBandsForType(type: GradingScaleType): GradingBand[] {
+        if (type === 'Percent') {
+            return [
+                { id: this.nextGradingBandId(), label: 'A', min: 90, max: 100, pass: true, gpa: null },
+                { id: this.nextGradingBandId(), label: 'B', min: 80, max: 89, pass: true, gpa: null },
+                { id: this.nextGradingBandId(), label: 'C', min: 70, max: 79, pass: true, gpa: null },
+                { id: this.nextGradingBandId(), label: 'D', min: 60, max: 69, pass: true, gpa: null },
+                { id: this.nextGradingBandId(), label: 'F', min: 0, max: 59, pass: false, gpa: null }
+            ];
+        }
+        if (type === 'GPA') {
+            return [
+                { id: this.nextGradingBandId(), label: '4.0', min: 90, max: 100, pass: true, gpa: 4.0 },
+                { id: this.nextGradingBandId(), label: '3.0', min: 80, max: 89, pass: true, gpa: 3.0 },
+                { id: this.nextGradingBandId(), label: '2.0', min: 70, max: 79, pass: true, gpa: 2.0 },
+                { id: this.nextGradingBandId(), label: '1.0', min: 60, max: 69, pass: true, gpa: 1.0 },
+                { id: this.nextGradingBandId(), label: '0.0', min: 0, max: 59, pass: false, gpa: 0.0 }
+            ];
+        }
+        if (type === 'Rubric') {
+            return [
+                { id: this.nextGradingBandId(), label: 'Exemplary', min: 90, max: 100, pass: true, gpa: null },
+                { id: this.nextGradingBandId(), label: 'Proficient', min: 75, max: 89, pass: true, gpa: null },
+                { id: this.nextGradingBandId(), label: 'Developing', min: 60, max: 74, pass: true, gpa: null },
+                { id: this.nextGradingBandId(), label: 'Beginning', min: 0, max: 59, pass: false, gpa: null }
+            ];
+        }
+        return [
+            { id: this.nextGradingBandId(), label: 'A', min: 90, max: 100, pass: true, gpa: null },
+            { id: this.nextGradingBandId(), label: 'B', min: 80, max: 89, pass: true, gpa: null },
+            { id: this.nextGradingBandId(), label: 'C', min: 70, max: 79, pass: true, gpa: null },
+            { id: this.nextGradingBandId(), label: 'D', min: 60, max: 69, pass: true, gpa: null },
+            { id: this.nextGradingBandId(), label: 'F', min: 0, max: 59, pass: false, gpa: null }
+        ];
+    }
+
+    private gradingScaleTemplates(): Array<{ id: string; label: string; type: GradingScaleType; bands: GradingBand[] }> {
+        return [
+            { id: 'letter-default', label: 'Default letter scale', type: 'Letter', bands: this.defaultBandsForType('Letter') },
+            { id: 'percent-default', label: 'Percent scale (A–F)', type: 'Percent', bands: this.defaultBandsForType('Percent') },
+            { id: 'gpa-default', label: 'GPA scale (4.0)', type: 'GPA', bands: this.defaultBandsForType('GPA') },
+            { id: 'rubric-default', label: 'Rubric scale', type: 'Rubric', bands: this.defaultBandsForType('Rubric') }
+        ];
+    }
+
+    private nextGradingScaleId(): string {
+        const maxId = this.gradingScales().reduce((max, scale) => {
+            const value = Number(scale.id.replace(/[^\d]/g, ''));
+            return Number.isFinite(value) ? Math.max(max, value) : max;
+        }, 0);
+        return `scale-${maxId + 1}`;
+    }
+
+    private nextGradingBandId(): string {
+        const scales = this.gradingScales();
+        const maxId = scales.reduce((max, scale) => {
+            return scale.bands.reduce((innerMax, band) => {
+                const value = Number(band.id.replace(/[^\d]/g, ''));
+                return Number.isFinite(value) ? Math.max(innerMax, value) : innerMax;
+            }, max);
+        }, 0);
+        return `band-${maxId + 1}`;
     }
 
     private fallbackTimezones(): string[] {
