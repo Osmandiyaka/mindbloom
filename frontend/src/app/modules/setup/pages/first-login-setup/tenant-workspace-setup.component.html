@@ -300,7 +300,10 @@
                                                                 (click)="openChangeParentOrgUnit(); ouActionsMenu.open = false">
                                                                 Change parent
                                                             </button>
-                                                            <button type="button" class="ou-actions-menu__item" disabled>
+                                                            <button type="button" class="ou-actions-menu__item"
+                                                                [disabled]="!canDeactivateSelectedOrgUnit()"
+                                                                [attr.title]="selectedOrgUnit()?.status === 'Inactive' ? 'Unit is already inactive.' : null"
+                                                                (click)="openDeactivateOrgUnit(); ouActionsMenu.open = false">
                                                                 Deactivate unit
                                                             </button>
                                                             <div class="ou-actions-menu__divider"></div>
@@ -734,6 +737,39 @@
                                         <mb-button variant="primary" [loading]="orgUnitMoveSubmitting()"
                                             (click)="saveChangeParentOrgUnit()">
                                             Save changes
+                                        </mb-button>
+                                    </div>
+                                </mb-modal>
+
+                                <mb-modal [open]="isOrgUnitDeactivateOpen()" title="Deactivate organizational unit" size="sm"
+                                    [hasFooter]="true" [closeable]="!orgUnitDeactivateSubmitting()"
+                                    [closeOnBackdrop]="!orgUnitDeactivateSubmitting()"
+                                    (closed)="requestCloseDeactivateOrgUnit()">
+                                    <div class="ou-deactivate">
+                                        <div class="ou-deactivate__subtitle">
+                                            Deactivating a unit hides it from assignments and scheduling.
+                                        </div>
+                                        <mb-alert *ngIf="orgUnitDeactivateError()" variant="danger">
+                                            {{ orgUnitDeactivateError() }}
+                                        </mb-alert>
+                                        <div class="ou-deactivate__impact">
+                                            <div class="ou-deactivate__row">
+                                                <span>Unit</span>
+                                                <span>{{ selectedOrgUnit()?.name }}</span>
+                                            </div>
+                                            <div class="ou-deactivate__row">
+                                                <span>Status</span>
+                                                <span>Active → Inactive</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div mbModalFooter class="ou-deactivate__footer">
+                                        <mb-button variant="secondary" (click)="requestCloseDeactivateOrgUnit()"
+                                            [disabled]="orgUnitDeactivateSubmitting()">Cancel</mb-button>
+                                        <mb-button variant="danger" [loading]="orgUnitDeactivateSubmitting()"
+                                            (click)="deactivateSelectedOrgUnit()">
+                                            Deactivate unit
                                         </mb-button>
                                     </div>
                                 </mb-modal>

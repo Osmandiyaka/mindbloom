@@ -196,6 +196,9 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     orgUnitMoveParentId = signal<string | null>(null);
     orgUnitMoveError = signal('');
     orgUnitMoveSubmitting = signal(false);
+    isOrgUnitDeactivateOpen = signal(false);
+    orgUnitDeactivateError = signal('');
+    orgUnitDeactivateSubmitting = signal(false);
 
     levelsTemplate = signal<'k12' | 'primary_secondary' | 'custom'>('k12');
     levels = signal<string[]>(this.defaultLevels('k12'));
@@ -965,6 +968,36 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         if (parentId === targetId) return false;
         const descendants = new Set(this.collectOrgUnitDescendantIds(targetId));
         return !descendants.has(parentId);
+    }
+
+    canDeactivateSelectedOrgUnit(): boolean {
+        const target = this.selectedOrgUnit();
+        return !!target && target.status === 'Active';
+    }
+
+    openDeactivateOrgUnit(): void {
+        const target = this.selectedOrgUnit();
+        if (!target || target.status !== 'Active') return;
+        this.orgUnitDeactivateError.set('');
+        this.orgUnitDeactivateSubmitting.set(false);
+        this.isOrgUnitDeactivateOpen.set(true);
+    }
+
+    requestCloseDeactivateOrgUnit(): void {
+        if (this.orgUnitDeactivateSubmitting()) return;
+        this.isOrgUnitDeactivateOpen.set(false);
+        this.orgUnitDeactivateError.set('');
+    }
+
+    deactivateSelectedOrgUnit(): void {
+        const target = this.selectedOrgUnit();
+        if (!target || target.status !== 'Active' || this.orgUnitDeactivateSubmitting()) return;
+        this.orgUnitDeactivateSubmitting.set(true);
+        this.orgUnits.update(items => items.map(unit => unit.id === target.id
+            ? { ...unit, status: 'Inactive' }
+            : unit));
+        this.toast.success(`Organizational unit "${target.name}" deactivated.`);
+        this.requestCloseDeactivateOrgUnit();
     }
 
     canDeleteSelectedOrgUnit(): boolean {
