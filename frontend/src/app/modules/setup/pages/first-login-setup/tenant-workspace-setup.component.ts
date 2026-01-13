@@ -1,4 +1,4 @@
-import { Component, EnvironmentInjector, OnInit, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { Component, EmbeddedViewRef, EnvironmentInjector, HostListener, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -113,13 +113,14 @@ interface FirstLoginSetupData {
     templateUrl: './tenant-workspace-setup.component.html',
     styleUrls: ['./tenant-workspace-setup.component.scss']
 })
-export class TenantWorkspaceSetupComponent implements OnInit {
+export class TenantWorkspaceSetupComponent implements OnInit, OnDestroy {
     private readonly tenantSettings = inject(TenantSettingsService);
     private readonly tenantService = inject(TenantService);
     private readonly schoolService = inject(SchoolService);
     private readonly setupStore = inject(FirstLoginSetupService);
     private readonly router = inject(Router);
     private readonly injector = inject(EnvironmentInjector);
+    private readonly viewContainerRef = inject(ViewContainerRef);
 
     private autosaveInitialized = false;
 
@@ -157,6 +158,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     orgUnitFormOpen = signal(false);
     orgUnitFormName = signal('');
     orgUnitFormType = signal<OrgUnitType>('Department');
+    orgUnitFormStatus = signal<OrgUnitStatus>('Active');
     orgUnitFormParentId = signal<string | null>(null);
     orgUnitFormError = signal('');
     assignMembersOpen = signal(false);
@@ -217,6 +219,10 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     private userCounter = 0;
     private orgUnitCounter = 0;
+    private orgUnitOverlayElement?: HTMLElement;
+    private orgUnitOverlayView?: EmbeddedViewRef<unknown>;
+
+    @ViewChild('orgUnitSlideOver') orgUnitSlideOver?: TemplateRef<unknown>;
 
     readonly orgUnitTypes: OrgUnitType[] = [
         'District',
@@ -652,6 +658,17 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.openViewUser(index);
     }
 
+    @HostListener('document:keydown.escape')
+    handleEscapeKey(): void {
+        if (this.orgUnitFormOpen()) {
+            this.requestCloseOrgUnitForm();
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.detachOrgUnitOverlay();
+    }
+
     trackOrgUnit = (_: number, node: OrgUnitNode) => node.id;
     trackUserRow = (_: number, user: UserRow) => user.id;
     trackOrgUnitRole = (_: number, role: OrgUnitRole) => role.id;
@@ -701,7 +718,12 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     startAddChildUnit(): void {
         const activeId = this.activeOrgUnitId();
-        if (!activeId) return;
+        if (!activeId) {
+            this.orgUnitFormParentId.set(null);
+            this.openOrgUnitForm();
+            this.orgUnitFormError.set('Select a parent unit before creating a child.');
+            return;
+        }
         this.orgUnitFormParentId.set(activeId);
         this.openOrgUnitForm();
     }
@@ -709,14 +731,25 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     openOrgUnitForm(): void {
         this.orgUnitFormName.set('');
         this.orgUnitFormType.set('Department');
+        this.orgUnitFormStatus.set('Active');
         this.orgUnitFormError.set('');
         this.orgUnitFormOpen.set(true);
+        this.attachOrgUnitOverlay();
     }
 
     cancelOrgUnitForm(): void {
         this.orgUnitFormOpen.set(false);
         this.orgUnitFormError.set('');
         this.orgUnitFormParentId.set(null);
+        this.detachOrgUnitOverlay();
+    }
+
+    requestCloseOrgUnitForm(): void {
+        if (!this.orgUnitFormOpen()) return;
+        if (this.isOrgUnitFormDirty() && !window.confirm('Discard this organizational unit?')) {
+            return;
+        }
+        this.cancelOrgUnitForm();
     }
 
     setOrgUnitFormType(value: string): void {
@@ -736,7 +769,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             id: this.nextOrgUnitId(),
             name,
             type: this.orgUnitFormType(),
-            status: 'Active',
+            status: this.orgUnitFormStatus(),
             parentId: this.orgUnitFormParentId() || undefined
         };
 
@@ -748,6 +781,33 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         }
         this.activeOrgUnitId.set(newUnit.id);
         this.cancelOrgUnitForm();
+    }
+
+    isOrgUnitFormDirty(): boolean {
+        return (
+            this.orgUnitFormName().trim().length > 0 ||
+            this.orgUnitFormType() !== 'Department' ||
+            this.orgUnitFormStatus() !== 'Active'
+        );
+    }
+
+    private attachOrgUnitOverlay(): void {
+        if (this.orgUnitOverlayElement || !this.orgUnitSlideOver) return;
+        const element = document.createElement('div');
+        element.className = 'ou-slide-over-host';
+        document.body.appendChild(element);
+        this.orgUnitOverlayView = this.viewContainerRef.createEmbeddedView(this.orgUnitSlideOver);
+        this.orgUnitOverlayView.detectChanges();
+        this.orgUnitOverlayView.rootNodes.forEach(node => element.appendChild(node));
+        this.orgUnitOverlayElement = element;
+    }
+
+    private detachOrgUnitOverlay(): void {
+        if (!this.orgUnitOverlayElement) return;
+        this.orgUnitOverlayView?.destroy();
+        this.orgUnitOverlayView = undefined;
+        this.orgUnitOverlayElement.remove();
+        this.orgUnitOverlayElement = undefined;
     }
 
     selectOrgUnit(id: string): void {

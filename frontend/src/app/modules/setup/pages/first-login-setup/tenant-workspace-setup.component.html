@@ -249,36 +249,6 @@
                                             </div>
                                         </div>
 
-                                        <div class="ou-form" *ngIf="orgUnitFormOpen()">
-                                            <div class="ou-form__title">New organizational unit</div>
-                                            <div class="ou-form__meta" *ngIf="orgUnitFormParentId()">
-                                                Parent: {{ selectedOrgUnit()?.name || 'Selected unit' }}
-                                            </div>
-                                            <div class="ou-form__fields">
-                                                <mb-form-field label="Unit name" [controlId]="'org-unit-name'">
-                                                    <mb-input id="org-unit-name" [value]="orgUnitFormName()"
-                                                        (valueChange)="orgUnitFormName.set($event)"></mb-input>
-                                                </mb-form-field>
-                                                <mb-form-field label="Type" [controlId]="'org-unit-type'">
-                                                    <mb-select id="org-unit-type" [value]="orgUnitFormType()"
-                                                        (valueChange)="setOrgUnitFormType($event)">
-                                                        <option *ngFor="let type of orgUnitTypes" [value]="type">
-                                                            {{ type }}
-                                                        </option>
-                                                    </mb-select>
-                                                </mb-form-field>
-                                            </div>
-                                            <div class="ou-form__error" *ngIf="orgUnitFormError()">
-                                                {{ orgUnitFormError() }}
-                                            </div>
-                                            <div class="ou-form__actions">
-                                                <mb-button variant="secondary"
-                                                    (click)="cancelOrgUnitForm()">Cancel</mb-button>
-                                                <mb-button variant="primary" (click)="saveOrgUnitForm()"
-                                                    [disabled]="!orgUnitFormName().trim()">Save unit</mb-button>
-                                            </div>
-                                        </div>
-
                                         <ng-container *ngIf="orgUnitTree().length; else ouEmptyTree">
                                             <div class="ou-tree" role="tree">
                                                 <ng-container *ngFor="let node of orgUnitTree(); trackBy: trackOrgUnit">
@@ -675,6 +645,87 @@
                                         <li *ngFor="let row of gradingScale()">{{ row.label }} — {{ row.value }}</li>
                                     </ul>
                                 </div>
+                                <ng-template #orgUnitSlideOver>
+                                    <div class="ou-slide-over" role="dialog" aria-modal="true">
+                                        <div class="ou-slide-over__backdrop"
+                                            (click)="requestCloseOrgUnitForm()"></div>
+                                        <div class="ou-slide-over__panel" (click)="$event.stopPropagation()">
+                                            <div class="ou-slide-over__header">
+                                                <div>
+                                                    <div class="ou-slide-over__title">Add organizational unit</div>
+                                                    <div class="ou-slide-over__subtitle" *ngIf="orgUnitFormParentId(); else ouRootSubtitle">
+                                                        Create a child unit under {{ selectedOrgUnit()?.name || 'Selected unit' }}.
+                                                    </div>
+                                                    <ng-template #ouRootSubtitle>
+                                                        <div class="ou-slide-over__subtitle">Create a new root unit for your organization.</div>
+                                                    </ng-template>
+                                                </div>
+                                                <button type="button" class="ou-slide-over__close"
+                                                    (click)="requestCloseOrgUnitForm()" aria-label="Close">
+                                                    ×
+                                                </button>
+                                            </div>
+
+                                            <div class="ou-slide-over__content">
+                                                <div class="ou-slide-over__section">
+                                                    <div class="ou-slide-over__section-label">Parent unit</div>
+                                                    <div class="ou-slide-over__context-value">
+                                                        {{ selectedOrgUnit()?.name || 'Organization' }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="ou-slide-over__section">
+                                                    <div class="ou-slide-over__section-label">Identity</div>
+                                                    <div class="ou-slide-over__fields">
+                                                        <mb-form-field label="Unit name" [controlId]="'org-unit-name'">
+                                                            <mb-input id="org-unit-name" [value]="orgUnitFormName()"
+                                                                (valueChange)="orgUnitFormName.set($event)">
+                                                            </mb-input>
+                                                        </mb-form-field>
+                                                        <mb-form-field label="Unit type" [controlId]="'org-unit-type'">
+                                                            <mb-select id="org-unit-type" [value]="orgUnitFormType()"
+                                                                (valueChange)="setOrgUnitFormType($event)">
+                                                                <option *ngFor="let type of orgUnitTypes" [value]="type">
+                                                                    {{ type }}
+                                                                </option>
+                                                            </mb-select>
+                                                        </mb-form-field>
+                                                    </div>
+                                                    <div class="ou-slide-over__helper">Used for access control and reporting.</div>
+                                                </div>
+
+                                                <div class="ou-slide-over__section">
+                                                    <div class="ou-slide-over__section-label">Status</div>
+                                                    <div class="ou-slide-over__radios">
+                                                        <label class="ou-slide-over__radio">
+                                                            <input type="radio" name="org-unit-status" value="Active"
+                                                                [checked]="orgUnitFormStatus() === 'Active'"
+                                                                (change)="orgUnitFormStatus.set('Active')" />
+                                                            <span>Active</span>
+                                                        </label>
+                                                        <label class="ou-slide-over__radio">
+                                                            <input type="radio" name="org-unit-status" value="Inactive"
+                                                                [checked]="orgUnitFormStatus() === 'Inactive'"
+                                                                (change)="orgUnitFormStatus.set('Inactive')" />
+                                                            <span>Inactive</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="ou-form__error" *ngIf="orgUnitFormError()">
+                                                    {{ orgUnitFormError() }}
+                                                </div>
+                                            </div>
+
+                                            <div class="ou-slide-over__footer">
+                                                <mb-button variant="secondary"
+                                                    (click)="requestCloseOrgUnitForm()">Cancel</mb-button>
+                                                <mb-button variant="primary" (click)="saveOrgUnitForm()"
+                                                    [disabled]="!orgUnitFormName().trim()">Create unit</mb-button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
                             </div>
 
                             <div class="setup-footer">
