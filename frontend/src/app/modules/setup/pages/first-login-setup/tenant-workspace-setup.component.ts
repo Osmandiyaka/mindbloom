@@ -186,6 +186,10 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     orgUnitDeleteConfirm = signal('');
     orgUnitDeleteError = signal('');
     orgUnitDeleteSubmitting = signal(false);
+    isOrgUnitRenameOpen = signal(false);
+    orgUnitRenameName = signal('');
+    orgUnitRenameError = signal('');
+    orgUnitRenameSubmitting = signal(false);
 
     levelsTemplate = signal<'k12' | 'primary_secondary' | 'custom'>('k12');
     levels = signal<string[]>(this.defaultLevels('k12'));
@@ -818,6 +822,39 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.orgUnitDeleteImpactLoading.set(false);
         this.orgUnitDeleteConfirm.set('');
         this.orgUnitDeleteError.set('');
+    }
+
+    openRenameOrgUnit(): void {
+        const target = this.selectedOrgUnit();
+        if (!target) return;
+        this.orgUnitRenameName.set(target.name);
+        this.orgUnitRenameError.set('');
+        this.orgUnitRenameSubmitting.set(false);
+        this.isOrgUnitRenameOpen.set(true);
+    }
+
+    requestCloseRenameOrgUnit(): void {
+        if (this.orgUnitRenameSubmitting()) return;
+        this.isOrgUnitRenameOpen.set(false);
+        this.orgUnitRenameError.set('');
+    }
+
+    saveRenameOrgUnit(): void {
+        const target = this.selectedOrgUnit();
+        if (!target || this.orgUnitRenameSubmitting()) return;
+        const nextName = this.orgUnitRenameName().trim();
+        if (!nextName) {
+            this.orgUnitRenameError.set('Unit name is required.');
+            return;
+        }
+        if (nextName === target.name) {
+            this.requestCloseRenameOrgUnit();
+            return;
+        }
+        this.orgUnitRenameSubmitting.set(true);
+        this.orgUnits.update(items => items.map(unit => unit.id === target.id ? { ...unit, name: nextName } : unit));
+        this.toast.success(`Organizational unit renamed to "${nextName}".`);
+        this.requestCloseRenameOrgUnit();
     }
 
     canDeleteSelectedOrgUnit(): boolean {

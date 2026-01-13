@@ -285,7 +285,9 @@
                                                         <summary class="ou-actions-menu__toggle"
                                                             aria-label="More actions">⋯</summary>
                                                         <div class="ou-actions-menu__panel">
-                                                            <button type="button" class="ou-actions-menu__item" disabled>
+                                                            <button type="button" class="ou-actions-menu__item"
+                                                                [disabled]="!selectedOrgUnit()"
+                                                                (click)="openRenameOrgUnit(); ouActionsMenu.open = false">
                                                                 Rename unit
                                                             </button>
                                                             <button type="button" class="ou-actions-menu__item" disabled>
@@ -636,6 +638,34 @@
                                             [attr.aria-describedby]="'ou-delete-warning'"
                                             (click)="deleteSelectedOrgUnit()">
                                             Delete unit
+                                        </mb-button>
+                                    </div>
+                                </mb-modal>
+
+                                <mb-modal [open]="isOrgUnitRenameOpen()" title="Rename organizational unit" size="sm"
+                                    [hasFooter]="true" [closeable]="!orgUnitRenameSubmitting()"
+                                    [closeOnBackdrop]="!orgUnitRenameSubmitting()"
+                                    (closed)="requestCloseRenameOrgUnit()">
+                                    <div class="ou-rename">
+                                        <div class="ou-rename__subtitle">
+                                            Update the unit name. Changes apply immediately.
+                                        </div>
+                                        <mb-alert *ngIf="orgUnitRenameError()" variant="danger">
+                                            {{ orgUnitRenameError() }}
+                                        </mb-alert>
+                                        <mb-form-field label="Unit name" [controlId]="'ou-rename-name'">
+                                            <mb-input id="ou-rename-name" [value]="orgUnitRenameName()"
+                                                (valueChange)="orgUnitRenameName.set($event)" cdkFocusInitial>
+                                            </mb-input>
+                                        </mb-form-field>
+                                    </div>
+
+                                    <div mbModalFooter class="ou-rename__footer">
+                                        <mb-button variant="secondary" (click)="requestCloseRenameOrgUnit()"
+                                            [disabled]="orgUnitRenameSubmitting()">Cancel</mb-button>
+                                        <mb-button variant="primary" [loading]="orgUnitRenameSubmitting()"
+                                            (click)="saveRenameOrgUnit()">
+                                            Save changes
                                         </mb-button>
                                     </div>
                                 </mb-modal>
