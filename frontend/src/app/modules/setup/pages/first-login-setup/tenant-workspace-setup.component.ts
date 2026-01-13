@@ -14,6 +14,7 @@ import {
     MbInputComponent,
     MbModalComponent,
     MbModalFooterDirective,
+    MbPopoverComponent,
     MbRoleSelectorComponent,
     MbSelectComponent,
     MbSplitButtonComponent,
@@ -136,10 +137,11 @@ interface FirstLoginSetupData {
         MbCardComponent,
         MbButtonComponent,
         MbFormFieldComponent,
-        MbInputComponent,
-        MbModalComponent,
-        MbModalFooterDirective,
-        MbRoleSelectorComponent,
+    MbInputComponent,
+    MbModalComponent,
+    MbModalFooterDirective,
+    MbPopoverComponent,
+    MbRoleSelectorComponent,
         MbSelectComponent,
         MbSplitButtonComponent,
         MbAlertComponent,
@@ -188,6 +190,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     schoolFormTouched = signal(false);
     schoolFormCodeTouched = signal(false);
     schoolFormAddress = signal<AddressValue>({});
+    schoolMenuOpenIndex = signal<number | null>(null);
 
     orgUnits = signal<OrgUnit[]>([]);
     orgUnitMemberIds = signal<Record<string, string[]>>({});
@@ -228,6 +231,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     isOrgUnitDeactivateOpen = signal(false);
     orgUnitDeactivateError = signal('');
     orgUnitDeactivateSubmitting = signal(false);
+    ouActionsMenuOpen = signal(false);
 
     levelsTemplate = signal<'k12' | 'primary_secondary' | 'custom'>('k12');
     levels = signal<string[]>(this.defaultLevels('k12'));
@@ -238,6 +242,9 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     classSchoolFilter = signal<string>('all');
     classFormOpen = signal(false);
     classFormMode = signal<'add' | 'edit' | 'view'>('add');
+    classMenuOpenId = signal<string | null>(null);
+    sectionsMenuOpen = signal(false);
+    sectionMenuOpenId = signal<string | null>(null);
     classFormId = signal<string | null>(null);
     classFormName = signal('');
     classFormCode = signal('');
@@ -289,6 +296,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     users = signal<UserRow[]>([]);
     userSearch = signal('');
+    userMenuOpenId = signal<string | null>(null);
     usersStepSkipped = signal(false);
     canCreateUsers = signal(true);
 
@@ -827,6 +835,17 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.openEditSchool(index);
     }
 
+    toggleSchoolMenu(index: number, event?: MouseEvent): void {
+        event?.stopPropagation();
+        const next = this.schoolMenuOpenIndex() === index ? null : index;
+        this.closeAllActionMenus();
+        this.schoolMenuOpenIndex.set(next);
+    }
+
+    closeSchoolMenu(): void {
+        this.schoolMenuOpenIndex.set(null);
+    }
+
     getUserRowIndex(row: UserRow): number {
         return this.users().indexOf(row);
     }
@@ -836,6 +855,17 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         const index = this.getUserRowIndex(event.row);
         if (index < 0) return;
         this.openViewUser(index);
+    }
+
+    toggleUserMenu(id: string, event?: MouseEvent): void {
+        event?.stopPropagation();
+        const next = this.userMenuOpenId() === id ? null : id;
+        this.closeAllActionMenus();
+        this.userMenuOpenId.set(next);
+    }
+
+    closeUserMenu(): void {
+        this.userMenuOpenId.set(null);
     }
 
     trackOrgUnit = (_: number, node: OrgUnitNode) => node.id;
@@ -965,6 +995,17 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             this.orgUnitDeleteImpact.set(impact);
             this.orgUnitDeleteImpactLoading.set(false);
         }, 120);
+    }
+
+    toggleOuActionsMenu(event?: MouseEvent): void {
+        event?.stopPropagation();
+        const next = !this.ouActionsMenuOpen();
+        this.closeAllActionMenus();
+        this.ouActionsMenuOpen.set(next);
+    }
+
+    closeOuActionsMenu(): void {
+        this.ouActionsMenuOpen.set(false);
     }
 
     requestCloseDeleteOrgUnit(): void {
@@ -1451,6 +1492,39 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.classFormMode.set('view');
     }
 
+    toggleClassMenu(id: string, event?: MouseEvent): void {
+        event?.stopPropagation();
+        const next = this.classMenuOpenId() === id ? null : id;
+        this.closeAllActionMenus();
+        this.classMenuOpenId.set(next);
+    }
+
+    closeClassMenu(): void {
+        this.classMenuOpenId.set(null);
+    }
+
+    toggleSectionsMenu(event?: MouseEvent): void {
+        event?.stopPropagation();
+        const next = !this.sectionsMenuOpen();
+        this.closeAllActionMenus();
+        this.sectionsMenuOpen.set(next);
+    }
+
+    closeSectionsMenu(): void {
+        this.sectionsMenuOpen.set(false);
+    }
+
+    toggleSectionMenu(id: string, event?: MouseEvent): void {
+        event?.stopPropagation();
+        const next = this.sectionMenuOpenId() === id ? null : id;
+        this.closeAllActionMenus();
+        this.sectionMenuOpenId.set(next);
+    }
+
+    closeSectionMenu(): void {
+        this.sectionMenuOpenId.set(null);
+    }
+
     requestCloseClassForm(): void {
         if (this.classFormMode() === 'view') {
             this.classFormOpen.set(false);
@@ -1808,8 +1882,18 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     }
 
     selectClass(row: ClassRow): void {
+        this.closeAllActionMenus();
         this.selectedClassId.set(row.id);
         this.sectionSearch.set('');
+    }
+
+    private closeAllActionMenus(): void {
+        this.schoolMenuOpenIndex.set(null);
+        this.ouActionsMenuOpen.set(false);
+        this.classMenuOpenId.set(null);
+        this.sectionsMenuOpen.set(false);
+        this.sectionMenuOpenId.set(null);
+        this.userMenuOpenId.set(null);
     }
 
     openClassReorder(): void {

@@ -600,11 +600,6 @@
     justify-content: flex-end;
 }
 
-.users-menu {
-    position: relative;
-    z-index: 6;
-}
-
 .users-menu__toggle {
     list-style: none;
     cursor: pointer;
@@ -622,17 +617,20 @@
     color: var(--mb-color-text);
 }
 
-.users-menu__panel {
-    position: absolute;
-    right: 0;
-    top: 28px;
+:host ::ng-deep .users-menu__panel {
+    z-index: var(--mb-layer-popover);
+}
+
+:host ::ng-deep .users-menu__panel .mb-popover {
     background: var(--mb-color-surface);
     border: 1px solid var(--mb-color-border-subtle);
     border-radius: 10px;
     box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
     min-width: 180px;
     padding: 6px;
-    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .users-menu__item {
@@ -990,11 +988,6 @@
     color: var(--mb-color-text);
 }
 
-.schools-menu {
-    position: relative;
-    z-index: 5;
-}
-
 .schools-menu__toggle {
     list-style: none;
     cursor: pointer;
@@ -1003,25 +996,20 @@
     padding: 0;
 }
 
-.schools-menu__toggle::-webkit-details-marker {
-    display: none;
+:host ::ng-deep .schools-menu__panel {
+    z-index: var(--mb-layer-popover);
 }
 
-.schools-menu[open] .schools-menu__toggle {
-    color: var(--mb-color-text);
-}
-
-.schools-menu__panel {
-    position: absolute;
-    right: 0;
-    top: 22px;
+:host ::ng-deep .schools-menu__panel .mb-popover {
     min-width: 160px;
     background: var(--mb-color-surface);
     border: 1px solid var(--mb-color-border-subtle);
     border-radius: 10px;
     box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
     padding: 6px;
-    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .schools-menu__item {
@@ -1627,10 +1615,6 @@
     align-items: center;
 }
 
-.ou-actions-menu {
-    position: relative;
-}
-
 .ou-actions-menu__toggle {
     list-style: none;
     cursor: pointer;
@@ -1647,15 +1631,6 @@
     background: var(--mb-color-surface);
 }
 
-.ou-actions-menu__toggle::-webkit-details-marker {
-    display: none;
-}
-
-.ou-actions-menu[open] .ou-actions-menu__toggle {
-    color: var(--mb-color-text);
-    border-color: rgba(15, 23, 42, 0.18);
-}
-
 .ou-actions-menu__toggle:hover {
     background: rgba(15, 23, 42, 0.04);
 }
@@ -1664,10 +1639,11 @@
     background: rgba(15, 23, 42, 0.08);
 }
 
-.ou-actions-menu__panel {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 6px);
+:host ::ng-deep .ou-actions-menu__panel {
+    z-index: var(--mb-layer-popover);
+}
+
+:host ::ng-deep .ou-actions-menu__panel .mb-popover {
     background: var(--mb-color-surface);
     border: 1px solid rgba(15, 23, 42, 0.12);
     border-radius: 12px;
@@ -1677,7 +1653,6 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    z-index: 3;
 }
 
 .ou-actions-menu__item {
@@ -2522,18 +2497,11 @@
     color: var(--mb-color-text);
 }
 
-.class-row__menu {
-    position: relative;
+:host ::ng-deep .class-row__menu-panel {
+    z-index: var(--mb-layer-popover);
 }
 
-.class-row__menu > summary::-webkit-details-marker {
-    display: none;
-}
-
-.class-row__menu-panel {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 6px);
+:host ::ng-deep .class-row__menu-panel .mb-popover {
     background: var(--mb-color-surface);
     border: 1px solid rgba(15, 23, 42, 0.12);
     border-radius: 12px;
@@ -2543,7 +2511,6 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    z-index: 5;
 }
 
 .class-row__menu-item {
@@ -2614,10 +2581,6 @@
     align-items: center;
 }
 
-.sections-menu {
-    position: relative;
-}
-
 .sections-menu__toggle {
     list-style: none;
     cursor: pointer;
@@ -2633,10 +2596,6 @@
     background: var(--mb-color-surface);
 }
 
-.sections-menu__toggle::-webkit-details-marker {
-    display: none;
-}
-
 .sections-menu__toggle:hover {
     background: rgba(15, 23, 42, 0.04);
     color: var(--mb-color-text);
@@ -2646,20 +2605,20 @@
     background: rgba(15, 23, 42, 0.08);
 }
 
-.sections-menu__panel {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 6px);
+:host ::ng-deep .sections-menu__panel {
+    z-index: var(--mb-layer-popover);
+}
+
+:host ::ng-deep .sections-menu__panel .mb-popover {
     background: var(--mb-color-surface);
     border: 1px solid rgba(15, 23, 42, 0.12);
     border-radius: 12px;
     box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
     padding: 8px;
-    min-width: 200px;
+    min-width: 220px;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    z-index: 5;
 }
 
 .sections-menu__item {
@@ -2741,10 +2700,6 @@
     text-align: right;
 }
 
-.sections-row-menu {
-    position: relative;
-}
-
 .sections-row-menu__toggle {
     list-style: none;
     cursor: pointer;
@@ -2758,19 +2713,16 @@
     justify-content: center;
 }
 
-.sections-row-menu__toggle::-webkit-details-marker {
-    display: none;
-}
-
 .sections-row-menu__toggle:hover {
     background: rgba(15, 23, 42, 0.06);
     color: var(--mb-color-text);
 }
 
-.sections-row-menu__panel {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 6px);
+:host ::ng-deep .sections-row-menu__panel {
+    z-index: var(--mb-layer-popover);
+}
+
+:host ::ng-deep .sections-row-menu__panel .mb-popover {
     background: var(--mb-color-surface);
     border: 1px solid rgba(15, 23, 42, 0.12);
     border-radius: 12px;
@@ -2780,7 +2732,6 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    z-index: 5;
 }
 
 .sections-row-menu__item {

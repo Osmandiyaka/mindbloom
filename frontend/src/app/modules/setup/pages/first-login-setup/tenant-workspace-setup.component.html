@@ -88,25 +88,33 @@
                                             (cellClick)="handleSchoolCellClick($event)">
                                             <ng-template mbTableActions let-row>
                                                 <div class="schools-table__actions">
-                                                    <details class="schools-menu" #menu>
-                                                        <summary class="schools-menu__toggle" aria-label="More actions">
-                                                            ⋯</summary>
-                                                        <div class="schools-menu__panel">
+                                                    <button type="button" class="schools-menu__toggle" #schoolMenuOrigin
+                                                        aria-label="More actions"
+                                                        [attr.aria-expanded]="schoolMenuOpenIndex() === getSchoolRowIndex(row)"
+                                                        (click)="toggleSchoolMenu(getSchoolRowIndex(row), $event)">⋯</button>
+                                                    <mb-popover
+                                                        [open]="schoolMenuOpenIndex() === getSchoolRowIndex(row)"
+                                                        [origin]="schoolMenuOrigin"
+                                                        [hasBackdrop]="true"
+                                                        [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'schools-menu__panel']"
+                                                        (closed)="closeSchoolMenu()"
+                                                    >
+                                                        <div class="schools-menu__panel-content" role="menu">
                                                             <button type="button" class="schools-menu__item"
-                                                                (click)="openEditSchool(getSchoolRowIndex(row)); menu.open = false">
+                                                                (click)="openEditSchool(getSchoolRowIndex(row)); closeSchoolMenu()">
                                                                 Edit school
                                                             </button>
                                                             <button type="button" class="schools-menu__item"
-                                                                (click)="toggleSchoolStatus(getSchoolRowIndex(row)); menu.open = false">
+                                                                (click)="toggleSchoolStatus(getSchoolRowIndex(row)); closeSchoolMenu()">
                                                                 {{ row.status === 'Active' ? 'Deactivate school' :
                                                                 'Activate school' }}
                                                             </button>
                                                             <button type="button" class="schools-menu__item"
-                                                                (click)="deleteSchool(getSchoolRowIndex(row)); menu.open = false">
+                                                                (click)="deleteSchool(getSchoolRowIndex(row)); closeSchoolMenu()">
                                                                 Delete school
                                                             </button>
                                                         </div>
-                                                    </details>
+                                                    </mb-popover>
                                                 </div>
                                             </ng-template>
                                         </mb-table>
@@ -281,29 +289,38 @@
                                                 <div class="ou-canvas__actions">
                                                     <mb-button class="ou-action-btn" variant="secondary"
                                                         (click)="startAddChildUnit()">Add child unit</mb-button>
-                                                    <details class="ou-actions-menu" #ouActionsMenu>
-                                                        <summary class="ou-actions-menu__toggle"
-                                                            aria-label="More actions" title="More actions">⋯</summary>
-                                                        <div class="ou-actions-menu__panel">
+                                                    <button type="button" class="ou-actions-menu__toggle"
+                                                        #ouActionsMenuOrigin aria-label="More actions"
+                                                        title="More actions"
+                                                        [attr.aria-expanded]="ouActionsMenuOpen()"
+                                                        (click)="toggleOuActionsMenu($event)">⋯</button>
+                                                    <mb-popover
+                                                        [open]="ouActionsMenuOpen()"
+                                                        [origin]="ouActionsMenuOrigin"
+                                                        [hasBackdrop]="true"
+                                                        [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'ou-actions-menu__panel']"
+                                                        (closed)="closeOuActionsMenu()"
+                                                    >
+                                                        <div class="ou-actions-menu__panel-content" role="menu">
                                                             <button type="button" class="ou-actions-menu__item"
                                                                 [disabled]="!selectedOrgUnit()"
-                                                                (click)="openRenameOrgUnit(); ouActionsMenu.open = false">
+                                                                (click)="openRenameOrgUnit(); closeOuActionsMenu()">
                                                                 Rename unit
                                                             </button>
                                                             <button type="button" class="ou-actions-menu__item"
                                                                 [disabled]="!selectedOrgUnit()"
-                                                                (click)="openMoveOrgUnit(); ouActionsMenu.open = false">
+                                                                (click)="openMoveOrgUnit(); closeOuActionsMenu()">
                                                                 Move unit
                                                             </button>
                                                             <button type="button" class="ou-actions-menu__item"
                                                                 [disabled]="!selectedOrgUnit()"
-                                                                (click)="openChangeParentOrgUnit(); ouActionsMenu.open = false">
+                                                                (click)="openChangeParentOrgUnit(); closeOuActionsMenu()">
                                                                 Change parent
                                                             </button>
                                                             <button type="button" class="ou-actions-menu__item"
                                                                 [disabled]="!canDeactivateSelectedOrgUnit()"
                                                                 [attr.title]="selectedOrgUnit()?.status === 'Inactive' ? 'Unit is already inactive.' : null"
-                                                                (click)="openDeactivateOrgUnit(); ouActionsMenu.open = false">
+                                                                (click)="openDeactivateOrgUnit(); closeOuActionsMenu()">
                                                                 Deactivate unit
                                                             </button>
                                                             <div class="ou-actions-menu__divider"></div>
@@ -311,11 +328,11 @@
                                                                 class="ou-actions-menu__item ou-actions-menu__item--danger"
                                                                 [disabled]="!canDeleteSelectedOrgUnit()"
                                                                 [attr.title]="getOrgUnitDeleteDisabledReason()"
-                                                                (click)="openDeleteOrgUnit(); ouActionsMenu.open = false">
+                                                                (click)="openDeleteOrgUnit(); closeOuActionsMenu()">
                                                                 Delete unit
                                                             </button>
                                                         </div>
-                                                    </details>
+                                                    </mb-popover>
                                                 </div>
                                             </div>
 
@@ -909,39 +926,46 @@
                                                         aria-label="Edit class">
                                                         ✎
                                                     </button>
-                                                    <details class="class-row__menu" #classMenu>
-                                                        <summary class="class-row__action" aria-label="More actions"
-                                                            (click)="$event.stopPropagation()">⋯</summary>
-                                                        <div class="class-row__menu-panel"
-                                                            (click)="$event.stopPropagation()">
+                                                    <button type="button" class="class-row__action"
+                                                        #classMenuOrigin aria-label="More actions"
+                                                        [attr.aria-expanded]="classMenuOpenId() === row.id"
+                                                        (click)="toggleClassMenu(row.id, $event)">⋯</button>
+                                                    <mb-popover
+                                                        [open]="classMenuOpenId() === row.id"
+                                                        [origin]="classMenuOrigin"
+                                                        [hasBackdrop]="true"
+                                                        [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'class-row__menu-panel']"
+                                                        (closed)="closeClassMenu()"
+                                                    >
+                                                        <div class="class-row__menu-content" role="menu">
                                                             <button type="button" class="class-row__menu-item"
-                                                                (click)="openViewClass(row); classMenu.open = false">
+                                                                (click)="openViewClass(row); closeClassMenu()">
                                                                 View details
                                                             </button>
                                                             <button type="button" class="class-row__menu-item"
-                                                                (click)="openEditClass(row); classMenu.open = false">
+                                                                (click)="openEditClass(row); closeClassMenu()">
                                                                 Edit class
                                                             </button>
                                                             <button type="button" class="class-row__menu-item"
-                                                                (click)="duplicateClass(row); classMenu.open = false">
+                                                                (click)="duplicateClass(row); closeClassMenu()">
                                                                 Duplicate class
                                                             </button>
                                                             <button type="button" class="class-row__menu-item"
-                                                                (click)="openClassReorder(); classMenu.open = false">
+                                                                (click)="openClassReorder(); closeClassMenu()">
                                                                 Reorder classes
                                                             </button>
                                                             <button type="button" class="class-row__menu-item"
-                                                                (click)="toggleClassActive(row); classMenu.open = false">
+                                                                (click)="toggleClassActive(row); closeClassMenu()">
                                                                 {{ row.active ? 'Deactivate class' : 'Activate class' }}
                                                             </button>
                                                             <div class="class-row__menu-divider"></div>
                                                             <button type="button"
                                                                 class="class-row__menu-item class-row__menu-item--danger"
-                                                                (click)="openClassDelete(row); classMenu.open = false">
+                                                                (click)="openClassDelete(row); closeClassMenu()">
                                                                 Delete class
                                                             </button>
                                                         </div>
-                                                    </details>
+                                                    </mb-popover>
                                                 </div>
                                             </div>
                                         </div>
@@ -970,47 +994,56 @@
                                                 <div class="sections-header__actions">
                                                     <mb-button variant="secondary" (click)="openAddSection(selected)">Add
                                                         section</mb-button>
-                                                    <details class="sections-menu" #sectionsMenu>
-                                                        <summary class="sections-menu__toggle"
-                                                            aria-label="More actions" title="More actions">⋯</summary>
-                                                        <div class="sections-menu__panel">
+                                                    <button type="button" class="sections-menu__toggle"
+                                                        #sectionsMenuOrigin aria-label="More actions"
+                                                        title="More actions"
+                                                        [attr.aria-expanded]="sectionsMenuOpen()"
+                                                        (click)="toggleSectionsMenu($event)">⋯</button>
+                                                    <mb-popover
+                                                        [open]="sectionsMenuOpen()"
+                                                        [origin]="sectionsMenuOrigin"
+                                                        [hasBackdrop]="true"
+                                                        [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'sections-menu__panel']"
+                                                        (closed)="closeSectionsMenu()"
+                                                    >
+                                                        <div class="sections-menu__panel-content" role="menu">
                                                             <button type="button" class="sections-menu__item"
-                                                                (click)="openImportModal('classes'); sectionsMenu.open = false">
+                                                                (click)="openImportModal('classes'); closeSectionsMenu()">
                                                                 Import CSV
                                                             </button>
                                                             <button type="button" class="sections-menu__item"
-                                                                (click)="downloadImportTemplate('classes'); sectionsMenu.open = false">
+                                                                (click)="downloadImportTemplate('classes'); closeSectionsMenu()">
                                                                 Download template
                                                             </button>
                                                             <button type="button" class="sections-menu__item"
-                                                                (click)="exportCsv('classes'); sectionsMenu.open = false">
+                                                                (click)="exportCsv('classes'); closeSectionsMenu()">
                                                                 Export CSV
                                                             </button>
                                                             <div class="sections-menu__divider"></div>
                                                             <button type="button" class="sections-menu__item"
-                                                                (click)="openSectionGenerator(); sectionsMenu.open = false">
+                                                                (click)="openSectionGenerator(); closeSectionsMenu()">
                                                                 Create multiple sections
                                                             </button>
                                                             <button type="button" class="sections-menu__item"
-                                                                (click)="openSectionReorder(); sectionsMenu.open = false">
+                                                                (click)="openSectionReorder(); closeSectionsMenu()">
                                                                 Reorder sections
                                                             </button>
                                                             <button type="button" class="sections-menu__item"
-                                                                (click)="openEditClass(selected); sectionsMenu.open = false">
+                                                                (click)="openEditClass(selected); closeSectionsMenu()">
                                                                 Edit class
                                                             </button>
                                                             <button type="button" class="sections-menu__item"
-                                                                (click)="toggleClassActive(selected); sectionsMenu.open = false">
+                                                                (click)="toggleClassActive(selected); closeSectionsMenu()">
                                                                 {{ selected.active ? 'Deactivate class' : 'Activate class' }}
                                                             </button>
                                                             <div class="sections-menu__divider"></div>
                                                             <button type="button"
                                                                 class="sections-menu__item sections-menu__item--danger"
-                                                                (click)="openClassDelete(selected); sectionsMenu.open = false">
+                                                                (click)="openClassDelete(selected); closeSectionsMenu()">
                                                                 Delete class
                                                             </button>
                                                         </div>
-                                                    </details>
+                                                    </mb-popover>
                                                 </div>
                                             </div>
 
@@ -1043,34 +1076,42 @@
                                                         </span>
                                                     </div>
                                                     <div class="sections-table__actions">
-                                                        <details class="sections-row-menu" #sectionMenu>
-                                                            <summary class="sections-row-menu__toggle"
-                                                                aria-label="Row actions">⋯</summary>
-                                                            <div class="sections-row-menu__panel">
+                                                        <button type="button" class="sections-row-menu__toggle"
+                                                            #sectionMenuOrigin aria-label="Row actions"
+                                                            [attr.aria-expanded]="sectionMenuOpenId() === section.id"
+                                                            (click)="toggleSectionMenu(section.id, $event)">⋯</button>
+                                                        <mb-popover
+                                                            [open]="sectionMenuOpenId() === section.id"
+                                                            [origin]="sectionMenuOrigin"
+                                                            [hasBackdrop]="true"
+                                                            [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'sections-row-menu__panel']"
+                                                            (closed)="closeSectionMenu()"
+                                                        >
+                                                            <div class="sections-row-menu__panel-content" role="menu">
                                                                 <button type="button" class="sections-row-menu__item"
-                                                                    (click)="openViewSection(section); sectionMenu.open = false">
+                                                                    (click)="openViewSection(section); closeSectionMenu()">
                                                                     View
                                                                 </button>
                                                                 <button type="button" class="sections-row-menu__item"
-                                                                    (click)="openEditSection(section); sectionMenu.open = false">
+                                                                    (click)="openEditSection(section); closeSectionMenu()">
                                                                     Edit
                                                                 </button>
                                                                 <button type="button" class="sections-row-menu__item"
-                                                                    (click)="openEditSection(section); sectionMenu.open = false">
+                                                                    (click)="openEditSection(section); closeSectionMenu()">
                                                                     Assign homeroom teacher
                                                                 </button>
                                                                 <button type="button" class="sections-row-menu__item"
-                                                                    (click)="toggleSectionActive(section); sectionMenu.open = false">
+                                                                    (click)="toggleSectionActive(section); closeSectionMenu()">
                                                                     {{ section.active ? 'Deactivate' : 'Activate' }}
                                                                 </button>
                                                                 <div class="sections-row-menu__divider"></div>
                                                                 <button type="button"
                                                                     class="sections-row-menu__item sections-row-menu__item--danger"
-                                                                    (click)="openSectionDelete(section); sectionMenu.open = false">
+                                                                    (click)="openSectionDelete(section); closeSectionMenu()">
                                                                     Delete section
                                                                 </button>
                                                             </div>
-                                                        </details>
+                                                        </mb-popover>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1497,31 +1538,40 @@
                                         (cellClick)="handleUserCellClick($event)">
                                         <ng-template mbTableActions let-row>
                                             <div class="users-table__actions">
-                                                <details class="users-menu" #userMenu>
-                                                    <summary class="users-menu__toggle" aria-label="Actions">⋯</summary>
-                                                    <div class="users-menu__panel">
+                                                <button type="button" class="users-menu__toggle" #userMenuOrigin
+                                                    aria-label="Actions"
+                                                    [attr.aria-expanded]="userMenuOpenId() === row.id"
+                                                    (click)="toggleUserMenu(row.id, $event)">⋯</button>
+                                                <mb-popover
+                                                    [open]="userMenuOpenId() === row.id"
+                                                    [origin]="userMenuOrigin"
+                                                    [hasBackdrop]="true"
+                                                    [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'users-menu__panel']"
+                                                    (closed)="closeUserMenu()"
+                                                >
+                                                    <div class="users-menu__panel-content" role="menu">
                                                         <button type="button" class="users-menu__item"
-                                                            (click)="openEditUser(getUserRowIndex(row)); userMenu.open = false">
+                                                            (click)="openEditUser(getUserRowIndex(row)); closeUserMenu()">
                                                             Edit details
                                                         </button>
                                                         <button type="button" class="users-menu__item"
                                                             *ngIf="row.status === 'Invited'"
-                                                            (click)="resendInvite(getUserRowIndex(row)); userMenu.open = false">
+                                                            (click)="resendInvite(getUserRowIndex(row)); closeUserMenu()">
                                                             Resend invite
                                                         </button>
                                                         <button type="button" class="users-menu__item"
                                                             *ngIf="row.status !== 'Invited'"
-                                                            (click)="toggleUserStatus(getUserRowIndex(row)); userMenu.open = false">
+                                                            (click)="toggleUserStatus(getUserRowIndex(row)); closeUserMenu()">
                                                             {{ row.status === 'Suspended' ? 'Activate user' : 'Suspend
                                                             user' }}
                                                         </button>
                                                         <button type="button"
                                                             class="users-menu__item users-menu__item--danger"
-                                                            (click)="removeUser(getUserRowIndex(row)); userMenu.open = false">
+                                                            (click)="removeUser(getUserRowIndex(row)); closeUserMenu()">
                                                             Remove
                                                         </button>
                                                     </div>
-                                                </details>
+                                                </mb-popover>
                                             </div>
                                         </ng-template>
                                     </mb-table>
