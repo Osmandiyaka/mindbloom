@@ -1408,6 +1408,13 @@
     color: var(--mb-color-text-subtle);
 }
 
+.ou-nav__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
 .ou-nav__title {
     font-size: 18px;
     font-weight: 600;
@@ -1431,14 +1438,14 @@
 }
 
 .ou-canvas__title {
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 22px;
+    font-weight: 650;
     color: var(--mb-color-text);
 }
 
 .ou-canvas__meta {
     margin-top: 4px;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--mb-color-text-muted);
 }
 
@@ -1518,7 +1525,7 @@
 }
 
 .ou-empty__text {
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .ou-tree {
@@ -1539,16 +1546,20 @@
     border-left: 2px solid transparent;
     background: transparent;
     padding: 8px 10px 8px 8px;
-    border-radius: 6px;
+    border-radius: 0;
     text-align: left;
-    font-size: 14px;
-    color: var(--mb-color-text);
+    font-size: 13px;
+    color: var(--mb-color-text-subtle);
     cursor: pointer;
 }
 
 .ou-tree__node.is-active {
     border-left-color: var(--mb-color-primary);
-    background: color-mix(in srgb, var(--mb-color-primary) 8%, transparent);
+    background: color-mix(in srgb, var(--mb-color-primary) 6%, transparent);
+    color: var(--mb-color-text);
+}
+
+.ou-tree__node:hover {
     color: var(--mb-color-text);
 }
 
@@ -1592,8 +1603,8 @@
 .ou-tab {
     border: none;
     background: transparent;
-    padding: 8px 0;
-    font-size: 14px;
+    padding: 6px 0;
+    font-size: 13px;
     color: var(--mb-color-text-muted);
     cursor: pointer;
     position: relative;

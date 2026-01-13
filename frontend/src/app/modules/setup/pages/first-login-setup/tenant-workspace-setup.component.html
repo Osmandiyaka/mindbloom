@@ -239,9 +239,11 @@
                                     <div class="ou-nav">
                                         <div class="ou-nav__header">
                                             <div class="ou-nav__kicker">Organization</div>
-                                            <div class="ou-nav__title">Units</div>
-                                            <mb-button variant="secondary" (click)="startAddRootUnit()">+ Add root
-                                                unit</mb-button>
+                                            <div class="ou-nav__title-row">
+                                                <div class="ou-nav__title">Units</div>
+                                                <mb-button variant="tertiary" (click)="startAddRootUnit()">+ Add root
+                                                    unit</mb-button>
+                                            </div>
                                         </div>
 
                                         <div class="ou-form" *ngIf="orgUnitFormOpen()">
@@ -368,13 +370,9 @@
                                                 </ng-container>
                                                 <ng-template #ouMembersEmpty>
                                                     <div class="ou-empty ou-empty--inline">
-                                                        <div class="ou-empty__title">This unit has no members yet.</div>
                                                         <div class="ou-empty__text">
                                                             Assign members to control access and responsibilities.
                                                         </div>
-                                                        <mb-button variant="primary" (click)="openAssignMembers()">
-                                                            Add members
-                                                        </mb-button>
                                                     </div>
                                                 </ng-template>
                                             </div>
