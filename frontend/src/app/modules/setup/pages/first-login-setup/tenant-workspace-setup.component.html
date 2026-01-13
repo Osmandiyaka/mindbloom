@@ -272,7 +272,8 @@
                                                 {{ orgUnitFormError() }}
                                             </div>
                                             <div class="ou-form__actions">
-                                                <mb-button variant="secondary" (click)="cancelOrgUnitForm()">Cancel</mb-button>
+                                                <mb-button variant="secondary"
+                                                    (click)="cancelOrgUnitForm()">Cancel</mb-button>
                                                 <mb-button variant="primary" (click)="saveOrgUnitForm()"
                                                     [disabled]="!orgUnitFormName().trim()">Save unit</mb-button>
                                             </div>
@@ -342,27 +343,33 @@
 
                                                 <div class="ou-assign" *ngIf="assignMembersOpen()">
                                                     <div class="ou-assign__title">Assign members</div>
-                                                    <div class="ou-assign__list" *ngIf="users().length; else ouAssignEmpty">
+                                                    <div class="ou-assign__list"
+                                                        *ngIf="users().length; else ouAssignEmpty">
                                                         <label class="ou-assign__row"
                                                             *ngFor="let user of users(); trackBy: trackUserRow">
                                                             <input type="checkbox"
                                                                 [checked]="assignMemberIds().includes(user.id)"
                                                                 (change)="toggleAssignMember(user.id, $event)" />
-                                                            <span class="ou-assign__name">{{ user.name || user.email }}</span>
+                                                            <span class="ou-assign__name">{{ user.name || user.email
+                                                                }}</span>
                                                             <span class="ou-assign__meta">{{ user.email }}</span>
                                                         </label>
                                                     </div>
                                                     <ng-template #ouAssignEmpty>
-                                                        <div class="ou-assign__empty">Add staff in the previous step to assign
+                                                        <div class="ou-assign__empty">Add staff in the previous step to
+                                                            assign
                                                             them here.</div>
                                                     </ng-template>
                                                     <div class="ou-assign__actions">
-                                                        <mb-button variant="secondary" (click)="cancelAssignMembers()">Cancel</mb-button>
-                                                        <mb-button variant="primary" (click)="saveAssignMembers()">Save</mb-button>
+                                                        <mb-button variant="secondary"
+                                                            (click)="cancelAssignMembers()">Cancel</mb-button>
+                                                        <mb-button variant="primary"
+                                                            (click)="saveAssignMembers()">Save</mb-button>
                                                     </div>
                                                 </div>
 
-                                                <ng-container *ngIf="selectedOrgUnitMembers().length; else ouMembersEmpty">
+                                                <ng-container
+                                                    *ngIf="selectedOrgUnitMembers().length; else ouMembersEmpty">
                                                     <div class="ou-members-table">
                                                         <div class="ou-members-table__header">
                                                             <div>Name</div>
@@ -409,11 +416,13 @@
                                             <div *ngIf="activeOrgUnitTab() === 'roles'" class="ou-roles">
                                                 <div class="ou-empty ou-empty--inline">
                                                     <div class="ou-empty__title">No roles assigned</div>
-                                                    <div class="ou-empty__text">Assign roles to inherit access across child
+                                                    <div class="ou-empty__text">Assign roles to inherit access across
+                                                        child
                                                         units.</div>
                                                 </div>
                                                 <div class="ou-helper">
-                                                    Roles assigned here inherit to child units. Add overrides at specific
+                                                    Roles assigned here inherit to child units. Add overrides at
+                                                    specific
                                                     units when needed.
                                                 </div>
                                             </div>
@@ -422,7 +431,8 @@
                                         <ng-template #ouEmptyDetail>
                                             <div class="ou-empty ou-empty--detail">
                                                 <div class="ou-empty__title">Select an organizational unit</div>
-                                                <div class="ou-empty__text">Choose a unit from the tree to manage members
+                                                <div class="ou-empty__text">Choose a unit from the tree to manage
+                                                    members
                                                     and roles.</div>
                                             </div>
                                         </ng-template>
@@ -636,9 +646,7 @@
                                         <h2>Staff & users</h2>
                                         <p>Add staff who will access the workspace. You can invite now and assign roles
                                             later.</p>
-                                        <mb-role-selector [value]="createRoleIds()" [label]="''"
-                                            [placeholder]="'Select role…'" [multiple]="true" [maxVisibleChips]="3"
-                                            (change)="handleCreateRoleChange($event)"></mb-role-selector>
+
                                     </div>
                                 </div>
                                 <input #csvInput type="file" class="users-csv-input" accept=".csv"
@@ -652,7 +660,7 @@
                                             (valueChange)="userSearch.set($event)"></mb-input>
                                     </mb-form-field>
                                     <div class="users-utility__actions">
-                                        <mb-split-button label="Add users ▼" variant="primary" size="md"
+                                        <mb-split-button label="Add users" variant="primary" size="md"
                                             [items]="addUsersMenuItems()" (primaryClick)="openInviteModal()"
                                             (itemSelect)="handleAddUsersAction($event, csvInput)"></mb-split-button>
                                     </div>
