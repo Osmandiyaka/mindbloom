@@ -10,6 +10,7 @@ import {
     MbCheckboxComponent,
     MbFormFieldComponent,
     MbInputComponent,
+    MbRoleSelectorComponent,
     MbSelectComponent,
     MbSplitButtonComponent,
     MbTableActionsDirective,
@@ -73,6 +74,7 @@ interface FirstLoginSetupData {
         MbButtonComponent,
         MbFormFieldComponent,
         MbInputComponent,
+        MbRoleSelectorComponent,
         MbSelectComponent,
         MbSplitButtonComponent,
         MbAlertComponent,
@@ -160,6 +162,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     createName = signal('');
     createEmail = signal('');
     createRole = signal<UserRole>('Staff');
+    createRoleIds = signal<string[]>([]);
     createSchoolAccess = signal<'all' | 'selected'>('all');
     createSelectedSchools = signal<string[]>([]);
     createJobTitle = signal('');
@@ -638,6 +641,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.createName.set('');
         this.createEmail.set('');
         this.createRole.set('Staff');
+        this.createRoleIds.set([this.createRole()]);
         this.createSchoolAccess.set('all');
         this.createSelectedSchools.set([]);
         this.createJobTitle.set('');
@@ -773,6 +777,13 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     setCreateRole(value: string): void {
         this.createRole.set(this.normalizeRole(value));
+    }
+
+    handleCreateRoleChange(event: { ids: string[]; roles?: { name: string }[] }): void {
+        this.createRoleIds.set(event.ids);
+        if (event.roles?.length) {
+            this.createRole.set(this.normalizeRole(event.roles[0].name));
+        }
     }
 
     saveCreateUser(): void {

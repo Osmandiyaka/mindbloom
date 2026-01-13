@@ -1,2 +1,6 @@
 // Import EduHub components
 @import 'styles/eduhub/index';
+
+.cdk-overlay-container {
+    z-index: 1300;
+}

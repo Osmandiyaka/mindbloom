@@ -15,9 +15,10 @@ import { CdkOverlayOrigin } from '@angular/cdk/overlay';
             [cdkConnectedOverlayPositions]="positions"
             [cdkConnectedOverlayHasBackdrop]="hasBackdrop"
             [cdkConnectedOverlayBackdropClass]="'mb-popover-backdrop'"
+            [cdkConnectedOverlayPanelClass]="panelClass"
             (backdropClick)="close()"
         >
-            <div class="mb-popover" role="dialog">
+            <div class="mb-popover" [class.mb-popover--plain]="variant === 'plain'" role="dialog">
                 <ng-content></ng-content>
             </div>
         </ng-template>
@@ -28,6 +29,8 @@ export class MbPopoverComponent {
     @Input() open = false;
     @Input({ required: true }) origin!: CdkOverlayOrigin;
     @Input() hasBackdrop = false;
+    @Input() variant: 'default' | 'plain' = 'default';
+    @Input() panelClass: string | string[] = 'mb-popover-panel';
     @Output() closed = new EventEmitter<void>();
 
     positions: ConnectedPosition[] = [

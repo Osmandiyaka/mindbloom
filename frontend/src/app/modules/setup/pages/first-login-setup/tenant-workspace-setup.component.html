@@ -12,7 +12,8 @@
                     <p class="setup-entry-body">
                         Set up your schools, academic structure, and staff so your team can start working right away.
                     </p>
-                    <p class="setup-entry-meta">Takes about 5–10 minutes · You can pause and continue anytime from Settings.</p>
+                    <p class="setup-entry-meta">Takes about 5–10 minutes · You can pause and continue anytime from
+                        Settings.</p>
                 </div>
 
                 <div class="setup-body">
@@ -33,34 +34,36 @@
                             <div class="setup-progress__header">
                                 <div class="setup-progress__kicker">Workspace configuration</div>
                                 <h2>Setup progress</h2>
-                                <p>Complete the setup to enable all features. You can return at any time from Settings.</p>
+                                <p>Complete the setup to enable all features. You can return at any time from Settings.
+                                </p>
                             </div>
-                            <div class="setup-progress__meta">Step {{ progressIndex() < 0 ? 0 : progressIndex() + 1 }} of {{ stepLabels.length }}</div>
-                            <div class="setup-progress__bar" aria-hidden="true">
-                                <div class="setup-progress__bar-fill" [style.width.%]="progressPercent()"></div>
+                            <div class="setup-progress__meta">Step {{ progressIndex() < 0 ? 0 : progressIndex() + 1 }}
+                                    of {{ stepLabels.length }}</div>
+                                    <div class="setup-progress__bar" aria-hidden="true">
+                                        <div class="setup-progress__bar-fill" [style.width.%]="progressPercent()"></div>
+                                    </div>
+                                    <div class="setup-progress__list">
+                                        <button type="button" class="setup-progress__item"
+                                            *ngFor="let label of stepLabels; let i = index"
+                                            [class.is-complete]="i < progressIndex()"
+                                            [class.is-current]="i === progressIndex()" (click)="goToStep(i + 1)">
+                                            <span class="setup-progress__icon" aria-hidden="true">{{ i < progressIndex()
+                                                    ? '✓' : (i===progressIndex() ? '●' : '○' ) }}</span>
+                                                    <span class="setup-progress__label">{{ label }}</span>
+                                        </button>
+                                    </div>
+                                    <div class="setup-progress__actions">
+                                        <mb-button variant="primary" (click)="continueFromPanel()">Continue
+                                            setup</mb-button>
+                                        <button type="button" class="setup-progress__dismiss"
+                                            (click)="skipSetup()">Dismiss for now</button>
+                                        <span class="setup-progress__hint">
+                                            You can resume anytime from Settings → Workspace setup.
+                                            <span class="setup-progress__info" aria-hidden="true"
+                                                title="Setup is saved automatically.">i</span>
+                                        </span>
+                                    </div>
                             </div>
-                            <div class="setup-progress__list">
-                                <button
-                                  type="button"
-                                  class="setup-progress__item"
-                                  *ngFor="let label of stepLabels; let i = index"
-                                  [class.is-complete]="i < progressIndex()"
-                                  [class.is-current]="i === progressIndex()"
-                                  (click)="goToStep(i + 1)"
-                                >
-                                  <span class="setup-progress__icon" aria-hidden="true">{{ i < progressIndex() ? '✓' : (i === progressIndex() ? '●' : '○') }}</span>
-                                  <span class="setup-progress__label">{{ label }}</span>
-                                </button>
-                            </div>
-                            <div class="setup-progress__actions">
-                                <mb-button variant="primary" (click)="continueFromPanel()">Continue setup</mb-button>
-                                <button type="button" class="setup-progress__dismiss" (click)="skipSetup()">Dismiss for now</button>
-                                <span class="setup-progress__hint">
-                                    You can resume anytime from Settings → Workspace setup.
-                                    <span class="setup-progress__info" aria-hidden="true" title="Setup is saved automatically.">i</span>
-                                </span>
-                            </div>
-                        </div>
                     </mb-card>
                 </div>
                 <div class="workspace-setup-content">
@@ -70,45 +73,36 @@
                         <div class="setup-body" id="setup-step-content" *ngIf="step() === 1">
                             <div class="setup-section">
                                 <h2>Schools</h2>
-                                <p>Manage the schools under your organization. You can add, edit, or deactivate schools at any time.</p>
+                                <p>Manage the schools under your organization. You can add, edit, or deactivate schools
+                                    at any time.</p>
 
                                 <div class="schools-grid">
                                     <div class="schools-table-wrap">
                                         <div class="schools-table__titlebar">
                                             <div class="schools-table__title">Schools</div>
-                                            <mb-button variant="primary" (click)="openAddSchool()">+ Add school</mb-button>
+                                            <mb-button variant="primary" (click)="openAddSchool()">+ Add
+                                                school</mb-button>
                                         </div>
-                                        <mb-table
-                                            class="schools-table"
-                                            *ngIf="schoolRows().length; else emptySchools"
-                                            [columns]="schoolTableColumns"
-                                            [rows]="schoolRows()"
-                                            (cellClick)="handleSchoolCellClick($event)"
-                                        >
+                                        <mb-table class="schools-table" *ngIf="schoolRows().length; else emptySchools"
+                                            [columns]="schoolTableColumns" [rows]="schoolRows()"
+                                            (cellClick)="handleSchoolCellClick($event)">
                                             <ng-template mbTableActions let-row>
                                                 <div class="schools-table__actions">
                                                     <details class="schools-menu" #menu>
-                                                        <summary class="schools-menu__toggle" aria-label="More actions">⋯</summary>
+                                                        <summary class="schools-menu__toggle" aria-label="More actions">
+                                                            ⋯</summary>
                                                         <div class="schools-menu__panel">
-                                                            <button
-                                                                type="button"
-                                                                class="schools-menu__item"
-                                                                (click)="openEditSchool(getSchoolRowIndex(row)); menu.open = false"
-                                                            >
+                                                            <button type="button" class="schools-menu__item"
+                                                                (click)="openEditSchool(getSchoolRowIndex(row)); menu.open = false">
                                                                 Edit school
                                                             </button>
-                                                            <button
-                                                                type="button"
-                                                                class="schools-menu__item"
-                                                                (click)="toggleSchoolStatus(getSchoolRowIndex(row)); menu.open = false"
-                                                            >
-                                                                {{ row.status === 'Active' ? 'Deactivate school' : 'Activate school' }}
+                                                            <button type="button" class="schools-menu__item"
+                                                                (click)="toggleSchoolStatus(getSchoolRowIndex(row)); menu.open = false">
+                                                                {{ row.status === 'Active' ? 'Deactivate school' :
+                                                                'Activate school' }}
                                                             </button>
-                                                            <button
-                                                                type="button"
-                                                                class="schools-menu__item"
-                                                                (click)="deleteSchool(getSchoolRowIndex(row)); menu.open = false"
-                                                            >
+                                                            <button type="button" class="schools-menu__item"
+                                                                (click)="deleteSchool(getSchoolRowIndex(row)); menu.open = false">
                                                                 Delete school
                                                             </button>
                                                         </div>
@@ -123,25 +117,18 @@
                                                     <svg viewBox="0 0 24 24" role="img" focusable="false">
                                                         <path
                                                             d="M4 10.5l8-5 8 5v8.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8.5Z"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            stroke-width="1.5"
-                                                            stroke-linejoin="round"
-                                                        />
-                                                        <path
-                                                            d="M9 20v-6h6v6"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            stroke-width="1.5"
-                                                            stroke-linecap="round"
-                                                        />
+                                                            fill="none" stroke="currentColor" stroke-width="1.5"
+                                                            stroke-linejoin="round" />
+                                                        <path d="M9 20v-6h6v6" fill="none" stroke="currentColor"
+                                                            stroke-width="1.5" stroke-linecap="round" />
                                                     </svg>
                                                 </div>
                                                 <div class="schools-empty__title">No schools added yet</div>
                                                 <div class="schools-empty__text">
                                                     Add your first school to continue setup.
                                                 </div>
-                                                <mb-button variant="primary" (click)="openAddSchool()">+ Add school</mb-button>
+                                                <mb-button variant="primary" (click)="openAddSchool()">+ Add
+                                                    school</mb-button>
                                             </div>
                                         </ng-template>
                                     </div>
@@ -160,8 +147,8 @@
                                                     Add a school to your organization. You can update details later.
                                                 </div>
                                             </div>
-                                            <button type="button" class="schools-modal__close" (click)="closeSchoolModal()"
-                                                aria-label="Close dialog">×</button>
+                                            <button type="button" class="schools-modal__close"
+                                                (click)="closeSchoolModal()" aria-label="Close dialog">×</button>
                                         </div>
                                         <div class="schools-modal__body">
                                             <div class="schools-modal__section">
@@ -185,43 +172,40 @@
 
                                             <div class="schools-modal__section">
                                                 <div class="schools-modal__section-title">Location & time</div>
-                                                <mb-form-field label="Country or region" [controlId]="'school-form-country'"
+                                                <mb-form-field label="Country or region"
+                                                    [controlId]="'school-form-country'"
                                                     [error]="schoolFormCountryError()">
-                                                    <app-country-select
-                                                        id="school-form-country"
+                                                    <app-country-select id="school-form-country"
                                                         [value]="schoolFormCountry()"
                                                         (valueChange)="onSchoolFormCountryChange($event)"
-                                                        (blurEvent)="markSchoolFormTouched()"
-                                                    ></app-country-select>
+                                                        (blurEvent)="markSchoolFormTouched()"></app-country-select>
                                                 </mb-form-field>
 
-                                                <app-address
-                                                    [value]="schoolFormAddress()"
+                                                <app-address [value]="schoolFormAddress()"
                                                     [showCopy]="!!tenantAddress()"
-                                                    [copyLabel]="'Copy from organization'"
-                                                    [title]="'Address'"
+                                                    [copyLabel]="'Copy from organization'" [title]="'Address'"
                                                     [controlPrefix]="'school-form-address'"
                                                     (valueChange)="schoolFormAddress.set($event)"
-                                                    (copyFromTenant)="copySchoolAddressFromTenant()"
-                                                ></app-address>
+                                                    (copyFromTenant)="copySchoolAddressFromTenant()"></app-address>
 
                                                 <mb-form-field label="Time zone" [controlId]="'school-form-timezone'"
                                                     hint="Used for schedules, attendance, and reports."
                                                     [error]="schoolFormTimezoneError()">
-                                                    <app-timezone-select
-                                                        id="school-form-timezone"
+                                                    <app-timezone-select id="school-form-timezone"
                                                         [value]="schoolFormTimezone()"
                                                         (valueChange)="schoolFormTimezone.set($event)"
-                                                        (blurEvent)="markSchoolFormTouched()"
-                                                    ></app-timezone-select>
+                                                        (blurEvent)="markSchoolFormTouched()"></app-timezone-select>
                                                 </mb-form-field>
                                             </div>
                                         </div>
                                         <div class="schools-modal__footer">
-                                            <div class="schools-modal__hint">Configuration changes are saved automatically.</div>
+                                            <div class="schools-modal__hint">Configuration changes are saved
+                                                automatically.</div>
                                             <div class="schools-modal__actions">
-                                                <mb-button variant="secondary" (click)="closeSchoolModal()">Cancel</mb-button>
-                                                <mb-button variant="primary" [disabled]="!canSaveSchool()" (click)="saveSchool()">
+                                                <mb-button variant="secondary"
+                                                    (click)="closeSchoolModal()">Cancel</mb-button>
+                                                <mb-button variant="primary" [disabled]="!canSaveSchool()"
+                                                    (click)="saveSchool()">
                                                     {{ editingSchoolIndex() === null ? 'Add school' : 'Save changes' }}
                                                 </mb-button>
                                             </div>
@@ -232,631 +216,659 @@
                             <div class="setup-footer">
                                 <div class="setup-footer__actions">
                                     <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                                    <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
+                                    <mb-button variant="primary" [disabled]="!canContinue()"
+                                        (click)="next()">Continue</mb-button>
                                 </div>
                                 <div class="setup-footer__aside">
-                                    <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
+                                    <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for
+                                        now</button>
                                     <div class="setup-footer__hint">You can change this later from Settings.</div>
                                 </div>
                             </div>
-                            <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
+                            <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are
+                                saved automatically.</div>
                         </div>
 
-            <div class="setup-body" *ngIf="step() === 3">
-                <div class="setup-section">
-                    <h2>Organizational units</h2>
-                    <p>Define departments or divisions for reporting and access.</p>
+                        <div class="setup-body" *ngIf="step() === 3">
+                            <div class="setup-section">
+                                <h2>Organizational units</h2>
+                                <p>Define departments or divisions for reporting and access.</p>
 
-                    <div class="list-stack">
-                        <div class="list-row" *ngFor="let department of departments(); let i = index">
-                            <mb-form-field label="Department" [controlId]="'department-' + i">
-                                <mb-input [id]="'department-' + i" [value]="department"
-                                    (valueChange)="updateDepartment(i, $event)"></mb-input>
-                            </mb-form-field>
-                            <button type="button" class="list-remove" *ngIf="departments().length > 1"
-                                (click)="removeDepartment(i)">Remove</button>
+                                <div class="list-stack">
+                                    <div class="list-row" *ngFor="let department of departments(); let i = index">
+                                        <mb-form-field label="Department" [controlId]="'department-' + i">
+                                            <mb-input [id]="'department-' + i" [value]="department"
+                                                (valueChange)="updateDepartment(i, $event)"></mb-input>
+                                        </mb-form-field>
+                                        <button type="button" class="list-remove" *ngIf="departments().length > 1"
+                                            (click)="removeDepartment(i)">Remove</button>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="list-add" (click)="addDepartment()">Add department</button>
+                            </div>
+
+                            <div class="setup-footer">
+                                <div class="setup-footer__actions">
+                                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                                    <mb-button variant="primary" (click)="next()">Continue</mb-button>
+                                </div>
+                                <div class="setup-footer__aside">
+                                    <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for
+                                        now</button>
+                                </div>
+                            </div>
+                            <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are
+                                saved automatically.</div>
                         </div>
-                    </div>
 
-                    <button type="button" class="list-add" (click)="addDepartment()">Add department</button>
-                </div>
+                        <div class="setup-body" *ngIf="step() === 4">
+                            <div class="setup-section">
+                                <h2>Academic levels</h2>
+                                <p>Choose a template, then adjust the list to match your structure.</p>
 
-                <div class="setup-footer">
-                    <div class="setup-footer__actions">
-                        <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                        <mb-button variant="primary" (click)="next()">Continue</mb-button>
-                    </div>
-                    <div class="setup-footer__aside">
-                        <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
-                    </div>
-                </div>
-                <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
-            </div>
+                                <div class="choice-grid">
+                                    <button type="button" class="choice-card"
+                                        [class.active]="levelsTemplate() === 'k12'" (click)="setLevelsTemplate('k12')">
+                                        <div class="choice-title">K–12</div>
+                                        <div class="choice-text">Kindergarten through Grade 12.</div>
+                                    </button>
+                                    <button type="button" class="choice-card"
+                                        [class.active]="levelsTemplate() === 'primary_secondary'"
+                                        (click)="setLevelsTemplate('primary_secondary')">
+                                        <div class="choice-title">Primary / Secondary</div>
+                                        <div class="choice-text">Split primary and secondary levels.</div>
+                                    </button>
+                                    <button type="button" class="choice-card"
+                                        [class.active]="levelsTemplate() === 'custom'"
+                                        (click)="setLevelsTemplate('custom')">
+                                        <div class="choice-title">Custom</div>
+                                        <div class="choice-text">Build your own list of levels.</div>
+                                    </button>
+                                </div>
 
-            <div class="setup-body" *ngIf="step() === 4">
-                <div class="setup-section">
-                    <h2>Academic levels</h2>
-                    <p>Choose a template, then adjust the list to match your structure.</p>
+                                <div class="list-stack">
+                                    <div class="list-row" *ngFor="let level of levels(); let i = index">
+                                        <mb-form-field label="Level" [controlId]="'level-' + i">
+                                            <mb-input [id]="'level-' + i" [value]="level"
+                                                (valueChange)="updateLevel(i, $event)"></mb-input>
+                                        </mb-form-field>
+                                        <button type="button" class="list-remove" *ngIf="levels().length > 1"
+                                            (click)="removeLevel(i)">Remove</button>
+                                    </div>
+                                </div>
 
-                    <div class="choice-grid">
-                        <button type="button" class="choice-card" [class.active]="levelsTemplate() === 'k12'"
-                            (click)="setLevelsTemplate('k12')">
-                            <div class="choice-title">K–12</div>
-                            <div class="choice-text">Kindergarten through Grade 12.</div>
-                        </button>
-                        <button type="button" class="choice-card"
-                            [class.active]="levelsTemplate() === 'primary_secondary'"
-                            (click)="setLevelsTemplate('primary_secondary')">
-                            <div class="choice-title">Primary / Secondary</div>
-                            <div class="choice-text">Split primary and secondary levels.</div>
-                        </button>
-                        <button type="button" class="choice-card" [class.active]="levelsTemplate() === 'custom'"
-                            (click)="setLevelsTemplate('custom')">
-                            <div class="choice-title">Custom</div>
-                            <div class="choice-text">Build your own list of levels.</div>
-                        </button>
-                    </div>
+                                <div class="setup-error" *ngIf="levelsError()">{{ levelsError() }}</div>
 
-                    <div class="list-stack">
-                        <div class="list-row" *ngFor="let level of levels(); let i = index">
-                            <mb-form-field label="Level" [controlId]="'level-' + i">
-                                <mb-input [id]="'level-' + i" [value]="level"
-                                    (valueChange)="updateLevel(i, $event)"></mb-input>
-                            </mb-form-field>
-                            <button type="button" class="list-remove" *ngIf="levels().length > 1"
-                                (click)="removeLevel(i)">Remove</button>
+                                <button type="button" class="list-add" (click)="addLevel()">Add level</button>
+                            </div>
+
+                            <div class="setup-footer">
+                                <div class="setup-footer__actions">
+                                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                                    <mb-button variant="primary" [disabled]="!canContinue()"
+                                        (click)="next()">Continue</mb-button>
+                                </div>
+                                <div class="setup-footer__aside">
+                                    <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for
+                                        now</button>
+                                </div>
+                            </div>
+                            <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are
+                                saved automatically.</div>
                         </div>
-                    </div>
 
-                    <div class="setup-error" *ngIf="levelsError()">{{ levelsError() }}</div>
+                        <div class="setup-body" *ngIf="step() === 5">
+                            <div class="setup-section">
+                                <h2>Classes and sections</h2>
+                                <p>Define your classes and assign them to academic levels.</p>
 
-                    <button type="button" class="list-add" (click)="addLevel()">Add level</button>
-                </div>
+                                <div class="list-stack">
+                                    <div class="list-row" *ngFor="let row of classes(); let i = index">
+                                        <mb-form-field label="Class name" [controlId]="'class-name-' + i"
+                                            [error]="showErrors() && !row.name.trim() ? 'Class name is required.' : ''">
+                                            <mb-input [id]="'class-name-' + i" [value]="row.name"
+                                                (valueChange)="updateClassRow(i, 'name', $event)"></mb-input>
+                                        </mb-form-field>
 
-                <div class="setup-footer">
-                    <div class="setup-footer__actions">
-                        <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                        <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
-                    </div>
-                    <div class="setup-footer__aside">
-                        <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
-                    </div>
-                </div>
-                <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
-            </div>
+                                        <mb-form-field label="Level" [controlId]="'class-level-' + i"
+                                            [error]="showErrors() && !row.level.trim() ? 'Select a level.' : ''">
+                                            <mb-select [id]="'class-level-' + i" placeholder="Select a level"
+                                                [value]="row.level" (valueChange)="updateClassRow(i, 'level', $event)">
+                                                <option *ngFor="let level of levels()" [value]="level">{{ level }}
+                                                </option>
+                                            </mb-select>
+                                        </mb-form-field>
 
-            <div class="setup-body" *ngIf="step() === 5">
-                <div class="setup-section">
-                    <h2>Classes and sections</h2>
-                    <p>Define your classes and assign them to academic levels.</p>
+                                        <mb-form-field label="Sections (optional)" [controlId]="'class-sections-' + i"
+                                            hint="Use commas to separate sections, e.g. A, B, C.">
+                                            <mb-input [id]="'class-sections-' + i" [value]="row.sections"
+                                                (valueChange)="updateClassRow(i, 'sections', $event)"></mb-input>
+                                        </mb-form-field>
 
-                    <div class="list-stack">
-                        <div class="list-row" *ngFor="let row of classes(); let i = index">
-                            <mb-form-field label="Class name" [controlId]="'class-name-' + i"
-                                [error]="showErrors() && !row.name.trim() ? 'Class name is required.' : ''">
-                                <mb-input [id]="'class-name-' + i" [value]="row.name"
-                                    (valueChange)="updateClassRow(i, 'name', $event)"></mb-input>
-                            </mb-form-field>
+                                        <button type="button" class="list-remove" *ngIf="classes().length > 1"
+                                            (click)="removeClassRow(i)">Remove</button>
+                                    </div>
+                                </div>
 
-                            <mb-form-field label="Level" [controlId]="'class-level-' + i"
-                                [error]="showErrors() && !row.level.trim() ? 'Select a level.' : ''">
-                                <mb-select [id]="'class-level-' + i" placeholder="Select a level"
-                                    [value]="row.level"
-                                    (valueChange)="updateClassRow(i, 'level', $event)">
-                                    <option *ngFor="let level of levels()" [value]="level">{{ level }}</option>
-                                </mb-select>
-                            </mb-form-field>
+                                <button type="button" class="list-add" (click)="addClassRow()">Add class</button>
+                            </div>
 
-                            <mb-form-field label="Sections (optional)" [controlId]="'class-sections-' + i"
-                                hint="Use commas to separate sections, e.g. A, B, C.">
-                                <mb-input [id]="'class-sections-' + i" [value]="row.sections"
-                                    (valueChange)="updateClassRow(i, 'sections', $event)"></mb-input>
-                            </mb-form-field>
-
-                            <button type="button" class="list-remove" *ngIf="classes().length > 1"
-                                (click)="removeClassRow(i)">Remove</button>
+                            <div class="setup-footer">
+                                <div class="setup-footer__actions">
+                                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                                    <mb-button variant="primary" [disabled]="!canContinue()"
+                                        (click)="next()">Continue</mb-button>
+                                </div>
+                                <div class="setup-footer__aside">
+                                    <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for
+                                        now</button>
+                                </div>
+                            </div>
+                            <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are
+                                saved automatically.</div>
                         </div>
-                    </div>
 
-                    <button type="button" class="list-add" (click)="addClassRow()">Add class</button>
-                </div>
+                        <div class="setup-body" *ngIf="step() === 6">
+                            <div class="setup-section">
+                                <h2>Grading system</h2>
+                                <p>Select the grading model used across your schools.</p>
 
-                <div class="setup-footer">
-                    <div class="setup-footer__actions">
-                        <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                        <mb-button variant="primary" [disabled]="!canContinue()" (click)="next()">Continue</mb-button>
-                    </div>
-                    <div class="setup-footer__aside">
-                        <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
-                    </div>
-                </div>
-                <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
-            </div>
+                                <div class="choice-grid">
+                                    <button type="button" class="choice-card"
+                                        [class.active]="gradingModel() === 'letter'"
+                                        (click)="gradingModel.set('letter')">
+                                        <div class="choice-title">Letter grades</div>
+                                        <div class="choice-text">A–F scale with descriptors.</div>
+                                    </button>
+                                    <button type="button" class="choice-card"
+                                        [class.active]="gradingModel() === 'numeric'"
+                                        (click)="gradingModel.set('numeric')">
+                                        <div class="choice-title">Numeric</div>
+                                        <div class="choice-text">Percentage-based scores.</div>
+                                    </button>
+                                    <button type="button" class="choice-card" [class.active]="gradingModel() === 'gpa'"
+                                        (click)="gradingModel.set('gpa')">
+                                        <div class="choice-title">GPA</div>
+                                        <div class="choice-text">GPA scale for reporting.</div>
+                                    </button>
+                                    <button type="button" class="choice-card"
+                                        [class.active]="gradingModel() === 'custom'"
+                                        (click)="gradingModel.set('custom')">
+                                        <div class="choice-title">Custom</div>
+                                        <div class="choice-text">Configure your own scale later.</div>
+                                    </button>
+                                </div>
 
-            <div class="setup-body" *ngIf="step() === 6">
-                <div class="setup-section">
-                    <h2>Grading system</h2>
-                    <p>Select the grading model used across your schools.</p>
+                                <div class="scale-preview">
+                                    <div class="scale-title">Scale preview</div>
+                                    <ul>
+                                        <li *ngFor="let row of gradingScale()">{{ row.label }} — {{ row.value }}</li>
+                                    </ul>
+                                </div>
+                            </div>
 
-                    <div class="choice-grid">
-                        <button type="button" class="choice-card" [class.active]="gradingModel() === 'letter'"
-                            (click)="gradingModel.set('letter')">
-                            <div class="choice-title">Letter grades</div>
-                            <div class="choice-text">A–F scale with descriptors.</div>
-                        </button>
-                        <button type="button" class="choice-card" [class.active]="gradingModel() === 'numeric'"
-                            (click)="gradingModel.set('numeric')">
-                            <div class="choice-title">Numeric</div>
-                            <div class="choice-text">Percentage-based scores.</div>
-                        </button>
-                        <button type="button" class="choice-card" [class.active]="gradingModel() === 'gpa'"
-                            (click)="gradingModel.set('gpa')">
-                            <div class="choice-title">GPA</div>
-                            <div class="choice-text">GPA scale for reporting.</div>
-                        </button>
-                        <button type="button" class="choice-card" [class.active]="gradingModel() === 'custom'"
-                            (click)="gradingModel.set('custom')">
-                            <div class="choice-title">Custom</div>
-                            <div class="choice-text">Configure your own scale later.</div>
-                        </button>
-                    </div>
-
-                    <div class="scale-preview">
-                        <div class="scale-title">Scale preview</div>
-                        <ul>
-                            <li *ngFor="let row of gradingScale()">{{ row.label }} — {{ row.value }}</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="setup-footer">
-                    <div class="setup-footer__actions">
-                        <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                        <mb-button variant="primary" (click)="next()">Continue</mb-button>
-                    </div>
-                    <div class="setup-footer__aside">
-                        <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for now</button>
-                    </div>
-                </div>
-                <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
-            </div>
-
-            <div class="setup-body" *ngIf="step() === 2">
-                <div class="setup-section">
-                    <div class="users-header">
-                        <div>
-                            <h2>Staff & users</h2>
-                            <p>Add staff who will access the workspace. You can invite now and assign roles later.</p>
+                            <div class="setup-footer">
+                                <div class="setup-footer__actions">
+                                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                                    <mb-button variant="primary" (click)="next()">Continue</mb-button>
+                                </div>
+                                <div class="setup-footer__aside">
+                                    <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for
+                                        now</button>
+                                </div>
+                            </div>
+                            <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are
+                                saved automatically.</div>
                         </div>
-                    </div>
-                    <input #csvInput type="file" class="users-csv-input" accept=".csv"
-                        (change)="handleCsvImport($event)" />
 
-                    <div class="users-utility" *ngIf="users().length">
-                        <mb-form-field *ngIf="users().length >= 5" label="Search" [controlId]="'user-search'">
-                            <mb-input
-                                id="user-search"
-                                [value]="userSearch()"
-                                [placeholder]="'Search by name or email'"
-                                (valueChange)="userSearch.set($event)"
-                            ></mb-input>
-                        </mb-form-field>
-                        <div class="users-utility__actions">
-                            <mb-split-button
-                                label="Add users ▼"
-                                variant="primary"
-                                size="md"
-                                [items]="addUsersMenuItems()"
-                                (primaryClick)="openInviteModal()"
-                                (itemSelect)="handleAddUsersAction($event, csvInput)"
-                            ></mb-split-button>
-                        </div>
-                    </div>
+                        <div class="setup-body" *ngIf="step() === 2">
+                            <div class="setup-section">
+                                <div class="users-header">
+                                    <div>
+                                        <h2>Staff & users</h2>
+                                        <p>Add staff who will access the workspace. You can invite now and assign roles
+                                            later.</p>
+                                    </div>
+                                </div>
+                                <input #csvInput type="file" class="users-csv-input" accept=".csv"
+                                    (change)="handleCsvImport($event)" />
 
-                    <div class="users-table-wrap" *ngIf="users().length; else emptyUsers">
-                        <mb-table
-                            class="users-table"
-                            [columns]="userTableColumns"
-                            [rows]="filteredUsers()"
-                            (cellClick)="handleUserCellClick($event)"
-                        >
-                            <ng-template mbTableActions let-row>
-                                <div class="users-table__actions">
-                                    <details class="users-menu" #userMenu>
-                                        <summary class="users-menu__toggle" aria-label="Actions">⋯</summary>
-                                        <div class="users-menu__panel">
-                                            <button type="button" class="users-menu__item"
-                                                (click)="openEditUser(getUserRowIndex(row)); userMenu.open = false">
-                                                Edit details
-                                            </button>
-                                            <button type="button" class="users-menu__item"
-                                                *ngIf="row.status === 'Invited'"
-                                                (click)="resendInvite(getUserRowIndex(row)); userMenu.open = false">
-                                                Resend invite
-                                            </button>
-                                            <button type="button" class="users-menu__item"
-                                                *ngIf="row.status !== 'Invited'"
-                                                (click)="toggleUserStatus(getUserRowIndex(row)); userMenu.open = false">
-                                                {{ row.status === 'Suspended' ? 'Activate user' : 'Suspend user' }}
-                                            </button>
-                                            <button type="button" class="users-menu__item users-menu__item--danger"
-                                                (click)="removeUser(getUserRowIndex(row)); userMenu.open = false">
-                                                Remove
-                                            </button>
+                                <div class="users-utility" *ngIf="users().length">
+                                    <mb-form-field *ngIf="users().length >= 5" label="Search"
+                                        [controlId]="'user-search'">
+                                        <mb-input id="user-search" [value]="userSearch()"
+                                            [placeholder]="'Search by name or email'"
+                                            (valueChange)="userSearch.set($event)"></mb-input>
+                                    </mb-form-field>
+                                    <div class="users-utility__actions">
+                                        <mb-split-button label="Add users ▼" variant="primary" size="md"
+                                            [items]="addUsersMenuItems()" (primaryClick)="openInviteModal()"
+                                            (itemSelect)="handleAddUsersAction($event, csvInput)"></mb-split-button>
+                                    </div>
+                                </div>
+
+                                <div class="users-table-wrap" *ngIf="users().length; else emptyUsers">
+                                    <mb-table class="users-table" [columns]="userTableColumns" [rows]="filteredUsers()"
+                                        (cellClick)="handleUserCellClick($event)">
+                                        <ng-template mbTableActions let-row>
+                                            <div class="users-table__actions">
+                                                <details class="users-menu" #userMenu>
+                                                    <summary class="users-menu__toggle" aria-label="Actions">⋯</summary>
+                                                    <div class="users-menu__panel">
+                                                        <button type="button" class="users-menu__item"
+                                                            (click)="openEditUser(getUserRowIndex(row)); userMenu.open = false">
+                                                            Edit details
+                                                        </button>
+                                                        <button type="button" class="users-menu__item"
+                                                            *ngIf="row.status === 'Invited'"
+                                                            (click)="resendInvite(getUserRowIndex(row)); userMenu.open = false">
+                                                            Resend invite
+                                                        </button>
+                                                        <button type="button" class="users-menu__item"
+                                                            *ngIf="row.status !== 'Invited'"
+                                                            (click)="toggleUserStatus(getUserRowIndex(row)); userMenu.open = false">
+                                                            {{ row.status === 'Suspended' ? 'Activate user' : 'Suspend
+                                                            user' }}
+                                                        </button>
+                                                        <button type="button"
+                                                            class="users-menu__item users-menu__item--danger"
+                                                            (click)="removeUser(getUserRowIndex(row)); userMenu.open = false">
+                                                            Remove
+                                                        </button>
+                                                    </div>
+                                                </details>
+                                            </div>
+                                        </ng-template>
+                                    </mb-table>
+
+                                </div>
+                                <ng-template #emptyUsers>
+                                    <div class="users-empty">
+                                        <div class="users-empty__icon" aria-hidden="true">
+                                            <svg viewBox="0 0 48 48" fill="none">
+                                                <circle cx="24" cy="16" r="8" stroke="currentColor" stroke-width="2">
+                                                </circle>
+                                                <path d="M10 40c0-7.2 6.3-13 14-13s14 5.8 14 13" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round"></path>
+                                            </svg>
                                         </div>
-                                    </details>
+                                        <div class="users-empty__title">No staff or users yet</div>
+                                        <div class="users-empty__text">
+                                            Add users to give your team access to the workspace.
+                                        </div>
+                                        <div class="users-empty__actions">
+                                            <mb-split-button label="Add users ▼" variant="primary" size="md"
+                                                [items]="addUsersMenuItems()" (primaryClick)="openInviteModal()"
+                                                (itemSelect)="handleAddUsersAction($event, csvInput)"></mb-split-button>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </div>
+
+                            <div class="setup-footer">
+                                <div class="setup-footer__actions">
+                                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                                    <mb-button variant="primary" [disabled]="!canContinueUsersStep()"
+                                        (click)="next()">Continue</mb-button>
                                 </div>
-                            </ng-template>
-                        </mb-table>
-
-                    </div>
-                    <ng-template #emptyUsers>
-                        <div class="users-empty">
-                            <div class="users-empty__icon" aria-hidden="true">
-                                <svg viewBox="0 0 48 48" fill="none">
-                                    <circle cx="24" cy="16" r="8" stroke="currentColor" stroke-width="2"></circle>
-                                    <path d="M10 40c0-7.2 6.3-13 14-13s14 5.8 14 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-                                </svg>
-                            </div>
-                            <div class="users-empty__title">No staff or users yet</div>
-                            <div class="users-empty__text">
-                                Add users to give your team access to the workspace.
-                            </div>
-                            <div class="users-empty__actions">
-                                <mb-split-button
-                                    label="Add users ▼"
-                                    variant="primary"
-                                    size="md"
-                                    [items]="addUsersMenuItems()"
-                                    (primaryClick)="openInviteModal()"
-                                    (itemSelect)="handleAddUsersAction($event, csvInput)"
-                                ></mb-split-button>
-                            </div>
-                        </div>
-                    </ng-template>
-                </div>
-
-                <div class="setup-footer">
-                    <div class="setup-footer__actions">
-                        <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                        <mb-button variant="primary" [disabled]="!canContinueUsersStep()" (click)="next()">Continue</mb-button>
-                    </div>
-                    <div class="setup-footer__aside">
-                        <button type="button" class="setup-skip-link" (click)="skipUsersStep()">Skip for now</button>
-                        <div class="setup-footer__hint">You can continue setup without adding users.</div>
-                        <div class="setup-footer__hint">You can resume later from Settings → Workspace setup.</div>
-                    </div>
-                </div>
-                <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are saved automatically.</div>
-
-                <div class="users-modal" *ngIf="isInviteModalOpen()" role="presentation">
-                    <div class="users-modal__backdrop"></div>
-                    <div class="users-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="invite-modal-title"
-                        tabindex="0" (keydown.escape)="closeInviteModal()">
-                        <div class="users-modal__header">
-                            <div>
-                                <div id="invite-modal-title" class="users-modal__title">Invite users</div>
-                                <div class="users-modal__subtitle">They’ll receive an email to set their password.</div>
-                            </div>
-                            <button type="button" class="users-modal__close" (click)="closeInviteModal()"
-                                aria-label="Close dialog">×</button>
-                        </div>
-                        <div class="users-modal__body">
-                            <mb-form-field label="Email addresses" [controlId]="'invite-emails'"
-                                [error]="inviteTouched() && inviteEmailList().length === 0 ? 'Add at least one email.' : (inviteInvalidEmails().length ? 'Remove invalid email addresses.' : (inviteDuplicateEmails().length ? 'Remove duplicate email addresses.' : ''))"
-                                hint="Paste one per line or separate with commas.">
-                                <mb-textarea id="invite-emails" [value]="inviteEmails()"
-                                    (valueChange)="inviteEmails.set($event)"
-                                    (blur)="inviteTouched.set(true)"></mb-textarea>
-                            </mb-form-field>
-
-                            <mb-form-field label="Default role" [controlId]="'invite-role'" hint="You can change roles later.">
-                                <mb-select id="invite-role" [value]="inviteRole()"
-                                    (valueChange)="setInviteRole($event)">
-                                    <option value="Owner">Owner</option>
-                                    <option value="Administrator">Administrator</option>
-                                    <option value="Staff">Staff</option>
-                                    <option value="Teacher">Teacher</option>
-                                </mb-select>
-                            </mb-form-field>
-
-                            <div class="users-modal__section">
-                                <div class="users-modal__section-title">School access</div>
-                                <label class="users-radio">
-                                    <input type="radio" name="invite-access" [checked]="inviteSchoolAccess() === 'all'"
-                                        (change)="inviteSchoolAccess.set('all')" />
-                                    <span>All schools</span>
-                                </label>
-                                <label class="users-radio">
-                                    <input type="radio" name="invite-access" [checked]="inviteSchoolAccess() === 'selected'"
-                                        (change)="inviteSchoolAccess.set('selected')" />
-                                    <span>Selected schools</span>
-                                </label>
-                                <div class="users-school-list" *ngIf="inviteSchoolAccess() === 'selected'">
-                                    <mb-checkbox
-                                        *ngFor="let name of activeSchoolNames()"
-                                        [checked]="inviteSelectedSchools().includes(name)"
-                                        (checkedChange)="toggleInviteSchoolSelection(name, $event)"
-                                    >{{ name }}</mb-checkbox>
-                                </div>
-                                <div class="users-inline-error" *ngIf="inviteTouched() && inviteSchoolAccess() === 'selected' && inviteSelectedSchools().length === 0">
-                                    Select at least one school.
+                                <div class="setup-footer__aside">
+                                    <button type="button" class="setup-skip-link" (click)="skipUsersStep()">Skip for
+                                        now</button>
+                                    <div class="setup-footer__hint">You can continue setup without adding users.</div>
+                                    <div class="setup-footer__hint">You can resume later from Settings → Workspace
+                                        setup.</div>
                                 </div>
                             </div>
+                            <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are
+                                saved automatically.</div>
 
-                            <button type="button" class="users-link" (click)="toggleInviteMessage()">
-                                {{ inviteMessageOpen() ? 'Hide message' : 'Add a message' }}
-                            </button>
-                            <mb-form-field *ngIf="inviteMessageOpen()" label="Message" [controlId]="'invite-message'">
-                                <mb-textarea id="invite-message" [value]="inviteMessage()"
-                                    (valueChange)="inviteMessage.set($event)"></mb-textarea>
-                            </mb-form-field>
-                        </div>
-                        <div class="users-modal__footer">
-                            <div class="users-modal__hint">Invites can be resent anytime.</div>
-                            <div class="users-modal__actions">
-                                <mb-button variant="secondary" (click)="closeInviteModal()">Cancel</mb-button>
-                                <mb-button variant="primary" [disabled]="!inviteCanSubmit()" (click)="sendInvites()">
-                                    Send invites
-                                </mb-button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            <div class="users-modal" *ngIf="isInviteModalOpen()" role="presentation">
+                                <div class="users-modal__backdrop"></div>
+                                <div class="users-modal__dialog" role="dialog" aria-modal="true"
+                                    aria-labelledby="invite-modal-title" tabindex="0"
+                                    (keydown.escape)="closeInviteModal()">
+                                    <div class="users-modal__header">
+                                        <div>
+                                            <div id="invite-modal-title" class="users-modal__title">Invite users</div>
+                                            <div class="users-modal__subtitle">They’ll receive an email to set their
+                                                password.</div>
+                                        </div>
+                                        <button type="button" class="users-modal__close" (click)="closeInviteModal()"
+                                            aria-label="Close dialog">×</button>
+                                    </div>
+                                    <div class="users-modal__body">
+                                        <mb-form-field label="Email addresses" [controlId]="'invite-emails'"
+                                            [error]="inviteTouched() && inviteEmailList().length === 0 ? 'Add at least one email.' : (inviteInvalidEmails().length ? 'Remove invalid email addresses.' : (inviteDuplicateEmails().length ? 'Remove duplicate email addresses.' : ''))"
+                                            hint="Paste one per line or separate with commas.">
+                                            <mb-textarea id="invite-emails" [value]="inviteEmails()"
+                                                (valueChange)="inviteEmails.set($event)"
+                                                (blur)="inviteTouched.set(true)"></mb-textarea>
+                                        </mb-form-field>
 
-                <div class="users-modal" *ngIf="isEditUserModalOpen()" role="presentation">
-                    <div class="users-modal__backdrop"></div>
-                    <div class="users-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="edit-user-title"
-                        tabindex="0" (keydown.escape)="closeEditUser()">
-                        <div class="users-modal__header">
-                            <div>
-                                <div id="edit-user-title" class="users-modal__title">Edit user</div>
-                                <div class="users-modal__subtitle">Update role, access, and employment details.</div>
-                            </div>
-                            <button type="button" class="users-modal__close" (click)="closeEditUser()"
-                                aria-label="Close dialog">×</button>
-                        </div>
-                        <div class="users-modal__body">
-                            <mb-form-field label="Full name" [controlId]="'edit-user-name'"
-                                [error]="editTouched() && !editName().trim() ? 'Name is required.' : ''">
-                                <mb-input id="edit-user-name" [value]="editName()"
-                                    (valueChange)="editName.set($event)"
-                                    (blur)="editTouched.set(true)"></mb-input>
-                            </mb-form-field>
-                            <mb-form-field label="Email" [controlId]="'edit-user-email'">
-                                <mb-input id="edit-user-email" [value]="editEmail()" [disabled]="true"></mb-input>
-                            </mb-form-field>
-                            <mb-form-field label="Role" [controlId]="'edit-user-role'">
-                                <mb-select id="edit-user-role" [value]="editRole()"
-                                    (valueChange)="setEditRole($event)">
-                                    <option value="Owner">Owner</option>
-                                    <option value="Administrator">Administrator</option>
-                                    <option value="Staff">Staff</option>
-                                    <option value="Teacher">Teacher</option>
-                                </mb-select>
-                            </mb-form-field>
+                                        <mb-form-field label="Default role" [controlId]="'invite-role'"
+                                            hint="You can change roles later.">
+                                            <mb-select id="invite-role" [value]="inviteRole()"
+                                                (valueChange)="setInviteRole($event)">
+                                                <option value="Owner">Owner</option>
+                                                <option value="Administrator">Administrator</option>
+                                                <option value="Staff">Staff</option>
+                                                <option value="Teacher">Teacher</option>
+                                            </mb-select>
+                                        </mb-form-field>
 
-                            <div class="users-modal__section">
-                                <div class="users-modal__section-title">School access</div>
-                                <label class="users-radio">
-                                    <input type="radio" name="edit-access" [checked]="editSchoolAccess() === 'all'"
-                                        (change)="editSchoolAccess.set('all')" />
-                                    <span>All schools</span>
-                                </label>
-                                <label class="users-radio">
-                                    <input type="radio" name="edit-access" [checked]="editSchoolAccess() === 'selected'"
-                                        (change)="editSchoolAccess.set('selected')" />
-                                    <span>Selected schools</span>
-                                </label>
-                                <div class="users-school-list" *ngIf="editSchoolAccess() === 'selected'">
-                                    <mb-checkbox
-                                        *ngFor="let name of activeSchoolNames()"
-                                        [checked]="editSelectedSchools().includes(name)"
-                                        (checkedChange)="toggleEditSchoolSelection(name, $event)"
-                                    >{{ name }}</mb-checkbox>
+                                        <div class="users-modal__section">
+                                            <div class="users-modal__section-title">School access</div>
+                                            <label class="users-radio">
+                                                <input type="radio" name="invite-access"
+                                                    [checked]="inviteSchoolAccess() === 'all'"
+                                                    (change)="inviteSchoolAccess.set('all')" />
+                                                <span>All schools</span>
+                                            </label>
+                                            <label class="users-radio">
+                                                <input type="radio" name="invite-access"
+                                                    [checked]="inviteSchoolAccess() === 'selected'"
+                                                    (change)="inviteSchoolAccess.set('selected')" />
+                                                <span>Selected schools</span>
+                                            </label>
+                                            <div class="users-school-list" *ngIf="inviteSchoolAccess() === 'selected'">
+                                                <mb-checkbox *ngFor="let name of activeSchoolNames()"
+                                                    [checked]="inviteSelectedSchools().includes(name)"
+                                                    (checkedChange)="toggleInviteSchoolSelection(name, $event)">{{ name
+                                                    }}</mb-checkbox>
+                                            </div>
+                                            <div class="users-inline-error"
+                                                *ngIf="inviteTouched() && inviteSchoolAccess() === 'selected' && inviteSelectedSchools().length === 0">
+                                                Select at least one school.
+                                            </div>
+                                        </div>
+
+                                        <button type="button" class="users-link" (click)="toggleInviteMessage()">
+                                            {{ inviteMessageOpen() ? 'Hide message' : 'Add a message' }}
+                                        </button>
+                                        <mb-form-field *ngIf="inviteMessageOpen()" label="Message"
+                                            [controlId]="'invite-message'">
+                                            <mb-textarea id="invite-message" [value]="inviteMessage()"
+                                                (valueChange)="inviteMessage.set($event)"></mb-textarea>
+                                        </mb-form-field>
+                                    </div>
+                                    <div class="users-modal__footer">
+                                        <div class="users-modal__hint">Invites can be resent anytime.</div>
+                                        <div class="users-modal__actions">
+                                            <mb-button variant="secondary"
+                                                (click)="closeInviteModal()">Cancel</mb-button>
+                                            <mb-button variant="primary" [disabled]="!inviteCanSubmit()"
+                                                (click)="sendInvites()">
+                                                Send invites
+                                            </mb-button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="users-modal__section">
-                                <div class="users-modal__section-title">Employment details</div>
-                                <mb-form-field label="Job title" [controlId]="'edit-user-job'">
-                                    <mb-input id="edit-user-job" [value]="editJobTitle()"
-                                        (valueChange)="editJobTitle.set($event)"></mb-input>
-                                </mb-form-field>
-                                <mb-form-field label="Department" [controlId]="'edit-user-dept'">
-                                    <mb-input id="edit-user-dept" [value]="editDepartment()"
-                                        (valueChange)="editDepartment.set($event)"></mb-input>
-                                </mb-form-field>
-                                <mb-form-field label="Staff ID (optional)" [controlId]="'edit-user-staff-id'">
-                                    <mb-input id="edit-user-staff-id" [value]="editStaffId()"
-                                        (valueChange)="editStaffId.set($event)"></mb-input>
-                                </mb-form-field>
-                            </div>
-                        </div>
-                        <div class="users-modal__footer">
-                            <div class="users-modal__hint">Changes are saved immediately.</div>
-                            <div class="users-modal__actions">
-                                <mb-button variant="secondary" (click)="closeEditUser()">Cancel</mb-button>
-                                <mb-button variant="primary" [disabled]="editTouched() && !editName().trim()" (click)="saveUserEdits()">
-                                    Save changes
-                                </mb-button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            <div class="users-modal" *ngIf="isEditUserModalOpen()" role="presentation">
+                                <div class="users-modal__backdrop"></div>
+                                <div class="users-modal__dialog" role="dialog" aria-modal="true"
+                                    aria-labelledby="edit-user-title" tabindex="0" (keydown.escape)="closeEditUser()">
+                                    <div class="users-modal__header">
+                                        <div>
+                                            <div id="edit-user-title" class="users-modal__title">Edit user</div>
+                                            <div class="users-modal__subtitle">Update role, access, and employment
+                                                details.</div>
+                                        </div>
+                                        <button type="button" class="users-modal__close" (click)="closeEditUser()"
+                                            aria-label="Close dialog">×</button>
+                                    </div>
+                                    <div class="users-modal__body">
+                                        <mb-form-field label="Full name" [controlId]="'edit-user-name'"
+                                            [error]="editTouched() && !editName().trim() ? 'Name is required.' : ''">
+                                            <mb-input id="edit-user-name" [value]="editName()"
+                                                (valueChange)="editName.set($event)"
+                                                (blur)="editTouched.set(true)"></mb-input>
+                                        </mb-form-field>
+                                        <mb-form-field label="Email" [controlId]="'edit-user-email'">
+                                            <mb-input id="edit-user-email" [value]="editEmail()"
+                                                [disabled]="true"></mb-input>
+                                        </mb-form-field>
+                                        <mb-form-field label="Role" [controlId]="'edit-user-role'">
+                                            <mb-select id="edit-user-role" [value]="editRole()"
+                                                (valueChange)="setEditRole($event)">
+                                                <option value="Owner">Owner</option>
+                                                <option value="Administrator">Administrator</option>
+                                                <option value="Staff">Staff</option>
+                                                <option value="Teacher">Teacher</option>
+                                            </mb-select>
+                                        </mb-form-field>
 
-                <div class="users-modal" *ngIf="isViewUserModalOpen()" role="presentation">
-                    <div class="users-modal__backdrop"></div>
-                    <div class="users-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="view-user-title"
-                        tabindex="0" (keydown.escape)="closeViewUser()">
-                        <div class="users-modal__header">
-                            <div>
-                                <div id="view-user-title" class="users-modal__title">User details</div>
-                                <div class="users-modal__subtitle">Review identity, access, and status.</div>
-                            </div>
-                            <button type="button" class="users-modal__close" (click)="closeViewUser()"
-                                aria-label="Close dialog">×</button>
-                        </div>
-                        <div class="users-modal__body" *ngIf="viewUser() as user">
-                            <div class="users-view">
-                                <div class="users-view__name">{{ user.name || 'Pending name' }}</div>
-                                <div class="users-view__email">{{ user.email }}</div>
-                                <div class="users-view__row">
-                                    <div class="users-view__label">Role</div>
-                                    <div class="users-view__value">{{ user.role }}</div>
-                                </div>
-                                <div class="users-view__row">
-                                    <div class="users-view__label">School access</div>
-                                    <div class="users-view__value">{{ schoolAccessLabel(user) }}</div>
-                                </div>
-                                <div class="users-view__row">
-                                    <div class="users-view__label">Status</div>
-                                    <div class="users-view__value">{{ user.status }}</div>
-                                </div>
-                                <div class="users-view__row" *ngIf="user.lastLogin">
-                                    <div class="users-view__label">Last login</div>
-                                    <div class="users-view__value">{{ user.lastLogin }}</div>
-                                </div>
-                                <div class="users-view__row" *ngIf="user.createdAt">
-                                    <div class="users-view__label">Created</div>
-                                    <div class="users-view__value">{{ user.createdAt | date:'mediumDate' }}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="users-modal__footer" *ngIf="viewUser() as user">
-                            <div class="users-modal__actions">
-                                <mb-button variant="secondary" (click)="closeViewUser()">Close</mb-button>
-                                <mb-button variant="primary" (click)="openEditUser(getUserRowIndex(user)); closeViewUser()">
-                                    Edit
-                                </mb-button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                        <div class="users-modal__section">
+                                            <div class="users-modal__section-title">School access</div>
+                                            <label class="users-radio">
+                                                <input type="radio" name="edit-access"
+                                                    [checked]="editSchoolAccess() === 'all'"
+                                                    (change)="editSchoolAccess.set('all')" />
+                                                <span>All schools</span>
+                                            </label>
+                                            <label class="users-radio">
+                                                <input type="radio" name="edit-access"
+                                                    [checked]="editSchoolAccess() === 'selected'"
+                                                    (change)="editSchoolAccess.set('selected')" />
+                                                <span>Selected schools</span>
+                                            </label>
+                                            <div class="users-school-list" *ngIf="editSchoolAccess() === 'selected'">
+                                                <mb-checkbox *ngFor="let name of activeSchoolNames()"
+                                                    [checked]="editSelectedSchools().includes(name)"
+                                                    (checkedChange)="toggleEditSchoolSelection(name, $event)">{{ name
+                                                    }}</mb-checkbox>
+                                            </div>
+                                        </div>
 
-                <div class="users-modal" *ngIf="isCreateUserModalOpen()" role="presentation">
-                    <div class="users-modal__backdrop"></div>
-                    <div class="users-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="create-user-title"
-                        tabindex="0" (keydown.escape)="closeCreateUserModal()">
-                        <div class="users-modal__header">
-                            <div>
-                                <div id="create-user-title" class="users-modal__title">Create user</div>
-                                <div class="users-modal__subtitle">Create an account manually for this workspace.</div>
-                            </div>
-                            <button type="button" class="users-modal__close" (click)="closeCreateUserModal()"
-                                aria-label="Close dialog">×</button>
-                        </div>
-                        <div class="users-modal__body">
-                            <mb-form-field label="Full name" [controlId]="'create-user-name'"
-                                [error]="createTouched() && !createName().trim() ? 'Name is required.' : ''">
-                                <mb-input id="create-user-name" [value]="createName()"
-                                    (valueChange)="createName.set($event)"
-                                    (blur)="createTouched.set(true)"></mb-input>
-                            </mb-form-field>
-                            <mb-form-field label="Email" [controlId]="'create-user-email'"
-                                [error]="createEmailError()">
-                                <mb-input id="create-user-email" [value]="createEmail()"
-                                    (valueChange)="createEmail.set($event)"
-                                    (blur)="createTouched.set(true)"></mb-input>
-                            </mb-form-field>
-                            <mb-form-field label="Role" [controlId]="'create-user-role'">
-                                <mb-select id="create-user-role" [value]="createRole()"
-                                    (valueChange)="setCreateRole($event)">
-                                    <option value="Owner">Owner</option>
-                                    <option value="Administrator">Administrator</option>
-                                    <option value="Staff">Staff</option>
-                                    <option value="Teacher">Teacher</option>
-                                </mb-select>
-                            </mb-form-field>
-
-                            <div class="users-modal__section">
-                                <div class="users-modal__section-title">School access</div>
-                                <label class="users-radio">
-                                    <input type="radio" name="create-access" [checked]="createSchoolAccess() === 'all'"
-                                        (change)="createSchoolAccess.set('all')" />
-                                    <span>All schools</span>
-                                </label>
-                                <label class="users-radio">
-                                    <input type="radio" name="create-access" [checked]="createSchoolAccess() === 'selected'"
-                                        (change)="createSchoolAccess.set('selected')" />
-                                    <span>Selected schools</span>
-                                </label>
-                                <div class="users-school-list" *ngIf="createSchoolAccess() === 'selected'">
-                                    <mb-checkbox
-                                        *ngFor="let name of activeSchoolNames()"
-                                        [checked]="createSelectedSchools().includes(name)"
-                                        (checkedChange)="toggleCreateSchoolSelection(name, $event)"
-                                    >{{ name }}</mb-checkbox>
+                                        <div class="users-modal__section">
+                                            <div class="users-modal__section-title">Employment details</div>
+                                            <mb-form-field label="Job title" [controlId]="'edit-user-job'">
+                                                <mb-input id="edit-user-job" [value]="editJobTitle()"
+                                                    (valueChange)="editJobTitle.set($event)"></mb-input>
+                                            </mb-form-field>
+                                            <mb-form-field label="Department" [controlId]="'edit-user-dept'">
+                                                <mb-input id="edit-user-dept" [value]="editDepartment()"
+                                                    (valueChange)="editDepartment.set($event)"></mb-input>
+                                            </mb-form-field>
+                                            <mb-form-field label="Staff ID (optional)"
+                                                [controlId]="'edit-user-staff-id'">
+                                                <mb-input id="edit-user-staff-id" [value]="editStaffId()"
+                                                    (valueChange)="editStaffId.set($event)"></mb-input>
+                                            </mb-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="users-modal__footer">
+                                        <div class="users-modal__hint">Changes are saved immediately.</div>
+                                        <div class="users-modal__actions">
+                                            <mb-button variant="secondary" (click)="closeEditUser()">Cancel</mb-button>
+                                            <mb-button variant="primary"
+                                                [disabled]="editTouched() && !editName().trim()"
+                                                (click)="saveUserEdits()">
+                                                Save changes
+                                            </mb-button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="users-modal__section">
-                                <div class="users-modal__section-title">Employment details</div>
-                                <mb-form-field label="Job title" [controlId]="'create-user-job'">
-                                    <mb-input id="create-user-job" [value]="createJobTitle()"
-                                        (valueChange)="createJobTitle.set($event)"></mb-input>
-                                </mb-form-field>
-                                <mb-form-field label="Department" [controlId]="'create-user-dept'">
-                                    <mb-input id="create-user-dept" [value]="createDepartment()"
-                                        (valueChange)="createDepartment.set($event)"></mb-input>
-                                </mb-form-field>
-                                <mb-form-field label="Staff ID (optional)" [controlId]="'create-user-staff-id'">
-                                    <mb-input id="create-user-staff-id" [value]="createStaffId()"
-                                        (valueChange)="createStaffId.set($event)"></mb-input>
-                                </mb-form-field>
+                            <div class="users-modal" *ngIf="isViewUserModalOpen()" role="presentation">
+                                <div class="users-modal__backdrop"></div>
+                                <div class="users-modal__dialog" role="dialog" aria-modal="true"
+                                    aria-labelledby="view-user-title" tabindex="0" (keydown.escape)="closeViewUser()">
+                                    <div class="users-modal__header">
+                                        <div>
+                                            <div id="view-user-title" class="users-modal__title">User details</div>
+                                            <div class="users-modal__subtitle">Review identity, access, and status.
+                                            </div>
+                                        </div>
+                                        <button type="button" class="users-modal__close" (click)="closeViewUser()"
+                                            aria-label="Close dialog">×</button>
+                                    </div>
+                                    <div class="users-modal__body" *ngIf="viewUser() as user">
+                                        <div class="users-view">
+                                            <div class="users-view__name">{{ user.name || 'Pending name' }}</div>
+                                            <div class="users-view__email">{{ user.email }}</div>
+                                            <div class="users-view__row">
+                                                <div class="users-view__label">Role</div>
+                                                <div class="users-view__value">{{ user.role }}</div>
+                                            </div>
+                                            <div class="users-view__row">
+                                                <div class="users-view__label">School access</div>
+                                                <div class="users-view__value">{{ schoolAccessLabel(user) }}</div>
+                                            </div>
+                                            <div class="users-view__row">
+                                                <div class="users-view__label">Status</div>
+                                                <div class="users-view__value">{{ user.status }}</div>
+                                            </div>
+                                            <div class="users-view__row" *ngIf="user.lastLogin">
+                                                <div class="users-view__label">Last login</div>
+                                                <div class="users-view__value">{{ user.lastLogin }}</div>
+                                            </div>
+                                            <div class="users-view__row" *ngIf="user.createdAt">
+                                                <div class="users-view__label">Created</div>
+                                                <div class="users-view__value">{{ user.createdAt | date:'mediumDate' }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="users-modal__footer" *ngIf="viewUser() as user">
+                                        <div class="users-modal__actions">
+                                            <mb-button variant="secondary" (click)="closeViewUser()">Close</mb-button>
+                                            <mb-button variant="primary"
+                                                (click)="openEditUser(getUserRowIndex(user)); closeViewUser()">
+                                                Edit
+                                            </mb-button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="users-modal" *ngIf="isCreateUserModalOpen()" role="presentation">
+                                <div class="users-modal__backdrop"></div>
+                                <div class="users-modal__dialog" role="dialog" aria-modal="true"
+                                    aria-labelledby="create-user-title" tabindex="0"
+                                    (keydown.escape)="closeCreateUserModal()">
+                                    <div class="users-modal__header">
+                                        <div>
+                                            <div id="create-user-title" class="users-modal__title">Create user</div>
+                                            <div class="users-modal__subtitle">Create an account manually for this
+                                                workspace.</div>
+                                        </div>
+                                        <button type="button" class="users-modal__close"
+                                            (click)="closeCreateUserModal()" aria-label="Close dialog">×</button>
+                                    </div>
+                                    <div class="users-modal__body">
+                                        <mb-form-field label="Full name" [controlId]="'create-user-name'"
+                                            [error]="createTouched() && !createName().trim() ? 'Name is required.' : ''">
+                                            <mb-input id="create-user-name" [value]="createName()"
+                                                (valueChange)="createName.set($event)"
+                                                (blur)="createTouched.set(true)"></mb-input>
+                                        </mb-form-field>
+                                        <mb-form-field label="Email" [controlId]="'create-user-email'"
+                                            [error]="createEmailError()">
+                                            <mb-input id="create-user-email" [value]="createEmail()"
+                                                (valueChange)="createEmail.set($event)"
+                                                (blur)="createTouched.set(true)"></mb-input>
+                                        </mb-form-field>
+                                        <mb-form-field label="Role" [controlId]="'create-user-role'">
+                                            <mb-role-selector [value]="createRoleIds()" [label]="''"
+                                                [placeholder]="'Select role…'" [multiple]="true" [maxVisibleChips]="3"
+                                                (change)="handleCreateRoleChange($event)"></mb-role-selector>
+                                        </mb-form-field>
+
+                                        <div class="users-modal__section">
+                                            <div class="users-modal__section-title">School access</div>
+                                            <label class="users-radio">
+                                                <input type="radio" name="create-access"
+                                                    [checked]="createSchoolAccess() === 'all'"
+                                                    (change)="createSchoolAccess.set('all')" />
+                                                <span>All schools</span>
+                                            </label>
+                                            <label class="users-radio">
+                                                <input type="radio" name="create-access"
+                                                    [checked]="createSchoolAccess() === 'selected'"
+                                                    (change)="createSchoolAccess.set('selected')" />
+                                                <span>Selected schools</span>
+                                            </label>
+                                            <div class="users-school-list" *ngIf="createSchoolAccess() === 'selected'">
+                                                <mb-checkbox *ngFor="let name of activeSchoolNames()"
+                                                    [checked]="createSelectedSchools().includes(name)"
+                                                    (checkedChange)="toggleCreateSchoolSelection(name, $event)">{{ name
+                                                    }}</mb-checkbox>
+                                            </div>
+                                        </div>
+
+                                        <div class="users-modal__section">
+                                            <div class="users-modal__section-title">Employment details</div>
+                                            <mb-form-field label="Job title" [controlId]="'create-user-job'">
+                                                <mb-input id="create-user-job" [value]="createJobTitle()"
+                                                    (valueChange)="createJobTitle.set($event)"></mb-input>
+                                            </mb-form-field>
+                                            <mb-form-field label="Department" [controlId]="'create-user-dept'">
+                                                <mb-input id="create-user-dept" [value]="createDepartment()"
+                                                    (valueChange)="createDepartment.set($event)"></mb-input>
+                                            </mb-form-field>
+                                            <mb-form-field label="Staff ID (optional)"
+                                                [controlId]="'create-user-staff-id'">
+                                                <mb-input id="create-user-staff-id" [value]="createStaffId()"
+                                                    (valueChange)="createStaffId.set($event)"></mb-input>
+                                            </mb-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="users-modal__footer">
+                                        <div class="users-modal__actions">
+                                            <mb-button variant="secondary"
+                                                (click)="closeCreateUserModal()">Cancel</mb-button>
+                                            <mb-button variant="primary" [disabled]="!createCanSubmit()"
+                                                (click)="saveCreateUser()">
+                                                Create user
+                                            </mb-button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="users-modal__footer">
-                            <div class="users-modal__actions">
-                                <mb-button variant="secondary" (click)="closeCreateUserModal()">Cancel</mb-button>
-                                <mb-button variant="primary"
-                                    [disabled]="!createCanSubmit()"
-                                    (click)="saveCreateUser()">
-                                    Create user
-                                </mb-button>
+
+                        <div class="setup-body" *ngIf="step() === 7">
+                            <div class="setup-section">
+                                <h2>Review and activate</h2>
+                                <p>Confirm these details before finishing setup.</p>
+
+                                <div class="review-grid">
+                                    <div class="review-card">
+                                        <div class="review-title">Schools</div>
+                                        <div class="review-value">{{ schoolRows().length }} school(s)</div>
+                                        <ul>
+                                            <li *ngFor="let row of schoolRows()">{{ row.name }}</li>
+                                        </ul>
+                                        <button type="button" class="review-link" (click)="goToStep(1)">Edit</button>
+                                    </div>
+                                    <div class="review-card">
+                                        <div class="review-title">Academic levels</div>
+                                        <div class="review-value">{{ levels().length }} levels</div>
+                                        <button type="button" class="review-link" (click)="goToStep(4)">Edit</button>
+                                    </div>
+                                    <div class="review-card">
+                                        <div class="review-title">Grading model</div>
+                                        <div class="review-value">{{ gradingModel() | titlecase }}</div>
+                                        <button type="button" class="review-link" (click)="goToStep(6)">Edit</button>
+                                    </div>
+                                    <div class="review-card">
+                                        <div class="review-title">Users</div>
+                                        <div class="review-value">{{ userCount() }} user(s)</div>
+                                        <button type="button" class="review-link" (click)="goToStep(2)">Edit</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="setup-actions">
+                                <mb-button variant="secondary" (click)="back()">Back</mb-button>
+                                <mb-button variant="primary" [loading]="isSaving()" (click)="next()">Finish
+                                    setup</mb-button>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="setup-body" *ngIf="step() === 7">
-                <div class="setup-section">
-                    <h2>Review and activate</h2>
-                    <p>Confirm these details before finishing setup.</p>
-
-                    <div class="review-grid">
-                        <div class="review-card">
-                            <div class="review-title">Schools</div>
-                            <div class="review-value">{{ schoolRows().length }} school(s)</div>
-                            <ul>
-                                <li *ngFor="let row of schoolRows()">{{ row.name }}</li>
-                            </ul>
-                            <button type="button" class="review-link" (click)="goToStep(1)">Edit</button>
-                        </div>
-                        <div class="review-card">
-                            <div class="review-title">Academic levels</div>
-                            <div class="review-value">{{ levels().length }} levels</div>
-                            <button type="button" class="review-link" (click)="goToStep(4)">Edit</button>
-                        </div>
-                        <div class="review-card">
-                            <div class="review-title">Grading model</div>
-                            <div class="review-value">{{ gradingModel() | titlecase }}</div>
-                            <button type="button" class="review-link" (click)="goToStep(6)">Edit</button>
-                        </div>
-                        <div class="review-card">
-                            <div class="review-title">Users</div>
-                            <div class="review-value">{{ userCount() }} user(s)</div>
-                            <button type="button" class="review-link" (click)="goToStep(2)">Edit</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="setup-actions">
-                    <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                    <mb-button variant="primary" [loading]="isSaving()" (click)="next()">Finish setup</mb-button>
-                </div>
-            </div>
 
                     </mb-card>
                 </div>

@@ -7,6 +7,22 @@
     box-shadow: var(--mb-shadow-2);
 }
 
+.mb-popover-panel {
+    z-index: var(--mb-layer-popover);
+}
+
+.mb-popover-panel--above-modal {
+    z-index: calc(var(--mb-layer-modal) + 1);
+}
+
+.mb-popover--plain {
+    min-width: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
 .mb-popover-backdrop {
     background: transparent;
 }
