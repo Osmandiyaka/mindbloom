@@ -414,12 +414,64 @@
                                             </div>
 
                                             <div *ngIf="activeOrgUnitTab() === 'roles'" class="ou-roles">
-                                                <div class="ou-empty ou-empty--inline">
-                                                    <div class="ou-empty__title">No roles assigned</div>
-                                                    <div class="ou-empty__text">Assign roles to inherit access across
-                                                        child
-                                                        units.</div>
+                                                <div class="ou-toolbar">
+                                                    <div class="ou-search">
+                                                        <mb-input [value]="orgUnitRoleSearch()"
+                                                            (valueChange)="orgUnitRoleSearch.set($event)"
+                                                            placeholder="Search roles..."></mb-input>
+                                                    </div>
+                                                    <mb-button class="ou-action-btn" variant="primary"
+                                                        (click)="openAssignRoles()">Add roles</mb-button>
                                                 </div>
+
+                                                <div class="ou-assign" *ngIf="assignRolesOpen()">
+                                                    <div class="ou-assign__title">Assign roles</div>
+                                                    <div class="ou-assign__selector">
+                                                        <mb-role-selector [value]="assignRoleIds()" label=""
+                                                            placeholder="Select roles..."
+                                                            (change)="handleAssignRoleChange($event)">
+                                                        </mb-role-selector>
+                                                    </div>
+                                                    <div class="ou-assign__actions">
+                                                        <mb-button variant="secondary"
+                                                            (click)="cancelAssignRoles()">Cancel</mb-button>
+                                                        <mb-button variant="primary"
+                                                            (click)="saveAssignRoles()">Save</mb-button>
+                                                    </div>
+                                                </div>
+
+                                                <ng-container
+                                                    *ngIf="selectedOrgUnitRoles().length; else ouRolesEmpty">
+                                                    <div class="ou-roles-table">
+                                                        <div class="ou-roles-table__header">
+                                                            <div>Role</div>
+                                                            <div>Description</div>
+                                                            <div class="ou-roles-table__actions">Actions</div>
+                                                        </div>
+                                                        <div class="ou-roles-table__row"
+                                                            *ngFor="let role of selectedOrgUnitRoles(); trackBy: trackOrgUnitRole">
+                                                            <div class="ou-roles-table__name">
+                                                                {{ role.name }}
+                                                            </div>
+                                                            <div class="ou-roles-table__description">
+                                                                {{ role.description || '—' }}
+                                                            </div>
+                                                            <div class="ou-roles-table__actions">
+                                                                <button type="button" class="ou-row-action"
+                                                                    (click)="removeRoleFromOrgUnit(role)">
+                                                                    Remove
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </ng-container>
+                                                <ng-template #ouRolesEmpty>
+                                                    <div class="ou-empty ou-empty--inline">
+                                                        <div class="ou-empty__text">
+                                                            Assign roles to inherit access across child units.
+                                                        </div>
+                                                    </div>
+                                                </ng-template>
                                                 <div class="ou-helper">
                                                     Roles assigned here inherit to child units. Add overrides at
                                                     specific

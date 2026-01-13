@@ -55,3 +55,9 @@
 ## 10) Optional enterprise upgrade (high impact, still minimal)
 - Prompt 18 — Add unit context line
   - Under the right panel title, add a small context chip row: “Path: Organization → Finance” in 12px muted, truncated if long. Keep it subtle and not interactive.
+
+## 11) Roles assignment (mirror Members UX)
+- Add Roles toolbar with search + primary “Add roles” action.
+- Add Assign roles panel using `mb-role-selector`, with Save/Cancel actions.
+- Add Roles table with Role/Description/Actions columns, remove action per row.
+- Add empty state + inheritance helper text consistent with Members styling.

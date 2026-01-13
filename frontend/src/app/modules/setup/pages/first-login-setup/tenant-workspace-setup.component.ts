@@ -55,6 +55,12 @@ interface UserRow {
 type OrgUnitStatus = 'Active' | 'Inactive';
 type OrgUnitType = 'District' | 'School' | 'Division' | 'Department' | 'Grade' | 'Section' | 'Custom';
 
+type OrgUnitRole = {
+    id: string;
+    name: string;
+    description?: string;
+};
+
 interface OrgUnit {
     id: string;
     name: string;
@@ -72,6 +78,7 @@ interface FirstLoginSetupData {
     departments?: string[];
     orgUnits?: OrgUnit[];
     orgUnitMemberIds?: Record<string, string[]>;
+    orgUnitRoles?: Record<string, OrgUnitRole[]>;
     levelsTemplate?: 'k12' | 'primary_secondary' | 'custom';
     levels?: string[];
     classes?: Array<{ name: string; level: string; sections: string }>;
@@ -141,10 +148,12 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     orgUnits = signal<OrgUnit[]>([]);
     orgUnitMemberIds = signal<Record<string, string[]>>({});
+    orgUnitRoles = signal<Record<string, OrgUnitRole[]>>({});
     activeOrgUnitId = signal<string | null>(null);
     expandedOrgUnitIds = signal<string[]>([]);
     activeOrgUnitTab = signal<'members' | 'roles'>('members');
     orgUnitMemberSearch = signal('');
+    orgUnitRoleSearch = signal('');
     orgUnitFormOpen = signal(false);
     orgUnitFormName = signal('');
     orgUnitFormType = signal<OrgUnitType>('Department');
@@ -152,6 +161,9 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     orgUnitFormError = signal('');
     assignMembersOpen = signal(false);
     assignMemberIds = signal<string[]>([]);
+    assignRolesOpen = signal(false);
+    assignRoleIds = signal<string[]>([]);
+    assignRoleDraft = signal<OrgUnitRole[]>([]);
 
     levelsTemplate = signal<'k12' | 'primary_secondary' | 'custom'>('k12');
     levels = signal<string[]>(this.defaultLevels('k12'));
@@ -235,6 +247,17 @@ export class TenantWorkspaceSetupComponent implements OnInit {
                 user.email.toLowerCase().includes(search) ||
                 user.role.toLowerCase().includes(search)
             );
+        });
+    });
+    readonly selectedOrgUnitRoles = computed(() => {
+        const activeId = this.activeOrgUnitId();
+        if (!activeId) return [];
+        const roles = this.orgUnitRoles()[activeId] || [];
+        const search = this.orgUnitRoleSearch().trim().toLowerCase();
+        if (!search) return roles;
+        return roles.filter(role => {
+            const haystack = [role.name, role.description].filter(Boolean).join(' ').toLowerCase();
+            return haystack.includes(search);
         });
     });
 
@@ -631,6 +654,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     trackOrgUnit = (_: number, node: OrgUnitNode) => node.id;
     trackUserRow = (_: number, user: UserRow) => user.id;
+    trackOrgUnitRole = (_: number, role: OrgUnitRole) => role.id;
     orgUnitMemberRowKey = (row: UserRow) => row.id;
 
     onSchoolFormNameChange(value: string): void {
@@ -789,6 +813,55 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.orgUnitMemberIds.update(map => ({
             ...map,
             [activeId]: (map[activeId] || []).filter(id => id !== user.id)
+        }));
+    }
+
+    openAssignRoles(): void {
+        const activeId = this.activeOrgUnitId();
+        if (!activeId) return;
+        const currentRoles = this.orgUnitRoles()[activeId] || [];
+        this.assignRoleIds.set(currentRoles.map(role => role.id));
+        this.assignRoleDraft.set(currentRoles);
+        this.assignRolesOpen.set(true);
+    }
+
+    cancelAssignRoles(): void {
+        this.assignRolesOpen.set(false);
+        this.assignRoleDraft.set([]);
+    }
+
+    handleAssignRoleChange(event: { ids: string[]; roles?: OrgUnitRole[] }): void {
+        this.assignRoleIds.set(event.ids);
+        if (event.roles && event.roles.length) {
+            const normalized = event.roles.map(role => ({
+                id: role.id,
+                name: role.name,
+                description: role.description
+            }));
+            this.assignRoleDraft.set(normalized);
+            return;
+        }
+        const fallback = new Map(this.assignRoleDraft().map(role => [role.id, role]));
+        const next = event.ids.map(id => fallback.get(id) ?? { id, name: id });
+        this.assignRoleDraft.set(next);
+    }
+
+    saveAssignRoles(): void {
+        const activeId = this.activeOrgUnitId();
+        if (!activeId) return;
+        this.orgUnitRoles.update(map => ({
+            ...map,
+            [activeId]: this.assignRoleDraft()
+        }));
+        this.assignRolesOpen.set(false);
+    }
+
+    removeRoleFromOrgUnit(role: OrgUnitRole): void {
+        const activeId = this.activeOrgUnitId();
+        if (!activeId) return;
+        this.orgUnitRoles.update(map => ({
+            ...map,
+            [activeId]: (map[activeId] || []).filter(item => item.id !== role.id)
         }));
     }
 
@@ -1174,6 +1247,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
                 this.schoolRows();
                 this.orgUnits();
                 this.orgUnitMemberIds();
+                this.orgUnitRoles();
                 this.levels();
                 this.levelsTemplate();
                 this.classes();
@@ -1203,6 +1277,9 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         if (data.orgUnitMemberIds) {
             this.orgUnitMemberIds.set(data.orgUnitMemberIds);
         }
+        if (data.orgUnitRoles) {
+            this.orgUnitRoles.set(data.orgUnitRoles);
+        }
         this.levelsTemplate.set(data.levelsTemplate || 'k12');
         this.levels.set(data.levels?.length ? data.levels : this.defaultLevels(this.levelsTemplate()));
         this.classes.set(data.classes?.length ? data.classes : this.classes());
@@ -1225,6 +1302,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
                 schoolRows: this.schoolRows(),
                 orgUnits: this.orgUnits(),
                 orgUnitMemberIds: this.orgUnitMemberIds(),
+                orgUnitRoles: this.orgUnitRoles(),
                 levelsTemplate: this.levelsTemplate(),
                 levels: this.levels(),
                 classes: this.classes(),
