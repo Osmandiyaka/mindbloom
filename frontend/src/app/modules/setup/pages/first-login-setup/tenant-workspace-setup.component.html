@@ -485,6 +485,74 @@
                                         </ng-container>
                                     </div>
                                 </ng-template>
+
+                                <mb-modal [open]="orgUnitFormOpen()" title="Add organizational unit" size="md"
+                                    [hasFooter]="true" (closed)="requestCloseOrgUnitForm()">
+                                    <div class="ou-modal">
+                                        <div class="ou-modal__subtitle" *ngIf="orgUnitFormParentId(); else ouRootSubtitle">
+                                            Create a child unit under {{ selectedOrgUnit()?.name || 'Selected unit' }}.
+                                        </div>
+                                        <ng-template #ouRootSubtitle>
+                                            <div class="ou-modal__subtitle">Create a new root unit for your organization.</div>
+                                        </ng-template>
+
+                                        <div class="ou-modal__section">
+                                            <div class="ou-modal__section-label">Parent unit</div>
+                                            <div class="ou-modal__context-value">
+                                                {{ selectedOrgUnit()?.name || 'Organization' }}
+                                            </div>
+                                        </div>
+
+                                        <div class="ou-modal__section">
+                                            <div class="ou-modal__section-label">Identity</div>
+                                            <div class="ou-modal__fields">
+                                                <mb-form-field label="Unit name" [controlId]="'org-unit-name'">
+                                                    <mb-input id="org-unit-name" [value]="orgUnitFormName()"
+                                                        (valueChange)="orgUnitFormName.set($event)">
+                                                    </mb-input>
+                                                </mb-form-field>
+                                                <mb-form-field label="Unit type" [controlId]="'org-unit-type'">
+                                                    <mb-select id="org-unit-type" [value]="orgUnitFormType()"
+                                                        (valueChange)="setOrgUnitFormType($event)">
+                                                        <option *ngFor="let type of orgUnitTypes" [value]="type">
+                                                            {{ type }}
+                                                        </option>
+                                                    </mb-select>
+                                                </mb-form-field>
+                                            </div>
+                                            <div class="ou-modal__helper">Used for access control and reporting.</div>
+                                        </div>
+
+                                        <div class="ou-modal__section">
+                                            <div class="ou-modal__section-label">Status</div>
+                                            <div class="ou-modal__radios">
+                                                <label class="ou-modal__radio">
+                                                    <input type="radio" name="org-unit-status" value="Active"
+                                                        [checked]="orgUnitFormStatus() === 'Active'"
+                                                        (change)="orgUnitFormStatus.set('Active')" />
+                                                    <span>Active</span>
+                                                </label>
+                                                <label class="ou-modal__radio">
+                                                    <input type="radio" name="org-unit-status" value="Inactive"
+                                                        [checked]="orgUnitFormStatus() === 'Inactive'"
+                                                        (change)="orgUnitFormStatus.set('Inactive')" />
+                                                    <span>Inactive</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="ou-form__error" *ngIf="orgUnitFormError()">
+                                            {{ orgUnitFormError() }}
+                                        </div>
+                                    </div>
+
+                                    <div mbModalFooter class="ou-modal__footer">
+                                        <mb-button variant="secondary"
+                                            (click)="requestCloseOrgUnitForm()">Cancel</mb-button>
+                                        <mb-button variant="primary" (click)="saveOrgUnitForm()"
+                                            [disabled]="!orgUnitFormName().trim()">Create unit</mb-button>
+                                    </div>
+                                </mb-modal>
                             </div>
 
                             <div class="setup-footer">
@@ -645,73 +713,6 @@
                                         <li *ngFor="let row of gradingScale()">{{ row.label }} — {{ row.value }}</li>
                                     </ul>
                                 </div>
-                                <mb-modal [open]="orgUnitFormOpen()" title="Add organizational unit" size="md"
-                                    [hasFooter]="true" (closed)="requestCloseOrgUnitForm()">
-                                    <div class="ou-modal">
-                                        <div class="ou-modal__subtitle" *ngIf="orgUnitFormParentId(); else ouRootSubtitle">
-                                            Create a child unit under {{ selectedOrgUnit()?.name || 'Selected unit' }}.
-                                        </div>
-                                        <ng-template #ouRootSubtitle>
-                                            <div class="ou-modal__subtitle">Create a new root unit for your organization.</div>
-                                        </ng-template>
-
-                                        <div class="ou-modal__section">
-                                            <div class="ou-modal__section-label">Parent unit</div>
-                                            <div class="ou-modal__context-value">
-                                                {{ selectedOrgUnit()?.name || 'Organization' }}
-                                            </div>
-                                        </div>
-
-                                        <div class="ou-modal__section">
-                                            <div class="ou-modal__section-label">Identity</div>
-                                            <div class="ou-modal__fields">
-                                                <mb-form-field label="Unit name" [controlId]="'org-unit-name'">
-                                                    <mb-input id="org-unit-name" [value]="orgUnitFormName()"
-                                                        (valueChange)="orgUnitFormName.set($event)">
-                                                    </mb-input>
-                                                </mb-form-field>
-                                                <mb-form-field label="Unit type" [controlId]="'org-unit-type'">
-                                                    <mb-select id="org-unit-type" [value]="orgUnitFormType()"
-                                                        (valueChange)="setOrgUnitFormType($event)">
-                                                        <option *ngFor="let type of orgUnitTypes" [value]="type">
-                                                            {{ type }}
-                                                        </option>
-                                                    </mb-select>
-                                                </mb-form-field>
-                                            </div>
-                                            <div class="ou-modal__helper">Used for access control and reporting.</div>
-                                        </div>
-
-                                        <div class="ou-modal__section">
-                                            <div class="ou-modal__section-label">Status</div>
-                                            <div class="ou-modal__radios">
-                                                <label class="ou-modal__radio">
-                                                    <input type="radio" name="org-unit-status" value="Active"
-                                                        [checked]="orgUnitFormStatus() === 'Active'"
-                                                        (change)="orgUnitFormStatus.set('Active')" />
-                                                    <span>Active</span>
-                                                </label>
-                                                <label class="ou-modal__radio">
-                                                    <input type="radio" name="org-unit-status" value="Inactive"
-                                                        [checked]="orgUnitFormStatus() === 'Inactive'"
-                                                        (change)="orgUnitFormStatus.set('Inactive')" />
-                                                    <span>Inactive</span>
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div class="ou-form__error" *ngIf="orgUnitFormError()">
-                                            {{ orgUnitFormError() }}
-                                        </div>
-                                    </div>
-
-                                    <div mbModalFooter class="ou-modal__footer">
-                                        <mb-button variant="secondary"
-                                            (click)="requestCloseOrgUnitForm()">Cancel</mb-button>
-                                        <mb-button variant="primary" (click)="saveOrgUnitForm()"
-                                            [disabled]="!orgUnitFormName().trim()">Create unit</mb-button>
-                                    </div>
-                                </mb-modal>
                             </div>
 
                             <div class="setup-footer">
