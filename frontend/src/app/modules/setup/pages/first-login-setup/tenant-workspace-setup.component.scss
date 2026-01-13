@@ -1191,8 +1191,8 @@
 
 .setup-auto-save {
     margin-top: 12px;
-    font-size: 12px;
-    color: var(--mb-color-text-muted);
+    font-size: 11px;
+    color: color-mix(in srgb, var(--mb-color-text-muted) 80%, transparent);
 }
 
 .list-stack {
@@ -1382,7 +1382,7 @@
 .ou-layout {
     display: grid;
     grid-template-columns: minmax(260px, 1fr) minmax(420px, 2fr);
-    gap: 20px;
+    gap: 28px;
     margin-top: 20px;
 }
 
@@ -1446,7 +1446,7 @@
 .ou-canvas__meta {
     margin-top: 4px;
     font-size: 11px;
-    color: var(--mb-color-text-muted);
+    color: var(--mb-color-text-subtle);
 }
 
 .ou-canvas__actions {
@@ -1560,6 +1560,7 @@
 }
 
 .ou-tree__node:hover {
+    background: color-mix(in srgb, var(--mb-color-border) 6%, transparent);
     color: var(--mb-color-text);
 }
 
