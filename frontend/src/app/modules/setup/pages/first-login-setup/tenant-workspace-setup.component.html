@@ -410,8 +410,7 @@
                                                     </div>
                                                 </div>
 
-                                                <ng-container
-                                                    *ngIf="selectedOrgUnitRoles().length; else ouRolesEmpty">
+                                                <ng-container *ngIf="selectedOrgUnitRoles().length; else ouRolesEmpty">
                                                     <div class="ou-roles-table">
                                                         <div class="ou-roles-table__header">
                                                             <div>Role</div>
@@ -489,11 +488,13 @@
                                 <mb-modal [open]="orgUnitFormOpen()" title="Add organizational unit" size="md"
                                     [hasFooter]="true" (closed)="requestCloseOrgUnitForm()">
                                     <div class="ou-modal">
-                                        <div class="ou-modal__subtitle" *ngIf="orgUnitFormParentId(); else ouRootSubtitle">
+                                        <div class="ou-modal__subtitle"
+                                            *ngIf="orgUnitFormParentId(); else ouRootSubtitle">
                                             Create a child unit under {{ selectedOrgUnit()?.name || 'Selected unit' }}.
                                         </div>
                                         <ng-template #ouRootSubtitle>
-                                            <div class="ou-modal__subtitle">Create a new root unit for your organization.</div>
+                                            <div class="ou-modal__subtitle">Create a new root unit for your
+                                                organization.</div>
                                         </ng-template>
 
                                         <div class="ou-modal__section">
@@ -834,56 +835,77 @@
                             <div class="users-modal" *ngIf="isInviteModalOpen()" role="presentation">
                                 <div class="users-modal__backdrop"></div>
                                 <div class="users-modal__dialog" role="dialog" aria-modal="true"
-                                    aria-labelledby="invite-modal-title" tabindex="0"
-                                    (keydown.escape)="closeInviteModal()">
+                                    aria-labelledby="invite-modal-title" tabindex="0" cdkTrapFocus
+                                    cdkTrapFocusAutoCapture (keydown.escape)="closeInviteModal()">
                                     <div class="users-modal__header">
                                         <div>
                                             <div id="invite-modal-title" class="users-modal__title">Invite users</div>
-                                            <div class="users-modal__subtitle">They’ll receive an email to set their
-                                                password.</div>
+                                            <div class="users-modal__subtitle">Users will receive an email to set up
+                                                their account.</div>
                                         </div>
                                         <button type="button" class="users-modal__close" (click)="closeInviteModal()"
                                             aria-label="Close dialog">×</button>
                                     </div>
-                                    <div class="users-modal__body">
+                                    <div class="users-modal__body" (keydown)="handleInviteKeydown($event)">
                                         <mb-form-field label="Email addresses" [controlId]="'invite-emails'"
                                             [error]="inviteTouched() && inviteEmailList().length === 0 ? 'Add at least one email.' : (inviteInvalidEmails().length ? 'Remove invalid email addresses.' : (inviteDuplicateEmails().length ? 'Remove duplicate email addresses.' : ''))"
-                                            hint="Paste one per line or separate with commas.">
-                                            <mb-textarea id="invite-emails" [value]="inviteEmails()"
-                                                (valueChange)="inviteEmails.set($event)"
-                                                (blur)="inviteTouched.set(true)"></mb-textarea>
+                                            hint="Enter one or more email addresses. Press Enter or comma to add.">
+                                            <div class="users-email-input">
+                                                <div class="users-email-input__list">
+                                                    <span class="users-token"
+                                                        *ngFor="let email of inviteEmailList(); let i = index; trackBy: trackInviteEmail"
+                                                        [class.is-invalid]="isInviteEmailInvalid(email) || isInviteEmailDuplicate(email, i)"
+                                                        [attr.title]="isInviteEmailInvalid(email) ? 'Invalid email' : (isInviteEmailDuplicate(email, i) ? 'Duplicate email' : null)">
+                                                        <span class="users-token__text">{{ email }}</span>
+                                                        <button type="button" class="users-token__remove"
+                                                            (click)="removeInviteEmail(i)"
+                                                            [attr.aria-label]="'Remove ' + email">
+                                                            ×
+                                                        </button>
+                                                    </span>
+                                                    <mb-input class="users-email-input__field" id="invite-emails"
+                                                        [value]="inviteEmailInput()"
+                                                        (valueChange)="inviteEmailInput.set($event)"
+                                                        (keydown)="onInviteEmailKeydown($event)"
+                                                        (paste)="onInviteEmailPaste($event)"
+                                                        (blurEvent)="onInviteEmailBlur()" cdkFocusInitial
+                                                        placeholder="name@company.com"></mb-input>
+                                                </div>
+                                            </div>
                                         </mb-form-field>
 
-                                        <mb-form-field label="Default role" [controlId]="'invite-role'"
+                                        <mb-form-field label="Assigned role" [controlId]="'invite-role'"
                                             hint="You can change roles later.">
-                                            <mb-select id="invite-role" [value]="inviteRole()"
-                                                (valueChange)="setInviteRole($event)">
-                                                <option value="Owner">Owner</option>
-                                                <option value="Administrator">Administrator</option>
-                                                <option value="Staff">Staff</option>
-                                                <option value="Teacher">Teacher</option>
-                                            </mb-select>
+                                            <mb-role-selector id="invite-role" [value]="inviteRoleIds()" [label]="''"
+                                                [multiple]="true" placeholder="Select role..."
+                                                (change)="handleInviteRoleChange($event)"></mb-role-selector>
                                         </mb-form-field>
 
                                         <div class="users-modal__section">
                                             <div class="users-modal__section-title">School access</div>
-                                            <label class="users-radio">
-                                                <input type="radio" name="invite-access"
-                                                    [checked]="inviteSchoolAccess() === 'all'"
-                                                    (change)="inviteSchoolAccess.set('all')" />
-                                                <span>All schools</span>
-                                            </label>
-                                            <label class="users-radio">
-                                                <input type="radio" name="invite-access"
-                                                    [checked]="inviteSchoolAccess() === 'selected'"
-                                                    (change)="inviteSchoolAccess.set('selected')" />
-                                                <span>Selected schools</span>
-                                            </label>
-                                            <div class="users-school-list" *ngIf="inviteSchoolAccess() === 'selected'">
-                                                <mb-checkbox *ngFor="let name of activeSchoolNames()"
-                                                    [checked]="inviteSelectedSchools().includes(name)"
-                                                    (checkedChange)="toggleInviteSchoolSelection(name, $event)">{{ name
-                                                    }}</mb-checkbox>
+                                            <div class="users-radio-group users-radio-group--compact">
+                                                <label class="users-radio">
+                                                    <input type="radio" name="invite-access"
+                                                        [checked]="inviteSchoolAccess() === 'all'"
+                                                        (change)="inviteSchoolAccess.set('all')" />
+                                                    <span>All schools</span>
+                                                    <span class="users-radio__hint">Recommended</span>
+                                                </label>
+                                                <label class="users-radio">
+                                                    <input type="radio" name="invite-access"
+                                                        [checked]="inviteSchoolAccess() === 'selected'"
+                                                        (change)="inviteSchoolAccess.set('selected')" />
+                                                    <span>Selected schools</span>
+                                                </label>
+                                            </div>
+                                            <div class="users-school-list"
+                                                [class.is-open]="inviteSchoolAccess() === 'selected'">
+                                                <div class="users-school-list__content">
+                                                    <mb-checkbox *ngFor="let name of activeSchoolNames()"
+                                                        [checked]="inviteSelectedSchools().includes(name)"
+                                                        (checkedChange)="toggleInviteSchoolSelection(name, $event)">{{
+                                                        name }}</mb-checkbox>
+                                                </div>
                                             </div>
                                             <div class="users-inline-error"
                                                 *ngIf="inviteTouched() && inviteSchoolAccess() === 'selected' && inviteSelectedSchools().length === 0">
@@ -892,22 +914,23 @@
                                         </div>
 
                                         <button type="button" class="users-link" (click)="toggleInviteMessage()">
-                                            {{ inviteMessageOpen() ? 'Hide message' : 'Add a message' }}
+                                            {{ inviteMessageOpen() ? 'Hide message' : '+ Add optional message' }}
                                         </button>
-                                        <mb-form-field *ngIf="inviteMessageOpen()" label="Message"
+                                        <mb-form-field *ngIf="inviteMessageOpen()" label="Optional message"
                                             [controlId]="'invite-message'">
                                             <mb-textarea id="invite-message" [value]="inviteMessage()"
-                                                (valueChange)="inviteMessage.set($event)"></mb-textarea>
+                                                (valueChange)="inviteMessage.set($event)"
+                                                placeholder="Add a short note to include in the invitation email."></mb-textarea>
                                         </mb-form-field>
                                     </div>
                                     <div class="users-modal__footer">
-                                        <div class="users-modal__hint">Invites can be resent anytime.</div>
+                                        <div class="users-modal__hint">Invitations can be resent or revoked later.</div>
                                         <div class="users-modal__actions">
                                             <mb-button variant="secondary"
                                                 (click)="closeInviteModal()">Cancel</mb-button>
                                             <mb-button variant="primary" [disabled]="!inviteCanSubmit()"
-                                                (click)="sendInvites()">
-                                                Send invites
+                                                [loading]="inviteSending()" (click)="sendInvites()">
+                                                Send invitations
                                             </mb-button>
                                         </div>
                                     </div>
@@ -1091,16 +1114,16 @@
                                             <div class="users-modal__section-title">School access</div>
                                             <div class="users-radio-group">
                                                 <label class="users-radio">
-                                                <input type="radio" name="create-access"
-                                                    [checked]="createSchoolAccess() === 'all'"
-                                                    (change)="createSchoolAccess.set('all')" />
-                                                <span>Access all schools</span>
+                                                    <input type="radio" name="create-access"
+                                                        [checked]="createSchoolAccess() === 'all'"
+                                                        (change)="createSchoolAccess.set('all')" />
+                                                    <span>Access all schools</span>
                                                 </label>
                                                 <label class="users-radio">
-                                                <input type="radio" name="create-access"
-                                                    [checked]="createSchoolAccess() === 'selected'"
-                                                    (change)="createSchoolAccess.set('selected')" />
-                                                <span>Limit to selected schools</span>
+                                                    <input type="radio" name="create-access"
+                                                        [checked]="createSchoolAccess() === 'selected'"
+                                                        (change)="createSchoolAccess.set('selected')" />
+                                                    <span>Limit to selected schools</span>
                                                 </label>
                                             </div>
                                             <div class="users-school-list" *ngIf="createSchoolAccess() === 'selected'">

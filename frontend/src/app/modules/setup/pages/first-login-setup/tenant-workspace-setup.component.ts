@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { A11yModule } from '@angular/cdk/a11y';
 import {
     MbAlertComponent,
     MbButtonComponent,
@@ -96,6 +97,7 @@ interface FirstLoginSetupData {
         CommonModule,
         FormsModule,
         RouterModule,
+        A11yModule,
         MbCardComponent,
         MbButtonComponent,
         MbFormFieldComponent,
@@ -186,12 +188,15 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     isInviteModalOpen = signal(false);
     inviteEmails = signal('');
+    inviteEmailInput = signal('');
     inviteRole = signal<UserRole>('Staff');
+    inviteRoleIds = signal<string[]>([]);
     inviteSchoolAccess = signal<'all' | 'selected'>('all');
     inviteSelectedSchools = signal<string[]>([]);
     inviteMessage = signal('');
     inviteMessageOpen = signal(false);
     inviteTouched = signal(false);
+    inviteSending = signal(false);
 
     isEditUserModalOpen = signal(false);
     editUserIndex = signal<number | null>(null);
@@ -924,18 +929,23 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     openInviteModal(): void {
         this.inviteEmails.set('');
+        this.inviteEmailInput.set('');
         this.inviteRole.set('Staff');
+        this.inviteRoleIds.set([this.inviteRole()]);
         this.inviteSchoolAccess.set('all');
         this.inviteSelectedSchools.set([]);
         this.inviteMessage.set('');
         this.inviteMessageOpen.set(false);
         this.inviteTouched.set(false);
+        this.inviteSending.set(false);
         this.isInviteModalOpen.set(true);
     }
 
     closeInviteModal(): void {
         this.isInviteModalOpen.set(false);
         this.inviteTouched.set(false);
+        this.inviteEmailInput.set('');
+        this.inviteSending.set(false);
     }
 
     openCreateUserModal(): void {
@@ -961,6 +971,42 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.inviteMessageOpen.set(!this.inviteMessageOpen());
     }
 
+    handleInviteKeydown(event: KeyboardEvent): void {
+        if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+            event.preventDefault();
+            if (this.inviteCanSubmit()) {
+                this.sendInvites();
+            }
+        }
+    }
+
+    onInviteEmailKeydown(event: KeyboardEvent): void {
+        if (event.key === 'Enter' || event.key === ',' || event.key === ' ') {
+            event.preventDefault();
+            this.commitInviteEmailInput();
+            return;
+        }
+        if (event.key === 'Backspace' && !this.inviteEmailInput()) {
+            const list = this.inviteEmailList();
+            if (!list.length) return;
+            this.removeInviteEmail(list.length - 1);
+        }
+    }
+
+    onInviteEmailPaste(event: ClipboardEvent): void {
+        const pasted = event.clipboardData?.getData('text') ?? '';
+        if (!pasted.trim()) return;
+        event.preventDefault();
+        this.addInviteEmails(pasted);
+        this.inviteEmailInput.set('');
+        this.inviteTouched.set(true);
+    }
+
+    onInviteEmailBlur(): void {
+        this.inviteTouched.set(true);
+        this.commitInviteEmailInput();
+    }
+
     toggleInviteSchoolSelection(name: string, checked: boolean): void {
         this.inviteSelectedSchools.update(items => {
             if (checked) return [...items, name];
@@ -969,8 +1015,11 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     }
 
     sendInvites(): void {
+        if (this.inviteSending()) return;
         this.inviteTouched.set(true);
+        this.commitInviteEmailInput();
         if (this.inviteHasErrors()) return;
+        this.inviteSending.set(true);
         const emails = this.inviteEmailList();
         const existingEmails = new Set(this.users().map(user => user.email.toLowerCase()));
         const schoolAccess = this.inviteSchoolAccess() === 'all'
@@ -997,6 +1046,44 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     setInviteRole(value: string): void {
         this.inviteRole.set(this.normalizeRole(value));
+    }
+
+    handleInviteRoleChange(event: { ids: string[]; roles?: { name: string }[] }): void {
+        this.inviteRoleIds.set(event.ids);
+        if (event.roles?.length) {
+            this.inviteRole.set(this.normalizeRole(event.roles[0].name));
+        }
+    }
+
+    isInviteEmailInvalid(email: string): boolean {
+        return !this.isValidEmail(email);
+    }
+
+    isInviteEmailDuplicate(email: string, index: number): boolean {
+        return this.inviteEmailList().indexOf(email) !== index;
+    }
+
+    trackInviteEmail(index: number, email: string): string {
+        return `${email}-${index}`;
+    }
+
+    removeInviteEmail(index: number): void {
+        const next = this.inviteEmailList().filter((_, i) => i !== index);
+        this.inviteEmails.set(next.join(', '));
+    }
+
+    private commitInviteEmailInput(): void {
+        const value = this.inviteEmailInput().trim();
+        if (!value) return;
+        this.addInviteEmails(value);
+        this.inviteEmailInput.set('');
+    }
+
+    private addInviteEmails(raw: string): void {
+        const parsed = this.parseEmailList(raw);
+        if (!parsed.length) return;
+        const next = [...this.inviteEmailList(), ...parsed];
+        this.inviteEmails.set(next.join(', '));
     }
 
     openViewUser(index: number): void {
@@ -1553,7 +1640,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     private parseEmailList(input: string): string[] {
         return input
-            .split(/[\n,;]/g)
+            .split(/[\n,;\s]+/g)
             .map(value => value.trim())
             .filter(value => value.length > 0);
     }
