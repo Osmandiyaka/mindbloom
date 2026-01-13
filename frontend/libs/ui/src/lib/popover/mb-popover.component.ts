@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, inject } from '@angular/core';
 import { ConnectedPosition, Overlay, OverlayModule, ScrollStrategy } from '@angular/cdk/overlay';
 import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 
@@ -30,7 +30,7 @@ export class MbPopoverComponent {
     private readonly overlay = inject(Overlay);
 
     @Input() open = false;
-    @Input({ required: true }) origin!: CdkOverlayOrigin;
+    @Input({ required: true }) origin!: CdkOverlayOrigin | ElementRef<HTMLElement> | HTMLElement;
     @Input() hasBackdrop = false;
     @Input() variant: 'default' | 'plain' = 'default';
     @Input() panelClass: string | string[] = 'mb-popover-panel';

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { CdkOverlayOrigin, ConnectedPosition, Overlay } from '@angular/cdk/overlay';
 import {
     Component,
     ElementRef,
@@ -9,14 +10,17 @@ import {
     OnDestroy,
     Output,
     QueryList,
+    EmbeddedViewRef,
+    TemplateRef,
     ViewChild,
     ViewChildren,
+    ViewContainerRef,
     inject
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { TemplatePortal } from '@angular/cdk/portal';
 import { Subscription } from 'rxjs';
-import { MbPopoverComponent } from '../popover/mb-popover.component';
-import { MbPopoverTriggerDirective } from '../popover/mb-popover.directive';
 import { MbTooltipDirective } from '../tooltip/mb-tooltip.directive';
 
 export type MbRoleSelectorRole = {
@@ -36,15 +40,15 @@ type RoleGroup = {
 @Component({
     selector: 'mb-role-selector',
     standalone: true,
-    imports: [CommonModule, FormsModule, MbPopoverComponent, MbPopoverTriggerDirective, MbTooltipDirective],
+    imports: [CommonModule, FormsModule, OverlayModule, MbTooltipDirective],
     template: `
         <div class="mb-role-selector" #host [class.mb-role-selector--single]="!multiple">
             <label class="mb-role-selector__label" *ngIf="label">{{ label }}</label>
             <div
                 #field
-                class="mb-role-selector__field"
-                mbPopoverTrigger
+                cdkOverlayOrigin
                 #origin="cdkOverlayOrigin"
+                class="mb-role-selector__field"
                 tabindex="0"
                 role="combobox"
                 [attr.aria-expanded]="open"
@@ -137,14 +141,7 @@ type RoleGroup = {
                 </span>
             </div>
 
-            <mb-popover
-                [open]="open"
-                [origin]="origin"
-                [hasBackdrop]="false"
-                variant="plain"
-                [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal']"
-                (closed)="close()"
-            >
+            <ng-template #overlayPanel>
                 <div
                     #popoverPanel
                     class="mb-role-selector__popover"
@@ -337,13 +334,15 @@ type RoleGroup = {
                         </button>
                     </div>
                 </div>
-            </mb-popover>
+            </ng-template>
         </div>
     `,
     styleUrls: ['./mb-role-selector.component.scss']
 })
 export class MbRoleSelectorComponent implements OnDestroy {
     private readonly http = inject(HttpClient);
+    private readonly overlay = inject(Overlay);
+    private readonly viewContainerRef = inject(ViewContainerRef);
 
     @Input() value: string[] = [];
     @Input() label = 'Roles';
@@ -361,9 +360,11 @@ export class MbRoleSelectorComponent implements OnDestroy {
 
     @ViewChild('host') host?: ElementRef<HTMLElement>;
     @ViewChild('field') field?: ElementRef<HTMLElement>;
+    @ViewChild('origin') origin?: CdkOverlayOrigin;
     @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
     @ViewChildren('roleOption') roleOptions?: QueryList<ElementRef<HTMLButtonElement>>;
     @ViewChild('popoverPanel') popoverPanel?: ElementRef<HTMLElement>;
+    @ViewChild('overlayPanel') overlayPanel?: TemplateRef<unknown>;
 
     open = false;
     loading = false;
@@ -375,11 +376,30 @@ export class MbRoleSelectorComponent implements OnDestroy {
     roles: MbRoleSelectorRole[] = [];
     fieldWidth = 360;
     private static cachedRoles: MbRoleSelectorRole[] | null = null;
+    scrollStrategy = this.overlay.scrollStrategies.reposition();
+    positions: ConnectedPosition[] = [
+        {
+            originX: 'start',
+            originY: 'bottom',
+            overlayX: 'start',
+            overlayY: 'top',
+            offsetY: 8
+        },
+        {
+            originX: 'start',
+            originY: 'top',
+            overlayX: 'start',
+            overlayY: 'bottom',
+            offsetY: -8
+        }
+    ];
     private searchTimer?: number;
     private rolesRequest?: Subscription;
     private activeIndex = -1;
     private ignoreOutsideClick = false;
     readonly skeletonRows = Array.from({ length: 5 });
+    private overlayElement?: HTMLElement;
+    private overlayView?: EmbeddedViewRef<unknown>;
 
     @HostListener('document:click', ['$event'])
     handleDocumentClick(event: MouseEvent): void {
@@ -388,7 +408,21 @@ export class MbRoleSelectorComponent implements OnDestroy {
         if (!target) return;
         if (this.host?.nativeElement.contains(target)) return;
         if (this.popoverPanel?.nativeElement.contains(target)) return;
+        if (this.overlayElement?.contains(target)) return;
         this.close();
+    }
+
+    @HostListener('window:resize')
+    handleWindowResize(): void {
+        if (!this.open || !this.overlayElement) return;
+        this.updateFieldWidth();
+        this.positionOverlay();
+    }
+
+    @HostListener('window:scroll')
+    handleWindowScroll(): void {
+        if (!this.open || !this.overlayElement) return;
+        this.positionOverlay();
     }
 
     ngOnDestroy(): void {
@@ -396,6 +430,7 @@ export class MbRoleSelectorComponent implements OnDestroy {
             window.clearTimeout(this.searchTimer);
         }
         this.rolesRequest?.unsubscribe();
+        this.detachOverlay();
     }
 
     get selectedRoles(): MbRoleSelectorRole[] {
@@ -641,6 +676,7 @@ export class MbRoleSelectorComponent implements OnDestroy {
         }
         this.open = true;
         this.updateFieldWidth();
+        this.attachOverlay();
         this.loadRoles();
         this.resetActiveIndex();
         this.ignoreOutsideClick = true;
@@ -653,6 +689,7 @@ export class MbRoleSelectorComponent implements OnDestroy {
     close(): void {
         this.open = false;
         this.activeIndex = -1;
+        this.detachOverlay();
     }
 
     private emitSelection(ids: string[]): void {
@@ -673,6 +710,9 @@ export class MbRoleSelectorComponent implements OnDestroy {
     private updateFieldWidth(): void {
         const width = this.field?.nativeElement.getBoundingClientRect().width ?? 0;
         this.fieldWidth = Math.min(480, Math.round(width || 360));
+        if (this.overlayElement) {
+            this.positionOverlay();
+        }
     }
 
     private normalizeRoles(response: unknown): MbRoleSelectorRole[] {
@@ -687,6 +727,48 @@ export class MbRoleSelectorComponent implements OnDestroy {
 
     private resetActiveIndex(): void {
         this.activeIndex = -1;
+    }
+
+    private attachOverlay(): void {
+        if (this.overlayElement || !this.overlayPanel || !this.field) return;
+        const element = document.createElement('div');
+        element.className = 'mb-role-selector__overlay mb-popover-panel mb-popover-panel--above-modal';
+        element.style.position = 'fixed';
+        element.style.zIndex = '1201';
+        element.style.pointerEvents = 'auto';
+        document.body.appendChild(element);
+
+        this.overlayView = this.viewContainerRef.createEmbeddedView(this.overlayPanel);
+        this.overlayView.rootNodes.forEach(node => element.appendChild(node));
+        this.overlayElement = element;
+        this.positionOverlay();
+    }
+
+    private positionOverlay(): void {
+        if (!this.overlayElement || !this.field) return;
+        const rect = this.field.nativeElement.getBoundingClientRect();
+        const estimatedHeight = 420;
+        const gutter = 8;
+        let top = rect.bottom + gutter;
+        if (top + estimatedHeight > window.innerHeight) {
+            top = rect.top - gutter - estimatedHeight;
+        }
+        top = Math.max(gutter, top);
+        let left = rect.left;
+        if (left + this.fieldWidth > window.innerWidth) {
+            left = Math.max(gutter, window.innerWidth - this.fieldWidth - gutter);
+        }
+        this.overlayElement.style.top = `${Math.round(top)}px`;
+        this.overlayElement.style.left = `${Math.round(left)}px`;
+        this.overlayElement.style.width = `${this.fieldWidth}px`;
+    }
+
+    private detachOverlay(): void {
+        if (!this.overlayElement) return;
+        this.overlayView?.destroy();
+        this.overlayView = undefined;
+        this.overlayElement.remove();
+        this.overlayElement = undefined;
     }
 
     private moveActive(delta: number): void {
