@@ -253,7 +253,7 @@
                                             <div class="ou-tree" role="tree">
                                                 <ng-container *ngFor="let node of orgUnitTree(); trackBy: trackOrgUnit">
                                                     <ng-container
-                                                        *ngTemplateOutlet="orgUnitNode; context: { $implicit: node }"></ng-container>
+                                                        *ngTemplateOutlet="orgUnitNode; context: { $implicit: node, depth: 0 }"></ng-container>
                                                 </ng-container>
                                             </div>
                                         </ng-container>
@@ -274,8 +274,8 @@
                                                     <div class="ou-canvas__title">{{ selectedOrgUnit()!.name }}</div>
                                                     <div class="ou-canvas__meta">{{ selectedOrgUnit()!.type }} ·
                                                         {{ selectedOrgUnit()!.status }}</div>
-                                                    <div class="ou-canvas__path">
-                                                        Path: {{ selectedOrgUnitPath() }}
+                                                    <div class="ou-breadcrumb">
+                                                        Organization / {{ selectedOrgUnitPath() }}
                                                     </div>
                                                 </div>
                                                 <div class="ou-canvas__actions">
@@ -283,7 +283,7 @@
                                                         (click)="startAddChildUnit()">Add child unit</mb-button>
                                                     <details class="ou-actions-menu" #ouActionsMenu>
                                                         <summary class="ou-actions-menu__toggle"
-                                                            aria-label="More actions">⋯</summary>
+                                                            aria-label="More actions" title="More actions">⋯</summary>
                                                         <div class="ou-actions-menu__panel">
                                                             <button type="button" class="ou-actions-menu__item"
                                                                 [disabled]="!selectedOrgUnit()"
@@ -324,13 +324,13 @@
                                                     [class.is-active]="activeOrgUnitTab() === 'members'" role="tab"
                                                     [attr.aria-selected]="activeOrgUnitTab() === 'members'"
                                                     (click)="setOrgUnitTab('members')">
-                                                    Members
+                                                    Members <span class="ou-tab__count">({{ selectedOrgUnitMemberCount() }})</span>
                                                 </button>
                                                 <button type="button" class="ou-tab"
                                                     [class.is-active]="activeOrgUnitTab() === 'roles'" role="tab"
                                                     [attr.aria-selected]="activeOrgUnitTab() === 'roles'"
                                                     (click)="setOrgUnitTab('roles')">
-                                                    Roles
+                                                    Roles <span class="ou-tab__count">({{ selectedOrgUnitRoleCount() }})</span>
                                                 </button>
                                             </div>
 
@@ -344,6 +344,9 @@
                                                     <mb-button class="ou-action-btn" variant="primary"
                                                         [disabled]="!users().length" (click)="openAssignMembers()">Add
                                                         members</mb-button>
+                                                </div>
+                                                <div class="ou-toolbar__hint">
+                                                    Members assigned here inherit this unit’s access.
                                                 </div>
 
                                                 <div class="ou-assign" *ngIf="assignMembersOpen()">
@@ -396,13 +399,15 @@
                                                             <div>{{ member.role }}</div>
                                                             <div>
                                                                 <span class="ou-status-pill"
-                                                                    [class.ou-status-pill--active]="member.status === 'Active'">
+                                                                    [class.ou-status-pill--active]="member.status === 'Active'"
+                                                                    [class.ou-status-pill--invited]="member.status === 'Invited'">
                                                                     {{ member.status }}
                                                                 </span>
                                                             </div>
                                                             <div class="ou-members-table__actions">
-                                                                <button type="button" class="ou-row-action"
-                                                                    (click)="removeMemberFromOrgUnit(member)">
+                                                                <button type="button" class="ou-row-action ou-row-action--subtle"
+                                                                    title="Remove from unit (does not delete user)"
+                                                                    (click)="confirmRemoveMemberFromOrgUnit(member)">
                                                                     Remove
                                                                 </button>
                                                             </div>
@@ -470,10 +475,12 @@
                                                     </div>
                                                 </ng-container>
                                                 <ng-template #ouRolesEmpty>
-                                                    <div class="ou-empty ou-empty--inline">
+                                                    <div class="ou-empty ou-empty--inline ou-empty--roles">
+                                                        <div class="ou-empty__title">No roles assigned</div>
                                                         <div class="ou-empty__text">
-                                                            Assign roles to inherit access across child units.
+                                                            Assign roles to control access for this unit.
                                                         </div>
+                                                        <mb-button variant="secondary" (click)="openAssignRoles()">Assign roles</mb-button>
                                                     </div>
                                                 </ng-template>
                                                 <div class="ou-helper">
@@ -495,8 +502,10 @@
                                     </div>
                                 </div>
 
-                                <ng-template #orgUnitNode let-node>
+                                <ng-template #orgUnitNode let-node let-depth="depth">
                                     <button type="button" class="ou-tree__node"
+                                        [style.--ou-depth]="depth"
+                                        [class.ou-tree__node--child]="depth > 0"
                                         [class.is-active]="activeOrgUnitId() === node.id" role="treeitem"
                                         [attr.aria-expanded]="node.children.length ? isOrgUnitExpanded(node.id) : null"
                                         (click)="selectOrgUnit(node.id)">
@@ -505,17 +514,17 @@
                                             {{ isOrgUnitExpanded(node.id) ? '▾' : '▸' }}
                                         </span>
                                         <span class="ou-tree__spacer" *ngIf="!node.children.length"></span>
+                                        <span class="ou-tree__indent" *ngIf="depth > 0 && !node.children.length">›</span>
                                         <span class="ou-tree__label">{{ node.name }}</span>
-                                        <span class="ou-tree__meta" *ngIf="node.children.length">
-                                            {{ node.children.length }} {{ node.children.length === 1 ? 'unit' : 'units'
-                                            }}
+                                        <span class="ou-tree__badge" *ngIf="node.children.length">
+                                            {{ node.children.length }}
                                         </span>
                                     </button>
                                     <div class="ou-tree__children" role="group"
                                         *ngIf="node.children.length && isOrgUnitExpanded(node.id)">
                                         <ng-container *ngFor="let child of node.children; trackBy: trackOrgUnit">
                                             <ng-container
-                                                *ngTemplateOutlet="orgUnitNode; context: { $implicit: child }"></ng-container>
+                                                *ngTemplateOutlet="orgUnitNode; context: { $implicit: child, depth: depth + 1 }"></ng-container>
                                         </ng-container>
                                     </div>
                                 </ng-template>

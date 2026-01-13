@@ -1636,7 +1636,12 @@
     cursor: pointer;
     color: var(--mb-color-text-muted);
     font-size: 18px;
-    padding: 4px 6px;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
     border-radius: 8px;
     border: 1px solid rgba(15, 23, 42, 0.08);
     background: var(--mb-color-surface);
@@ -1649,6 +1654,14 @@
 .ou-actions-menu[open] .ou-actions-menu__toggle {
     color: var(--mb-color-text);
     border-color: rgba(15, 23, 42, 0.18);
+}
+
+.ou-actions-menu__toggle:hover {
+    background: rgba(15, 23, 42, 0.04);
+}
+
+.ou-actions-menu__toggle:active {
+    background: rgba(15, 23, 42, 0.08);
 }
 
 .ou-actions-menu__panel {
@@ -1906,6 +1919,10 @@
     background: transparent;
 }
 
+.ou-empty--roles {
+    gap: 6px;
+}
+
 .ou-empty__title {
     font-weight: 600;
     color: var(--mb-color-text);
@@ -1919,7 +1936,7 @@
 .ou-tree {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     padding: 0 8px 0 0;
     margin: 0 8px 0 0;
     max-height: 420px;
@@ -1929,61 +1946,93 @@
 
 .ou-tree__node {
     display: grid;
-    grid-template-columns: 16px 1fr auto;
+    grid-template-columns: 16px 12px 1fr auto;
     align-items: center;
     gap: 8px;
-    border-left: 3px solid transparent;
+    border: 1px solid rgba(15, 23, 42, 0.08);
     background: transparent;
-    padding: 0 12px;
-    border-radius: 10px;
-    height: 44px;
+    padding: 0 12px 0 calc(12px + (var(--ou-depth, 0) * 16px));
+    border-radius: 12px;
+    min-height: 44px;
     text-align: left;
     font-size: 14px;
     font-weight: 600;
     color: #0f172a;
     cursor: pointer;
+    transition: border-color 150ms ease-out, background 150ms ease-out, color 150ms ease-out;
+    position: relative;
 }
 
 .ou-tree__node.is-active {
-    border-left-color: var(--mb-color-primary);
-    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.45);
+    background: rgba(16, 185, 129, 0.08);
     color: #0f172a;
 }
 
 .ou-tree__node:hover {
-    background: rgba(16, 24, 40, 0.04);
+    background: rgba(15, 23, 42, 0.03);
+    border-color: rgba(15, 23, 42, 0.18);
+}
+
+.ou-tree__node:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4), 0 0 0 4px rgba(255, 255, 255, 0.9);
+}
+
+.ou-tree__node.is-active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 4px;
+    border-radius: 999px;
+    background: var(--mb-color-primary);
 }
 
 .ou-tree__caret {
     color: rgba(15, 23, 42, 0.65);
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .ou-tree__spacer {
     width: 12px;
 }
 
+.ou-tree__indent {
+    font-size: 12px;
+    color: rgba(15, 23, 42, 0.4);
+}
+
 .ou-tree__label {
     font-weight: 500;
 }
 
-.ou-tree__meta {
-    font-size: 12px;
-    color: var(--mb-color-text-muted);
+.ou-tree__node--child .ou-tree__label {
+    font-size: 13px;
+    color: rgba(15, 23, 42, 0.75);
+}
+
+.ou-tree__badge {
+    font-size: 11px;
+    color: rgba(15, 23, 42, 0.6);
+    background: rgba(15, 23, 42, 0.06);
+    padding: 2px 6px;
+    border-radius: 999px;
 }
 
 .ou-tree__children {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    margin-left: 12px;
+    margin-left: 0;
 }
 
 
 .ou-breadcrumb {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
-    color: rgba(15, 23, 42, 0.65);
+    color: rgba(15, 23, 42, 0.55);
 }
 
 .ou-tabs {
@@ -2001,6 +2050,11 @@
     color: rgba(15, 23, 42, 0.65);
     cursor: pointer;
     position: relative;
+    transition: color 150ms ease-out;
+}
+
+.ou-tab:hover {
+    color: rgba(15, 23, 42, 0.85);
 }
 
 .ou-tab.is-active {
@@ -2011,12 +2065,17 @@
 .ou-tab.is-active::after {
     content: '';
     position: absolute;
-    left: 0;
-    right: 0;
+    left: 6px;
+    right: 6px;
     bottom: -1px;
     height: 2px;
     background: var(--mb-color-primary);
     border-radius: 999px;
+}
+
+.ou-tab__count {
+    font-size: 12px;
+    color: rgba(15, 23, 42, 0.55);
 }
 
 .ou-toolbar {
@@ -2025,6 +2084,11 @@
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
+}
+
+.ou-toolbar__hint {
+    font-size: 12px;
+    color: rgba(15, 23, 42, 0.55);
 }
 
 .ou-search {
@@ -2078,7 +2142,7 @@
     grid-template-columns: 2fr 1fr 1fr 90px;
     gap: 12px;
     align-items: center;
-    padding: 14px 16px;
+    padding: 12px 16px;
 }
 
 .ou-members-table__header {
@@ -2092,7 +2156,7 @@
 .ou-members-table__row {
     font-size: 13px;
     color: #0f172a;
-    min-height: 52px;
+    min-height: 48px;
     border-top: 1px solid rgba(15, 23, 42, 0.06);
 }
 
@@ -2106,11 +2170,12 @@
 .ou-members-table__name-text {
     font-weight: 600;
     font-size: 13px;
+    color: #0f172a;
 }
 
 .ou-members-table__email {
     font-size: 12px;
-    color: rgba(15, 23, 42, 0.65);
+    color: rgba(15, 23, 42, 0.55);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2148,7 +2213,7 @@
 .ou-roles-table__row {
     font-size: 13px;
     color: #0f172a;
-    min-height: 52px;
+    min-height: 48px;
     border-top: 1px solid rgba(15, 23, 42, 0.06);
 }
 
@@ -2173,13 +2238,21 @@
     border-radius: 999px;
     font-size: 12px;
     font-weight: 500;
-    color: rgba(15, 23, 42, 0.65);
-    background: rgba(15, 23, 42, 0.06);
+    color: rgba(15, 23, 42, 0.6);
+    background: rgba(15, 23, 42, 0.04);
+    border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .ou-status-pill--active {
     color: #047857;
     background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.18);
+}
+
+.ou-status-pill--invited {
+    color: rgba(15, 23, 42, 0.6);
+    background: rgba(15, 23, 42, 0.04);
+    border-color: rgba(15, 23, 42, 0.12);
 }
 
 .ou-assign {
@@ -2238,7 +2311,7 @@
 }
 
 .ou-row-action {
-    border: 1px solid var(--mb-color-border);
+    border: 1px solid transparent;
     background: transparent;
     border-radius: 8px;
     padding: 4px 8px;
@@ -2249,6 +2322,11 @@
 
 .ou-row-action:hover {
     background: color-mix(in srgb, var(--mb-color-border) 20%, transparent);
+}
+
+.ou-row-action--subtle:hover {
+    color: #dc2626;
+    background: rgba(239, 68, 68, 0.08);
 }
 
 .ou-helper {

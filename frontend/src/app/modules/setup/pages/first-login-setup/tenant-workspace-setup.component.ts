@@ -287,6 +287,11 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             );
         });
     });
+    readonly selectedOrgUnitMemberCount = computed(() => {
+        const activeId = this.activeOrgUnitId();
+        if (!activeId) return 0;
+        return (this.orgUnitMemberIds()[activeId] || []).length;
+    });
     readonly selectedOrgUnitRoles = computed(() => {
         const activeId = this.activeOrgUnitId();
         if (!activeId) return [];
@@ -297,6 +302,11 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             const haystack = [role.name, role.description].filter(Boolean).join(' ').toLowerCase();
             return haystack.includes(search);
         });
+    });
+    readonly selectedOrgUnitRoleCount = computed(() => {
+        const activeId = this.activeOrgUnitId();
+        if (!activeId) return 0;
+        return (this.orgUnitRoles()[activeId] || []).length;
     });
     readonly orgUnitDeleteRequiresConfirm = computed(() => {
         const impact = this.orgUnitDeleteImpact();
@@ -1180,6 +1190,12 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             ...map,
             [activeId]: (map[activeId] || []).filter(id => id !== user.id)
         }));
+    }
+
+    confirmRemoveMemberFromOrgUnit(user: UserRow): void {
+        const label = user.name || user.email;
+        if (!window.confirm(`Remove ${label} from this unit?`)) return;
+        this.removeMemberFromOrgUnit(user);
     }
 
     openAssignRoles(): void {
