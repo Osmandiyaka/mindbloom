@@ -1518,71 +1518,19 @@
     color: rgba(15, 23, 42, 0.65);
 }
 
-.ou-slide-over {
-    position: fixed;
-    inset: 0;
-    z-index: 1200;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.ou-slide-over__backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.25);
-}
-
-.ou-slide-over__panel {
-    position: relative;
-    width: 440px;
-    max-width: 92vw;
-    height: 100%;
-    background: #ffffff;
-    box-shadow: -12px 0 24px rgba(15, 23, 42, 0.12);
-    display: flex;
-    flex-direction: column;
-    z-index: 1;
-}
-
-.ou-slide-over__header {
-    padding: 20px 20px 16px;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-}
-
-.ou-slide-over__title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #0f172a;
-}
-
-.ou-slide-over__subtitle {
-    font-size: 12px;
-    color: rgba(15, 23, 42, 0.65);
-    margin-top: 4px;
-}
-
-.ou-slide-over__close {
-    border: none;
-    background: transparent;
-    font-size: 20px;
-    line-height: 1;
-    color: rgba(15, 23, 42, 0.65);
-    cursor: pointer;
-}
-
-.ou-slide-over__content {
-    padding: 20px;
+.ou-modal {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    overflow: auto;
-    flex: 1;
 }
 
-.ou-slide-over__section-label {
+.ou-modal__subtitle {
+    font-size: 12px;
+    color: rgba(15, 23, 42, 0.65);
+    margin-top: 2px;
+}
+
+.ou-modal__section-label {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -1590,30 +1538,30 @@
     margin-bottom: 8px;
 }
 
-.ou-slide-over__context-value {
+.ou-modal__context-value {
     font-size: 14px;
     font-weight: 500;
     color: #0f172a;
 }
 
-.ou-slide-over__fields {
+.ou-modal__fields {
     display: grid;
     gap: 12px;
 }
 
-.ou-slide-over__helper {
+.ou-modal__helper {
     font-size: 12px;
     color: rgba(15, 23, 42, 0.65);
     margin-top: 8px;
 }
 
-.ou-slide-over__radios {
+.ou-modal__radios {
     display: flex;
     gap: 16px;
     flex-wrap: wrap;
 }
 
-.ou-slide-over__radio {
+.ou-modal__radio {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -1626,13 +1574,11 @@
     color: var(--mb-color-danger);
 }
 
-.ou-slide-over__footer {
-    padding: 16px 20px;
-    border-top: 1px solid rgba(15, 23, 42, 0.08);
+.ou-modal__footer {
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    background: #ffffff;
+    width: 100%;
 }
 
 .ou-empty {

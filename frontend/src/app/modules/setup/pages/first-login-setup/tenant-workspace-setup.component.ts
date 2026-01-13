@@ -1,4 +1,4 @@
-import { Component, EmbeddedViewRef, EnvironmentInjector, HostListener, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { Component, EnvironmentInjector, OnInit, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -10,6 +10,8 @@ import {
     MbCheckboxComponent,
     MbFormFieldComponent,
     MbInputComponent,
+    MbModalComponent,
+    MbModalFooterDirective,
     MbRoleSelectorComponent,
     MbSelectComponent,
     MbSplitButtonComponent,
@@ -98,6 +100,8 @@ interface FirstLoginSetupData {
         MbButtonComponent,
         MbFormFieldComponent,
         MbInputComponent,
+        MbModalComponent,
+        MbModalFooterDirective,
         MbRoleSelectorComponent,
         MbSelectComponent,
         MbSplitButtonComponent,
@@ -113,14 +117,13 @@ interface FirstLoginSetupData {
     templateUrl: './tenant-workspace-setup.component.html',
     styleUrls: ['./tenant-workspace-setup.component.scss']
 })
-export class TenantWorkspaceSetupComponent implements OnInit, OnDestroy {
+export class TenantWorkspaceSetupComponent implements OnInit {
     private readonly tenantSettings = inject(TenantSettingsService);
     private readonly tenantService = inject(TenantService);
     private readonly schoolService = inject(SchoolService);
     private readonly setupStore = inject(FirstLoginSetupService);
     private readonly router = inject(Router);
     private readonly injector = inject(EnvironmentInjector);
-    private readonly viewContainerRef = inject(ViewContainerRef);
 
     private autosaveInitialized = false;
 
@@ -219,10 +222,6 @@ export class TenantWorkspaceSetupComponent implements OnInit, OnDestroy {
 
     private userCounter = 0;
     private orgUnitCounter = 0;
-    private orgUnitOverlayElement?: HTMLElement;
-    private orgUnitOverlayView?: EmbeddedViewRef<unknown>;
-
-    @ViewChild('orgUnitSlideOver') orgUnitSlideOver?: TemplateRef<unknown>;
 
     readonly orgUnitTypes: OrgUnitType[] = [
         'District',
@@ -658,17 +657,6 @@ export class TenantWorkspaceSetupComponent implements OnInit, OnDestroy {
         this.openViewUser(index);
     }
 
-    @HostListener('document:keydown.escape')
-    handleEscapeKey(): void {
-        if (this.orgUnitFormOpen()) {
-            this.requestCloseOrgUnitForm();
-        }
-    }
-
-    ngOnDestroy(): void {
-        this.detachOrgUnitOverlay();
-    }
-
     trackOrgUnit = (_: number, node: OrgUnitNode) => node.id;
     trackUserRow = (_: number, user: UserRow) => user.id;
     trackOrgUnitRole = (_: number, role: OrgUnitRole) => role.id;
@@ -734,14 +722,12 @@ export class TenantWorkspaceSetupComponent implements OnInit, OnDestroy {
         this.orgUnitFormStatus.set('Active');
         this.orgUnitFormError.set('');
         this.orgUnitFormOpen.set(true);
-        this.attachOrgUnitOverlay();
     }
 
     cancelOrgUnitForm(): void {
         this.orgUnitFormOpen.set(false);
         this.orgUnitFormError.set('');
         this.orgUnitFormParentId.set(null);
-        this.detachOrgUnitOverlay();
     }
 
     requestCloseOrgUnitForm(): void {
@@ -791,24 +777,6 @@ export class TenantWorkspaceSetupComponent implements OnInit, OnDestroy {
         );
     }
 
-    private attachOrgUnitOverlay(): void {
-        if (this.orgUnitOverlayElement || !this.orgUnitSlideOver) return;
-        const element = document.createElement('div');
-        element.className = 'ou-slide-over-host';
-        document.body.appendChild(element);
-        this.orgUnitOverlayView = this.viewContainerRef.createEmbeddedView(this.orgUnitSlideOver);
-        this.orgUnitOverlayView.detectChanges();
-        this.orgUnitOverlayView.rootNodes.forEach(node => element.appendChild(node));
-        this.orgUnitOverlayElement = element;
-    }
-
-    private detachOrgUnitOverlay(): void {
-        if (!this.orgUnitOverlayElement) return;
-        this.orgUnitOverlayView?.destroy();
-        this.orgUnitOverlayView = undefined;
-        this.orgUnitOverlayElement.remove();
-        this.orgUnitOverlayElement = undefined;
-    }
 
     selectOrgUnit(id: string): void {
         this.activeOrgUnitId.set(id);
