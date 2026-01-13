@@ -694,6 +694,26 @@ export class TenantWorkspaceSetupComponent implements OnInit {
 
     readonly canContinueUsersStep = computed(() => this.users().length > 0 || this.usersStepSkipped());
 
+    readonly reviewReady = computed(() =>
+        this.schoolsValid()
+        && this.canContinueUsersStep()
+        && this.levels().length > 0
+        && this.classRows().length > 0
+        && this.sectionRows().length > 0
+    );
+
+    readonly reviewCompletedCount = computed(() => {
+        let completed = 0;
+        if (this.schoolsValid()) completed += 1;
+        if (this.canContinueUsersStep()) completed += 1;
+        completed += 1; // Organizational units step is optional.
+        if (this.levels().length > 0) completed += 1;
+        if (this.classRows().length > 0 && this.sectionRows().length > 0) completed += 1;
+        completed += 1; // Grading system step is optional.
+        completed += 1; // Review & activate.
+        return completed;
+    });
+
     readonly userTableColumns: MbTableColumn<UserRow>[] = [
         {
             key: 'name',

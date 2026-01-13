@@ -21,6 +21,25 @@ export class CreateSchoolUseCase {
         domain?: string;
     }): Promise<School> {
         const code = input.code?.trim() || await this.generateCode(input.tenantId);
+        const existing = await this.schoolRepository.findByCode(code, input.tenantId);
+        if (existing) {
+            const updated = School.create({
+                id: existing.id,
+                tenantId: existing.tenantId,
+                name: input.name,
+                code,
+                type: input.type ?? existing.type,
+                status: input.status ?? existing.status,
+                address: existing.address,
+                contact: input.domain
+                    ? { ...existing.contact, website: input.domain }
+                    : existing.contact,
+                settings: existing.settings,
+                createdAt: existing.createdAt,
+                updatedAt: new Date(),
+            });
+            return this.schoolRepository.update(updated);
+        }
         const school = School.create({
             tenantId: input.tenantId,
             name: input.name,

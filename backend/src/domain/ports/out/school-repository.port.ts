@@ -6,6 +6,7 @@ export interface ISchoolRepository {
     findById(id: string, tenantId: string): Promise<School | null>;
     findByCode(code: string, tenantId: string): Promise<School | null>;
     create(school: School): Promise<School>;
+    update(school: School): Promise<School>;
     count(tenantId: string): Promise<number>;
 }
 

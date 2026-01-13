@@ -482,7 +482,7 @@ export class SidebarComponent implements OnInit {
     {
       title: 'System',
       items: [
-        { label: 'Tenant Settings', path: '/setup/tenant-settings', icon: 'settings', permission: PERMISSIONS.setup.write, moduleKey: 'setup' },
+        // { label: 'Tenant Settings', path: '/setup/tenant-settings', icon: 'settings', permission: PERMISSIONS.setup.write, moduleKey: 'setup' },
         { label: 'Workspace Setup', path: '/setup/first-login', icon: 'dashboard', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
         { label: 'Marketplace', path: '/setup/marketplace', icon: 'marketplace', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
         { label: 'Plugins', path: '/plugins', icon: 'plugins', permission: PERMISSIONS.setup.read, moduleKey: 'plugins' },

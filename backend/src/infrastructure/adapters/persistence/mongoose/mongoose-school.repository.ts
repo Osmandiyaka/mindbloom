@@ -74,6 +74,32 @@ export class MongooseSchoolRepository extends TenantScopedRepository<SchoolDocum
         return this.toDomain(saved);
     }
 
+    async update(school: School): Promise<School> {
+        const tenantId = this.requireTenant(school.tenantId);
+        const doc = await this.schoolModel.findOneAndUpdate(
+            { _id: new Types.ObjectId(school.id), tenantId: new Types.ObjectId(tenantId) },
+            {
+                $set: {
+                    name: school.name,
+                    code: school.code,
+                    type: school.type,
+                    status: school.status,
+                    address: school.address,
+                    contact: school.contact,
+                    settings: school.settings,
+                    updatedAt: new Date(),
+                },
+            },
+            { new: true },
+        );
+
+        if (!doc) {
+            throw new Error('School not found');
+        }
+
+        return this.toDomain(doc);
+    }
+
     async count(tenantId: string): Promise<number> {
         const resolved = this.requireTenant(tenantId);
         return this.schoolModel.countDocuments({ tenantId: new Types.ObjectId(resolved) });
