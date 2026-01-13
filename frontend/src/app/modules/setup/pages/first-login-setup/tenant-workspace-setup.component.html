@@ -241,8 +241,11 @@
                                             <div class="ou-nav__kicker">Organization</div>
                                             <div class="ou-nav__title-row">
                                                 <div class="ou-nav__title">Units</div>
-                                                <mb-button variant="tertiary" (click)="startAddRootUnit()">+ Add root
-                                                    unit</mb-button>
+                                                <mb-button class="ou-nav__add" variant="tertiary"
+                                                    (click)="startAddRootUnit()">
+                                                    <span class="ou-nav__add-icon" aria-hidden="true">+</span>
+                                                    <span>Add root unit</span>
+                                                </mb-button>
                                             </div>
                                         </div>
 
@@ -300,10 +303,13 @@
                                                     <div class="ou-canvas__title">{{ selectedOrgUnit()!.name }}</div>
                                                     <div class="ou-canvas__meta">{{ selectedOrgUnit()!.type }} ·
                                                         {{ selectedOrgUnit()!.status }}</div>
+                                                    <div class="ou-canvas__path">
+                                                        Path: {{ selectedOrgUnitPath() }}
+                                                    </div>
                                                 </div>
                                                 <div class="ou-canvas__actions">
-                                                    <mb-button variant="secondary" (click)="startAddChildUnit()">Add child
-                                                        unit</mb-button>
+                                                    <mb-button class="ou-action-btn" variant="secondary"
+                                                        (click)="startAddChildUnit()">Add child unit</mb-button>
                                                 </div>
                                             </div>
 
@@ -327,10 +333,11 @@
                                                     <div class="ou-search">
                                                         <mb-input [value]="orgUnitMemberSearch()"
                                                             (valueChange)="orgUnitMemberSearch.set($event)"
-                                                            placeholder="Search members"></mb-input>
+                                                            placeholder="Search members..."></mb-input>
                                                     </div>
-                                                    <mb-button variant="primary" [disabled]="!users().length"
-                                                        (click)="openAssignMembers()">Add members</mb-button>
+                                                    <mb-button class="ou-action-btn" variant="primary"
+                                                        [disabled]="!users().length" (click)="openAssignMembers()">Add
+                                                        members</mb-button>
                                                 </div>
 
                                                 <div class="ou-assign" *ngIf="assignMembersOpen()">
@@ -356,17 +363,39 @@
                                                 </div>
 
                                                 <ng-container *ngIf="selectedOrgUnitMembers().length; else ouMembersEmpty">
-                                                    <mb-table [columns]="orgUnitMemberColumns"
-                                                        [rows]="selectedOrgUnitMembers()"
-                                                        [emptyMessage]="'No members assigned yet.'"
-                                                        [rowKey]="orgUnitMemberRowKey">
-                                                        <ng-template mbTableActions let-row>
-                                                            <button type="button" class="ou-row-action"
-                                                                (click)="removeMemberFromOrgUnit(row)">
-                                                                Remove
-                                                            </button>
-                                                        </ng-template>
-                                                    </mb-table>
+                                                    <div class="ou-members-table">
+                                                        <div class="ou-members-table__header">
+                                                            <div>Name</div>
+                                                            <div>Role</div>
+                                                            <div>Status</div>
+                                                            <div class="ou-members-table__actions">Actions</div>
+                                                        </div>
+                                                        <div class="ou-members-table__row"
+                                                            *ngFor="let member of selectedOrgUnitMembers(); trackBy: trackUserRow">
+                                                            <div class="ou-members-table__name">
+                                                                <div class="ou-members-table__name-text">
+                                                                    {{ member.name || '—' }}
+                                                                </div>
+                                                                <div class="ou-members-table__email"
+                                                                    [attr.title]="member.email">
+                                                                    {{ member.email }}
+                                                                </div>
+                                                            </div>
+                                                            <div>{{ member.role }}</div>
+                                                            <div>
+                                                                <span class="ou-status-pill"
+                                                                    [class.ou-status-pill--active]="member.status === 'Active'">
+                                                                    {{ member.status }}
+                                                                </span>
+                                                            </div>
+                                                            <div class="ou-members-table__actions">
+                                                                <button type="button" class="ou-row-action"
+                                                                    (click)="removeMemberFromOrgUnit(member)">
+                                                                    Remove
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </ng-container>
                                                 <ng-template #ouMembersEmpty>
                                                     <div class="ou-empty ou-empty--inline">

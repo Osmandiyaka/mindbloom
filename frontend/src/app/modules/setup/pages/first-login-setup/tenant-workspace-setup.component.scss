@@ -1151,7 +1151,7 @@
 }
 
 .setup-footer {
-    border-top: 1px solid var(--mb-color-border-subtle);
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
     padding-top: 16px;
     display: flex;
     align-items: center;
@@ -1164,6 +1164,14 @@
     gap: 16px;
 }
 
+.setup-footer__actions .mb-button {
+    height: 40px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0 16px;
+}
+
 .setup-footer__aside {
     display: flex;
     flex-direction: column;
@@ -1174,8 +1182,9 @@
 .setup-skip-link {
     border: none;
     background: transparent;
-    color: var(--mb-color-text-subtle);
-    font-size: 12px;
+    color: rgba(15, 23, 42, 0.65);
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
     padding: 0;
 }
@@ -1191,8 +1200,16 @@
 
 .setup-auto-save {
     margin-top: 12px;
-    font-size: 11px;
-    color: color-mix(in srgb, var(--mb-color-text-muted) 80%, transparent);
+    font-size: 12px;
+    color: rgba(15, 23, 42, 0.65);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.setup-auto-save span {
+    font-size: 14px;
+    color: rgba(15, 23, 42, 0.45);
 }
 
 .list-stack {
@@ -1391,7 +1408,7 @@
     flex-direction: column;
     gap: 16px;
     padding: 8px 0;
-    border-right: 1px solid var(--mb-color-border-subtle);
+    border-right: 1px solid rgba(15, 23, 42, 0.1);
 }
 
 .ou-nav__header {
@@ -1402,10 +1419,10 @@
 }
 
 .ou-nav__kicker {
-    font-size: 11px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--mb-color-text-subtle);
+    color: rgba(15, 23, 42, 0.65);
 }
 
 .ou-nav__title-row {
@@ -1416,9 +1433,31 @@
 }
 
 .ou-nav__title {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
-    color: var(--mb-color-text);
+    color: #0f172a;
+}
+
+.ou-nav__add .mb-button {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.65);
+    padding: 0;
+    height: auto;
+}
+
+.ou-nav__add .mb-button:hover {
+    text-decoration: underline;
+}
+
+.ou-nav__add-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    margin-right: 6px;
 }
 
 .ou-canvas {
@@ -1433,20 +1472,21 @@
     justify-content: space-between;
     gap: 16px;
     align-items: center;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--mb-color-border);
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .ou-canvas__title {
-    font-size: 22px;
-    font-weight: 650;
-    color: var(--mb-color-text);
+    font-size: 28px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-top: 8px;
+    margin-bottom: 6px;
 }
 
 .ou-canvas__meta {
-    margin-top: 4px;
-    font-size: 11px;
-    color: var(--mb-color-text-subtle);
+    font-size: 13px;
+    color: rgba(15, 23, 42, 0.65);
 }
 
 .ou-canvas__actions {
@@ -1454,6 +1494,11 @@
     gap: 8px;
     flex-wrap: wrap;
     align-items: center;
+}
+
+.ou-canvas__path {
+    font-size: 12px;
+    color: rgba(15, 23, 42, 0.65);
 }
 
 .ou-form {
@@ -1531,11 +1576,12 @@
 .ou-tree {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     padding: 0 8px 0 0;
     margin: 0 8px 0 0;
     max-height: 420px;
     overflow: auto;
+    margin-top: 16px;
 }
 
 .ou-tree__node {
@@ -1543,30 +1589,31 @@
     grid-template-columns: 16px 1fr auto;
     align-items: center;
     gap: 8px;
-    border-left: 2px solid transparent;
+    border-left: 3px solid transparent;
     background: transparent;
-    padding: 8px 10px 8px 8px;
-    border-radius: 0;
+    padding: 0 12px;
+    border-radius: 10px;
+    height: 44px;
     text-align: left;
-    font-size: 13px;
-    color: var(--mb-color-text-subtle);
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
     cursor: pointer;
 }
 
 .ou-tree__node.is-active {
     border-left-color: var(--mb-color-primary);
-    background: color-mix(in srgb, var(--mb-color-primary) 6%, transparent);
-    color: var(--mb-color-text);
+    background: rgba(16, 185, 129, 0.1);
+    color: #0f172a;
 }
 
 .ou-tree__node:hover {
-    background: color-mix(in srgb, var(--mb-color-border) 6%, transparent);
-    color: var(--mb-color-text);
+    background: rgba(16, 24, 40, 0.04);
 }
 
 .ou-tree__caret {
-    color: var(--mb-color-text-subtle);
-    font-size: 12px;
+    color: rgba(15, 23, 42, 0.65);
+    font-size: 16px;
 }
 
 .ou-tree__spacer {
@@ -1586,27 +1633,29 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    margin-left: 18px;
+    margin-left: 12px;
 }
 
 
 .ou-breadcrumb {
     font-size: 12px;
-    color: var(--mb-color-text-muted);
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.65);
 }
 
 .ou-tabs {
     display: flex;
     gap: 12px;
-    border-bottom: 1px solid var(--mb-color-border);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .ou-tab {
     border: none;
     background: transparent;
     padding: 6px 0;
-    font-size: 13px;
-    color: var(--mb-color-text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.65);
     cursor: pointer;
     position: relative;
 }
@@ -1644,11 +1693,106 @@
     width: 100%;
 }
 
+.ou-search .mb-input-shell {
+    height: 40px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 10px;
+    padding: 0 12px;
+    background: #ffffff;
+}
+
+.ou-search .mb-input {
+    height: 40px;
+    padding: 0;
+    font-size: 14px;
+}
+
 .ou-members,
 .ou-roles {
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+.ou-action-btn .mb-button {
+    height: 40px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0 16px;
+}
+
+.ou-members-table {
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.ou-members-table__header,
+.ou-members-table__row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 90px;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 16px;
+}
+
+.ou-members-table__header {
+    background: rgba(15, 23, 42, 0.03);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgba(15, 23, 42, 0.65);
+}
+
+.ou-members-table__row {
+    font-size: 13px;
+    color: #0f172a;
+    min-height: 52px;
+    border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.ou-members-table__name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.ou-members-table__name-text {
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.ou-members-table__email {
+    font-size: 12px;
+    color: rgba(15, 23, 42, 0.65);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.ou-members-table__actions {
+    text-align: right;
+}
+
+.ou-status-pill {
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(15, 23, 42, 0.65);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.ou-status-pill--active {
+    color: #047857;
+    background: rgba(16, 185, 129, 0.12);
 }
 
 .ou-assign {
