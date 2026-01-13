@@ -28,6 +28,7 @@ import { TenantSettingsService } from '../../../../core/services/tenant-settings
 import { TenantService } from '../../../../core/services/tenant.service';
 import { SchoolService } from '../../../../core/school/school.service';
 import { FirstLoginSetupService, FirstLoginSetupState } from '../../../../core/services/first-login-setup.service';
+import { ToastService } from '../../../../core/ui/toast/toast.service';
 
 interface SchoolRow {
     name: string;
@@ -75,6 +76,12 @@ interface OrgUnit {
 interface OrgUnitNode extends OrgUnit {
     children: OrgUnitNode[];
 }
+
+type OrgUnitDeleteImpact = {
+    childUnits: number;
+    members: number;
+    roles: number;
+};
 
 interface FirstLoginSetupData {
     schoolRows?: SchoolRow[];
@@ -126,6 +133,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     private readonly setupStore = inject(FirstLoginSetupService);
     private readonly router = inject(Router);
     private readonly injector = inject(EnvironmentInjector);
+    private readonly toast = inject(ToastService);
 
     private autosaveInitialized = false;
 
@@ -171,6 +179,13 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     assignRolesOpen = signal(false);
     assignRoleIds = signal<string[]>([]);
     assignRoleDraft = signal<OrgUnitRole[]>([]);
+    isOrgUnitDeleteOpen = signal(false);
+    orgUnitDeleteTarget = signal<OrgUnit | null>(null);
+    orgUnitDeleteImpact = signal<OrgUnitDeleteImpact | null>(null);
+    orgUnitDeleteImpactLoading = signal(false);
+    orgUnitDeleteConfirm = signal('');
+    orgUnitDeleteError = signal('');
+    orgUnitDeleteSubmitting = signal(false);
 
     levelsTemplate = signal<'k12' | 'primary_secondary' | 'custom'>('k12');
     levels = signal<string[]>(this.defaultLevels('k12'));
@@ -269,6 +284,10 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             const haystack = [role.name, role.description].filter(Boolean).join(' ').toLowerCase();
             return haystack.includes(search);
         });
+    });
+    readonly orgUnitDeleteRequiresConfirm = computed(() => {
+        const impact = this.orgUnitDeleteImpact();
+        return !!impact && impact.childUnits > 0;
     });
 
     readonly addUsersMenuItems = computed(() => ([
@@ -772,6 +791,140 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         }
         this.activeOrgUnitId.set(newUnit.id);
         this.cancelOrgUnitForm();
+    }
+
+    openDeleteOrgUnit(): void {
+        const target = this.selectedOrgUnit();
+        if (!target) return;
+        this.orgUnitDeleteTarget.set(target);
+        this.orgUnitDeleteConfirm.set('');
+        this.orgUnitDeleteError.set('');
+        this.orgUnitDeleteImpact.set(null);
+        this.orgUnitDeleteImpactLoading.set(true);
+        this.orgUnitDeleteSubmitting.set(false);
+        this.isOrgUnitDeleteOpen.set(true);
+        const impact = this.buildOrgUnitDeleteImpact(target.id);
+        setTimeout(() => {
+            this.orgUnitDeleteImpact.set(impact);
+            this.orgUnitDeleteImpactLoading.set(false);
+        }, 120);
+    }
+
+    requestCloseDeleteOrgUnit(): void {
+        if (this.orgUnitDeleteSubmitting()) return;
+        this.isOrgUnitDeleteOpen.set(false);
+        this.orgUnitDeleteTarget.set(null);
+        this.orgUnitDeleteImpact.set(null);
+        this.orgUnitDeleteImpactLoading.set(false);
+        this.orgUnitDeleteConfirm.set('');
+        this.orgUnitDeleteError.set('');
+    }
+
+    canDeleteSelectedOrgUnit(): boolean {
+        return !!this.selectedOrgUnit() && this.canDeleteOrgUnit() && !this.isOrgUnitDeleteLocked();
+    }
+
+    deleteSelectedOrgUnit(): void {
+        const target = this.orgUnitDeleteTarget();
+        if (!target || this.orgUnitDeleteSubmitting()) return;
+        if (this.orgUnitDeleteRequiresConfirm() && !this.isOrgUnitDeleteConfirmValid()) return;
+        this.orgUnitDeleteSubmitting.set(true);
+        const deleteIds = this.collectOrgUnitDescendantIds(target.id);
+        deleteIds.unshift(target.id);
+        this.orgUnits.update(items => items.filter(unit => !deleteIds.includes(unit.id)));
+        this.orgUnitMemberIds.update(map => {
+            const next = { ...map };
+            deleteIds.forEach(id => delete next[id]);
+            return next;
+        });
+        this.orgUnitRoles.update(map => {
+            const next = { ...map };
+            deleteIds.forEach(id => delete next[id]);
+            return next;
+        });
+        this.expandedOrgUnitIds.update(items => items.filter(id => !deleteIds.includes(id)));
+        this.selectFallbackOrgUnit(target);
+        // TODO: log audit event for organizational unit deletion.
+        this.toast.success(`Organizational unit "${target.name}" and its child units were deleted.`);
+        this.requestCloseDeleteOrgUnit();
+    }
+
+    isOrgUnitDeleteConfirmValid(): boolean {
+        const target = this.orgUnitDeleteTarget();
+        if (!target) return false;
+        return this.orgUnitDeleteConfirm().trim().toLowerCase() === target.name.trim().toLowerCase();
+    }
+
+    getOrgUnitDeleteDisabledReason(): string | null {
+        if (!this.selectedOrgUnit()) return 'Select a unit to manage actions.';
+        if (this.isOrgUnitDeleteLocked()) return 'This unit can’t be deleted.';
+        if (!this.canDeleteOrgUnit()) return 'Insufficient permissions.';
+        return null;
+    }
+
+    private isOrgUnitDeleteLocked(): boolean {
+        return false;
+    }
+
+    private canDeleteOrgUnit(): boolean {
+        return true;
+    }
+
+    private buildOrgUnitDeleteImpact(id: string): OrgUnitDeleteImpact {
+        const descendantIds = this.collectOrgUnitDescendantIds(id);
+        const affectedIds = [id, ...descendantIds];
+        const memberIds = new Set<string>();
+        const memberMap = this.orgUnitMemberIds();
+        affectedIds.forEach(unitId => {
+            (memberMap[unitId] || []).forEach(memberId => memberIds.add(memberId));
+        });
+        const roleMap = this.orgUnitRoles();
+        const rolesCount = affectedIds.reduce((count, unitId) => count + (roleMap[unitId]?.length || 0), 0);
+        return {
+            childUnits: descendantIds.length,
+            members: memberIds.size,
+            roles: rolesCount
+        };
+    }
+
+    private collectOrgUnitDescendantIds(id: string): string[] {
+        const byParent = new Map<string, string[]>();
+        this.orgUnits().forEach(unit => {
+            if (!unit.parentId) return;
+            const list = byParent.get(unit.parentId) ?? [];
+            list.push(unit.id);
+            byParent.set(unit.parentId, list);
+        });
+        const collected: string[] = [];
+        const stack = [...(byParent.get(id) ?? [])];
+        while (stack.length) {
+            const next = stack.pop()!;
+            collected.push(next);
+            const children = byParent.get(next);
+            if (children?.length) {
+                stack.push(...children);
+            }
+        }
+        return collected;
+    }
+
+    private selectFallbackOrgUnit(deletedUnit: OrgUnit): void {
+        const remaining = this.orgUnits();
+        if (!remaining.length) {
+            this.activeOrgUnitId.set(null);
+            return;
+        }
+        const parentId = deletedUnit.parentId ?? null;
+        if (parentId && remaining.some(unit => unit.id === parentId)) {
+            this.selectOrgUnit(parentId);
+            return;
+        }
+        const root = remaining.find(unit => !unit.parentId);
+        if (root) {
+            this.selectOrgUnit(root.id);
+            return;
+        }
+        this.activeOrgUnitId.set(remaining[0].id);
     }
 
     isOrgUnitFormDirty(): boolean {

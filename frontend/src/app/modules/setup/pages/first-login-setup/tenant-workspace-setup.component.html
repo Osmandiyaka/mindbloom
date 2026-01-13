@@ -281,6 +281,32 @@
                                                 <div class="ou-canvas__actions">
                                                     <mb-button class="ou-action-btn" variant="secondary"
                                                         (click)="startAddChildUnit()">Add child unit</mb-button>
+                                                    <details class="ou-actions-menu" #ouActionsMenu>
+                                                        <summary class="ou-actions-menu__toggle"
+                                                            aria-label="More actions">⋯</summary>
+                                                        <div class="ou-actions-menu__panel">
+                                                            <button type="button" class="ou-actions-menu__item" disabled>
+                                                                Rename unit
+                                                            </button>
+                                                            <button type="button" class="ou-actions-menu__item" disabled>
+                                                                Move unit
+                                                            </button>
+                                                            <button type="button" class="ou-actions-menu__item" disabled>
+                                                                Change parent
+                                                            </button>
+                                                            <button type="button" class="ou-actions-menu__item" disabled>
+                                                                Deactivate unit
+                                                            </button>
+                                                            <div class="ou-actions-menu__divider"></div>
+                                                            <button type="button"
+                                                                class="ou-actions-menu__item ou-actions-menu__item--danger"
+                                                                [disabled]="!canDeleteSelectedOrgUnit()"
+                                                                [attr.title]="getOrgUnitDeleteDisabledReason()"
+                                                                (click)="openDeleteOrgUnit(); ouActionsMenu.open = false">
+                                                                Delete unit
+                                                            </button>
+                                                        </div>
+                                                    </details>
                                                 </div>
                                             </div>
 
@@ -552,6 +578,65 @@
                                             (click)="requestCloseOrgUnitForm()">Cancel</mb-button>
                                         <mb-button variant="primary" (click)="saveOrgUnitForm()"
                                             [disabled]="!orgUnitFormName().trim()">Create unit</mb-button>
+                                    </div>
+                                </mb-modal>
+
+                                <mb-modal [open]="isOrgUnitDeleteOpen()" title="Delete organizational unit" size="sm"
+                                    [hasFooter]="true" [closeable]="!orgUnitDeleteSubmitting()"
+                                    [closeOnBackdrop]="!orgUnitDeleteSubmitting()"
+                                    (closed)="requestCloseDeleteOrgUnit()">
+                                    <div class="ou-delete">
+                                        <div class="ou-delete__subtitle">
+                                            This action will permanently delete this unit and all of its child units.
+                                        </div>
+                                        <mb-alert *ngIf="orgUnitDeleteError()" variant="danger">
+                                            {{ orgUnitDeleteError() }}
+                                        </mb-alert>
+                                        <div class="ou-delete__loading" *ngIf="orgUnitDeleteImpactLoading()">
+                                            Loading delete impact…
+                                        </div>
+                                        <div class="ou-delete__impact" *ngIf="!orgUnitDeleteImpactLoading()">
+                                            <div class="ou-delete__row">
+                                                <span>Unit</span>
+                                                <span>{{ orgUnitDeleteTarget()?.name }}</span>
+                                            </div>
+                                            <div class="ou-delete__row">
+                                                <span>Child units</span>
+                                                <span>{{ orgUnitDeleteImpact()?.childUnits ?? 0 }}</span>
+                                            </div>
+                                            <div class="ou-delete__row">
+                                                <span>Members affected</span>
+                                                <span>{{ orgUnitDeleteImpact()?.members ?? 0 }}</span>
+                                            </div>
+                                            <div class="ou-delete__row">
+                                                <span>Roles removed</span>
+                                                <span>{{ orgUnitDeleteImpact()?.roles ?? 0 }}</span>
+                                            </div>
+                                            <div class="ou-delete__warning" id="ou-delete-warning">
+                                                This action cannot be undone.
+                                            </div>
+                                        </div>
+
+                                        <mb-form-field *ngIf="orgUnitDeleteRequiresConfirm()"
+                                            label="Type the unit name to confirm"
+                                            [controlId]="'ou-delete-confirm'"
+                                            hint="Enter '{{ orgUnitDeleteTarget()?.name }}' to enable deletion.">
+                                            <mb-input id="ou-delete-confirm" [value]="orgUnitDeleteConfirm()"
+                                                (valueChange)="orgUnitDeleteConfirm.set($event)"
+                                                [placeholder]="orgUnitDeleteTarget()?.name || ''"></mb-input>
+                                        </mb-form-field>
+                                    </div>
+
+                                    <div mbModalFooter class="ou-delete__footer">
+                                        <mb-button variant="secondary" cdkFocusInitial
+                                            (click)="requestCloseDeleteOrgUnit()"
+                                            [disabled]="orgUnitDeleteSubmitting()">Cancel</mb-button>
+                                        <mb-button variant="danger" [loading]="orgUnitDeleteSubmitting()"
+                                            [disabled]="orgUnitDeleteRequiresConfirm() && !isOrgUnitDeleteConfirmValid()"
+                                            [attr.aria-describedby]="'ou-delete-warning'"
+                                            (click)="deleteSelectedOrgUnit()">
+                                            Delete unit
+                                        </mb-button>
                                     </div>
                                 </mb-modal>
                             </div>

@@ -1627,6 +1627,76 @@
     align-items: center;
 }
 
+.ou-actions-menu {
+    position: relative;
+}
+
+.ou-actions-menu__toggle {
+    list-style: none;
+    cursor: pointer;
+    color: var(--mb-color-text-muted);
+    font-size: 18px;
+    padding: 4px 6px;
+    border-radius: 8px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: var(--mb-color-surface);
+}
+
+.ou-actions-menu__toggle::-webkit-details-marker {
+    display: none;
+}
+
+.ou-actions-menu[open] .ou-actions-menu__toggle {
+    color: var(--mb-color-text);
+    border-color: rgba(15, 23, 42, 0.18);
+}
+
+.ou-actions-menu__panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    background: var(--mb-color-surface);
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 12px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+    padding: 8px;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 3;
+}
+
+.ou-actions-menu__item {
+    border: none;
+    background: none;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--mb-color-text);
+    cursor: pointer;
+}
+
+.ou-actions-menu__item:disabled {
+    color: var(--mb-color-text-muted);
+    cursor: not-allowed;
+}
+
+.ou-actions-menu__item:not(:disabled):hover {
+    background: rgba(15, 23, 42, 0.05);
+}
+
+.ou-actions-menu__item--danger:not(:disabled) {
+    color: var(--mb-color-danger);
+}
+
+.ou-actions-menu__divider {
+    height: 1px;
+    background: rgba(15, 23, 42, 0.08);
+    margin: 4px 0;
+}
+
 .ou-canvas__path {
     font-size: 12px;
     color: rgba(15, 23, 42, 0.65);
@@ -1689,6 +1759,54 @@
 }
 
 .ou-modal__footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+}
+
+.ou-delete {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ou-delete__subtitle {
+    font-size: 12px;
+    color: rgba(15, 23, 42, 0.65);
+}
+
+.ou-delete__loading {
+    font-size: 12px;
+    color: var(--mb-color-text-muted);
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.04);
+}
+
+.ou-delete__impact {
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 12px;
+    padding: 12px;
+    display: grid;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.02);
+}
+
+.ou-delete__row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--mb-color-text);
+}
+
+.ou-delete__warning {
+    font-size: 12px;
+    color: var(--mb-color-danger);
+    margin-top: 4px;
+}
+
+.ou-delete__footer {
     display: flex;
     justify-content: space-between;
     gap: 12px;
