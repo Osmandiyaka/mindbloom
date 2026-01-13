@@ -57,8 +57,9 @@ export class MongooseSchoolRepository extends TenantScopedRepository<SchoolDocum
 
     async create(school: School): Promise<School> {
         const tenantId = this.requireTenant(school.tenantId);
+        const resolvedId = Types.ObjectId.isValid(school.id) ? new Types.ObjectId(school.id) : undefined;
         const doc = new this.schoolModel({
-            _id: new Types.ObjectId(school.id),
+            ...(resolvedId ? { _id: resolvedId } : {}),
             tenantId: new Types.ObjectId(tenantId),
             name: school.name,
             code: school.code,
