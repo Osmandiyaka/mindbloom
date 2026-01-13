@@ -9,6 +9,7 @@ import {
     MbAlertComponent,
     MbButtonComponent,
     MbCardComponent,
+    MbClassSelectorComponent,
     MbCheckboxComponent,
     MbFormFieldComponent,
     MbInputComponent,
@@ -18,6 +19,7 @@ import {
     MbRoleSelectorComponent,
     MbSelectComponent,
     MbSplitButtonComponent,
+    MbStaffSelectorComponent,
     MbTableActionsDirective,
     MbTableComponent,
     MbTableColumn,
@@ -136,14 +138,16 @@ interface FirstLoginSetupData {
         DragDropModule,
         MbCardComponent,
         MbButtonComponent,
+        MbClassSelectorComponent,
         MbFormFieldComponent,
-    MbInputComponent,
-    MbModalComponent,
-    MbModalFooterDirective,
-    MbPopoverComponent,
-    MbRoleSelectorComponent,
+        MbInputComponent,
+        MbModalComponent,
+        MbModalFooterDirective,
+        MbPopoverComponent,
+        MbRoleSelectorComponent,
         MbSelectComponent,
         MbSplitButtonComponent,
+        MbStaffSelectorComponent,
         MbAlertComponent,
         MbTableComponent,
         MbTableActionsDirective,
@@ -450,6 +454,22 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         }))
         .sort((a, b) => a.label.localeCompare(b.label))
     );
+    readonly classSelectorOptions = computed(() => this.sortedClassRows()
+        .map(row => ({
+            id: row.id,
+            name: row.name,
+            code: row.code,
+            levelType: row.levelType || undefined,
+        })));
+    readonly staffSelectorOptions = computed(() => this.users()
+        .filter(user => ['Teacher', 'Staff'].includes(user.role))
+        .map(user => ({
+            id: user.id,
+            name: user.name || user.email,
+            email: user.email,
+            role: user.role,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)));
     readonly orgUnitDeleteRequiresConfirm = computed(() => {
         const impact = this.orgUnitDeleteImpact();
         return !!impact && impact.childUnits > 0;

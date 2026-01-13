@@ -1242,12 +1242,12 @@
                                     </div>
                                     <mb-alert *ngIf="sectionFormError()" variant="danger">{{ sectionFormError() }}</mb-alert>
                                     <mb-form-field label="Class" [controlId]="'section-class'">
-                                        <mb-select id="section-class" [value]="sectionFormClassId() || ''"
+                                        <mb-class-selector
+                                            [value]="sectionFormClassId()"
+                                            [options]="classSelectorOptions()"
                                             [disabled]="sectionFormMode() === 'view'"
                                             (valueChange)="sectionFormClassId.set($event)">
-                                            <option *ngFor="let row of classRows()" [value]="row.id">{{ row.name }}
-                                            </option>
-                                        </mb-select>
+                                        </mb-class-selector>
                                     </mb-form-field>
                                     <mb-form-field label="Section name" [controlId]="'section-name'">
                                         <mb-input id="section-name" [value]="sectionFormName()"
@@ -1267,14 +1267,13 @@
                                             placeholder="Optional"></mb-input>
                                     </mb-form-field>
                                     <mb-form-field label="Homeroom teacher" [controlId]="'section-teacher'">
-                                        <mb-select id="section-teacher" [value]="sectionFormTeacherId() || ''"
+                                        <mb-staff-selector
+                                            [value]="sectionFormTeacherId()"
+                                            [options]="staffSelectorOptions()"
                                             [disabled]="sectionFormMode() === 'view'"
-                                            (valueChange)="sectionFormTeacherId.set($event || null)">
-                                            <option value="">Unassigned</option>
-                                            <option *ngFor="let option of teacherOptions()" [value]="option.id">
-                                                {{ option.label }}
-                                            </option>
-                                        </mb-select>
+                                            placeholder="Unassigned"
+                                            (valueChange)="sectionFormTeacherId.set($event)">
+                                        </mb-staff-selector>
                                     </mb-form-field>
                                     <label class="section-modal__toggle">
                                         <input type="checkbox" [checked]="sectionFormActive()"
