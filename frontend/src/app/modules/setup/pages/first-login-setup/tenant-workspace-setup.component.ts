@@ -52,9 +52,26 @@ interface UserRow {
     createdAt?: string;
 }
 
+type OrgUnitStatus = 'Active' | 'Inactive';
+type OrgUnitType = 'District' | 'School' | 'Division' | 'Department' | 'Grade' | 'Section' | 'Custom';
+
+interface OrgUnit {
+    id: string;
+    name: string;
+    type: OrgUnitType;
+    status: OrgUnitStatus;
+    parentId?: string | null;
+}
+
+interface OrgUnitNode extends OrgUnit {
+    children: OrgUnitNode[];
+}
+
 interface FirstLoginSetupData {
     schoolRows?: SchoolRow[];
     departments?: string[];
+    orgUnits?: OrgUnit[];
+    orgUnitMemberIds?: Record<string, string[]>;
     levelsTemplate?: 'k12' | 'primary_secondary' | 'custom';
     levels?: string[];
     classes?: Array<{ name: string; level: string; sections: string }>;
@@ -122,7 +139,20 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     schoolFormCodeTouched = signal(false);
     schoolFormAddress = signal<AddressValue>({});
 
-    departments = signal<string[]>(['Academics', 'Administration', 'Finance']);
+    orgUnits = signal<OrgUnit[]>([]);
+    orgUnitMemberIds = signal<Record<string, string[]>>({});
+    activeOrgUnitId = signal<string | null>(null);
+    expandedOrgUnitIds = signal<string[]>([]);
+    activeOrgUnitTab = signal<'members' | 'roles'>('members');
+    orgUnitMemberSearch = signal('');
+    orgUnitFormOpen = signal(false);
+    orgUnitFormName = signal('');
+    orgUnitFormType = signal<OrgUnitType>('Department');
+    orgUnitFormParentId = signal<string | null>(null);
+    orgUnitFormError = signal('');
+    assignMembersOpen = signal(false);
+    assignMemberIds = signal<string[]>([]);
+
     levelsTemplate = signal<'k12' | 'primary_secondary' | 'custom'>('k12');
     levels = signal<string[]>(this.defaultLevels('k12'));
     classes = signal<Array<{ name: string; level: string; sections: string }>>([
@@ -174,6 +204,39 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     viewUser = signal<UserRow | null>(null);
 
     private userCounter = 0;
+    private orgUnitCounter = 0;
+
+    readonly orgUnitTypes: OrgUnitType[] = [
+        'District',
+        'School',
+        'Division',
+        'Department',
+        'Grade',
+        'Section',
+        'Custom'
+    ];
+
+    readonly orgUnitTree = computed(() => this.buildOrgUnitTree(this.orgUnits()));
+    readonly selectedOrgUnit = computed(() => {
+        const activeId = this.activeOrgUnitId();
+        return activeId ? this.orgUnits().find(unit => unit.id === activeId) || null : null;
+    });
+    readonly selectedOrgUnitPath = computed(() => this.buildOrgUnitPath(this.activeOrgUnitId()));
+    readonly selectedOrgUnitMembers = computed(() => {
+        const activeId = this.activeOrgUnitId();
+        if (!activeId) return [];
+        const memberIds = new Set(this.orgUnitMemberIds()[activeId] || []);
+        const search = this.orgUnitMemberSearch().trim().toLowerCase();
+        return this.users().filter(user => {
+            if (!memberIds.has(user.id)) return false;
+            if (!search) return true;
+            return (
+                user.name.toLowerCase().includes(search) ||
+                user.email.toLowerCase().includes(search) ||
+                user.role.toLowerCase().includes(search)
+            );
+        });
+    });
 
     readonly addUsersMenuItems = computed(() => ([
         { label: 'Invite by email', value: 'invite' },
@@ -207,6 +270,29 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             key: 'timezone',
             label: 'Time zone',
             cell: row => row.timezone
+        },
+        {
+            key: 'status',
+            label: 'Status',
+            cell: row => row.status
+        }
+    ];
+
+    readonly orgUnitMemberColumns: MbTableColumn<UserRow>[] = [
+        {
+            key: 'name',
+            label: 'Name',
+            cell: row => row.name || '—'
+        },
+        {
+            key: 'email',
+            label: 'Email',
+            cell: row => row.email
+        },
+        {
+            key: 'role',
+            label: 'Role',
+            cell: row => row.role
         },
         {
             key: 'status',
@@ -543,6 +629,10 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.openViewUser(index);
     }
 
+    trackOrgUnit = (_: number, node: OrgUnitNode) => node.id;
+    trackUserRow = (_: number, user: UserRow) => user.id;
+    orgUnitMemberRowKey = (row: UserRow) => row.id;
+
     onSchoolFormNameChange(value: string): void {
         this.schoolFormName.set(value);
         if (this.editingSchoolIndex() !== null) return;
@@ -580,16 +670,126 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         }
     }
 
-    addDepartment(): void {
-        this.departments.update(items => [...items, '']);
+    startAddRootUnit(): void {
+        this.orgUnitFormParentId.set(null);
+        this.openOrgUnitForm();
     }
 
-    updateDepartment(index: number, value: string): void {
-        this.departments.update(items => items.map((item, i) => i === index ? value : item));
+    startAddChildUnit(): void {
+        const activeId = this.activeOrgUnitId();
+        if (!activeId) return;
+        this.orgUnitFormParentId.set(activeId);
+        this.openOrgUnitForm();
     }
 
-    removeDepartment(index: number): void {
-        this.departments.update(items => items.filter((_, i) => i !== index));
+    openOrgUnitForm(): void {
+        this.orgUnitFormName.set('');
+        this.orgUnitFormType.set('Department');
+        this.orgUnitFormError.set('');
+        this.orgUnitFormOpen.set(true);
+    }
+
+    cancelOrgUnitForm(): void {
+        this.orgUnitFormOpen.set(false);
+        this.orgUnitFormError.set('');
+        this.orgUnitFormParentId.set(null);
+    }
+
+    setOrgUnitFormType(value: string): void {
+        if (this.orgUnitTypes.includes(value as OrgUnitType)) {
+            this.orgUnitFormType.set(value as OrgUnitType);
+        }
+    }
+
+    saveOrgUnitForm(): void {
+        const name = this.orgUnitFormName().trim();
+        if (!name) {
+            this.orgUnitFormError.set('Unit name is required.');
+            return;
+        }
+
+        const newUnit: OrgUnit = {
+            id: this.nextOrgUnitId(),
+            name,
+            type: this.orgUnitFormType(),
+            status: 'Active',
+            parentId: this.orgUnitFormParentId() || undefined
+        };
+
+        this.orgUnits.update(items => [...items, newUnit]);
+        if (newUnit.parentId) {
+            this.expandedOrgUnitIds.update(items => items.includes(newUnit.parentId!)
+                ? items
+                : [...items, newUnit.parentId!]);
+        }
+        this.activeOrgUnitId.set(newUnit.id);
+        this.cancelOrgUnitForm();
+    }
+
+    selectOrgUnit(id: string): void {
+        this.activeOrgUnitId.set(id);
+        this.orgUnitMemberSearch.set('');
+        this.assignMembersOpen.set(false);
+        this.assignMemberIds.set([]);
+    }
+
+    toggleOrgUnitExpanded(id: string): void {
+        this.expandedOrgUnitIds.update(items => items.includes(id)
+            ? items.filter(item => item !== id)
+            : [...items, id]);
+    }
+
+    isOrgUnitExpanded(id: string): boolean {
+        return this.expandedOrgUnitIds().includes(id);
+    }
+
+    setOrgUnitTab(tab: 'members' | 'roles'): void {
+        this.activeOrgUnitTab.set(tab);
+        if (tab === 'roles') {
+            this.assignMembersOpen.set(false);
+        }
+    }
+
+    openAssignMembers(): void {
+        const activeId = this.activeOrgUnitId();
+        if (!activeId) return;
+        this.assignMemberIds.set([...(this.orgUnitMemberIds()[activeId] || [])]);
+        this.assignMembersOpen.set(true);
+    }
+
+    cancelAssignMembers(): void {
+        this.assignMembersOpen.set(false);
+    }
+
+    toggleAssignMember(userId: string, event: Event): void {
+        const target = event.target as HTMLInputElement | null;
+        const checked = target?.checked ?? false;
+        this.assignMemberIds.update(ids => {
+            if (checked) {
+                return ids.includes(userId) ? ids : [...ids, userId];
+            }
+            return ids.filter(id => id !== userId);
+        });
+    }
+
+    saveAssignMembers(): void {
+        const activeId = this.activeOrgUnitId();
+        if (!activeId) return;
+        const memberIds = this.assignMemberIds();
+        this.orgUnitMemberIds.update(map => ({
+            ...map,
+            [activeId]: memberIds
+        }));
+        this.assignMembersOpen.set(false);
+    }
+
+    removeMemberFromOrgUnit(user: UserRow): void {
+        const activeId = this.activeOrgUnitId();
+        if (!activeId) return;
+        this.orgUnitMemberIds.update(map => ({
+            ...map,
+            [activeId]: (map[activeId] || []).filter(id => id !== user.id)
+        }));
     }
 
     setLevelsTemplate(template: 'k12' | 'primary_secondary' | 'custom'): void {
@@ -972,7 +1172,8 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             effect(() => {
                 this.step();
                 this.schoolRows();
-                this.departments();
+                this.orgUnits();
+                this.orgUnitMemberIds();
                 this.levels();
                 this.levelsTemplate();
                 this.classes();
@@ -993,7 +1194,15 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         if (data.schoolRows?.length) {
             this.schoolRows.set(data.schoolRows.map(row => this.normalizeSchoolRow(row)));
         }
-        this.departments.set(data.departments?.length ? data.departments : this.departments());
+        if (data.orgUnits?.length) {
+            this.orgUnits.set(data.orgUnits);
+        } else if (data.departments?.length) {
+            this.orgUnits.set(this.migrateDepartments(data.departments));
+        }
+        this.syncOrgUnitCounter();
+        if (data.orgUnitMemberIds) {
+            this.orgUnitMemberIds.set(data.orgUnitMemberIds);
+        }
         this.levelsTemplate.set(data.levelsTemplate || 'k12');
         this.levels.set(data.levels?.length ? data.levels : this.defaultLevels(this.levelsTemplate()));
         this.classes.set(data.classes?.length ? data.classes : this.classes());
@@ -1014,7 +1223,8 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             completedAt: status === 'completed' ? new Date().toISOString() : undefined,
             data: {
                 schoolRows: this.schoolRows(),
-                departments: this.departments(),
+                orgUnits: this.orgUnits(),
+                orgUnitMemberIds: this.orgUnitMemberIds(),
                 levelsTemplate: this.levelsTemplate(),
                 levels: this.levels(),
                 classes: this.classes(),
@@ -1170,6 +1380,65 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         } catch {
             return 'UTC';
         }
+    }
+
+    private buildOrgUnitTree(units: OrgUnit[]): OrgUnitNode[] {
+        const nodeMap = new Map<string, OrgUnitNode>();
+        for (const unit of units) {
+            nodeMap.set(unit.id, { ...unit, children: [] });
+        }
+        const roots: OrgUnitNode[] = [];
+        for (const node of nodeMap.values()) {
+            if (node.parentId && nodeMap.has(node.parentId)) {
+                nodeMap.get(node.parentId)!.children.push(node);
+            } else {
+                roots.push(node);
+            }
+        }
+        const sortNodes = (nodes: OrgUnitNode[]) => {
+            nodes.sort((a, b) => a.name.localeCompare(b.name));
+            nodes.forEach(child => sortNodes(child.children));
+        };
+        sortNodes(roots);
+        return roots;
+    }
+
+    private buildOrgUnitPath(activeId: string | null): string {
+        if (!activeId) return '';
+        const nodes = new Map(this.orgUnits().map(unit => [unit.id, unit]));
+        const path: string[] = [];
+        let current = nodes.get(activeId);
+        while (current) {
+            path.unshift(current.name);
+            if (!current.parentId) break;
+            current = nodes.get(current.parentId);
+        }
+        return path.join(' / ');
+    }
+
+    private migrateDepartments(departments: string[]): OrgUnit[] {
+        return departments
+            .filter(name => name.trim().length)
+            .map(name => ({
+                id: this.nextOrgUnitId(),
+                name,
+                type: 'Department',
+                status: 'Active',
+            }));
+    }
+
+    private syncOrgUnitCounter(): void {
+        const maxId = this.orgUnits().reduce((max, unit) => {
+            const match = /^org-unit-(\d+)$/.exec(unit.id);
+            if (!match) return max;
+            return Math.max(max, Number(match[1]));
+        }, 0);
+        this.orgUnitCounter = Math.max(this.orgUnitCounter, maxId);
+    }
+
+    private nextOrgUnitId(): string {
+        this.orgUnitCounter += 1;
+        return `org-unit-${this.orgUnitCounter}`;
     }
 
     isValidEmail(email: string): boolean {

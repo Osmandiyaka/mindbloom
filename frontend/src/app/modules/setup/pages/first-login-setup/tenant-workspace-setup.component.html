@@ -232,144 +232,200 @@
                         <div class="setup-body" *ngIf="step() === 3">
                             <div class="setup-section">
                                 <h2>Organizational units</h2>
-                                <p>Build a hierarchy of schools, divisions, and departments for access and reporting.</p>
+                                <p>Build a hierarchy of schools, divisions, and departments for access and reporting.
+                                </p>
 
                                 <div class="ou-layout">
-                                    <div class="ou-panel ou-panel--tree">
-                                        <div class="ou-panel__header">
-                                            <div>
-                                                <div class="ou-panel__kicker">Organization tree</div>
-                                                <div class="ou-panel__title">Units</div>
-                                                <p class="ou-panel__subtitle">Add root units, then nest divisions and teams.</p>
-                                            </div>
-                                            <mb-button variant="secondary">+ Add root unit</mb-button>
+                                    <div class="ou-nav">
+                                        <div class="ou-nav__header">
+                                            <div class="ou-nav__kicker">Organization</div>
+                                            <div class="ou-nav__title">Units</div>
+                                            <mb-button variant="secondary" (click)="startAddRootUnit()">+ Add root
+                                                unit</mb-button>
                                         </div>
 
-                                        <div class="ou-tree" role="tree">
-                                            <button type="button" class="ou-tree__node is-active" role="treeitem" aria-expanded="true">
-                                                <span class="ou-tree__caret">▾</span>
-                                                <span class="ou-tree__label">District Office</span>
-                                                <span class="ou-tree__meta">3 schools</span>
-                                            </button>
-                                            <div class="ou-tree__children" role="group">
-                                                <button type="button" class="ou-tree__node" role="treeitem" aria-expanded="true">
-                                                    <span class="ou-tree__caret">▾</span>
-                                                    <span class="ou-tree__label">School A</span>
-                                                    <span class="ou-tree__meta">5 units</span>
-                                                </button>
-                                                <div class="ou-tree__children" role="group">
-                                                    <button type="button" class="ou-tree__node" role="treeitem">
-                                                        <span class="ou-tree__spacer"></span>
-                                                        <span class="ou-tree__label">Academics</span>
-                                                    </button>
-                                                    <button type="button" class="ou-tree__node" role="treeitem">
-                                                        <span class="ou-tree__spacer"></span>
-                                                        <span class="ou-tree__label">Student Services</span>
-                                                    </button>
-                                                    <button type="button" class="ou-tree__node" role="treeitem">
-                                                        <span class="ou-tree__spacer"></span>
-                                                        <span class="ou-tree__label">Finance</span>
-                                                    </button>
-                                                </div>
-
-                                                <button type="button" class="ou-tree__node" role="treeitem" aria-expanded="false">
-                                                    <span class="ou-tree__caret">▸</span>
-                                                    <span class="ou-tree__label">School B</span>
-                                                    <span class="ou-tree__meta">2 units</span>
-                                                </button>
+                                        <div class="ou-form" *ngIf="orgUnitFormOpen()">
+                                            <div class="ou-form__title">New organizational unit</div>
+                                            <div class="ou-form__meta" *ngIf="orgUnitFormParentId()">
+                                                Parent: {{ selectedOrgUnit()?.name || 'Selected unit' }}
+                                            </div>
+                                            <div class="ou-form__fields">
+                                                <mb-form-field label="Unit name" [controlId]="'org-unit-name'">
+                                                    <mb-input id="org-unit-name" [value]="orgUnitFormName()"
+                                                        (valueChange)="orgUnitFormName.set($event)"></mb-input>
+                                                </mb-form-field>
+                                                <mb-form-field label="Type" [controlId]="'org-unit-type'">
+                                                    <mb-select id="org-unit-type" [value]="orgUnitFormType()"
+                                                        (valueChange)="setOrgUnitFormType($event)">
+                                                        <option *ngFor="let type of orgUnitTypes" [value]="type">
+                                                            {{ type }}
+                                                        </option>
+                                                    </mb-select>
+                                                </mb-form-field>
+                                            </div>
+                                            <div class="ou-form__error" *ngIf="orgUnitFormError()">
+                                                {{ orgUnitFormError() }}
+                                            </div>
+                                            <div class="ou-form__actions">
+                                                <mb-button variant="secondary" (click)="cancelOrgUnitForm()">Cancel</mb-button>
+                                                <mb-button variant="primary" (click)="saveOrgUnitForm()"
+                                                    [disabled]="!orgUnitFormName().trim()">Save unit</mb-button>
                                             </div>
                                         </div>
 
-                                        <div class="ou-tree__footer">
-                                            <span class="ou-tree__hint">Select a unit to manage members and roles.</span>
-                                        </div>
+                                        <ng-container *ngIf="orgUnitTree().length; else ouEmptyTree">
+                                            <div class="ou-tree" role="tree">
+                                                <ng-container *ngFor="let node of orgUnitTree(); trackBy: trackOrgUnit">
+                                                    <ng-container
+                                                        *ngTemplateOutlet="orgUnitNode; context: { $implicit: node }"></ng-container>
+                                                </ng-container>
+                                            </div>
+                                        </ng-container>
+                                        <ng-template #ouEmptyTree>
+                                            <div class="ou-empty">
+                                                <div class="ou-empty__title">No organizational units yet</div>
+                                                <div class="ou-empty__text">Create a root unit to start building your
+                                                    hierarchy.</div>
+                                            </div>
+                                        </ng-template>
                                     </div>
 
-                                    <div class="ou-panel ou-panel--detail">
-                                        <div class="ou-panel__header ou-panel__header--detail">
-                                            <div>
-                                                <div class="ou-breadcrumb">District Office / School A</div>
-                                                <div class="ou-panel__title">Academics</div>
-                                                <div class="ou-panel__subtitle">Department · Active</div>
+                                    <div class="ou-canvas">
+                                        <ng-container *ngIf="selectedOrgUnit(); else ouEmptyDetail">
+                                            <div class="ou-canvas__header">
+                                                <div>
+                                                    <div class="ou-breadcrumb">{{ selectedOrgUnitPath() }}</div>
+                                                    <div class="ou-canvas__title">{{ selectedOrgUnit()!.name }}</div>
+                                                    <div class="ou-canvas__meta">{{ selectedOrgUnit()!.type }} ·
+                                                        {{ selectedOrgUnit()!.status }}</div>
+                                                </div>
+                                                <div class="ou-canvas__actions">
+                                                    <mb-button variant="secondary" (click)="startAddChildUnit()">Add child
+                                                        unit</mb-button>
+                                                </div>
                                             </div>
-                                            <div class="ou-panel__actions">
-                                                <mb-button variant="secondary">Add child unit</mb-button>
-                                                <button type="button" class="ou-ghost-button">More actions</button>
-                                            </div>
-                                        </div>
 
-                                        <div class="ou-tabs" role="tablist">
-                                            <button type="button" class="ou-tab is-active" role="tab" aria-selected="true">
-                                                Members
-                                            </button>
-                                            <button type="button" class="ou-tab" role="tab" aria-selected="false">
-                                                Roles
-                                            </button>
-                                        </div>
-
-                                        <div class="ou-toolbar">
-                                            <div class="ou-search">
-                                                <input type="text" class="ou-input" placeholder="Search members" />
+                                            <div class="ou-tabs" role="tablist">
+                                                <button type="button" class="ou-tab"
+                                                    [class.is-active]="activeOrgUnitTab() === 'members'" role="tab"
+                                                    [attr.aria-selected]="activeOrgUnitTab() === 'members'"
+                                                    (click)="setOrgUnitTab('members')">
+                                                    Members
+                                                </button>
+                                                <button type="button" class="ou-tab"
+                                                    [class.is-active]="activeOrgUnitTab() === 'roles'" role="tab"
+                                                    [attr.aria-selected]="activeOrgUnitTab() === 'roles'"
+                                                    (click)="setOrgUnitTab('roles')">
+                                                    Roles
+                                                </button>
                                             </div>
-                                            <mb-button variant="primary">Add members</mb-button>
-                                        </div>
 
-                                        <div class="ou-table">
-                                            <div class="ou-table__header">
-                                                <div>Name</div>
-                                                <div>Role</div>
-                                                <div>Status</div>
-                                                <div class="ou-table__actions">Actions</div>
-                                            </div>
-                                            <div class="ou-table__row">
-                                                <div class="ou-person">
-                                                    <div class="ou-avatar">AL</div>
-                                                    <div>
-                                                        <div class="ou-person__name">Avery Lawson</div>
-                                                        <div class="ou-person__meta">avery.lawson&#64;mindbloom.edu</div>
+                                            <div *ngIf="activeOrgUnitTab() === 'members'" class="ou-members">
+                                                <div class="ou-toolbar">
+                                                    <div class="ou-search">
+                                                        <mb-input [value]="orgUnitMemberSearch()"
+                                                            (valueChange)="orgUnitMemberSearch.set($event)"
+                                                            placeholder="Search members"></mb-input>
+                                                    </div>
+                                                    <mb-button variant="primary" [disabled]="!users().length"
+                                                        (click)="openAssignMembers()">Add members</mb-button>
+                                                </div>
+
+                                                <div class="ou-assign" *ngIf="assignMembersOpen()">
+                                                    <div class="ou-assign__title">Assign members</div>
+                                                    <div class="ou-assign__list" *ngIf="users().length; else ouAssignEmpty">
+                                                        <label class="ou-assign__row"
+                                                            *ngFor="let user of users(); trackBy: trackUserRow">
+                                                            <input type="checkbox"
+                                                                [checked]="assignMemberIds().includes(user.id)"
+                                                                (change)="toggleAssignMember(user.id, $event)" />
+                                                            <span class="ou-assign__name">{{ user.name || user.email }}</span>
+                                                            <span class="ou-assign__meta">{{ user.email }}</span>
+                                                        </label>
+                                                    </div>
+                                                    <ng-template #ouAssignEmpty>
+                                                        <div class="ou-assign__empty">Add staff in the previous step to assign
+                                                            them here.</div>
+                                                    </ng-template>
+                                                    <div class="ou-assign__actions">
+                                                        <mb-button variant="secondary" (click)="cancelAssignMembers()">Cancel</mb-button>
+                                                        <mb-button variant="primary" (click)="saveAssignMembers()">Save</mb-button>
                                                     </div>
                                                 </div>
-                                                <div><span class="ou-pill">Head of Department</span></div>
-                                                <div class="ou-status ou-status--active">Active</div>
-                                                <div class="ou-table__actions">
-                                                    <button type="button" class="ou-row-action">...</button>
-                                                </div>
-                                            </div>
-                                            <div class="ou-table__row">
-                                                <div class="ou-person">
-                                                    <div class="ou-avatar">MS</div>
-                                                    <div>
-                                                        <div class="ou-person__name">Maya Singh</div>
-                                                        <div class="ou-person__meta">maya.singh&#64;mindbloom.edu</div>
-                                                    </div>
-                                                </div>
-                                                <div><span class="ou-pill">Teacher</span></div>
-                                                <div class="ou-status ou-status--active">Active</div>
-                                                <div class="ou-table__actions">
-                                                    <button type="button" class="ou-row-action">...</button>
-                                                </div>
-                                            </div>
-                                            <div class="ou-table__row">
-                                                <div class="ou-person">
-                                                    <div class="ou-avatar">RJ</div>
-                                                    <div>
-                                                        <div class="ou-person__name">Riley Jones</div>
-                                                        <div class="ou-person__meta">riley.jones&#64;mindbloom.edu</div>
-                                                    </div>
-                                                </div>
-                                                <div><span class="ou-pill">Staff</span></div>
-                                                <div class="ou-status ou-status--muted">Invited</div>
-                                                <div class="ou-table__actions">
-                                                    <button type="button" class="ou-row-action">...</button>
-                                                </div>
-                                            </div>
-                                        </div>
 
-                                        <div class="ou-helper">
-                                            Roles assigned here inherit to child units. Switch to the Roles tab to manage them.
-                                        </div>
+                                                <ng-container *ngIf="selectedOrgUnitMembers().length; else ouMembersEmpty">
+                                                    <mb-table [columns]="orgUnitMemberColumns"
+                                                        [rows]="selectedOrgUnitMembers()"
+                                                        [emptyMessage]="'No members assigned yet.'"
+                                                        [rowKey]="orgUnitMemberRowKey">
+                                                        <ng-template mbTableActions let-row>
+                                                            <button type="button" class="ou-row-action"
+                                                                (click)="removeMemberFromOrgUnit(row)">
+                                                                Remove
+                                                            </button>
+                                                        </ng-template>
+                                                    </mb-table>
+                                                </ng-container>
+                                                <ng-template #ouMembersEmpty>
+                                                    <div class="ou-empty ou-empty--inline">
+                                                        <div class="ou-empty__title">This unit has no members yet.</div>
+                                                        <div class="ou-empty__text">
+                                                            Assign members to control access and responsibilities.
+                                                        </div>
+                                                        <mb-button variant="primary" (click)="openAssignMembers()">
+                                                            Add members
+                                                        </mb-button>
+                                                    </div>
+                                                </ng-template>
+                                            </div>
+
+                                            <div *ngIf="activeOrgUnitTab() === 'roles'" class="ou-roles">
+                                                <div class="ou-empty ou-empty--inline">
+                                                    <div class="ou-empty__title">No roles assigned</div>
+                                                    <div class="ou-empty__text">Assign roles to inherit access across child
+                                                        units.</div>
+                                                </div>
+                                                <div class="ou-helper">
+                                                    Roles assigned here inherit to child units. Add overrides at specific
+                                                    units when needed.
+                                                </div>
+                                            </div>
+                                        </ng-container>
+
+                                        <ng-template #ouEmptyDetail>
+                                            <div class="ou-empty ou-empty--detail">
+                                                <div class="ou-empty__title">Select an organizational unit</div>
+                                                <div class="ou-empty__text">Choose a unit from the tree to manage members
+                                                    and roles.</div>
+                                            </div>
+                                        </ng-template>
                                     </div>
                                 </div>
+
+                                <ng-template #orgUnitNode let-node>
+                                    <button type="button" class="ou-tree__node"
+                                        [class.is-active]="activeOrgUnitId() === node.id" role="treeitem"
+                                        [attr.aria-expanded]="node.children.length ? isOrgUnitExpanded(node.id) : null"
+                                        (click)="selectOrgUnit(node.id)">
+                                        <span class="ou-tree__caret" *ngIf="node.children.length"
+                                            (click)="toggleOrgUnitExpanded(node.id); $event.stopPropagation()">
+                                            {{ isOrgUnitExpanded(node.id) ? '▾' : '▸' }}
+                                        </span>
+                                        <span class="ou-tree__spacer" *ngIf="!node.children.length"></span>
+                                        <span class="ou-tree__label">{{ node.name }}</span>
+                                        <span class="ou-tree__meta" *ngIf="node.children.length">
+                                            {{ node.children.length }} {{ node.children.length === 1 ? 'unit' : 'units'
+                                            }}
+                                        </span>
+                                    </button>
+                                    <div class="ou-tree__children" role="group"
+                                        *ngIf="node.children.length && isOrgUnitExpanded(node.id)">
+                                        <ng-container *ngFor="let child of node.children; trackBy: trackOrgUnit">
+                                            <ng-container
+                                                *ngTemplateOutlet="orgUnitNode; context: { $implicit: child }"></ng-container>
+                                        </ng-container>
+                                    </div>
+                                </ng-template>
                             </div>
 
                             <div class="setup-footer">
@@ -553,6 +609,9 @@
                                         <h2>Staff & users</h2>
                                         <p>Add staff who will access the workspace. You can invite now and assign roles
                                             later.</p>
+                                        <mb-role-selector [value]="createRoleIds()" [label]="''"
+                                            [placeholder]="'Select role…'" [multiple]="true" [maxVisibleChips]="3"
+                                            (change)="handleCreateRoleChange($event)"></mb-role-selector>
                                     </div>
                                 </div>
                                 <input #csvInput type="file" class="users-csv-input" accept=".csv"
