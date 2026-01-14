@@ -85,14 +85,17 @@ interface CurrentLoginInfoResponse {
         name: string;
         subdomain: string;
         status: string;
-        plan: string;
+        plan?: string | null;
+        editionId?: string | null;
+        edition?: string | null;
         locale?: string;
         timezone?: string;
         enabledModules?: string[];
         contactInfo?: { email: string };
     };
-    edition: EditionSnapshot;
+    edition?: EditionSnapshot | null;
     roles?: any[];
+    requiresEditionSelection?: boolean;
 }
 
 // Legacy User type for compatibility
@@ -586,15 +589,6 @@ export class AuthService {
         }
 
         await this.ensureTenantLoaded(membership.tenantId);
-        const tenant = this.tenantService.getCurrentTenantValue?.();
-        if (tenant?.enabledModules?.length) {
-            this.editionFeatures.setEdition({
-                editionCode: tenant.edition ?? tenant.plan ?? 'custom',
-                editionName: tenant.edition ?? tenant.plan ?? 'Custom',
-                modules: tenant.enabledModules,
-                features: tenant.enabledModules,
-            });
-        }
         const rbacSession = {
             userId: session.user.id,
             tenantId: membership.tenantId,
@@ -776,19 +770,15 @@ export class AuthService {
         }
     }
 
-    private normalizeEditionSnapshot(raw: EditionSnapshot | null | undefined, tenant?: { enabledModules?: string[] }): EditionSnapshot | null {
+    private normalizeEditionSnapshot(raw: EditionSnapshot | null | undefined): EditionSnapshot | null {
         if (!raw) return null;
 
-        const modulesFromTenant = tenant?.enabledModules?.length ? tenant.enabledModules : undefined;
         const modulesFromEdition = (raw as any).modules as string[] | undefined;
-        const modules = modulesFromEdition?.length
-            ? modulesFromEdition
-            : (modulesFromTenant || []);
+        const modules = modulesFromEdition?.length ? modulesFromEdition : [];
 
         return {
             ...raw,
             modules,
-            // keep legacy features unchanged for backward compatibility
             features: raw.features ?? [],
         };
     }
@@ -805,8 +795,15 @@ export class AuthService {
             }
         }
 
-        if (loginInfo.edition) {
-            this.editionFeatures.setEdition(this.normalizeEditionSnapshot(loginInfo.edition, loginInfo.tenant));
+        const requiresEditionSelection = !!loginInfo.requiresEditionSelection || !loginInfo.tenant?.editionId;
+
+        if (requiresEditionSelection) {
+            this.editionFeatures.clear();
+            if (!this.router.url.startsWith('/onboarding')) {
+                this.router.navigate(['/onboarding']);
+            }
+        } else if (loginInfo.edition) {
+            this.editionFeatures.setEdition(this.normalizeEditionSnapshot(loginInfo.edition));
         }
 
         const inlinePermissions = (loginInfo.user.permissions || [])

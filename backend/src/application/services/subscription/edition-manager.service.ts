@@ -133,6 +133,13 @@ export class EditionManager {
         return { edition, features };
     }
 
+    async getEditionByName(name: string): Promise<{ edition: Edition; features: Record<string, string> } | null> {
+        const edition = await this.editions.findByName(name.toLowerCase());
+        if (!edition) return null;
+        const features = await this.getFeatureMapCached(edition.id);
+        return { edition, features };
+    }
+
     async setEditionFeatures(editionId: string, assignments: EditionFeatureAssignment[]): Promise<void> {
         const edition = await this.editions.findById(editionId);
         if (!edition) throw new Error('Edition not found');

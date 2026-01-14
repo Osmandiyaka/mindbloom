@@ -47,7 +47,7 @@ export class EditionFeaturesService {
     }
 
     private selectModules(snapshot: EditionSnapshot): ModuleKey[] {
-        const preferred = snapshot.modules && snapshot.modules.length ? snapshot.modules : snapshot.features || [];
+        const preferred = snapshot.modules && snapshot.modules.length ? snapshot.modules : [];
         // Normalize to ModuleKey string literals and drop duplicates
         const normalized = preferred
             .filter(Boolean)

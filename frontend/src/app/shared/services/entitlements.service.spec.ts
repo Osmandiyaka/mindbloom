@@ -20,23 +20,21 @@ describe('EditionService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('returns minimal surface when no edition loaded', () => {
+    it('returns empty set when no edition loaded', () => {
         const enabled = service.enabledModules();
-        expect(enabled.has(MODULE_KEYS.DASHBOARD)).toBe(true);
-        expect(enabled.has(MODULE_KEYS.APPLY)).toBe(true);
+        expect(enabled.size).toBe(0);
     });
 
-    it('returns backend-provided features when edition set', () => {
-        editionService.setEdition({ editionCode: 'enterprise', editionName: 'Enterprise', features: [MODULE_KEYS.STUDENTS, MODULE_KEYS.FEES] });
+    it('returns backend-provided modules when edition set', () => {
+        editionService.setEdition({ editionCode: 'enterprise', editionName: 'Enterprise', modules: [MODULE_KEYS.STUDENTS, MODULE_KEYS.FEES] });
         const enabled = service.enabledModules();
         expect(enabled.has(MODULE_KEYS.STUDENTS)).toBe(true);
         expect(enabled.has(MODULE_KEYS.FEES)).toBe(true);
-        expect(enabled.has(MODULE_KEYS.APPLY)).toBe(false);
     });
 
     describe('getModulesForPlan()', () => {
         it('should return modules for trial plan', () => {
-            editionService.setEdition({ editionCode: 'trial', editionName: 'Trial', features: [MODULE_KEYS.STUDENTS, MODULE_KEYS.ADMISSIONS] });
+            editionService.setEdition({ editionCode: 'trial', editionName: 'Trial', modules: [MODULE_KEYS.STUDENTS, MODULE_KEYS.ADMISSIONS] });
             const modules = service.getModulesForPlan('trial');
 
             expect(modules.has(MODULE_KEYS.STUDENTS)).toBe(true);
@@ -45,7 +43,7 @@ describe('EditionService', () => {
         });
 
         it('should return modules for enterprise plan', () => {
-            editionService.setEdition({ editionCode: 'enterprise', editionName: 'Enterprise', features: [MODULE_KEYS.HR, MODULE_KEYS.PAYROLL, MODULE_KEYS.LIBRARY] });
+            editionService.setEdition({ editionCode: 'enterprise', editionName: 'Enterprise', modules: [MODULE_KEYS.HR, MODULE_KEYS.PAYROLL, MODULE_KEYS.LIBRARY] });
             const modules = service.getModulesForPlan('enterprise');
 
             expect(modules.has(MODULE_KEYS.HR)).toBe(true);
@@ -56,7 +54,6 @@ describe('EditionService', () => {
 
     describe('getAdditionalModulesInPlan()', () => {
         it('should return modules not in current plan', () => {
-            // current plan (default) has DASHBOARD and APPLY, other plans contain more modules
             const additionalModules = service.getAdditionalModulesInPlan('premium');
 
             // We expect some premium modules to be available (module lists are defined in edition features)
@@ -66,7 +63,7 @@ describe('EditionService', () => {
         it('should return empty array if target plan is same', () => {
             // When target plan equals current plan, there are no additional modules
             // Simulate editions code same as target
-            editionService.setEdition({ editionCode: 'premium', editionName: 'Premium', features: [MODULE_KEYS.FEES, MODULE_KEYS.LIBRARY] });
+            editionService.setEdition({ editionCode: 'premium', editionName: 'Premium', modules: [MODULE_KEYS.FEES, MODULE_KEYS.LIBRARY] });
             const additionalModules = service.getAdditionalModulesInPlan('premium');
 
             expect(additionalModules.length).toBe(0);

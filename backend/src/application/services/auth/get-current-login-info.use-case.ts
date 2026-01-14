@@ -13,7 +13,8 @@ import { Role } from '../../../domain/rbac/entities/role.entity';
 export interface CurrentLoginInfoResult {
     user: User;
     tenant: Tenant;
-    edition: ReturnType<typeof Tenant.editionSnapshot>;
+    edition: ReturnType<typeof Tenant.editionSnapshot> | null;
+    requiresEditionSelection: boolean;
     permissions: string[];
     roles: Role[];
 }
@@ -42,11 +43,11 @@ export class GetCurrentLoginInfoUseCase {
             throw new NotFoundException('Tenant not found');
         }
 
-        // If tenant has an editionId, fetch edition details (name + features), otherwise fall back to plan-based snapshot
-        let edition: ReturnType<typeof Tenant.editionSnapshot> | { editionCode: string; editionName: string; features: string[]; modules?: string[] };
-        if (tenant.editionId) {
+        const requiresEditionSelection = !tenant.editionId;
+        let edition: ReturnType<typeof Tenant.editionSnapshot> | null = null;
+        if (!requiresEditionSelection) {
             try {
-                const res = await this.editionManager.getEditionWithFeatures(tenant.editionId);
+                const res = await this.editionManager.getEditionWithFeatures(tenant.editionId!);
                 edition = {
                     editionCode: res.edition.name,
                     editionName: res.edition.displayName || res.edition.name,
@@ -54,11 +55,8 @@ export class GetCurrentLoginInfoUseCase {
                     modules: res.edition.modules ?? Object.keys(res.features),
                 };
             } catch (err) {
-                // If edition lookup fails, fall back to plan snapshot
                 edition = Tenant.editionSnapshot(tenant);
             }
-        } else {
-            edition = Tenant.editionSnapshot(tenant);
         }
         const rolePermissions = user.role?.permissions ?? [];
         const directPermissions = user.permissions ?? [];
@@ -78,6 +76,7 @@ export class GetCurrentLoginInfoUseCase {
             user,
             tenant,
             edition,
+            requiresEditionSelection,
             permissions: permissionKeys,
             roles,
         };

@@ -14,7 +14,8 @@ export interface Tenant {
     subdomain: string;
     status: TenantStatus;
     plan?: TenantPlan; // deprecated, use `edition` when available
-    edition?: TenantEdition;
+    editionId?: string | null;
+    edition?: TenantEdition | null;
     ownerId?: string | null;
     contactInfo: {
         email: string;

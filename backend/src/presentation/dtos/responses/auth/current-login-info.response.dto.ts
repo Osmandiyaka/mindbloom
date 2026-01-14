@@ -117,11 +117,11 @@ class TenantInfoDto {
     @ApiProperty()
     subdomain!: string;
 
-    @ApiPropertyOptional({ description: 'Tenant edition id (preferred)' })
-    editionId?: string;
+    @ApiPropertyOptional({ description: 'Tenant edition id (preferred)', nullable: true })
+    editionId?: string | null;
 
-    @ApiProperty({ description: 'Tenant edition code (fallback to plan)' })
-    edition!: string;
+    @ApiPropertyOptional({ description: 'Tenant edition code', nullable: true })
+    edition?: string | null;
 
     @ApiProperty({ enum: TenantStatus })
     status!: TenantStatus;
@@ -138,13 +138,13 @@ class TenantInfoDto {
     @ApiProperty({ description: 'Primary tenant contact info' })
     contactInfo!: ContactInfo;
 
-    static fromDomain(tenant: Tenant): TenantInfoDto {
+    static fromDomain(tenant: Tenant, editionCode?: string | null): TenantInfoDto {
         const dto = new TenantInfoDto();
         dto.id = tenant.id;
         dto.name = tenant.name;
         dto.subdomain = tenant.subdomain;
-        dto.editionId = tenant.editionId ?? undefined;
-        dto.edition = tenant.metadata?.editionCode ?? 'trial';
+        dto.editionId = tenant.editionId ?? null;
+        dto.edition = editionCode ?? null;
         dto.status = tenant.status;
         dto.locale = tenant.locale;
         dto.timezone = tenant.timezone;
@@ -161,25 +161,31 @@ export class CurrentLoginInfoResponseDto {
     @ApiProperty({ type: () => TenantInfoDto })
     tenant!: TenantInfoDto;
 
-    @ApiProperty({ type: () => TenantEditionResponseDto })
-    edition!: TenantEditionResponseDto;
+    @ApiPropertyOptional({ type: () => TenantEditionResponseDto, nullable: true })
+    edition?: TenantEditionResponseDto | null;
 
     @ApiProperty({ type: [RoleDto] })
     roles!: RoleDto[];
+
+    @ApiProperty({ description: 'Tenant must select an edition before using the platform' })
+    requiresEditionSelection!: boolean;
 
     static from(result: CurrentLoginInfoResult): CurrentLoginInfoResponseDto {
         const dto = new CurrentLoginInfoResponseDto();
         const permissionKeys = result.permissions || [];
 
         dto.user = UserLoginInfoDto.fromDomain(result.user, permissionKeys);
-        dto.tenant = TenantInfoDto.fromDomain(result.tenant);
-        dto.edition = {
-            editionCode: result.edition.editionCode,
-            editionName: result.edition.editionName,
-            features: result.edition.features,
-            modules: (result as any)?.edition?.modules ?? result.edition.features,
-        } as TenantEditionResponseDto;
+        dto.tenant = TenantInfoDto.fromDomain(result.tenant, result.edition?.editionCode ?? null);
+        dto.edition = result.edition
+            ? ({
+                editionCode: result.edition.editionCode,
+                editionName: result.edition.editionName,
+                features: result.edition.features,
+                modules: (result as any)?.edition?.modules ?? result.edition.features,
+            } as TenantEditionResponseDto)
+            : null;
         dto.roles = (result.roles || []).map((role) => RoleDto.fromDomain(role));
+        dto.requiresEditionSelection = result.requiresEditionSelection;
         return dto;
     }
 }

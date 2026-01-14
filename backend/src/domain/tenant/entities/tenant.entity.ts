@@ -117,18 +117,14 @@ export interface IdTemplateSettings {
 export class Tenant {
 
     static editionSnapshot(tenant: Tenant): EditionFeatures {
-        const features = tenant.enabledModules?.length
-            ? tenant.enabledModules
-            : [];
-
         // With edition stored as an id, fall back to metadata.editionCode or 'trial' when no edition details are available
         const editionCode = tenant.metadata?.editionCode ?? 'trial';
 
         return {
             editionCode,
             editionName: editionCode,
-            features,
-            modules: features,
+            features: [],
+            modules: [],
         };
     }
 

@@ -9,7 +9,7 @@ import { Injectable, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, distinctUntilChanged, map } from 'rxjs';
 import { EditionFeaturesService } from './edition-features.service';
-import { ModuleKey, MODULE_KEYS } from '../types/module-keys';
+import { ModuleKey } from '../types/module-keys';
 
 @Injectable({
     providedIn: 'root'
@@ -17,14 +17,10 @@ import { ModuleKey, MODULE_KEYS } from '../types/module-keys';
 export class EditionService {
     private readonly editions = inject(EditionFeaturesService);
 
-    // Reactive enabled modules based on current tenant plan
+    // Reactive enabled modules based on current tenant edition modules
     private readonly _enabledModules = computed<ReadonlySet<ModuleKey>>(() => {
         const featureSet = this.editions.features();
-        if (featureSet.size > 0) {
-            return new Set(featureSet) as ReadonlySet<ModuleKey>;
-        }
-        // Minimal safe surface when edition not yet loaded
-        return new Set<ModuleKey>([MODULE_KEYS.DASHBOARD, MODULE_KEYS.APPLY]);
+        return new Set(featureSet) as ReadonlySet<ModuleKey>;
     });
 
     /**
@@ -68,8 +64,7 @@ export class EditionService {
     }
 
     /**
-     * Check if current plan includes a module
-     * This is plan-based only, ignoring custom enabledModules overrides
+     * Check if current edition includes a module
      * @param moduleKey Module to check
      * @returns true if plan includes module
      */

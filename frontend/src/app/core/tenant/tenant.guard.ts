@@ -17,11 +17,13 @@ import { inject } from '@angular/core';
 import { Router, type CanActivateFn } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { TenantContextService } from './tenant-context.service';
+import { TenantService } from '../services/tenant.service';
 
 export const tenantGuard: CanActivateFn = (route, state) => {
     const tenantContext = inject(TenantContextService);
     const router = inject(Router);
     const authService = inject(AuthService);
+    const tenantService = inject(TenantService);
 
     // Allow public routes
     if (route.data?.['public'] === true) {
@@ -38,6 +40,13 @@ export const tenantGuard: CanActivateFn = (route, state) => {
 
     if (isHostSession) {
         return router.createUrlTree(['/host']);
+    }
+
+    const tenant = tenantService.getCurrentTenantValue?.();
+    if (tenant && !tenant.editionId) {
+        if (!state.url.startsWith('/onboarding')) {
+            return router.createUrlTree(['/onboarding']);
+        }
     }
 
     // Check if tenant context exists
