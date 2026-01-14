@@ -10,8 +10,15 @@ export interface MbTableColumn<T> {
     sortable?: boolean;
     width?: string;
     align?: 'start' | 'center' | 'end';
-    cell?: (row: T) => string;
+    cell?: (row: T) => MbTableCellValue;
 }
+
+export type MbTableCellValue =
+    | string
+    | {
+          primary: string;
+          secondary?: string;
+      };
 
 @Component({
     selector: 'mb-table',
@@ -71,7 +78,17 @@ export interface MbTableColumn<T> {
                                 [class.is-inactive]="isStatusColumn(column) && isInactiveStatus(row)"
                                 (click)="handleCellClick($event, row, column)"
                             >
-                                {{ getCellValue(row, column) }}
+                                <ng-container *ngIf="getCellValue(row, column) as cell">
+                                    <ng-container *ngIf="isCellObject(cell); else cellText">
+                                        <span class="mb-table__cell-group">
+                                            <span class="mb-table__cell-primary">{{ cell.primary }}</span>
+                                            <span class="mb-table__cell-secondary" *ngIf="cell.secondary">
+                                                {{ cell.secondary }}
+                                            </span>
+                                        </span>
+                                    </ng-container>
+                                    <ng-template #cellText>{{ cell }}</ng-template>
+                                </ng-container>
                             </span>
                         </td>
                         <td *ngIf="actionsTemplate" class="mb-table__actions">
@@ -185,13 +202,17 @@ export class MbTableComponent<T extends Record<string, any>> {
         return this.rowKey ? this.rowKey(row) : JSON.stringify(row);
     }
 
-    getCellValue(row: T, column: MbTableColumn<T>): string {
+    getCellValue(row: T, column: MbTableColumn<T>): MbTableCellValue {
         if (column.cell) {
             return column.cell(row);
         }
         const key = column.key as keyof T;
         const value = row[key];
         return value === undefined || value === null ? '' : String(value);
+    }
+
+    isCellObject(value: MbTableCellValue): value is { primary: string; secondary?: string } {
+        return typeof value === 'object' && value !== null && 'primary' in value;
     }
 
     getColumnKey(column: MbTableColumn<T>): string {

@@ -36,6 +36,22 @@
     gap: var(--mb-space-2);
 }
 
+.mb-table__cell-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mb-table__cell-primary {
+    font-weight: 600;
+    color: var(--mb-color-text);
+}
+
+.mb-table__cell-secondary {
+    font-size: 12px;
+    color: var(--mb-color-text-muted);
+}
+
 .mb-table__cell--status {
     padding: 2px 10px;
     border-radius: 999px;

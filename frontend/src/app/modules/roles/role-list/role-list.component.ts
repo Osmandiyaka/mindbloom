@@ -80,8 +80,10 @@ export class RoleListComponent implements OnInit {
         {
             key: 'name',
             label: 'Role',
-            cell: (role: Role) =>
-                role.description ? `${role.name}\n${role.description}` : role.name,
+            cell: (role: Role) => ({
+                primary: role.name,
+                secondary: role.description || undefined,
+            }),
         },
         {
             key: 'type',
