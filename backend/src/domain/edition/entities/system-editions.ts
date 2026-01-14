@@ -21,6 +21,7 @@ export function createGlobalEditions(): Edition[] {
                 'dashboard',
                 'students',
                 'attendance',
+                'roles',
                 'setup'
             ],
         }),
@@ -43,6 +44,7 @@ export function createGlobalEditions(): Edition[] {
                 'academics',
                 'fees',
                 'library',
+                'roles',
                 'tasks',
                 'setup',
                 'plugins'
