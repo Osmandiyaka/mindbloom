@@ -10,6 +10,8 @@ export interface CreateRoleDto {
     tenantId: string;
     name: string;
     description: string;
+    scopeType?: 'workspace' | 'school';
+    status?: 'active' | 'inactive';
     permissions: Array<{
         resource: string;
         actions: string[];
@@ -50,6 +52,8 @@ export class CreateRoleUseCase {
             tenantId: dto.tenantId,
             name: dto.name,
             description: dto.description,
+            scopeType: dto.scopeType,
+            status: dto.status,
             permissions,
             isSystemRole: false, // Custom roles are never system roles
         });

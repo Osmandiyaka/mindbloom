@@ -3,6 +3,16 @@ import { IsString, IsArray, IsNotEmpty, IsEnum, ValidateNested, IsOptional } fro
 import { Type } from 'class-transformer';
 import { PermissionAction, PermissionScope } from '../../../../domain/rbac/entities/permission.entity';
 
+export enum RoleScopeTypeDto {
+    WORKSPACE = 'workspace',
+    SCHOOL = 'school',
+}
+
+export enum RoleStatusDto {
+    ACTIVE = 'active',
+    INACTIVE = 'inactive',
+}
+
 export class PermissionDto {
     @ApiProperty({ example: 'students', required: false })
     @IsString()
@@ -70,6 +80,16 @@ export class CreateRoleDto {
     @IsNotEmpty()
     description: string;
 
+    @ApiProperty({ example: 'workspace', enum: RoleScopeTypeDto, required: false })
+    @IsEnum(RoleScopeTypeDto)
+    @IsOptional()
+    scopeType?: RoleScopeTypeDto;
+
+    @ApiProperty({ example: 'active', enum: RoleStatusDto, required: false })
+    @IsEnum(RoleStatusDto)
+    @IsOptional()
+    status?: RoleStatusDto;
+
     @ApiProperty({ type: [PermissionDto] })
     @IsArray()
     @ValidateNested({ each: true })
@@ -86,6 +106,16 @@ export class UpdateRoleDto {
     @ApiProperty({ example: 'Manages exams and assessments', required: false })
     @IsString()
     description?: string;
+
+    @ApiProperty({ example: 'workspace', enum: RoleScopeTypeDto, required: false })
+    @IsEnum(RoleScopeTypeDto)
+    @IsOptional()
+    scopeType?: RoleScopeTypeDto;
+
+    @ApiProperty({ example: 'active', enum: RoleStatusDto, required: false })
+    @IsEnum(RoleStatusDto)
+    @IsOptional()
+    status?: RoleStatusDto;
 
     @ApiProperty({ type: [PermissionDto], required: false })
     @IsArray()

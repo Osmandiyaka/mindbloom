@@ -1,0 +1,37 @@
+<div class="access-scope">
+    <div class="access-scope__options">
+        <label class="access-scope__option">
+            <input
+                type="radio"
+                [name]="scopeName"
+                [checked]="scope === 'all'"
+                (change)="selectScope('all')"
+                [disabled]="disabled"
+            />
+            <span>All schools</span>
+        </label>
+        <label class="access-scope__option">
+            <input
+                type="radio"
+                [name]="scopeName"
+                [checked]="scope === 'selected'"
+                (change)="selectScope('selected')"
+                [disabled]="disabled"
+            />
+            <span>Selected schools</span>
+        </label>
+    </div>
+
+    <div class="access-scope__list" *ngIf="scope === 'selected'">
+        <div class="access-scope__empty" *ngIf="!schools.length">No schools available.</div>
+        <div class="access-scope__item" *ngFor="let school of schools; track school.id">
+            <mb-checkbox
+                [checked]="isSelected(school.id)"
+                [disabled]="disabled"
+                (checkedChange)="toggleSchool(school.id)"
+            >
+                {{ school.name }}
+            </mb-checkbox>
+        </div>
+    </div>
+</div>

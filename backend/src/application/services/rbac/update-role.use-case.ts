@@ -11,6 +11,8 @@ export interface UpdateRoleDto {
     tenantId: string;
     name?: string;
     description?: string;
+    scopeType?: 'workspace' | 'school';
+    status?: 'active' | 'inactive';
     permissions?: Array<{
         resource: string;
         actions: string[];
@@ -42,6 +44,14 @@ export class UpdateRoleUseCase {
 
         if (dto.description) {
             role.description = dto.description;
+        }
+
+        if (dto.scopeType) {
+            role.scopeType = dto.scopeType;
+        }
+
+        if (dto.status) {
+            role.status = dto.status;
         }
 
         if (dto.permissions) {

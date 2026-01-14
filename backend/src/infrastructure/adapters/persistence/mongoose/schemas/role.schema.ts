@@ -23,6 +23,16 @@ export const RoleSchema = new Schema(
             type: Boolean,
             default: false,
         },
+        scopeType: {
+            type: String,
+            enum: ['workspace', 'school'],
+            default: 'workspace',
+        },
+        status: {
+            type: String,
+            enum: ['active', 'inactive'],
+            default: 'active',
+        },
         permissions: [
             {
                 resource: { type: String, required: true },
@@ -59,6 +69,8 @@ export interface RoleDocument {
     description: string;
     isSystemRole: boolean;
     isGlobal: boolean;
+    scopeType: 'workspace' | 'school';
+    status: 'active' | 'inactive';
     permissions: Array<{
         resource: string;
         actions: string[];

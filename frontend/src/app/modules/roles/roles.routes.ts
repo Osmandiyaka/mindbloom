@@ -1,6 +1,5 @@
-import { Routes } from '@angular/router';
 import { RoleListComponent } from './role-list/role-list.component';
-import { RoleFormComponent } from './role-form/role-form.component';
+import { Routes } from '@angular/router';
 
 export const rolesRoutes: Routes = [
     {
@@ -9,10 +8,12 @@ export const rolesRoutes: Routes = [
     },
     {
         path: 'create',
-        component: RoleFormComponent
+        redirectTo: '',
+        pathMatch: 'full'
     },
     {
         path: ':id/edit',
-        component: RoleFormComponent
+        redirectTo: '',
+        pathMatch: 'full'
     }
 ];

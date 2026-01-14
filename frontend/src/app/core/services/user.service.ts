@@ -30,7 +30,7 @@ export interface CreateUserDto {
 export interface UpdateUserDto {
     email?: string;
     name?: string;
-    roleId?: string;
+    roleId?: string | null;
     profilePicture?: string;
     forcePasswordReset?: boolean;
     mfaEnabled?: boolean;

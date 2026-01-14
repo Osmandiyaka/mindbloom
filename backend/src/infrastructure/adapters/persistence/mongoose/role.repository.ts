@@ -28,6 +28,8 @@ export class MongooseRoleRepository extends TenantScopedRepository<RoleDocument,
             description: role.description,
             isSystemRole: role.isSystemRole,
             isGlobal: role.isGlobal ?? false,
+            scopeType: role.scopeType,
+            status: role.status,
             permissions: role.permissions.map((p) => ({
                 resource: p.resource,
                 actions: p.actions,
@@ -113,6 +115,8 @@ export class MongooseRoleRepository extends TenantScopedRepository<RoleDocument,
                     description: role.description,
                     isGlobal: role.isGlobal ?? false,
                     isSystemRole: role.isSystemRole,
+                    scopeType: role.scopeType,
+                    status: role.status,
                     permissions: role.permissions.map((p) => ({
                         resource: p.resource,
                         actions: p.actions,
@@ -228,6 +232,8 @@ export class MongooseRoleRepository extends TenantScopedRepository<RoleDocument,
             description: doc.description,
             isSystemRole: doc.isSystemRole,
             isGlobal: doc.isGlobal,
+            scopeType: doc.scopeType,
+            status: doc.status,
             permissions: doc.permissions.map(
                 (p) =>
                     new Permission({

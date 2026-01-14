@@ -45,6 +45,8 @@ export interface Role {
     name: string;
     description: string;
     isSystemRole: boolean;
+    scopeType?: 'workspace' | 'school';
+    status?: 'active' | 'inactive';
     permissions: Permission[];
     parentRoleId?: string;
     createdAt: Date;
@@ -54,11 +56,15 @@ export interface Role {
 export interface CreateRoleDto {
     name: string;
     description: string;
+    scopeType?: 'workspace' | 'school';
+    status?: 'active' | 'inactive';
     permissions: Permission[];
 }
 
 export interface UpdateRoleDto {
     name?: string;
     description?: string;
+    scopeType?: 'workspace' | 'school';
+    status?: 'active' | 'inactive';
     permissions?: Permission[];
 }

@@ -8,6 +8,8 @@ export class Role {
     tenantId: string | null;
     name: string;
     description: string;
+    scopeType: RoleScopeType;
+    status: RoleStatus;
 
     /** System roles cannot be deleted or modified */
     isSystemRole: boolean;
@@ -29,6 +31,8 @@ export class Role {
         this.permissions = this.permissions || [];
         this.isSystemRole = this.isSystemRole || false;
         this.isGlobal = this.isGlobal || false;
+        this.scopeType = this.scopeType || 'workspace';
+        this.status = this.status || 'active';
         this.createdAt = this.createdAt || new Date();
         this.updatedAt = this.updatedAt || new Date();
     }
@@ -84,6 +88,8 @@ export class Role {
         permissions?: Permission[];
         isSystemRole?: boolean;
         isGlobal?: boolean;
+        scopeType?: RoleScopeType;
+        status?: RoleStatus;
     }): Role {
         return new Role({
             id: undefined, // Will be set by repository
@@ -94,3 +100,6 @@ export class Role {
         });
     }
 }
+
+export type RoleScopeType = 'workspace' | 'school';
+export type RoleStatus = 'active' | 'inactive';
