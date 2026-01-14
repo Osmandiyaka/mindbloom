@@ -329,6 +329,22 @@ export class TenantOnboardingComponent implements OnInit {
     editions = signal<Array<{ id: string; name: string; displayName: string; description?: string | null; features?: Record<string, string> }>>([]);
     selectedEditionId = signal<string>('');
     selectedEditionName = signal<string>('');
+    readonly orderedEditions = computed(() => {
+        const order = ['starter', 'professional', 'premium', 'enterprise'];
+        const list = [...this.editions()];
+        return list.sort((a, b) => {
+            const aName = (a.displayName || a.name || '').toLowerCase();
+            const bName = (b.displayName || b.name || '').toLowerCase();
+            const aIndex = order.findIndex((key) => aName.includes(key));
+            const bIndex = order.findIndex((key) => bName.includes(key));
+            if (aIndex === -1 && bIndex === -1) {
+                return aName.localeCompare(bName);
+            }
+            if (aIndex === -1) return 1;
+            if (bIndex === -1) return -1;
+            return aIndex - bIndex;
+        });
+    });
 
     createExtraAdmin = signal(false);
     adminFirstName = signal('');
@@ -810,9 +826,26 @@ export class TenantOnboardingComponent implements OnInit {
         this.selectedEditionName.set(edition.displayName || edition.name);
     }
 
-    editionFeatures(edition: { features?: Record<string, string> }): string[] {
+    editionBullets(edition: { features?: Record<string, string> }): string[] {
         const entries = edition.features ? Object.values(edition.features) : [];
-        return entries.filter(Boolean).slice(0, 4);
+        return entries.filter(Boolean).slice(0, 5);
+    }
+
+    editionBadge(edition: { name: string; displayName?: string }): string | null {
+        const label = (edition.displayName || edition.name || '').toLowerCase();
+        if (label.includes('professional')) return 'Most popular';
+        if (label.includes('enterprise')) return 'Best for large teams';
+        return null;
+    }
+
+    isEnterpriseEdition(edition: { name: string; displayName?: string }): boolean {
+        const label = (edition.displayName || edition.name || '').toLowerCase();
+        return label.includes('enterprise');
+    }
+
+    contactSales(event: Event): void {
+        event.stopPropagation();
+        window.location.href = 'mailto:support@mindbloom.com?subject=Enterprise%20edition';
     }
 
     back(): void {

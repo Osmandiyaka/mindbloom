@@ -1,23 +1,42 @@
 <div class="onboarding-page" [class.onboarding-page--modal]="isRegistrationMode()">
-    <mb-card class="onboarding-card">
+    <mb-card class="onboarding-card" [class.onboarding-card--wide]="!isRegistrationMode() && step() === 3">
         <div class="onboarding-header">
             <h1>{{ stepTitle() }}</h1>
             <p>{{ stepSubtitle() }}</p>
         </div>
 
         <div class="onboarding-steps" role="list">
+            @if (isRegistrationMode()) {
             <div class="step" [class.active]="step() === 1" role="listitem">
                 <span class="step-dot" aria-hidden="true"></span>
                 <span class="step-label">Organization</span>
             </div>
-            <div class="step" [class.active]="isAdminStepActive()" role="listitem">
+            <div class="step" [class.active]="step() === 2" role="listitem">
                 <span class="step-dot" aria-hidden="true"></span>
                 <span class="step-label">Administrator</span>
             </div>
-            <div class="step" [class.active]="isVerificationStepActive()" role="listitem">
+            <div class="step" [class.active]="step() === 3" role="listitem">
                 <span class="step-dot" aria-hidden="true"></span>
                 <span class="step-label">Verification</span>
             </div>
+            } @else {
+            <div class="step" [class.active]="step() === 1" role="listitem">
+                <span class="step-dot" aria-hidden="true"></span>
+                <span class="step-label">Organization</span>
+            </div>
+            <div class="step" [class.active]="step() === 2" role="listitem">
+                <span class="step-dot" aria-hidden="true"></span>
+                <span class="step-label">Schools</span>
+            </div>
+            <div class="step" [class.active]="step() === 3" role="listitem">
+                <span class="step-dot" aria-hidden="true"></span>
+                <span class="step-label">Edition</span>
+            </div>
+            <div class="step" [class.active]="step() === 4" role="listitem">
+                <span class="step-dot" aria-hidden="true"></span>
+                <span class="step-label">Review</span>
+            </div>
+            }
         </div>
 
         @if (showValidationSummary()) {
@@ -112,23 +131,59 @@
 
             @if (!isRegistrationMode() && step() === 3) {
             <div class="step-section">
-                <div class="edition-grid">
-                    @for (edition of editions(); track edition.id) {
-                    <button type="button" class="edition-card" [class.selected]="selectedEditionId() === edition.id"
-                        (click)="selectEdition(edition)">
-                        <div class="edition-title">{{ edition.displayName || edition.name }}</div>
-                        <div class="edition-description">{{ edition.description || 'Configured for your organization.'
-                            }}</div>
-                        @if (editionFeatures(edition).length) {
-                        <ul class="edition-features">
-                            @for (feature of editionFeatures(edition); track feature) {
-                            <li>{{ feature }}</li>
+                <div class="edition-helper">You can change this later from Tenant Settings.</div>
+                @if (editions().length) {
+                <div class="edition-layout" role="radiogroup" aria-label="Platform edition">
+                    <div class="edition-grid">
+                    @for (edition of orderedEditions(); track edition.id) {
+                        <button
+                            type="button"
+                            class="edition-card"
+                            [class.selected]="selectedEditionId() === edition.id"
+                            [class.edition-card--enterprise]="isEnterpriseEdition(edition)"
+                            role="radio"
+                            [attr.aria-checked]="selectedEditionId() === edition.id"
+                            (click)="selectEdition(edition)"
+                        >
+                            <div class="edition-card__top">
+                                <div class="edition-title">{{ edition.displayName || edition.name }}</div>
+                                @if (editionBadge(edition)) {
+                                <span class="edition-badge">{{ editionBadge(edition) }}</span>
+                                }
+                                @if (selectedEditionId() === edition.id) {
+                                <span class="edition-selected-badge">
+                                    <span class="edition-selected-icon" aria-hidden="true">✓</span>
+                                    Selected
+                                </span>
+                                }
+                            </div>
+                            <div class="edition-description">{{ edition.description || 'Configured for your organization.' }}</div>
+                            @if (isEnterpriseEdition(edition)) {
+                            <div class="edition-plus">Includes everything in Premium, plus:</div>
                             }
-                        </ul>
+                            @if (editionBullets(edition).length) {
+                            <ul class="edition-features">
+                                @for (feature of editionBullets(edition); track feature) {
+                                <li>
+                                    <span class="edition-feature-icon" aria-hidden="true">✓</span>
+                                    <span>{{ feature }}</span>
+                                </li>
+                                }
+                            </ul>
+                            }
+                            @if (isEnterpriseEdition(edition)) {
+                            <div class="edition-actions">
+                                <mb-button variant="secondary" type="button" (click)="contactSales($event)">Contact sales</mb-button>
+                            </div>
+                            }
+                        </button>
                         }
-                    </button>
-                    }
+                    </div>
                 </div>
+                <div class="edition-info">Your edition controls feature availability and default permissions. You can modify access later.</div>
+                } @else {
+                <div class="edition-empty">No editions are available right now. Please try again later.</div>
+                }
             </div>
             }
 
@@ -255,12 +310,21 @@
 
         @if (!isRegistrationMode()) {
         <div class="onboarding-actions">
-            <mb-button variant="tertiary" (click)="back()" [disabled]="step() === 1 || isSaving()">Back</mb-button>
-            <mb-button variant="tertiary" (click)="saveAndExit()" [disabled]="isSaving()">Save &amp; exit</mb-button>
-            <mb-button variant="primary" [loading]="isSaving()" [fullWidth]="true" [disabled]="!canContinue()"
-                [attr.title]="!canContinue() ? 'Complete all required fields to continue.' : null" (click)="next()">
-                {{ step() === 4 ? 'Create organization' : 'Continue' }}
-            </mb-button>
+            <div class="onboarding-actions__left">
+                <mb-button variant="tertiary" (click)="back()" [disabled]="step() === 1 || isSaving()">Back</mb-button>
+            </div>
+            <div class="onboarding-actions__center">
+                <mb-button variant="tertiary" (click)="saveAndExit()" [disabled]="isSaving()">Save &amp; exit</mb-button>
+            </div>
+            <div class="onboarding-actions__right">
+                @if (!isRegistrationMode() && step() === 3 && selectedEditionName()) {
+                <div class="edition-selected-summary">Selected: {{ selectedEditionName() }}</div>
+                }
+                <mb-button variant="primary" [loading]="isSaving()" [disabled]="!canContinue()"
+                    [attr.title]="!canContinue() ? 'Complete all required fields to continue.' : null" (click)="next()">
+                    {{ step() === 4 ? 'Create organization' : 'Continue' }}
+                </mb-button>
+            </div>
         </div>
         } @else {
         <div class="onboarding-actions">
