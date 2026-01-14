@@ -4,6 +4,18 @@ import { Tenant, TenantStatus, ContactInfo } from '../../../../domain/tenant/ent
 import { Role } from '../../../../domain/rbac/entities/role.entity';
 import { User } from '../../../../domain/entities/user.entity';
 import { TenantEditionResponseDto } from '../tenant/tenant-edition.response.dto';
+import { PermissionAction, PermissionScope } from '../../../../domain/rbac/entities/permission.entity';
+
+class RolePermissionDto {
+    @ApiProperty()
+    resource!: string;
+
+    @ApiProperty({ isArray: true, enum: PermissionAction })
+    actions!: PermissionAction[];
+
+    @ApiProperty({ enum: PermissionScope })
+    scope!: PermissionScope;
+}
 
 class RoleDto {
     @ApiProperty()
@@ -21,6 +33,15 @@ class RoleDto {
     @ApiProperty({ description: 'Role is global across tenants', required: false })
     isGlobal?: boolean;
 
+    @ApiProperty({ description: 'Role scope type', required: false })
+    scopeType?: string;
+
+    @ApiProperty({ description: 'Role status', required: false })
+    status?: string;
+
+    @ApiProperty({ type: [RolePermissionDto], required: false })
+    permissions?: RolePermissionDto[];
+
     static fromDomain(role: Role): RoleDto {
         const dto = new RoleDto();
         dto.id = role.id;
@@ -28,6 +49,13 @@ class RoleDto {
         dto.description = role.description;
         dto.isSystemRole = role.isSystemRole;
         dto.isGlobal = role.isGlobal;
+        dto.scopeType = role.scopeType;
+        dto.status = role.status;
+        dto.permissions = role.permissions?.map((perm) => ({
+            resource: perm.resource,
+            actions: perm.actions,
+            scope: perm.scope,
+        }));
         return dto;
     }
 }
@@ -136,6 +164,9 @@ export class CurrentLoginInfoResponseDto {
     @ApiProperty({ type: () => TenantEditionResponseDto })
     edition!: TenantEditionResponseDto;
 
+    @ApiProperty({ type: [RoleDto] })
+    roles!: RoleDto[];
+
     static from(result: CurrentLoginInfoResult): CurrentLoginInfoResponseDto {
         const dto = new CurrentLoginInfoResponseDto();
         const permissionKeys = result.permissions || [];
@@ -148,6 +179,7 @@ export class CurrentLoginInfoResponseDto {
             features: result.edition.features,
             modules: (result as any)?.edition?.modules ?? result.edition.features,
         } as TenantEditionResponseDto;
+        dto.roles = (result.roles || []).map((role) => RoleDto.fromDomain(role));
         return dto;
     }
 }

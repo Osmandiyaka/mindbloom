@@ -1,8 +1,8 @@
 import { Injectable, computed, signal, inject } from '@angular/core';
 import { HttpBackend, HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, throwError, BehaviorSubject, of, firstValueFrom } from 'rxjs';
-import { tap, catchError, map, finalize, shareReplay } from 'rxjs/operators';
+import { Observable, throwError, BehaviorSubject, firstValueFrom } from 'rxjs';
+import { tap, catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { AuthSession, AuthTokens } from './auth.models';
 import { AuthStorage } from './auth.storage';
@@ -92,6 +92,7 @@ interface CurrentLoginInfoResponse {
         contactInfo?: { email: string };
     };
     edition: EditionSnapshot;
+    roles?: any[];
 }
 
 // Legacy User type for compatibility
@@ -135,8 +136,6 @@ export class AuthService {
 
     // Ensure RBAC roles load once per session
     private rbacLoadPromise: Promise<void> | null = null;
-
-    private readonly allActions = ['create', 'read', 'update', 'delete', 'export', 'import', 'approve', 'manage', 'mark', 'issue', 'return', 'process', 'publish', 'edit', 'view', 'write', 'assign', 'allocate', 'impersonate', 'system', 'record', 'refund', 'cancel'];
 
     // Fallback expiry for tokens that do not provide exp
     private readonly defaultTtlMs = 10 * 60 * 1000; // 10 minutes
@@ -582,74 +581,32 @@ export class AuthService {
         const loginInfo = await this.fetchCurrentLoginInfo(membership.tenantId, session.tokens.accessToken);
 
         if (loginInfo) {
-            if (loginInfo.tenant) {
-                try {
-                    this.tenantService.setTenant({
-                        ...loginInfo.tenant,
-                        enabledModules: loginInfo.tenant.enabledModules || [],
-                    } as any);
-                } catch (error) {
-                    console.warn('[AuthService] Failed to cache tenant from login-info', error);
-                }
-            }
-
-            if (loginInfo.edition) {
-                this.editionFeatures.setEdition(this.normalizeEditionSnapshot(loginInfo.edition, loginInfo.tenant));
-            }
-
-            const inlinePermissions = (loginInfo.user.permissions || [])
-                .map((p: string) => this.normalizePermissionKey(p));
-
-            const rbacSession = {
-                userId: loginInfo.user.id,
-                tenantId: loginInfo.user.tenantId,
-                roleIds: this.roleIdsFromLoginInfo(loginInfo),
-                permissionOverrides: inlinePermissions.length
-                    ? { allow: inlinePermissions }
-                    : undefined,
-            };
-
-            this.rbacService.setSession(rbacSession);
-
-            const roles: RoleDefinition[] = [];
-
-            if (loginInfo.user.role) {
-                roles.push(this.mapRoleFromApi(loginInfo.user.role));
-            }
-
-            this.rbacService.setRoles(roles);
+            this.applyLoginInfo(loginInfo);
             return;
         }
 
-        // Ensure tenant details (plan, enabledModules) are loaded from backend to drive entitlements
         await this.ensureTenantLoaded(membership.tenantId);
-
-        // Load edition/features for current tenant (backend-driven)
-        const edition = await this.fetchEditionForTenant(membership.tenantId, session.tokens.accessToken);
-        if (edition) {
-            this.editionFeatures.setEdition(this.normalizeEditionSnapshot(edition, this.tenantService.getCurrentTenantValue?.() ?? undefined));
+        const tenant = this.tenantService.getCurrentTenantValue?.();
+        if (tenant?.enabledModules?.length) {
+            this.editionFeatures.setEdition({
+                editionCode: tenant.edition ?? tenant.plan ?? 'custom',
+                editionName: tenant.edition ?? tenant.plan ?? 'Custom',
+                modules: tenant.enabledModules,
+                features: tenant.enabledModules,
+            });
         }
-
         const rbacSession = {
             userId: session.user.id,
             tenantId: membership.tenantId,
-            roleIds: membership.roles || []
+            roleIds: membership.roles || [],
+            permissionOverrides: membership.permissions?.length
+                ? { allow: membership.permissions.map((p) => this.normalizePermissionKey(p)) }
+                : undefined,
         };
 
         this.rbacService.setSession(rbacSession);
 
         const roles: RoleDefinition[] = [];
-
-        // Inline permissions from membership (if provided by backend)
-        if (membership.permissions?.length) {
-            roles.push({
-                id: 'membership-inline',
-                name: 'Membership Permissions',
-                description: 'Permissions provided by membership',
-                permissions: membership.permissions.map((p) => this.normalizePermissionKey(p)),
-                isSystem: true,
-            });
-        }
 
         // Fetch role definitions from backend
         try {
@@ -743,11 +700,8 @@ export class AuthService {
                     continue;
                 }
                 if (action === 'manage') {
-                    // Grant all known actions for this resource
-                    for (const a of this.allActions) {
-                        set.add(this.normalizePermissionKey(`${resource}.${a}`));
-                    }
                     set.add(this.normalizePermissionKey(`${resource}.*`));
+                    set.add(this.normalizePermissionKey(`${resource}.manage`));
                 } else {
                     set.add(this.normalizePermissionKey(`${resource}.${action}`));
                 }
@@ -822,65 +776,14 @@ export class AuthService {
         }
     }
 
-    private async fetchEditionForTenant(tenantId: string, accessToken: string | undefined): Promise<EditionSnapshot | null> {
-        try {
-            if (!accessToken) return null;
-            const dto = await firstValueFrom(
-                this.http.get<EditionSnapshot>(`${this.API_URL}/tenants/current/edition`, {
-                    withCredentials: true,
-                    headers: {
-                        'x-tenant-id': tenantId,
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                }),
-            );
-            return dto;
-        } catch (error) {
-            console.warn('[AuthService] Failed to load edition/features', { tenantId, error });
-            return null;
-        }
-    }
-
     private normalizeEditionSnapshot(raw: EditionSnapshot | null | undefined, tenant?: { enabledModules?: string[] }): EditionSnapshot | null {
         if (!raw) return null;
 
         const modulesFromTenant = tenant?.enabledModules?.length ? tenant.enabledModules : undefined;
         const modulesFromEdition = (raw as any).modules as string[] | undefined;
-        const featuresLegacy = raw.features ?? [];
-
-        // Normalize edition code to lower-case for lookup
-        const editionCode = (raw as any).editionCode?.toString().toLowerCase?.() || raw.editionName?.toLowerCase?.();
-
-        // Known defaults when backend omits modules
-        const defaultModulesByEdition: Record<string, string[]> = {
-            starter: ['dashboard', 'students', 'attendance', 'setup'],
-            professional: ['dashboard', 'students', 'admissions', 'attendance', 'academics', 'fees', 'library', 'tasks', 'setup', 'plugins'],
-            premium: ['dashboard', 'students', 'admissions', 'attendance', 'academics', 'fees', 'accounting', 'finance', 'hr', 'library', 'hostel', 'transport', 'roles', 'tasks', 'setup', 'plugins'],
-            enterprise: ['dashboard', 'students', 'admissions', 'apply', 'attendance', 'academics', 'fees', 'accounting', 'finance', 'hr', 'payroll', 'library', 'hostel', 'transport', 'roles', 'tasks', 'setup', 'plugins'],
-            trial: ['dashboard', 'students', 'attendance', 'setup'],
-        };
-
-        // Try explicit modules, then tenant enabledModules, then map legacy features, then defaults by edition code
-        let modules: string[] | undefined;
-
-        if (modulesFromEdition?.length) {
-            modules = modulesFromEdition;
-        } else if (modulesFromTenant?.length) {
-            modules = modulesFromTenant;
-        } else if (featuresLegacy.length) {
-            // Minimal heuristic: if enterprise-style support features present, assume enterprise module set
-            const looksEnterprise = featuresLegacy.some(f => ['dedicated_db', 'sso', 'custom_modules', 'on_prem', 'white_label', 'support_level'].includes(f));
-            if (looksEnterprise) {
-                modules = defaultModulesByEdition['enterprise'];
-            } else {
-                // Fallback: keep legacy features as-is (may align with module keys if backend sends them)
-                modules = featuresLegacy;
-            }
-        } else if (editionCode && defaultModulesByEdition[editionCode]) {
-            modules = defaultModulesByEdition[editionCode];
-        } else {
-            modules = [];
-        }
+        const modules = modulesFromEdition?.length
+            ? modulesFromEdition
+            : (modulesFromTenant || []);
 
         return {
             ...raw,
@@ -888,6 +791,45 @@ export class AuthService {
             // keep legacy features unchanged for backward compatibility
             features: raw.features ?? [],
         };
+    }
+
+    private applyLoginInfo(loginInfo: CurrentLoginInfoResponse): void {
+        if (loginInfo.tenant) {
+            try {
+                this.tenantService.setTenant({
+                    ...loginInfo.tenant,
+                    enabledModules: loginInfo.tenant.enabledModules || [],
+                } as any);
+            } catch (error) {
+                console.warn('[AuthService] Failed to cache tenant from login-info', error);
+            }
+        }
+
+        if (loginInfo.edition) {
+            this.editionFeatures.setEdition(this.normalizeEditionSnapshot(loginInfo.edition, loginInfo.tenant));
+        }
+
+        const inlinePermissions = (loginInfo.user.permissions || [])
+            .map((p: string) => this.normalizePermissionKey(p));
+
+        const rbacSession = {
+            userId: loginInfo.user.id,
+            tenantId: loginInfo.user.tenantId,
+            roleIds: this.roleIdsFromLoginInfo(loginInfo),
+            permissionOverrides: inlinePermissions.length
+                ? { allow: inlinePermissions }
+                : undefined,
+        };
+
+        this.rbacService.setSession(rbacSession);
+
+        const roles = (loginInfo.roles || []).map((role) => this.mapRoleFromApi(role));
+
+        if (!roles.length && loginInfo.user.role) {
+            roles.push(this.mapRoleFromApi(loginInfo.user.role));
+        }
+
+        this.rbacService.setRoles(roles);
     }
 
     private isHostSession(session?: AuthSession | null): boolean {

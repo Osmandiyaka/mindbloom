@@ -7,12 +7,15 @@ import { Permission, PermissionAction } from '../../../domain/rbac/entities/perm
 import { SYSTEM_ROLE_NAMES } from '../../../domain/rbac/entities/system-roles';
 import { User } from '../../../domain/entities/user.entity';
 import { EditionManager } from '../subscription/edition-manager.service';
+import { ROLE_REPOSITORY, IRoleRepository } from '../../../domain/ports/out/role-repository.port';
+import { Role } from '../../../domain/rbac/entities/role.entity';
 
 export interface CurrentLoginInfoResult {
     user: User;
     tenant: Tenant;
     edition: ReturnType<typeof Tenant.editionSnapshot>;
     permissions: string[];
+    roles: Role[];
 }
 
 @Injectable()
@@ -22,6 +25,8 @@ export class GetCurrentLoginInfoUseCase {
         private readonly userRepository: IUserRepository,
         @Inject(TENANT_REPOSITORY)
         private readonly tenantRepository: ITenantRepository,
+        @Inject(ROLE_REPOSITORY)
+        private readonly roleRepository: IRoleRepository,
         private readonly editionManager: EditionManager,
     ) { }
 
@@ -67,11 +72,14 @@ export class GetCurrentLoginInfoUseCase {
         }
 
 
+        const roles = await this.roleRepository.findAll(tenantId);
+
         return {
             user,
             tenant,
             edition,
             permissions: permissionKeys,
+            roles,
         };
     }
 
