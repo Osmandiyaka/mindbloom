@@ -77,6 +77,7 @@ export class RoleListComponent implements OnInit {
     detailTab = signal<RoleTab>('permissions');
     roleRowKey = (role: Role) => role.id;
     roleRowClass = (role: Role) => (this.detailRoleId() === role.id ? 'roles-row--selected' : '');
+    detailMenuOpen = signal(false);
     roleTableColumns: MbTableColumn<Role>[] = [
         {
             key: 'name',
@@ -274,6 +275,14 @@ export class RoleListComponent implements OnInit {
 
     closeRoleMenu(): void {
         this.roleMenuOpenId.set(null);
+    }
+
+    toggleDetailMenu(): void {
+        this.detailMenuOpen.set(!this.detailMenuOpen());
+    }
+
+    closeDetailMenu(): void {
+        this.detailMenuOpen.set(false);
     }
 
     openRoleDetails(roleId: string, tab: RoleTab): void {
