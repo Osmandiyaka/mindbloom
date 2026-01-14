@@ -1,7 +1,7 @@
 /**
  * Module Not Enabled Component
  * 
- * Displayed when user attempts to access a module that's not included in their plan.
+ * Displayed when user attempts to access a module that's not included in their edition.
  * Provides upgrade guidance and navigation options.
  */
 
@@ -223,7 +223,7 @@ export class ModuleNotEnabledComponent implements OnInit {
         });
 
         // Get current edition
-        const code = this.entitlements.getCurrentPlan();
+        const code = this.entitlements.getCurrentEdition();
         if (code) {
             this.currentEdition.set(code);
         }
@@ -234,8 +234,8 @@ export class ModuleNotEnabledComponent implements OnInit {
     }
 
     goToSetup(): void {
-        // Navigate to setup/plans page if it exists
-        // TODO: Create a plans/pricing page in setup module
+        // Navigate to setup/editions page if it exists
+        // TODO: Create an editions/pricing page in setup module
         this.router.navigate(['/setup']);
     }
 

@@ -1,7 +1,7 @@
 /**
  * Module Entitlement Guard
  * 
- * Prevents navigation to disabled modules based on tenant plan/subscription.
+ * Prevents navigation to disabled modules based on tenant edition.
  * Uses CanMatchFn to prevent route matching entirely (better than CanActivate for lazy loading).
  */
 

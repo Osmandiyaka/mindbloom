@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class TenantEditionResponseDto {
-    @ApiProperty({ description: 'Edition code (mapped from tenant plan for now)' })
+    @ApiProperty({ description: 'Edition code' })
     editionCode!: string;
 
     @ApiProperty({ description: 'Edition display name' })

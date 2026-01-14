@@ -20,7 +20,6 @@ export interface CreateTenantCommand {
         customDomain?: string;
     };
     ownerId?: string;
-    plan?: 'trial' | 'free' | 'basic' | 'premium' | 'enterprise';
     /** Optional edition code (legacy). Prefer `editionId` when available. */
     edition?: string;
     /** Optional edition id (preferred). */

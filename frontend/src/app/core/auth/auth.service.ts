@@ -85,7 +85,6 @@ interface CurrentLoginInfoResponse {
         name: string;
         subdomain: string;
         status: string;
-        plan?: string | null;
         editionId?: string | null;
         edition?: string | null;
         locale?: string;
@@ -761,7 +760,7 @@ export class AuthService {
                 this.tenantService.setTenant(tenant);
                 console.debug('[AuthService] Tenant loaded for RBAC', {
                     tenantId: tenant.id,
-                    edition: tenant.edition ?? tenant.plan,
+                    edition: tenant.edition,
                     enabledModules: tenant.enabledModules,
                 });
             }

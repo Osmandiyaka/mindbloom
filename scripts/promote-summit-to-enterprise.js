@@ -26,11 +26,11 @@ async function run() {
         maxBandwidth: -1,
     };
 
-    tenant.plan = 'enterprise';
+    tenant.editionId = 'enterprise';
     tenant.limits = enterpriseLimits;
     await tenant.save();
 
-    console.log('Updated tenant plan to enterprise and set enterprise limits.');
+    console.log('Updated tenant edition to enterprise and set enterprise limits.');
 
     await mongoose.disconnect();
 }

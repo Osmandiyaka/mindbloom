@@ -4,16 +4,13 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export type TenantStatus = 'pending' | 'active' | 'suspended' | 'inactive' | 'deleted';
-export type TenantEdition = 'trial' | 'starter' | 'professional' | 'premium' | 'enterprise';
-// Backwards-compatible alias
-export type TenantPlan = TenantEdition;
+export type TenantEdition = 'free' | 'professional' | 'premium' | 'enterprise';
 
 export interface Tenant {
     id: string;
     name: string;
     subdomain: string;
     status: TenantStatus;
-    plan?: TenantPlan; // deprecated, use `edition` when available
     editionId?: string | null;
     edition?: TenantEdition | null;
     ownerId?: string | null;
@@ -126,8 +123,6 @@ export class TenantService {
         adminPassword: string;
         ownerId?: string;
         edition?: TenantEdition;
-        // plan is accepted as a deprecated fallback
-        plan?: TenantPlan;
         address?: {
             street?: string;
             city?: string;
@@ -173,14 +168,13 @@ export class TenantService {
         if (!tenant) return false;
 
         const featuresByEdition: Record<TenantEdition, string[]> = {
-            trial: ['basic_features', 'student_management', 'attendance', 'grades'],
-            starter: ['basic_features', 'student_management', 'attendance', 'grades'],
-            professional: ['basic_features', 'timetabling', 'parent_portal', 'library'],
-            premium: ['basic_features', 'student_management', 'attendance', 'finance', 'library', 'analytics'],
-            enterprise: ['basic_features', 'student_management', 'attendance', 'finance', 'library', 'hr', 'transport', 'hostel'],
+            free: ['basic_features', 'student_management', 'attendance', 'basic_reporting'],
+            professional: ['basic_features', 'timetabling', 'reporting', 'library', 'fees'],
+            premium: ['basic_features', 'multi_school', 'rbac', 'finance', 'analytics', 'transport'],
+            enterprise: ['basic_features', 'sso', 'audit_logs', 'rbac', 'unlimited_storage', 'priority_support'],
         };
 
-        const code = tenant.edition ?? tenant.plan;
+        const code = tenant.editionId ?? tenant.edition;
         if (!code) return false;
         return featuresByEdition[code as TenantEdition]?.includes(feature) || false;
     }

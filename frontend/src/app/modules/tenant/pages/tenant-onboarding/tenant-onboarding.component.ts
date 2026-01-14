@@ -326,11 +326,11 @@ export class TenantOnboardingComponent implements OnInit {
     schoolRows = signal<OnboardingSchoolRow[]>([]);
     existingSchoolCount = computed(() => this.schoolRows().filter(row => row.existing).length);
 
-    editions = signal<Array<{ id: string; name: string; displayName: string; description?: string | null; features?: Record<string, string> }>>([]);
+    editions = signal<Array<{ id: string; name: string; displayName: string; description?: string | null; features?: string[] | Record<string, string> }>>([]);
     selectedEditionId = signal<string>('');
     selectedEditionName = signal<string>('');
     readonly orderedEditions = computed(() => {
-        const order = ['starter', 'professional', 'premium', 'enterprise'];
+        const order = ['free', 'professional', 'premium', 'enterprise'];
         const list = [...this.editions()];
         return list.sort((a, b) => {
             const aName = (a.displayName || a.name || '').toLowerCase();
@@ -826,8 +826,12 @@ export class TenantOnboardingComponent implements OnInit {
         this.selectedEditionName.set(edition.displayName || edition.name);
     }
 
-    editionBullets(edition: { features?: Record<string, string> }): string[] {
-        const entries = edition.features ? Object.values(edition.features) : [];
+    editionBullets(edition: { features?: string[] | Record<string, string> }): string[] {
+        const raw = edition.features;
+        if (Array.isArray(raw)) {
+            return raw.filter(Boolean).slice(0, 5);
+        }
+        const entries = raw ? Object.values(raw) : [];
         return entries.filter(Boolean).slice(0, 5);
     }
 
@@ -1028,8 +1032,7 @@ export class TenantOnboardingComponent implements OnInit {
                 adminName: fullName,
                 adminEmail: this.adminEmail().trim(),
                 adminPassword: this.adminPassword().trim(),
-                edition: 'trial',
-                plan: 'trial',
+                edition: 'free',
                 address: {
                     country: this.orgCountry().trim()
                 }
@@ -1103,6 +1106,7 @@ export class TenantOnboardingComponent implements OnInit {
         this.isSaving.set(true);
         try {
             await firstValueFrom(this.tenantSettings.updateSettings({
+                editionId: this.selectedEditionId(),
                 extras: {
                     onboarding: {
                         editionId: this.selectedEditionId(),

@@ -3,14 +3,14 @@ import { MailService } from '../../../infrastructure/mail/mail.service';
 import { ResourceLimits } from '../../../domain/tenant/entities/tenant.entity';
 
 @Injectable()
-export class TenantPlanMailer {
+export class TenantEditionMailer {
     constructor(private readonly mailService: MailService) { }
 
     private formatLimit(value: number): string {
         return value === -1 ? 'Unlimited' : value.toString();
     }
 
-    async sendPlanAssignment(to: string, schoolName: string, editionCode: string, limits: ResourceLimits): Promise<void> {
+    async sendEditionAssignment(to: string, schoolName: string, editionCode: string, limits: ResourceLimits): Promise<void> {
         const subject = `Your MindBloom edition: ${editionCode}`;
         const text = [
             `Hi ${schoolName} Admin,`,

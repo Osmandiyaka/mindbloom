@@ -270,8 +270,8 @@ export class TenantDocument extends Document {
     @Prop()
     suspensionReason?: string;
 
-    @Prop({ type: Types.ObjectId, ref: 'Edition' })
-    editionId?: Types.ObjectId;
+    @Prop({ type: String, default: null })
+    editionId?: string | null;
 
     @Prop()
     subscriptionEndDate?: Date;
@@ -391,7 +391,7 @@ TenantSchema.virtual('usagePercentage').get(function () {
 
 TenantSchema.pre('save', function (next) {
     if (!this.limits) {
-        this.limits = getDefaultLimitsForEdition(this.metadata?.editionCode || 'trial');
+        this.limits = getDefaultLimitsForEdition(this.editionId || this.metadata?.editionCode || 'free');
     }
     if (this.isNew && this.metadata?.editionCode === 'trial' && !this.trialEndsAt) {
         this.trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
@@ -400,16 +400,8 @@ TenantSchema.pre('save', function (next) {
 });
 
 function getDefaultLimitsForEdition(editionCode: string): ResourceLimitsSchema {
-    const normalized = String(editionCode || 'trial').toLowerCase();
+    const normalized = String(editionCode || 'free').toLowerCase();
     const limits = {
-        'trial': {
-            maxStudents: 50,
-            maxTeachers: 10,
-            maxClasses: 5,
-            maxAdmins: 2,
-            maxStorage: 500,
-            maxBandwidth: 5,
-        },
         'free': {
             maxStudents: 25,
             maxTeachers: 5,
@@ -418,11 +410,11 @@ function getDefaultLimitsForEdition(editionCode: string): ResourceLimitsSchema {
             maxStorage: 100,
             maxBandwidth: 1,
         },
-        'basic': {
-            maxStudents: 200,
-            maxTeachers: 30,
-            maxClasses: 20,
-            maxAdmins: 3,
+        'professional': {
+            maxStudents: 300,
+            maxTeachers: 40,
+            maxClasses: 25,
+            maxAdmins: 5,
             maxStorage: 5000,
             maxBandwidth: 50,
         },
@@ -442,8 +434,23 @@ function getDefaultLimitsForEdition(editionCode: string): ResourceLimitsSchema {
             maxStorage: -1,
             maxBandwidth: -1,
         },
+        'trial': {
+            maxStudents: 25,
+            maxTeachers: 5,
+            maxClasses: 3,
+            maxAdmins: 1,
+            maxStorage: 100,
+            maxBandwidth: 1,
+        },
+        'basic': {
+            maxStudents: 300,
+            maxTeachers: 40,
+            maxClasses: 25,
+            maxAdmins: 5,
+            maxStorage: 5000,
+            maxBandwidth: 50,
+        },
     } as Record<string, ResourceLimitsSchema>;
 
-    return limits[normalized] || limits['trial'];
+    return limits[normalized] || limits['free'];
 }
-

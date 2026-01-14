@@ -32,19 +32,19 @@ describe('EditionService', () => {
         expect(enabled.has(MODULE_KEYS.FEES)).toBe(true);
     });
 
-    describe('getModulesForPlan()', () => {
-        it('should return modules for trial plan', () => {
-            editionService.setEdition({ editionCode: 'trial', editionName: 'Trial', modules: [MODULE_KEYS.STUDENTS, MODULE_KEYS.ADMISSIONS] });
-            const modules = service.getModulesForPlan('trial');
+    describe('getModulesForEdition()', () => {
+        it('should return modules for free edition', () => {
+            editionService.setEdition({ editionCode: 'free', editionName: 'Free', modules: [MODULE_KEYS.STUDENTS, MODULE_KEYS.ADMISSIONS] });
+            const modules = service.getModulesForEdition('free');
 
             expect(modules.has(MODULE_KEYS.STUDENTS)).toBe(true);
             expect(modules.has(MODULE_KEYS.ADMISSIONS)).toBe(true);
             expect(modules.has(MODULE_KEYS.HR)).toBe(false);
         });
 
-        it('should return modules for enterprise plan', () => {
+        it('should return modules for enterprise edition', () => {
             editionService.setEdition({ editionCode: 'enterprise', editionName: 'Enterprise', modules: [MODULE_KEYS.HR, MODULE_KEYS.PAYROLL, MODULE_KEYS.LIBRARY] });
-            const modules = service.getModulesForPlan('enterprise');
+            const modules = service.getModulesForEdition('enterprise');
 
             expect(modules.has(MODULE_KEYS.HR)).toBe(true);
             expect(modules.has(MODULE_KEYS.PAYROLL)).toBe(true);
@@ -52,19 +52,19 @@ describe('EditionService', () => {
         });
     });
 
-    describe('getAdditionalModulesInPlan()', () => {
-        it('should return modules not in current plan', () => {
-            const additionalModules = service.getAdditionalModulesInPlan('premium');
+    describe('getAdditionalModulesInEdition()', () => {
+        it('should return modules not in current edition', () => {
+            const additionalModules = service.getAdditionalModulesInEdition('premium');
 
             // We expect some premium modules to be available (module lists are defined in edition features)
             expect(Array.isArray(additionalModules)).toBe(true);
         });
 
-        it('should return empty array if target plan is same', () => {
-            // When target plan equals current plan, there are no additional modules
+        it('should return empty array if target edition is same', () => {
+            // When target edition equals current edition, there are no additional modules
             // Simulate editions code same as target
             editionService.setEdition({ editionCode: 'premium', editionName: 'Premium', modules: [MODULE_KEYS.FEES, MODULE_KEYS.LIBRARY] });
-            const additionalModules = service.getAdditionalModulesInPlan('premium');
+            const additionalModules = service.getAdditionalModulesInEdition('premium');
 
             expect(additionalModules.length).toBe(0);
         });

@@ -2,6 +2,11 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString, IsIn, IsObject, IsBoolean, IsNumber, Matches } from 'class-validator';
 
 export class UpdateTenantSettingsDto {
+    @ApiPropertyOptional({ description: 'Edition code for the tenant' })
+    @IsOptional()
+    @IsString()
+    editionId?: string;
+
     @ApiPropertyOptional({ description: 'Primary brand color' })
     @IsOptional()
     @Matches(/^#[0-9A-Fa-f]{6}$/)

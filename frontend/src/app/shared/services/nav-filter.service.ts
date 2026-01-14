@@ -2,7 +2,7 @@
  * Navigation Filter Service
  * 
  * Filters navigation items based on:
- * - Module entitlements (tenant plan)
+ * - Module entitlements (tenant edition)
  * - User permissions (RBAC)
  * - User roles
  * 

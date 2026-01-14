@@ -159,86 +159,46 @@ async function main() {
     await mongoose.connect(MONGODB_URI);
     const TenantModel = mongoose.model('Tenant', new mongoose.Schema({}, { strict: false, collection: 'tenants' }));
 
-    // Fetch public editions from API and build a lookup by name. If API is unavailable, fall back to a direct DB lookup.
-    let editions = [];
-    try {
-        const res = await request({ path: '/api/editions', method: 'GET' });
-        if (res.status === 200 && Array.isArray(res.body)) {
-            editions = res.body;
-        } else {
-            console.warn('GET /api/editions returned non-200 or non-array result; falling back to DB lookup');
-        }
-    } catch (err) {
-        console.warn('Failed to fetch editions from API, falling back to DB lookup', err.message);
-    }
+    const canonical = new Set(['free', 'professional', 'premium', 'enterprise']);
 
-    // If the API didn't return editions, query the DB directly (useful when the app isn't running)
-    if (!editions || editions.length === 0) {
-        try {
-            const EditionModel = mongoose.model('Edition', new mongoose.Schema({}, { strict: false, collection: 'editions' }));
-            const docs = await EditionModel.find({}).lean().exec();
-            if (Array.isArray(docs) && docs.length) {
-                editions = docs.map(d => ({ id: d._id ? String(d._id) : (d.id || null), name: d.name, displayName: d.displayName }));
-                console.log(`Found ${editions.length} editions in DB`);
-            } else {
-                console.warn('No editions found in DB; tenant editionId will not be set');
-            }
-        } catch (err) {
-            console.warn('Failed to lookup editions in DB', err.message);
-        }
-    }
-
-    const editionByName = new Map((editions || []).map(e => [String(e.name).toLowerCase(), e]));
-
-    // simple alias map for legacy plan names
+    // simple alias map for legacy names
     const aliasMap = {
-        free: 'starter',
-        trial: 'starter',
+        trial: 'free',
+        starter: 'free',
         basic: 'professional',
     };
 
     for (const t of tenantsToCreate) {
         try {
             // resolve canonical edition name and find corresponding edition record
-            const requested = (t.edition || 'trial').toLowerCase();
+            const requested = (t.edition || 'free').toLowerCase();
             const resolvedName = aliasMap[requested] || requested;
-            const editionDoc = editionByName.get(resolvedName);
-
-            if (editionDoc) {
-                console.log(`- Resolved edition '${t.edition}' -> '${resolvedName}' (id=${editionDoc.id})`);
-            } else {
-                console.log(`- No edition found for '${t.edition}' (resolved '${resolvedName}'), creating tenant without editionId`);
-            }
+            const resolved = canonical.has(resolvedName) ? resolvedName : 'free';
+            console.log(`- Resolved edition '${t.edition || 'free'}' -> '${resolved}'`);
 
             let tenant = await findTenantByCode(t.subdomain);
             if (tenant) {
                 console.log(`- Tenant ${t.subdomain} exists (id=${tenant.id}), reusing`);
             } else {
                 console.log(`- Creating tenant ${t.subdomain}...`);
-                // prefer creating tenant with editionId if we have it
                 const createPayload = { ...t };
-                if (editionDoc) {
-                    createPayload.editionId = editionDoc.id;
-                } else {
-                    createPayload.edition = resolvedName;
-                }
+                createPayload.editionId = resolved;
                 tenant = await createTenant(createPayload);
                 console.log(`  created id=${tenant.id}`);
             }
 
-            // If we have the edition's database id, update tenant document directly to set editionId
-            if (editionDoc && tenant && tenant.id) {
+            // Ensure tenant has canonical edition id
+            if (tenant && tenant.id) {
                 try {
                     if (dryRun) {
-                        console.log(`DRY RUN: would update tenant ${t.subdomain} (${tenant.id}) with editionId=${editionDoc.id} (name=${editionDoc.name})`);
+                        console.log(`DRY RUN: would update tenant ${t.subdomain} (${tenant.id}) with editionId=${resolved}`);
                     } else {
-                        const editionObjectId = new Types.ObjectId(editionDoc.id);
                         const tenantObjectId = new Types.ObjectId(tenant.id);
                         await TenantModel.updateOne(
                             { _id: tenantObjectId },
-                            { $set: { editionId: editionObjectId, 'metadata.editionCode': editionDoc.name } }
+                            { $set: { editionId: resolved } }
                         ).exec();
-                        console.log(`  - tenant ${t.subdomain} updated with editionId=${editionDoc.id} (name=${editionDoc.name})`);
+                        console.log(`  - tenant ${t.subdomain} updated with editionId=${resolved}`);
                     }
                 } catch (err) {
                     console.warn(`  - failed to set editionId for tenant ${t.subdomain}:`, err.message || (err.stack || err));

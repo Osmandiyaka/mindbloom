@@ -4,7 +4,7 @@ import { TenantController } from '../../presentation/controllers/tenant.controll
 import { HostEditionsController } from '../../presentation/controllers/host-editions.controller';
 import { HostTenantSubscriptionsController } from '../../presentation/controllers/host-tenant-subscriptions.controller';
 import { GetTenantBySubdomainUseCase, GetTenantByIdUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, ListTenantsUseCase, TenantManager } from '../../application/services/tenant';
-import { TenantPlanMailer } from '../../application/services/tenant/tenant-plan.mailer';
+import { TenantEditionMailer } from '../../application/services/tenant/tenant-edition.mailer';
 import { TenantSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/tenant.schema';
 import { MongooseTenantRepository } from '../../infrastructure/adapters/persistence/mongoose/mongoose-tenant.repository';
 import { EDITION_REPOSITORY, TENANT_FEATURE_OVERRIDE_REPOSITORY, TENANT_REPOSITORY } from '../../domain/ports/out/repository.tokens';
@@ -83,7 +83,7 @@ class EditionsInitializer implements OnApplicationBootstrap {
         SubscriptionLifecycleService,
         FeatureValidationService,
         EffectiveFeatureResolver,
-        TenantPlanMailer,
+        TenantEditionMailer,
         PermissionGuard,
         HostContextGuard,
         // Edition initializer machinery

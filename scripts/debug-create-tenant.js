@@ -11,7 +11,7 @@ async function run() {
         const tenant = await createTenantUseCase.execute({
             name: 'Summit Debug',
             subdomain: 'summit-debug',
-            plan: 'enterprise',
+            editionId: 'enterprise',
             contactEmail: 'admin@summit-debug.test',
             adminName: 'Debug Admin',
             adminEmail: 'admin@summit-debug.test',

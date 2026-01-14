@@ -154,7 +154,7 @@ export class CreateTenantDto {
         name?: string;
     };
 
-    @ApiPropertyOptional({ description: 'Override plan limits' })
+    @ApiPropertyOptional({ description: 'Override edition limits' })
     @IsOptional()
     @ValidateNested()
     @Type(() => LimitsDto)
@@ -170,15 +170,6 @@ export class CreateTenantDto {
     @IsString()
     editionId?: string;
 
-    @ApiProperty({
-        description: 'Tenant plan (deprecated). Prefer `edition` in new requests.',
-        enum: ['trial', 'free', 'basic', 'premium', 'enterprise'],
-        required: false,
-        default: 'trial'
-    })
-    @IsEnum(['trial', 'free', 'basic', 'premium', 'enterprise'])
-    @IsOptional()
-    plan?: 'trial' | 'free' | 'basic' | 'premium' | 'enterprise';
 
     @ApiProperty({ description: 'Admin full name', example: 'Jane Doe' })
     @IsString()

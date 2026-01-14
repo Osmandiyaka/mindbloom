@@ -10,7 +10,7 @@ const http = require('http');
 const tenantData = JSON.stringify({
     name: "Greenfield High School",
     subdomain: "greenfield",
-    plan: "premium"
+    editionId: "premium"
 });
 
 const options = {
@@ -43,7 +43,7 @@ const req = http.request(options, (res) => {
             console.log('  ID:', response.id);
             console.log('  Name:', response.name);
             console.log('  Code:', response.subdomain);
-            console.log('  Plan:', response.plan);
+            console.log('  Edition:', response.edition || response.editionId);
             console.log('  Status:', response.status);
             console.log('\n📝 You can now use this code to login: "greenfield"');
         } catch (e) {

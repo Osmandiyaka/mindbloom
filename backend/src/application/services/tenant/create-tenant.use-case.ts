@@ -6,7 +6,7 @@ import { CreateTenantCommand } from '../../ports/in/commands/create-tenant.comma
 import { InitializeSystemRolesUseCase } from '../rbac/initialize-system-roles.use-case';
 import { CreateUserUseCase } from '../user';
 import { SYSTEM_ROLE_NAMES } from '../../../domain/rbac/entities/system-roles';
-import { TenantPlanMailer } from './tenant-plan.mailer';
+import { TenantEditionMailer } from './tenant-edition.mailer';
 
 @Injectable()
 export class CreateTenantUseCase {
@@ -15,7 +15,7 @@ export class CreateTenantUseCase {
         private readonly tenantRepository: ITenantRepository,
         private readonly initializeSystemRolesUseCase: InitializeSystemRolesUseCase,
         private readonly createUserUseCase: CreateUserUseCase,
-        private readonly tenantPlanMailer: TenantPlanMailer,
+        private readonly tenantEditionMailer: TenantEditionMailer,
     ) { }
 
     async execute(command: CreateTenantCommand): Promise<Tenant> {
@@ -31,8 +31,11 @@ export class CreateTenantUseCase {
         const timezone = command.timezone || 'Europe/London';
         const weekStartsOn = (command.weekStartsOn as WeekStart) || WeekStart.MONDAY;
         const academicYear = this.resolveAcademicYear(command.academicYear);
-        // Determine edition code for defaults (prefer explicit metadata.editionCode; fallback to trial)
-        const editionCode = (command.metadata && command.metadata.editionCode) ? command.metadata.editionCode : (command.editionId ? 'paid' : 'trial');
+        const editionCode =
+            command.editionId
+            || command.edition
+            || command.metadata?.editionCode
+            || 'free';
         const limits = this.resolveLimits(editionCode, command.limits);
 
         const customization = {
@@ -54,7 +57,7 @@ export class CreateTenantUseCase {
             contactPhone: command.contactPhone,
             address: command.address,
             customization,
-            editionId: command.editionId,
+            editionId: command.editionId || command.edition || null,
             status: (command.status || TenantStatus.PENDING) as TenantStatus,
             locale,
             timezone,
@@ -91,10 +94,10 @@ export class CreateTenantUseCase {
 
             // fire-and-forget email notification; do not block creation on mail failure
             // Mail assignment using edition code for clarity
-            this.tenantPlanMailer.sendPlanAssignment(
+            this.tenantEditionMailer.sendEditionAssignment(
                 adminUser.email,
                 createdTenant.name,
-                createdTenant.metadata?.editionCode ?? 'trial',
+                createdTenant.editionId ?? createdTenant.metadata?.editionCode ?? 'free',
                 limits,
             ).catch(() => undefined);
 

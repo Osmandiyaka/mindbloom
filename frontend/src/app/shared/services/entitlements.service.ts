@@ -1,7 +1,7 @@
 /**
  * EditionService - Module Entitlement Management
  * 
- * Determines which modules are enabled for the current tenant based on subscription plan.
+ * Determines which modules are enabled for the current tenant based on edition.
  * Integrates with TenantService to provide reactive module access control.
  */
 
@@ -55,10 +55,10 @@ export class EditionService {
     }
 
     /**
-     * Get the current tenant plan
-     * @returns TenantPlan or null if no tenant
+     * Get the current tenant edition
+     * @returns Edition code or null if no tenant
      */
-    getCurrentPlan(): string | null {
+    getCurrentEdition(): string | null {
         const code = this.editions.code();
         return code || null;
     }
@@ -66,33 +66,33 @@ export class EditionService {
     /**
      * Check if current edition includes a module
      * @param moduleKey Module to check
-     * @returns true if plan includes module
+     * @returns true if edition includes module
      */
-    isPlanIncluded(moduleKey: ModuleKey): boolean {
+    isEditionIncluded(moduleKey: ModuleKey): boolean {
         return this.isEnabled(moduleKey);
     }
 
     /**
-     * Get all modules available in a specific plan
-     * @param plan The plan to query
-     * @returns Set of modules available in that plan
+     * Get all modules available in a specific edition
+     * @param edition The edition to query
+     * @returns Set of modules available in that edition
      */
-    getModulesForPlan(plan: string): ReadonlySet<ModuleKey> {
-        if (this.editions.code() === plan) {
+    getModulesForEdition(edition: string): ReadonlySet<ModuleKey> {
+        if (this.editions.code() === edition) {
             return this._enabledModules();
         }
         return new Set<ModuleKey>();
     }
 
     /**
-     * Compare current plan modules with a target plan
+     * Compare current edition modules with a target edition
      * Useful for upgrade prompts
-     * @param targetPlan Plan to compare against
-     * @returns Array of additional modules available in target plan
+     * @param targetEdition Edition to compare against
+     * @returns Array of additional modules available in target edition
      */
-    getAdditionalModulesInPlan(targetPlan: string): ModuleKey[] {
+    getAdditionalModulesInEdition(targetEdition: string): ModuleKey[] {
         const currentModules = this._enabledModules();
-        const targetModules = this.getModulesForPlan(targetPlan);
+        const targetModules = this.getModulesForEdition(targetEdition);
 
         return Array.from(targetModules).filter(mod => !currentModules.has(mod));
     }

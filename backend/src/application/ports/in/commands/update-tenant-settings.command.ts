@@ -38,6 +38,7 @@ export interface TenantSettingsUpdate {
     ssoConfig?: Record<string, any>;
     dataRetentionDays?: number;
     metadata?: Record<string, any>;
+    editionId?: string | null;
     tags?: string[];
     trialEndsAt?: Date;
     idTemplates?: {

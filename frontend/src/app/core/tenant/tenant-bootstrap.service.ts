@@ -86,7 +86,7 @@ export class TenantBootstrapService {
 
         return of(void 0).pipe(
             tap(() => {
-                // Load plan features, module access, etc.
+                // Load edition features, module access, etc.
                 console.log('[TenantBootstrap] Entitlements reloaded');
             })
         );

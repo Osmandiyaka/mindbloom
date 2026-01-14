@@ -20,7 +20,7 @@ export class TenantResponseDto {
     @ApiPropertyOptional({ description: 'Tenant edition id (preferred)' })
     editionId?: string;
 
-    @ApiProperty({ description: 'Tenant edition (fallback to plan)' })
+    @ApiProperty({ description: 'Tenant edition code' })
     edition: string;
 
     @ApiProperty({ description: 'Locale' })
@@ -88,7 +88,7 @@ export class TenantResponseDto {
             subdomain: tenant.subdomain,
             status: tenant.status,
             editionId: tenant.editionId ?? undefined,
-            edition: tenant.metadata?.editionCode ?? 'trial',
+            edition: tenant.editionId ?? tenant.metadata?.editionCode ?? 'free',
             ownerId: tenant.ownerId,
             contactEmail: tenant.contactInfo.email,
             contactPhone: tenant.contactInfo.phone,

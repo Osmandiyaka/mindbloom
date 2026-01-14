@@ -112,7 +112,8 @@ export class AppComponent implements OnInit {
                 name: 'Development School',
                 subdomain: 'dev',
                 status: 'active' as const,
-                plan: 'enterprise' as const,
+                editionId: 'enterprise',
+                edition: 'enterprise' as const,
                 contactInfo: { email: 'admin@devschool.local' },
             };
             this.tenantService.setTenant(devTenant);

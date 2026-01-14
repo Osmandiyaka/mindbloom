@@ -198,9 +198,9 @@ describe('NavFilterService', () => {
         });
     });
 
-    describe('Trial plan scenario', () => {
-        it('should show only trial-tier modules', () => {
-            // Simulate trial plan: dashboard, students, admissions, academics, attendance, setup
+    describe('Free edition scenario', () => {
+        it('should show only free-tier modules', () => {
+            // Simulate free edition: dashboard, students, admissions, academics, attendance, setup
             entitlementsService.isEnabled.and.callFake((moduleKey: string) => {
                 return ['dashboard', 'students', 'admissions', 'academics', 'attendance', 'setup'].includes(moduleKey);
             });
@@ -215,9 +215,9 @@ describe('NavFilterService', () => {
         });
     });
 
-    describe('Premium plan scenario', () => {
+    describe('Premium edition scenario', () => {
         it('should show premium-tier modules but hide enterprise modules', () => {
-            // Simulate premium plan: includes fees, accounting, finance, but not hr, payroll, hostel, transport, roles
+            // Simulate premium edition: includes fees, accounting, finance, but not hr, payroll, hostel, transport, roles
             entitlementsService.isEnabled.and.callFake((moduleKey: string) => {
                 return !['hr', 'payroll', 'hostel', 'transport', 'roles'].includes(moduleKey);
             });

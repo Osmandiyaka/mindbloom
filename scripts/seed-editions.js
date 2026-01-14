@@ -25,14 +25,14 @@ async function seed() {
 
     const editions = [
         {
-            name: 'starter',
-            displayName: 'Starter',
-            description: 'Basic features for small schools',
-            monthlyPrice: 29,
-            annualPrice: 278,
+            name: 'free',
+            displayName: 'Free',
+            description: 'Basic features for small schools and evaluation',
+            monthlyPrice: 0,
+            annualPrice: 0,
             perStudentMonthly: null,
             annualPriceNotes: null,
-            modules: ['dashboard', 'students', 'attendance', 'roles', 'setup'],
+            modules: ['dashboard', 'students', 'attendance', 'academics', 'setup'],
             sortOrder: 10,
             isActive: true,
             isFallback: true,
@@ -40,7 +40,7 @@ async function seed() {
         {
             name: 'professional',
             displayName: 'Professional',
-            description: 'Expanded features for growing schools',
+            description: 'Most features for small to medium schools',
             monthlyPrice: 99,
             annualPrice: 950,
             perStudentMonthly: null,
@@ -52,7 +52,7 @@ async function seed() {
         {
             name: 'premium',
             displayName: 'Premium',
-            description: 'Advanced features for larger schools',
+            description: 'Advanced features for multi-school operations',
             monthlyPrice: 299,
             annualPrice: 2870,
             perStudentMonthly: null,
@@ -64,8 +64,8 @@ async function seed() {
         {
             name: 'enterprise',
             displayName: 'Enterprise',
-            description: 'Full enterprise-grade features and support',
-            monthlyPrice: 599,
+            description: 'Enterprise-grade features and support',
+            monthlyPrice: null,
             perStudentMonthly: 2,
             annualPrice: null,
             annualPriceNotes: 'Custom',

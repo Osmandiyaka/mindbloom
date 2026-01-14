@@ -51,11 +51,7 @@ export class MongooseTenantRepository implements ITenantRepository {
         }
 
         if (query.editions && query.editions.length > 0) {
-            // Match either legacy plan or new edition field
-            filter.$or = [
-                { plan: { $in: query.editions } },
-                { edition: { $in: query.editions } },
-            ];
+            filter.editionId = { $in: query.editions };
         }
 
         if (query.trialExpiringBefore) {

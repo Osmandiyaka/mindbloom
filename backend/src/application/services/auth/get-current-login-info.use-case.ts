@@ -6,14 +6,14 @@ import { Tenant } from '../../../domain/tenant/entities/tenant.entity';
 import { Permission, PermissionAction } from '../../../domain/rbac/entities/permission.entity';
 import { SYSTEM_ROLE_NAMES } from '../../../domain/rbac/entities/system-roles';
 import { User } from '../../../domain/entities/user.entity';
-import { EditionManager } from '../subscription/edition-manager.service';
 import { ROLE_REPOSITORY, IRoleRepository } from '../../../domain/ports/out/role-repository.port';
 import { Role } from '../../../domain/rbac/entities/role.entity';
+import { getCanonicalEditionByCode } from '../../../domain/edition/entities/canonical-editions';
 
 export interface CurrentLoginInfoResult {
     user: User;
     tenant: Tenant;
-    edition: ReturnType<typeof Tenant.editionSnapshot> | null;
+    edition: { editionCode: string; editionName: string; features: string[]; modules: string[] } | null;
     requiresEditionSelection: boolean;
     permissions: string[];
     roles: Role[];
@@ -28,7 +28,6 @@ export class GetCurrentLoginInfoUseCase {
         private readonly tenantRepository: ITenantRepository,
         @Inject(ROLE_REPOSITORY)
         private readonly roleRepository: IRoleRepository,
-        private readonly editionManager: EditionManager,
     ) { }
 
     async execute(userId: string, tenantId: string): Promise<CurrentLoginInfoResult> {
@@ -43,21 +42,17 @@ export class GetCurrentLoginInfoUseCase {
             throw new NotFoundException('Tenant not found');
         }
 
-        const requiresEditionSelection = !tenant.editionId;
-        let edition: ReturnType<typeof Tenant.editionSnapshot> | null = null;
-        if (!requiresEditionSelection) {
-            try {
-                const res = await this.editionManager.getEditionWithFeatures(tenant.editionId!);
-                edition = {
-                    editionCode: res.edition.name,
-                    editionName: res.edition.displayName || res.edition.name,
-                    features: Object.keys(res.features),
-                    modules: res.edition.modules ?? Object.keys(res.features),
-                };
-            } catch (err) {
-                edition = Tenant.editionSnapshot(tenant);
+        const editionCode = tenant.editionId ?? null;
+        const canonical = editionCode ? getCanonicalEditionByCode(editionCode) : null;
+        const requiresEditionSelection = !canonical;
+        const edition = canonical
+            ? {
+                editionCode: canonical.code,
+                editionName: canonical.displayName,
+                features: canonical.features,
+                modules: canonical.modules,
             }
-        }
+            : null;
         const rolePermissions = user.role?.permissions ?? [];
         const directPermissions = user.permissions ?? [];
         const effectivePermissions = [...rolePermissions, ...directPermissions];

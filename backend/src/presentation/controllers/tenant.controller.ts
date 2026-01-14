@@ -191,6 +191,7 @@ export class TenantController {
     @ApiOperation({ summary: 'Update tenant settings for current tenant' })
     async updateSettings(@Body() dto: UpdateTenantSettingsDto) {
         const command = new UpdateTenantSettingsCommand(this.tenantContext.tenantId, {
+            editionId: dto.editionId ?? undefined,
             customization: {
                 logo: dto.logo,
                 favicon: dto.favicon,

@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { Tenant } from './tenant.service';
 
 export interface TenantSettingsUpdate {
+    editionId?: string | null;
     customization?: {
         logo?: string;
         primaryColor?: string;

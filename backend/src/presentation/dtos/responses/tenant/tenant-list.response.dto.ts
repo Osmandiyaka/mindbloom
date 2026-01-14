@@ -59,7 +59,7 @@ export class TenantListItemDto {
             subdomain: tenant.subdomain,
             customDomain: tenant.customization?.customDomain,
             status: tenant.status,
-            edition: tenant.metadata?.editionCode ?? 'trial',
+            edition: tenant.editionId ?? tenant.metadata?.editionCode ?? 'free',
             trialEndsAt: tenant.trialEndsAt,
             contactEmail: tenant.contactInfo.email,
             contactPhone: tenant.contactInfo.phone,
