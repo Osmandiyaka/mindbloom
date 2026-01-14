@@ -18,12 +18,15 @@ import { Router, type CanActivateFn } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { TenantContextService } from './tenant-context.service';
 import { TenantService } from '../services/tenant.service';
+import { EditionService } from '../../shared/services/entitlements.service';
+import { firstValueFrom } from 'rxjs';
 
-export const tenantGuard: CanActivateFn = (route, state) => {
+export const tenantGuard: CanActivateFn = async (route, state) => {
     const tenantContext = inject(TenantContextService);
     const router = inject(Router);
     const authService = inject(AuthService);
     const tenantService = inject(TenantService);
+    const entitlements = inject(EditionService);
 
     // Allow public routes
     if (route.data?.['public'] === true) {
@@ -43,9 +46,15 @@ export const tenantGuard: CanActivateFn = (route, state) => {
     }
 
     const tenant = tenantService.getCurrentTenantValue?.();
-    if (tenant && !tenant.editionId) {
-        if (!state.url.startsWith('/onboarding')) {
-            return router.createUrlTree(['/onboarding']);
+    if (tenant) {
+        try {
+            const snapshot = await firstValueFrom(entitlements.loadEntitlements());
+            if (snapshot.requiresEditionSelection && !state.url.startsWith('/onboarding')) {
+                return router.createUrlTree(['/onboarding']);
+            }
+        } catch (error) {
+            console.warn('[TenantGuard] Failed to load entitlements', error);
+            return router.createUrlTree(['/no-access'], { queryParams: { reason: 'entitlements' } });
         }
     }
 

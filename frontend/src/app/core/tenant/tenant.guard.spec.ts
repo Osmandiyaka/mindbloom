@@ -15,11 +15,14 @@ import { tenantGuard } from './tenant.guard';
 import { TenantContextService } from './tenant-context.service';
 import { AuthService } from '../auth/auth.service';
 import { TenantMembership } from '../auth/auth.models';
+import { EditionService } from '../../shared/services/entitlements.service';
+import { of } from 'rxjs';
 
 describe('TenantGuard', () => {
     let tenantContextService: jasmine.SpyObj<TenantContextService>;
     let router: jasmine.SpyObj<Router>;
     let authService: jasmine.SpyObj<AuthService>;
+    let entitlementsService: jasmine.SpyObj<EditionService>;
     let mockRoute: ActivatedRouteSnapshot;
     let mockState: RouterStateSnapshot;
 
@@ -29,13 +32,22 @@ describe('TenantGuard', () => {
         router = jasmine.createSpyObj('Router', ['createUrlTree']);
         authService = jasmine.createSpyObj('AuthService', ['getSession']);
         authService.getSession.and.returnValue(null);
+        entitlementsService = jasmine.createSpyObj('EditionService', ['loadEntitlements']);
+        entitlementsService.loadEntitlements.and.returnValue(of({
+            tenantId: 't-1',
+            edition: { code: 'free', displayName: 'Free', version: 1 },
+            modules: {},
+            features: {},
+            requiresEditionSelection: false,
+        } as any));
 
         // Setup TestBed
         TestBed.configureTestingModule({
             providers: [
                 { provide: TenantContextService, useValue: tenantContextService },
                 { provide: Router, useValue: router },
-                { provide: AuthService, useValue: authService }
+                { provide: AuthService, useValue: authService },
+                { provide: EditionService, useValue: entitlementsService }
             ]
         });
 
@@ -49,12 +61,12 @@ describe('TenantGuard', () => {
         } as any;
     });
 
-    it('should allow public routes', () => {
+    it('should allow public routes', async () => {
         // Arrange
         mockRoute.data = { public: true };
 
         // Act
-        const result = TestBed.runInInjectionContext(() =>
+        const result = await TestBed.runInInjectionContext(() =>
             tenantGuard(mockRoute, mockState)
         );
 
@@ -63,12 +75,12 @@ describe('TenantGuard', () => {
         expect(tenantContextService.hasTenant).not.toHaveBeenCalled();
     });
 
-    it('should allow routes with skipTenant flag', () => {
+    it('should allow routes with skipTenant flag', async () => {
         // Arrange
         mockRoute.data = { skipTenant: true };
 
         // Act
-        const result = TestBed.runInInjectionContext(() =>
+        const result = await TestBed.runInInjectionContext(() =>
             tenantGuard(mockRoute, mockState)
         );
 
@@ -77,13 +89,13 @@ describe('TenantGuard', () => {
         expect(tenantContextService.hasTenant).not.toHaveBeenCalled();
     });
 
-    it('should allow tenant routes when tenant context exists', () => {
+    it('should allow tenant routes when tenant context exists', async () => {
         // Arrange
         mockRoute.data = {}; // Protected route
         tenantContextService.hasTenant.and.returnValue(true);
 
         // Act
-        const result = TestBed.runInInjectionContext(() =>
+        const result = await TestBed.runInInjectionContext(() =>
             tenantGuard(mockRoute, mockState)
         );
 
@@ -92,7 +104,7 @@ describe('TenantGuard', () => {
         expect(tenantContextService.hasTenant).toHaveBeenCalled();
     });
 
-    it('should route host sessions to /host when no tenant context', () => {
+    it('should route host sessions to /host when no tenant context', async () => {
         // Arrange
         mockRoute.data = {}; // Protected route
         mockState.url = '/dashboard';
@@ -102,7 +114,7 @@ describe('TenantGuard', () => {
         router.createUrlTree.and.returnValue(expectedUrlTree);
 
         // Act
-        const result = TestBed.runInInjectionContext(() =>
+        const result = await TestBed.runInInjectionContext(() =>
             tenantGuard(mockRoute, mockState)
         );
 
@@ -112,49 +124,23 @@ describe('TenantGuard', () => {
         expect(tenantContextService.hasTenant).not.toHaveBeenCalled();
     });
 
-    it('should block tenant routes when tenant context is missing', () => {
+    it('should allow tenant routes when tenant context is missing', async () => {
         // Arrange
         mockRoute.data = {}; // Protected route
         mockState.url = '/students';
         tenantContextService.hasTenant.and.returnValue(false);
 
-        const expectedUrlTree = new UrlTree();
-        router.createUrlTree.and.returnValue(expectedUrlTree);
-
         // Act
-        const result = TestBed.runInInjectionContext(() =>
+        const result = await TestBed.runInInjectionContext(() =>
             tenantGuard(mockRoute, mockState)
         );
 
         // Assert
-        expect(result).toBe(expectedUrlTree);
+        expect(result).toBe(true);
         expect(tenantContextService.hasTenant).toHaveBeenCalled();
-        expect(router.createUrlTree).toHaveBeenCalledWith(['/select-school'], {
-            queryParams: { returnUrl: '/students' }
-        });
     });
 
-    it('should include returnUrl in redirect when tenant missing', () => {
-        // Arrange
-        mockRoute.data = {};
-        mockState.url = '/students/list';
-        tenantContextService.hasTenant.and.returnValue(false);
-
-        const expectedUrlTree = new UrlTree();
-        router.createUrlTree.and.returnValue(expectedUrlTree);
-
-        // Act
-        const result = TestBed.runInInjectionContext(() =>
-            tenantGuard(mockRoute, mockState)
-        );
-
-        // Assert
-        expect(router.createUrlTree).toHaveBeenCalledWith(['/select-school'], {
-            queryParams: { returnUrl: '/students/list' }
-        });
-    });
-
-    it('should not call hasTenant for public routes even if data has other properties', () => {
+    it('should not call hasTenant for public routes even if data has other properties', async () => {
         // Arrange
         mockRoute.data = {
             public: true,
@@ -162,7 +148,7 @@ describe('TenantGuard', () => {
         };
 
         // Act
-        const result = TestBed.runInInjectionContext(() =>
+        const result = await TestBed.runInInjectionContext(() =>
             tenantGuard(mockRoute, mockState)
         );
 
@@ -171,23 +157,26 @@ describe('TenantGuard', () => {
         expect(tenantContextService.hasTenant).not.toHaveBeenCalled();
     });
 
-    it('should handle root path redirect when tenant missing', () => {
-        // Arrange
+    it('should redirect to onboarding when edition is missing', async () => {
         mockRoute.data = {};
-        mockState.url = '/';
-        tenantContextService.hasTenant.and.returnValue(false);
+        mockState.url = '/dashboard';
+        tenantContextService.hasTenant.and.returnValue(true);
+        entitlementsService.loadEntitlements.and.returnValue(of({
+            tenantId: 't-1',
+            edition: null,
+            modules: {},
+            features: {},
+            requiresEditionSelection: true,
+        } as any));
 
         const expectedUrlTree = new UrlTree();
         router.createUrlTree.and.returnValue(expectedUrlTree);
 
-        // Act
-        const result = TestBed.runInInjectionContext(() =>
+        const result = await TestBed.runInInjectionContext(() =>
             tenantGuard(mockRoute, mockState)
         );
 
-        // Assert
-        expect(router.createUrlTree).toHaveBeenCalledWith(['/select-school'], {
-            queryParams: { returnUrl: '/' }
-        });
+        expect(result).toBe(expectedUrlTree);
+        expect(router.createUrlTree).toHaveBeenCalledWith(['/onboarding']);
     });
 });

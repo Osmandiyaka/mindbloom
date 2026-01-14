@@ -26,7 +26,8 @@ describe('EntitlementGuard', () => {
         const guard = new EntitlementGuard(new Reflector(), entitlementsService);
         const context = createExecutionContext(handler, { tenantId: 't-1' });
 
-        await expect(guard.canActivate(context)).resolves.toBe(true);
+        const result = await guard.canActivate(context);
+        expect(result).toBe(true);
     });
 
     it('blocks when entitlement is disabled', async () => {
@@ -44,7 +45,13 @@ describe('EntitlementGuard', () => {
         const guard = new EntitlementGuard(new Reflector(), entitlementsService);
         const context = createExecutionContext(handler, { tenantId: 't-1' });
 
-        await expect(guard.canActivate(context)).rejects.toThrow('MODULE_NOT_ENABLED');
+        try {
+            await guard.canActivate(context);
+            fail('Expected MODULE_NOT_ENABLED');
+        } catch (error) {
+            expect(error).toBeTruthy();
+            expect((error as Error).message).toBe('MODULE_NOT_ENABLED');
+        }
     });
 
     it('blocks when feature entitlement is disabled', async () => {
@@ -62,6 +69,12 @@ describe('EntitlementGuard', () => {
         const guard = new EntitlementGuard(new Reflector(), entitlementsService);
         const context = createExecutionContext(handler, { tenantId: 't-1' });
 
-        await expect(guard.canActivate(context)).rejects.toThrow('FEATURE_NOT_ENABLED');
+        try {
+            await guard.canActivate(context);
+            fail('Expected FEATURE_NOT_ENABLED');
+        } catch (error) {
+            expect(error).toBeTruthy();
+            expect((error as Error).message).toBe('FEATURE_NOT_ENABLED');
+        }
     });
 });

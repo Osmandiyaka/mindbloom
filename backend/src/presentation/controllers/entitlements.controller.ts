@@ -17,7 +17,7 @@ export class EntitlementsController {
     @Get('me')
     @ApiOperation({ summary: 'Get effective entitlements for current tenant' })
     async me() {
-        const tenantId = this.tenantContext.getTenantId();
+        const tenantId = this.tenantContext.tenantId;
         return this.entitlements.getEntitlementsForTenant(tenantId);
     }
 }
