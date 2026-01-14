@@ -18,6 +18,11 @@ export type MbTableCellValue =
     | {
           primary: string;
           secondary?: string;
+          meta?: string;
+          tertiary?: string;
+          tooltip?: string;
+          badges?: Array<{ label: string; tone?: 'neutral' | 'success' | 'warning' | 'danger' }>;
+          icon?: { symbol: string; title: string };
       };
 
 @Component({
@@ -33,6 +38,7 @@ export type MbTableCellValue =
                             <input
                                 type="checkbox"
                                 [checked]="allSelected"
+                                [disabled]="selectionDisabled"
                                 (change)="toggleAll($event)"
                                 aria-label="Select all rows"
                             />
@@ -61,6 +67,7 @@ export type MbTableCellValue =
                             <input
                                 type="checkbox"
                                 [checked]="isSelected(row)"
+                                [disabled]="selectionDisabled"
                                 (change)="toggleRow(row)"
                                 aria-label="Select row"
                             />
@@ -81,9 +88,40 @@ export type MbTableCellValue =
                                 <ng-container *ngIf="getCellValue(row, column) as cell">
                                     <ng-container *ngIf="isCellObject(cell); else cellText">
                                         <span class="mb-table__cell-group">
-                                            <span class="mb-table__cell-primary">{{ cell.primary }}</span>
+                                            <span class="mb-table__cell-primary">
+                                                <span
+                                                    class="mb-table__cell-icon"
+                                                    *ngIf="cell.icon"
+                                                    [attr.title]="cell.icon.title"
+                                                    aria-hidden="true"
+                                                >
+                                                    {{ cell.icon.symbol }}
+                                                </span>
+                                                <span class="mb-table__cell-text">{{ cell.primary }}</span>
+                                                <span class="mb-table__cell-badges" *ngIf="cell.badges?.length">
+                                                    <span
+                                                        class="mb-table__badge"
+                                                        *ngFor="let badge of cell.badges"
+                                                        [class.mb-table__badge--success]="badge.tone === 'success'"
+                                                        [class.mb-table__badge--warning]="badge.tone === 'warning'"
+                                                        [class.mb-table__badge--danger]="badge.tone === 'danger'"
+                                                    >
+                                                        {{ badge.label }}
+                                                    </span>
+                                                </span>
+                                            </span>
                                             <span class="mb-table__cell-secondary" *ngIf="cell.secondary">
                                                 {{ cell.secondary }}
+                                            </span>
+                                            <span class="mb-table__cell-meta" *ngIf="cell.meta">
+                                                {{ cell.meta }}
+                                            </span>
+                                            <span
+                                                class="mb-table__cell-tertiary"
+                                                *ngIf="cell.tertiary"
+                                                [attr.title]="cell.tooltip || null"
+                                            >
+                                                {{ cell.tertiary }}
                                             </span>
                                         </span>
                                     </ng-container>
@@ -108,6 +146,7 @@ export class MbTableComponent<T extends Record<string, any>> {
     @Input() columns: MbTableColumn<T>[] = [];
     @Input() rows: T[] = [];
     @Input() selectable = false;
+    @Input() selectionDisabled = false;
     @Input() sortLocal = true;
     @Input() emptyMessage = 'No data available.';
     @Input() rowKey?: (row: T) => string;
@@ -169,6 +208,9 @@ export class MbTableComponent<T extends Record<string, any>> {
     }
 
     toggleAll(event: Event): void {
+        if (this.selectionDisabled) {
+            return;
+        }
         const checked = (event.target as HTMLInputElement).checked;
         this.selectedKeys.clear();
         if (checked) {
@@ -178,6 +220,9 @@ export class MbTableComponent<T extends Record<string, any>> {
     }
 
     toggleRow(row: T): void {
+        if (this.selectionDisabled) {
+            return;
+        }
         const key = this.resolveKey(row);
         if (this.selectedKeys.has(key)) {
             this.selectedKeys.delete(key);

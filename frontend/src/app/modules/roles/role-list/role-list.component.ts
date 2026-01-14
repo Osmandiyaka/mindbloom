@@ -14,6 +14,7 @@ import {
     MbModalFooterDirective,
     MbPopoverComponent,
     MbTableComponent,
+    type MbTableColumn,
     MbTableActionsDirective,
     MbFormFieldComponent,
     MbSelectComponent,
@@ -69,42 +70,42 @@ export class RoleListComponent implements OnInit {
     schools = signal<Array<{ id: string; name: string }>>([]);
 
     search = signal('');
-    filter = signal<RoleFilter>('all');
+    filters = signal<Set<RoleFilter>>(new Set(['all']));
     selectedRoleId = signal<string | null>(null);
-    activeTab = signal<RoleTab>('permissions');
     roleMenuOpenId = signal<string | null>(null);
     detailRoleId = signal<string | null>(null);
     detailTab = signal<RoleTab>('permissions');
     roleRowKey = (role: Role) => role.id;
-    roleTableColumns = [
+    roleTableColumns: MbTableColumn<Role>[] = [
         {
             key: 'name',
             label: 'Role',
-            cell: (role: Role) => ({
-                primary: role.name,
-                secondary: role.description || undefined,
-            }),
-        },
-        {
-            key: 'type',
-            label: 'Type',
-            cell: (role: Role) => (role.isSystemRole ? 'System' : 'Custom'),
-        },
-        {
-            key: 'scope',
-            label: 'Scope',
-            cell: (role: Role) => this.roleScopeLabel(role),
+            cell: (role: Role) => {
+                const summary = this.rolePermissionSummary(role);
+                const meta = `Scope: ${this.roleScopeLabel(role)} · Users: ${this.roleUserCount(role.id)}`;
+                return {
+                    primary: role.name,
+                    secondary: role.description || undefined,
+                    meta,
+                    tertiary: summary.text ? `Permissions: ${summary.text}` : 'Permissions: none',
+                    tooltip: summary.tooltip || undefined,
+                    badges: [
+                        { label: this.roleCategoryLabel(role), tone: 'neutral' as const },
+                        {
+                            label: role.isSystemRole ? 'System' : 'Custom',
+                            tone: (role.isSystemRole ? 'success' : 'neutral') as 'success' | 'neutral',
+                        },
+                    ],
+                    icon: this.roleHasAdminPerms(role)
+                        ? { symbol: '⚠', title: 'High privilege' }
+                        : undefined,
+                };
+            },
         },
         {
             key: 'status',
             label: 'Status',
             cell: (role: Role) => this.roleStatusLabel(role),
-        },
-        {
-            key: 'users',
-            label: 'Users',
-            align: 'center' as const,
-            cell: (role: Role) => String(this.roleUserCount(role.id)),
         },
     ];
 
@@ -137,23 +138,49 @@ export class RoleListComponent implements OnInit {
 
     readonly filteredRoles = computed(() => {
         const term = this.search().trim().toLowerCase();
-        const filter = this.filter();
+        const filters = this.filters();
         const list = this.roles().filter((role): role is Role => !!role && !!role.id);
         return list.filter((role) => {
             if (term && !role.name.toLowerCase().includes(term) && !role.description?.toLowerCase().includes(term)) {
                 return false;
             }
-            if (filter === 'system') {
-                return role.isSystemRole;
+            if (!filters.size || filters.has('all')) {
+                return true;
             }
-            if (filter === 'custom') {
-                return !role.isSystemRole;
+            if (filters.has('system') && !role.isSystemRole) {
+                return false;
             }
-            if (filter === 'active') {
-                return (role.status || 'active') === 'active';
+            if (filters.has('custom') && role.isSystemRole) {
+                return false;
+            }
+            if (filters.has('active') && (role.status || 'active') !== 'active') {
+                return false;
             }
             return true;
         });
+    });
+
+    readonly activeFilterCount = computed(() => {
+        const filters = this.filters();
+        if (!filters.size || filters.has('all')) {
+            return 0;
+        }
+        return filters.size;
+    });
+
+    readonly permissionModuleMap = computed(() => {
+        const map = new Map<string, string>();
+        const roots = this.permissionTree() || [];
+        const walk = (perm: Permission, rootLabel: string) => {
+            const key = perm.id || perm.resource;
+            map.set(key, rootLabel);
+            perm.children?.forEach((child) => walk(child, rootLabel));
+        };
+        roots.forEach((root) => {
+            const label = root.displayName || root.resource;
+            walk(root, label);
+        });
+        return map;
     });
 
     readonly selectedRole = computed(() => {
@@ -228,16 +255,31 @@ export class RoleListComponent implements OnInit {
         });
     }
 
-    selectRole(roleId: string): void {
-        this.selectedRoleId.set(roleId);
-        this.activeTab.set('permissions');
-    }
 
     setFilter(value: RoleFilter): void {
-        this.filter.set(value);
+        const next = new Set(this.filters());
+        if (value === 'all') {
+            next.clear();
+            next.add('all');
+        } else {
+            next.delete('all');
+            if (next.has(value)) {
+                next.delete(value);
+            } else {
+                next.add(value);
+            }
+            if (!next.size) {
+                next.add('all');
+            }
+        }
+        this.filters.set(next);
         if (!this.filteredRoles().length) {
             this.selectedRoleId.set(null);
         }
+    }
+
+    clearFilters(): void {
+        this.filters.set(new Set(['all']));
     }
 
     roleUserCount(roleId: string): number {
@@ -279,6 +321,37 @@ export class RoleListComponent implements OnInit {
 
     roleUsers(role: Role): User[] {
         return this.users().filter((user) => user.roleId === role.id);
+    }
+
+    roleCategoryLabel(role: Role): string {
+        const resources = role.permissions.map((perm) => perm.resource);
+        if (resources.some((resource) => resource.startsWith('system') || resource.startsWith('admin'))) {
+            return 'Admin';
+        }
+        if (resources.some((resource) => resource.startsWith('academics') || resource.startsWith('students'))) {
+            return 'Academic';
+        }
+        if (resources.some((resource) => resource.startsWith('fees') || resource.startsWith('finance') || resource.startsWith('hr'))) {
+            return 'Operational';
+        }
+        return 'External';
+    }
+
+    rolePermissionSummary(role: Role): { text: string; tooltip: string } {
+        const moduleMap = this.permissionModuleMap();
+        const counts = new Map<string, number>();
+        role.permissions.forEach((perm) => {
+            const key = perm.id || perm.resource;
+            const moduleName = moduleMap.get(key) || perm.resource.split('.')[0] || 'General';
+            counts.set(moduleName, (counts.get(moduleName) || 0) + 1);
+        });
+        if (!counts.size) {
+            return { text: '', tooltip: '' };
+        }
+        const entries = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+        const summary = entries.slice(0, 3).map(([name, count]) => `${name} (${count})`).join(', ');
+        const tooltip = entries.map(([name, count]) => `${name} (${count})`).join(', ');
+        return { text: summary, tooltip };
     }
 
     openCreateRole(): void {
