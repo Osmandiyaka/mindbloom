@@ -76,9 +76,10 @@
                             [columns]="roleTableColumns"
                             [rows]="filteredRoles()"
                             [rowKey]="roleRowKey"
+                            [rowClass]="roleRowClass"
                             [selectable]="true"
                             [selectionDisabled]="true"
-                            (cellClick)="openRoleDetails($event.row.id, 'permissions')"
+                            (rowClick)="openRoleDetails($event.id, 'permissions')"
                         >
                             <ng-template mbTableActions let-row>
                                 <div class="roles-table__actions">

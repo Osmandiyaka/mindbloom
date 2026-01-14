@@ -76,6 +76,7 @@ export class RoleListComponent implements OnInit {
     detailRoleId = signal<string | null>(null);
     detailTab = signal<RoleTab>('permissions');
     roleRowKey = (role: Role) => role.id;
+    roleRowClass = (role: Role) => (this.detailRoleId() === role.id ? 'roles-row--selected' : '');
     roleTableColumns: MbTableColumn<Role>[] = [
         {
             key: 'name',

@@ -62,7 +62,11 @@ export type MbTableCellValue =
                     </tr>
                 </thead>
                 <tbody *ngIf="displayRows.length; else emptyState">
-                    <tr *ngFor="let row of displayRows; trackBy: trackByKey">
+                    <tr
+                        *ngFor="let row of displayRows; trackBy: trackByKey"
+                        [class]="rowClass?.(row) || null"
+                        (click)="handleRowClick($event, row)"
+                    >
                         <td *ngIf="selectable" class="mb-table__checkbox">
                             <input
                                 type="checkbox"
@@ -150,9 +154,11 @@ export class MbTableComponent<T extends Record<string, any>> {
     @Input() sortLocal = true;
     @Input() emptyMessage = 'No data available.';
     @Input() rowKey?: (row: T) => string;
+    @Input() rowClass?: (row: T) => string;
     @Output() selectionChange = new EventEmitter<T[]>();
     @Output() sortChange = new EventEmitter<{ key: string; direction: MbSortDirection }>();
     @Output() cellClick = new EventEmitter<{ row: T; column: MbTableColumn<T> }>();
+    @Output() rowClick = new EventEmitter<T>();
 
     @ContentChild(MbTableActionsDirective) actionsTemplate?: MbTableActionsDirective;
 
@@ -281,5 +287,16 @@ export class MbTableComponent<T extends Record<string, any>> {
         if (!this.isNameColumn(column)) return;
         event.stopPropagation();
         this.cellClick.emit({ row, column });
+        if (this.rowClick.observed) {
+            this.rowClick.emit(row);
+        }
+    }
+
+    handleRowClick(event: Event, row: T): void {
+        const target = event.target as HTMLElement | null;
+        if (target && target.closest('button, a, input, [role="button"]')) {
+            return;
+        }
+        this.rowClick.emit(row);
     }
 }

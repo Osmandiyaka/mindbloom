@@ -127,9 +127,26 @@
     border-radius: 14px;
 }
 
-.roles-table__list .mb-table tbody td {
+:host ::ng-deep .roles-table__list .mb-table tbody td {
     padding-top: 16px;
     padding-bottom: 16px;
+}
+
+:host ::ng-deep .roles-table__list .mb-table tbody tr {
+    cursor: pointer;
+}
+
+:host ::ng-deep .roles-table__list .mb-table tbody tr .roles-menu__trigger {
+    cursor: pointer;
+}
+
+:host ::ng-deep .roles-table__list .mb-table tbody tr.roles-row--selected {
+    background: rgba(16, 185, 129, 0.1);
+    box-shadow: inset 3px 0 0 #10b981;
+}
+
+:host ::ng-deep .roles-table__list .mb-table tbody tr.roles-row--selected:hover {
+    background: rgba(16, 185, 129, 0.14);
 }
 
 .roles-table__actions {
