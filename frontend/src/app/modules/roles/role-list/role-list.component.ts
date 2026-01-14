@@ -24,6 +24,7 @@ import { PermissionMatrixComponent } from '../components/permission-matrix/permi
 import { PermissionTreeComponent } from '../components/permission-tree/permission-tree.component';
 import { AccessScopePickerComponent } from '../components/access-scope-picker/access-scope-picker.component';
 import { SchoolService } from '../../../core/school/school.service';
+import { SearchInputComponent } from '../../../shared/components/search-input/search-input.component';
 
 type RoleFilter = 'all' | 'system' | 'custom' | 'active';
 type RoleTab = 'permissions' | 'assignments';
@@ -50,6 +51,7 @@ type RoleFormMode = 'create' | 'edit' | 'duplicate';
         PermissionMatrixComponent,
         PermissionTreeComponent,
         AccessScopePickerComponent,
+        SearchInputComponent,
     ],
     templateUrl: './role-list.component.html',
     styleUrls: ['./role-list.component.scss'],

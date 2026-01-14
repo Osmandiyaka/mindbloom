@@ -17,8 +17,8 @@
             <div class="roles-split__table">
                 <div class="roles-table">
                     <div class="roles-table__controls">
-                        <mb-input class="roles-table__search" placeholder="Search roles…" [value]="search()"
-                            (valueChange)="search.set($event)"></mb-input>
+                        <app-search-input class="roles-table__search" placeholder="Search roles…"
+                            (search)="search.set($event)"></app-search-input>
                         <div class="roles-table__filters">
                             <button type="button" class="roles-chip" [class.is-active]="filters().has('all')"
                                 (click)="setFilter('all')">
