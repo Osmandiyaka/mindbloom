@@ -76,7 +76,7 @@ interface NavSection {
         </div>
       </div>
 
-      <nav class="sidebar-nav">
+      <nav class="sidebar-nav" *ngIf="navReady(); else navLoading">
         <section class="nav-section" *ngFor="let section of filteredNavSections()">
           <header class="nav-section-title" *ngIf="!collapsed">{{ section.title }}</header>
           <div class="nav-card">
@@ -98,6 +98,17 @@ interface NavSection {
           </div>
         </section>
       </nav>
+      <ng-template #navLoading>
+        <div class="nav-loading">
+          <div class="nav-loading__section" *ngFor="let _ of [0,1,2]">
+            <div class="nav-loading__title" *ngIf="!collapsed"></div>
+            <div class="nav-loading__item" *ngFor="let __ of [0,1,2]">
+              <span class="nav-loading__icon"></span>
+              <span class="nav-loading__text" *ngIf="!collapsed"></span>
+            </div>
+          </div>
+        </div>
+      </ng-template>
 
       <div class="sidebar-footer">
         <div class="footer-cta" *ngIf="!collapsed">
@@ -331,6 +342,40 @@ interface NavSection {
       text-transform: uppercase;
     }
 
+    .nav-loading {
+      padding: 0.25rem 0.6rem;
+      display: grid;
+      gap: 1.1rem;
+    }
+    .nav-loading__section {
+      display: grid;
+      gap: 0.55rem;
+    }
+    .nav-loading__title {
+      width: 60%;
+      height: 10px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--surface-hover) 70%, transparent);
+    }
+    .nav-loading__item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.35rem 0.4rem;
+    }
+    .nav-loading__icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--surface-hover) 70%, transparent);
+    }
+    .nav-loading__text {
+      flex: 1;
+      height: 10px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--surface-hover) 70%, transparent);
+    }
+
     .sidebar.sidebar-collapsed .nav-section-title { display: none; }
     .sidebar.sidebar-collapsed .nav-link { justify-content: center; padding: 0 0.65rem; }
     .sidebar.sidebar-collapsed .nav-link-text, .sidebar.sidebar-collapsed .nav-badge, .sidebar.sidebar-collapsed .nav-meta { display: none; }
@@ -535,11 +580,29 @@ export class SidebarComponent implements OnInit {
     private navFilterService: NavFilterService
   ) { }
 
+  navReady = signal(false);
+  navError = signal<string | null>(null);
+
   icon(name: string) {
     return this.icons.icon(name);
   }
 
   ngOnInit(): void {
+    if (this.isHostSidebar) {
+      this.navReady.set(true);
+    } else {
+      this.entitlements.loadEntitlements().subscribe({
+        next: () => {
+          this.navReady.set(true);
+          this.navError.set(null);
+        },
+        error: (error) => {
+          console.warn('[Sidebar] Failed to load entitlements', error);
+          this.navReady.set(false);
+          this.navError.set('Unable to load navigation');
+        },
+      });
+    }
     this.authService.currentUser$.subscribe((user: any) => {
       this.currentUser = user;
     });

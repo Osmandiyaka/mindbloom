@@ -1,27 +1,41 @@
-<div class="permission-matrix">
+<div class="permission-matrix" [style.--action-count]="actionColumns().length">
     <div class="permission-matrix__controls">
-        <input
-            class="permission-matrix__search"
-            type="search"
-            placeholder="Search permissions…"
-            [ngModel]="search()"
-            (ngModelChange)="search.set($event)"
-        />
-        <div class="permission-matrix__selected" *ngIf="!readOnly">
-            {{ selectedIds().size }} selected
+        <div class="permission-matrix__title">
+            <span>Permissions</span>
+            <span class="permission-matrix__selected">{{ selectedIds().size }} selected</span>
+        </div>
+        <div class="permission-matrix__tools">
+            <input
+                class="permission-matrix__search"
+                type="search"
+                placeholder="Search permissions…"
+                [ngModel]="search()"
+                (ngModelChange)="search.set($event)"
+            />
+            <button type="button" class="permission-matrix__btn" (click)="expandAll()">Expand all</button>
+            <button type="button" class="permission-matrix__btn" (click)="collapseAll()">Collapse all</button>
         </div>
     </div>
 
-    <div class="permission-matrix__groups">
-        <div class="permission-group" *ngFor="let group of filteredGroups(); track group.id">
+    <div class="permission-matrix__table">
+        <div class="permission-matrix__head">
+            <div class="permission-matrix__cell permission-matrix__cell--label">Permission</div>
+            <div class="permission-matrix__cell" *ngFor="let action of actionColumns()">
+                {{ action.label }}
+            </div>
+        </div>
+
+        <div class="permission-group" *ngFor="let group of filteredGroups(); trackBy: trackByGroup">
             <div class="permission-group__header">
                 <button type="button" class="permission-group__toggle" (click)="toggleGroupExpanded(group.id)">
-                    <span>{{ group.displayName || group.resource }}</span>
+                    <span class="permission-group__caret" [class.is-open]="isGroupExpanded(group.id)">▾</span>
+                    <span class="permission-group__title">{{ group.displayName || group.resource }}</span>
                     <span class="permission-group__count">{{ groupSelectionCount(group) }}/{{ groupTotalCount(group) }}</span>
                 </button>
                 <div class="permission-group__actions" *ngIf="!readOnly">
                     <mb-checkbox
                         [checked]="groupSelectionCount(group) === groupTotalCount(group)"
+                        [indeterminate]="isPartiallySelected(group)"
                         [ariaLabel]="'Select all ' + (group.displayName || group.resource)"
                         (checkedChange)="toggleGroupSelection(group)"
                     >
@@ -31,34 +45,48 @@
             </div>
 
             <div class="permission-group__body" *ngIf="isGroupExpanded(group.id)">
-                <ng-container *ngFor="let item of group.children">
-                    <div class="permission-item">
-                        <mb-checkbox
-                            *ngIf="!readOnly"
-                            [checked]="isSelected(item.id)"
-                            [ariaLabel]="item.displayName || item.resource"
-                            (checkedChange)="togglePermission(item)"
-                        ></mb-checkbox>
-                        <span class="permission-item__check" *ngIf="readOnly && isSelected(item.id)">✓</span>
-                        <div class="permission-item__info">
-                            <div class="permission-item__name">{{ item.displayName || item.resource }}</div>
-                            <div class="permission-item__desc">{{ item.description }}</div>
+                <ng-container *ngFor="let item of group.children || []; trackBy: trackByPermission">
+                    <div class="permission-row">
+                        <div class="permission-row__name">
+                            <mb-checkbox
+                                *ngIf="!readOnly"
+                                [checked]="isSelected(item.id)"
+                                [indeterminate]="isPartiallySelected(item)"
+                                [ariaLabel]="item.displayName || item.resource"
+                                (checkedChange)="togglePermission(item)"
+                            ></mb-checkbox>
+                            <span class="permission-row__check" *ngIf="readOnly && isSelected(item.id)">✓</span>
+                            <div class="permission-row__info">
+                                <div class="permission-row__title">{{ item.displayName || item.resource }}</div>
+                                <div class="permission-row__desc">{{ item.description }}</div>
+                            </div>
                         </div>
-                        <div class="permission-item__actions">{{ actionsLabel(item) }}</div>
+                        <div class="permission-row__action" *ngFor="let action of actionColumns()">
+                            <span class="permission-action" [class.is-on]="hasAction(item, action.key)">
+                                {{ hasAction(item, action.key) ? '✓' : '—' }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="permission-item permission-item--child" *ngFor="let child of item.children">
-                        <mb-checkbox
-                            *ngIf="!readOnly"
-                            [checked]="isSelected(child.id)"
-                            [ariaLabel]="child.displayName || child.resource"
-                            (checkedChange)="togglePermission(child)"
-                        ></mb-checkbox>
-                        <span class="permission-item__check" *ngIf="readOnly && isSelected(child.id)">✓</span>
-                        <div class="permission-item__info">
-                            <div class="permission-item__name">{{ child.displayName || child.resource }}</div>
-                            <div class="permission-item__desc">{{ child.description }}</div>
+
+                    <div class="permission-row permission-row--child" *ngFor="let child of item.children || []; trackBy: trackByPermission">
+                        <div class="permission-row__name">
+                            <mb-checkbox
+                                *ngIf="!readOnly"
+                                [checked]="isSelected(child.id)"
+                                [ariaLabel]="child.displayName || child.resource"
+                                (checkedChange)="togglePermission(child)"
+                            ></mb-checkbox>
+                            <span class="permission-row__check" *ngIf="readOnly && isSelected(child.id)">✓</span>
+                            <div class="permission-row__info">
+                                <div class="permission-row__title">{{ child.displayName || child.resource }}</div>
+                                <div class="permission-row__desc">{{ child.description }}</div>
+                            </div>
                         </div>
-                        <div class="permission-item__actions">{{ actionsLabel(child) }}</div>
+                        <div class="permission-row__action" *ngFor="let action of actionColumns()">
+                            <span class="permission-action" [class.is-on]="hasAction(child, action.key)">
+                                {{ hasAction(child, action.key) ? '✓' : '—' }}
+                            </span>
+                        </div>
                     </div>
                 </ng-container>
             </div>

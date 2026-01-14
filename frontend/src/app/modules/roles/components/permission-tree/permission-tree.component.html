@@ -24,6 +24,7 @@
                 <!-- Checkbox -->
                 <label class="checkbox-container" (click)="$event.stopPropagation()">
                     <input type="checkbox" [checked]="isSelected(permission.id)"
+                        [disabled]="readOnly"
                         [indeterminate]="isIndeterminate(permission)" (change)="togglePermission(permission, $event)" />
                     <span class="checkmark"></span>
                 </label>
@@ -58,6 +59,7 @@
                 <div class="child-permission">
                     <label class="checkbox-container">
                         <input type="checkbox" [checked]="isSelected(child.id)"
+                            [disabled]="readOnly"
                             (change)="togglePermission(child, $event)" />
                         <span class="checkmark"></span>
                     </label>

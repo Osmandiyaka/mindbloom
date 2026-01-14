@@ -20,6 +20,7 @@ import {
     MbCheckboxComponent,
 } from '@mindbloom/ui';
 import { PermissionMatrixComponent } from '../components/permission-matrix/permission-matrix.component';
+import { PermissionTreeComponent } from '../components/permission-tree/permission-tree.component';
 import { AccessScopePickerComponent } from '../components/access-scope-picker/access-scope-picker.component';
 import { SchoolService } from '../../../core/school/school.service';
 
@@ -46,12 +47,15 @@ type RoleFormMode = 'create' | 'edit' | 'duplicate';
         MbSelectComponent,
         MbCheckboxComponent,
         PermissionMatrixComponent,
+        PermissionTreeComponent,
         AccessScopePickerComponent,
     ],
     templateUrl: './role-list.component.html',
     styleUrls: ['./role-list.component.scss'],
 })
 export class RoleListComponent implements OnInit {
+    trackByRole = (_: number, role: Role) => role?.id ?? _;
+    trackByUser = (_: number, user: User) => user?.id ?? _;
     private readonly roleService = inject(RoleService);
     private readonly userService = inject(UserService);
     private readonly schoolService = inject(SchoolService);
@@ -69,7 +73,38 @@ export class RoleListComponent implements OnInit {
     selectedRoleId = signal<string | null>(null);
     activeTab = signal<RoleTab>('permissions');
     roleMenuOpenId = signal<string | null>(null);
-    roleActionMenuOpen = signal(false);
+    detailRoleId = signal<string | null>(null);
+    detailTab = signal<RoleTab>('permissions');
+    roleRowKey = (role: Role) => role.id;
+    roleTableColumns = [
+        {
+            key: 'name',
+            label: 'Role',
+            cell: (role: Role) =>
+                role.description ? `${role.name}\n${role.description}` : role.name,
+        },
+        {
+            key: 'type',
+            label: 'Type',
+            cell: (role: Role) => (role.isSystemRole ? 'System' : 'Custom'),
+        },
+        {
+            key: 'scope',
+            label: 'Scope',
+            cell: (role: Role) => this.roleScopeLabel(role),
+        },
+        {
+            key: 'status',
+            label: 'Status',
+            cell: (role: Role) => this.roleStatusLabel(role),
+        },
+        {
+            key: 'users',
+            label: 'Users',
+            align: 'center' as const,
+            cell: (role: Role) => String(this.roleUserCount(role.id)),
+        },
+    ];
 
     roleFormOpen = signal(false);
     roleFormMode = signal<RoleFormMode>('create');
@@ -101,7 +136,8 @@ export class RoleListComponent implements OnInit {
     readonly filteredRoles = computed(() => {
         const term = this.search().trim().toLowerCase();
         const filter = this.filter();
-        return this.roles().filter((role) => {
+        const list = this.roles().filter((role): role is Role => !!role && !!role.id);
+        return list.filter((role) => {
             if (term && !role.name.toLowerCase().includes(term) && !role.description?.toLowerCase().includes(term)) {
                 return false;
             }
@@ -125,6 +161,12 @@ export class RoleListComponent implements OnInit {
             return null;
         }
         return list.find((role) => role.id === roleId) || list[0];
+    });
+
+    readonly detailRole = computed(() => {
+        const roleId = this.detailRoleId();
+        if (!roleId) return null;
+        return this.filteredRoles().find((role) => role.id === roleId) || null;
     });
 
     readonly roleCounts = computed(() => {
@@ -172,7 +214,7 @@ export class RoleListComponent implements OnInit {
 
     loadUsers(): void {
         this.userService.getUsers().subscribe({
-            next: (users) => this.users.set(users),
+            next: (users) => this.users.set((users || []).filter((user) => !!user && !!user.id)),
             error: () => this.users.set([]),
         });
     }
@@ -187,7 +229,6 @@ export class RoleListComponent implements OnInit {
     selectRole(roleId: string): void {
         this.selectedRoleId.set(roleId);
         this.activeTab.set('permissions');
-        this.roleActionMenuOpen.set(false);
     }
 
     setFilter(value: RoleFilter): void {
@@ -210,12 +251,32 @@ export class RoleListComponent implements OnInit {
         this.roleMenuOpenId.set(null);
     }
 
-    toggleRoleActionMenu(): void {
-        this.roleActionMenuOpen.set(!this.roleActionMenuOpen());
+    openRoleDetails(roleId: string, tab: RoleTab): void {
+        this.detailRoleId.set(roleId);
+        this.detailTab.set(tab);
+        this.selectedRoleId.set(roleId);
     }
 
-    closeRoleActionMenu(): void {
-        this.roleActionMenuOpen.set(false);
+    closeRoleDetails(): void {
+        this.detailRoleId.set(null);
+    }
+
+    isRoleDetailOpen(roleId: string): boolean {
+        return this.detailRoleId() === roleId;
+    }
+
+    setDetailTab(tab: RoleTab): void {
+        this.detailTab.set(tab);
+    }
+
+    roleHasAdminPerms(role: Role): boolean {
+        return role.permissions.some((perm) =>
+            perm.resource.startsWith('system') || perm.actions?.includes(PermissionAction.MANAGE)
+        );
+    }
+
+    roleUsers(role: Role): User[] {
+        return this.users().filter((user) => user.roleId === role.id);
     }
 
     openCreateRole(): void {
@@ -262,10 +323,21 @@ export class RoleListComponent implements OnInit {
         }));
     }
 
+    assignmentRowsForRole(role: Role) {
+        return this.roleUsers(role).map((user) => ({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            scope: this.roleScopeLabel(role),
+            status: 'Active',
+        }));
+    }
+
     openEditRole(role: Role): void {
         if (role.isSystemRole) {
             return;
         }
+        this.selectedRoleId.set(role.id);
         this.roleFormMode.set('edit');
         this.roleFormId.set(role.id);
         this.roleFormName.set(role.name);
@@ -280,6 +352,7 @@ export class RoleListComponent implements OnInit {
     }
 
     openDuplicateRole(role: Role): void {
+        this.selectedRoleId.set(role.id);
         this.roleFormMode.set('duplicate');
         this.roleFormId.set(null);
         this.roleFormName.set(`${role.name} copy`);
@@ -379,6 +452,7 @@ export class RoleListComponent implements OnInit {
 
     requestDeleteRole(role: Role): void {
         if (role.isSystemRole) return;
+        this.selectedRoleId.set(role.id);
         this.roleToDelete.set(role);
         this.deleteConfirmText.set('');
         this.deleteError.set('');
@@ -418,7 +492,10 @@ export class RoleListComponent implements OnInit {
         });
     }
 
-    openAssignmentsModal(): void {
+    openAssignmentsModal(role?: Role): void {
+        if (role) {
+            this.selectedRoleId.set(role.id);
+        }
         this.assignSelections.set(new Set());
         this.assignSearch.set('');
         this.assignError.set('');

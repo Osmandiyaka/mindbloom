@@ -3,6 +3,7 @@ import { Component, EventEmitter, Input, Output, computed, signal } from '@angul
 import { FormsModule } from '@angular/forms';
 import { MbCheckboxComponent } from '@mindbloom/ui';
 import { Permission } from '../../../../core/models/role.model';
+import { PermissionAction } from '../../../../core/models/role.model';
 
 @Component({
     selector: 'app-permission-matrix',
@@ -12,11 +13,34 @@ import { Permission } from '../../../../core/models/role.model';
     styleUrls: ['./permission-matrix.component.scss'],
 })
 export class PermissionMatrixComponent {
+    readonly actionColumns = computed(() => {
+        const base = [
+            PermissionAction.READ,
+            PermissionAction.CREATE,
+            PermissionAction.UPDATE,
+            PermissionAction.DELETE,
+            PermissionAction.APPROVE,
+        ];
+        const present = new Set<string>();
+        const walk = (node: Permission) => {
+            (node.actions || []).forEach((action) => present.add(action));
+            node.children?.forEach(walk);
+        };
+        this.permissionTree().forEach(walk);
+        const available = base.filter((action) => present.has(action) || present.has(PermissionAction.MANAGE));
+        return (available.length ? available : base).map((action) => ({
+            key: action,
+            label: this.actionLabel(action),
+        }));
+    });
+    trackByGroup = (_: number, group: Permission) => group?.id ?? _;
+    trackByPermission = (_: number, permission: Permission) => permission?.id ?? _;
     @Input() set permissions(value: Permission[]) {
-        this.permissionTree.set(value || []);
+        const safeTree = this.sanitizePermissionTree(value || []);
+        this.permissionTree.set(safeTree);
         const current = this.expandedGroups();
-        if (!current.size && value?.length) {
-            this.expandedGroups.set(new Set([value[0].id]));
+        if (!current.size && safeTree.length) {
+            this.expandedGroups.set(new Set([safeTree[0].id]));
         }
     }
     @Input() set selectedPermissions(value: string[]) {
@@ -32,10 +56,11 @@ export class PermissionMatrixComponent {
 
     filteredGroups = computed(() => {
         const term = this.search().trim().toLowerCase();
+        const tree = this.sanitizePermissionTree(this.permissionTree());
         if (!term) {
-            return this.permissionTree();
+            return tree;
         }
-        return this.permissionTree()
+        return tree
             .map((group) => this.filterGroup(group, term))
             .filter((group): group is Permission => !!group);
     });
@@ -62,6 +87,20 @@ export class PermissionMatrixComponent {
         this.expandedGroups.set(next);
     }
 
+    expandAll(): void {
+        const next = new Set<string>();
+        this.permissionTree().forEach((group) => {
+            if (group?.id) {
+                next.add(group.id);
+            }
+        });
+        this.expandedGroups.set(next);
+    }
+
+    collapseAll(): void {
+        this.expandedGroups.set(new Set());
+    }
+
     toggleGroupSelection(group: Permission): void {
         if (this.readOnly) return;
         const ids = this.collectIds(group);
@@ -80,12 +119,16 @@ export class PermissionMatrixComponent {
 
     togglePermission(permission: Permission): void {
         if (this.readOnly) return;
+        const ids = this.collectIds(permission);
         const next = new Set(this.selectedIds());
-        if (next.has(permission.id)) {
-            next.delete(permission.id);
-        } else {
-            next.add(permission.id);
-        }
+        const allSelected = ids.every((id) => next.has(id));
+        ids.forEach((id) => {
+            if (allSelected) {
+                next.delete(id);
+            } else {
+                next.add(id);
+            }
+        });
         this.selectedIds.set(next);
         this.selectedPermissionsChange.emit([...next]);
     }
@@ -94,8 +137,26 @@ export class PermissionMatrixComponent {
         return this.selectedIds().has(permissionId);
     }
 
+    isPartiallySelected(permission: Permission): boolean {
+        const ids = this.collectIds(permission);
+        const selected = ids.filter((id) => this.selectedIds().has(id)).length;
+        return selected > 0 && selected < ids.length;
+    }
+
     actionsLabel(permission: Permission): string {
         return (permission.actions || []).map((action) => action.toUpperCase()).join(', ');
+    }
+
+    hasAction(permission: Permission, action: PermissionAction): boolean {
+        const actions = permission.actions || [];
+        if (actions.includes(PermissionAction.MANAGE)) {
+            return true;
+        }
+        return actions.includes(action);
+    }
+
+    private actionLabel(action: PermissionAction): string {
+        return String(action).charAt(0).toUpperCase() + String(action).slice(1);
     }
 
     private collectIds(group: Permission): string[] {
@@ -126,5 +187,18 @@ export class PermissionMatrixComponent {
             || permission.description?.toLowerCase().includes(term)
             || false
         );
+    }
+
+    private sanitizePermissionTree(tree: Permission[]): Permission[] {
+        const sanitize = (node: Permission): Permission | null => {
+            if (!node || !node.id) return null;
+            const children = (node.children || [])
+                .map((child) => sanitize(child))
+                .filter((child): child is Permission => !!child);
+            return { ...node, children };
+        };
+        return tree
+            .map((node) => sanitize(node))
+            .filter((node): node is Permission => !!node);
     }
 }

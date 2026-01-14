@@ -28,7 +28,8 @@ export class RoleService {
         return this.http.get<Role[]>(this.apiUrl).pipe(
             tap({
                 next: (roles) => {
-                    this.roles.set(roles);
+                    const safeRoles = (roles || []).filter((role) => !!role && !!role.id);
+                    this.roles.set(safeRoles);
                     this.loading.set(false);
                 },
                 error: (err) => {
@@ -135,7 +136,7 @@ export class RoleService {
         return this.http.get<Permission[]>(`${this.permissionsApiUrl}/tree`).pipe(
             tap({
                 next: (tree) => {
-                    this.permissionTree.set(tree);
+                    this.permissionTree.set(this.sanitizePermissionTree(tree || []));
                     this.loading.set(false);
                 },
                 error: (err) => {
@@ -167,5 +168,18 @@ export class RoleService {
                 }
             })
         );
+    }
+
+    private sanitizePermissionTree(tree: Permission[]): Permission[] {
+        const sanitize = (node: Permission): Permission | null => {
+            if (!node || !node.id) return null;
+            const children = (node.children || [])
+                .map((child) => sanitize(child))
+                .filter((child): child is Permission => !!child);
+            return { ...node, children };
+        };
+        return tree
+            .map((node) => sanitize(node))
+            .filter((node): node is Permission => !!node);
     }
 }

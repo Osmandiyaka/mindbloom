@@ -16,6 +16,7 @@ export class PermissionTreeComponent {
     @Input() set selectedPermissions(value: string[]) {
         this._selectedPermissions.set(new Set(value));
     }
+    @Input() readOnly = false;
     @Output() permissionsChange = new EventEmitter<string[]>();
 
     private _permissionTree = signal<Permission[]>([]);
@@ -40,6 +41,11 @@ export class PermissionTreeComponent {
     }
 
     togglePermission(permission: Permission, event: Event) {
+        if (this.readOnly) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         event.stopPropagation();
 
         const selected = new Set(this._selectedPermissions());

@@ -44,7 +44,17 @@
     border-color: var(--mb-color-primary);
 }
 
-.mb-checkbox__input:checked + .mb-checkbox__box svg {
+.mb-checkbox__input:checked + .mb-checkbox__box .mb-checkbox__icon-check {
+    opacity: 1;
+}
+
+.mb-checkbox--indeterminate .mb-checkbox__box {
+    background: color-mix(in srgb, var(--mb-color-primary) 16%, transparent);
+    border-color: color-mix(in srgb, var(--mb-color-primary) 55%, transparent);
+    color: var(--mb-color-primary);
+}
+
+.mb-checkbox--indeterminate .mb-checkbox__icon-minus {
     opacity: 1;
 }
 
