@@ -8,6 +8,7 @@ import { Observable, forkJoin, of } from 'rxjs';
 import { map, tap, catchError, finalize } from 'rxjs/operators';
 import { TenantContextService, TenantMembership } from './tenant-context.service';
 import { SchoolContextService } from '../school/school-context.service';
+import { EditionService } from '../../shared/services/entitlements.service';
 
 export type BootstrapStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -17,6 +18,7 @@ export type BootstrapStatus = 'idle' | 'loading' | 'ready' | 'error';
 export class TenantBootstrapService {
     private readonly tenantContext = inject(TenantContextService);
     private readonly schoolContext = inject(SchoolContextService);
+    private readonly entitlements = inject(EditionService);
 
     // Bootstrap loading state
     readonly status = signal<BootstrapStatus>('idle');
@@ -84,11 +86,15 @@ export class TenantBootstrapService {
         // Placeholder - replace with actual entitlement loading
         // Example: return this.entitlementsService.loadForTenant(tenantId);
 
-        return of(void 0).pipe(
+        return this.entitlements.loadEntitlements().pipe(
             tap(() => {
-                // Load edition features, module access, etc.
                 console.log('[TenantBootstrap] Entitlements reloaded');
-            })
+            }),
+            map(() => void 0),
+            catchError((error) => {
+                console.warn('[TenantBootstrap] Failed to reload entitlements', error);
+                return of(void 0);
+            }),
         );
     }
 

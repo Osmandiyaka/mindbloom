@@ -6,8 +6,10 @@ import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
 import * as path from 'path';
 import { InitializeGlobalRolesUseCase, InitializeSystemRolesUseCase } from './application/services/rbac';
+import { validateEntitlementsRegistry } from './domain/entitlements/entitlements.registry';
 
 async function bootstrap() {
+    validateEntitlementsRegistry();
     const app = await NestFactory.create(AppModule);
     const logger = new Logger('Bootstrap');
 

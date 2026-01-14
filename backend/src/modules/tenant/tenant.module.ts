@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { TenantController } from '../../presentation/controllers/tenant.controller';
 import { HostEditionsController } from '../../presentation/controllers/host-editions.controller';
 import { HostTenantSubscriptionsController } from '../../presentation/controllers/host-tenant-subscriptions.controller';
+import { EntitlementsController } from '../../presentation/controllers/entitlements.controller';
 import { GetTenantBySubdomainUseCase, GetTenantByIdUseCase, CreateTenantUseCase, GetTenantSettingsUseCase, UpdateTenantSettingsUseCase, ListTenantsUseCase, TenantManager } from '../../application/services/tenant';
 import { TenantEditionMailer } from '../../application/services/tenant/tenant-edition.mailer';
 import { TenantSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/tenant.schema';
@@ -26,6 +27,7 @@ import { PluginsModule } from '../plugins/plugins.module';
 import { ExpirationPolicyEngine } from '../../application/services/subscription/expiration-policy.engine';
 import { InitializeGlobalEditionsUseCase } from '../../application/services/subscription/initialize-global-editions.use-case';
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import { EntitlementsService } from '../../application/services/entitlements/entitlements.service';
 
 @Injectable()
 class EditionsInitializer implements OnApplicationBootstrap {
@@ -57,7 +59,13 @@ class EditionsInitializer implements OnApplicationBootstrap {
         MailModule,
         PluginsModule,
     ],
-    controllers: [TenantController, HostEditionsController, HostTenantSubscriptionsController, (require('../../presentation/controllers/editions.controller').EditionsController)],
+    controllers: [
+        TenantController,
+        HostEditionsController,
+        HostTenantSubscriptionsController,
+        EntitlementsController,
+        (require('../../presentation/controllers/editions.controller').EditionsController),
+    ],
     providers: [
         {
             provide: TENANT_REPOSITORY,
@@ -84,6 +92,7 @@ class EditionsInitializer implements OnApplicationBootstrap {
         FeatureValidationService,
         EffectiveFeatureResolver,
         TenantEditionMailer,
+        EntitlementsService,
         PermissionGuard,
         HostContextGuard,
         // Edition initializer machinery
@@ -111,6 +120,7 @@ class EditionsInitializer implements OnApplicationBootstrap {
         SubscriptionLifecycleService,
         FeatureValidationService,
         EffectiveFeatureResolver,
+        EntitlementsService,
         InitializeGlobalEditionsUseCase,
     ],
 })

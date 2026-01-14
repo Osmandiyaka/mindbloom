@@ -3,14 +3,43 @@ import { Router, UrlTree, Route, UrlSegment } from '@angular/router';
 import { moduleEntitlementGuard } from './module-entitlement.guard';
 import { EditionService } from '../services/entitlements.service';
 import { MODULE_KEYS } from '../types/module-keys';
+import { Observable, firstValueFrom, of } from 'rxjs';
+
+const defaultSnapshot = {
+    tenantId: 't-1',
+    edition: { code: 'professional', displayName: 'Professional', version: 1 },
+    modules: {
+        dashboard: true,
+        students: true,
+        admissions: true,
+        apply: true,
+        academics: true,
+        attendance: true,
+        fees: true,
+        accounting: true,
+        finance: true,
+        hr: true,
+        payroll: true,
+        library: true,
+        hostel: true,
+        transport: true,
+        roles: true,
+        tasks: true,
+        setup: true,
+        plugins: true,
+    },
+    features: {},
+    requiresEditionSelection: false,
+};
 
 describe('moduleEntitlementGuard', () => {
     let entitlementsService: jasmine.SpyObj<EditionService>;
     let router: jasmine.SpyObj<Router>;
 
     beforeEach(() => {
-        entitlementsService = jasmine.createSpyObj('EditionService', ['isEnabled']);
+        entitlementsService = jasmine.createSpyObj('EditionService', ['isEnabled', 'loadEntitlements']);
         router = jasmine.createSpyObj('Router', ['createUrlTree']);
+        entitlementsService.loadEntitlements.and.returnValue(of(defaultSnapshot as any));
 
         TestBed.configureTestingModule({
             providers: [
@@ -20,21 +49,28 @@ describe('moduleEntitlementGuard', () => {
         });
     });
 
-    it('should allow access when no moduleKey specified', () => {
+    async function resolveGuard(result: boolean | UrlTree | Observable<boolean | UrlTree>): Promise<boolean | UrlTree> {
+        if (result instanceof Observable) {
+            return firstValueFrom(result);
+        }
+        return result;
+    }
+
+    it('should allow access when no moduleKey specified', async () => {
         const route: Route = {
             path: 'test',
             data: {}
         };
         const segments: UrlSegment[] = [];
 
-        const result = TestBed.runInInjectionContext(() =>
+        const result = await resolveGuard(TestBed.runInInjectionContext(() =>
             moduleEntitlementGuard(route, segments)
-        );
+        ));
 
         expect(result).toBe(true);
     });
 
-    it('should allow access when module is enabled', () => {
+    it('should allow access when module is enabled', async () => {
         entitlementsService.isEnabled.and.returnValue(true);
 
         const route: Route = {
@@ -43,15 +79,15 @@ describe('moduleEntitlementGuard', () => {
         };
         const segments: UrlSegment[] = [];
 
-        const result = TestBed.runInInjectionContext(() =>
+        const result = await resolveGuard(TestBed.runInInjectionContext(() =>
             moduleEntitlementGuard(route, segments)
-        );
+        ));
 
         expect(entitlementsService.isEnabled).toHaveBeenCalledWith(MODULE_KEYS.STUDENTS);
         expect(result).toBe(true);
     });
 
-    it('should deny access when module is disabled', () => {
+    it('should deny access when module is disabled', async () => {
         entitlementsService.isEnabled.and.returnValue(false);
         const urlTree = new UrlTree();
         router.createUrlTree.and.returnValue(urlTree);
@@ -64,9 +100,9 @@ describe('moduleEntitlementGuard', () => {
             { path: 'hr', parameters: {} } as UrlSegment
         ];
 
-        const result = TestBed.runInInjectionContext(() =>
+        const result = await resolveGuard(TestBed.runInInjectionContext(() =>
             moduleEntitlementGuard(route, segments)
-        );
+        ));
 
         expect(entitlementsService.isEnabled).toHaveBeenCalledWith(MODULE_KEYS.HR);
         expect(router.createUrlTree).toHaveBeenCalledWith(
@@ -81,7 +117,7 @@ describe('moduleEntitlementGuard', () => {
         expect(result).toBe(urlTree);
     });
 
-    it('should include correct returnUrl for nested paths', () => {
+    it('should include correct returnUrl for nested paths', async () => {
         entitlementsService.isEnabled.and.returnValue(false);
         const urlTree = new UrlTree();
         router.createUrlTree.and.returnValue(urlTree);
@@ -96,9 +132,9 @@ describe('moduleEntitlementGuard', () => {
             { path: 'add', parameters: {} } as UrlSegment
         ];
 
-        TestBed.runInInjectionContext(() =>
+        await resolveGuard(TestBed.runInInjectionContext(() =>
             moduleEntitlementGuard(route, segments)
-        );
+        ));
 
         expect(router.createUrlTree).toHaveBeenCalledWith(
             ['/module-not-enabled'],
@@ -111,7 +147,7 @@ describe('moduleEntitlementGuard', () => {
         );
     });
 
-    it('should handle attendance module', () => {
+    it('should handle attendance module', async () => {
         entitlementsService.isEnabled.and.returnValue(false);
         const urlTree = new UrlTree();
         router.createUrlTree.and.returnValue(urlTree);
@@ -124,15 +160,15 @@ describe('moduleEntitlementGuard', () => {
             { path: 'attendance', parameters: {} } as UrlSegment
         ];
 
-        const result = TestBed.runInInjectionContext(() =>
+        const result = await resolveGuard(TestBed.runInInjectionContext(() =>
             moduleEntitlementGuard(route, segments)
-        );
+        ));
 
         expect(entitlementsService.isEnabled).toHaveBeenCalledWith(MODULE_KEYS.ATTENDANCE);
         expect(result).toBe(urlTree);
     });
 
-    it('should handle fees module', () => {
+    it('should handle fees module', async () => {
         entitlementsService.isEnabled.and.returnValue(true);
 
         const route: Route = {
@@ -141,15 +177,15 @@ describe('moduleEntitlementGuard', () => {
         };
         const segments: UrlSegment[] = [];
 
-        const result = TestBed.runInInjectionContext(() =>
+        const result = await resolveGuard(TestBed.runInInjectionContext(() =>
             moduleEntitlementGuard(route, segments)
-        );
+        ));
 
         expect(entitlementsService.isEnabled).toHaveBeenCalledWith(MODULE_KEYS.FEES);
         expect(result).toBe(true);
     });
 
-    it('should allow plugins module when enabled', () => {
+    it('should allow plugins module when enabled', async () => {
         entitlementsService.isEnabled.and.returnValue(true);
 
         const route: Route = {
@@ -158,14 +194,14 @@ describe('moduleEntitlementGuard', () => {
         };
         const segments: UrlSegment[] = [];
 
-        const result = TestBed.runInInjectionContext(() =>
+        const result = await resolveGuard(TestBed.runInInjectionContext(() =>
             moduleEntitlementGuard(route, segments)
-        );
+        ));
 
         expect(result).toBe(true);
     });
 
-    it('should deny setup module when disabled', () => {
+    it('should deny setup module when disabled', async () => {
         entitlementsService.isEnabled.and.returnValue(false);
         const urlTree = new UrlTree();
         router.createUrlTree.and.returnValue(urlTree);
@@ -176,9 +212,9 @@ describe('moduleEntitlementGuard', () => {
         };
         const segments: UrlSegment[] = [];
 
-        const result = TestBed.runInInjectionContext(() =>
+        const result = await resolveGuard(TestBed.runInInjectionContext(() =>
             moduleEntitlementGuard(route, segments)
-        );
+        ));
 
         expect(result).toBe(urlTree);
     });

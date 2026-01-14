@@ -10,6 +10,7 @@ import { RbacService } from '../rbac/rbac.service';
 import { RoleDefinition } from '../rbac/permissions.types';
 import { TenantService } from '../services/tenant.service';
 import { EditionFeaturesService, EditionSnapshot } from '../../shared/services/edition-features.service';
+import { EditionService } from '../../shared/services/entitlements.service';
 
 interface RefreshTokenRequest {
     refreshToken: string;
@@ -121,6 +122,7 @@ export class AuthService {
     private readonly http = new HttpClient(inject(HttpBackend));
     private readonly tenantService = inject(TenantService);
     private readonly editionFeatures = inject(EditionFeaturesService);
+    private readonly entitlements = inject(EditionService);
     private readonly router = inject(Router);
     private readonly API_URL = environment.apiUrl;
     private readonly tenantSelectionKey = 'mb_tenant_selection';
@@ -216,6 +218,7 @@ export class AuthService {
         this.status.set('anonymous');
         AuthStorage.clear();
         this.rbacService.clear();
+        this.entitlements.clearEntitlements();
         this.rbacLoadPromise = null;
     }
 
@@ -803,6 +806,9 @@ export class AuthService {
             }
         } else if (loginInfo.edition) {
             this.editionFeatures.setEdition(this.normalizeEditionSnapshot(loginInfo.edition));
+            this.entitlements.loadEntitlements().subscribe({
+                error: (error) => console.warn('[AuthService] Failed to load entitlements', error),
+            });
         }
 
         const inlinePermissions = (loginInfo.user.permissions || [])

@@ -42,8 +42,11 @@ export class GetCurrentLoginInfoUseCase {
             throw new NotFoundException('Tenant not found');
         }
 
-        const editionCode = tenant.editionId ?? null;
-        const canonical = editionCode ? getCanonicalEditionByCode(editionCode) : null;
+        const editionFromId = tenant.editionId ? getCanonicalEditionByCode(tenant.editionId) : null;
+        const editionFromMetadata = tenant.metadata?.editionCode
+            ? getCanonicalEditionByCode(String(tenant.metadata.editionCode))
+            : null;
+        const canonical = editionFromId ?? editionFromMetadata;
         const requiresEditionSelection = !canonical;
         const edition = canonical
             ? {

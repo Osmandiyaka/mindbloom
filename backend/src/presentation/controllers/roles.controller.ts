@@ -20,11 +20,17 @@ import {
 } from '../../application/services/rbac';
 import { GetPermissionTreeUseCase } from '../../application/services/rbac/get-permission-tree.use-case';
 import { AddPermissionsToRoleUseCase } from '../../application/services/rbac/add-permissions-to-role.use-case';
+import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
+import { TenantGuard } from '../../common/tenant/tenant.guard';
+import { PermissionGuard } from '../../common/guards/permission.guard';
+import { EntitlementGuard } from '../../common/guards/entitlement.guard';
+import { RequireModule } from '../../common/decorators/require-entitlement.decorator';
 
 @ApiTags('Roles')
 @ApiBearerAuth()
 @Controller('roles')
-@UseGuards(/* TenantGuard, AuthGuard, PermissionGuard */)
+@UseGuards(JwtAuthGuard, TenantGuard, EntitlementGuard, PermissionGuard)
+@RequireModule('roles')
 export class RolesController {
     constructor(
         private readonly createRoleUseCase: CreateRoleUseCase,
@@ -115,6 +121,8 @@ export class RolesController {
 @ApiTags('Permissions')
 @ApiBearerAuth()
 @Controller('permissions')
+@UseGuards(JwtAuthGuard, TenantGuard, EntitlementGuard, PermissionGuard)
+@RequireModule('roles')
 export class PermissionsController {
     constructor(
         private readonly getPermissionTreeUseCase: GetPermissionTreeUseCase,

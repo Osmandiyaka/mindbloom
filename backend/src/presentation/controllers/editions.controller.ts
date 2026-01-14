@@ -24,6 +24,7 @@ export class EditionsController {
                 perStudentMonthly: edition.perStudentMonthly ?? null,
                 annualPriceNotes: edition.annualPriceNotes ?? null,
                 features: edition.features,
+                marketingHighlights: edition.marketingHighlights,
                 modules: edition.modules,
             }));
     }

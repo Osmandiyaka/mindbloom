@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { EditionService } from './entitlements.service';
 import { EditionFeaturesService } from './edition-features.service';
 import { MODULE_KEYS } from '../types/module-keys';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('EditionService', () => {
     let service: EditionService;
@@ -9,6 +10,7 @@ describe('EditionService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
+            imports: [HttpClientTestingModule],
             providers: [EditionService, EditionFeaturesService],
         });
 

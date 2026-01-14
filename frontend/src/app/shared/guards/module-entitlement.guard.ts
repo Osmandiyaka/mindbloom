@@ -9,6 +9,7 @@ import { inject } from '@angular/core';
 import { CanMatchFn, Router, UrlTree, Route, UrlSegment } from '@angular/router';
 import { EditionService } from '../services/entitlements.service';
 import { ModuleKey } from '../types/module-keys';
+import { catchError, map, of } from 'rxjs';
 
 /**
  * Guard function that checks if a module is enabled for current tenant
@@ -28,7 +29,7 @@ import { ModuleKey } from '../types/module-keys';
 export const moduleEntitlementGuard: CanMatchFn = (
     route: Route,
     segments: UrlSegment[]
-): boolean | UrlTree => {
+): boolean | UrlTree | import('rxjs').Observable<boolean | UrlTree> => {
     const entitlements = inject(EditionService);
     const router = inject(Router);
 
@@ -51,22 +52,27 @@ export const moduleEntitlementGuard: CanMatchFn = (
         return true;
     }
 
-    // Check if module is enabled for current tenant
-    const isEnabled = entitlements.isEnabled(moduleKey);
+    return entitlements.loadEntitlements().pipe(
+        map((snapshot) => {
+            if (snapshot.requiresEditionSelection) {
+                return router.createUrlTree(['/onboarding']);
+            }
 
-    if (isEnabled) {
-        return true;
-    }
+            const isEnabled = entitlements.isEnabled(moduleKey);
+            if (isEnabled) {
+                return true;
+            }
 
-    // Module not enabled - redirect to not-enabled page with context
-    const queryParams = {
-        module: moduleKey,
-        returnUrl: attemptedPath
-    };
+            const queryParams = {
+                module: moduleKey,
+                returnUrl: attemptedPath
+            };
 
-    console.log('[ModuleEntitlement] Access denied to module:', moduleKey, 'Attempted path:', attemptedPath);
-
-    return router.createUrlTree(['/module-not-enabled'], { queryParams });
+            console.log('[ModuleEntitlement] Access denied to module:', moduleKey, 'Attempted path:', attemptedPath);
+            return router.createUrlTree(['/module-not-enabled'], { queryParams });
+        }),
+        catchError(() => of(true))
+    );
 };
 
 /**
@@ -78,7 +84,7 @@ import { CanActivateFn, ActivatedRouteSnapshot, RouterStateSnapshot } from '@ang
 export const moduleEntitlementActivateGuard: CanActivateFn = (
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-): boolean | UrlTree => {
+): boolean | UrlTree | import('rxjs').Observable<boolean | UrlTree> => {
     const entitlements = inject(EditionService);
     const router = inject(Router);
 
@@ -100,20 +106,25 @@ export const moduleEntitlementActivateGuard: CanActivateFn = (
         return true;
     }
 
-    // Check if module is enabled
-    const isEnabled = entitlements.isEnabled(moduleKey);
+    return entitlements.loadEntitlements().pipe(
+        map((snapshot) => {
+            if (snapshot.requiresEditionSelection) {
+                return router.createUrlTree(['/onboarding']);
+            }
 
-    if (isEnabled) {
-        return true;
-    }
+            const isEnabled = entitlements.isEnabled(moduleKey);
+            if (isEnabled) {
+                return true;
+            }
 
-    // Module not enabled - redirect
-    const queryParams = {
-        module: moduleKey,
-        returnUrl: state.url
-    };
+            const queryParams = {
+                module: moduleKey,
+                returnUrl: state.url
+            };
 
-    console.log('[ModuleEntitlement] Access denied to module:', moduleKey, 'URL:', state.url);
-
-    return router.createUrlTree(['/module-not-enabled'], { queryParams });
+            console.log('[ModuleEntitlement] Access denied to module:', moduleKey, 'URL:', state.url);
+            return router.createUrlTree(['/module-not-enabled'], { queryParams });
+        }),
+        catchError(() => of(true))
+    );
 };

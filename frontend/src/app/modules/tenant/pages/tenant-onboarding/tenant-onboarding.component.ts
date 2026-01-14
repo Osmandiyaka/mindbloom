@@ -326,7 +326,7 @@ export class TenantOnboardingComponent implements OnInit {
     schoolRows = signal<OnboardingSchoolRow[]>([]);
     existingSchoolCount = computed(() => this.schoolRows().filter(row => row.existing).length);
 
-    editions = signal<Array<{ id: string; name: string; displayName: string; description?: string | null; features?: string[] | Record<string, string> }>>([]);
+    editions = signal<Array<{ id: string; name: string; displayName: string; description?: string | null; features?: string[] | Record<string, string>; marketingHighlights?: string[] }>>([]);
     selectedEditionId = signal<string>('');
     selectedEditionName = signal<string>('');
     readonly orderedEditions = computed(() => {
@@ -826,8 +826,8 @@ export class TenantOnboardingComponent implements OnInit {
         this.selectedEditionName.set(edition.displayName || edition.name);
     }
 
-    editionBullets(edition: { features?: string[] | Record<string, string> }): string[] {
-        const raw = edition.features;
+    editionBullets(edition: { features?: string[] | Record<string, string>; marketingHighlights?: string[] }): string[] {
+        const raw = edition.marketingHighlights ?? edition.features;
         if (Array.isArray(raw)) {
             return raw.filter(Boolean).slice(0, 5);
         }

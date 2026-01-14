@@ -5,23 +5,94 @@
  * Integrates with TenantService to provide reactive module access control.
  */
 
-import { Injectable, computed, inject } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, distinctUntilChanged, map } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, distinctUntilChanged, finalize, map, of, shareReplay, tap } from 'rxjs';
 import { EditionFeaturesService } from './edition-features.service';
 import { ModuleKey } from '../types/module-keys';
+
+export interface EntitlementsSnapshot {
+    tenantId: string;
+    edition: {
+        code: string;
+        displayName: string;
+        description?: string | null;
+        version: number;
+    } | null;
+    modules: Record<ModuleKey, boolean>;
+    features: Record<string, boolean>;
+    limits?: {
+        maxSchools?: number | null;
+        maxUsers?: number | null;
+        maxStudents?: number | null;
+    };
+    requiresEditionSelection: boolean;
+}
 
 @Injectable({
     providedIn: 'root'
 })
 export class EditionService {
     private readonly editions = inject(EditionFeaturesService);
+    private readonly http = inject(HttpClient);
+    private readonly entitlements = signal<EntitlementsSnapshot | null>(null);
+    private loadInFlight: Observable<EntitlementsSnapshot> | null = null;
 
     // Reactive enabled modules based on current tenant edition modules
     private readonly _enabledModules = computed<ReadonlySet<ModuleKey>>(() => {
+        const snapshot = this.entitlements();
+        if (snapshot?.modules) {
+            const enabled = Object.keys(snapshot.modules)
+                .filter((key) => snapshot.modules[key as ModuleKey]) as ModuleKey[];
+            return new Set(enabled);
+        }
+
         const featureSet = this.editions.features();
         return new Set(featureSet) as ReadonlySet<ModuleKey>;
     });
+
+    loadEntitlements(): Observable<EntitlementsSnapshot> {
+        const cached = this.entitlements();
+        if (cached) {
+            return of(cached);
+        }
+        if (this.loadInFlight) {
+            return this.loadInFlight;
+        }
+
+        this.loadInFlight = this.http.get<EntitlementsSnapshot>('/api/entitlements/me').pipe(
+            tap((snapshot) => {
+                this.entitlements.set(snapshot);
+                if (snapshot.edition) {
+                    this.editions.setEdition({
+                        editionCode: snapshot.edition.code,
+                        editionName: snapshot.edition.displayName,
+                        modules: Object.keys(snapshot.modules).filter(
+                            (key) => snapshot.modules[key as ModuleKey],
+                        ),
+                        features: [],
+                    });
+                } else {
+                    this.editions.clear();
+                }
+            }),
+            shareReplay(1),
+            finalize(() => {
+                this.loadInFlight = null;
+            }),
+        );
+        return this.loadInFlight;
+    }
+
+    currentEntitlements(): EntitlementsSnapshot | null {
+        return this.entitlements();
+    }
+
+    clearEntitlements(): void {
+        this.entitlements.set(null);
+        this.editions.clear();
+    }
 
     /**
      * Get currently enabled modules (synchronous)
@@ -59,6 +130,10 @@ export class EditionService {
      * @returns Edition code or null if no tenant
      */
     getCurrentEdition(): string | null {
+        const snapshot = this.entitlements();
+        if (snapshot?.edition?.code) {
+            return snapshot.edition.code;
+        }
         const code = this.editions.code();
         return code || null;
     }
