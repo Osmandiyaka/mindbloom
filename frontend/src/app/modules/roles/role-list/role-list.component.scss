@@ -127,6 +127,11 @@
     border-radius: 14px;
 }
 
+.roles-table__list .mb-table tbody td {
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+
 .roles-table__actions {
     display: flex;
     justify-content: flex-end;
@@ -154,6 +159,12 @@
     font-size: 16px;
     font-weight: 600;
     color: var(--mb-color-text);
+}
+
+.roles-detail__subtitle {
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--mb-color-text-muted);
 }
 
 .roles-detail__meta {
@@ -205,6 +216,34 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+.roles-detail__summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(148, 163, 184, 0.08);
+}
+
+.roles-detail__summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.roles-detail__summary-label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mb-color-text-muted);
+}
+
+.roles-detail__summary-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--mb-color-text);
 }
 
 .roles-expand__warning {

@@ -81,14 +81,9 @@ export class RoleListComponent implements OnInit {
             key: 'name',
             label: 'Role',
             cell: (role: Role) => {
-                const summary = this.rolePermissionSummary(role);
-                const meta = `Scope: ${this.roleScopeLabel(role)} · Users: ${this.roleUserCount(role.id)}`;
                 return {
                     primary: role.name,
                     secondary: role.description || undefined,
-                    meta,
-                    tertiary: summary.text ? `Permissions: ${summary.text}` : 'Permissions: none',
-                    tooltip: summary.tooltip || undefined,
                     badges: [
                         { label: this.roleCategoryLabel(role), tone: 'neutral' as const },
                         {
@@ -166,21 +161,6 @@ export class RoleListComponent implements OnInit {
             return 0;
         }
         return filters.size;
-    });
-
-    readonly permissionModuleMap = computed(() => {
-        const map = new Map<string, string>();
-        const roots = this.permissionTree() || [];
-        const walk = (perm: Permission, rootLabel: string) => {
-            const key = perm.id || perm.resource;
-            map.set(key, rootLabel);
-            perm.children?.forEach((child) => walk(child, rootLabel));
-        };
-        roots.forEach((root) => {
-            const label = root.displayName || root.resource;
-            walk(root, label);
-        });
-        return map;
     });
 
     readonly selectedRole = computed(() => {
@@ -337,22 +317,6 @@ export class RoleListComponent implements OnInit {
         return 'External';
     }
 
-    rolePermissionSummary(role: Role): { text: string; tooltip: string } {
-        const moduleMap = this.permissionModuleMap();
-        const counts = new Map<string, number>();
-        role.permissions.forEach((perm) => {
-            const key = perm.id || perm.resource;
-            const moduleName = moduleMap.get(key) || perm.resource.split('.')[0] || 'General';
-            counts.set(moduleName, (counts.get(moduleName) || 0) + 1);
-        });
-        if (!counts.size) {
-            return { text: '', tooltip: '' };
-        }
-        const entries = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-        const summary = entries.slice(0, 3).map(([name, count]) => `${name} (${count})`).join(', ');
-        const tooltip = entries.map(([name, count]) => `${name} (${count})`).join(', ');
-        return { text: summary, tooltip };
-    }
 
     openCreateRole(): void {
         this.roleFormMode.set('create');

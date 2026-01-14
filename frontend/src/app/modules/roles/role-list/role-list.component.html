@@ -156,10 +156,14 @@
                         <div class="roles-detail__header">
                             <div>
                                 <div class="roles-detail__title">{{ detailRole.name }}</div>
+                                <div class="roles-detail__subtitle" *ngIf="detailRole.description">
+                                    {{ detailRole.description }}
+                                </div>
                                 <div class="roles-detail__meta">
                                     <span class="roles-pill" [class.roles-pill--system]="detailRole.isSystemRole">
                                         {{ detailRole.isSystemRole ? 'System' : 'Custom' }}
                                     </span>
+                                    <span class="roles-pill">{{ roleCategoryLabel(detailRole) }}</span>
                                     <span class="roles-pill roles-pill--muted">{{ roleScopeLabel(detailRole) }}</span>
                                     <span class="roles-pill" [class.roles-pill--muted]="(detailRole.status || 'active') !== 'active'">
                                         {{ roleStatusLabel(detailRole) }}
@@ -196,6 +200,20 @@
                         </div>
 
                         <div class="roles-detail__body" *ngIf="detailTab() === 'permissions'">
+                            <div class="roles-detail__summary">
+                                <div class="roles-detail__summary-item">
+                                    <span class="roles-detail__summary-label">Scope</span>
+                                    <span class="roles-detail__summary-value">{{ roleScopeLabel(detailRole) }}</span>
+                                </div>
+                                <div class="roles-detail__summary-item">
+                                    <span class="roles-detail__summary-label">Users</span>
+                                    <span class="roles-detail__summary-value">{{ roleUserCount(detailRole.id) }}</span>
+                                </div>
+                                <div class="roles-detail__summary-item">
+                                    <span class="roles-detail__summary-label">Permissions</span>
+                                    <span class="roles-detail__summary-value">{{ rolePermissionIds(detailRole).length }}</span>
+                                </div>
+                            </div>
                             <div class="roles-expand__warning" *ngIf="roleHasAdminPerms(detailRole)">
                                 High privilege role — grants administrative access.
                             </div>
