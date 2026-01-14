@@ -43,7 +43,7 @@
 }
 
 .roles-split__table {
-    flex: 1 1 70%;
+    flex: 1 1 50%;
     min-width: 0;
 }
 
@@ -195,6 +195,10 @@
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.roles-detail__header-actions .mb-button {
+    white-space: nowrap;
 }
 
 .roles-detail__subtitle {
