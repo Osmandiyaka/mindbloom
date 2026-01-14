@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -85,16 +85,20 @@ export class RoleListComponent implements OnInit {
             key: 'name',
             label: 'Role',
             cell: (role: Role) => {
+                const badges = [
+                    { label: this.roleCategoryLabel(role), tone: 'neutral' as const },
+                    {
+                        label: role.isSystemRole ? 'System' : 'Custom',
+                        tone: (role.isSystemRole ? 'success' : 'neutral') as 'success' | 'neutral',
+                    },
+                ];
+                if ((role.scopeType || 'workspace') === 'school') {
+                    badges.push({ label: 'School', tone: 'neutral' as const });
+                }
                 return {
                     primary: role.name,
                     secondary: role.description || undefined,
-                    badges: [
-                        { label: this.roleCategoryLabel(role), tone: 'neutral' as const },
-                        {
-                            label: role.isSystemRole ? 'System' : 'Custom',
-                            tone: (role.isSystemRole ? 'success' : 'neutral') as 'success' | 'neutral',
-                        },
-                    ],
+                    badges,
                     icon: this.roleHasAdminPerms(role)
                         ? { symbol: '⚠', title: 'High privilege' }
                         : undefined,
@@ -216,6 +220,17 @@ export class RoleListComponent implements OnInit {
             if (!term) return true;
             return user.name.toLowerCase().includes(term) || user.email.toLowerCase().includes(term);
         });
+    });
+
+    private readonly defaultSelectionEffect = effect(() => {
+        if (this.detailRoleId()) {
+            return;
+        }
+        const list = this.filteredRoles();
+        if (list.length) {
+            this.detailRoleId.set(list[0].id);
+            this.detailTab.set('permissions');
+        }
     });
 
     ngOnInit(): void {

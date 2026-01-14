@@ -16,9 +16,12 @@
         <div class="roles-split">
             <div class="roles-split__table">
                 <div class="roles-table">
-                    <div class="roles-table__controls">
-                        <app-search-input class="roles-table__search" placeholder="Search roles…"
-                            (search)="search.set($event)"></app-search-input>
+                    <div class="roles-table__toolbar">
+                        <div class="roles-table__toolbar-left">
+                            <app-search-input class="roles-table__search" placeholder="Search roles…"
+                                (search)="search.set($event)"></app-search-input>
+                            <span class="roles-table__count">{{ filteredRoles().length }} roles</span>
+                        </div>
                         <div class="roles-table__filters">
                             <button type="button" class="roles-chip" [class.is-active]="filters().has('all')"
                                 (click)="setFilter('all')">
@@ -48,8 +51,8 @@
 
                     <ng-container *ngIf="filteredRoles().length; else rolesEmpty">
                         <mb-table class="roles-table__list" [columns]="roleTableColumns" [rows]="filteredRoles()"
-                            [rowKey]="roleRowKey" [rowClass]="roleRowClass" [selectable]="true"
-                            [selectionDisabled]="true" (rowClick)="openRoleDetails($event.id, 'permissions')">
+                            [rowKey]="roleRowKey" [rowClass]="roleRowClass"
+                            (rowClick)="openRoleDetails($event.id, 'permissions')">
                             <ng-template mbTableActions let-row>
                                 <div class="roles-table__actions">
                                     <button type="button" class="roles-menu__trigger" #roleMenuOrigin
