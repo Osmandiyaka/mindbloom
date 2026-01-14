@@ -172,14 +172,14 @@
                             </div>
                             <div class="roles-detail__header-actions">
                                 <mb-button
-                                    variant="secondary"
+                                    variant="primary"
                                     *ngIf="!detailRole.isSystemRole"
                                     (click)="openEditRole(detailRole)"
                                 >
                                     Edit role
                                 </mb-button>
                                 <mb-button
-                                    variant="secondary"
+                                    variant="primary"
                                     *ngIf="detailRole.isSystemRole"
                                     (click)="openDuplicateRole(detailRole)"
                                 >
@@ -205,39 +205,20 @@
                                         <button
                                             type="button"
                                             class="roles-menu__item"
-                                            (click)="setDetailTab('permissions'); closeDetailMenu()"
-                                        >
-                                            View permissions
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="roles-menu__item"
-                                            (click)="setDetailTab('assignments'); closeDetailMenu()"
-                                        >
-                                            View assigned users
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="roles-menu__item"
-                                            *ngIf="!detailRole.isSystemRole"
-                                            (click)="openEditRole(detailRole); closeDetailMenu()"
-                                        >
-                                            Edit role
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="roles-menu__item"
-                                            (click)="openDuplicateRole(detailRole); closeDetailMenu()"
-                                        >
-                                            Duplicate role
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="roles-menu__item"
-                                            *ngIf="!detailRole.isSystemRole"
+                                            [disabled]="detailRole.isSystemRole"
                                             (click)="toggleRoleStatus(detailRole); closeDetailMenu()"
                                         >
                                             {{ (detailRole.status || 'active') === 'active' ? 'Deactivate role' : 'Activate role' }}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="roles-menu__item"
+                                            (click)="exportRole(detailRole); closeDetailMenu()"
+                                        >
+                                            Export role
+                                        </button>
+                                        <button type="button" class="roles-menu__item" disabled title="Coming soon">
+                                            View audit
                                         </button>
                                         <div class="roles-menu__divider" *ngIf="!detailRole.isSystemRole"></div>
                                         <button
@@ -281,20 +262,28 @@
                         </div>
 
                         <div class="roles-detail__body" *ngIf="detailTab() === 'permissions'">
-                        <div class="roles-detail__summary">
-                            <div class="roles-detail__summary-item">
-                                <span class="roles-detail__summary-label">Scope</span>
-                                <span class="roles-detail__summary-value">{{ roleScopeLabel(detailRole) }}</span>
+                            <div class="roles-detail__summary">
+                                <div class="roles-detail__summary-item">
+                                    <span class="roles-detail__summary-label">Scope</span>
+                                    <span class="roles-detail__summary-value">{{ roleScopeLabel(detailRole) }}</span>
+                                </div>
+                                <div class="roles-detail__summary-item">
+                                    <span class="roles-detail__summary-label">Users</span>
+                                    <span class="roles-detail__summary-value">{{ roleUserCount(detailRole.id) }}</span>
+                                </div>
+                                <div class="roles-detail__summary-item">
+                                    <span class="roles-detail__summary-label">Permissions</span>
+                                    <span class="roles-detail__summary-value">{{ rolePermissionIds(detailRole).length }}</span>
+                                </div>
                             </div>
-                            <div class="roles-detail__summary-item">
-                                <span class="roles-detail__summary-label">Users</span>
-                                <span class="roles-detail__summary-value">{{ roleUserCount(detailRole.id) }}</span>
+                            <div class="roles-detail__notice" *ngIf="detailRole.isSystemRole">
+                                <div class="roles-detail__notice-text">
+                                    System roles cannot be edited. Duplicate this role to create a custom version.
+                                </div>
+                                <mb-button variant="secondary" (click)="openDuplicateRole(detailRole)">
+                                    Duplicate role
+                                </mb-button>
                             </div>
-                            <div class="roles-detail__summary-item">
-                                <span class="roles-detail__summary-label">Permissions</span>
-                                <span class="roles-detail__summary-value">{{ rolePermissionIds(detailRole).length }}</span>
-                            </div>
-                        </div>
                             <div class="roles-expand__warning" *ngIf="roleHasAdminPerms(detailRole)">
                                 High privilege role — grants administrative access.
                             </div>
@@ -303,9 +292,6 @@
                                 [selectedPermissions]="rolePermissionIds(detailRole)"
                                 [readOnly]="true"
                             ></app-permission-tree>
-                            <div class="roles-expand__lock" *ngIf="detailRole.isSystemRole">
-                                System roles can’t be edited. Duplicate this role to create a custom version.
-                            </div>
                         </div>
 
                         <div class="roles-detail__body" *ngIf="detailTab() === 'assignments'">

@@ -214,8 +214,8 @@
     width: 32px;
     height: 32px;
     border-radius: 10px;
-    border: 1px solid var(--mb-color-border-subtle);
-    background: var(--mb-color-surface);
+    border: none;
+    background: transparent;
     cursor: pointer;
     font-size: 16px;
     color: var(--mb-color-text-muted);
@@ -280,6 +280,22 @@
     font-size: 14px;
     font-weight: 600;
     color: var(--mb-color-text);
+}
+
+.roles-detail__notice {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--mb-color-text-muted);
+    font-size: 13px;
+}
+
+.roles-detail__notice-text {
+    line-height: 1.4;
 }
 
 .roles-expand__warning {

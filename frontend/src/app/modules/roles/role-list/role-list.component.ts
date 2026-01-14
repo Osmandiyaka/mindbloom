@@ -285,6 +285,25 @@ export class RoleListComponent implements OnInit {
         this.detailMenuOpen.set(false);
     }
 
+    exportRole(role: Role): void {
+        const payload = {
+            id: role.id,
+            name: role.name,
+            description: role.description,
+            isSystemRole: role.isSystemRole,
+            scopeType: role.scopeType || 'workspace',
+            status: role.status || 'active',
+            permissions: role.permissions,
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${role.name.replace(/\s+/g, '-').toLowerCase()}-role.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
     openRoleDetails(roleId: string, tab: RoleTab): void {
         this.detailRoleId.set(roleId);
         this.detailTab.set(tab);
