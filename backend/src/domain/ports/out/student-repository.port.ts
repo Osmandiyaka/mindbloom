@@ -13,10 +13,12 @@ export interface StudentFilters {
 export interface IStudentRepository {
     create(student: Student): Promise<Student>;
     findById(id: string, tenantId: string): Promise<Student | null>;
+    findByIds(ids: string[], tenantId: string): Promise<Student[]>;
     findByAdmissionNumber(admissionNumber: string, tenantId: string): Promise<Student | null>;
     findAll(tenantId: string, filters?: StudentFilters): Promise<Student[]>;
     update(student: Student): Promise<Student>;
     delete(id: string, tenantId: string): Promise<void>;
+    deleteMany(ids: string[], tenantId: string): Promise<number>;
     count(tenantId: string, filters?: StudentFilters): Promise<number>;
 }
 

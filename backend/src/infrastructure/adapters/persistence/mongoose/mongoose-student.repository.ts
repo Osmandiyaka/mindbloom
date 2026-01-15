@@ -78,6 +78,18 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
         return doc ? this.toDomain(doc) : null;
     }
 
+    async findByIds(ids: string[], tenantId: string): Promise<Student[]> {
+        const resolved = this.requireTenant(tenantId);
+        if (!ids.length) {
+            return [];
+        }
+        const docs = await this.studentModel.find({
+            _id: { $in: ids },
+            tenantId: new Types.ObjectId(resolved),
+        });
+        return docs.map(doc => this.toDomain(doc));
+    }
+
     async findAll(tenantId: string, filters?: StudentFilters): Promise<Student[]> {
         const resolved = this.requireTenant(tenantId);
         const query: any = { tenantId: new Types.ObjectId(resolved) };
@@ -157,6 +169,17 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
             _id: id,
             tenantId: new Types.ObjectId(tenantId),
         });
+    }
+
+    async deleteMany(ids: string[], tenantId: string): Promise<number> {
+        if (!ids.length) {
+            return 0;
+        }
+        const result = await this.studentModel.deleteMany({
+            _id: { $in: ids },
+            tenantId: new Types.ObjectId(tenantId),
+        });
+        return result.deletedCount ?? 0;
     }
 
     async count(tenantId: string, filters?: StudentFilters): Promise<number> {

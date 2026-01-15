@@ -59,6 +59,20 @@ export class StudentService {
         return this.http.get<StudentActivityItem[]>(`${this.apiUrl}/${id}/activity`, { params });
     }
 
+    previewArchive(ids: string[]): Observable<{ total: number; activeCount: number; linkedAccountsCount: number }> {
+        return this.http.post<{ total: number; activeCount: number; linkedAccountsCount: number }>(
+            `${this.apiUrl}/archive/impact`,
+            { ids }
+        );
+    }
+
+    bulkArchive(ids: string[]): Observable<{ deleted: number }> {
+        return this.http.post<{ deleted: number }>(
+            `${this.apiUrl}/archive`,
+            { ids }
+        );
+    }
+
     createStudent(dto: CreateStudentDto): Observable<Student> {
         return this.http.post<Student>(this.apiUrl, dto);
     }

@@ -9,6 +9,8 @@ import {
     GetStudentByIdUseCase,
     UpdateStudentUseCase,
     DeleteStudentUseCase,
+    BulkDeleteStudentsUseCase,
+    GetStudentArchiveImpactUseCase,
 } from '../../application/services/student';
 import { AddGuardianToStudentUseCase } from '../../application/services/student/add-guardian-to-student.use-case';
 import { UpdateStudentEnrollmentUseCase } from '../../application/services/student/update-student-enrollment.use-case';
@@ -47,6 +49,8 @@ import { PluginsModule } from '../plugins/plugins.module';
         GetStudentByIdUseCase,
         UpdateStudentUseCase,
         DeleteStudentUseCase,
+        BulkDeleteStudentsUseCase,
+        GetStudentArchiveImpactUseCase,
         AddGuardianToStudentUseCase,
         UpdateStudentEnrollmentUseCase,
         CreateStudentNoteUseCase,

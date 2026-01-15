@@ -533,13 +533,39 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
         [hasFooter]="true">
         <p>Archives {{ selectedIds().size }} student records.</p>
         <p>This removes students from active class rosters.</p>
-        <label>
-          Type ARCHIVE to confirm
-          <mb-input [(ngModel)]="bulkConfirmText"></mb-input>
-        </label>
+        @if (bulkImpactLoading()) {
+          <div class="state-block">
+            <p>Loading impact preview…</p>
+          </div>
+        } @else if (bulkArchiveSubmitting()) {
+          <div class="state-block">
+            <p>Archiving students…</p>
+          </div>
+        } @else if (bulkImpactError()) {
+          <div class="state-block error">
+            <p>{{ bulkImpactError() }}</p>
+            <mb-button size="sm" variant="tertiary" (click)="loadBulkArchiveImpact()">Retry</mb-button>
+          </div>
+        } @else if (bulkImpact()) {
+          <div class="impact-summary">
+            <p>Impact preview</p>
+            <span>{{ bulkImpact()?.activeCount }} active enrollments</span>
+            <span>{{ bulkImpact()?.linkedAccountsCount }} linked accounts</span>
+          </div>
+        }
+        @if (requiresBulkConfirm()) {
+          <label>
+            Type ARCHIVE to confirm
+            <mb-input [(ngModel)]="bulkConfirmText"></mb-input>
+          </label>
+        }
         <div mbModalFooter>
           <mb-button size="sm" variant="tertiary" (click)="closeBulkModals()">Cancel</mb-button>
-          <mb-button size="sm" variant="danger" [disabled]="bulkConfirmText !== 'ARCHIVE'" (click)="confirmBulkArchive()">
+          <mb-button
+            size="sm"
+            variant="danger"
+            [disabled]="!canConfirmBulkArchive()"
+            (click)="confirmBulkArchive()">
             Archive students
           </mb-button>
         </div>
@@ -624,6 +650,10 @@ export class StudentsListComponent implements OnInit {
   rowMenuOpen = signal<string | null>(null);
   createModalOpen = signal(false);
   bulkArchiveOpen = signal(false);
+  bulkImpactLoading = signal(false);
+  bulkImpactError = signal<string | null>(null);
+  bulkImpact = signal<{ total: number; activeCount: number; linkedAccountsCount: number } | null>(null);
+  bulkArchiveSubmitting = signal(false);
   bulkStatusOpen = signal(false);
   bulkAssignOpen = signal(false);
   columnsDrawerOpen = signal(false);
@@ -1562,7 +1592,12 @@ export class StudentsListComponent implements OnInit {
 
   bulkArchive(): void {
     this.bulkConfirmText = '';
+    this.bulkImpact.set(null);
+    this.bulkImpactError.set(null);
+    this.bulkImpactLoading.set(false);
+    this.bulkArchiveSubmitting.set(false);
     this.bulkArchiveOpen.set(true);
+    this.loadBulkArchiveImpact();
   }
 
   editStudent(event: Event, id: string): void {
@@ -1644,13 +1679,33 @@ export class StudentsListComponent implements OnInit {
     this.bulkArchiveOpen.set(false);
     this.bulkStatusOpen.set(false);
     this.bulkAssignOpen.set(false);
+    this.bulkImpact.set(null);
+    this.bulkImpactError.set(null);
+    this.bulkImpactLoading.set(false);
+    this.bulkArchiveSubmitting.set(false);
   }
 
   confirmBulkArchive(): void {
-    this.closeBulkModals();
-    this.selectedIds.set(new Set());
-    this.resetTableSelection();
-    this.logAction('students_bulk_archived');
+    if (!this.canConfirmBulkArchive()) {
+      return;
+    }
+    const ids = Array.from(this.selectedIds());
+    this.bulkImpactError.set(null);
+    this.bulkArchiveSubmitting.set(true);
+    this.studentsService.bulkArchive(ids).subscribe({
+      next: () => {
+        this.bulkArchiveSubmitting.set(false);
+        this.closeBulkModals();
+        this.selectedIds.set(new Set());
+        this.resetTableSelection();
+        this.loadStudents();
+        this.logAction('students_bulk_archived');
+      },
+      error: () => {
+        this.bulkArchiveSubmitting.set(false);
+        this.bulkImpactError.set('Unable to archive students.');
+      }
+    });
   }
 
   confirmBulkStatus(): void {
@@ -1661,6 +1716,48 @@ export class StudentsListComponent implements OnInit {
   confirmBulkAssign(): void {
     this.closeBulkModals();
     this.logAction('students_bulk_assigned');
+  }
+
+  loadBulkArchiveImpact(): void {
+    const ids = Array.from(this.selectedIds());
+    if (!ids.length) {
+      this.bulkImpact.set(null);
+      this.bulkImpactLoading.set(false);
+      return;
+    }
+    this.bulkImpactLoading.set(true);
+    this.bulkImpactError.set(null);
+    this.studentsService.previewArchive(ids).subscribe({
+      next: (impact) => {
+        this.bulkImpact.set(impact);
+        this.bulkImpactLoading.set(false);
+      },
+      error: () => {
+        this.bulkImpactError.set('Unable to load impact preview.');
+        this.bulkImpactLoading.set(false);
+      }
+    });
+  }
+
+  requiresBulkConfirm(): boolean {
+    const impact = this.bulkImpact();
+    if (!impact) {
+      return false;
+    }
+    return impact.activeCount > 0 || impact.linkedAccountsCount > 0;
+  }
+
+  canConfirmBulkArchive(): boolean {
+    if (this.bulkImpactLoading() || this.bulkArchiveSubmitting()) {
+      return false;
+    }
+    if (this.bulkImpactError()) {
+      return false;
+    }
+    if (this.requiresBulkConfirm()) {
+      return this.bulkConfirmText === 'ARCHIVE';
+    }
+    return true;
   }
 
   handleAddMenu(value: string): void {

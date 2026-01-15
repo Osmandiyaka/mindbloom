@@ -24,11 +24,14 @@ import {
     GetStudentByIdUseCase,
     UpdateStudentUseCase,
     DeleteStudentUseCase,
+    BulkDeleteStudentsUseCase,
+    GetStudentArchiveImpactUseCase,
 } from '../../application/services/student';
 import { AddGuardianToStudentUseCase } from '../../application/services/student/add-guardian-to-student.use-case';
 import { UpdateStudentEnrollmentUseCase } from '../../application/services/student/update-student-enrollment.use-case';
 import { CreateStudentDto } from '../dtos/requests/students/create-student.dto';
 import { UpdateStudentDto } from '../dtos/requests/students/update-student.dto';
+import { BulkStudentIdsDto } from '../dtos/requests/students/bulk-student-ids.dto';
 import { StudentResponseDto } from '../dtos/responses/students/student-response.dto';
 import { TenantGuard } from '../../common/tenant/tenant.guard';
 import { TenantContext } from '../../common/tenant/tenant.context';
@@ -43,6 +46,8 @@ export class StudentsController {
         private readonly getStudentByIdUseCase: GetStudentByIdUseCase,
         private readonly updateStudentUseCase: UpdateStudentUseCase,
         private readonly deleteStudentUseCase: DeleteStudentUseCase,
+        private readonly bulkDeleteStudentsUseCase: BulkDeleteStudentsUseCase,
+        private readonly getStudentArchiveImpactUseCase: GetStudentArchiveImpactUseCase,
         private readonly addGuardianUseCase: AddGuardianToStudentUseCase,
         private readonly updateEnrollmentUseCase: UpdateStudentEnrollmentUseCase,
         private readonly tenantContext: TenantContext,
@@ -226,6 +231,21 @@ export class StudentsController {
         }
 
         return results;
+    }
+
+    @Post('archive/impact')
+    @ApiOperation({ summary: 'Preview bulk archive impact' })
+    async previewArchiveImpact(@Body() body: BulkStudentIdsDto): Promise<any> {
+        const tenantId = this.tenantContext.tenantId;
+        return this.getStudentArchiveImpactUseCase.execute(body.ids, tenantId);
+    }
+
+    @Post('archive')
+    @ApiOperation({ summary: 'Archive students in bulk' })
+    async bulkArchive(@Body() body: BulkStudentIdsDto): Promise<{ deleted: number }> {
+        const tenantId = this.tenantContext.tenantId;
+        const deleted = await this.bulkDeleteStudentsUseCase.execute(body.ids, tenantId);
+        return { deleted };
     }
 
     @Get(':id')
