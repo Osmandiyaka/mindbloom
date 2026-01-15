@@ -223,8 +223,8 @@ type FilterChip = { key: string; label: string; type: 'search' | 'status' | 'gra
                     <div class="row-actions" [class.open]="rowMenuOpen() === student.id">
                       <mb-button size="sm" variant="tertiary" (click)="toggleRowMenu($event, student.id)">•••</mb-button>
                       <div class="row-menu" *ngIf="rowMenuOpen() === student.id">
-                        <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="selectStudent(student)">
-                          Open
+                        <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="viewStudent($event, student)">
+                          View student
                         </mb-button>
                         <mb-button
                           size="sm"
@@ -247,8 +247,8 @@ type FilterChip = { key: string; label: string; type: 'search' | 'status' | 'gra
                           variant="tertiary"
                           [fullWidth]="true"
                           *can="'students.write'"
-                          (click)="openPromote($event, student)">
-                          Promote student
+                          (click)="openChangeSection($event, student)">
+                          Change section
                         </mb-button>
                         <mb-button
                           size="sm"
@@ -316,6 +316,40 @@ type FilterChip = { key: string; label: string; type: 'search' | 'status' | 'gra
         title="Workflow panel"
         (closed)="closeWorkflowDrawer()">
         <ng-container *ngTemplateOutlet="workflowPanel"></ng-container>
+      </mb-drawer>
+
+      <mb-drawer
+        [open]="detailDrawerOpen()"
+        title="Student details"
+        (closed)="closeDetailDrawer()">
+        @if (selectedStudent()) {
+          <div class="detail-panel">
+            <div class="detail-header">
+              <h3>{{ selectedStudent()?.fullName }}</h3>
+              <span class="detail-meta">ID · {{ selectedStudent()?.enrollment?.admissionNumber || '—' }}</span>
+            </div>
+            <div class="detail-section">
+              <h4>Status</h4>
+              <p>{{ titleCase(selectedStudent()?.status || '') }}</p>
+            </div>
+            <div class="detail-section">
+              <h4>Enrollment</h4>
+              <p>{{ selectedStudent()?.enrollment?.academicYear || '—' }}</p>
+              <p>
+                {{ selectedStudent()?.enrollment?.class || '—' }}
+                {{ selectedStudent()?.enrollment?.section ? ' · ' + selectedStudent()?.enrollment?.section : '' }}
+              </p>
+            </div>
+            <div class="detail-section">
+              <h4>Primary guardian</h4>
+              <p>{{ primaryGuardianName(selectedStudent()) }}</p>
+              <p>{{ primaryGuardianPhone(selectedStudent()) }}</p>
+              <p>{{ primaryGuardianEmail(selectedStudent()) }}</p>
+            </div>
+          </div>
+        } @else {
+          <p class="detail-empty">Select a student to view details.</p>
+        }
       </mb-drawer>
 
       <mb-modal
@@ -405,6 +439,7 @@ export class StudentsListComponent implements OnInit {
   selectedStudentId = signal<string | null>(null);
   attentionFilters = signal<Set<AttentionFilter>>(new Set());
   workflowDrawerOpen = signal(false);
+  detailDrawerOpen = signal(false);
 
   overflowOpen = signal(false);
   rowMenuOpen = signal<string | null>(null);
@@ -724,6 +759,14 @@ export class StudentsListComponent implements OnInit {
     this.workflowDrawerOpen.set(false);
   }
 
+  openDetailDrawer(): void {
+    this.detailDrawerOpen.set(true);
+  }
+
+  closeDetailDrawer(): void {
+    this.detailDrawerOpen.set(false);
+  }
+
   primaryActionHint(student: Student): string {
     if (this.hasMissingGuardian(student)) {
       return 'Add a primary guardian to complete the student record.';
@@ -877,6 +920,7 @@ export class StudentsListComponent implements OnInit {
 
   closeDetail(): void {
     this.selectedStudentId.set(null);
+    this.detailDrawerOpen.set(false);
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { studentId: null },
@@ -892,6 +936,13 @@ export class StudentsListComponent implements OnInit {
   toggleRowMenu(event: Event, id: string): void {
     event.stopPropagation();
     this.rowMenuOpen.set(this.rowMenuOpen() === id ? null : id);
+  }
+
+  viewStudent(event: Event, student: Student): void {
+    event.stopPropagation();
+    this.rowMenuOpen.set(null);
+    this.selectStudent(student);
+    this.openDetailDrawer();
   }
 
   openCreateModal(): void {
@@ -942,7 +993,7 @@ export class StudentsListComponent implements OnInit {
     event.stopPropagation();
   }
 
-  openPromote(event: Event, _student: Student): void {
+  openChangeSection(event: Event, _student: Student): void {
     event.stopPropagation();
   }
 
