@@ -21,10 +21,10 @@
         <aside class="plan-list">
             <div class="plan-list__header">
                 <div>
-                    <h2>Plan</h2>
-                    <p>Choose an edition to view included modules and limits.</p>
+                    <h2>Plans</h2>
+                    <p>Compare modules and limits across editions.</p>
                 </div>
-                <span class="pill">Current: {{ currentPlanName() }}</span>
+                <span class="pill pill--current">Current plan: {{ currentPlanName() }}</span>
             </div>
             <div class="plan-list__items">
                 @for (edition of editions(); track edition.id) {
@@ -33,20 +33,29 @@
                     role="button"
                     tabindex="0"
                     [class.is-active]="isSelected(edition)"
+                    [class.is-current]="editionStatus(edition) === 'current'"
                     (click)="selectEdition(edition)"
                     (keydown.enter)="selectEdition(edition)"
                     (keydown.space)="$event.preventDefault(); selectEdition(edition)">
                     <div class="plan-row__main">
                         <div class="plan-row__title">
-                            <span>{{ edition.name }}</span>
+                            <span class="plan-name">{{ edition.name }}</span>
                             @if (edition.recommended) {
                             <span class="pill pill--accent">Recommended</span>
                             }
                         </div>
-                        <p>{{ edition.tagline }}</p>
+                        <p class="plan-tagline">{{ edition.tagline }}</p>
                     </div>
                     <div class="plan-row__meta">
                         <span class="price">{{ edition.priceLabel }}</span>
+                        @if (editionStatus(edition) === 'current') {
+                        <span class="pill pill--success pill--current-flag">
+                            <svg viewBox="0 0 16 16" aria-hidden="true">
+                                <path d="M12.5 4.5l-6 6-3-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                            Current
+                        </span>
+                        }
                         @if (edition.requiresSales) {
                         <span class="lock-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24">

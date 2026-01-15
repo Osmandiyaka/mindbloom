@@ -43,6 +43,14 @@
     gap: 12px;
 }
 
+.plan-list__header {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding-bottom: 10px;
+    z-index: 2;
+}
+
 .plan-list__header h2 {
     margin: 0 0 4px;
     font-size: 16px;
@@ -62,9 +70,14 @@
     color: var(--color-text-secondary);
 }
 
-.pill--accent {
+.pill--current {
     background: rgba(59, 130, 246, 0.12);
     color: #2563eb;
+}
+
+.pill--accent {
+    background: rgba(100, 116, 139, 0.12);
+    color: #475569;
 }
 
 .pill--success {
@@ -109,9 +122,26 @@
     cursor: pointer;
 }
 
+.plan-row.is-current {
+    background: rgba(59, 130, 246, 0.06);
+    border-color: rgba(59, 130, 246, 0.35);
+}
+
 .plan-row.is-active {
     border-color: rgba(59, 130, 246, 0.6);
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.plan-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.plan-tagline {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--color-text-secondary);
 }
 
 .plan-row__title {
@@ -121,18 +151,28 @@
     font-weight: 600;
 }
 
-.plan-row__main p {
-    margin: 4px 0 0;
-    font-size: 12px;
-    color: var(--color-text-secondary);
-}
-
 .plan-row__meta {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 6px;
     font-size: 12px;
+}
+
+.pill--current-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+
+    svg {
+        width: 12px;
+        height: 12px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2px;
+    }
 }
 
 .lock-icon {

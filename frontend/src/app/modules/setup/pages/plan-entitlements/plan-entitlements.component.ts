@@ -333,7 +333,7 @@ const DEFAULT_EDITIONS: EditionPlan[] = [
         id: 'free',
         name: 'Free',
         tagline: 'Starter plan for early adoption',
-        priceLabel: '$0',
+        priceLabel: '$0 / month',
         description: 'Essential modules to run daily school operations.',
         highlights: ['Community support', 'Core student workflows'],
         limits: [
