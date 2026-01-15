@@ -1,15 +1,12 @@
-import { Component, OnInit, Input, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { CardComponent } from '../../../../shared/components/card/card.component';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
 import { StudentService } from '../../../../core/services/student.service';
-import { Student } from '../../../../core/models/student.model';
-import { IconRegistryService } from '../../../../shared/services/icon-registry.service';
-import { BreadcrumbsComponent, Crumb } from '../../../../shared/components/breadcrumbs/breadcrumbs.component';
-import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
+import { Student, StudentStatus } from '../../../../core/models/student.model';
+import { UiButtonComponent } from '../../../../shared/ui/buttons/ui-button.component';
+import { UiInputComponent } from '../../../../shared/ui/forms/ui-input.component';
+import { UiCheckboxComponent } from '../../../../shared/ui/forms/ui-checkbox.component';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { StudentFormComponent } from '../../../setup/pages/students/student-form/student-form.component';
 import { CanDirective } from '../../../../shared/security/can.directive';
@@ -17,797 +14,814 @@ import { CanDirective } from '../../../../shared/security/can.directive';
 @Component({
   selector: 'app-students-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, CardComponent, ButtonComponent, BadgeComponent, BreadcrumbsComponent, SearchInputComponent, ModalComponent, StudentFormComponent, CanDirective],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    UiButtonComponent,
+    UiInputComponent,
+    UiCheckboxComponent,
+    ModalComponent,
+    StudentFormComponent,
+    CanDirective,
+  ],
   styleUrls: ['./students-list.component.scss'],
   template: `
-    <div class="students-page">
-      <div class="page-context-card">
-        <div class="context-kicker">Students / Hub</div>
-        <div class="context-title">Student Management Workspace</div>
-        <div class="context-subtitle">Live roster, triage, and quick actions for front-desk staff.</div>
-      </div>
-
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <div class="filter-field">
-            <span class="filter-label">Search</span>
-            <app-search-input class="search-inline" placeholder="Search students..." (search)="onSearch($event)"></app-search-input>
-          </div>
-          <div class="filter-field">
-            <span class="filter-label">Grade</span>
-            <select [(ngModel)]="gradeFilter" (change)="applyFilters()">
-              <option value="">All grades</option>
-              <option *ngFor="let g of grades" [value]="g">{{ g }}</option>
-            </select>
-          </div>
-          <div class="filter-field">
-            <span class="filter-label">Status</span>
-            <select [(ngModel)]="statusFilter" (change)="applyFilters()">
-              <option value="">All statuses</option>
-              <option *ngFor="let s of statuses" [value]="s">{{ s | titlecase }}</option>
-            </select>
-          </div>
+    <div class="students-directory">
+      <header class="directory-header">
+        <div class="header-left">
+          <h1>Students</h1>
+          <p>Search, filter, and manage student records.</p>
         </div>
-        <div class="toolbar-right">
-          <div class="bulk-inline" *ngIf="selectedIds().size">
-            <span class="selected-count">{{ selectedIds().size }} selected</span>
-            <app-button *can="'students.write'" variant="secondary" size="sm" (click)="bulkAction('attendance')">Take attendance</app-button>
-            <app-button *can="'students.write'" variant="secondary" size="sm" (click)="bulkAction('note')">Add note</app-button>
-          </div>
-          <div class="view-toggle" role="group" aria-label="View switch">
-            <button
-              type="button"
-              [class.active]="viewMode() === 'table'"
-              (click)="setView('table')"
-              title="Table view"
-              aria-label="Switch to table view"
-              [attr.aria-pressed]="viewMode() === 'table'"
-            >
-              <span class="icon" [innerHTML]="icon('inbox')"></span>
-            </button>
-            <button
-              type="button"
-              [class.active]="viewMode() === 'grid'"
-              (click)="setView('grid')"
-              title="Grid view"
-              aria-label="Switch to grid view"
-              [attr.aria-pressed]="viewMode() === 'grid'"
-            >
-              <span class="icon" [innerHTML]="icon('dashboard')"></span>
-            </button>
-          </div>
-          <div class="actions-menu" [class.open]="actionsOpen">
-            <app-button variant="secondary" size="sm" (click)="toggleActions()" aria-label="Open actions menu">
-              <span class="icon" [innerHTML]="icon('ellipsis')"></span>
-              Actions
-              <span class="chevron">▾</span>
-            </app-button>
-            <div class="menu" *ngIf="actionsOpen">
-              <button *can="'students.export'" type="button" (click)="exportAndClose()">
-                <span class="icon" [innerHTML]="icon('download')"></span>
-                Export
-              </button>
-              <button *can="'students.create'" type="button" (click)="importAndClose()">
-                <span class="icon" [innerHTML]="icon('upload')"></span>
-                Import
-              </button>
+        <div class="header-actions">
+          <div class="split-button" [class.open]="addMenuOpen()">
+            <ui-button *can="'students.create'" size="sm" variant="primary" (click)="openCreateModal()">
+              Add student
+            </ui-button>
+            <button type="button" class="split-toggle" (click)="toggleAddMenu($event)">▾</button>
+            <div class="split-menu" *ngIf="addMenuOpen()">
+              <button type="button" *can="'students.create'" (click)="openCreateModal()">Add student</button>
+              <button type="button" *can="'students.create'" (click)="openImport()">Import CSV</button>
             </div>
           </div>
-          <app-button *can="'students.create'" variant="primary" size="sm" (click)="openModal()">
-            <span class="icon" [innerHTML]="icon('student-add')"></span> Add Student
-          </app-button>
-        </div>
-      </div>
-
-      <!-- Loading State -->
-      @if (loading()) {
-        <div class="loading-state" role="status" aria-live="polite">
-          <div class="spinner"></div>
-          <p>Loading students...</p>
-          <div class="skeleton-stack">
-            <div class="skeleton-row" *ngFor="let _ of [1,2,3,4,5]">
-              <span class="skeleton-avatar"></span>
-              <span class="skeleton-line short"></span>
-              <span class="skeleton-line"></span>
-              <span class="skeleton-pill"></span>
+          <ui-button size="sm" variant="ghost" (click)="toggleColumns()">Columns</ui-button>
+          <div class="overflow" [class.open]="overflowOpen()">
+            <ui-button size="sm" variant="ghost" (click)="toggleOverflow($event)">•••</ui-button>
+            <div class="overflow-menu" *ngIf="overflowOpen()">
+              <button type="button" *can="'students.export'" (click)="exportStudents()">Export CSV</button>
+              <button type="button" (click)="openSavedViews()">Saved views</button>
+              <button type="button" (click)="bulkHelp()">Bulk actions</button>
             </div>
           </div>
         </div>
-      }
+      </header>
 
-      <!-- Error State -->
-      @if (error()) {
-        <div class="error-state">
-          <p>{{ error() }}</p>
-          <app-button variant="primary" (click)="loadStudents()">Retry</app-button>
-        </div>
-      }
+      <div class="directory-layout">
+        <section class="directory-panel" (keydown)="handleKeydown($event)">
+          <div class="directory-filters">
+            <div class="search-field">
+              <ui-input
+                [value]="searchTerm()"
+                placeholder="Search by name, student ID, admission no., guardian phone/email"
+                (valueChange)="updateSearch($event)">
+              </ui-input>
+              <span class="result-count">{{ filteredStudents().length }} students</span>
+            </div>
+            <div class="filter-row">
+              <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+                <option value="">Status</option>
+                <option *ngFor="let status of statuses" [value]="status">{{ status | titlecase }}</option>
+              </select>
+              <select [(ngModel)]="gradeFilter" (change)="applyFilters()">
+                <option value="">Grade</option>
+                <option *ngFor="let grade of grades" [value]="grade">{{ grade }}</option>
+              </select>
+              <select [(ngModel)]="classFilter" (change)="applyFilters()">
+                <option value="">Class/Section</option>
+                <option *ngFor="let group of classSections" [value]="group">{{ group }}</option>
+              </select>
+              <select [(ngModel)]="yearFilter" (change)="applyFilters()">
+                <option value="">Academic year</option>
+                <option *ngFor="let year of academicYears" [value]="year">{{ year }}</option>
+              </select>
+              <button type="button" class="clear-filters" *ngIf="hasFilters()" (click)="clearFilters()">
+                Clear all
+              </button>
+            </div>
+          </div>
 
-      @if (!loading() && !error()) {
-        <ng-container [ngSwitch]="activeTabLabel()">
-          <ng-container *ngSwitchCase="'Roster Lookup'">
-            @if (filteredStudents().length > 0) {
-              <ng-container [ngSwitch]="viewMode()">
-                <div *ngSwitchCase="'table'" class="data-table">
-                  <div class="table-wrapper">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th style="width:48px;"><input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll($event)"/></th>
-                    <th class="sortable">Student</th>
-                    <th>ID</th>
-                    <th class="class-col">Class/Section</th>
-                    <th>Guardian Name and Phone</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let student of filteredStudents()" class="row-clickable" [routerLink]="['/students', student.id]">
-                    <td><input type="checkbox" [checked]="isSelected(student.id)" (click)="toggleSelect($event, student.id)"/></td>
-                          <td class="col-primary student-cell">
-                            <div class="student-meta">
-                              <div class="avatar-wrap" aria-hidden="true">
-                                <span class="avatar">{{ initials(student.fullName) }}</span>
-                              </div>
-                              <div class="student-name-block">
-                                <div class="name-row">
-                                  <span class="name">{{ student.fullName }}</span>
-                                  <span class="status-chip" [ngClass]="hasFeeDue(student) ? 'due' : 'clear'">{{ hasFeeDue(student) ? 'Fees Due' : 'No Fees Due' }}</span>
-                                </div>
-                                <span class="student-id">ID · {{ student.enrollment.admissionNumber }}</span>
-                              </div>
-                            </div>
-                          </td>
-                    <td>{{ student.enrollment.admissionNumber || '—' }}</td>
-                    <td class="class-col">{{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}</td>
-                    <td>
-                      <div class="meta-cell">
-                        <div>{{ primaryGuardianName(student) }}</div>
-                        <div class="muted tiny phone-line">
-                          <span>{{ primaryGuardianPhone(student) }}</span>
-                          <a
-                            class="phone-link"
-                            [href]="primaryGuardianPhoneHref(student)"
-                            [attr.aria-label]="'Call ' + primaryGuardianName(student)"
-                            (click)="$event.stopPropagation()">
-                            <span class="icon" [innerHTML]="icon('phone')"></span>
-                            Call
-                          </a>
-                        </div>
-                        <div class="trust-pill">
-                          <span class="icon" [innerHTML]="icon('lock')"></span>
-                          <span>Protected contact</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell-actions">
-                        <button (click)="logAttendanceAction($event, student)" title="Record attendance"><span class="icon" [innerHTML]="icon('calendar')"></span></button>
-                        <button (click)="contactGuardianAction($event, student)" title="Contact guardian"><span class="icon" [innerHTML]="icon('phone')"></span></button>
-                        <div class="more-menu" [class.open]="rowMenuOpen() === student.id">
-                          <button (click)="toggleRowMenu($event, student.id)" title="More actions"><span class="icon" [innerHTML]="icon('ellipsis')"></span></button>
-                          <div class="menu-panel" *ngIf="rowMenuOpen() === student.id">
-                            <button *can="'students.read'" (click)="openQuickView($event, student)">Quick view</button>
-                            <button *can="'students.write'" (click)="logIncidentAction($event, student)">Log incident</button>
-                            <button *can="'students.update'" (click)="editStudent($event, student.id)">Edit</button>
-                            <button *can="'students.delete'" class="danger" (click)="deleteStudent($event, student)">Delete</button>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+          <div class="bulk-bar" *ngIf="selectedIds().size">
+            <span>{{ selectedIds().size }} selected</span>
+            <div class="bulk-actions">
+              <ui-button size="sm" variant="ghost" *can="'students.write'" (click)="bulkAssign()">Assign section</ui-button>
+              <ui-button size="sm" variant="ghost" *can="'students.write'" (click)="bulkStatus()">Update status</ui-button>
+              <ui-button size="sm" variant="ghost" *can="'students.export'" (click)="bulkExport()">Export selected</ui-button>
+              <ui-button size="sm" variant="danger" *can="'students.delete'" (click)="bulkArchive()">Archive</ui-button>
+            </div>
+          </div>
 
-                <div *ngSwitchCase="'grid'" class="card-grid" role="list" aria-label="Student grid view">
-                  <article
-                    class="student-card"
-                    *ngFor="let student of filteredStudents()"
-                    role="listitem"
-                    tabindex="0"
-                    (click)="viewStudent($event, student.id)"
-                    (keyup.enter)="viewStudent($event, student.id)"
-                    (keyup.space)="viewStudent($event, student.id)"
-                    [attr.aria-label]="'Open profile for ' + student.fullName"
-                    [attr.aria-describedby]="'student-'+student.id"
-                  >
-                    <div class="card-hero">
-                      <div class="hero-main">
-                        <div class="avatar-wrap" aria-hidden="true">
-                          <span class="avatar">{{ initials(student.fullName) }}</span>
-                        </div>
-                        <div class="hero-text">
-                          <div class="name-line">
-                            <h3 id="{{ 'student-' + student.id }}">{{ student.fullName }}</h3>
-                          </div>
-                          <div class="sub-line">
-                            <span class="grade-pill">
-                              <span class="icon tiny" [innerHTML]="icon('students')"></span>
-                              Class {{ student.enrollment.class }}{{ student.enrollment.section ? '-' + student.enrollment.section : '' }}
-                            </span>
-                            <span class="status-pill" [ngClass]="student.status">{{ student.status }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+          @if (loading()) {
+            <div class="state-block">
+              <div class="spinner"></div>
+              <p>Loading students...</p>
+            </div>
+          }
 
-                    <div class="meta-grid simple">
-                      <div class="meta-line">
-                        <span class="icon tiny" [innerHTML]="icon('mail')"></span>
-                        <div>
-                          <p class="eyebrow xxs">Email</p>
-                          <p class="value">{{ student.email || 'Email not provided' }}</p>
-                        </div>
-                      </div>
-                      <div class="meta-line">
-                        <span class="icon tiny" [innerHTML]="icon('students')"></span>
-                        <div>
-                          <p class="eyebrow xxs">Admission</p>
-                          <p class="value">{{ student.enrollment.admissionNumber }}</p>
-                        </div>
-                      </div>
-                      <div class="meta-line">
-                        <span class="icon tiny" [innerHTML]="icon('phone')"></span>
-                        <div>
-                          <p class="eyebrow xxs">Contact</p>
-                          <p class="value">{{ student.phone || 'Not provided' }}</p>
-                        </div>
-                      </div>
-                    </div>
+          @if (error()) {
+            <div class="state-block error">
+              <p>{{ error() }}</p>
+              <ui-button size="sm" variant="ghost" (click)="loadStudents()">Retry</ui-button>
+            </div>
+          }
 
-                    <div class="divider"></div>
-                    <div class="card-actions" role="group" [attr.aria-label]="'Actions for ' + student.fullName">
-                      <button type="button" [attr.aria-label]="'View ' + student.fullName" (click)="viewStudent($event, student.id)">
-                        <span class="icon" [innerHTML]="icon('eye')"></span>
-                        <span class="sr-only">View</span>
-                      </button>
-                      <button *can="'students.update'" type="button" [attr.aria-label]="'Edit ' + student.fullName" (click)="editStudent($event, student.id)">
-                        <span class="icon" [innerHTML]="icon('edit')"></span>
-                        <span class="sr-only">Edit</span>
-                      </button>
-                      <button *can="'students.delete'" type="button" [attr.aria-label]="'Delete ' + student.fullName" (click)="deleteStudent($event, student)">
-                        <span class="icon" [innerHTML]="icon('trash')"></span>
-                        <span class="sr-only">Delete</span>
-                      </button>
-                    </div>
-                  </article>
-                </div>
-              </ng-container>
-            }
+          @if (!loading() && !error()) {
             @if (filteredStudents().length === 0) {
               <div class="empty-state">
-                <h3>No students found</h3>
-                <p>Get started by adding your first student</p>
-                <app-button variant="primary" (click)="openModal()">
-                  + Add New Student
-                </app-button>
+                <p>No students found</p>
+                <span>Try adjusting your filters or search terms.</span>
+                <div class="empty-actions">
+                  <ui-button size="sm" variant="ghost" (click)="clearFilters()">Clear filters</ui-button>
+                  <ui-button size="sm" variant="primary" *can="'students.create'" (click)="openCreateModal()">Add student</ui-button>
+                </div>
+              </div>
+            } @else {
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="checkbox-col">
+                        <div (click)="$event.stopPropagation()">
+                          <ui-checkbox
+                            [checked]="allSelected()"
+                            (checkedChange)="toggleSelectAll($event)"
+                            [hideLabel]="true">
+                          </ui-checkbox>
+                        </div>
+                      </th>
+                      <th>Student</th>
+                      <th>Grade</th>
+                      <th>Class/Section</th>
+                      <th>Status</th>
+                      <th>Updated</th>
+                      <th class="actions-col">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      *ngFor="let student of pagedStudents(); let index = index"
+                      [class.is-selected]="selectedStudentId() === student.id"
+                      (click)="selectStudent(student)"
+                      tabindex="0">
+                      <td>
+                        <div (click)="$event.stopPropagation()">
+                          <ui-checkbox
+                            [checked]="isSelected(student.id)"
+                            (checkedChange)="toggleSelectRow(student.id, $event)"
+                            [hideLabel]="true">
+                          </ui-checkbox>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="student-cell">
+                          <div class="avatar">{{ initials(student.fullName) }}</div>
+                          <div>
+                            <div class="student-name">{{ student.fullName }}</div>
+                            <div class="student-id">ID · {{ student.enrollment.admissionNumber || '—' }}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>{{ student.enrollment.class || '—' }}</td>
+                      <td>{{ student.enrollment.class }}{{ student.enrollment.section ? ' · ' + student.enrollment.section : '' }}</td>
+                      <td>
+                        <span class="status-tag" [class]="'status-' + student.status">{{ student.status | titlecase }}</span>
+                      </td>
+                      <td>{{ formatUpdated(student.updatedAt) }}</td>
+                      <td class="actions-col">
+                        <div class="row-actions" [class.open]="rowMenuOpen() === student.id">
+                          <button type="button" (click)="toggleRowMenu($event, student.id)">•••</button>
+                          <div class="row-menu" *ngIf="rowMenuOpen() === student.id">
+                            <button type="button" (click)="selectStudent(student)">View details</button>
+                            <button type="button" *can="'students.update'" (click)="editStudent($event, student.id)">Edit student</button>
+                            <button type="button" *can="'students.write'" (click)="openTransfer($event, student)">Transfer student</button>
+                            <button type="button" *can="'students.write'" (click)="openPromote($event, student)">Promote student</button>
+                            <button type="button" class="danger" *can="'students.delete'" (click)="archiveStudent($event, student)">Archive</button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="pagination">
+                <span>Page {{ page() }} of {{ totalPages() }}</span>
+                <div class="pagination-actions">
+                  <button type="button" (click)="prevPage()" [disabled]="page() === 1">Previous</button>
+                  <button type="button" (click)="nextPage()" [disabled]="page() === totalPages()">Next</button>
+                </div>
               </div>
             }
-          </ng-container>
+          }
+        </section>
 
-          <div *ngSwitchCase="'Today Triage'" class="stub-panel">
-            <h3>Today Triage</h3>
-            <div class="stub-grid">
-              <div class="stub-card" *ngFor="let item of triageToday">
-                <div class="stub-title">{{ item.name }}</div>
-                <div class="stub-value">{{ item.value }}</div>
-                <button type="button" class="stub-cta">{{ item.cta }}</button>
-              </div>
+        <aside class="detail-panel" *ngIf="selectedStudent() as student">
+          <div class="detail-header">
+            <div>
+              <h2>{{ student.fullName }}</h2>
+              <p>
+                {{ student.enrollment.admissionNumber || '—' }} ·
+                {{ student.status | titlecase }}
+              </p>
+            </div>
+            <div class="detail-actions">
+              <ui-button size="sm" variant="ghost" *can="'students.update'" (click)="editStudent($event, student.id)">Edit</ui-button>
+              <ui-button size="sm" variant="ghost" (click)="closeDetail()">Close</ui-button>
             </div>
           </div>
 
-          <div *ngSwitchCase="'Health Flags'" class="stub-panel">
-            <h3>Health Flags</h3>
-            <div class="stub-grid">
-              <div class="stub-card" *ngFor="let item of healthFlags">
-                <div class="stub-title">{{ item.name }}</div>
-                <div class="stub-value">{{ item.value }}</div>
-                <button type="button" class="stub-cta">{{ item.cta }}</button>
+          <div class="detail-tabs">
+            <button type="button" [class.active]="activeTab() === 'overview'" (click)="activeTab.set('overview')">Overview</button>
+            <button type="button" [class.active]="activeTab() === 'enrollment'" (click)="activeTab.set('enrollment')">Enrollment</button>
+            <button type="button" [class.active]="activeTab() === 'guardians'" (click)="activeTab.set('guardians')">Guardians</button>
+            <button type="button" [class.active]="activeTab() === 'documents'" (click)="activeTab.set('documents')">Documents</button>
+            <button type="button" [class.active]="activeTab() === 'access'" (click)="activeTab.set('access')">Access</button>
+            <button type="button" [class.active]="activeTab() === 'audit'" (click)="activeTab.set('audit')">Audit</button>
+          </div>
+
+          <div class="detail-content">
+            @if (activeTab() === 'overview') {
+              <div class="detail-section">
+                <h3>Identity</h3>
+                <div class="detail-grid">
+                  <div>
+                    <span>Full name</span>
+                    <strong>{{ student.fullName }}</strong>
+                  </div>
+                  <div>
+                    <span>Date of birth</span>
+                    <strong>{{ student.dateOfBirth | date }}</strong>
+                  </div>
+                  <div>
+                    <span>Gender</span>
+                    <strong>{{ student.gender | titlecase }}</strong>
+                  </div>
+                  <div>
+                    <span>Nationality</span>
+                    <strong>{{ student.nationality || '—' }}</strong>
+                  </div>
+                </div>
               </div>
+              <div class="detail-section">
+                <h3>Enrollment</h3>
+                <div class="detail-grid">
+                  <div>
+                    <span>Academic year</span>
+                    <strong>{{ student.enrollment.academicYear }}</strong>
+                  </div>
+                  <div>
+                    <span>Grade</span>
+                    <strong>{{ student.enrollment.class }}</strong>
+                  </div>
+                  <div>
+                    <span>Section</span>
+                    <strong>{{ student.enrollment.section || '—' }}</strong>
+                  </div>
+                  <div>
+                    <span>Status</span>
+                    <strong>{{ student.status | titlecase }}</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="detail-section">
+                <h3>Primary guardian</h3>
+                <div class="detail-grid">
+                  <div>
+                    <span>Name</span>
+                    <strong>{{ primaryGuardianName(student) }}</strong>
+                  </div>
+                  <div>
+                    <span>Phone</span>
+                    <strong>{{ primaryGuardianPhone(student) }}</strong>
+                  </div>
+                  <div>
+                    <span>Email</span>
+                    <strong>{{ primaryGuardianEmail(student) }}</strong>
+                  </div>
+                </div>
+              </div>
+            }
+
+            @if (activeTab() === 'enrollment') {
+              <div class="detail-section">
+                <h3>Current placement</h3>
+                <div class="detail-grid">
+                  <div>
+                    <span>Academic year</span>
+                    <strong>{{ student.enrollment.academicYear }}</strong>
+                  </div>
+                  <div>
+                    <span>Grade</span>
+                    <strong>{{ student.enrollment.class }}</strong>
+                  </div>
+                  <div>
+                    <span>Section</span>
+                    <strong>{{ student.enrollment.section || '—' }}</strong>
+                  </div>
+                  <div>
+                    <span>Admission date</span>
+                    <strong>{{ student.enrollment.admissionDate | date }}</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="detail-section">
+                <h3>Enrollment history</h3>
+                <div class="detail-placeholder">
+                  <p>No history available.</p>
+                </div>
+              </div>
+            }
+
+            @if (activeTab() === 'guardians') {
+              <div class="detail-section">
+                <h3>Guardians</h3>
+                <div class="detail-table">
+                  <div class="detail-table__header">
+                    <span>Name</span>
+                    <span>Relationship</span>
+                    <span>Phone</span>
+                    <span>Email</span>
+                  </div>
+                  <div class="detail-table__row" *ngFor="let guardian of student.guardians || []">
+                    <span>{{ guardian.name }}</span>
+                    <span>{{ guardian.relationship | titlecase }}</span>
+                    <span>{{ guardian.phone }}</span>
+                    <span>{{ guardian.email || '—' }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+
+            @if (activeTab() === 'documents') {
+              <div class="detail-section">
+                <h3>Documents</h3>
+                <div class="detail-table">
+                  <div class="detail-table__header">
+                    <span>Document</span>
+                    <span>Type</span>
+                    <span>Uploaded</span>
+                  </div>
+                  <div class="detail-table__row" *ngFor="let doc of student.documents || []">
+                    <span>{{ doc.name }}</span>
+                    <span>{{ doc.type }}</span>
+                    <span>{{ doc.uploadedAt | date }}</span>
+                  </div>
+                  @if ((student.documents || []).length === 0) {
+                    <div class="detail-placeholder">
+                      <p>No documents uploaded.</p>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (activeTab() === 'access') {
+              <div class="detail-section">
+                <h3>Access & Accounts</h3>
+                <div class="detail-grid">
+                  <div>
+                    <span>Student portal</span>
+                    <strong>Not created</strong>
+                  </div>
+                  <div>
+                    <span>Guardian portal</span>
+                    <strong>Disabled</strong>
+                  </div>
+                </div>
+              </div>
+            }
+
+            @if (activeTab() === 'audit') {
+              <div class="detail-section">
+                <h3>Audit log</h3>
+                <div class="detail-placeholder">
+                  <p>No audit events yet.</p>
+                </div>
+              </div>
+            }
+          </div>
+        </aside>
+      </div>
+
+      <app-modal *ngIf="createModalOpen()" (close)="closeCreateModal()">
+        <app-student-form (close)="closeCreateModal()"></app-student-form>
+      </app-modal>
+
+      @if (bulkArchiveOpen()) {
+        <div class="modal-overlay" (click)="closeBulkModals()">
+          <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <div>
+                <h3>Archive students</h3>
+                <p>Archives {{ selectedIds().size }} student records.</p>
+              </div>
+              <ui-button size="sm" variant="ghost" (click)="closeBulkModals()">✕</ui-button>
+            </div>
+            <div class="modal-body">
+              <p>This removes students from active class rosters.</p>
+              <label>
+                Type ARCHIVE to confirm
+                <ui-input [(value)]="bulkConfirmText"></ui-input>
+              </label>
+            </div>
+            <div class="modal-footer">
+              <ui-button size="sm" variant="ghost" (click)="closeBulkModals()">Cancel</ui-button>
+              <ui-button size="sm" variant="danger" [disabled]="bulkConfirmText !== 'ARCHIVE'" (click)="confirmBulkArchive()">
+                Archive students
+              </ui-button>
             </div>
           </div>
+        </div>
+      }
 
-          <div *ngSwitchCase="'Pending Tasks'" class="stub-panel">
-            <h3>Pending Tasks</h3>
-            <ul class="stub-list">
-              <li *ngFor="let item of pendingTasks">
-                <div class="stub-title">{{ item.name }}</div>
-                <div class="stub-detail">{{ item.detail }}</div>
-              </li>
-            </ul>
+      @if (bulkStatusOpen()) {
+        <div class="modal-overlay" (click)="closeBulkModals()">
+          <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <div>
+                <h3>Update status</h3>
+                <p>Apply a new status to {{ selectedIds().size }} students.</p>
+              </div>
+              <ui-button size="sm" variant="ghost" (click)="closeBulkModals()">✕</ui-button>
+            </div>
+            <div class="modal-body">
+              <label>
+                Status
+                <select [(ngModel)]="bulkStatusValue">
+                  <option *ngFor="let status of statuses" [value]="status">{{ status | titlecase }}</option>
+                </select>
+              </label>
+            </div>
+            <div class="modal-footer">
+              <ui-button size="sm" variant="ghost" (click)="closeBulkModals()">Cancel</ui-button>
+              <ui-button size="sm" variant="primary" (click)="confirmBulkStatus()">Update status</ui-button>
+            </div>
           </div>
+        </div>
+      }
 
-          <div *ngSwitchDefault class="stub-panel">
-            <h3>{{ activeTabLabel() }}</h3>
-            <p>Content coming soon.</p>
+      @if (bulkAssignOpen()) {
+        <div class="modal-overlay" (click)="closeBulkModals()">
+          <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <div>
+                <h3>Assign section</h3>
+                <p>Assign a class/section to {{ selectedIds().size }} students.</p>
+              </div>
+              <ui-button size="sm" variant="ghost" (click)="closeBulkModals()">✕</ui-button>
+            </div>
+            <div class="modal-body">
+              <label>
+                Class/Section
+                <select [(ngModel)]="bulkSectionValue">
+                  <option *ngFor="let group of classSections" [value]="group">{{ group }}</option>
+                </select>
+              </label>
+            </div>
+            <div class="modal-footer">
+              <ui-button size="sm" variant="ghost" (click)="closeBulkModals()">Cancel</ui-button>
+              <ui-button size="sm" variant="primary" (click)="confirmBulkAssign()">Assign</ui-button>
+            </div>
           </div>
-        </ng-container>
+        </div>
       }
     </div>
-
-    <!-- Quick View Drawer -->
-        <div class="quick-view-overlay" *ngIf="quickViewStudent()">
-          <div class="quick-view-backdrop" (click)="closeQuickView()"></div>
-          <aside class="quick-view-drawer">
-            <div class="drawer-handle"></div>
-            <div class="drawer-container">
-              <header class="quick-view-header">
-                <div class="header-main">
-                  <div class="photo-frame hero" [class.has-photo]="quickViewStudent()!.photo">
-                    <img *ngIf="quickViewStudent()!.photo" [src]="quickViewStudent()!.photo" [alt]="quickViewStudent()!.fullName" />
-                    <span *ngIf="!quickViewStudent()!.photo" class="avatar">{{ initials(quickViewStudent()!.fullName) }}</span>
-                  </div>
-                  <div class="header-text">
-                    <div class="name-row">
-                      <h3>{{ quickViewStudent()!.fullName }}</h3>
-                      <div class="chip-row">
-                        <span class="status-pill" [ngClass]="(quickViewStudent()!.status || 'active')">{{ (quickViewStudent()!.status || 'active') | titlecase }}</span>
-                        <span class="id-chip">{{ quickViewStudent()!.enrollment.admissionNumber || 'ID —' }}</span>
-                        <span class="grade-chip">Grade {{ quickViewStudent()!.enrollment.class }}{{ quickViewStudent()!.enrollment.section ? '-' + quickViewStudent()!.enrollment.section : '' }}</span>
-                        <span class="status-chip" [ngClass]="hasFeeDue(quickViewStudent()!) ? 'due' : 'clear'">
-                          {{ hasFeeDue(quickViewStudent()!) ? 'Fees Due' : 'No Fees Due' }}
-                        </span>
-                      </div>
-                    </div>
-                    <p class="subline">
-                      DOB {{ quickViewStudent()!.dateOfBirth | date:'mediumDate' }}
-                    </p>
-                  </div>
-                </div>
-                <div class="header-alert" *ngIf="hasFeeDue(quickViewStudent()!) || healthAlert(quickViewStudent()!)">
-                  <span class="pill critical" *ngIf="healthAlert(quickViewStudent()!)">{{ healthAlert(quickViewStudent()!) }}</span>
-                  <span class="pill critical" *ngIf="hasFeeDue(quickViewStudent()!)">Outstanding fees</span>
-                </div>
-                <button class="icon-btn" type="button" (click)="closeQuickView()" aria-label="Close quick view">
-                  <span [innerHTML]="icon('close')"></span>
-                </button>
-              </header>
-              <div class="quick-view-body">
-                <div class="pane-grid">
-                  <div class="pane identity-pane">
-                    <div class="identity-block">
-                      <div class="photo-frame hero large" [class.has-photo]="quickViewStudent()!.photo">
-                        <img *ngIf="quickViewStudent()!.photo" [src]="quickViewStudent()!.photo" [alt]="quickViewStudent()!.fullName" />
-                        <span *ngIf="!quickViewStudent()!.photo" class="avatar">{{ initials(quickViewStudent()!.fullName) }}</span>
-                      </div>
-                      <div class="id-copy">
-                        <div class="name-lg">{{ quickViewStudent()!.fullName }}</div>
-                        <div class="id-line">
-                          <span class="badge id">{{ quickViewStudent()!.enrollment.admissionNumber || 'ID —' }}</span>
-                          <span class="badge grade">Grade {{ quickViewStudent()!.enrollment.class }}{{ quickViewStudent()!.enrollment.section ? '-' + quickViewStudent()!.enrollment.section : '' }}</span>
-                        </div>
-                        <div class="alert-block" *ngIf="healthAlert(quickViewStudent()!) || hasFeeDue(quickViewStudent()!)">
-                          <span class="pill critical" *ngIf="healthAlert(quickViewStudent()!)">{{ healthAlert(quickViewStudent()!) }}</span>
-                          <span class="pill warn" *ngIf="hasFeeDue(quickViewStudent()!)">Fees outstanding</span>
-                        </div>
-                      </div>
-                    </div>
-                    <app-button variant="primary" size="sm" (click)="viewStudent($event, quickViewStudent()!.id)">
-                      <span class="icon" [innerHTML]="icon('eye')"></span>
-                      Open full profile
-                    </app-button>
-                  </div>
-
-                  <div class="pane middle-pane">
-                    <div class="tile">
-                      <div class="section-title">Primary guardian</div>
-                      <div class="kv-row"><span class="label">Name</span><span class="value">{{ primaryGuardianName(quickViewStudent()!) }}</span></div>
-                      <div class="kv-row"><span class="label">Relationship</span><span class="value">{{ primaryGuardianRelationship(quickViewStudent()!) }}</span></div>
-                      <div class="kv-row action-row"><span class="label">Contact</span><a class="value link" [href]="primaryGuardianPhoneHref(quickViewStudent()!)">{{ primaryGuardianPhone(quickViewStudent()!) }}</a></div>
-                    </div>
-                    <div class="tile">
-                      <div class="section-title">Logistics</div>
-                      <div class="kv-row"><span class="label">Current class</span><span class="value">Class {{ quickViewStudent()!.enrollment.class }}{{ quickViewStudent()!.enrollment.section ? '-' + quickViewStudent()!.enrollment.section : '' }}</span></div>
-                      <div class="kv-row"><span class="label">Fee status</span><span class="pill subtle" [ngClass]="hasFeeDue(quickViewStudent()!) ? 'due' : 'clear'">{{ hasFeeDue(quickViewStudent()!) ? 'Outstanding' : 'Clear' }}</span></div>
-                      <div class="kv-row"><span class="label">Last updated</span><span class="value">{{ quickViewStudent()!.updatedAt | date:'mediumDate' }}</span></div>
-                    </div>
-                  </div>
-
-                  <div class="pane right-pane">
-                    <div class="tile gauge">
-                      <div class="section-title">Attendance</div>
-                      <div class="ring-row">
-                        <div class="ring" [style.--val]="attendancePercent(quickViewStudent()!) * 3.6"><span>{{ attendancePercent(quickViewStudent()!) }}%</span></div>
-                        <div class="ring-label">Year to date</div>
-                      </div>
-                      <div class="kv-row"><span class="label">Health flags</span><span class="pill critical" *ngIf="healthAlert(quickViewStudent()!)">{{ healthAlert(quickViewStudent()!) }}</span><span class="pill neutral" *ngIf="!healthAlert(quickViewStudent()!)">No active flags</span></div>
-                      <div class="kv-row"><span class="label">Documents</span><span class="value">{{ documentsCount(quickViewStudent()!) }} on file</span></div>
-                    </div>
-                    <div class="tile">
-                      <div class="section-title">Recent activity</div>
-                      <ul class="activity-list">
-                        <li *ngFor="let item of quickViewTimeline(quickViewStudent()!)">
-                          <span class="bullet" [ngClass]="item.tone"></span>
-                          <div class="activity-copy">
-                            <div class="activity-title">{{ item.title }}</div>
-                            <div class="activity-meta">{{ item.meta }}</div>
-                          </div>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <footer class="quick-view-footer">
-                <app-button variant="secondary" size="sm" (click)="logAttendanceAction($event, quickViewStudent()!)">
-                  <span class="icon" [innerHTML]="icon('calendar')"></span>
-                  Record attendance
-                </app-button>
-                <app-button variant="secondary" size="sm" (click)="contactGuardianAction($event, quickViewStudent()!)">
-                  <span class="icon" [innerHTML]="icon('phone')"></span>
-                  Call guardian
-                </app-button>
-                <app-button variant="primary" size="sm" (click)="viewStudent($event, quickViewStudent()!.id)">
-                  <span class="icon" [innerHTML]="icon('eye')"></span>
-                  Open profile
-                </app-button>
-              </footer>
-            </div>
-          </aside>
-        </div>
-
-    <app-modal [isOpen]="modalOpen()" (closed)="closeModal()" title="Add Student" size="xl">
-      <app-student-form (submitted)="onModalSubmit()" (cancelled)="closeModal()"></app-student-form>
-    </app-modal>
   `
 })
 export class StudentsListComponent implements OnInit {
-  @Input() showBreadcrumbs = true;
-  allStudents = signal<Student[]>([]);
-  loading = signal(false);
-  error = signal<string | null>(null);
-  searchTerm = '';
-  viewMode = signal<'table' | 'grid'>('table');
-  rowMenuOpen = signal<string | null>(null);
-  gradeFilter = '';
-  statusFilter = 'active';
-  actionsOpen = false;
-  grades: string[] = ['Grade 5', 'Grade 6', 'Grade 7', 'Grade 8'];
-  statuses: string[] = ['active', 'inactive', 'transferred'];
-  selectedIds = signal<Set<string>>(new Set());
-  modalOpen = signal(false);
-  quickViewStudent = signal<Student | null>(null);
-  triageToday = [
-    { name: 'Late arrivals', value: 3, cta: 'Process' },
-    { name: 'Early leaves', value: 1, cta: 'Review' },
-    { name: 'Absences to verify', value: 4, cta: 'Verify' }
-  ];
-  healthFlags = [
-    { name: 'Medication needed', value: 2, cta: 'View orders' },
-    { name: 'Allergy alerts', value: 3, cta: 'Notify staff' },
-    { name: 'Clinic visits today', value: 1, cta: 'Review log' }
-  ];
-  pendingTasks = [
-    { name: 'Call guardian', detail: 'John Doe - absence note missing' },
-    { name: 'Collect documents', detail: 'Maria Lee - birth certificate' },
-    { name: 'Fee query', detail: 'Sam Patel - overdue notice' }
-  ];
-  crumbs: Crumb[] = [
-    { label: 'Roster' }
-  ];
-  commandTabs = [
-    { label: 'Roster Lookup', active: true },
-    { label: 'Today Triage', active: false },
-    { label: 'Health Flags', active: false },
-    { label: 'Pending Tasks', active: false },
-  ];
-
   constructor(
-    private router: Router,
-    private studentService: StudentService,
-    private icons: IconRegistryService
-  ) { }
+    private readonly studentsService: StudentService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+  ) {}
+
+  loading = signal(true);
+  error = signal<string | null>(null);
+  students = signal<Student[]>([]);
+
+  searchTerm = signal('');
+  statusFilter = '';
+  gradeFilter = '';
+  classFilter = '';
+  yearFilter = '';
+
+  page = signal(1);
+  pageSize = signal(25);
+
+  selectedIds = signal<Set<string>>(new Set());
+  selectedStudentId = signal<string | null>(null);
+  activeTab = signal<'overview' | 'enrollment' | 'guardians' | 'documents' | 'access' | 'audit'>('overview');
+
+  addMenuOpen = signal(false);
+  overflowOpen = signal(false);
+  rowMenuOpen = signal<string | null>(null);
+  createModalOpen = signal(false);
+  bulkArchiveOpen = signal(false);
+  bulkStatusOpen = signal(false);
+  bulkAssignOpen = signal(false);
+  bulkConfirmText = '';
+  bulkStatusValue: StudentStatus = StudentStatus.ACTIVE;
+  bulkSectionValue = '';
+
+  statuses = Object.values(StudentStatus);
+  grades = ['JSS1', 'JSS2', 'JSS3', 'SS1', 'SS2', 'SS3'];
+  classSections = ['A', 'B', 'C', 'Blue', 'Red'];
+  academicYears = ['2023/2024', '2024/2025', '2025/2026'];
+
+  filteredStudents = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    return this.students().filter((student) => {
+      if (term) {
+        const match = [
+          student.fullName,
+          student.enrollment.admissionNumber,
+          this.primaryGuardianPhone(student),
+          this.primaryGuardianEmail(student),
+        ]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(term));
+        if (!match) {
+          return false;
+        }
+      }
+
+      if (this.statusFilter && student.status !== this.statusFilter) {
+        return false;
+      }
+      if (this.gradeFilter && student.enrollment.class !== this.gradeFilter) {
+        return false;
+      }
+      if (this.classFilter && student.enrollment.section !== this.classFilter) {
+        return false;
+      }
+      if (this.yearFilter && student.enrollment.academicYear !== this.yearFilter) {
+        return false;
+      }
+
+      return true;
+    });
+  });
+
+  pagedStudents = computed(() => {
+    const start = (this.page() - 1) * this.pageSize();
+    return this.filteredStudents().slice(start, start + this.pageSize());
+  });
+
+  totalPages = computed(() => {
+    const total = Math.max(this.filteredStudents().length, 1);
+    return Math.ceil(total / this.pageSize());
+  });
+
+  selectedStudent = computed(() => {
+    const id = this.selectedStudentId();
+    if (!id) {
+      return null;
+    }
+    return this.students().find((student) => student.id === id) || null;
+  });
 
   ngOnInit(): void {
     this.loadStudents();
+    this.route.queryParamMap.subscribe((params) => {
+      const id = params.get('studentId');
+      if (id) {
+        this.selectedStudentId.set(id);
+      }
+    });
   }
 
   loadStudents(): void {
     this.loading.set(true);
     this.error.set(null);
-
-    const filters = this.searchTerm ? { search: this.searchTerm } : {};
-
-    this.studentService.getStudents(filters).subscribe({
-      next: (students: Student[]) => {
-        this.allStudents.set(students);
+    this.studentsService.getStudents().subscribe({
+      next: (students) => {
+        this.students.set(students);
         this.loading.set(false);
       },
-      error: (err: any) => {
-        console.error('Error loading students:', err);
-        this.error.set('Failed to load students. Please try again.');
+      error: () => {
+        this.error.set('Could not load students.');
         this.loading.set(false);
       }
     });
   }
 
-  onSearch(term: string) {
-    this.searchTerm = term;
-    this.applyFilters();
+  updateSearch(value: string): void {
+    this.searchTerm.set(value);
+    this.page.set(1);
   }
 
-  openModal(): void {
-    this.modalOpen.set(true);
+  applyFilters(): void {
+    this.page.set(1);
   }
 
-  closeModal(): void {
-    this.modalOpen.set(false);
+  clearFilters(): void {
+    this.searchTerm.set('');
+    this.statusFilter = '';
+    this.gradeFilter = '';
+    this.classFilter = '';
+    this.yearFilter = '';
+    this.page.set(1);
   }
 
-  onModalSubmit(): void {
-    this.closeModal();
-    this.loadStudents();
+  hasFilters(): boolean {
+    return !!(this.searchTerm() || this.statusFilter || this.gradeFilter || this.classFilter || this.yearFilter);
   }
 
-  editStudent(event: Event, id: string): void {
-    event.stopPropagation();
-    this.closeRowMenu();
-    this.router.navigate(['/students', id, 'edit']);
-  }
-
-  deleteStudent(event: Event, student: Student): void {
-    event.stopPropagation();
-    this.closeRowMenu();
-    if (confirm(`Are you sure you want to delete ${student.fullName}?`)) {
-      this.studentService.deleteStudent(student.id).subscribe({
-        next: () => {
-          this.loadStudents();
-        },
-        error: (err: any) => {
-          alert('Failed to delete student');
-          console.error('Error deleting student:', err);
-        }
-      });
+  toggleSelectAll(checked: boolean): void {
+    if (!checked) {
+      this.selectedIds.set(new Set());
+      return;
     }
+    const ids = new Set(this.pagedStudents().map((student) => student.id));
+    this.selectedIds.set(ids);
   }
 
-  importStudents(): void {
-    this.router.navigate(['/students/import']);
-  }
-
-  importAndClose(): void {
-    this.actionsOpen = false;
-    this.importStudents();
-  }
-
-  exportStudents(): void {
-    const filters = this.searchTerm ? { search: this.searchTerm } : {};
-
-    this.studentService.exportStudents(filters).subscribe({
-      next: (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `students_export_${new Date().toISOString().split('T')[0]}.csv`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-      },
-      error: (err: any) => {
-        alert('Failed to export students');
-        console.error('Error exporting students:', err);
-      }
-    });
-  }
-
-  exportAndClose(): void {
-    this.actionsOpen = false;
-    this.exportStudents();
-  }
-
-  viewStudent(event: Event, id: string): void {
-    event.stopPropagation();
-    this.router.navigate(['/students', id]);
-  }
-
-  setView(mode: 'table' | 'grid') {
-    this.viewMode.set(mode);
-  }
-
-  toggleActions() {
-    this.actionsOpen = !this.actionsOpen;
-  }
-
-  icon(name: string) {
-    return this.icons.icon(name);
-  }
-
-  applyFilters() {
-    // No-op; filters are applied via getter
-  }
-
-  filteredStudents(): Student[] {
-    const term = this.searchTerm.toLowerCase().trim();
-    return this.allStudents().filter(s => {
-      const matchesTerm =
-        !term ||
-        s.fullName.toLowerCase().includes(term) ||
-        s.enrollment.admissionNumber.toLowerCase().includes(term) ||
-        (s.email || '').toLowerCase().includes(term);
-      const matchesGrade = !this.gradeFilter || s.enrollment.class?.toLowerCase().startsWith(this.gradeFilter.toLowerCase());
-      const matchesStatus = !this.statusFilter || (s.status || '').toLowerCase() === this.statusFilter.toLowerCase();
-      return matchesTerm && matchesGrade && matchesStatus;
-    });
-  }
-
-  initials(name: string) {
-    return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-  }
-
-  toggleSelect(event: Event, id: string) {
-    event.stopPropagation();
+  toggleSelectRow(id: string, checked: boolean): void {
     const next = new Set(this.selectedIds());
-    if (next.has(id)) next.delete(id); else next.add(id);
+    if (checked) {
+      next.add(id);
+    } else {
+      next.delete(id);
+    }
     this.selectedIds.set(next);
   }
 
-  isSelected(id: string) {
+  isSelected(id: string): boolean {
     return this.selectedIds().has(id);
   }
 
-  toggleSelectAll(event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
-    if (checked) {
-      this.selectedIds.set(new Set(this.filteredStudents().map(s => s.id)));
-    } else {
-      this.selectedIds.set(new Set());
-    }
+  allSelected(): boolean {
+    const pageIds = this.pagedStudents().map((student) => student.id);
+    return pageIds.length > 0 && pageIds.every((id) => this.selectedIds().has(id));
   }
 
-  allSelected() {
-    const filtered = this.filteredStudents();
-    return filtered.length > 0 && filtered.every(s => this.selectedIds().has(s.id));
+  selectStudent(student: Student): void {
+    this.selectedStudentId.set(student.id);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { studentId: student.id },
+      queryParamsHandling: 'merge',
+    });
   }
 
-  setActiveTab(label: string) {
-    this.commandTabs = this.commandTabs.map(tab => ({ ...tab, active: tab.label === label }));
+  closeDetail(): void {
+    this.selectedStudentId.set(null);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { studentId: null },
+      queryParamsHandling: 'merge',
+    });
   }
 
-  activeTabLabel(): string {
-    return this.commandTabs.find(t => t.active)?.label || 'Roster Lookup';
+  toggleAddMenu(event: Event): void {
+    event.stopPropagation();
+    this.addMenuOpen.set(!this.addMenuOpen());
   }
 
-  bulkAction(action: 'attendance' | 'note') {
-    // Placeholder for future wiring; keeps UI aligned with bulk flow
-    console.log(`Bulk action: ${action}`, Array.from(this.selectedIds()));
+  toggleOverflow(event: Event): void {
+    event.stopPropagation();
+    this.overflowOpen.set(!this.overflowOpen());
   }
 
-  toggleRowMenu(event: Event, id: string) {
+  toggleRowMenu(event: Event, id: string): void {
     event.stopPropagation();
     this.rowMenuOpen.set(this.rowMenuOpen() === id ? null : id);
   }
 
-  closeRowMenu() {
-    this.rowMenuOpen.set(null);
+  openCreateModal(): void {
+    this.createModalOpen.set(true);
+    this.addMenuOpen.set(false);
+    this.logAction('student_create_opened');
   }
 
-  openQuickView(event: Event, student: Student) {
+  closeCreateModal(): void {
+    this.createModalOpen.set(false);
+  }
+
+  openImport(): void {
+    this.addMenuOpen.set(false);
+  }
+
+  exportStudents(): void {
+    this.overflowOpen.set(false);
+  }
+
+  openSavedViews(): void {
+    this.overflowOpen.set(false);
+  }
+
+  bulkHelp(): void {
+    this.overflowOpen.set(false);
+  }
+
+  bulkAssign(): void {
+    this.bulkAssignOpen.set(true);
+  }
+
+  bulkStatus(): void {
+    this.bulkStatusOpen.set(true);
+  }
+
+  bulkExport(): void {}
+
+  bulkArchive(): void {
+    this.bulkConfirmText = '';
+    this.bulkArchiveOpen.set(true);
+  }
+
+  editStudent(event: Event, id: string): void {
     event.stopPropagation();
-    this.closeRowMenu();
-    this.quickViewStudent.set(student);
+    this.router.navigate(['/students', id, 'edit']);
   }
 
-  closeQuickView() {
-    this.quickViewStudent.set(null);
-  }
-
-  logAttendanceAction(event: Event, student: Student) {
+  openTransfer(event: Event, _student: Student): void {
     event.stopPropagation();
-    this.closeRowMenu();
-    console.log('Record attendance (stub):', student);
   }
 
-  logIncidentAction(event: Event, student: Student) {
+  openPromote(event: Event, _student: Student): void {
     event.stopPropagation();
-    this.closeRowMenu();
-    console.log('Log incident (stub):', student);
   }
 
-  contactGuardianAction(event: Event, student: Student) {
+  archiveStudent(event: Event, _student: Student): void {
     event.stopPropagation();
-    this.closeRowMenu();
-    console.log('Contact guardian (stub):', this.primaryGuardianPhone(student));
+    this.logAction('student_archive_opened');
   }
 
-  activeCount(): number {
-    const actives = this.allStudents().filter(s => (s.status || '').toLowerCase() === 'active');
-    return actives.length || this.allStudents().length;
-  }
-
-  triageTotal(): number {
-    return this.triageToday.reduce((sum, item) => sum + (item.value || 0), 0);
-  }
-
-  healthFlagTotal(): number {
-    return this.healthFlags.reduce((sum, item) => sum + (item.value || 0), 0);
-  }
-
-  hasFeeDue(student: Student): boolean {
-    const anyStudent = student as any;
-    return Boolean(anyStudent.feeFlag || anyStudent.feeDue || anyStudent.feeBalance || anyStudent.balanceDue);
-  }
-
-  primaryGuardianName(student: Student): string {
-    const g = student.guardians && student.guardians.length ? student.guardians[0] : null;
-    return g?.name || '—';
-  }
-
-  primaryGuardianPhone(student: Student): string {
-    const g = student.guardians && student.guardians.length ? student.guardians[0] : null;
-    return g?.phone || student.phone || 'No contact';
-  }
-
-  primaryGuardianPhoneHref(student: Student): string {
-    const raw = this.primaryGuardianPhone(student);
-    const digitsOnly = raw.replace(/[^0-9+]/g, '');
-    return digitsOnly ? `tel:${digitsOnly}` : '#';
-  }
-
-  primaryGuardianRelationship(student: Student): string {
-    const g = student.guardians && student.guardians.length ? student.guardians[0] : null;
-    return g?.relationship ? (g.relationship.charAt(0).toUpperCase() + g.relationship.slice(1)) : 'Primary';
-  }
-
-  primaryGuardianEmail(student: Student): string | null {
-    const g = student.guardians && student.guardians.length ? student.guardians[0] : null;
-    return g?.email || null;
-  }
-
-  healthAlert(student: Student): string | null {
-    const allergies = student.medicalInfo?.allergies?.length || 0;
-    const meds = student.medicalInfo?.medications?.length || 0;
-    if (allergies > 0) return `${allergies} allergy alert${allergies > 1 ? 's' : ''}`;
-    if (meds > 0) return `Medication: ${student.medicalInfo?.medications?.[0] || 'on file'}`;
-    return null;
-  }
-
-  allergyCount(student: Student): number {
-    return student.medicalInfo?.allergies?.length || 0;
-  }
-
-  documentsCount(student: Student): number {
-    return student.documents?.length || 0;
-  }
-
-  attendancePercent(student: Student): number {
-    const raw = (student as any)?.attendancePercent;
-    if (typeof raw === 'number' && !Number.isNaN(raw)) {
-      return Math.min(100, Math.max(0, raw));
+  formatUpdated(date: Date): string {
+    if (!date) {
+      return '—';
     }
-    return 0;
+    return new Date(date).toLocaleDateString();
   }
 
-  quickViewTimeline(student: Student): { title: string; meta: string; tone: 'success' | 'warn' | 'danger' | 'neutral' }[] {
-    const items: { title: string; meta: string; tone: 'success' | 'warn' | 'danger' | 'neutral' }[] = [];
-    const attendance = this.attendancePercent(student);
-    items.push({
-      title: `Attendance ${attendance}%`,
-      meta: attendance ? 'Year-to-date attendance' : 'Attendance not recorded',
-      tone: attendance >= 90 ? 'success' : attendance >= 70 ? 'warn' : 'danger'
-    });
-
-    const feeDue = this.hasFeeDue(student);
-    items.push({
-      title: feeDue ? 'Fees outstanding' : 'Fees clear',
-      meta: feeDue ? 'Balance requires follow-up' : 'No balance due',
-      tone: feeDue ? 'warn' : 'success'
-    });
-
-    const health = this.healthAlert(student);
-    items.push({
-      title: health ? 'Health alert' : 'Health status',
-      meta: health || 'No active flags',
-      tone: health ? 'danger' : 'neutral'
-    });
-
-    const updatedAt = (student as any)?.updatedAt ? new Date((student as any).updatedAt) : null;
-    items.push({
-      title: 'Last updated',
-      meta: updatedAt ? updatedAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Synced recently',
-      tone: 'neutral'
-    });
-
-    return items;
+  initials(name: string): string {
+    if (!name) return '—';
+    return name
+      .split(' ')
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join('')
+      .toUpperCase();
   }
+
+  primaryGuardianName(student?: Student | null): string {
+    if (!student) return '—';
+    return student.primaryGuardian?.name || student.guardians?.[0]?.name || '—';
+  }
+
+  primaryGuardianPhone(student?: Student | null): string {
+    if (!student) return '—';
+    return student.primaryGuardian?.phone || student.guardians?.[0]?.phone || '—';
+  }
+
+  primaryGuardianEmail(student?: Student | null): string {
+    if (!student) return '—';
+    return student.primaryGuardian?.email || student.guardians?.[0]?.email || '—';
+  }
+
+  handleKeydown(event: KeyboardEvent): void {
+    if (!this.pagedStudents().length) {
+      return;
+    }
+    const currentIndex = this.pagedStudents().findIndex((student) => student.id === this.selectedStudentId());
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      const nextIndex = currentIndex === -1 ? 0 : Math.min(currentIndex + 1, this.pagedStudents().length - 1);
+      this.selectStudent(this.pagedStudents()[nextIndex]);
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      const nextIndex = currentIndex <= 0 ? 0 : currentIndex - 1;
+      this.selectStudent(this.pagedStudents()[nextIndex]);
+    }
+    if (event.key === 'Escape') {
+      this.closeDetail();
+    }
+  }
+
+  toggleColumns(): void {}
+
+  closeBulkModals(): void {
+    this.bulkArchiveOpen.set(false);
+    this.bulkStatusOpen.set(false);
+    this.bulkAssignOpen.set(false);
+  }
+
+  confirmBulkArchive(): void {
+    this.closeBulkModals();
+    this.selectedIds.set(new Set());
+    this.logAction('students_bulk_archived');
+  }
+
+  confirmBulkStatus(): void {
+    this.closeBulkModals();
+    this.logAction('students_bulk_status_updated');
+  }
+
+  confirmBulkAssign(): void {
+    this.closeBulkModals();
+    this.logAction('students_bulk_assigned');
+  }
+
+  prevPage(): void {
+    this.page.set(Math.max(1, this.page() - 1));
+  }
+
+  nextPage(): void {
+    this.page.set(Math.min(this.totalPages(), this.page() + 1));
+  }
+
+  logAction(action: string): void {
+    console.log('[Students]', action);
+  }
+
 }

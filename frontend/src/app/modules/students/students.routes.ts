@@ -28,7 +28,7 @@ export const STUDENTS_ROUTES: Routes = [
     },
     {
         path: '',
-        loadComponent: () => import('./pages/student-workspace/student-workspace.component').then(m => m.StudentWorkspaceComponent)
+        loadComponent: () => import('./pages/students-list/students-list.component').then(m => m.StudentsListComponent)
     },
     {
         path: 'roster',
