@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { StudentService } from '../../../../core/services/student.service';
-import { Student, StudentStatus } from '../../../../core/models/student.model';
+import { Student, StudentFilters, StudentStatus } from '../../../../core/models/student.model';
 import { StudentFormComponent } from '../../../setup/pages/students/student-form/student-form.component';
 import { CanDirective } from '../../../../shared/security/can.directive';
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
@@ -22,6 +22,7 @@ import {
 } from '@mindbloom/ui';
 
 type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
+type FilterChip = { key: string; label: string; type: 'search' | 'status' | 'grade' | 'section' | 'year' | 'attention' };
 
 @Component({
   selector: 'app-students-list',
@@ -92,27 +93,28 @@ type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
 
       <div class="hub-controls">
         <app-search-input
+          [value]="searchTerm()"
           placeholder="Search by name, student ID, admission no., guardian phone/email"
           (search)="updateSearch($event)">
         </app-search-input>
         <div class="scope-filters">
           <mb-select
-            [options]="statusOptions"
+            [options]="statusOptions()"
             [(ngModel)]="statusFilter"
             (valueChange)="applyFilters()">
           </mb-select>
           <mb-select
-            [options]="gradeOptions"
+            [options]="gradeOptions()"
             [(ngModel)]="gradeFilter"
             (valueChange)="applyFilters()">
           </mb-select>
           <mb-select
-            [options]="classOptions"
+            [options]="classOptions()"
             [(ngModel)]="classFilter"
             (valueChange)="applyFilters()">
           </mb-select>
           <mb-select
-            [options]="yearOptions"
+            [options]="yearOptions()"
             [(ngModel)]="yearFilter"
             (valueChange)="applyFilters()">
           </mb-select>
@@ -124,6 +126,20 @@ type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
             Clear filters
           </mb-button>
         </div>
+      </div>
+      <div class="active-filters" *ngIf="activeFilterChips().length">
+        <span class="active-label">Filters</span>
+        <div class="chip-list">
+          <mb-button
+            class="filter-chip"
+            size="sm"
+            variant="tertiary"
+            *ngFor="let chip of activeFilterChips()"
+            (click)="removeFilterChip(chip)">
+            {{ chip.label }} ✕
+          </mb-button>
+        </div>
+        <mb-button size="sm" variant="tertiary" (click)="clearFilters()">Clear all</mb-button>
       </div>
 
       <div class="hub-body">
@@ -333,7 +349,7 @@ type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
         <p>Apply a new status to {{ selectedIds().size }} students.</p>
         <label>
           Status
-          <mb-select [options]="bulkStatusOptions" [(ngModel)]="bulkStatusValue"></mb-select>
+          <mb-select [options]="bulkStatusOptions()" [(ngModel)]="bulkStatusValue"></mb-select>
         </label>
         <div mbModalFooter>
           <mb-button size="sm" variant="tertiary" (click)="closeBulkModals()">Cancel</mb-button>
@@ -349,7 +365,7 @@ type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
         <p>Assign a class/section to {{ selectedIds().size }} students.</p>
         <label>
           Class/Section
-          <mb-select [options]="bulkClassOptions" [(ngModel)]="bulkSectionValue"></mb-select>
+          <mb-select [options]="bulkClassOptions()" [(ngModel)]="bulkSectionValue"></mb-select>
         </label>
         <div mbModalFooter>
           <mb-button size="sm" variant="tertiary" (click)="closeBulkModals()">Cancel</mb-button>
@@ -369,6 +385,7 @@ export class StudentsListComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   students = signal<Student[]>([]);
+  filterSource = signal<Student[]>([]);
 
   searchTerm = signal('');
   statusFilter = '';
@@ -394,44 +411,50 @@ export class StudentsListComponent implements OnInit {
   bulkConfirmText = '';
   bulkStatusValue: StudentStatus = StudentStatus.ACTIVE;
   bulkSectionValue = '';
+  private searchDebounce?: ReturnType<typeof setTimeout>;
 
   statuses = Object.values(StudentStatus);
-  grades = ['JSS1', 'JSS2', 'JSS3', 'SS1', 'SS2', 'SS3'];
-  classSections = ['A', 'B', 'C', 'Blue', 'Red'];
-  academicYears = ['2023/2024', '2024/2025', '2025/2026'];
 
   addStudentItems: MbSplitButtonItem[] = [
     { label: 'Add student', value: 'create' },
     { label: 'Import CSV', value: 'import' },
   ];
 
-  statusOptions: MbSelectOption[] = [
-    { label: 'All statuses', value: '' },
-    ...this.statuses.map((status) => ({ label: this.titleCase(status), value: status })),
-  ];
-  gradeOptions: MbSelectOption[] = [
-    { label: 'All grades', value: '' },
-    ...this.grades.map((grade) => ({ label: grade, value: grade })),
-  ];
-  classOptions: MbSelectOption[] = [
-    { label: 'All sections', value: '' },
-    ...this.classSections.map((group) => ({ label: group, value: group })),
-  ];
-  yearOptions: MbSelectOption[] = [
-    { label: 'All years', value: '' },
-    ...this.academicYears.map((year) => ({ label: year, value: year })),
-  ];
-  bulkStatusOptions: MbSelectOption[] = this.statuses.map((status) => ({
-    label: this.titleCase(status),
-    value: status,
-  }));
-  bulkClassOptions: MbSelectOption[] = this.classSections.map((group) => ({
-    label: group,
-    value: group,
-  }));
+  statusOptions = computed<MbSelectOption[]>(() => {
+    const values = this.uniqueValues(this.filterSource().map((student) => student.status));
+    const options = values.length ? values : this.statuses;
+    return [{ label: 'All statuses', value: '' }, ...options.map((status) => ({ label: this.titleCase(status), value: status }))];
+  });
+
+  gradeOptions = computed<MbSelectOption[]>(() => {
+    const values = this.uniqueValues(this.filterSource().map((student) => student.enrollment.class));
+    return [{ label: 'All grades', value: '' }, ...values.map((grade) => ({ label: grade, value: grade }))];
+  });
+
+  classOptions = computed<MbSelectOption[]>(() => {
+    const values = this.uniqueValues(this.filterSource().map((student) => student.enrollment.section).filter(Boolean) as string[]);
+    return [{ label: 'All sections', value: '' }, ...values.map((section) => ({ label: section, value: section }))];
+  });
+
+  yearOptions = computed<MbSelectOption[]>(() => {
+    const values = this.uniqueValues(this.filterSource().map((student) => student.enrollment.academicYear));
+    return [{ label: 'All years', value: '' }, ...values.map((year) => ({ label: year, value: year }))];
+  });
+
+  bulkStatusOptions = computed<MbSelectOption[]>(() =>
+    (this.uniqueValues(this.filterSource().map((student) => student.status)).length
+      ? this.uniqueValues(this.filterSource().map((student) => student.status))
+      : this.statuses
+    ).map((status) => ({ label: this.titleCase(status), value: status })),
+  );
+
+  bulkClassOptions = computed<MbSelectOption[]>(() => {
+    const values = this.uniqueValues(this.filterSource().map((student) => student.enrollment.section).filter(Boolean) as string[]);
+    return values.map((section) => ({ label: section, value: section }));
+  });
 
   attentionFiltersList = computed(() => {
-    const students = this.students();
+    const students = this.filterSource();
     return [
       { key: 'missing-docs' as const, label: 'Missing documents', count: students.filter((student) => this.hasMissingDocs(student)).length },
       { key: 'missing-guardian' as const, label: 'No guardian', count: students.filter((student) => this.hasMissingGuardian(student)).length },
@@ -474,41 +497,38 @@ export class StudentsListComponent implements OnInit {
   ]);
 
   filteredStudents = computed(() => {
-    const term = this.searchTerm().toLowerCase();
     return this.students().filter((student) => {
-      if (term) {
-        const match = [
-          student.fullName,
-          student.enrollment.admissionNumber,
-          this.primaryGuardianPhone(student),
-          this.primaryGuardianEmail(student),
-        ]
-          .filter(Boolean)
-          .some((value) => value.toLowerCase().includes(term));
-        if (!match) {
-          return false;
-        }
-      }
-
-      if (this.statusFilter && student.status !== this.statusFilter) {
-        return false;
-      }
-      if (this.gradeFilter && student.enrollment.class !== this.gradeFilter) {
-        return false;
-      }
-      if (this.classFilter && student.enrollment.section !== this.classFilter) {
-        return false;
-      }
-      if (this.yearFilter && student.enrollment.academicYear !== this.yearFilter) {
-        return false;
-      }
-
       if (!this.matchesAttentionFilters(student)) {
         return false;
       }
 
       return true;
     });
+  });
+
+  activeFilterChips = computed<FilterChip[]>(() => {
+    const chips: FilterChip[] = [];
+    if (this.searchTerm()) {
+      chips.push({ key: 'search', label: `Search: ${this.searchTerm()}`, type: 'search' });
+    }
+    if (this.statusFilter) {
+      chips.push({ key: 'status', label: `Status: ${this.titleCase(this.statusFilter)}`, type: 'status' });
+    }
+    if (this.gradeFilter) {
+      chips.push({ key: 'grade', label: `Grade: ${this.gradeFilter}`, type: 'grade' });
+    }
+    if (this.classFilter) {
+      chips.push({ key: 'section', label: `Section: ${this.classFilter}`, type: 'section' });
+    }
+    if (this.yearFilter) {
+      chips.push({ key: 'year', label: `Year: ${this.yearFilter}`, type: 'year' });
+    }
+    const attentionMap = new Map(this.attentionFiltersList().map((filter) => [filter.key, filter.label]));
+    this.attentionFilters().forEach((filter) => {
+      const label = attentionMap.get(filter) || filter;
+      chips.push({ key: filter, label: `Attention: ${label}`, type: 'attention' });
+    });
+    return chips;
   });
 
   toggleAttentionFilter(filter: AttentionFilter): void {
@@ -520,11 +540,13 @@ export class StudentsListComponent implements OnInit {
     }
     this.attentionFilters.set(next);
     this.page.set(1);
+    this.updateQueryParams();
   }
 
   clearAttentionFilters(): void {
     this.attentionFilters.set(new Set());
     this.page.set(1);
+    this.updateQueryParams();
   }
 
   hasAttentionFilters(): boolean {
@@ -546,6 +568,68 @@ export class StudentsListComponent implements OnInit {
       return true;
     }
     return false;
+  }
+
+  removeFilterChip(chip: FilterChip): void {
+    if (chip.type === 'search') {
+      this.searchTerm.set('');
+    }
+    if (chip.type === 'status') {
+      this.statusFilter = '';
+    }
+    if (chip.type === 'grade') {
+      this.gradeFilter = '';
+    }
+    if (chip.type === 'section') {
+      this.classFilter = '';
+    }
+    if (chip.type === 'year') {
+      this.yearFilter = '';
+    }
+    if (chip.type === 'attention') {
+      this.toggleAttentionFilter(chip.key as AttentionFilter);
+      return;
+    }
+    this.updateQueryParams();
+  }
+
+  private buildStudentFilters(): StudentFilters {
+    return {
+      search: this.searchTerm() || undefined,
+      status: this.statusFilter || undefined,
+      class: this.gradeFilter || undefined,
+      section: this.classFilter || undefined,
+      academicYear: this.yearFilter || undefined,
+    };
+  }
+
+  private updateQueryParams(): void {
+    const attention = this.serializeAttentionFilters();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        search: this.searchTerm() || null,
+        status: this.statusFilter || null,
+        grade: this.gradeFilter || null,
+        section: this.classFilter || null,
+        year: this.yearFilter || null,
+        attention: attention || null,
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  private serializeAttentionFilters(): string {
+    return Array.from(this.attentionFilters()).join(',');
+  }
+
+  private isAttentionFilter(value: string): value is AttentionFilter {
+    return value === 'missing-docs' || value === 'missing-guardian' || value === 'inactive';
+  }
+
+  private uniqueValues(values: string[]): string[] {
+    return Array.from(new Set(values.filter(Boolean))).sort();
   }
 
   hasMissingDocs(student: Student): boolean {
@@ -664,21 +748,39 @@ export class StudentsListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.loadStudents();
     this.route.queryParamMap.subscribe((params) => {
       const id = params.get('studentId');
-      if (id) {
-        this.selectedStudentId.set(id);
-      }
+      this.selectedStudentId.set(id);
+      this.searchTerm.set(params.get('search') || '');
+      this.statusFilter = params.get('status') || '';
+      this.gradeFilter = params.get('grade') || '';
+      this.classFilter = params.get('section') || '';
+      this.yearFilter = params.get('year') || '';
+      const attention = params.get('attention');
+      this.attentionFilters.set(
+        attention
+          ? new Set(
+              attention
+                .split(',')
+                .map((value) => value.trim())
+                .filter((value): value is AttentionFilter => this.isAttentionFilter(value))
+            )
+          : new Set()
+      );
+      this.loadStudents();
     });
+    this.loadFilterOptions();
   }
 
   loadStudents(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.studentsService.getStudents().subscribe({
+    this.studentsService.getStudents(this.buildStudentFilters()).subscribe({
       next: (students) => {
         this.students.set(students);
+        if (this.selectedStudentId() && !students.some((student) => student.id === this.selectedStudentId())) {
+          this.selectedStudentId.set(null);
+        }
         this.loading.set(false);
       },
       error: () => {
@@ -688,13 +790,27 @@ export class StudentsListComponent implements OnInit {
     });
   }
 
+  loadFilterOptions(): void {
+    this.studentsService.getStudents().subscribe({
+      next: (students) => {
+        this.filterSource.set(students);
+      },
+      error: () => {
+        this.filterSource.set([]);
+      }
+    });
+  }
+
   updateSearch(value: string): void {
     this.searchTerm.set(value);
     this.page.set(1);
+    clearTimeout(this.searchDebounce);
+    this.searchDebounce = setTimeout(() => this.updateQueryParams(), 300);
   }
 
   applyFilters(): void {
     this.page.set(1);
+    this.updateQueryParams();
   }
 
   clearFilters(): void {
@@ -703,8 +819,9 @@ export class StudentsListComponent implements OnInit {
     this.gradeFilter = '';
     this.classFilter = '';
     this.yearFilter = '';
-    this.clearAttentionFilters();
+    this.attentionFilters.set(new Set());
     this.page.set(1);
+    this.updateQueryParams();
   }
 
   hasFilters(): boolean {

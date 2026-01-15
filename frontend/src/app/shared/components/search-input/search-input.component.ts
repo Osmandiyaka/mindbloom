@@ -14,17 +14,19 @@ import { CommonModule } from '@angular/common';
           <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
         </svg>
       </span>
-      <input type="search" [placeholder]="placeholder" (input)="emit($event)" />
+      <input type="search" [placeholder]="placeholder" [value]="value" (input)="emit($event)" />
     </label>
   `
 })
 export class SearchInputComponent {
   @Input() placeholder = 'Search...';
+  @Input() value = '';
   @Output() search = new EventEmitter<string>();
   private debounceTimer?: any;
 
   emit(event: Event) {
     const term = (event.target as HTMLInputElement).value;
+    this.value = term;
     clearTimeout(this.debounceTimer);
     this.debounceTimer = setTimeout(() => this.search.emit(term), 200);
   }
