@@ -25,6 +25,13 @@
     color: var(--mb-color-text-muted);
 }
 
+.roles-header__hint {
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--mb-color-text-subtle);
+}
+
 .roles-header__actions {
     display: flex;
     align-items: center;
