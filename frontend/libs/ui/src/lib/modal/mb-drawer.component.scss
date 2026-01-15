@@ -60,26 +60,16 @@
 }
 
 .student-detail-drawer {
-    width: clamp(640px, 60vw, 980px);
-    max-width: 980px;
-    height: auto;
-    max-height: 95vh;
-}
-
-@media (min-width: 1600px) {
-    .student-detail-drawer {
-        width: clamp(720px, 55vw, 980px);
-    }
-}
-
-@media (max-width: 1200px) {
-    .student-detail-drawer {
-        width: clamp(600px, 70vw, 760px);
-    }
+    width: min(880px, 92vw);
+    max-width: 880px;
+    height: 100%;
+    max-height: 100%;
 }
 
 .student-detail-drawer .mb-drawer__body {
-    overflow: visible;
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
 }
 
 @media (max-width: 900px) {
