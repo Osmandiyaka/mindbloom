@@ -8,17 +8,36 @@
             <span class="permission-tree__count">Selected: {{ selectedCount }}</span>
         </div>
     </div>
+    <div class="permission-tree__filters">
+        <label class="permission-tree__toggle">
+            <input type="checkbox" [checked]="viewSelectedOnly()"
+                (change)="viewSelectedOnly.set($any($event.target).checked)" />
+            <span>View selected only</span>
+        </label>
+        <div class="permission-tree__chips" *ngIf="selectedModuleChips.length">
+            @for (chip of visibleModuleChips; track chip.id) {
+            <button type="button" class="permission-tree__chip" (click)="clearModuleSelection(chip.id)">
+                <span>{{ chip.name }}</span>
+                <span class="permission-tree__chip-count">{{ chip.count }}</span>
+                <span class="permission-tree__chip-close">×</span>
+            </button>
+            }
+            @if (overflowModuleCount > 0) {
+            <span class="permission-tree__chip-overflow">+{{ overflowModuleCount }} more</span>
+            }
+        </div>
+    </div>
     @if (permissionTreeValue.length === 0) {
     <div class="empty-state">
         <p>No permissions available</p>
     </div>
-    } @else if (filteredTree.length === 0) {
+    } @else if (displayedTree.length === 0) {
     <div class="empty-state">
         <p>No permissions match your search</p>
     </div>
     } @else {
     <div class="permission-list">
-        @for (permission of filteredTree; track permission.id) {
+        @for (permission of displayedTree; track permission.id) {
         <div class="permission-item" [class.has-children]="hasChildren(permission)">
             <!-- Permission Header -->
             <div class="permission-header" (click)="hasChildren(permission) && toggleNode(permission.id)">

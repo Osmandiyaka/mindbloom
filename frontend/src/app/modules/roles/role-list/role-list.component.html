@@ -248,7 +248,7 @@
 
     <mb-modal class="role-form-modal" [open]="roleFormOpen()"
         title="{{ roleFormMode() === 'edit' ? 'Edit role' : (roleFormMode() === 'duplicate' ? 'Duplicate role' : 'Create role') }}"
-        [closeable]="!roleFormSaving()" [closeOnBackdrop]="!roleFormSaving()" (closed)="closeRoleForm()">
+        [closeable]="!roleFormSaving()" [closeOnBackdrop]="!roleFormSaving()" (closed)="requestCloseRoleForm()">
         <div class="role-form">
             <div class="role-form__layout">
                 <aside class="role-form__sidebar">
@@ -355,12 +355,29 @@
         </div>
 
         <div mbModalFooter class="role-form__footer">
-            <span class="role-form__hint">Changes are saved when you click save.</span>
+            <div class="role-form__status">
+                <span class="role-form__dirty" *ngIf="roleFormDirty()">Unsaved changes</span>
+                <span class="role-form__hint">Changes are saved when you click save.</span>
+            </div>
             <div class="role-form__actions">
-                <mb-button variant="secondary" (click)="closeRoleForm()">Cancel</mb-button>
-                <mb-button variant="primary" [loading]="roleFormSaving()" (click)="saveRole()">
+                <mb-button variant="secondary" (click)="requestCloseRoleForm()">Cancel</mb-button>
+                <mb-button variant="primary" [loading]="roleFormSaving()"
+                    [disabled]="roleFormSaving() || roleFormInvalid()" (click)="saveRole()">
                     Save role
                 </mb-button>
+            </div>
+        </div>
+    </mb-modal>
+
+    <mb-modal [open]="roleFormDiscardOpen()" title="Discard unsaved changes?"
+        [closeable]="!roleFormSaving()" [closeOnBackdrop]="!roleFormSaving()" (closed)="keepEditingRoleForm()">
+        <div class="role-form__confirm">
+            You have unsaved changes. Are you sure you want to discard them?
+        </div>
+        <div mbModalFooter class="role-form__footer">
+            <div class="role-form__actions">
+                <mb-button variant="secondary" (click)="keepEditingRoleForm()">Continue editing</mb-button>
+                <mb-button variant="primary" (click)="discardRoleFormChanges()">Discard</mb-button>
             </div>
         </div>
     </mb-modal>

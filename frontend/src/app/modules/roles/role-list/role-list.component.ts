@@ -129,6 +129,12 @@ export class RoleListComponent implements OnInit {
     roleFormSaving = signal(false);
     roleFormDirty = signal(false);
     roleFormTemplate = signal('custom');
+    roleFormDiscardOpen = signal(false);
+
+    readonly roleFormInvalid = computed(() => {
+        const name = this.roleFormName().trim();
+        return !name || !this.roleFormPermissions().length;
+    });
 
     deleteModalOpen = signal(false);
     deleteConfirmText = signal('');
@@ -487,13 +493,28 @@ export class RoleListComponent implements OnInit {
         this.roleFormOpen.set(true);
     }
 
-    closeRoleForm(): void {
-        if (this.roleFormDirty() && !confirm('Discard changes?')) {
+    requestCloseRoleForm(): void {
+        if (this.roleFormDirty()) {
+            this.roleFormDiscardOpen.set(true);
             return;
         }
+        this.closeRoleForm();
+    }
+
+    closeRoleForm(): void {
         this.roleFormOpen.set(false);
         this.roleFormError.set('');
         this.roleFormPermissionSearch.set('');
+        this.roleFormDiscardOpen.set(false);
+    }
+
+    discardRoleFormChanges(): void {
+        this.roleFormDirty.set(false);
+        this.closeRoleForm();
+    }
+
+    keepEditingRoleForm(): void {
+        this.roleFormDiscardOpen.set(false);
     }
 
     markRoleFormDirty(): void {
@@ -574,6 +595,7 @@ export class RoleListComponent implements OnInit {
                 this.roleFormSaving.set(false);
                 this.roleFormOpen.set(false);
                 this.roleFormDirty.set(false);
+                this.roleFormDiscardOpen.set(false);
                 this.selectedRoleId.set(role.id);
             },
             error: (err) => {

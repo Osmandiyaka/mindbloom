@@ -30,6 +30,7 @@ export class PermissionTreeComponent {
     private _permissionTree = signal<Permission[]>([]);
     private _selectedPermissions = signal<Set<string>>(new Set());
     search = signal('');
+    viewSelectedOnly = signal(false);
 
     get permissionTreeValue() {
         return this._permissionTree();
@@ -65,6 +66,33 @@ export class PermissionTreeComponent {
             .filter((module): module is Permission => !!module);
     }
 
+    get displayedTree(): Permission[] {
+        if (!this.viewSelectedOnly()) {
+            return this.filteredTree;
+        }
+        return this.filteredTree
+            .map((module) => this.filterSelected(module))
+            .filter((module): module is Permission => !!module);
+    }
+
+    get selectedModuleChips(): Array<{ id: string; name: string; count: number }> {
+        return this.permissionTreeValue
+            .map((module) => ({
+                id: module.id,
+                name: module.displayName || module.resource,
+                count: this.moduleCoverage(module).enabled,
+            }))
+            .filter((chip) => chip.count > 0);
+    }
+
+    get visibleModuleChips(): Array<{ id: string; name: string; count: number }> {
+        return this.selectedModuleChips.slice(0, 4);
+    }
+
+    get overflowModuleCount(): number {
+        return Math.max(0, this.selectedModuleChips.length - this.visibleModuleChips.length);
+    }
+
     expandedNodes = signal<Set<string>>(new Set());
 
     toggleNode(permissionId: string) {
@@ -82,7 +110,7 @@ export class PermissionTreeComponent {
     }
 
     expandAll(): void {
-        this.expandedNodes.set(new Set(this.filteredTree.map((module) => module.id)));
+        this.expandedNodes.set(new Set(this.displayedTree.map((module) => module.id)));
     }
 
     collapseAll(): void {
@@ -171,6 +199,18 @@ export class PermissionTreeComponent {
         return this.collectRows(group.children || [], 0, []);
     }
 
+    clearModuleSelection(moduleId: string): void {
+        if (this.readOnly) {
+            return;
+        }
+        const module = this.permissionTreeValue.find((item) => item.id === moduleId);
+        if (!module) return;
+        const selected = new Set(this._selectedPermissions());
+        this.collectDescendantIds(module).forEach((id) => selected.delete(id));
+        this._selectedPermissions.set(selected);
+        this.permissionsChange.emit(Array.from(selected));
+    }
+
     private collectDescendantIds(permission: Permission): string[] {
         const ids: string[] = [];
         const walk = (node: Permission) => {
@@ -195,5 +235,17 @@ export class PermissionTreeComponent {
             }
         });
         return rows;
+    }
+
+    private filterSelected(permission: Permission): Permission | null {
+        const children = (permission.children || [])
+            .map((child) => this.filterSelected(child))
+            .filter((child): child is Permission => !!child);
+        const isLeafSelected = !permission.children?.length && this.isSelected(permission.id);
+        const hasSelectedChild = children.length > 0;
+        if (isLeafSelected || hasSelectedChild) {
+            return { ...permission, children };
+        }
+        return null;
     }
 }

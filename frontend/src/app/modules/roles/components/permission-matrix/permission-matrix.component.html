@@ -32,16 +32,6 @@
                     <span class="permission-group__title">{{ group.displayName || group.resource }}</span>
                     <span class="permission-group__count">{{ groupSelectionCount(group) }}/{{ groupTotalCount(group) }}</span>
                 </button>
-                <div class="permission-group__actions" *ngIf="!readOnly">
-                    <mb-checkbox
-                        [checked]="groupSelectionCount(group) === groupTotalCount(group)"
-                        [indeterminate]="isPartiallySelected(group)"
-                        [ariaLabel]="'Select all ' + (group.displayName || group.resource)"
-                        (checkedChange)="toggleGroupSelection(group)"
-                    >
-                        Select all
-                    </mb-checkbox>
-                </div>
             </div>
 
             <div class="permission-group__body" *ngIf="isGroupExpanded(group.id)">
