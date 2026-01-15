@@ -602,7 +602,7 @@ tbody tr.is-selected {
   color: var(--color-text-primary);
 }
 
-.status-tag {
+.detail-status-pill {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -619,23 +619,6 @@ tbody tr.is-selected {
   gap: 6px;
   font-size: 12px;
   color: var(--color-text-secondary);
-}
-
-.detail-tag-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.detail-tag {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  color: var(--color-text-secondary);
-  background: rgba(148, 163, 184, 0.12);
 }
 
 .detail-actions {

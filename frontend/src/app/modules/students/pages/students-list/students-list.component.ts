@@ -530,21 +530,17 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
               <div class="detail-header-main">
                 <div class="detail-title-row">
                   <h3>{{ panelStudent()?.fullName }}</h3>
+                  <span class="detail-status-pill">
+                    {{ titleCase(panelStudent()?.status || '') || '—' }}
+                  </span>
                 </div>
                 <div class="detail-meta-line">
                   <span>ID: {{ panelStudent()?.enrollment?.admissionNumber || '—' }}</span>
-                  <span>·</span>
-                  <span>Status: {{ titleCase(panelStudent()?.status || '') || '—' }}</span>
                   <span>·</span>
                   <span>{{ panelStudent()?.enrollment?.class || '—' }}</span>
                   <span *ngIf="panelStudent()?.enrollment?.section">· {{ panelStudent()?.enrollment?.section }}</span>
                   <span>·</span>
                   <span>{{ panelStudent()?.enrollment?.academicYear || '—' }}</span>
-                </div>
-                <div class="detail-tag-row" *ngIf="headerFlagTags(panelStudent()).length">
-                  <span class="detail-tag" *ngFor="let tag of headerFlagTags(panelStudent())">
-                    {{ tag }}
-                  </span>
                 </div>
               </div>
               <div class="detail-actions">
