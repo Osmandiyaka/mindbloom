@@ -297,12 +297,28 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
       </div>
 
       <ng-template #workflowPanel>
+        <div class="workflow-summary">
+          @if (panelLoading()) {
+            <div class="panel-skeleton">
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line short"></div>
+            </div>
+          } @else if (panelStudent()) {
+            <div class="summary-title">
+              <h3>{{ panelStudent()?.fullName }}</h3>
+              <span class="status-pill">{{ titleCase(panelStudent()?.status || '') }}</span>
+            </div>
+            <p class="summary-meta">ID · {{ panelStudent()?.enrollment?.admissionNumber || '—' }}</p>
+          } @else {
+            <p class="summary-empty">Select a student to see actions and timeline.</p>
+          }
+        </div>
         <div class="workflow-section">
           <div class="workflow-header">
             <div class="workflow-header-text">
               <h3>Quick actions</h3>
-              @if (selectedStudent()) {
-                <p class="workflow-meta">For {{ selectedStudent()?.fullName }}</p>
+              @if (panelStudent()) {
+                <p class="workflow-meta">For {{ panelStudent()?.fullName }}</p>
               } @else {
                 <p class="workflow-meta">Select a student to enable actions.</p>
               }
@@ -368,7 +384,7 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
             </mb-button>
           </div>
           <div class="timeline-list">
-            @if (!selectedStudent()) {
+            @if (!panelStudent()) {
               <div class="timeline-empty">No activity to show.</div>
             } @else if (activityLoading()) {
               <div class="timeline-skeleton">
@@ -555,6 +571,7 @@ export class StudentsListComponent implements OnInit {
   workflowDrawerOpen = signal(false);
   detailDrawerOpen = signal(false);
   quickActionsMenuOpen = signal(false);
+  detailLoading = signal(false);
   activityFilter = signal<ActivityFilter>('all');
   activityItems = signal<StudentActivityItem[]>([]);
   activityLoading = signal(false);
@@ -988,10 +1005,27 @@ export class StudentsListComponent implements OnInit {
     return this.students().find((student) => student.id === id) || null;
   });
 
+  panelStudent = computed(() => this.selectedStudentDetail() || this.selectedStudent());
+
+  panelLoading = computed(() => {
+    if (!this.selectedStudentId()) {
+      return false;
+    }
+    return this.loading() || this.detailLoading() || this.activityLoading();
+  });
+
+  selectedStudentDetail = signal<Student | null>(null);
+
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
       const id = params.get('studentId');
       this.selectedStudentId.set(id);
+      if (!id) {
+        this.selectedStudentDetail.set(null);
+        this.detailLoading.set(false);
+        this.activityItems.set([]);
+        this.activityDetailOpen.set(false);
+      }
       this.searchTerm.set(params.get('search') || '');
       this.statusFilter = params.get('status') || '';
       this.gradeFilter = params.get('grade') || '';
@@ -1030,7 +1064,12 @@ export class StudentsListComponent implements OnInit {
       next: (students) => {
         this.students.set(students);
         if (this.selectedStudentId() && !students.some((student) => student.id === this.selectedStudentId())) {
-          this.selectedStudentId.set(null);
+          this.loadSelectedStudentDetail(this.selectedStudentId()!);
+        } else if (this.selectedStudentId()) {
+          const matched = students.find((student) => student.id === this.selectedStudentId());
+          if (matched) {
+            this.selectedStudentDetail.set(matched);
+          }
         }
         this.loading.set(false);
       },
@@ -1103,6 +1142,8 @@ export class StudentsListComponent implements OnInit {
 
   selectStudent(student: Student): void {
     this.selectedStudentId.set(student.id);
+    this.selectedStudentDetail.set(student);
+    this.detailLoading.set(false);
     this.activityPage.set(1);
     this.activityItems.set([]);
     this.router.navigate([], {
@@ -1117,6 +1158,7 @@ export class StudentsListComponent implements OnInit {
     this.detailDrawerOpen.set(false);
     this.activityItems.set([]);
     this.activityDetailOpen.set(false);
+    this.selectedStudentDetail.set(null);
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { studentId: null },
@@ -1140,7 +1182,7 @@ export class StudentsListComponent implements OnInit {
   }
 
   isActionEnabled(action: QuickAction): boolean {
-    if (!this.selectedStudent()) {
+    if (!this.panelStudent()) {
       return false;
     }
     if (!this.entitlements.isEnabled(action.moduleKey)) {
@@ -1150,7 +1192,7 @@ export class StudentsListComponent implements OnInit {
   }
 
   actionTooltip(action: QuickAction): string {
-    if (!this.selectedStudent()) {
+    if (!this.panelStudent()) {
       return 'Select a student';
     }
     if (!this.entitlements.isEnabled(action.moduleKey)) {
@@ -1168,6 +1210,20 @@ export class StudentsListComponent implements OnInit {
     }
     this.quickActionsMenuOpen.set(false);
     this.logAction(`student_quick_action:${action.key}`);
+  }
+
+  loadSelectedStudentDetail(id: string): void {
+    this.detailLoading.set(true);
+    this.studentsService.getStudent(id).subscribe({
+      next: (student) => {
+        this.selectedStudentDetail.set(student);
+        this.detailLoading.set(false);
+      },
+      error: () => {
+        this.selectedStudentDetail.set(null);
+        this.detailLoading.set(false);
+      }
+    });
   }
 
   setActivityFilter(filter: ActivityFilter): void {

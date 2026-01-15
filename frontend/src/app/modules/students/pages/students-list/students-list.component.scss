@@ -233,6 +233,63 @@ tbody tr.is-selected {
   top: 120px;
 }
 
+.workflow-summary {
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 10px;
+  padding: 12px;
+  background: rgba(148, 163, 184, 0.04);
+  display: grid;
+  gap: 6px;
+}
+
+.summary-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summary-title h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.status-pill {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  color: var(--color-text-secondary);
+}
+
+.summary-meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.summary-empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.panel-skeleton {
+  display: grid;
+  gap: 6px;
+}
+
+.panel-skeleton .skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.15), rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.15));
+  background-size: 200% 100%;
+  animation: shimmer 1.3s ease-in-out infinite;
+}
+
+.panel-skeleton .skeleton-line.short {
+  width: 60%;
+}
+
 .workflow-section {
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 10px;
