@@ -86,6 +86,7 @@ export interface EnrollmentInfo {
 export interface StudentProps {
     id: string;
     tenantId: string;
+    schoolId: string;
 
     // Personal Information
     firstName: string;
@@ -140,6 +141,9 @@ export class Student {
         if (!this.props.tenantId) {
             throw new Error('Tenant ID is required');
         }
+        if (!this.props.schoolId) {
+            throw new Error('School ID is required');
+        }
         if (!this.props.firstName || !this.props.lastName) {
             throw new Error('First name and last name are required');
         }
@@ -167,6 +171,10 @@ export class Student {
 
     get tenantId(): string {
         return this.props.tenantId;
+    }
+
+    get schoolId(): string {
+        return this.props.schoolId;
     }
 
     get firstName(): string {

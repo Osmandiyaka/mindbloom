@@ -121,6 +121,9 @@ export class StudentDocument extends Document {
     @Prop({ type: Types.ObjectId, ref: 'Tenant', required: true, index: true })
     tenantId: Types.ObjectId;
 
+    @Prop({ required: true })
+    schoolId: string;
+
     @Prop()
     admissionId?: string;
 
@@ -195,6 +198,7 @@ export const StudentSchema = SchemaFactory.createForClass(StudentDocument);
 
 // Indexes for efficient queries
 StudentSchema.index({ tenantId: 1, 'enrollment.admissionNumber': 1 }, { unique: true });
+StudentSchema.index({ tenantId: 1, schoolId: 1 });
 StudentSchema.index({ tenantId: 1, firstName: 1, lastName: 1 });
 StudentSchema.index({ tenantId: 1, 'enrollment.class': 1, 'enrollment.section': 1 });
 StudentSchema.index({ tenantId: 1, status: 1 });

@@ -34,6 +34,7 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
         const studentDoc = new this.studentModel({
             _id: new Types.ObjectId(student.id), // Use the ObjectId from domain
             tenantId: new Types.ObjectId(tenantId),
+            schoolId: student.schoolId,
             firstName: student.firstName,
             lastName: student.lastName,
             middleName: student['props'].middleName,
@@ -90,6 +91,9 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
                     { email: { $regex: filters.search, $options: 'i' } },
                 ];
             }
+            if (filters.schoolId) {
+                query.schoolId = filters.schoolId;
+            }
             if (filters.class) {
                 query['enrollment.class'] = filters.class;
             }
@@ -117,6 +121,7 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
             { _id: student.id, tenantId: new Types.ObjectId(resolved) },
             {
                 $set: {
+                    schoolId: student.schoolId,
                     firstName: student.firstName,
                     lastName: student.lastName,
                     middleName: student['props'].middleName,
@@ -166,6 +171,9 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
                     { email: { $regex: filters.search, $options: 'i' } },
                 ];
             }
+            if (filters.schoolId) {
+                query.schoolId = filters.schoolId;
+            }
             if (filters.class) {
                 query['enrollment.class'] = filters.class;
             }
@@ -190,6 +198,7 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
         const props: StudentProps = {
             id: doc._id.toString(),
             tenantId: doc.tenantId ? doc.tenantId.toString() : '',
+            schoolId: doc.schoolId,
             firstName: doc.firstName,
             lastName: doc.lastName,
             middleName: doc.middleName,

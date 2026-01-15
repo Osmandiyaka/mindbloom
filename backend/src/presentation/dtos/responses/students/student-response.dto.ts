@@ -121,6 +121,9 @@ export class StudentResponseDto {
     id: string;
 
     @ApiProperty()
+    schoolId: string;
+
+    @ApiProperty()
     firstName: string;
 
     @ApiProperty()
@@ -189,6 +192,7 @@ export class StudentResponseDto {
     static fromDomain(student: Student): StudentResponseDto {
         const dto = new StudentResponseDto();
         dto.id = student.id;
+        dto.schoolId = student.schoolId;
         dto.firstName = student.firstName;
         dto.lastName = student.lastName;
         dto.fullName = student.fullName;

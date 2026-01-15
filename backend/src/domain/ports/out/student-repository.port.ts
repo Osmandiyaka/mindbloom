@@ -2,6 +2,7 @@ import { Student } from '../../student/entities/student.entity';
 
 export interface StudentFilters {
     search?: string; // Search by name, admission number, email
+    schoolId?: string;
     class?: string;
     section?: string;
     status?: string;

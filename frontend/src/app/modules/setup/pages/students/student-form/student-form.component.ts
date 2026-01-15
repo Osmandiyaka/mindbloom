@@ -7,6 +7,7 @@ import { Student, Gender, BloodGroup, RelationshipType } from '../../../../../co
 import { TenantService, Tenant } from '../../../../../core/services/tenant.service';
 import { TenantSettingsService } from '../../../../../core/services/tenant-settings.service';
 import { IconRegistryService } from '../../../../../shared/services/icon-registry.service';
+import { SchoolContextService } from '../../../../../core/school/school-context.service';
 
 @Component({
     selector: 'app-student-form',
@@ -26,6 +27,7 @@ export class StudentFormComponent implements OnInit {
     photoPreview = signal<string | null>(null);
     photoFile: File | null = null;
     templateSettings: Tenant['idTemplates'] | null = null;
+    schoolId = signal<string | null>(null);
 
     // Enums for templates
     Gender = Gender;
@@ -50,6 +52,7 @@ export class StudentFormComponent implements OnInit {
         private route: ActivatedRoute,
         private tenantService: TenantService,
         private tenantSettingsService: TenantSettingsService,
+        private schoolContext: SchoolContextService,
         public iconRegistry: IconRegistryService,
     ) {
         this.initializeForms();
@@ -187,6 +190,7 @@ export class StudentFormComponent implements OnInit {
     }
 
     populateForms(student: Student): void {
+        this.schoolId.set(student.schoolId);
         // Personal Information
         this.personalInfoForm.patchValue({
             firstName: student.firstName,
@@ -468,6 +472,7 @@ export class StudentFormComponent implements OnInit {
         const { id: enrollId, _id: enroll_id, ...enrollmentData } = this.enrollmentForm.value.enrollment;
 
         const studentData: any = {
+            schoolId: this.resolveSchoolId(),
             firstName: personalInfo.firstName,
             lastName: personalInfo.lastName,
             dateOfBirth: personalInfo.dateOfBirth,
@@ -543,6 +548,16 @@ export class StudentFormComponent implements OnInit {
         if (confirm('Are you sure you want to cancel? All changes will be lost.')) {
             this.router.navigate(['/students']);
         }
+    }
+
+    private resolveSchoolId(): string {
+        const fromContext = this.schoolContext.activeSchool()?.id;
+        const fromTenant = this.currentTenant?.metadata?.['schoolId'];
+        const resolved = this.schoolId() || fromContext || fromTenant;
+        if (!resolved) {
+            throw new Error('School ID is required to create a student.');
+        }
+        return resolved;
     }
 
     getStepStatus(step: number): 'completed' | 'current' | 'upcoming' {

@@ -22,6 +22,7 @@ export class StudentService {
 
         if (filters) {
             if (filters.search) params = params.set('search', filters.search);
+            if (filters.schoolId) params = params.set('schoolId', filters.schoolId);
             if (filters.class) params = params.set('class', filters.class);
             if (filters.section) params = params.set('section', filters.section);
             if (filters.status) params = params.set('status', filters.status);
@@ -68,6 +69,7 @@ export class StudentService {
 
         if (filters) {
             if (filters.search) params = params.set('search', filters.search);
+            if (filters.schoolId) params = params.set('schoolId', filters.schoolId);
             if (filters.class) params = params.set('class', filters.class);
             if (filters.section) params = params.set('section', filters.section);
             if (filters.status) params = params.set('status', filters.status);

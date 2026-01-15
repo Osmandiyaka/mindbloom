@@ -64,6 +64,7 @@ export class StudentsController {
     @ApiOperation({ summary: 'Get all students' })
     @ApiResponse({ status: 200, description: 'List of students', type: [StudentResponseDto] })
     @ApiQuery({ name: 'search', required: false })
+    @ApiQuery({ name: 'schoolId', required: false })
     @ApiQuery({ name: 'class', required: false })
     @ApiQuery({ name: 'section', required: false })
     @ApiQuery({ name: 'status', required: false })
@@ -71,6 +72,7 @@ export class StudentsController {
     @ApiQuery({ name: 'gender', required: false })
     async findAll(
         @Query('search') search?: string,
+        @Query('schoolId') schoolId?: string,
         @Query('class') classFilter?: string,
         @Query('section') section?: string,
         @Query('status') status?: string,
@@ -80,6 +82,7 @@ export class StudentsController {
         const tenantId = this.tenantContext.tenantId;
         const filters = {
             search,
+            schoolId,
             class: classFilter,
             section,
             status,
@@ -95,6 +98,7 @@ export class StudentsController {
     @ApiResponse({ status: 200, description: 'CSV file' })
     async exportStudents(
         @Query('search') search?: string,
+        @Query('schoolId') schoolId?: string,
         @Query('class') classFilter?: string,
         @Query('section') section?: string,
         @Query('status') status?: string,
@@ -105,6 +109,7 @@ export class StudentsController {
         const tenantId = this.tenantContext.tenantId;
         const filters = {
             search,
+            schoolId,
             class: classFilter,
             section,
             status,
@@ -169,6 +174,7 @@ export class StudentsController {
     @ApiResponse({ status: 200, description: 'Import result' })
     async importStudents(
         @UploadedFile() file: any,
+        @Query('schoolId') schoolId?: string,
     ): Promise<any> {
         const tenantId = this.tenantContext.tenantId;
 
@@ -202,6 +208,9 @@ export class StudentsController {
                 results.total++;
 
                 const studentData = this.mapCSVToStudent(headers, values);
+                if (schoolId && !studentData.schoolId) {
+                    studentData.schoolId = schoolId;
+                }
                 await this.createStudentUseCase.execute({
                     ...studentData,
                     tenantId,
@@ -344,6 +353,9 @@ export class StudentsController {
                     break;
                 case 'phone':
                     data.phone = value;
+                    break;
+                case 'schoolid':
+                    data.schoolId = value;
                     break;
                 case 'nationality':
                     data.nationality = value;

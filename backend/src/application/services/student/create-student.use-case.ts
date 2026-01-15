@@ -41,6 +41,7 @@ export class CreateStudentUseCase {
         const studentProps: StudentProps = {
             id: studentId,
             tenantId: command.tenantId,
+            schoolId: command.schoolId,
             firstName: command.firstName,
             lastName: command.lastName,
             middleName: command.middleName,

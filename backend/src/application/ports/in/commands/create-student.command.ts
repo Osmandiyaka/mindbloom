@@ -1,5 +1,6 @@
 export interface CreateStudentCommand {
     tenantId: string;
+    schoolId: string;
     // Personal Information
     firstName: string;
     lastName: string;

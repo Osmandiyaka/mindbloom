@@ -85,6 +85,7 @@ export interface EnrollmentInfo {
 
 export interface Student {
     id: string;
+    schoolId: string;
 
     // Personal Information
     firstName: string;
@@ -131,6 +132,7 @@ export interface Student {
 
 export interface StudentFilters {
     search?: string;
+    schoolId?: string;
     class?: string;
     section?: string;
     status?: string;
@@ -142,6 +144,7 @@ export interface StudentFilters {
 }
 
 export interface CreateStudentDto {
+    schoolId: string;
     firstName: string;
     lastName: string;
     middleName?: string;

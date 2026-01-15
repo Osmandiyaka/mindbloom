@@ -2,7 +2,7 @@ import {
     IsString,
     IsEmail,
     IsOptional,
-    IsDateString,
+    IsDate,
     IsEnum,
     IsArray,
     ValidateNested,
@@ -128,7 +128,7 @@ class EnrollmentInfoDto {
     admissionNumber: string;
 
     @ApiProperty()
-    @IsDateString()
+    @IsDate()
     @Type(() => Date)
     admissionDate: Date;
 
@@ -164,6 +164,9 @@ class EnrollmentInfoDto {
 export class CreateStudentDto {
     @ApiProperty()
     @IsString()
+    schoolId: string;
+    @ApiProperty()
+    @IsString()
     firstName: string;
 
     @ApiProperty()
@@ -176,7 +179,7 @@ export class CreateStudentDto {
     middleName?: string;
 
     @ApiProperty()
-    @IsDateString()
+    @IsDate()
     @Type(() => Date)
     dateOfBirth: Date;
 
