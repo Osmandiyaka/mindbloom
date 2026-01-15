@@ -40,12 +40,25 @@ interface ModuleDefinition {
     permissions: string[];
 }
 
+interface ComparePlanCell {
+    planId: SubscriptionPlan;
+    included: boolean;
+    label: string;
+}
+
+interface ComparePlanRow {
+    key: ModuleKey;
+    name: string;
+    cells: ComparePlanCell[];
+}
+
 type OverrideFilter = 'all' | 'enabled' | 'disabled' | 'limits' | 'security';
 type OverrideType = 'enabled' | 'disabled' | 'limit' | 'security';
 
 interface EntitlementOverride {
     module: string;
     overrideType: OverrideType;
+    previous?: string;
     value: string;
     reason: string;
     updatedBy: string;
@@ -78,6 +91,7 @@ export class PlanEntitlementsComponent implements OnInit {
     drawerModuleKey = signal<ModuleKey | null>(null);
     showRequestModal = signal(false);
     showOverridesDrawer = signal(false);
+    showCompareModal = signal(false);
     activeLockInfo = signal<ModuleKey | null>(null);
     overflowOpen = signal(false);
     overrideFilter = signal<OverrideFilter>('all');
@@ -88,6 +102,7 @@ export class PlanEntitlementsComponent implements OnInit {
 
     currentPlanId = signal<SubscriptionPlan>('free');
     currentPlanName = signal('Free');
+    billingLabel = signal('Monthly');
     entitlements = signal(this.entitlementsService.currentEntitlements());
     entitlementsLastSynced = signal('Jan 15, 2026');
     entitlementsSource = signal('Backend');
@@ -124,6 +139,7 @@ export class PlanEntitlementsComponent implements OnInit {
                 change,
                 isAdded: change === '+ Added',
                 isUnchanged: change === 'No change',
+                needsSetup: status === 'not_configured',
                 lockReason: this.lockReason(module.key, config.access, status),
             };
         });
@@ -187,6 +203,25 @@ export class PlanEntitlementsComponent implements OnInit {
             diff('Storage'),
             diff('Support'),
         ];
+    });
+
+    comparePlanRows = computed<ComparePlanRow[]>(() => {
+        const editions = this.editions();
+        return this.moduleCatalog().map((module) => {
+            const cells = editions.map((edition) => {
+                const access = edition.modules?.[module.key]?.access || 'not_included';
+                return {
+                    planId: edition.id,
+                    included: access === 'included',
+                    label: access === 'included' ? 'Included' : access === 'add_on' ? 'Add-on' : '—',
+                };
+            });
+            return {
+                key: module.key,
+                name: module.name,
+                cells,
+            };
+        });
     });
 
     isDowngrade = computed(() => {
@@ -354,9 +389,9 @@ export class PlanEntitlementsComponent implements OnInit {
             case 'enabled':
                 return 'Enabled';
             case 'disabled_override':
-                return 'Disabled (override)';
+                return 'Disabled';
             case 'not_configured':
-                return 'Not configured';
+                return 'Needs setup';
             default:
                 return 'Locked (plan)';
         }
@@ -380,7 +415,7 @@ export class PlanEntitlementsComponent implements OnInit {
             return 'Disabled by admin override';
         }
         if (status === 'not_configured') {
-            return 'Setup required to activate';
+            return 'Setup required';
         }
         if (!this.isViewingCurrent() && access === 'included') {
             const required = this.minimumPlanForModule(moduleKey);
@@ -390,7 +425,8 @@ export class PlanEntitlementsComponent implements OnInit {
             return 'Add-on available';
         }
         if (access === 'not_included') {
-            return 'Upgrade to enable this module';
+            const required = this.minimumPlanForModule(moduleKey);
+            return required ? `Requires ${required} or higher` : 'Requires higher plan';
         }
         return undefined;
     }
@@ -562,6 +598,14 @@ export class PlanEntitlementsComponent implements OnInit {
         this.showRequestModal.set(false);
     }
 
+    openCompareModal(): void {
+        this.showCompareModal.set(true);
+    }
+
+    closeCompareModal(): void {
+        this.showCompareModal.set(false);
+    }
+
     submitRequest(): void {
         this.showRequestModal.set(false);
     }
@@ -580,6 +624,11 @@ export class PlanEntitlementsComponent implements OnInit {
 
     closeOverridesDrawer(): void {
         this.showOverridesDrawer.set(false);
+    }
+
+    startSetup(moduleKey: ModuleKey, event: Event): void {
+        event.stopPropagation();
+        this.openModuleDetail(moduleKey);
     }
 
     titleCase(value: string): string {
@@ -773,6 +822,7 @@ const DEFAULT_OVERRIDES: EntitlementOverride[] = [
     {
         module: 'Finance',
         overrideType: 'disabled',
+        previous: 'Enabled',
         value: 'Disabled',
         reason: 'Trial expired',
         updatedBy: 'System',
@@ -781,6 +831,7 @@ const DEFAULT_OVERRIDES: EntitlementOverride[] = [
     {
         module: 'Users',
         overrideType: 'limit',
+        previous: '100 users',
         value: 'Up to 200 users',
         reason: 'Enterprise pilot',
         updatedBy: 'Success Team',
@@ -789,6 +840,7 @@ const DEFAULT_OVERRIDES: EntitlementOverride[] = [
     {
         module: 'SSO',
         overrideType: 'security',
+        previous: 'Unavailable',
         value: 'Enabled',
         reason: 'Security requirement',
         updatedBy: 'Security Admin',
