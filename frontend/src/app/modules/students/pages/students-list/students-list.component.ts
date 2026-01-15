@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Subscription } from 'rxjs';
 import { StudentService } from '../../../../core/services/student.service';
+import { ToastService } from '../../../../core/ui/toast/toast.service';
 import {
   Document,
   Guardian,
@@ -528,20 +529,30 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
           @if (panelStudent()) {
             <div class="detail-header">
               <div class="detail-header-main">
-                <div class="detail-title-row">
-                  <h3>{{ panelStudent()?.fullName }}</h3>
-                  <span class="detail-status-pill">
-                    {{ titleCase(panelStudent()?.status || '') || '—' }}
-                  </span>
-                </div>
-                <div class="detail-meta-line">
-                  <span>ID: {{ panelStudent()?.enrollment?.admissionNumber || '—' }}</span>
-                  <span>·</span>
-                  <span>{{ panelStudent()?.enrollment?.class || '—' }}</span>
-                  <span *ngIf="panelStudent()?.enrollment?.section">· {{ panelStudent()?.enrollment?.section }}</span>
-                  <span>·</span>
-                  <span>{{ panelStudent()?.enrollment?.academicYear || '—' }}</span>
-                </div>
+                @if (detailLoading()) {
+                  <div class="detail-title-row">
+                    <div class="skeleton-line skeleton-title"></div>
+                    <div class="skeleton-pill"></div>
+                  </div>
+                  <div class="detail-meta-line">
+                    <div class="skeleton-line skeleton-meta"></div>
+                  </div>
+                } @else {
+                  <div class="detail-title-row">
+                    <h3>{{ panelStudent()?.fullName }}</h3>
+                    <span class="detail-status-pill">
+                      {{ titleCase(panelStudent()?.status || '') || '—' }}
+                    </span>
+                  </div>
+                  <div class="detail-meta-line">
+                    <span>ID: {{ panelStudent()?.enrollment?.admissionNumber || '—' }}</span>
+                    <span>·</span>
+                    <span>{{ panelStudent()?.enrollment?.class || '—' }}</span>
+                    <span *ngIf="panelStudent()?.enrollment?.section">· {{ panelStudent()?.enrollment?.section }}</span>
+                    <span>·</span>
+                    <span>{{ panelStudent()?.enrollment?.academicYear || '—' }}</span>
+                  </div>
+                }
               </div>
               <div class="detail-actions">
                 <mb-button size="sm" variant="primary" *can="'students.update'" (click)="editPanelStudent()">
@@ -626,20 +637,28 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                     <span class="summary-label">Last updated</span>
                     <span class="summary-value">{{ formatUpdated(panelStudent()?.updatedAt) }}</span>
                   </div>
-                  <div class="summary-item">
-                    <span class="summary-label">Attendance</span>
-                    <span class="summary-value">—</span>
-                  </div>
                 }
               </div>
-              <div class="detail-tab-panel">
-                @if (detailLoading()) {
-                  <div class="detail-tab-loading">
-                    <div class="summary-skeleton"></div>
-                    <div class="summary-skeleton"></div>
-                    <div class="summary-skeleton"></div>
+            <div class="detail-tab-panel">
+              @if (detailLoading()) {
+                <div class="detail-tab-loading">
+                  <div class="skeleton-card">
+                    <div class="skeleton-line skeleton-title"></div>
+                    <div class="skeleton-line skeleton-row"></div>
+                    <div class="skeleton-line skeleton-row"></div>
                   </div>
-                } @else {
+                  <div class="skeleton-card">
+                    <div class="skeleton-line skeleton-title"></div>
+                    <div class="skeleton-line skeleton-row"></div>
+                    <div class="skeleton-line skeleton-row"></div>
+                  </div>
+                  <div class="skeleton-card">
+                    <div class="skeleton-line skeleton-title"></div>
+                    <div class="skeleton-line skeleton-row"></div>
+                    <div class="skeleton-line skeleton-row"></div>
+                  </div>
+                </div>
+              } @else {
                   @switch (selectedDetailTab()) {
                   @case ('overview') {
                       <div class="overview-grid">
@@ -685,6 +704,7 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                                       variant="tertiary"
                                       class="guardian-copy"
                                       aria-label="Copy guardian phone"
+                                      appTooltip="Copy"
                                       [disabled]="!guardian.phone"
                                       (click)="copyToClipboard(guardian.phone)">
                                       ⧉
@@ -708,42 +728,67 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                         </div>
                         <div class="overview-column">
                           <div class="overview-card">
-                            <div class="overview-card-title">Quick info</div>
-                            <div class="detail-grid">
-                              <div class="detail-item">
+                            <div class="overview-card-title">Student details</div>
+                            <div class="details-grid">
+                              <div class="details-row">
                                 <span class="detail-label">Legal name</span>
                                 <span class="detail-value">{{ panelStudent()?.fullName || '—' }}</span>
                               </div>
-                              <div class="detail-item">
+                              <div class="details-row">
                                 <span class="detail-label">Date of birth</span>
                                 <span class="detail-value">{{ formatDate(panelStudent()?.dateOfBirth) }}</span>
                               </div>
-                              <div class="detail-item">
+                              <div class="details-row">
                                 <span class="detail-label">Gender</span>
                                 <span class="detail-value">{{ titleCase(panelStudent()?.gender || '') || '—' }}</span>
                               </div>
-                              <div class="detail-item">
-                                <span class="detail-label">Student ID</span>
-                                <span class="detail-value">{{ panelStudent()?.id || '—' }}</span>
-                              </div>
-                              <div class="detail-item">
+                              <div class="details-row">
                                 <span class="detail-label">Admission no.</span>
-                                <span class="detail-value">{{ panelStudent()?.enrollment?.admissionNumber || '—' }}</span>
+                                <span class="detail-value detail-copy">
+                                  {{ panelStudent()?.enrollment?.admissionNumber || '—' }}
+                                  <mb-button
+                                    size="sm"
+                                    variant="tertiary"
+                                    class="detail-copy-button"
+                                    aria-label="Copy admission number"
+                                    appTooltip="Copy"
+                                    [disabled]="!panelStudent()?.enrollment?.admissionNumber"
+                                    (click)="copyToClipboard(panelStudent()?.enrollment?.admissionNumber)">
+                                    ⧉
+                                  </mb-button>
+                                </span>
                               </div>
-                              <div class="detail-item detail-item-full">
+                              <div class="details-row details-row-full">
                                 <span class="detail-label">Address</span>
                                 <span class="detail-value">{{ formatAddress(panelStudent()) }}</span>
+                              </div>
+                              <div class="details-row details-row-full">
+                                <span class="detail-label">Student internal ID</span>
+                                <span class="detail-value detail-copy detail-truncate" [attr.title]="panelStudent()?.id || ''">
+                                  {{ panelStudent()?.id || '—' }}
+                                  <mb-button
+                                    size="sm"
+                                    variant="tertiary"
+                                    class="detail-copy-button"
+                                    aria-label="Copy student ID"
+                                    appTooltip="Copy"
+                                    [disabled]="!panelStudent()?.id"
+                                    (click)="copyToClipboard(panelStudent()?.id)">
+                                    ⧉
+                                  </mb-button>
+                                </span>
                               </div>
                             </div>
                           </div>
                           @if (detailFlags(panelStudent()).length) {
                             <div class="overview-card overview-alerts">
                               <div class="overview-card-title">Alerts & missing info</div>
-                              <div class="detail-flags">
-                                <div class="detail-flag" *ngFor="let flag of detailFlags(panelStudent())">
-                                  <div class="detail-flag-text">
-                                    <span class="detail-flag-title">{{ flag.label }}</span>
-                                    <span class="detail-flag-note">{{ flag.note }}</span>
+                              <div class="alert-list">
+                                <div class="alert-row" *ngFor="let flag of detailFlags(panelStudent())">
+                                  <span class="alert-icon" aria-hidden="true">!</span>
+                                  <div class="alert-text">
+                                    <span class="alert-title">{{ flag.label }}</span>
+                                    <span class="alert-note">{{ flag.note }}</span>
                                   </div>
                                   <mb-button size="sm" variant="tertiary" (click)="selectDetailTab(flag.tab)">
                                     {{ flag.action }}
@@ -767,6 +812,15 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                         <div class="detail-empty">Loading guardians…</div>
                       } @else if (guardiansError()) {
                         <div class="detail-empty">{{ guardiansError() }}</div>
+                      } @else if (!guardians().length) {
+                        <div class="tab-empty">
+                          <span class="tab-empty-icon" aria-hidden="true">👥</span>
+                          <span class="tab-empty-title">No guardians assigned</span>
+                          <span class="tab-empty-note">Add a guardian to complete the student profile.</span>
+                          <mb-button size="sm" variant="primary" *can="'students.write'" (click)="openGuardianModal()">
+                            Add guardian
+                          </mb-button>
+                        </div>
                       } @else {
                         <mb-table
                           [rows]="guardians()"
@@ -875,7 +929,14 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                         <p class="detail-empty">Loading notes…</p>
                       } @else if (notesError()) {
                         <p class="detail-empty">{{ notesError() }}</p>
-                      } @else if (notes().length) {
+                      } @else if (!notes().length) {
+                        <div class="tab-empty">
+                          <span class="tab-empty-icon" aria-hidden="true">📝</span>
+                          <span class="tab-empty-title">No notes yet</span>
+                          <span class="tab-empty-note">Add the first note to keep a record of updates.</span>
+                          <mb-button size="sm" variant="primary" (click)="openNoteModal()">Add note</mb-button>
+                        </div>
+                      } @else {
                         <div class="notes-list">
                           <div class="note-card" *ngFor="let note of notes()">
                             <div class="note-header">
@@ -891,8 +952,6 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                             <p class="note-body">{{ note.content }}</p>
                           </div>
                         </div>
-                      } @else {
-                        <p class="detail-empty">No notes available.</p>
                       }
                     </div>
                   }
@@ -906,6 +965,13 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                         <div class="detail-empty">Loading documents…</div>
                       } @else if (documentsError()) {
                         <div class="detail-empty">{{ documentsError() }}</div>
+                      } @else if (!documents().length) {
+                        <div class="tab-empty">
+                          <span class="tab-empty-icon" aria-hidden="true">📄</span>
+                          <span class="tab-empty-title">No documents uploaded</span>
+                          <span class="tab-empty-note">Upload required documents to complete the record.</span>
+                          <mb-button size="sm" variant="primary" (click)="openDocumentModal()">Upload document</mb-button>
+                        </div>
                       } @else {
                         <mb-table
                           [rows]="documents()"
@@ -965,7 +1031,11 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                         } @else if (activityError()) {
                           <div class="timeline-error">{{ activityError() }}</div>
                         } @else if (activityItems().length === 0) {
-                          <div class="timeline-empty">No activity available.</div>
+                          <div class="tab-empty">
+                            <span class="tab-empty-icon" aria-hidden="true">⏳</span>
+                            <span class="tab-empty-title">No activity yet</span>
+                            <span class="tab-empty-note">Activity will appear as changes are made.</span>
+                          </div>
                         } @else {
                           <div class="timeline-list">
                             <div class="timeline-items">
@@ -1253,6 +1323,7 @@ export class StudentsListComponent implements OnInit {
     private readonly rbac: RbacService,
     private readonly entitlements: EditionService,
     private readonly tenantContext: TenantContextService,
+    private readonly toast: ToastService,
   ) {}
 
   loading = signal(true);
@@ -2949,7 +3020,9 @@ export class StudentsListComponent implements OnInit {
 
   copyToClipboard(value?: string | null): void {
     if (!value || !navigator?.clipboard) return;
-    navigator.clipboard.writeText(value).catch(() => {});
+    navigator.clipboard.writeText(value).then(() => {
+      this.toast.info('Copied to clipboard', 1500);
+    }).catch(() => {});
   }
 
   handleKeydown(event: KeyboardEvent): void {
