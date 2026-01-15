@@ -184,7 +184,7 @@
                         </div>
 
                         <div class="roles-detail__body" *ngIf="detailTab() === 'assignments'">
-                            <div class="roles-assignments__header">
+                            <div class="roles-assignments__header" *ngIf="roleUsers(detailRole).length">
                                 <div>
                                     <div class="roles-assignments__title">Users with this role</div>
                                     <div class="roles-assignments__subtitle">
@@ -208,10 +208,20 @@
                                 </ng-template>
                             </mb-table>
                             <ng-template #assignmentsEmpty>
-                                <div class="roles-empty roles-empty--inline">
-                                    <div class="roles-empty__title">No users have this role yet</div>
-                                    <div class="roles-empty__text">Assign users to apply these permissions.</div>
-                                    <mb-button variant="secondary" (click)="openAssignmentsModal(detailRole)">
+                                <div class="roles-empty-card">
+                                    <div class="roles-empty-card__icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <circle cx="9" cy="8" r="3.5"></circle>
+                                            <path d="M3.5 19.5c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5"></path>
+                                            <circle cx="17.5" cy="8.5" r="2.5"></circle>
+                                            <path d="M15 19.5c.2-2.4 2.2-4.3 4.6-4.3"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="roles-empty-card__title">No users assigned</div>
+                                    <div class="roles-empty-card__text">
+                                        Assign users to this role to apply its permissions across the workspace.
+                                    </div>
+                                    <mb-button variant="primary" (click)="openAssignmentsModal(detailRole)">
                                         Assign users
                                     </mb-button>
                                 </div>
