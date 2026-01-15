@@ -76,11 +76,11 @@
         <div class="plan-detail">
             @if (!selectedEdition()) {
             <div class="state-block">
-                <p>Select an edition to view details.</p>
+                <p>Select a plan to view included modules and limits.</p>
             </div>
             } @else {
             <div class="plan-summary">
-                <div>
+                <div class="plan-summary__content">
                     <div class="plan-summary__title">
                         <h2>{{ selectedEdition()?.name }}</h2>
                         @if (isViewingCurrent()) {
@@ -97,10 +97,23 @@
                         {{ primaryCtaLabel() }}
                     </ui-button>
                     <ui-button variant="ghost" size="sm" (click)="openRequestModal()">Request plan change</ui-button>
-                    <ui-button variant="ghost" size="sm" (click)="toggleCompare()">Compare with current</ui-button>
-                    <ui-button variant="ghost" size="sm">⋯</ui-button>
+                    <ui-button variant="ghost" size="sm" (click)="toggleCompare()">
+                        {{ compareMode() ? 'Exit compare' : 'Compare with current' }}
+                    </ui-button>
+                    <div class="plan-overflow">
+                        <ui-button variant="ghost" size="sm" (click)="toggleOverflow()">⋯</ui-button>
+                        @if (overflowOpen()) {
+                        <div class="plan-overflow__menu" role="menu">
+                            <button type="button" (click)="downloadPlanSummary()">Download plan summary</button>
+                            <button type="button" (click)="copyEntitlementSnapshot()">Copy entitlement snapshot</button>
+                        </div>
+                        }
+                    </div>
                 </div>
                 <p class="plan-summary__helper">Changes apply at the tenant level. Billing handled by admin.</p>
+                <p class="plan-summary__meta">
+                    Entitlements last synced: {{ entitlementsLastSynced() }} • Source: {{ entitlementsSource() }}
+                </p>
             </div>
 
             <div class="plan-summary__highlights">
@@ -110,10 +123,16 @@
             </div>
 
             <div class="plan-summary__limits">
-                @for (limit of selectedEdition()?.limits || []; track limit.label) {
-                <div class="limit-card">
-                    <p class="limit-label">{{ limit.label }}</p>
-                    <p class="limit-value">{{ limit.value }}</p>
+                @for (card of summaryCards(); track card.label) {
+                <div class="metric-card" [class.is-warning]="card.warning">
+                    <p class="metric-label">{{ card.label }}</p>
+                    <div class="metric-value">
+                        <span>{{ card.value }}</span>
+                        @if (card.warning) {
+                        <span class="metric-badge">Over limit</span>
+                        }
+                    </div>
+                    <p class="metric-subtext">{{ card.subtext }}</p>
                 </div>
                 }
             </div>
@@ -245,39 +264,51 @@
             } @else {
             <div class="limits-groups">
                 <div class="limits-group">
-                    <h3>Users & Schools</h3>
+                    <h3>Limits</h3>
                     <div class="limits-table">
-                        @for (limit of selectedEdition()?.limits || []; track limit.label) {
-                        <div class="limits-row">
-                            <span>{{ limit.label }}</span>
-                            <span>{{ limit.value }}</span>
-                        </div>
-                        }
+                        <div class="limits-row"><span>Users</span><span>{{ limitValue(selectedEdition()!, 'Users') }}</span></div>
+                        <div class="limits-row"><span>Schools</span><span>{{ limitValue(selectedEdition()!, 'Schools') }}</span></div>
+                        <div class="limits-row"><span>Storage</span><span>{{ limitValue(selectedEdition()!, 'Storage') }}</span></div>
+                        <div class="limits-row"><span>Classes/Sections</span><span>Unlimited</span></div>
                     </div>
                 </div>
                 <div class="limits-group">
-                    <h3>Security & Compliance</h3>
+                    <h3>Security</h3>
                     <div class="limits-table">
-                        <div class="limits-row">
-                            <span>Audit log retention</span>
-                            <span>{{ isViewingCurrent() ? '90 days' : '365 days' }}</span>
-                        </div>
-                        <div class="limits-row">
-                            <span>SSO</span>
-                            <span>{{ selectedEdition()?.id === 'enterprise' ? 'Included' : 'Add-on' }}</span>
-                        </div>
+                        <div class="limits-row"><span>SSO</span><span>{{ selectedEdition()?.id === 'enterprise' ? 'Included' : 'Add-on' }}</span></div>
+                        <div class="limits-row"><span>Audit log retention</span><span>{{ isViewingCurrent() ? '90 days' : '365 days' }}</span></div>
+                        <div class="limits-row"><span>MFA</span><span>{{ selectedEdition()?.id === 'enterprise' ? 'Included' : 'Available' }}</span></div>
+                    </div>
+                </div>
+                <div class="limits-group">
+                    <h3>Data & Export</h3>
+                    <div class="limits-table">
+                        <div class="limits-row"><span>CSV export</span><span>Included</span></div>
+                        <div class="limits-row"><span>API access</span><span>{{ selectedEdition()?.id === 'enterprise' ? 'Included' : 'Limited' }}</span></div>
                     </div>
                 </div>
                 <div class="limits-group">
                     <h3>Support</h3>
                     <div class="limits-table">
-                        <div class="limits-row">
-                            <span>Support tier</span>
-                            <span>{{ selectedEdition()?.limits?.[3]?.value }}</span>
-                        </div>
+                        <div class="limits-row"><span>SLA</span><span>{{ selectedEdition()?.id === 'enterprise' ? '99.9% uptime' : 'Standard' }}</span></div>
+                        <div class="limits-row"><span>Onboarding</span><span>{{ selectedEdition()?.id === 'enterprise' ? 'Dedicated' : 'Self-serve' }}</span></div>
+                        <div class="limits-row"><span>Support tier</span><span>{{ limitValue(selectedEdition()!, 'Support') }}</span></div>
                     </div>
                 </div>
             </div>
+            @if (compareMode() && compareDiffs().length) {
+            <div class="limits-diff">
+                <h3>Differences vs current</h3>
+                <div class="limits-table">
+                    @for (diff of compareDiffs(); track diff.label) {
+                    <div class="limits-row">
+                        <span>{{ diff.label }}</span>
+                        <span>{{ diff.current }} → {{ diff.selected }}</span>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
             }
             }
         </div>
@@ -332,7 +363,7 @@
                 }
             </div>
             <div class="drawer-actions">
-                <ui-button variant="primary" size="sm">{{ primaryCtaLabel() }}</ui-button>
+                <ui-button variant="primary" size="sm" [disabled]="primaryCtaLabel() === 'Current plan'">{{ primaryCtaLabel() }}</ui-button>
                 <ui-button variant="ghost" size="sm" (click)="openRequestModal()">Request change</ui-button>
             </div>
         </div>
@@ -355,6 +386,20 @@
                 Requested plan
                 <ui-input [value]="selectedEdition()?.name || ''" [disabled]="true"></ui-input>
             </label>
+            @if (isDowngrade() && downgradeImpacts().length > 0) {
+            <div class="downgrade-warning">
+                <p>This change reduces access for the tenant.</p>
+                <ul>
+                    @for (impact of downgradeImpacts(); track impact) {
+                    <li>{{ impact }}</li>
+                    }
+                </ul>
+                <label>
+                    Type DOWNGRADE to confirm
+                    <ui-input [(value)]="downgradeConfirmText"></ui-input>
+                </label>
+            </div>
+            }
             <label>
                 Reason
                 <textarea rows="3" [(ngModel)]="bulkReason"></textarea>
@@ -373,7 +418,13 @@
         </div>
         <div class="modal-footer">
             <ui-button variant="ghost" size="sm" (click)="closeRequestModal()">Cancel</ui-button>
-            <ui-button variant="primary" size="sm" (click)="submitRequest()">Send request</ui-button>
+            <ui-button
+                variant="primary"
+                size="sm"
+                [disabled]="isDowngrade() && downgradeImpacts().length > 0 && downgradeConfirmText !== 'DOWNGRADE'"
+                (click)="submitRequest()">
+                Send request
+            </ui-button>
         </div>
     </div>
 </div>

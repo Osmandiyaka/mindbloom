@@ -52,6 +52,13 @@ interface EntitlementOverride {
     updatedAt: string;
 }
 
+interface SummaryCard {
+    label: string;
+    value: string;
+    subtext: string;
+    warning: boolean;
+}
+
 @Component({
     selector: 'app-plan-entitlements',
     standalone: true,
@@ -72,7 +79,9 @@ export class PlanEntitlementsComponent implements OnInit {
     showRequestModal = signal(false);
     showOverridesDrawer = signal(false);
     activeLockInfo = signal<ModuleKey | null>(null);
+    overflowOpen = signal(false);
     overrideFilter = signal<OverrideFilter>('all');
+    downgradeConfirmText = '';
     bulkReason = '';
     bulkEmail = '';
     bulkUrgency: 'normal' | 'urgent' = 'normal';
@@ -80,6 +89,8 @@ export class PlanEntitlementsComponent implements OnInit {
     currentPlanId = signal<SubscriptionPlan>('free');
     currentPlanName = signal('Free');
     entitlements = signal(this.entitlementsService.currentEntitlements());
+    entitlementsLastSynced = signal('Jan 15, 2026');
+    entitlementsSource = signal('Backend');
 
     editions = signal<EditionPlan[]>(DEFAULT_EDITIONS);
     moduleCatalog = signal<ModuleDefinition[]>(DEFAULT_MODULES);
@@ -101,7 +112,7 @@ export class PlanEntitlementsComponent implements OnInit {
         return this.moduleCatalog().map((module) => {
             const config = edition.modules[module.key] || { access: 'not_included' as AccessType };
             const currentConfig = currentModules[module.key] || { access: 'not_included' as AccessType };
-            const status = this.moduleStatus(module.key, config.access);
+            const status = this.moduleStatus(module.key, currentConfig.access || 'not_included');
             const change = this.compareMode() && !this.isViewingCurrent()
                 ? this.compareAccess(config.access, currentConfig.access)
                 : null;
@@ -133,6 +144,76 @@ export class PlanEntitlementsComponent implements OnInit {
         };
     });
 
+    usageSnapshot = signal({
+        users: 28,
+        schools: 2,
+        storageGb: 120,
+    });
+
+    summaryCards = computed<SummaryCard[]>(() => {
+        const edition = this.selectedEdition();
+        if (!edition) {
+            return [];
+        }
+        const users = this.limitValue(edition, 'Users') || '—';
+        const schools = this.limitValue(edition, 'Schools') || '—';
+        const storage = this.limitValue(edition, 'Storage') || '—';
+        const support = this.limitValue(edition, 'Support') || '—';
+        return [
+            this.buildSummaryCard('Schools', schools, 'per tenant', this.usageSnapshot().schools),
+            this.buildSummaryCard('Users', users, 'per tenant', this.usageSnapshot().users),
+            this.buildSummaryCard('Storage', storage, 'soft limit', this.usageSnapshot().storageGb),
+            { label: 'Support', value: support, subtext: 'support tier', warning: false },
+        ];
+    });
+
+    compareDiffs = computed(() => {
+        if (!this.compareMode() || this.isViewingCurrent()) {
+            return [];
+        }
+        const current = this.currentEdition();
+        const selected = this.selectedEdition();
+        if (!current || !selected) {
+            return [];
+        }
+        const diff = (label: string) => ({
+            label,
+            current: this.limitValue(current, label) || '—',
+            selected: this.limitValue(selected, label) || '—',
+        });
+        return [
+            diff('Users'),
+            diff('Schools'),
+            diff('Storage'),
+            diff('Support'),
+        ];
+    });
+
+    isDowngrade = computed(() => {
+        const selected = this.selectedEdition()?.id;
+        const current = this.currentPlanId();
+        if (!selected) {
+            return false;
+        }
+        return this.isLowerPlan(selected, current);
+    });
+
+    downgradeImpacts = computed(() => {
+        const current = this.currentEdition();
+        const selected = this.selectedEdition();
+        if (!current || !selected) {
+            return [];
+        }
+        const currentIncluded = Object.entries(current.modules || {})
+            .filter(([, config]) => config?.access === 'included')
+            .map(([key]) => key);
+        const selectedIncluded = Object.entries(selected.modules || {})
+            .filter(([, config]) => config?.access === 'included')
+            .map(([key]) => key);
+        const removed = currentIncluded.filter((key) => !selectedIncluded.includes(key as ModuleKey));
+        return removed.map((key) => MODULE_NAMES[key as ModuleKey] || key);
+    });
+
     overrides = signal<EntitlementOverride[]>(DEFAULT_OVERRIDES);
 
     overrideCount = computed(() => this.overrides().length);
@@ -160,6 +241,14 @@ export class PlanEntitlementsComponent implements OnInit {
 
     setOverrideFilter(filter: OverrideFilter): void {
         this.overrideFilter.set(filter);
+    }
+
+    toggleOverflow(): void {
+        this.overflowOpen.set(!this.overflowOpen());
+    }
+
+    closeOverflow(): void {
+        this.overflowOpen.set(false);
     }
 
     planRank(plan: SubscriptionPlan | null | undefined): number {
@@ -232,7 +321,6 @@ export class PlanEntitlementsComponent implements OnInit {
 
     selectEdition(edition: EditionPlan): void {
         this.selectedEditionId.set(edition.id);
-        this.compareMode.set(false);
         this.drawerModuleKey.set(null);
     }
 
@@ -275,9 +363,6 @@ export class PlanEntitlementsComponent implements OnInit {
     }
 
     moduleStatus(moduleKey: ModuleKey, access: AccessType): StatusType {
-        if (!this.isViewingCurrent()) {
-            return 'locked_plan';
-        }
         if (access === 'included') {
             const entitlements = this.entitlements();
             if (!entitlements?.modules) {
@@ -298,13 +383,14 @@ export class PlanEntitlementsComponent implements OnInit {
             return 'Setup required to activate';
         }
         if (!this.isViewingCurrent() && access === 'included') {
-            return 'Switch to this plan to enable';
+            const required = this.minimumPlanForModule(moduleKey);
+            return required ? `Requires ${required} or higher` : 'Requires higher plan';
         }
         if (access === 'add_on') {
-            return 'Contact sales to enable';
+            return 'Add-on available';
         }
         if (access === 'not_included') {
-            return 'Not included in this edition';
+            return 'Upgrade to enable this module';
         }
         return undefined;
     }
@@ -342,7 +428,8 @@ export class PlanEntitlementsComponent implements OnInit {
             return 'Complete setup to enable this module for the tenant.';
         }
         if (status === 'locked_plan' && access === 'included' && !this.isViewingCurrent()) {
-            return 'This module is included in the selected plan. Switch plans to enable.';
+            const required = this.minimumPlanForModule(moduleKey);
+            return required ? `Requires ${required} or higher.` : 'Requires a higher plan.';
         }
         if (access === 'add_on') {
             return 'This module is available as an add-on. Contact sales to enable.';
@@ -404,6 +491,33 @@ export class PlanEntitlementsComponent implements OnInit {
         return edition.limits.find((limit) => limit.label === label)?.value || null;
     }
 
+    buildSummaryCard(label: string, value: string, subtext: string, usage?: number): SummaryCard {
+        const limit = this.parseLimit(value);
+        const isOver = typeof usage === 'number' && typeof limit === 'number' && usage > limit;
+        const overBy = isOver ? usage - (limit || 0) : 0;
+        return {
+            label,
+            value: isOver ? `${usage} ${label.toLowerCase()} (${overBy} over limit)` : value,
+            subtext,
+            warning: isOver,
+        };
+    }
+
+    parseLimit(value: string): number | null {
+        if (!value) {
+            return null;
+        }
+        const lowered = value.toLowerCase();
+        if (lowered.includes('unlimited') || lowered.includes('custom') || lowered.includes('contact')) {
+            return null;
+        }
+        const match = value.match(/(\d+[\d,]*)/);
+        if (!match) {
+            return null;
+        }
+        return Number(match[1].replace(/,/g, ''));
+    }
+
     openModuleDetail(moduleKey: ModuleKey): void {
         this.drawerModuleKey.set(moduleKey);
     }
@@ -450,6 +564,14 @@ export class PlanEntitlementsComponent implements OnInit {
 
     submitRequest(): void {
         this.showRequestModal.set(false);
+    }
+
+    downloadPlanSummary(): void {
+        this.closeOverflow();
+    }
+
+    copyEntitlementSnapshot(): void {
+        this.closeOverflow();
     }
 
     openOverridesDrawer(): void {
