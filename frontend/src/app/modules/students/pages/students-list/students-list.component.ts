@@ -567,21 +567,11 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                     •••
                   </mb-button>
                   <div class="detail-actions-panel" *ngIf="detailMenuOpen()">
-                    <mb-button size="sm" variant="tertiary" [fullWidth]="true" *can="'students.write'" (click)="openTransferFromPanel()">
-                      Change section
-                    </mb-button>
-                    <mb-button size="sm" variant="tertiary" [fullWidth]="true" *can="'students.write'" (click)="openTransferFromPanel()">
-                      Transfer student
-                    </mb-button>
                     <mb-button size="sm" variant="tertiary" [fullWidth]="true">
                       Print profile
                     </mb-button>
                     <mb-button size="sm" variant="tertiary" [fullWidth]="true">
                       Export student
-                    </mb-button>
-                    <div class="detail-actions-divider" aria-hidden="true"></div>
-                    <mb-button size="sm" variant="danger" [fullWidth]="true" *can="'students.delete'" (click)="archivePanelStudent()">
-                      Archive / Deactivate
                     </mb-button>
                   </div>
                 </div>
@@ -625,17 +615,45 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                   <div class="summary-skeleton"></div>
                   <div class="summary-skeleton"></div>
                 } @else {
-                  <div class="summary-item">
-                    <span class="summary-label">Enrollment</span>
-                    <span class="summary-value">
-                      {{ panelStudent()?.enrollment?.academicYear || '—' }} ·
-                      {{ panelStudent()?.enrollment?.class || '—' }}
-                      {{ panelStudent()?.enrollment?.section ? ' · ' + panelStudent()?.enrollment?.section : '' }}
-                    </span>
-                  </div>
-                  <div class="summary-item">
-                    <span class="summary-label">Last updated</span>
-                    <span class="summary-value">{{ formatUpdated(panelStudent()?.updatedAt) }}</span>
+                  <div class="summary-strip">
+                    <div class="summary-group">
+                      <span class="summary-label">Enrollment</span>
+                      <span class="summary-value">
+                        {{ panelStudent()?.enrollment?.academicYear || '—' }} ·
+                        {{ panelStudent()?.enrollment?.class || '—' }}
+                        {{ panelStudent()?.enrollment?.section ? ' · ' + panelStudent()?.enrollment?.section : '' }}
+                      </span>
+                    </div>
+                    <div class="summary-group">
+                      <span class="summary-label">Status</span>
+                      <span class="summary-status">{{ titleCase(panelStudent()?.status || '') || '—' }}</span>
+                    </div>
+                    <div class="summary-group">
+                      <span class="summary-label">Last updated</span>
+                      <span class="summary-value">Updated {{ formatRelativeUpdated(panelStudent()?.updatedAt) }}</span>
+                    </div>
+                    <div class="summary-actions">
+                      <mb-button size="sm" variant="tertiary" *can="'students.write'" (click)="openChangeSectionFromPanel()">
+                        Change section
+                      </mb-button>
+                      <mb-button size="sm" variant="tertiary" *can="'students.write'" (click)="openTransferFromPanel()">
+                        Transfer
+                      </mb-button>
+                      <div class="summary-actions-menu" [class.open]="summaryMenuOpen()">
+                        <mb-button
+                          size="sm"
+                          variant="tertiary"
+                          aria-label="More actions"
+                          (click)="toggleSummaryMenu($event)">
+                          •••
+                        </mb-button>
+                        <div class="summary-actions-panel" *ngIf="summaryMenuOpen()">
+                          <mb-button size="sm" variant="danger" [fullWidth]="true" *can="'students.delete'" (click)="archivePanelStudent()">
+                            Archive
+                          </mb-button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 }
               </div>
@@ -1316,6 +1334,7 @@ export class StudentsListComponent implements OnInit {
   overflowOpen = signal(false);
   rowMenuOpen = signal<string | null>(null);
   detailMenuOpen = signal(false);
+  summaryMenuOpen = signal(false);
   guardianMenuOpen = signal<string | null>(null);
   guardianModalOpen = signal(false);
   guardianSubmitting = signal(false);
@@ -2366,6 +2385,11 @@ export class StudentsListComponent implements OnInit {
     this.detailMenuOpen.set(!this.detailMenuOpen());
   }
 
+  toggleSummaryMenu(event: Event): void {
+    event.stopPropagation();
+    this.summaryMenuOpen.set(!this.summaryMenuOpen());
+  }
+
   toggleGuardianMenu(event: Event, id: string): void {
     event.stopPropagation();
     this.guardianMenuOpen.set(this.guardianMenuOpen() === id ? null : id);
@@ -2938,6 +2962,23 @@ export class StudentsListComponent implements OnInit {
       return '—';
     }
     const value = typeof date === 'string' ? new Date(date) : date;
+    return value.toLocaleDateString();
+  }
+
+  formatRelativeUpdated(date?: Date | string): string {
+    if (!date) {
+      return '—';
+    }
+    const value = typeof date === 'string' ? new Date(date) : date;
+    const diffMs = Date.now() - value.getTime();
+    if (Number.isNaN(diffMs)) return '—';
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+    if (diffMs < minute) return 'just now';
+    if (diffMs < hour) return `${Math.floor(diffMs / minute)} min ago`;
+    if (diffMs < day) return `${Math.floor(diffMs / hour)} h ago`;
+    if (diffMs < day * 30) return `${Math.floor(diffMs / day)} days ago`;
     return value.toLocaleDateString();
   }
 
