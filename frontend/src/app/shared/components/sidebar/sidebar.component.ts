@@ -529,6 +529,7 @@ export class SidebarComponent implements OnInit {
       items: [
         { label: 'Workspace Setup', path: '/setup/first-login', icon: 'dashboard', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
         { label: 'Access control', path: '/roles', icon: 'settings', permission: PERMISSIONS.roles.read, moduleKey: 'setup' },
+        { label: 'Plan & Entitlements', path: '/setup/plan-entitlements', icon: 'expenses', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
 
         { label: 'Marketplace', path: '/setup/marketplace', icon: 'marketplace', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
         { label: 'Plugins', path: '/plugins', icon: 'plugins', permission: PERMISSIONS.setup.read, moduleKey: 'plugins' },
