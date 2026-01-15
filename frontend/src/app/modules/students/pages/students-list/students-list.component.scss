@@ -666,14 +666,44 @@ tbody tr.is-selected {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 12px 22px;
+  padding: 8px 22px;
   border-bottom: 1px solid var(--mb-color-border-subtle);
   background: var(--mb-color-surface);
+  min-height: 52px;
+  align-items: center;
+}
+
+.detail-tab-button {
+  position: relative;
+  padding: 6px 8px;
+  font-size: 12px;
+  line-height: 1.2;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
 }
 
 .detail-tab-button.active {
-  background: rgba(15, 23, 42, 0.08);
+  background: transparent;
   color: var(--color-text-primary);
+  border-bottom-color: var(--mb-color-primary, #0f172a);
+}
+
+.detail-tab-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.detail-tab-count {
+  min-width: 16px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--color-text-secondary);
+  background: rgba(148, 163, 184, 0.16);
 }
 
 .detail-scroll {

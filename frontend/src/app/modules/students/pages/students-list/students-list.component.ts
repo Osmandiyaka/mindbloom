@@ -589,7 +589,21 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                 [class.active]="tab.key === selectedDetailTab()"
                 [attr.aria-selected]="tab.key === selectedDetailTab()"
                 (click)="selectDetailTab(tab.key)">
-                {{ tab.label }}
+                <span class="detail-tab-label">
+                  {{ tab.label }}
+                  <span class="detail-tab-count" *ngIf="tab.key === 'guardians'">
+                    {{ guardians().length }}
+                  </span>
+                  <span class="detail-tab-count" *ngIf="tab.key === 'documents'">
+                    {{ documents().length }}
+                  </span>
+                  <span class="detail-tab-count" *ngIf="tab.key === 'notes'">
+                    {{ notes().length }}
+                  </span>
+                  <span class="detail-tab-count" *ngIf="tab.key === 'activity'">
+                    {{ activityItems().length }}
+                  </span>
+                </span>
               </mb-button>
             </div>
             <div class="detail-scroll">
