@@ -560,6 +560,33 @@
     font-size: 12px;
 }
 
+.drawer-section {
+    display: grid;
+    gap: 6px;
+}
+
+.drawer-section + .drawer-section {
+    margin-top: 12px;
+}
+
+.drawer-muted {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+}
+
+.drawer-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.drawer-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
 .modal-overlay {
     justify-content: center;
     align-items: center;

@@ -37,6 +37,7 @@ interface ModuleDefinition {
     description: string;
     icon: string;
     features: string[];
+    permissions: string[];
 }
 
 @Component({
@@ -377,6 +378,22 @@ export class PlanEntitlementsComponent implements OnInit {
         return this.moduleCatalog().find((module) => module.key === key) || null;
     }
 
+    includedPlans(moduleKey: ModuleKey): string[] {
+        return this.editions()
+            .filter((edition) => edition.modules?.[moduleKey]?.access === 'included')
+            .map((edition) => edition.name);
+    }
+
+    currentTenantModuleState(moduleKey: ModuleKey): { label: string; reason: string | null } {
+        const current = this.currentEdition();
+        const access = current?.modules?.[moduleKey]?.access || 'not_included';
+        const status = this.moduleStatus(moduleKey, access);
+        return {
+            label: this.statusLabel(status),
+            reason: this.lockReason(moduleKey, access, status),
+        };
+    }
+
     toggleCompare(): void {
         this.compareMode.set(!this.compareMode());
     }
@@ -415,6 +432,7 @@ const DEFAULT_MODULES: ModuleDefinition[] = [
         description: 'Student profiles, enrollment, and records.',
         icon: 'users',
         features: ['Student profiles', 'Guardian contacts', 'Enrollment history'],
+        permissions: ['Read', 'Create', 'Update', 'Delete'],
     },
     {
         key: 'academics',
@@ -422,6 +440,7 @@ const DEFAULT_MODULES: ModuleDefinition[] = [
         description: 'Classes, curricula, grading, and academic setup.',
         icon: 'book-open',
         features: ['Class setup', 'Subjects', 'Grading policies'],
+        permissions: ['Read', 'Create', 'Update', 'Delete'],
     },
     {
         key: 'fees',
@@ -429,6 +448,7 @@ const DEFAULT_MODULES: ModuleDefinition[] = [
         description: 'Tuition plans, invoicing, and payment tracking.',
         icon: 'banknote',
         features: ['Fee plans', 'Invoicing', 'Payment tracking'],
+        permissions: ['Read', 'Create', 'Update', 'Delete'],
     },
     {
         key: 'accounting',
@@ -436,6 +456,7 @@ const DEFAULT_MODULES: ModuleDefinition[] = [
         description: 'Accounting ledgers and reconciliation.',
         icon: 'calculator',
         features: ['Journals', 'Chart of accounts', 'Reconciliation'],
+        permissions: ['Read', 'Create', 'Update', 'Delete'],
     },
     {
         key: 'hr',
@@ -443,6 +464,7 @@ const DEFAULT_MODULES: ModuleDefinition[] = [
         description: 'Staff records, onboarding, and HR workflows.',
         icon: 'briefcase',
         features: ['Staff profiles', 'Contracts', 'Leave tracking'],
+        permissions: ['Read', 'Create', 'Update', 'Delete'],
     },
     {
         key: 'library',
@@ -450,6 +472,7 @@ const DEFAULT_MODULES: ModuleDefinition[] = [
         description: 'Library catalog and lending workflows.',
         icon: 'book',
         features: ['Catalog', 'Lending', 'Fines'],
+        permissions: ['Read', 'Create', 'Update', 'Delete'],
     },
     {
         key: 'transport',
@@ -457,6 +480,7 @@ const DEFAULT_MODULES: ModuleDefinition[] = [
         description: 'Routes, vehicles, and transport management.',
         icon: 'bus',
         features: ['Routes', 'Vehicles', 'Driver assignments'],
+        permissions: ['Read', 'Create', 'Update', 'Delete'],
     },
     {
         key: 'roles',
@@ -464,6 +488,7 @@ const DEFAULT_MODULES: ModuleDefinition[] = [
         description: 'Roles, permissions, and access governance.',
         icon: 'shield',
         features: ['Role management', 'Permission trees', 'Audit trails'],
+        permissions: ['Read', 'Create', 'Update', 'Delete'],
     },
     {
         key: 'dashboard',
@@ -471,6 +496,7 @@ const DEFAULT_MODULES: ModuleDefinition[] = [
         description: 'Reporting dashboards and exports.',
         icon: 'bar-chart',
         features: ['Dashboards', 'Exports', 'Usage insights'],
+        permissions: ['Read', 'Export'],
     },
 ];
 

@@ -283,21 +283,44 @@
             <ui-button size="sm" variant="ghost" (click)="closeModuleDetail()">✕</ui-button>
         </div>
         <div class="drawer-body">
-            <h4>Included features</h4>
-            <ul>
-                @for (feature of selectedModule()?.features || []; track feature) {
-                <li>{{ feature }}</li>
-                }
-            </ul>
+            <div class="drawer-section">
+                <h4>Module summary</h4>
+                <p class="drawer-muted">{{ selectedModule()?.description }}</p>
+            </div>
+            <div class="drawer-section">
+                <h4>Included in</h4>
+                <div class="drawer-tags">
+                    @for (plan of includedPlans(selectedModule()?.key!); track plan) {
+                    <span class="tag tag--included">{{ plan }}</span>
+                    }
+                </div>
+            </div>
+            <div class="drawer-section">
+                <h4>What you get</h4>
+                <ul>
+                    @for (feature of selectedModule()?.features || []; track feature) {
+                    <li>{{ feature }}</li>
+                    }
+                </ul>
+            </div>
+            <div class="drawer-section">
+                <h4>Permissions</h4>
+                <div class="drawer-tags">
+                    @for (perm of selectedModule()?.permissions || []; track perm) {
+                    <span class="tag tag--not_configured">{{ perm }}</span>
+                    }
+                </div>
+            </div>
             <div class="drawer-note">
-                <h4>Why locked</h4>
-                <p>
-                    {{ statusNote(
-                        selectedModule()?.key!,
-                        selectedEdition()?.modules?.[selectedModule()?.key!]?.access || 'not_included',
-                        moduleStatus(selectedModule()?.key!, selectedEdition()?.modules?.[selectedModule()?.key!]?.access || 'not_included')
-                    ) || 'Included when this plan is active.' }}
-                </p>
+                <h4>Current tenant state</h4>
+                <p>{{ currentTenantModuleState(selectedModule()?.key!).label }}</p>
+                @if (currentTenantModuleState(selectedModule()?.key!).reason) {
+                <p class="drawer-muted">{{ currentTenantModuleState(selectedModule()?.key!).reason }}</p>
+                }
+            </div>
+            <div class="drawer-actions">
+                <ui-button variant="primary" size="sm">{{ primaryCtaLabel() }}</ui-button>
+                <ui-button variant="ghost" size="sm" (click)="openRequestModal()">Request change</ui-button>
             </div>
         </div>
     </div>
