@@ -881,6 +881,10 @@ tbody tr.is-selected {
   gap: 16px;
 }
 
+.overview-card-wide {
+  grid-column: 1 / -1;
+}
+
 .overview-column {
   display: grid;
   gap: 16px;

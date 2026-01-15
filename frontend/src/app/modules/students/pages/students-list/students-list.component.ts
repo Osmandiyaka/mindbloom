@@ -662,6 +662,39 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                   @switch (selectedDetailTab()) {
                   @case ('overview') {
                       <div class="overview-grid">
+                        <div class="overview-card overview-card-wide">
+                          <div class="overview-card-title">Student details</div>
+                          <div class="details-grid">
+                            <div class="details-row">
+                              <span class="detail-label">Date of birth</span>
+                              <span class="detail-value">{{ formatDate(panelStudent()?.dateOfBirth) }}</span>
+                            </div>
+                            <div class="details-row">
+                              <span class="detail-label">Gender</span>
+                              <span class="detail-value">{{ titleCase(panelStudent()?.gender || '') || '—' }}</span>
+                            </div>
+                            <div class="details-row details-row-full">
+                              <span class="detail-label">Address</span>
+                              <span class="detail-value">{{ formatAddress(panelStudent()) }}</span>
+                            </div>
+                            <div class="details-row details-row-full">
+                              <span class="detail-label">Student internal ID</span>
+                              <span class="detail-value detail-copy detail-truncate" [attr.title]="panelStudent()?.id || ''">
+                                {{ panelStudent()?.id || '—' }}
+                                <mb-button
+                                  size="sm"
+                                  variant="tertiary"
+                                  class="detail-copy-button"
+                                  aria-label="Copy student ID"
+                                  appTooltip="Copy"
+                                  [disabled]="!panelStudent()?.id"
+                                  (click)="copyToClipboard(panelStudent()?.id)">
+                                  ⧉
+                                </mb-button>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                         <div class="overview-column">
                           <div class="overview-card">
                             <div class="overview-card-title">Primary guardian</div>
@@ -703,39 +736,6 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                           </div>
                         </div>
                         <div class="overview-column">
-                          <div class="overview-card">
-                            <div class="overview-card-title">Student details</div>
-                            <div class="details-grid">
-                              <div class="details-row">
-                                <span class="detail-label">Date of birth</span>
-                                <span class="detail-value">{{ formatDate(panelStudent()?.dateOfBirth) }}</span>
-                              </div>
-                              <div class="details-row">
-                                <span class="detail-label">Gender</span>
-                                <span class="detail-value">{{ titleCase(panelStudent()?.gender || '') || '—' }}</span>
-                              </div>
-                              <div class="details-row details-row-full">
-                                <span class="detail-label">Address</span>
-                                <span class="detail-value">{{ formatAddress(panelStudent()) }}</span>
-                              </div>
-                              <div class="details-row details-row-full">
-                                <span class="detail-label">Student internal ID</span>
-                                <span class="detail-value detail-copy detail-truncate" [attr.title]="panelStudent()?.id || ''">
-                                  {{ panelStudent()?.id || '—' }}
-                                  <mb-button
-                                    size="sm"
-                                    variant="tertiary"
-                                    class="detail-copy-button"
-                                    aria-label="Copy student ID"
-                                    appTooltip="Copy"
-                                    [disabled]="!panelStudent()?.id"
-                                    (click)="copyToClipboard(panelStudent()?.id)">
-                                    ⧉
-                                  </mb-button>
-                                </span>
-                              </div>
-                            </div>
-                          </div>
                           @if (detailFlags(panelStudent()).length) {
                             <div class="overview-card overview-alerts">
                               <div class="overview-card-title">Alerts & missing info</div>
