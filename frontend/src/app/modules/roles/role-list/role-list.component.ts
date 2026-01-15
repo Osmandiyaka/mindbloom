@@ -133,6 +133,29 @@ export class RoleListComponent implements OnInit {
         return !name || !this.roleFormPermissions().length;
     });
     readonly internalRoleKey = computed(() => this.generateInternalRoleKey(this.roleFormName()));
+    readonly roleFormScopeSummary = computed(() => {
+        const scope = this.roleFormScopeType();
+        if (scope === 'workspace') {
+            return 'All schools';
+        }
+        if (scope === 'school') {
+            const count = this.roleFormSchoolIds().size;
+            return count ? `${count} selected` : 'Selected schools';
+        }
+        const orgCount = this.roleFormOrgUnitIds().size;
+        return orgCount ? `${orgCount} selected` : 'Selected organizational units';
+    });
+
+    readonly roleFormTemplateLabel = computed(() => {
+        const map: Record<string, string> = {
+            custom: 'None',
+            teacher: 'Teacher',
+            finance: 'Accountant',
+            principal: 'Principal',
+            admin: 'Tenant Admin',
+        };
+        return map[this.roleFormTemplate()] || 'None';
+    });
 
     deleteModalOpen = signal(false);
     deleteConfirmText = signal('');

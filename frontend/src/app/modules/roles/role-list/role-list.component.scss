@@ -785,6 +785,29 @@
     color: var(--mb-color-danger);
 }
 
+.role-form__summary {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: rgba(248, 250, 252, 0.9);
+    font-size: 12px;
+    color: var(--mb-color-text-muted);
+}
+
+.role-form__summary-label {
+    font-weight: 600;
+    color: var(--mb-color-text);
+}
+
+.role-form__summary-divider {
+    color: var(--mb-color-text-subtle);
+}
+
 .role-form__confirm {
     font-size: 13px;
     color: var(--mb-color-text-muted);

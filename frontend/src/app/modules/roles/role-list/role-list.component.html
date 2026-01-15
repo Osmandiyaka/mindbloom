@@ -371,8 +371,16 @@
                 </section>
             </div>
 
-            <div class="role-form__error" *ngIf="roleFormError()">{{ roleFormError() }}</div>
+        <div class="role-form__error" *ngIf="roleFormError()">{{ roleFormError() }}</div>
+        <div class="role-form__summary">
+            <span class="role-form__summary-label">Summary:</span>
+            <span>Scope: {{ roleFormScopeSummary() }}</span>
+            <span class="role-form__summary-divider">·</span>
+            <span>Permissions: {{ roleFormPermissions().length }}</span>
+            <span class="role-form__summary-divider">·</span>
+            <span>Template: {{ roleFormTemplateLabel() }}</span>
         </div>
+    </div>
 
         <div mbModalFooter class="role-form__footer">
             <div class="role-form__status">
