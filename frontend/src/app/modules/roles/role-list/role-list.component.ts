@@ -126,11 +126,13 @@ export class RoleListComponent implements OnInit {
     roleFormDirty = signal(false);
     roleFormTemplate = signal('custom');
     roleFormDiscardOpen = signal(false);
+    roleFormShowAdvanced = signal(false);
 
     readonly roleFormInvalid = computed(() => {
         const name = this.roleFormName().trim();
         return !name || !this.roleFormPermissions().length;
     });
+    readonly internalRoleKey = computed(() => this.generateInternalRoleKey(this.roleFormName()));
 
     deleteModalOpen = signal(false);
     deleteConfirmText = signal('');
@@ -406,6 +408,7 @@ export class RoleListComponent implements OnInit {
         this.roleFormTemplate.set('custom');
         this.roleFormError.set('');
         this.roleFormDirty.set(false);
+        this.roleFormShowAdvanced.set(false);
         this.roleFormOpen.set(true);
     }
 
@@ -466,6 +469,7 @@ export class RoleListComponent implements OnInit {
         this.roleFormTemplate.set('custom');
         this.roleFormError.set('');
         this.roleFormDirty.set(false);
+        this.roleFormShowAdvanced.set(false);
         this.roleFormOpen.set(true);
     }
 
@@ -483,6 +487,7 @@ export class RoleListComponent implements OnInit {
         this.roleFormTemplate.set('custom');
         this.roleFormError.set('');
         this.roleFormDirty.set(true);
+        this.roleFormShowAdvanced.set(false);
         this.roleFormOpen.set(true);
     }
 
@@ -498,6 +503,7 @@ export class RoleListComponent implements OnInit {
         this.roleFormOpen.set(false);
         this.roleFormError.set('');
         this.roleFormDiscardOpen.set(false);
+        this.roleFormShowAdvanced.set(false);
     }
 
     discardRoleFormChanges(): void {
@@ -708,6 +714,17 @@ export class RoleListComponent implements OnInit {
 
     roleStatusLabel(role: Role): string {
         return (role.status || 'active') === 'active' ? 'Active' : 'Inactive';
+    }
+
+    private generateInternalRoleKey(name: string): string {
+        const normalized = name
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '_')
+            .replace(/^_+|_+$/g, '')
+            .replace(/_{2,}/g, '_');
+        const base = normalized || 'custom_role';
+        return `${base}_1`;
     }
 
     private collectPermissionsByIds(tree: Permission[], ids: string[]): Permission[] {

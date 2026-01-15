@@ -264,10 +264,27 @@
             <div class="role-form__layout">
                 <aside class="role-form__sidebar">
                     <div class="role-form__section">
-                        <div class="role-form__title">Identity</div>
-                        <mb-form-field label="Role name" [controlId]="'role-name'">
+                        <div class="role-form__step-title"><span class="role-form__step-index">1</span> Identity</div>
+                        <mb-form-field
+                            label="Role name"
+                            [controlId]="'role-name'"
+                            hint="Choose a clear name that reflects responsibility, not a person."
+                        >
                             <mb-input id="role-name" [value]="roleFormName()"
                                 (valueChange)="roleFormName.set($event); markRoleFormDirty()"></mb-input>
+                        </mb-form-field>
+                        <button type="button" class="role-form__advanced-toggle"
+                            (click)="roleFormShowAdvanced.set(!roleFormShowAdvanced())">
+                            {{ roleFormShowAdvanced() ? 'Hide advanced' : 'Show advanced' }}
+                        </button>
+                        <mb-form-field
+                            class="role-form__internal-key"
+                            *ngIf="roleFormShowAdvanced()"
+                            label="Internal key"
+                            [controlId]="'role-internal-key'"
+                            hint="Optional"
+                        >
+                            <mb-input id="role-internal-key" [value]="internalRoleKey()" [readonly]="true"></mb-input>
                         </mb-form-field>
                         <mb-form-field label="Description" [controlId]="'role-description'">
                             <mb-textarea id="role-description" [value]="roleFormDescription()"
@@ -276,12 +293,16 @@
                     </div>
 
                     <div class="role-form__section">
-                        <div class="role-form__title">Scope</div>
+                        <div class="role-form__step-title"><span class="role-form__step-index">2</span> Scope</div>
                         <mb-select [value]="roleFormScopeType()" [options]="[
                               { label: 'Workspace-wide', value: 'workspace' },
                               { label: 'Selected schools', value: 'school' },
                               { label: 'Selected organizational units', value: 'org' }
                             ]" (valueChange)="handleScopeTypeChange($event)"></mb-select>
+                        <div class="role-form__helper">Scope controls where this role can be assigned.</div>
+                        <div class="role-form__scope-note" *ngIf="roleFormScopeType() === 'workspace'">
+                            This role applies to all schools in the workspace.
+                        </div>
                         <div class="role-form__multiselect" *ngIf="roleFormScopeType() !== 'workspace'">
                             <div class="role-form__multiselect-title">
                                 {{ roleFormScopeType() === 'school' ? 'Select schools' : 'Select organizational units' }}
@@ -316,7 +337,7 @@
                     </div>
 
                     <div class="role-form__section">
-                        <div class="role-form__title">Template</div>
+                        <div class="role-form__step-title"><span class="role-form__step-index">3</span> Starting point</div>
                         <mb-select [value]="roleFormTemplate()" [options]="[
                               { label: 'None', value: 'custom' },
                               { label: 'Teacher', value: 'teacher' },
@@ -332,7 +353,7 @@
 
                 <section class="role-form__main">
                     <div class="role-form__section">
-                        <div class="role-form__title">Permissions</div>
+                        <div class="role-form__step-title"><span class="role-form__step-index">4</span> Permissions</div>
                         <div class="role-form__row">
                             <mb-select [value]="roleFormStatus()" [options]="[
                                   { label: 'Active', value: 'active' },
