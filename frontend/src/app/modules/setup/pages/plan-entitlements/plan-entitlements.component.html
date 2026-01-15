@@ -245,7 +245,7 @@
                     <div class="tag tag--access" [class]="'tag--' + row.access">{{ accessLabel(row.access) }}</div>
                     <div class="status-cell">
                         <span class="tag tag--status" [class]="'tag--' + row.status">{{ statusLabel(row.status) }}</span>
-                        @if (row.lockReason) {
+                        @if (row.lockReasonType) {
                         <button type="button" class="info-icon" (click)="toggleLockInfo(row.key, $event)" aria-label="Why locked?">
                             <svg viewBox="0 0 16 16" aria-hidden="true">
                                 <circle cx="8" cy="8" r="7"></circle>
@@ -254,11 +254,12 @@
                             </svg>
                         </button>
                         }
-                        @if (activeLockInfo() === row.key && row.lockReason) {
-                        <div class="lock-popover" role="tooltip">
-                            {{ row.lockReason }}
-                        </div>
-                        }
+                        <app-locked-popover
+                            [open]="activeLockInfo() === row.key && !!row.lockReasonType"
+                            [reason]="row.lockReasonType || 'NOT_IN_PLAN'"
+                            [context]="row.lockContext"
+                            (action)="handleLockAction($event, row.key)">
+                        </app-locked-popover>
                     </div>
                     <div class="setup-cell">
                         @if (row.needsSetup) {

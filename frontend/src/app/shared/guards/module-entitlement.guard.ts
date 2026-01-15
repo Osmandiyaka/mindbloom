@@ -65,7 +65,8 @@ export const moduleEntitlementGuard: CanMatchFn = (
 
             const queryParams = {
                 module: moduleKey,
-                returnUrl: attemptedPath
+                returnUrl: attemptedPath,
+                reason: 'NOT_IN_PLAN'
             };
 
             console.log('[ModuleEntitlement] Access denied to module:', moduleKey, 'Attempted path:', attemptedPath);
@@ -119,7 +120,8 @@ export const moduleEntitlementActivateGuard: CanActivateFn = (
 
             const queryParams = {
                 module: moduleKey,
-                returnUrl: state.url
+                returnUrl: state.url,
+                reason: 'NOT_IN_PLAN'
             };
 
             console.log('[ModuleEntitlement] Access denied to module:', moduleKey, 'URL:', state.url);

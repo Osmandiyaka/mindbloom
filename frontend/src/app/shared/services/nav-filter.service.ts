@@ -13,6 +13,7 @@ import { Injectable, inject, computed, Signal } from '@angular/core';
 import { EditionService } from './entitlements.service';
 import { AuthorizationService } from '../security/authorization.service';
 import { ModuleKey } from '../types/module-keys';
+import { LockReason } from '../types/entitlement-lock';
 
 export interface NavItem {
     label: string;
@@ -22,6 +23,9 @@ export interface NavItem {
     permission?: string;
     moduleKey?: string;
     rolesAllowed?: string[];
+    locked?: boolean;
+    lockReason?: LockReason;
+    requiredPlan?: string;
 }
 
 export interface NavSection {
@@ -49,8 +53,9 @@ export class NavFilterService {
                 const visibleItems: NavItem[] = [];
 
                 for (const item of section.items) {
-                    if (this.isItemVisible(item)) {
-                        visibleItems.push(item);
+                    const decorated = this.decorateItem(item);
+                    if (decorated) {
+                        visibleItems.push(decorated);
                     }
                 }
 
@@ -72,21 +77,28 @@ export class NavFilterService {
      * @param item Navigation item to check
      * @returns true if item should be visible
      */
-    private isItemVisible(item: NavItem): boolean {
-        if (item.moduleKey && !this.entitlements.isEnabled(item.moduleKey as ModuleKey)) {
-            return false;
+    private decorateItem(item: NavItem): NavItem | null {
+        const moduleEnabled = !item.moduleKey || this.entitlements.isEnabled(item.moduleKey as ModuleKey);
+        const permissionOk = !item.permission || this.authorization.can(item.permission);
+
+        if (!moduleEnabled) {
+            return {
+                ...item,
+                locked: true,
+                lockReason: 'NOT_IN_PLAN',
+                requiredPlan: this.requiredPlanForModule(item.moduleKey as ModuleKey),
+            };
         }
 
-        // Check permission
-        if (item.permission && !this.authorization.can(item.permission)) {
-            return false;
+        if (!permissionOk) {
+            return {
+                ...item,
+                locked: true,
+                lockReason: 'INSUFFICIENT_ROLE_PERMISSIONS',
+            };
         }
 
-        if (item.rolesAllowed && item.rolesAllowed.length > 0) {
-
-        }
-
-        return true;
+        return item;
     }
 
     /**
@@ -99,8 +111,9 @@ export class NavFilterService {
             const visibleItems: NavItem[] = [];
 
             for (const item of section.items) {
-                if (this.isItemVisible(item)) {
-                    visibleItems.push(item);
+                const decorated = this.decorateItem(item);
+                if (decorated) {
+                    visibleItems.push(decorated);
                 }
             }
 
@@ -131,5 +144,20 @@ export class NavFilterService {
             return true;
         }
         return this.authorization.can(item.permission);
+    }
+
+    private requiredPlanForModule(moduleKey: ModuleKey): string | undefined {
+        const premiumModules = new Set<ModuleKey>([
+            'fees',
+            'accounting',
+            'library',
+            'transport',
+            'hr',
+            'payroll',
+        ]);
+        if (premiumModules.has(moduleKey)) {
+            return 'Premium';
+        }
+        return 'Professional';
     }
 }

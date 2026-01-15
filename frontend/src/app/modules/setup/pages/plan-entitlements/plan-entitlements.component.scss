@@ -650,20 +650,6 @@
     stroke-linejoin: round;
 }
 
-.lock-popover {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    z-index: 5;
-    min-width: 200px;
-    padding: 8px 10px;
-    border-radius: 8px;
-    border: 1px solid rgba(148, 163, 184, 0.25);
-    background: white;
-    color: var(--color-text-secondary);
-    font-size: 11px;
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
-}
 
 .row-action {
     justify-self: end;

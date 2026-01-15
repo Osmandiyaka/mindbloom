@@ -11,22 +11,7 @@ import { SchoolSettingsService } from '../../../core/services/school-settings.se
 import { CanDirective } from '../../security/can.directive';
 import { MbLogoComponent } from '@mindbloom/ui';
 import { PERMISSIONS } from '../../../core/rbac/permission.constants';
-import { NavFilterService } from '../../services/nav-filter.service';
-
-interface NavItem {
-  label: string;
-  path: string;
-  icon: string;
-  badge?: string;
-  permission?: string;
-  moduleKey?: string;  // Module entitlement check
-  rolesAllowed?: string[];  // RBAC role check
-}
-
-interface NavSection {
-  title: string;
-  items: NavItem[];
-}
+import { NavFilterService, NavItem, NavSection } from '../../services/nav-filter.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -83,15 +68,23 @@ interface NavSection {
             <ng-container *ngFor="let item of section.items">
               <a
                 class="nav-link"
-                [routerLink]="item.path"
+                [class.is-locked]="item.locked"
+                [routerLink]="item.locked ? null : item.path"
                 routerLinkActive="active"
                 #rla="routerLinkActive"
                 [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
                 [attr.aria-current]="rla.isActive ? 'page' : null"
-                (click)="onNavigate()">
+                [attr.aria-disabled]="item.locked ? 'true' : null"
+                (click)="onNavItemClick($event, item)">
                 <span class="nav-link-icon" [innerHTML]="icon(item.icon)"></span>
                 <span class="nav-link-text" *ngIf="!collapsed">{{ item.label }}</span>
                 <span class="nav-meta" *ngIf="!collapsed"></span>
+                <span class="nav-lock" *ngIf="item.locked && !collapsed" [attr.title]="lockTooltip(item)">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                </span>
                 <span class="nav-badge" *ngIf="item.badge && !collapsed">{{ item.badge }}</span>
               </a>
             </ng-container>
@@ -291,6 +284,16 @@ interface NavSection {
       color: var(--text-primary);
     }
 
+    .nav-link.is-locked {
+      color: var(--text-muted);
+      cursor: default;
+    }
+
+    .nav-link.is-locked:hover {
+      background: transparent;
+      color: var(--text-muted);
+    }
+
     .nav-link:focus-visible {
       outline: 2px solid var(--accent-primary);
       outline-offset: -2px;
@@ -328,6 +331,25 @@ interface NavSection {
     .nav-link-text { font-weight: 400; letter-spacing: 0.01em; font-size: 14px; line-height: 1.15; }
 
     .nav-meta { margin-left: auto; min-width: 16px; height: 18px; display: inline-flex; align-items: center; justify-content: flex-end; }
+
+    .nav-lock {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+    }
+
+    .nav-lock svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.6px;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
 
     .nav-badge {
       margin-left: auto;
@@ -678,6 +700,34 @@ export class SidebarComponent implements OnInit {
 
   onNavigate(): void {
     this.navigate.emit();
+  }
+
+  onNavItemClick(event: Event, item: NavItem): void {
+    if (item.locked) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.onNavigate();
+      this.router.navigate(['/module-not-enabled'], {
+        queryParams: {
+          module: item.moduleKey,
+          returnUrl: item.path,
+          reason: item.lockReason || 'NOT_IN_PLAN',
+          requiredPlan: item.requiredPlan
+        }
+      });
+      return;
+    }
+    this.onNavigate();
+  }
+
+  lockTooltip(item: NavItem): string {
+    if (item.lockReason === 'INSUFFICIENT_ROLE_PERMISSIONS') {
+      return 'Access restricted';
+    }
+    if (item.lockReason === 'NOT_IN_PLAN') {
+      return item.requiredPlan ? `Requires ${item.requiredPlan}+` : 'Requires a higher plan';
+    }
+    return 'Locked';
   }
 
   get isHostSidebar(): boolean {

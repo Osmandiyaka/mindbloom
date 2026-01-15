@@ -9,6 +9,8 @@ import { MODULE_NAMES, ModuleKey } from '../../../../shared/types/module-keys';
 import { UiButtonComponent } from '../../../../shared/ui/buttons/ui-button.component';
 import { UiCheckboxComponent } from '../../../../shared/ui/forms/ui-checkbox.component';
 import { UiInputComponent } from '../../../../shared/ui/forms/ui-input.component';
+import { LockedPopoverComponent } from '../../../../shared/components/entitlements/locked-popover/locked-popover.component';
+import { LockContext, LockCtaType, LockReason, getLockMessage } from '../../../../shared/types/entitlement-lock';
 
 type AccessType = 'included' | 'not_included' | 'add_on';
 type StatusType = 'enabled' | 'locked_plan' | 'disabled_override' | 'not_configured';
@@ -75,7 +77,14 @@ interface SummaryCard {
 @Component({
     selector: 'app-plan-entitlements',
     standalone: true,
-    imports: [CommonModule, FormsModule, UiButtonComponent, UiCheckboxComponent, UiInputComponent],
+    imports: [
+        CommonModule,
+        FormsModule,
+        UiButtonComponent,
+        UiCheckboxComponent,
+        UiInputComponent,
+        LockedPopoverComponent,
+    ],
     templateUrl: './plan-entitlements.component.html',
     styleUrls: ['./plan-entitlements.component.scss'],
 })
@@ -130,6 +139,9 @@ export class PlanEntitlementsComponent implements OnInit {
             const config = edition.modules[module.key] || { access: 'not_included' as AccessType };
             const currentConfig = currentModules[module.key] || { access: 'not_included' as AccessType };
             const status = this.moduleStatus(module.key, currentConfig.access || 'not_included');
+            const lockReasonType = this.lockReasonType(module.key, config.access, status);
+            const lockContext = this.lockContext(module.key, config.access, status);
+            const lockMessage = lockReasonType ? getLockMessage(lockReasonType, lockContext) : null;
             const change = this.compareMode() && !this.isViewingCurrent()
                 ? this.compareAccess(config.access, currentConfig.access)
                 : null;
@@ -137,12 +149,13 @@ export class PlanEntitlementsComponent implements OnInit {
                 ...module,
                 access: config.access,
                 status,
-                notes: config.notes || this.statusNote(module.key, config.access, status),
+                notes: config.notes || lockMessage?.body || '',
                 change,
                 isAdded: change === '+ Added',
                 isUnchanged: change === 'No change',
                 needsSetup: status === 'not_configured',
-                lockReason: this.lockReason(module.key, config.access, status),
+                lockReasonType,
+                lockContext,
             };
         });
     });
@@ -412,24 +425,7 @@ export class PlanEntitlementsComponent implements OnInit {
         return 'locked_plan';
     }
 
-    statusNote(moduleKey: ModuleKey, access: AccessType, status: StatusType): string | undefined {
-        if (status === 'disabled_override') {
-            return 'Disabled by admin override';
-        }
-        if (status === 'not_configured') {
-            return 'Setup required';
-        }
-        if (!this.isViewingCurrent() && access === 'included') {
-            const required = this.minimumPlanForModule(moduleKey);
-            return required ? `Requires ${required} or higher` : 'Requires higher plan';
-        }
-        if (access === 'add_on') {
-            return 'Add-on available';
-        }
-        if (access === 'not_included') {
-            const required = this.minimumPlanForModule(moduleKey);
-            return required ? `Requires ${required} or higher` : 'Requires higher plan';
-        }
+    statusNote(_moduleKey: ModuleKey, _access: AccessType, _status: StatusType): string | undefined {
         return undefined;
     }
 
@@ -458,28 +454,29 @@ export class PlanEntitlementsComponent implements OnInit {
         return requires.has(moduleKey);
     }
 
-    lockReason(moduleKey: ModuleKey, access: AccessType, status: StatusType): string | null {
+    lockReasonType(moduleKey: ModuleKey, access: AccessType, status: StatusType): LockReason | null {
         if (status === 'disabled_override') {
-            return 'This module is disabled by an admin override.';
+            return 'DISABLED_BY_OVERRIDE';
         }
         if (status === 'not_configured') {
-            return 'Complete setup to enable this module for the tenant.';
-        }
-        if (status === 'locked_plan' && access === 'included' && !this.isViewingCurrent()) {
-            const required = this.minimumPlanForModule(moduleKey);
-            return required ? `Requires ${required} or higher.` : 'Requires a higher plan.';
+            return 'PREREQUISITE_NOT_CONFIGURED';
         }
         if (access === 'add_on') {
-            return 'This module is available as an add-on. Contact sales to enable.';
+            return 'ADDON_REQUIRED';
         }
-        if (access === 'not_included') {
-            const required = this.minimumPlanForModule(moduleKey);
-            if (required) {
-                return `This module requires ${required} or higher.`;
-            }
-            return 'This module is not included in the selected edition.';
+        if (access === 'not_included' || status === 'locked_plan') {
+            return 'NOT_IN_PLAN';
         }
         return null;
+    }
+
+    lockContext(moduleKey: ModuleKey, access: AccessType, status: StatusType): LockContext {
+        const reason = this.lockReasonType(moduleKey, access, status);
+        return {
+            requiredPlan: reason === 'NOT_IN_PLAN' ? this.minimumPlanForModule(moduleKey) || undefined : undefined,
+            moduleName: MODULE_NAMES[moduleKey] || moduleKey,
+            isBillingAdmin: true,
+        };
     }
 
     minimumPlanForModule(moduleKey: ModuleKey): string | null {
@@ -582,9 +579,12 @@ export class PlanEntitlementsComponent implements OnInit {
         const current = this.currentEdition();
         const access = current?.modules?.[moduleKey]?.access || 'not_included';
         const status = this.moduleStatus(moduleKey, access);
+        const reasonType = this.lockReasonType(moduleKey, access, status);
+        const context = this.lockContext(moduleKey, access, status);
+        const message = reasonType ? getLockMessage(reasonType, context) : null;
         return {
             label: this.statusLabel(status),
-            reason: this.lockReason(moduleKey, access, status),
+            reason: message?.body || null,
         };
     }
 
@@ -650,6 +650,27 @@ export class PlanEntitlementsComponent implements OnInit {
     startSetup(moduleKey: ModuleKey, event: Event): void {
         event.stopPropagation();
         this.openModuleDetail(moduleKey);
+    }
+
+    handleLockAction(action: LockCtaType, moduleKey?: ModuleKey): void {
+        switch (action) {
+            case 'view_overrides':
+                this.openOverridesDrawer();
+                break;
+            case 'request_change':
+                this.openRequestModal();
+                break;
+            case 'view_plans':
+                this.openCompareModal();
+                break;
+            case 'start_setup':
+                if (moduleKey) {
+                    this.openModuleDetail(moduleKey);
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     titleCase(value: string): string {
