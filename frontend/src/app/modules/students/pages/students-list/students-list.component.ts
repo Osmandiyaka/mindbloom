@@ -646,76 +646,93 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                   </div>
                 } @else {
                   @switch (selectedDetailTab()) {
-                    @case ('overview') {
-                      <div class="detail-panel">
-                        <div class="detail-section">
-                          <h4>Student information</h4>
-                          <div class="detail-grid">
-                            <div class="detail-item">
-                              <span class="detail-label">Legal name</span>
-                              <span class="detail-value">{{ panelStudent()?.fullName || '—' }}</span>
-                            </div>
-                            <div class="detail-item">
-                              <span class="detail-label">Date of birth</span>
-                              <span class="detail-value">{{ formatDate(panelStudent()?.dateOfBirth) }}</span>
-                            </div>
-                            <div class="detail-item">
-                              <span class="detail-label">Gender</span>
-                              <span class="detail-value">{{ titleCase(panelStudent()?.gender || '') || '—' }}</span>
-                            </div>
-                            <div class="detail-item">
-                              <span class="detail-label">Student ID</span>
-                              <span class="detail-value">{{ panelStudent()?.id || '—' }}</span>
-                            </div>
-                            <div class="detail-item">
-                              <span class="detail-label">Admission no.</span>
-                              <span class="detail-value">{{ panelStudent()?.enrollment?.admissionNumber || '—' }}</span>
-                            </div>
-                            <div class="detail-item detail-item-full">
-                              <span class="detail-label">Address</span>
-                              <span class="detail-value">{{ formatAddress(panelStudent()) }}</span>
-                            </div>
-                          </div>
-                        </div>
-                      <div class="detail-section">
-                        <div class="detail-section-header">
-                          <h4>Enrollment summary</h4>
-                        </div>
-                          <div class="detail-grid">
-                            <div class="detail-item">
-                              <span class="detail-label">Academic year</span>
-                              <span class="detail-value">{{ panelStudent()?.enrollment?.academicYear || '—' }}</span>
-                            </div>
-                            <div class="detail-item">
-                              <span class="detail-label">Class / Section</span>
-                              <span class="detail-value">
-                                {{ panelStudent()?.enrollment?.class || '—' }}
-                                {{ panelStudent()?.enrollment?.section ? ' · ' + panelStudent()?.enrollment?.section : '' }}
-                              </span>
-                            </div>
-                            <div class="detail-item">
-                              <span class="detail-label">Enrollment date</span>
-                              <span class="detail-value">{{ formatDate(panelStudent()?.enrollment?.admissionDate) }}</span>
-                            </div>
-                            <div class="detail-item">
-                              <span class="detail-label">Status</span>
-                              <span class="detail-value">{{ titleCase(panelStudent()?.status || '') || '—' }}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="detail-section" *ngIf="detailFlags(panelStudent()).length">
-                          <h4>Resolve flags</h4>
-                          <div class="detail-flags">
-                            <div class="detail-flag" *ngFor="let flag of detailFlags(panelStudent())">
-                              <div class="detail-flag-text">
-                                <span class="detail-flag-title">{{ flag.label }}</span>
-                                <span class="detail-flag-note">{{ flag.note }}</span>
+                  @case ('overview') {
+                      <div class="overview-grid">
+                        <div class="overview-column">
+                          <div class="overview-card">
+                            <div class="overview-card-title">Enrollment summary</div>
+                            <div class="detail-grid">
+                              <div class="detail-item">
+                                <span class="detail-label">Academic year</span>
+                                <span class="detail-value">{{ panelStudent()?.enrollment?.academicYear || '—' }}</span>
                               </div>
-                              <mb-button size="sm" variant="tertiary" (click)="selectDetailTab(flag.tab)">
-                                {{ flag.action }}
-                              </mb-button>
+                              <div class="detail-item">
+                                <span class="detail-label">Class / Section</span>
+                                <span class="detail-value">
+                                  {{ panelStudent()?.enrollment?.class || '—' }}
+                                  {{ panelStudent()?.enrollment?.section ? ' · ' + panelStudent()?.enrollment?.section : '' }}
+                                </span>
+                              </div>
+                              <div class="detail-item">
+                                <span class="detail-label">Enrollment date</span>
+                                <span class="detail-value">{{ formatDate(panelStudent()?.enrollment?.admissionDate) }}</span>
+                              </div>
+                              <div class="detail-item">
+                                <span class="detail-label">Status</span>
+                                <span class="detail-value">{{ titleCase(panelStudent()?.status || '') || '—' }}</span>
+                              </div>
                             </div>
                           </div>
+                          <div class="overview-card">
+                            <div class="overview-card-title">Primary guardian</div>
+                            <div class="detail-grid">
+                              <div class="detail-item">
+                                <span class="detail-label">Name</span>
+                                <span class="detail-value">{{ primaryGuardianName(panelStudent()) || '—' }}</span>
+                              </div>
+                              <div class="detail-item">
+                                <span class="detail-label">Phone</span>
+                                <span class="detail-value">{{ primaryGuardianPhone(panelStudent()) || '—' }}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="overview-column">
+                          <div class="overview-card">
+                            <div class="overview-card-title">Quick info</div>
+                            <div class="detail-grid">
+                              <div class="detail-item">
+                                <span class="detail-label">Legal name</span>
+                                <span class="detail-value">{{ panelStudent()?.fullName || '—' }}</span>
+                              </div>
+                              <div class="detail-item">
+                                <span class="detail-label">Date of birth</span>
+                                <span class="detail-value">{{ formatDate(panelStudent()?.dateOfBirth) }}</span>
+                              </div>
+                              <div class="detail-item">
+                                <span class="detail-label">Gender</span>
+                                <span class="detail-value">{{ titleCase(panelStudent()?.gender || '') || '—' }}</span>
+                              </div>
+                              <div class="detail-item">
+                                <span class="detail-label">Student ID</span>
+                                <span class="detail-value">{{ panelStudent()?.id || '—' }}</span>
+                              </div>
+                              <div class="detail-item">
+                                <span class="detail-label">Admission no.</span>
+                                <span class="detail-value">{{ panelStudent()?.enrollment?.admissionNumber || '—' }}</span>
+                              </div>
+                              <div class="detail-item detail-item-full">
+                                <span class="detail-label">Address</span>
+                                <span class="detail-value">{{ formatAddress(panelStudent()) }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          @if (detailFlags(panelStudent()).length) {
+                            <div class="overview-card overview-alerts">
+                              <div class="overview-card-title">Alerts & missing info</div>
+                              <div class="detail-flags">
+                                <div class="detail-flag" *ngFor="let flag of detailFlags(panelStudent())">
+                                  <div class="detail-flag-text">
+                                    <span class="detail-flag-title">{{ flag.label }}</span>
+                                    <span class="detail-flag-note">{{ flag.note }}</span>
+                                  </div>
+                                  <mb-button size="sm" variant="tertiary" (click)="selectDetailTab(flag.tab)">
+                                    {{ flag.action }}
+                                  </mb-button>
+                                </div>
+                              </div>
+                            </div>
+                          }
                         </div>
                       </div>
                     }

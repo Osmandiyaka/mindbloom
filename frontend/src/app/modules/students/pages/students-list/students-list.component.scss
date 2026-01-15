@@ -797,6 +797,37 @@ tbody tr.is-selected {
   gap: 12px;
 }
 
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.overview-column {
+  display: grid;
+  gap: 16px;
+}
+
+.overview-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #eef2f3;
+  display: grid;
+  gap: 12px;
+}
+
+.overview-card-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+}
+
+.overview-alerts .detail-flag {
+  background: rgba(148, 163, 184, 0.06);
+}
+
 .detail-item {
   display: grid;
   gap: 4px;
@@ -997,6 +1028,10 @@ tbody tr.is-selected {
 
 @media (max-width: 900px) {
   .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-grid {
     grid-template-columns: 1fr;
   }
 }
