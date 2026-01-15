@@ -526,8 +526,18 @@ export class RoleListComponent implements OnInit {
 
 
     applyPermissionTemplate(templateId: string): void {
+        const current = this.roleFormTemplate();
+        const hasSelection = this.roleFormPermissions().length > 0;
+        if (templateId !== current && hasSelection) {
+            const confirmed = confirm('Changing the template will reset selected permissions.');
+            if (!confirmed) {
+                return;
+            }
+        }
         this.roleFormTemplate.set(templateId);
         if (templateId === 'custom') {
+            this.roleFormPermissions.set([]);
+            this.roleFormDirty.set(true);
             return;
         }
         const ids = new Set<string>();

@@ -338,15 +338,17 @@
 
                     <div class="role-form__section">
                         <div class="role-form__step-title"><span class="role-form__step-index">3</span> Starting point</div>
-                        <mb-select [value]="roleFormTemplate()" [options]="[
-                              { label: 'None', value: 'custom' },
-                              { label: 'Teacher', value: 'teacher' },
-                              { label: 'Accountant', value: 'finance' },
-                              { label: 'Principal', value: 'principal' },
-                              { label: 'Tenant Admin', value: 'admin' }
-                            ]" (valueChange)="applyPermissionTemplate($event)"></mb-select>
-                        <div class="role-form__helper" *ngIf="roleFormTemplate() !== 'custom'">
-                            Permissions will be prefilled based on the selected template.
+                        <mb-form-field label="Start from template (optional)" [controlId]="'role-template'">
+                            <mb-select id="role-template" [value]="roleFormTemplate()" [options]="[
+                                  { label: 'None', value: 'custom' },
+                                  { label: 'Teacher', value: 'teacher' },
+                                  { label: 'Accountant', value: 'finance' },
+                                  { label: 'Principal', value: 'principal' },
+                                  { label: 'Tenant Admin', value: 'admin' }
+                                ]" (valueChange)="applyPermissionTemplate($event)"></mb-select>
+                        </mb-form-field>
+                        <div class="role-form__helper">
+                            Templates preselect permissions. You can fully customize them below.
                         </div>
                     </div>
                 </aside>
