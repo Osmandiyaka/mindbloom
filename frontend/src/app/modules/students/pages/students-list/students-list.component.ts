@@ -6,10 +6,10 @@ import { StudentService } from '../../../../core/services/student.service';
 import { Student, StudentStatus } from '../../../../core/models/student.model';
 import { StudentFormComponent } from '../../../setup/pages/students/student-form/student-form.component';
 import { CanDirective } from '../../../../shared/security/can.directive';
+import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
 import {
   MbButtonComponent,
   MbDrawerComponent,
-  MbInputComponent,
   MbModalComponent,
   MbModalFooterDirective,
   MbSelectComponent,
@@ -36,7 +36,6 @@ type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
     RouterModule,
     FormsModule,
     MbButtonComponent,
-    MbInputComponent,
     MbSelectComponent,
     MbSplitButtonComponent,
     MbTableComponent,
@@ -45,6 +44,7 @@ type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
     MbModalFooterDirective,
     MbDrawerComponent,
     StudentFormComponent,
+    SearchInputComponent,
     CanDirective,
   ],
   styleUrls: ['./students-list.component.scss'],
@@ -96,11 +96,10 @@ type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
       </header>
 
       <div class="hub-controls">
-        <mb-input
-          [value]="searchTerm()"
+        <app-search-input
           placeholder="Search by name, student ID, admission no., guardian phone/email"
-          (valueChange)="updateSearch($event)">
-        </mb-input>
+          (search)="updateSearch($event)">
+        </app-search-input>
         <div class="scope-filters">
           <mb-select
             [options]="gradeOptions"
