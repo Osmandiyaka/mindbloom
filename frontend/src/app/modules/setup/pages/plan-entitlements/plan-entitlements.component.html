@@ -1,0 +1,344 @@
+<div class="plan-entitlements">
+    <div class="page-header">
+        <div>
+            <h1>Plan & Entitlements</h1>
+            <p class="subtitle">View what your current plan includes and compare available editions.</p>
+        </div>
+    </div>
+
+    @if (loading()) {
+    <div class="state-block">
+        <div class="spinner"></div>
+        <p>Loading plans...</p>
+    </div>
+    } @else if (error()) {
+    <div class="state-block error">
+        <p>{{ error() }}</p>
+        <ui-button size="sm" variant="ghost" (click)="loading.set(true); error.set(null); reload()">Retry</ui-button>
+    </div>
+    } @else {
+    <div class="plan-layout">
+        <aside class="plan-list">
+            <div class="plan-list__header">
+                <div>
+                    <h2>Plan</h2>
+                    <p>Choose an edition to view included modules and limits.</p>
+                </div>
+                <span class="pill">Current: {{ currentPlanName() }}</span>
+            </div>
+            <div class="plan-list__items">
+                @for (edition of editions(); track edition.id) {
+                <div
+                    class="plan-row"
+                    role="button"
+                    tabindex="0"
+                    [class.is-active]="isSelected(edition)"
+                    (click)="selectEdition(edition)"
+                    (keydown.enter)="selectEdition(edition)"
+                    (keydown.space)="$event.preventDefault(); selectEdition(edition)">
+                    <div class="plan-row__main">
+                        <div class="plan-row__title">
+                            <span>{{ edition.name }}</span>
+                            @if (edition.recommended) {
+                            <span class="pill pill--accent">Recommended</span>
+                            }
+                        </div>
+                        <p>{{ edition.tagline }}</p>
+                    </div>
+                    <div class="plan-row__meta">
+                        <span class="price">{{ edition.priceLabel }}</span>
+                        @if (edition.requiresSales) {
+                        <span class="lock-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </span>
+                        }
+                        <span class="status-pill" [class]="'status-' + editionStatus(edition)">
+                            {{ editionStatus(edition) === 'current' ? 'Current' : (editionStatus(edition) === 'requires_sales' ? 'Requires sales' : 'Available') }}
+                        </span>
+                    </div>
+                </div>
+                }
+            </div>
+        </aside>
+
+        <div class="plan-detail">
+            @if (!selectedEdition()) {
+            <div class="state-block">
+                <p>Select an edition to view details.</p>
+            </div>
+            } @else {
+            <div class="plan-summary">
+                <div>
+                    <div class="plan-summary__title">
+                        <h2>{{ selectedEdition()?.name }}</h2>
+                        @if (isViewingCurrent()) {
+                        <span class="pill pill--success">Current</span>
+                        }
+                    </div>
+                    <p>{{ selectedEdition()?.description }}</p>
+                </div>
+                <div class="plan-summary__actions">
+                    @if (isViewingCurrent()) {
+                    <ui-button variant="primary" size="sm">Manage subscription</ui-button>
+                    <ui-button variant="ghost" size="sm" (click)="openRequestModal()">Request plan change</ui-button>
+                    } @else {
+                    <ui-button variant="primary" size="sm">
+                        {{ selectedEdition()?.requiresSales ? 'Request Enterprise' : 'Upgrade to ' + selectedEdition()?.name }}
+                    </ui-button>
+                    <ui-button variant="ghost" size="sm" (click)="toggleCompare()">Compare with current</ui-button>
+                    }
+                    <ui-button variant="ghost" size="sm">⋯</ui-button>
+                </div>
+            </div>
+
+            <div class="plan-summary__highlights">
+                @for (item of selectedEdition()?.highlights || []; track item) {
+                <span class="highlight">{{ item }}</span>
+                }
+            </div>
+
+            <div class="plan-summary__limits">
+                @for (limit of selectedEdition()?.limits || []; track limit.label) {
+                <div class="limit-card">
+                    <p class="limit-label">{{ limit.label }}</p>
+                    <p class="limit-value">{{ limit.value }}</p>
+                </div>
+                }
+            </div>
+
+            <div class="plan-tabs" role="tablist" aria-label="Plan detail tabs">
+                <button
+                    type="button"
+                    role="tab"
+                    [attr.aria-selected]="activeTab() === 'modules'"
+                    [class.active]="activeTab() === 'modules'"
+                    (click)="activeTab.set('modules')">
+                    Modules
+                </button>
+                <button
+                    type="button"
+                    role="tab"
+                    [attr.aria-selected]="activeTab() === 'limits'"
+                    [class.active]="activeTab() === 'limits'"
+                    (click)="activeTab.set('limits')">
+                    Features & Limits
+                </button>
+            </div>
+
+            <div class="entitlement-source">
+                <span>Entitlements source: Edition + Tenant overrides</span>
+                <ui-button size="sm" variant="ghost" (click)="openOverridesDrawer()">View overrides</ui-button>
+            </div>
+
+            @if (activeTab() === 'modules') {
+            <div class="modules-table" [class.is-compare]="compareMode() && !isViewingCurrent()">
+                <div class="modules-table__header">
+                    <span>Module</span>
+                    <span>Access</span>
+                    <span>Status</span>
+                    <span>Notes</span>
+                    @if (compareMode() && !isViewingCurrent()) {
+                    <span>Change</span>
+                    }
+                    <span></span>
+                </div>
+                @for (row of moduleRows(); track row.key) {
+                <div class="modules-table__row" (click)="openModuleDetail(row.key)">
+                    <div class="module-cell">
+                        <span class="module-icon" aria-hidden="true">
+                            @switch (row.icon) {
+                            @case ('users') {
+                            <svg viewBox="0 0 24 24"><path d="M17 21a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            }
+                            @case ('book-open') {
+                            <svg viewBox="0 0 24 24"><path d="M2 4.5C2 3.12 3.12 2 4.5 2H12v20H4.5A2.5 2.5 0 0 1 2 19.5z"></path><path d="M22 19.5a2.5 2.5 0 0 1-2.5 2.5H12V2h7.5A2.5 2.5 0 0 1 22 4.5z"></path></svg>
+                            }
+                            @case ('banknote') {
+                            <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="3"></circle><path d="M6 10h0M18 14h0"></path></svg>
+                            }
+                            @case ('calculator') {
+                            <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"></rect><path d="M8 6h8"></path><path d="M8 10h0M12 10h0M16 10h0M8 14h0M12 14h0M16 14h0M8 18h0M12 18h0M16 18h0"></path></svg>
+                            }
+                            @case ('briefcase') {
+                            <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M9 7V5a3 3 0 0 1 6 0v2"></path><path d="M3 13h18"></path></svg>
+                            }
+                            @case ('book') {
+                            <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"></path><path d="M8 2v15"></path></svg>
+                            }
+                            @case ('bus') {
+                            <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="13" rx="2"></rect><path d="M4 8h16"></path><path d="M6 16h0M18 16h0"></path><path d="M8 20h8"></path></svg>
+                            }
+                            @case ('shield') {
+                            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            }
+                            @case ('bar-chart') {
+                            <svg viewBox="0 0 24 24"><path d="M3 3v18h18"></path><rect x="7" y="12" width="3" height="6"></rect><rect x="12" y="9" width="3" height="9"></rect><rect x="17" y="6" width="3" height="12"></rect></svg>
+                            }
+                            @default {
+                            <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"></path></svg>
+                            }
+                            }
+                        </span>
+                        <div>
+                            <p class="module-name">{{ row.name }}</p>
+                            <p class="module-desc">{{ row.description }}</p>
+                        </div>
+                    </div>
+                    <div class="pill pill--soft">{{ accessLabel(row.access) }}</div>
+                    <div class="pill" [class]="'pill--' + row.status">{{ statusLabel(row.status) }}</div>
+                    <p class="notes">{{ row.notes || '—' }}</p>
+                    @if (compareMode() && !isViewingCurrent()) {
+                    <p class="compare">{{ row.change }}</p>
+                    }
+                    <ui-button size="sm" variant="ghost" class="row-action" (click)="$event.stopPropagation()">⋯</ui-button>
+                </div>
+                }
+            </div>
+            } @else {
+            <div class="limits-groups">
+                <div class="limits-group">
+                    <h3>Users & Schools</h3>
+                    <div class="limits-table">
+                        @for (limit of selectedEdition()?.limits || []; track limit.label) {
+                        <div class="limits-row">
+                            <span>{{ limit.label }}</span>
+                            <span>{{ limit.value }}</span>
+                        </div>
+                        }
+                    </div>
+                </div>
+                <div class="limits-group">
+                    <h3>Security & Compliance</h3>
+                    <div class="limits-table">
+                        <div class="limits-row">
+                            <span>Audit log retention</span>
+                            <span>{{ isViewingCurrent() ? '90 days' : '365 days' }}</span>
+                        </div>
+                        <div class="limits-row">
+                            <span>SSO</span>
+                            <span>{{ selectedEdition()?.id === 'enterprise' ? 'Included' : 'Add-on' }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="limits-group">
+                    <h3>Support</h3>
+                    <div class="limits-table">
+                        <div class="limits-row">
+                            <span>Support tier</span>
+                            <span>{{ selectedEdition()?.limits?.[3]?.value }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
+            }
+        </div>
+    </div>
+    }
+</div>
+
+@if (drawerModuleKey() && selectedModule()) {
+<div class="drawer-overlay" (click)="closeModuleDetail()">
+    <div class="drawer" (click)="$event.stopPropagation()">
+        <div class="drawer-header">
+            <div>
+                <h3>{{ selectedModule()?.name }}</h3>
+                <p>{{ selectedModule()?.description }}</p>
+            </div>
+            <ui-button size="sm" variant="ghost" (click)="closeModuleDetail()">✕</ui-button>
+        </div>
+        <div class="drawer-body">
+            <h4>Included features</h4>
+            <ul>
+                @for (feature of selectedModule()?.features || []; track feature) {
+                <li>{{ feature }}</li>
+                }
+            </ul>
+            <div class="drawer-note">
+                <h4>Why locked</h4>
+                <p>
+                    {{ statusNote(
+                        selectedModule()?.key!,
+                        selectedEdition()?.modules?.[selectedModule()?.key!]?.access || 'not_included',
+                        moduleStatus(selectedModule()?.key!, selectedEdition()?.modules?.[selectedModule()?.key!]?.access || 'not_included')
+                    ) || 'Included when this plan is active.' }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+@if (showRequestModal()) {
+<div class="modal-overlay" (click)="closeRequestModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <div>
+                <h3>Request plan change</h3>
+                <p>Send a request to change your plan. We'll follow up to confirm details.</p>
+            </div>
+            <ui-button size="sm" variant="ghost" (click)="closeRequestModal()">✕</ui-button>
+        </div>
+        <div class="modal-body">
+            <label>
+                Requested plan
+                <ui-input [value]="selectedEdition()?.name || ''" [disabled]="true"></ui-input>
+            </label>
+            <label>
+                Reason
+                <textarea rows="3" [(ngModel)]="bulkReason"></textarea>
+            </label>
+            <label>
+                Preferred contact
+                <ui-input type="email" [(value)]="bulkEmail"></ui-input>
+            </label>
+            <label>
+                Urgency
+                <select [(ngModel)]="bulkUrgency">
+                    <option value="normal">Normal</option>
+                    <option value="urgent">Urgent</option>
+                </select>
+            </label>
+        </div>
+        <div class="modal-footer">
+            <ui-button variant="ghost" size="sm" (click)="closeRequestModal()">Cancel</ui-button>
+            <ui-button variant="primary" size="sm" (click)="submitRequest()">Send request</ui-button>
+        </div>
+    </div>
+</div>
+}
+
+@if (showOverridesDrawer()) {
+<div class="drawer-overlay" (click)="closeOverridesDrawer()">
+    <div class="drawer" (click)="$event.stopPropagation()">
+        <div class="drawer-header">
+            <div>
+                <h3>Entitlement overrides</h3>
+                <p>Edition overrides applied to this tenant.</p>
+            </div>
+            <ui-button size="sm" variant="ghost" (click)="closeOverridesDrawer()">✕</ui-button>
+        </div>
+        <div class="drawer-body">
+            <div class="override-table">
+                <div class="override-table__row header">
+                    <span>Module</span>
+                    <span>Override</span>
+                    <span>Reason</span>
+                    <span>By</span>
+                    <span>Date</span>
+                </div>
+                <div class="override-table__row">
+                    <span>Finance</span>
+                    <span>Disabled</span>
+                    <span>Trial expired</span>
+                    <span>System</span>
+                    <span>Jan 12, 2026</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}

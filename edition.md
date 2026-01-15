@@ -1,0 +1,19 @@
+- [ ] Confirm route naming: `Settings → Billing & Plan` vs `Settings → Plan & Entitlements`.
+- [ ] Define data contracts for editions, modules, and limits (API or mock JSON).
+- [ ] Build page shell: two-panel layout with left list and right detail.
+- [ ] Implement `EditionListPanel` with header, current plan pill, and selectable rows.
+- [ ] Add row states: Current, Available, Requires sales; include locked icon for non-selectable.
+- [ ] Implement `EditionDetailPanel` with top summary card and primary actions.
+- [ ] Add tabs: Modules (default) and Features & Limits.
+- [ ] Build Modules table with columns: Module, Access, Status, Notes, Actions.
+- [ ] Implement access/status logic (Included/Not included/Add-on vs Enabled/Locked/Disabled).
+- [ ] Add module detail drawer with “why locked” and upgrade CTA.
+- [ ] Add compare mode toggle and diff column when viewing non-current plan.
+- [ ] Build Features & Limits grouped tables (Users & Schools, Reporting, Security, Support, etc.).
+- [ ] Add Request Plan Change modal with required fields and success state.
+- [ ] Add empty/error states: auto-select current edition, retry on data failure.
+- [ ] Add entitlement source line + overrides drawer (future-proof, view-only).
+- [ ] Hook up primary actions (Manage subscription / Request plan change / Upgrade).
+- [ ] Add copy polish and inline help text (enterprise tone, no marketing).
+- [ ] Add accessibility checks: focus order, ARIA for tabs/drawers, keyboard nav.
+- [ ] Add tests (basic rendering + selection + compare mode).

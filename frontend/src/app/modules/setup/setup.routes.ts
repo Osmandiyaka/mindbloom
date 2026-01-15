@@ -51,6 +51,10 @@ export const SETUP_ROUTES: Routes = [
         loadComponent: () => import('./pages/tenant-settings/tenant-settings.component').then(m => m.TenantSettingsComponent)
     },
     {
+        path: 'plan-entitlements',
+        loadComponent: () => import('./pages/plan-entitlements/plan-entitlements.component').then(m => m.PlanEntitlementsComponent)
+    },
+    {
         path: 'students',
         loadComponent: () => import('./pages/students/student-list/student-list.component').then(m => m.StudentListComponent)
     }

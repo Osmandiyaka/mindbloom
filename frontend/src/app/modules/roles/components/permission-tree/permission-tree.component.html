@@ -226,7 +226,7 @@
                 </div>
 
                 <!-- Action Badges -->
-                @if (!hasChildren(permission) && permission.actions?.length) {
+                @if (!hasChildren(permission) && permission.actions.length) {
                 <div class="permission-actions">
                     @for (action of displayActions(permission.actions); track action) {
                     <span class="action-badge" [class]="'action-' + action">
@@ -325,7 +325,7 @@
                         <div class="permission-child-desc" [innerHTML]="highlightText(row.permission.description)"></div>
                         }
                     </div>
-                    @if (row.permission.actions?.length) {
+                    @if (row.permission.actions.length) {
                     <div class="permission-child-actions">
                         @for (action of displayActions(row.permission.actions); track action) {
                         <span class="permission-action-chip">{{ action | uppercase }}</span>

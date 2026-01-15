@@ -527,7 +527,6 @@ export class SidebarComponent implements OnInit {
     {
       title: 'System',
       items: [
-        // { label: 'Tenant Settings', path: '/setup/tenant-settings', icon: 'settings', permission: PERMISSIONS.setup.write, moduleKey: 'setup' },
         { label: 'Workspace Setup', path: '/setup/first-login', icon: 'dashboard', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
         { label: 'Access control', path: '/roles', icon: 'settings', permission: PERMISSIONS.roles.read, moduleKey: 'setup' },
 
@@ -536,12 +535,7 @@ export class SidebarComponent implements OnInit {
         { label: 'Tasks', path: '/tasks', icon: 'tasks', permission: PERMISSIONS.tasks.read, moduleKey: 'tasks' }
       ]
     },
-    {
-      title: 'Access control',
-      items: [
-        { label: 'Roles & permissions', path: '/roles', icon: 'settings', permission: PERMISSIONS.roles.read, moduleKey: 'roles' }
-      ]
-    }
+
   ];
 
   // Host-specific navigation
