@@ -1,12 +1,14 @@
 import { Component, Input, Output, EventEmitter, signal, effect, ViewChildren, ElementRef, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
+import { UiButtonComponent } from '../../../../shared/ui/buttons/ui-button.component';
+import { UiCheckboxComponent } from '../../../../shared/ui/forms/ui-checkbox.component';
 import { Permission, PermissionAction } from '../../../../core/models/role.model';
 
 @Component({
     selector: 'app-permission-tree',
     standalone: true,
-    imports: [CommonModule, SearchInputComponent],
+    imports: [CommonModule, SearchInputComponent, UiButtonComponent, UiCheckboxComponent],
     templateUrl: './permission-tree.component.html',
     styleUrls: ['./permission-tree.component.scss']
 })
@@ -139,13 +141,10 @@ export class PermissionTreeComponent {
         this.expandedNodes.set(new Set());
     }
 
-    togglePermission(permission: Permission, event: Event) {
+    togglePermission(permission: Permission) {
         if (this.readOnly) {
-            event.preventDefault();
-            event.stopPropagation();
             return;
         }
-        event.stopPropagation();
 
         const selected = new Set(this._selectedPermissions());
         const hasChildren = this.hasChildren(permission);
@@ -304,7 +303,7 @@ export class PermissionTreeComponent {
         }
         if (key === ' ' || key === 'Spacebar') {
             event.preventDefault();
-            this.togglePermission(permission, event);
+            this.togglePermission(permission);
         }
     }
 

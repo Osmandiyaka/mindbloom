@@ -6,10 +6,11 @@ import { CommonModule } from '@angular/common';
     standalone: true,
     imports: [CommonModule],
     template: `
-    <label class="ui-checkbox" [class.ui-checkbox--disabled]="disabledState">
+    <label class="ui-checkbox" [class.ui-checkbox--disabled]="disabledState" [class.ui-checkbox--label-hidden]="hideLabel">
       <input
         type="checkbox"
         [checked]="checked"
+        [indeterminate]="indeterminate"
         [disabled]="disabledState"
         (change)="onChange($event)"
       />
@@ -68,17 +69,40 @@ import { CommonModule } from '@angular/common';
       background: var(--color-on-primary, #fff);
     }
 
+    .ui-checkbox input:indeterminate + .ui-checkbox__box {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .ui-checkbox input:indeterminate + .ui-checkbox__box::after {
+      content: '';
+      width: 10px;
+      height: 2px;
+      border-radius: 2px;
+      background: var(--color-on-primary, #fff);
+    }
+
     .ui-checkbox--disabled {
       opacity: 0.65;
       cursor: not-allowed;
     }
 
     .ui-checkbox__label { font: inherit; }
+
+    .ui-checkbox--label-hidden {
+      gap: 0;
+    }
+
+    .ui-checkbox--label-hidden .ui-checkbox__label {
+      display: none;
+    }
   `]
 })
 export class UiCheckboxComponent {
     @Input() label = '';
     @Input() checked = false;
+    @Input() indeterminate = false;
+    @Input() hideLabel = false;
     @Output() checkedChange = new EventEmitter<boolean>();
     @Input() disabled: boolean | '' | string = false;
 

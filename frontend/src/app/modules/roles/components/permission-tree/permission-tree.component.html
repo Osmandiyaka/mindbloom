@@ -5,50 +5,71 @@
         <app-search-input placeholder="Search permissions…" (search)="search.set($event)"></app-search-input>
         <div class="permission-tree__toolbar-actions">
             <div class="permission-tree__view-toggle" role="group" aria-label="Permission view mode">
-                <button type="button" class="permission-tree__view-option"
+                <ui-button
+                    class="permission-tree__view-option"
+                    size="sm"
+                    variant="ghost"
                     [class.is-active]="viewMode() === 'simple'"
                     (click)="viewMode.set('simple')">
                     Simple view
-                </button>
-                <button type="button" class="permission-tree__view-option"
+                </ui-button>
+                <ui-button
+                    class="permission-tree__view-option"
+                    size="sm"
+                    variant="ghost"
                     [class.is-active]="viewMode() === 'detailed'"
                     (click)="viewMode.set('detailed')">
                     Detailed view
-                </button>
+                </ui-button>
             </div>
             <div class="permission-tree__view-toggle" role="group" aria-label="Density mode">
-                <button type="button" class="permission-tree__view-option"
+                <ui-button
+                    class="permission-tree__view-option"
+                    size="sm"
+                    variant="ghost"
                     [class.is-active]="densityMode() === 'comfortable'"
                     (click)="setDensity('comfortable')">
                     Comfortable
-                </button>
-                <button type="button" class="permission-tree__view-option"
+                </ui-button>
+                <ui-button
+                    class="permission-tree__view-option"
+                    size="sm"
+                    variant="ghost"
                     [class.is-active]="densityMode() === 'compact'"
                     (click)="setDensity('compact')">
                     Compact
-                </button>
+                </ui-button>
             </div>
-            <button type="button" class="permission-tree__link"
+            <ui-button
+                class="permission-tree__link"
+                size="sm"
+                variant="ghost"
                 [disabled]="readOnly || displayedTree.length === 0"
                 (click)="selectVisibleResults()">
                 Select all results
-            </button>
+            </ui-button>
             <span class="permission-tree__divider">/</span>
-            <button type="button" class="permission-tree__link" [disabled]="readOnly" (click)="clearAllSelections()">
+            <ui-button
+                class="permission-tree__link"
+                size="sm"
+                variant="ghost"
+                [disabled]="readOnly"
+                (click)="clearAllSelections()">
                 Clear all
-            </button>
-            <button type="button" class="permission-tree__link" (click)="expandAll()">Expand all</button>
+            </ui-button>
+            <ui-button class="permission-tree__link" size="sm" variant="ghost" (click)="expandAll()">Expand all</ui-button>
             <span class="permission-tree__divider">/</span>
-            <button type="button" class="permission-tree__link" (click)="collapseAll()">Collapse all</button>
+            <ui-button class="permission-tree__link" size="sm" variant="ghost" (click)="collapseAll()">Collapse all</ui-button>
             <span class="permission-tree__count">Selected: {{ selectedCount }}</span>
         </div>
     </div>
     <div class="permission-tree__filters">
-        <label class="permission-tree__toggle">
-            <input type="checkbox" [checked]="viewSelectedOnly()"
-                (change)="viewSelectedOnly.set($any($event.target).checked)" />
-            <span>View selected only</span>
-        </label>
+        <ui-checkbox
+            class="permission-tree__toggle"
+            [checked]="viewSelectedOnly()"
+            (checkedChange)="viewSelectedOnly.set($event)">
+            View selected only
+        </ui-checkbox>
         @if (searchSummary) {
         <div class="permission-tree__search-summary">
             Showing {{ searchSummary.results }} results in {{ searchSummary.categories }} categories
@@ -56,11 +77,15 @@
         }
         <div class="permission-tree__chips" *ngIf="selectedModuleChips.length">
             @for (chip of visibleModuleChips; track chip.id) {
-            <button type="button" class="permission-tree__chip" (click)="clearModuleSelection(chip.id)">
+            <ui-button
+                class="permission-tree__chip"
+                size="sm"
+                variant="ghost"
+                (click)="clearModuleSelection(chip.id)">
                 <span>{{ chip.name }}</span>
                 <span class="permission-tree__chip-count">{{ chip.count }}</span>
                 <span class="permission-tree__chip-close">×</span>
-            </button>
+            </ui-button>
             }
             @if (overflowModuleCount > 0) {
             <span class="permission-tree__chip-overflow">+{{ overflowModuleCount }} more</span>
@@ -75,7 +100,13 @@
     <div class="empty-state">
         <p class="empty-state__title">No permissions selected</p>
         <p class="empty-state__body">Select permissions to build this role.</p>
-        <button type="button" class="empty-state__action" (click)="viewSelectedOnly.set(false)">Clear filter</button>
+        <ui-button
+            class="empty-state__action"
+            size="sm"
+            variant="ghost"
+            (click)="viewSelectedOnly.set(false)">
+            Clear filter
+        </ui-button>
     </div>
     } @else if (displayedTree.length === 0 && search().trim().length) {
     <div class="empty-state">
@@ -101,34 +132,27 @@
                 (keydown)="handleRowKeydown($event, permission, true)"
                 (click)="viewMode() === 'detailed' && hasChildren(permission) && toggleNode(permission.id)">
                 <!-- Expand/Collapse Icon -->
-                @if (hasChildren(permission) && viewMode() === 'detailed') {
-                <button class="expand-btn" type="button">
+            @if (hasChildren(permission) && viewMode() === 'detailed') {
+                <ui-button class="expand-btn" type="button" size="sm" variant="ghost">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" [class.expanded]="isExpanded(permission.id)">
                         <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
-                </button>
+                </ui-button>
                 } @else {
                 <span class="expand-placeholder"></span>
                 }
 
                 <!-- Checkbox -->
-                <label class="checkbox-container" (click)="$event.stopPropagation()">
-                    @if (hasChildren(permission)) {
-                    <input
-                        type="checkbox"
-                        [checked]="moduleSelectionState(permission).checked"
-                        [indeterminate]="moduleSelectionState(permission).indeterminate"
-                        [disabled]="readOnly"
-                        (change)="togglePermission(permission, $event)"
-                    />
-                    } @else {
-                    <input type="checkbox" [checked]="isSelected(permission.id)"
-                        [disabled]="readOnly"
-                        [indeterminate]="isIndeterminate(permission)" (change)="togglePermission(permission, $event)" />
-                    }
-                    <span class="checkmark"></span>
-                </label>
+                <ui-checkbox
+                    class="permission-checkbox"
+                    [checked]="hasChildren(permission) ? moduleSelectionState(permission).checked : isSelected(permission.id)"
+                    [indeterminate]="hasChildren(permission) ? moduleSelectionState(permission).indeterminate : isIndeterminate(permission)"
+                    [disabled]="readOnly"
+                    [hideLabel]="true"
+                    (click)="$event.stopPropagation()"
+                    (checkedChange)="togglePermission(permission)">
+                </ui-checkbox>
 
                 <!-- Permission Info -->
                 <div class="permission-info">
@@ -226,25 +250,15 @@
                     [class.is-nested]="row.depth > 0"
                     (keydown)="handleRowKeydown($event, row.permission, false)"
                 >
-                    <label class="checkbox-container" (click)="$event.stopPropagation()">
-                        @if (hasChildren(row.permission)) {
-                        <input
-                            type="checkbox"
-                            [checked]="moduleSelectionState(row.permission).checked"
-                            [indeterminate]="moduleSelectionState(row.permission).indeterminate"
-                            [disabled]="readOnly"
-                            (change)="togglePermission(row.permission, $event)"
-                        />
-                        } @else {
-                        <input
-                            type="checkbox"
-                            [checked]="isSelected(row.permission.id)"
-                            [disabled]="readOnly"
-                            (change)="togglePermission(row.permission, $event)"
-                        />
-                        }
-                        <span class="checkmark"></span>
-                    </label>
+                    <ui-checkbox
+                        class="permission-checkbox"
+                        [checked]="hasChildren(row.permission) ? moduleSelectionState(row.permission).checked : isSelected(row.permission.id)"
+                        [indeterminate]="hasChildren(row.permission) ? moduleSelectionState(row.permission).indeterminate : false"
+                        [disabled]="readOnly"
+                        [hideLabel]="true"
+                        (click)="$event.stopPropagation()"
+                        (checkedChange)="togglePermission(row.permission)">
+                    </ui-checkbox>
                     <div class="permission-child-info">
                         <div class="permission-child-name">
                             <span class="permission-icon">
