@@ -5,7 +5,22 @@ import { FormsModule } from '@angular/forms';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Subscription } from 'rxjs';
 import { StudentService } from '../../../../core/services/student.service';
-import { Student, StudentActivityItem, StudentFilterResponse, StudentFilters, StudentStatus } from '../../../../core/models/student.model';
+import {
+  Document,
+  Guardian,
+  RelationshipType,
+  Student,
+  StudentActivityItem,
+  StudentAcademicSubject,
+  StudentAcademicTerm,
+  StudentFeeInvoice,
+  StudentFeePayment,
+  StudentFeeSummary,
+  StudentFilterResponse,
+  StudentFilters,
+  StudentNote,
+  StudentStatus,
+} from '../../../../core/models/student.model';
 import { StudentFormComponent } from '../../../setup/pages/students/student-form/student-form.component';
 import { CanDirective } from '../../../../shared/security/can.directive';
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
@@ -27,6 +42,7 @@ import {
   MbSelectOption,
   MbSplitButtonComponent,
   MbSplitButtonItem,
+  MbTextareaComponent,
   MbTableActionsDirective,
   MbTableColumn,
   MbTableComponent,
@@ -34,6 +50,13 @@ import {
 
 type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
 type FilterChip = { key: string; label: string; type: 'search' | 'status' | 'grade' | 'section' | 'year' | 'attention' };
+type DetailTabKey = 'overview' | 'guardians' | 'academics' | 'fees' | 'notes' | 'documents' | 'activity';
+type DetailTab = {
+  key: DetailTabKey;
+  label: string;
+  moduleKey?: ModuleKey;
+  permission?: string;
+};
 type QuickAction = {
   key: string;
   label: string;
@@ -63,6 +86,7 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
     MbModalFooterDirective,
     MbDrawerComponent,
     MbInputComponent,
+    MbTextareaComponent,
     StudentFormComponent,
     SearchInputComponent,
     CanDirective,
@@ -496,37 +520,546 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
 
       <mb-drawer
         [open]="detailDrawerOpen()"
-        title="Student details"
+        title=""
+        panelClass="student-detail-drawer"
+        backdropClass="student-detail-drawer-backdrop"
         (closed)="closeDetailDrawer()">
-        @if (selectedStudent()) {
-          <div class="detail-panel">
+        <div class="detail-shell">
+          @if (panelStudent()) {
             <div class="detail-header">
-              <h3>{{ selectedStudent()?.fullName }}</h3>
-              <span class="detail-meta">ID · {{ selectedStudent()?.enrollment?.admissionNumber || '—' }}</span>
+              <div class="detail-header-main">
+                <div class="detail-title-row">
+                  <h3>{{ panelStudent()?.fullName }}</h3>
+                  <span class="status-tag">{{ titleCase(panelStudent()?.status || '') }}</span>
+                </div>
+                <div class="detail-meta-line">
+                  <span>ID: {{ panelStudent()?.enrollment?.admissionNumber || '—' }}</span>
+                  <span>·</span>
+                  <span>{{ panelStudent()?.enrollment?.class || '—' }}</span>
+                  <span *ngIf="panelStudent()?.enrollment?.section">· {{ panelStudent()?.enrollment?.section }}</span>
+                  <span>·</span>
+                  <span>{{ panelStudent()?.enrollment?.academicYear || '—' }}</span>
+                </div>
+              </div>
+              <div class="detail-actions">
+                <mb-button size="sm" variant="primary" *can="'students.update'" (click)="editPanelStudent()">
+                  Edit
+                </mb-button>
+                <div class="detail-actions-menu" [class.open]="detailMenuOpen()">
+                  <mb-button
+                    size="sm"
+                    variant="tertiary"
+                    aria-label="More actions"
+                    (click)="toggleDetailMenu($event)">
+                    •••
+                  </mb-button>
+                  <div class="detail-actions-panel" *ngIf="detailMenuOpen()">
+                    <mb-button size="sm" variant="tertiary" [fullWidth]="true" *can="'students.write'" (click)="openTransferFromPanel()">
+                      Transfer student
+                    </mb-button>
+                    <mb-button size="sm" variant="tertiary" [fullWidth]="true" *can="'students.write'" (click)="openChangeSectionFromPanel()">
+                      Change section
+                    </mb-button>
+                    <mb-button size="sm" variant="danger" [fullWidth]="true" *can="'students.delete'" (click)="archivePanelStudent()">
+                      Archive student
+                    </mb-button>
+                  </div>
+                </div>
+                <mb-button size="sm" variant="tertiary" aria-label="Close drawer" (click)="closeDetailDrawer()">
+                  ✕
+                </mb-button>
+              </div>
             </div>
-            <div class="detail-section">
-              <h4>Status</h4>
-              <p>{{ titleCase(selectedStudent()?.status || '') }}</p>
+            <div class="detail-summary">
+              @if (detailLoading()) {
+                <div class="summary-skeleton"></div>
+                <div class="summary-skeleton"></div>
+                <div class="summary-skeleton"></div>
+                <div class="summary-skeleton"></div>
+              } @else {
+                <div class="summary-item">
+                  <span class="summary-label">Enrollment</span>
+                  <span class="summary-value">
+                    {{ panelStudent()?.enrollment?.academicYear || '—' }} ·
+                    {{ panelStudent()?.enrollment?.class || '—' }}
+                    {{ panelStudent()?.enrollment?.section ? ' · ' + panelStudent()?.enrollment?.section : '' }}
+                  </span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Primary guardian</span>
+                  <span class="summary-value">{{ primaryGuardianName(panelStudent()) || '—' }}</span>
+                  <span class="summary-sub">{{ primaryGuardianPhone(panelStudent()) || '—' }}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Last updated</span>
+                  <span class="summary-value">{{ formatUpdated(panelStudent()?.updatedAt) }}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Attendance</span>
+                  <span class="summary-value">—</span>
+                </div>
+              }
             </div>
-            <div class="detail-section">
-              <h4>Enrollment</h4>
-              <p>{{ selectedStudent()?.enrollment?.academicYear || '—' }}</p>
-              <p>
-                {{ selectedStudent()?.enrollment?.class || '—' }}
-                {{ selectedStudent()?.enrollment?.section ? ' · ' + selectedStudent()?.enrollment?.section : '' }}
-              </p>
+            <div class="detail-tabs" role="tablist">
+              <mb-button
+                size="sm"
+                variant="tertiary"
+                class="detail-tab-button"
+                role="tab"
+                *ngFor="let tab of visibleDetailTabs()"
+                [class.active]="tab.key === selectedDetailTab()"
+                [attr.aria-selected]="tab.key === selectedDetailTab()"
+                (click)="selectDetailTab(tab.key)">
+                {{ tab.label }}
+              </mb-button>
             </div>
-            <div class="detail-section">
-              <h4>Primary guardian</h4>
-              <p>{{ primaryGuardianName(selectedStudent()) }}</p>
-              <p>{{ primaryGuardianPhone(selectedStudent()) }}</p>
-              <p>{{ primaryGuardianEmail(selectedStudent()) }}</p>
+            <div class="detail-tab-panel">
+              @if (detailLoading()) {
+                <div class="detail-tab-loading">
+                  <div class="summary-skeleton"></div>
+                  <div class="summary-skeleton"></div>
+                  <div class="summary-skeleton"></div>
+                </div>
+              } @else {
+                @switch (selectedDetailTab()) {
+                  @case ('overview') {
+                    <div class="detail-panel">
+                      <div class="detail-section">
+                        <h4>Student information</h4>
+                        <div class="detail-grid">
+                          <div class="detail-item">
+                            <span class="detail-label">Legal name</span>
+                            <span class="detail-value">{{ panelStudent()?.fullName || '—' }}</span>
+                          </div>
+                          <div class="detail-item">
+                            <span class="detail-label">Date of birth</span>
+                            <span class="detail-value">{{ formatDate(panelStudent()?.dateOfBirth) }}</span>
+                          </div>
+                          <div class="detail-item">
+                            <span class="detail-label">Gender</span>
+                            <span class="detail-value">{{ titleCase(panelStudent()?.gender || '') || '—' }}</span>
+                          </div>
+                          <div class="detail-item">
+                            <span class="detail-label">Student ID</span>
+                            <span class="detail-value">{{ panelStudent()?.id || '—' }}</span>
+                          </div>
+                          <div class="detail-item">
+                            <span class="detail-label">Admission no.</span>
+                            <span class="detail-value">{{ panelStudent()?.enrollment?.admissionNumber || '—' }}</span>
+                          </div>
+                          <div class="detail-item detail-item-full">
+                            <span class="detail-label">Address</span>
+                            <span class="detail-value">{{ formatAddress(panelStudent()) }}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="detail-section">
+                        <div class="detail-section-header">
+                          <h4>Enrollment summary</h4>
+                          <div class="detail-section-actions">
+                            <mb-button size="sm" variant="tertiary" *can="'students.write'" (click)="openChangeSectionFromPanel()">
+                              Change section
+                            </mb-button>
+                            <mb-button size="sm" variant="tertiary" *can="'students.write'" (click)="openTransferFromPanel()">
+                              Transfer
+                            </mb-button>
+                          </div>
+                        </div>
+                        <div class="detail-grid">
+                          <div class="detail-item">
+                            <span class="detail-label">Academic year</span>
+                            <span class="detail-value">{{ panelStudent()?.enrollment?.academicYear || '—' }}</span>
+                          </div>
+                          <div class="detail-item">
+                            <span class="detail-label">Class / Section</span>
+                            <span class="detail-value">
+                              {{ panelStudent()?.enrollment?.class || '—' }}
+                              {{ panelStudent()?.enrollment?.section ? ' · ' + panelStudent()?.enrollment?.section : '' }}
+                            </span>
+                          </div>
+                          <div class="detail-item">
+                            <span class="detail-label">Enrollment date</span>
+                            <span class="detail-value">{{ formatDate(panelStudent()?.enrollment?.admissionDate) }}</span>
+                          </div>
+                          <div class="detail-item">
+                            <span class="detail-label">Status</span>
+                            <span class="detail-value">{{ titleCase(panelStudent()?.status || '') || '—' }}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="detail-section" *ngIf="detailFlags(panelStudent()).length">
+                        <h4>Resolve flags</h4>
+                        <div class="detail-flags">
+                          <div class="detail-flag" *ngFor="let flag of detailFlags(panelStudent())">
+                            <div class="detail-flag-text">
+                              <span class="detail-flag-title">{{ flag.label }}</span>
+                              <span class="detail-flag-note">{{ flag.note }}</span>
+                            </div>
+                            <mb-button size="sm" variant="tertiary" (click)="selectDetailTab(flag.tab)">
+                              {{ flag.action }}
+                            </mb-button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  @case ('guardians') {
+                    <div class="detail-section">
+                      <div class="detail-section-header">
+                        <h4>Guardians</h4>
+                        <mb-button size="sm" variant="primary" *can="'students.write'" (click)="openGuardianModal()">
+                          Add guardian
+                        </mb-button>
+                      </div>
+                      @if (guardiansLoading()) {
+                        <div class="detail-empty">Loading guardians…</div>
+                      } @else if (guardiansError()) {
+                        <div class="detail-empty">{{ guardiansError() }}</div>
+                      } @else {
+                        <mb-table
+                          [rows]="guardians()"
+                          [columns]="guardianColumns"
+                          [rowKey]="guardianRowKey"
+                          emptyMessage="No guardians available."
+                        >
+                          <ng-template mbTableActions let-guardian>
+                            <div class="row-actions" [class.open]="guardianMenuOpen() === guardian.id">
+                              <mb-button size="sm" variant="tertiary" aria-label="Guardian actions" (click)="toggleGuardianMenu($event, guardian.id)">•••</mb-button>
+                              <div class="row-menu" *ngIf="guardianMenuOpen() === guardian.id">
+                                <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="setPrimaryGuardian(guardian)">
+                                  Set primary
+                                </mb-button>
+                                <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="inviteGuardian(guardian)">
+                                  Invite guardian
+                                </mb-button>
+                                <mb-button size="sm" variant="danger" [fullWidth]="true" (click)="removeGuardian(guardian)">
+                                  Remove guardian
+                                </mb-button>
+                              </div>
+                            </div>
+                          </ng-template>
+                        </mb-table>
+                      }
+                    </div>
+                  }
+                  @case ('academics') {
+                    @if (academicsLoading()) {
+                      <p class="detail-empty">Loading academic records…</p>
+                    } @else if (academicsError()) {
+                      <p class="detail-empty">{{ academicsError() }}</p>
+                    } @else {
+                      <div class="detail-section">
+                        <h4>Current classes</h4>
+                        <mb-table
+                          [rows]="academicsSubjects()"
+                          [columns]="academicSubjectColumns"
+                          emptyMessage="No classes available.">
+                        </mb-table>
+                      </div>
+                      <div class="detail-section">
+                        <div class="detail-section-header">
+                          <h4>Term history</h4>
+                          <mb-button size="sm" variant="tertiary">View report card</mb-button>
+                        </div>
+                        <mb-table
+                          [rows]="academicsTerms()"
+                          [columns]="academicTermColumns"
+                          emptyMessage="No term records available.">
+                        </mb-table>
+                      </div>
+                    }
+                  }
+                  @case ('fees') {
+                    @if (feesLoading()) {
+                      <p class="detail-empty">Loading fee records…</p>
+                    } @else if (feesError()) {
+                      <p class="detail-empty">{{ feesError() }}</p>
+                    } @else {
+                      <div class="detail-section">
+                        <div class="fees-strip">
+                          <div class="fees-metric">
+                            <span class="fees-label">Current balance</span>
+                            <span class="fees-value">{{ feesSummary()?.balance || '—' }}</span>
+                          </div>
+                          <div class="fees-metric">
+                            <span class="fees-label">Paid YTD</span>
+                            <span class="fees-value">{{ feesSummary()?.paidYtd || '—' }}</span>
+                          </div>
+                          <div class="fees-metric">
+                            <span class="fees-label">Outstanding invoices</span>
+                            <span class="fees-value">{{ feesSummary()?.outstandingCount ?? '—' }}</span>
+                          </div>
+                          <div class="fees-actions">
+                            <mb-button size="sm" variant="tertiary">View in Fees</mb-button>
+                            <mb-button size="sm" variant="tertiary">Export payments</mb-button>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="detail-section">
+                        <h4>Invoices</h4>
+                        <mb-table
+                          [rows]="feesInvoices()"
+                          [columns]="feeInvoiceColumns"
+                          emptyMessage="No invoices available.">
+                        </mb-table>
+                      </div>
+                      <div class="detail-section">
+                        <h4>Payments</h4>
+                        <mb-table
+                          [rows]="feesPayments()"
+                          [columns]="feePaymentColumns"
+                          emptyMessage="No payments available.">
+                        </mb-table>
+                      </div>
+                    }
+                  }
+                  @case ('notes') {
+                    <div class="detail-section">
+                      <div class="detail-section-header">
+                        <h4>Notes</h4>
+                        <mb-button size="sm" variant="primary" (click)="openNoteModal()">Add note</mb-button>
+                      </div>
+                      @if (notesLoading()) {
+                        <p class="detail-empty">Loading notes…</p>
+                      } @else if (notesError()) {
+                        <p class="detail-empty">{{ notesError() }}</p>
+                      } @else if (notes().length) {
+                        <div class="notes-list">
+                          <div class="note-card" *ngFor="let note of notes()">
+                            <div class="note-header">
+                              <div>
+                                <p class="note-title" *ngIf="note.title">{{ note.title }}</p>
+                                <p class="note-meta">
+                                  {{ formatDate(note.createdAt) }}
+                                  <span *ngIf="note.author"> · {{ note.author }}</span>
+                                </p>
+                              </div>
+                              <span class="note-visibility">{{ note.visibility || 'internal' }}</span>
+                            </div>
+                            <p class="note-body">{{ note.content }}</p>
+                          </div>
+                        </div>
+                      } @else {
+                        <p class="detail-empty">No notes available.</p>
+                      }
+                    </div>
+                  }
+                  @case ('documents') {
+                    <div class="detail-section">
+                      <div class="detail-section-header">
+                        <h4>Documents</h4>
+                        <mb-button size="sm" variant="primary" (click)="openDocumentModal()">Upload document</mb-button>
+                      </div>
+                      @if (documentsLoading()) {
+                        <div class="detail-empty">Loading documents…</div>
+                      } @else if (documentsError()) {
+                        <div class="detail-empty">{{ documentsError() }}</div>
+                      } @else {
+                        <mb-table
+                          [rows]="documents()"
+                          [columns]="documentColumns"
+                          emptyMessage="No documents available.">
+                          <ng-template mbTableActions let-document>
+                            <div class="row-actions">
+                              <mb-button size="sm" variant="tertiary" aria-label="Document actions">•••</mb-button>
+                            </div>
+                          </ng-template>
+                        </mb-table>
+                      }
+                    </div>
+                  }
+                  @case ('activity') {
+                    <div class="detail-section">
+                      <div class="timeline">
+                        <div class="timeline-filters">
+                          <mb-button
+                            size="sm"
+                            variant="tertiary"
+                            [class.active]="activityFilter() === 'all'"
+                            (click)="setActivityFilter('all')">
+                            All
+                          </mb-button>
+                          <mb-button
+                            size="sm"
+                            variant="tertiary"
+                            [class.active]="activityFilter() === 'enrollment'"
+                            (click)="setActivityFilter('enrollment')">
+                            Enrollment
+                          </mb-button>
+                          <mb-button
+                            size="sm"
+                            variant="tertiary"
+                            [class.active]="activityFilter() === 'documents'"
+                            (click)="setActivityFilter('documents')">
+                            Documents
+                          </mb-button>
+                          <mb-button
+                            size="sm"
+                            variant="tertiary"
+                            [class.active]="activityFilter() === 'guardians'"
+                            (click)="setActivityFilter('guardians')">
+                            Guardians
+                          </mb-button>
+                          <mb-button
+                            size="sm"
+                            variant="tertiary"
+                            [class.active]="activityFilter() === 'system'"
+                            (click)="setActivityFilter('system')">
+                            System
+                          </mb-button>
+                        </div>
+                        @if (activityLoading()) {
+                          <div class="timeline-loading">Loading activity…</div>
+                        } @else if (activityError()) {
+                          <div class="timeline-error">{{ activityError() }}</div>
+                        } @else if (activityItems().length === 0) {
+                          <div class="timeline-empty">No activity available.</div>
+                        } @else {
+                          <div class="timeline-list">
+                            <div class="timeline-items">
+                              <mb-button
+                                size="sm"
+                                variant="tertiary"
+                                *ngFor="let item of activityItems()"
+                                class="timeline-item"
+                                (click)="openActivityDetail(item)">
+                                <div class="timeline-item-text">
+                                  <div class="timeline-title">{{ item.title }}</div>
+                                  <div class="timeline-meta">
+                                    <span>{{ formatActivityTime(item.createdAt) }}</span>
+                                    <span *ngIf="item.actor">· {{ item.actor }}</span>
+                                  </div>
+                                  <div class="timeline-detail" *ngIf="item.metadata">{{ item.metadata }}</div>
+                                </div>
+                              </mb-button>
+                            </div>
+                            <div class="timeline-load" *ngIf="activityHasNext()">
+                              <mb-button size="sm" variant="tertiary" (click)="loadMoreActivity()">Load more</mb-button>
+                            </div>
+                          </div>
+                          <div class="activity-detail" *ngIf="activityDetailOpen()">
+                            <div class="activity-detail-header">
+                              <div>
+                                <h4>{{ selectedActivity()?.title }}</h4>
+                                <p>{{ formatActivityTime(selectedActivity()?.createdAt) }}</p>
+                              </div>
+                              <mb-button size="sm" variant="tertiary" (click)="closeActivityDetail()">Close</mb-button>
+                            </div>
+                            <p class="activity-detail-meta" *ngIf="selectedActivity()?.actor">
+                              Actor: {{ selectedActivity()?.actor }}
+                            </p>
+                            <p class="activity-detail-body" *ngIf="selectedActivity()?.metadata">
+                              {{ selectedActivity()?.metadata }}
+                            </p>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                }
+              }
             </div>
-          </div>
-        } @else {
-          <p class="detail-empty">Select a student to view details.</p>
-        }
+          } @else {
+            <p class="detail-empty">Select a student to view details.</p>
+          }
+        </div>
       </mb-drawer>
+
+      <mb-modal
+        [open]="guardianModalOpen()"
+        title="Add guardian"
+        (closed)="closeGuardianModal()"
+        [hasFooter]="true">
+        <div class="modal-form">
+          <label>
+            Full name
+            <mb-input [(ngModel)]="guardianDraft.name" placeholder="Guardian name"></mb-input>
+          </label>
+          <label>
+            Relationship
+            <mb-select [options]="guardianRelationshipOptions" [(ngModel)]="guardianDraft.relationship"></mb-select>
+          </label>
+          <label>
+            Phone
+            <mb-input [(ngModel)]="guardianDraft.phone" placeholder="Phone number"></mb-input>
+          </label>
+          <label>
+            Email
+            <mb-input [(ngModel)]="guardianDraft.email" placeholder="Email address"></mb-input>
+          </label>
+          <label>
+            Occupation
+            <mb-input [(ngModel)]="guardianDraft.occupation" placeholder="Occupation"></mb-input>
+          </label>
+          <div class="modal-toggle-row">
+            <mb-checkbox [(ngModel)]="guardianDraft.isPrimary">Primary guardian</mb-checkbox>
+            <mb-checkbox [(ngModel)]="guardianDraft.isEmergencyContact">Emergency contact</mb-checkbox>
+          </div>
+          <div class="modal-error" *ngIf="guardianError()">{{ guardianError() }}</div>
+        </div>
+        <div mbModalFooter>
+          <mb-button size="sm" variant="tertiary" (click)="closeGuardianModal()">Cancel</mb-button>
+          <mb-button size="sm" variant="primary" [disabled]="guardianSubmitting()" (click)="submitGuardian()">
+            Save guardian
+          </mb-button>
+        </div>
+      </mb-modal>
+
+      <mb-modal
+        [open]="noteModalOpen()"
+        title="Add note"
+        (closed)="closeNoteModal()"
+        [hasFooter]="true">
+        <div class="modal-form">
+          <label>
+            Title (optional)
+            <mb-input [(ngModel)]="noteDraft.title" placeholder="Note title"></mb-input>
+          </label>
+          <label>
+            Note
+            <mb-textarea [(ngModel)]="noteDraft.content" placeholder="Write a note..."></mb-textarea>
+          </label>
+          <label>
+            Visibility
+            <mb-select [options]="noteVisibilityOptions" [(ngModel)]="noteDraft.visibility"></mb-select>
+          </label>
+          <div class="modal-error" *ngIf="notesError()">{{ notesError() }}</div>
+        </div>
+        <div mbModalFooter>
+          <mb-button size="sm" variant="tertiary" (click)="closeNoteModal()">Cancel</mb-button>
+          <mb-button size="sm" variant="primary" [disabled]="noteSubmitting()" (click)="submitNote()">
+            Save note
+          </mb-button>
+        </div>
+      </mb-modal>
+
+      <mb-modal
+        [open]="documentModalOpen()"
+        title="Upload document"
+        (closed)="closeDocumentModal()"
+        [hasFooter]="true">
+        <div class="modal-form">
+          <label>
+            Document type
+            <mb-select [options]="documentTypeOptions" [(ngModel)]="documentDraft.type"></mb-select>
+          </label>
+          <label>
+            File
+            <input type="file" (change)="handleDocumentFile($event)" />
+          </label>
+          <label>
+            Note (optional)
+            <mb-textarea [(ngModel)]="documentDraft.note" placeholder="Add a note..."></mb-textarea>
+          </label>
+          <div class="modal-error" *ngIf="documentError()">{{ documentError() }}</div>
+        </div>
+        <div mbModalFooter>
+          <mb-button size="sm" variant="tertiary" (click)="closeDocumentModal()">Cancel</mb-button>
+          <mb-button size="sm" variant="primary" [disabled]="documentSubmitting()" (click)="submitDocument()">
+            Upload
+          </mb-button>
+        </div>
+      </mb-modal>
 
       <mb-modal
         [open]="createModalOpen()"
@@ -534,6 +1067,50 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
         (closed)="closeCreateModal()"
         [hasFooter]="false">
         <app-student-form (close)="closeCreateModal()"></app-student-form>
+      </mb-modal>
+
+      <mb-modal
+        [open]="singleArchiveOpen()"
+        title="Archive student"
+        (closed)="closeSingleArchive()"
+        [hasFooter]="true">
+        <p>Archive this student record.</p>
+        @if (singleArchiveLoading()) {
+          <div class="state-block">
+            <p>Loading impact preview…</p>
+          </div>
+        } @else if (singleArchiveSubmitting()) {
+          <div class="state-block">
+            <p>Archiving student…</p>
+          </div>
+        } @else if (singleArchiveError()) {
+          <div class="state-block error">
+            <p>{{ singleArchiveError() }}</p>
+            <mb-button size="sm" variant="tertiary" (click)="openSingleArchive(selectedStudentId()!)">Retry</mb-button>
+          </div>
+        } @else if (singleArchiveImpact()) {
+          <div class="impact-summary">
+            <p>Impact preview</p>
+            <span>{{ singleArchiveImpact()?.activeCount }} active enrollments</span>
+            <span>{{ singleArchiveImpact()?.linkedAccountsCount }} linked accounts</span>
+          </div>
+        }
+        @if (requiresSingleArchiveConfirm()) {
+          <label>
+            Type ARCHIVE to confirm
+            <mb-input [(ngModel)]="singleArchiveConfirmText"></mb-input>
+          </label>
+        }
+        <div mbModalFooter>
+          <mb-button size="sm" variant="tertiary" (click)="closeSingleArchive()">Cancel</mb-button>
+          <mb-button
+            size="sm"
+            variant="danger"
+            [disabled]="!canConfirmSingleArchive()"
+            (click)="confirmSingleArchive()">
+            Archive student
+          </mb-button>
+        </div>
       </mb-modal>
 
       <mb-modal
@@ -658,12 +1235,76 @@ export class StudentsListComponent implements OnInit {
 
   overflowOpen = signal(false);
   rowMenuOpen = signal<string | null>(null);
+  detailMenuOpen = signal(false);
+  guardianMenuOpen = signal<string | null>(null);
+  guardianModalOpen = signal(false);
+  guardianSubmitting = signal(false);
+  guardianError = signal<string | null>(null);
+  guardianDraft = {
+    name: '',
+    relationship: RelationshipType.FATHER,
+    phone: '',
+    email: '',
+    isPrimary: true,
+    isEmergencyContact: true,
+    occupation: '',
+  };
+  academicsLoading = signal(false);
+  academicsError = signal<string | null>(null);
+  academicsSubjects = signal<StudentAcademicSubject[]>([]);
+  academicsTerms = signal<StudentAcademicTerm[]>([]);
+  feesLoading = signal(false);
+  feesError = signal<string | null>(null);
+  feesSummary = signal<StudentFeeSummary | null>(null);
+  feesInvoices = signal<StudentFeeInvoice[]>([]);
+  feesPayments = signal<StudentFeePayment[]>([]);
+  notesLoading = signal(false);
+  notesError = signal<string | null>(null);
+  notes = signal<StudentNote[]>([]);
+  guardiansLoading = signal(false);
+  guardiansError = signal<string | null>(null);
+  guardians = signal<Guardian[]>([]);
+  documentsLoading = signal(false);
+  documentsError = signal<string | null>(null);
+  documents = signal<Document[]>([]);
+  noteModalOpen = signal(false);
+  noteSubmitting = signal(false);
+  noteDraft = {
+    title: '',
+    content: '',
+    visibility: 'internal' as 'internal' | 'staff',
+  };
+  documentModalOpen = signal(false);
+  documentSubmitting = signal(false);
+  documentError = signal<string | null>(null);
+  documentDraft = {
+    type: '',
+    note: '',
+  };
+  documentFile: File | null = null;
+  selectedDetailTab = signal<DetailTabKey>('overview');
+  detailTabs: DetailTab[] = [
+    { key: 'overview', label: 'Overview', moduleKey: MODULE_KEYS.STUDENTS, permission: PERMISSIONS.students.read },
+    { key: 'guardians', label: 'Guardians', moduleKey: MODULE_KEYS.STUDENTS, permission: PERMISSIONS.students.read },
+    { key: 'academics', label: 'Academics', moduleKey: MODULE_KEYS.ACADEMICS, permission: PERMISSIONS.academics.read },
+    { key: 'fees', label: 'Fees', moduleKey: MODULE_KEYS.FEES, permission: PERMISSIONS.fees.read },
+    { key: 'notes', label: 'Notes', moduleKey: MODULE_KEYS.STUDENTS, permission: PERMISSIONS.students.read },
+    { key: 'documents', label: 'Documents', moduleKey: MODULE_KEYS.STUDENTS, permission: PERMISSIONS.students.read },
+    { key: 'activity', label: 'Activity', moduleKey: MODULE_KEYS.STUDENTS, permission: PERMISSIONS.students.read },
+  ];
+  visibleDetailTabs = computed(() => this.detailTabs.filter((tab) => this.isDetailTabVisible(tab)));
   createModalOpen = signal(false);
   bulkArchiveOpen = signal(false);
   bulkImpactLoading = signal(false);
   bulkImpactError = signal<string | null>(null);
   bulkImpact = signal<{ total: number; activeCount: number; linkedAccountsCount: number } | null>(null);
   bulkArchiveSubmitting = signal(false);
+  singleArchiveOpen = signal(false);
+  singleArchiveLoading = signal(false);
+  singleArchiveError = signal<string | null>(null);
+  singleArchiveImpact = signal<{ total: number; activeCount: number; linkedAccountsCount: number } | null>(null);
+  singleArchiveSubmitting = signal(false);
+  singleArchiveConfirmText = '';
   bulkStatusOpen = signal(false);
   bulkAssignOpen = signal(false);
   columnsDrawerOpen = signal(false);
@@ -679,6 +1320,11 @@ export class StudentsListComponent implements OnInit {
   private filtersSub?: Subscription;
   private activitySub?: Subscription;
   private detailSub?: Subscription;
+  private guardiansSub?: Subscription;
+  private notesSub?: Subscription;
+  private documentsSub?: Subscription;
+  private academicsSub?: Subscription;
+  private feesSub?: Subscription;
 
   skeletonRows = Array.from({ length: 8 });
 
@@ -705,6 +1351,134 @@ export class StudentsListComponent implements OnInit {
     reset: 'Reset',
     saveDefault: 'Save as default',
   };
+
+  guardianRelationshipOptions: MbSelectOption[] = [
+    { label: 'Father', value: RelationshipType.FATHER },
+    { label: 'Mother', value: RelationshipType.MOTHER },
+    { label: 'Guardian', value: RelationshipType.GUARDIAN },
+    { label: 'Sibling', value: RelationshipType.SIBLING },
+    { label: 'Grandparent', value: RelationshipType.GRANDPARENT },
+    { label: 'Other', value: RelationshipType.OTHER },
+  ];
+
+  noteVisibilityOptions: MbSelectOption[] = [
+    { label: 'Internal', value: 'internal' },
+    { label: 'Staff only', value: 'staff' },
+  ];
+
+  documentTypeOptions: MbSelectOption[] = [];
+
+  guardianColumns: MbTableColumn<Guardian>[] = [
+    {
+      key: 'name',
+      label: 'Name',
+      cell: (row) => ({
+        primary: row.name,
+        secondary: row.relationship ? this.titleCase(row.relationship) : undefined,
+        badges: row.isPrimary ? [{ label: 'Primary', tone: 'success' }] : undefined,
+      }),
+    },
+    {
+      key: 'phone',
+      label: 'Phone',
+      cell: (row) => row.phone || '—',
+    },
+    {
+      key: 'email',
+      label: 'Email',
+      cell: (row) => row.email || '—',
+    },
+    {
+      key: 'emergency',
+      label: 'Emergency',
+      align: 'center',
+      cell: (row) => (row.isEmergencyContact ? 'Yes' : '—'),
+    },
+  ];
+
+  academicSubjectColumns: MbTableColumn<StudentAcademicSubject>[] = [
+    {
+      key: 'subject',
+      label: 'Subject',
+      cell: (row) => row.subject,
+    },
+    {
+      key: 'teacher',
+      label: 'Teacher',
+      cell: (row) => row.teacher || '—',
+    },
+    {
+      key: 'performance',
+      label: 'Term performance',
+      cell: (row) => row.performance || '—',
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      align: 'center',
+      cell: (row) => row.status || '—',
+    },
+  ];
+
+  academicTermColumns: MbTableColumn<StudentAcademicTerm>[] = [
+    {
+      key: 'year',
+      label: 'Year',
+      cell: (row) => row.year,
+    },
+    {
+      key: 'term',
+      label: 'Term',
+      cell: (row) => row.term,
+    },
+    {
+      key: 'average',
+      label: 'Average/GPA',
+      cell: (row) => row.average || '—',
+    },
+    {
+      key: 'rank',
+      label: 'Rank',
+      align: 'center',
+      cell: (row) => row.rank || '—',
+    },
+  ];
+
+  feeInvoiceColumns: MbTableColumn<StudentFeeInvoice>[] = [
+    { key: 'invoiceNumber', label: 'Invoice #' },
+    { key: 'period', label: 'Period' },
+    { key: 'amount', label: 'Amount' },
+    { key: 'paid', label: 'Paid' },
+    { key: 'balance', label: 'Balance' },
+    { key: 'status', label: 'Status' },
+    { key: 'dueDate', label: 'Due date' },
+  ];
+
+  feePaymentColumns: MbTableColumn<StudentFeePayment>[] = [
+    { key: 'date', label: 'Date' },
+    { key: 'amount', label: 'Amount' },
+    { key: 'method', label: 'Method' },
+    { key: 'reference', label: 'Reference' },
+    { key: 'receivedBy', label: 'Received by' },
+  ];
+
+  documentColumns: MbTableColumn<Document>[] = [
+    {
+      key: 'type',
+      label: 'Type',
+      cell: (row) => row.type || '—',
+    },
+    {
+      key: 'name',
+      label: 'File',
+      cell: (row) => row.name || '—',
+    },
+    {
+      key: 'uploadedAt',
+      label: 'Uploaded',
+      cell: (row) => this.formatDate(row.uploadedAt),
+    },
+  ];
 
   addStudentItems: MbSplitButtonItem[] = [
     { label: this.headerCopy.addStudent, value: 'create' },
@@ -972,6 +1746,34 @@ export class StudentsListComponent implements OnInit {
     return Array.from(this.attentionFilters()).join(',');
   }
 
+  private resetGuardianDraft(): void {
+    this.guardianDraft = {
+      name: '',
+      relationship: RelationshipType.FATHER,
+      phone: '',
+      email: '',
+      isPrimary: true,
+      isEmergencyContact: true,
+      occupation: '',
+    };
+  }
+
+  private resetNoteDraft(): void {
+    this.noteDraft = {
+      title: '',
+      content: '',
+      visibility: 'internal',
+    };
+  }
+
+  private resetDocumentDraft(): void {
+    this.documentDraft = {
+      type: '',
+      note: '',
+    };
+    this.documentFile = null;
+  }
+
   private isAttentionFilter(value: string): value is AttentionFilter {
     return value === 'missing-docs' || value === 'missing-guardian' || value === 'inactive';
   }
@@ -1057,6 +1859,7 @@ export class StudentsListComponent implements OnInit {
 
   closeDetailDrawer(): void {
     this.detailDrawerOpen.set(false);
+    this.detailMenuOpen.set(false);
   }
 
   primaryActionHint(student: Student): string {
@@ -1135,6 +1938,12 @@ export class StudentsListComponent implements OnInit {
             )
           : new Set()
       );
+      const tabParam = params.get('tab');
+      const storedTab = this.loadStoredDetailTab();
+      const nextTab = this.resolveDetailTab((tabParam || storedTab) as DetailTabKey | null);
+      if (nextTab) {
+        this.selectedDetailTab.set(nextTab);
+      }
       this.loadStudents();
       this.loadActivity(true);
       this.loadFilterOptions();
@@ -1233,6 +2042,15 @@ export class StudentsListComponent implements OnInit {
     this.detailLoading.set(false);
     this.activityPage.set(1);
     this.activityItems.set([]);
+    this.guardians.set([]);
+    this.documents.set([]);
+    this.notes.set([]);
+    this.academicsSubjects.set([]);
+    this.academicsTerms.set([]);
+    this.feesSummary.set(null);
+    this.feesInvoices.set([]);
+    this.feesPayments.set([]);
+    this.loadDetailTabData(this.selectedDetailTab());
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { studentId: student.id },
@@ -1246,6 +2064,14 @@ export class StudentsListComponent implements OnInit {
     this.activityItems.set([]);
     this.activityDetailOpen.set(false);
     this.selectedStudentDetail.set(null);
+    this.guardians.set([]);
+    this.documents.set([]);
+    this.notes.set([]);
+    this.academicsSubjects.set([]);
+    this.academicsTerms.set([]);
+    this.feesSummary.set(null);
+    this.feesInvoices.set([]);
+    this.feesPayments.set([]);
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { studentId: null },
@@ -1455,6 +2281,279 @@ export class StudentsListComponent implements OnInit {
     this.rowMenuOpen.set(this.rowMenuOpen() === id ? null : id);
   }
 
+  toggleDetailMenu(event: Event): void {
+    event.stopPropagation();
+    this.detailMenuOpen.set(!this.detailMenuOpen());
+  }
+
+  toggleGuardianMenu(event: Event, id: string): void {
+    event.stopPropagation();
+    this.guardianMenuOpen.set(this.guardianMenuOpen() === id ? null : id);
+  }
+
+  openGuardianModal(): void {
+    this.guardianError.set(null);
+    this.resetGuardianDraft();
+    this.guardianModalOpen.set(true);
+  }
+
+  closeGuardianModal(): void {
+    this.guardianModalOpen.set(false);
+    this.guardianSubmitting.set(false);
+  }
+
+  openNoteModal(): void {
+    this.resetNoteDraft();
+    this.notesError.set(null);
+    this.noteModalOpen.set(true);
+  }
+
+  closeNoteModal(): void {
+    this.noteModalOpen.set(false);
+    this.noteSubmitting.set(false);
+  }
+
+  submitNote(): void {
+    if (!this.noteDraft.content.trim()) {
+      this.notesError.set('Note content is required.');
+      return;
+    }
+    this.noteSubmitting.set(true);
+    this.notesError.set(null);
+    this.logAction('student_note_created');
+    this.noteSubmitting.set(false);
+    this.noteModalOpen.set(false);
+  }
+
+  openDocumentModal(): void {
+    this.resetDocumentDraft();
+    this.documentError.set(null);
+    this.documentModalOpen.set(true);
+  }
+
+  closeDocumentModal(): void {
+    this.documentModalOpen.set(false);
+    this.documentSubmitting.set(false);
+  }
+
+  handleDocumentFile(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.documentFile = target.files?.[0] || null;
+  }
+
+  submitDocument(): void {
+    if (!this.documentDraft.type) {
+      this.documentError.set('Document type is required.');
+      return;
+    }
+    if (!this.documentFile) {
+      this.documentError.set('Please select a file to upload.');
+      return;
+    }
+    this.documentSubmitting.set(true);
+    this.documentError.set(null);
+    this.logAction('student_document_uploaded');
+    this.documentSubmitting.set(false);
+    this.documentModalOpen.set(false);
+  }
+
+  submitGuardian(): void {
+    if (!this.selectedStudentId()) {
+      return;
+    }
+    if (!this.guardianDraft.name.trim() || !this.guardianDraft.phone.trim()) {
+      this.guardianError.set('Name and phone are required.');
+      return;
+    }
+    this.guardianSubmitting.set(true);
+    this.guardianError.set(null);
+    const payload = {
+      name: this.guardianDraft.name.trim(),
+      relationship: this.guardianDraft.relationship,
+      phone: this.guardianDraft.phone.trim(),
+      email: this.guardianDraft.email?.trim() || undefined,
+      occupation: this.guardianDraft.occupation?.trim() || undefined,
+      isPrimary: this.guardianDraft.isPrimary,
+      isEmergencyContact: this.guardianDraft.isEmergencyContact,
+    };
+    this.studentsService.addGuardian(this.selectedStudentId()!, payload).subscribe({
+      next: (student) => {
+        this.selectedStudentDetail.set(student);
+        this.students.set(
+          this.students().map((existing) => (existing.id === student.id ? student : existing))
+        );
+        this.guardians.set(student.guardians || []);
+        this.guardianSubmitting.set(false);
+        this.guardianModalOpen.set(false);
+      },
+      error: () => {
+        this.guardianError.set('Unable to add guardian.');
+        this.guardianSubmitting.set(false);
+      },
+    });
+  }
+
+  setPrimaryGuardian(guardian: Guardian): void {
+    this.guardianMenuOpen.set(null);
+    this.logAction(`guardian_set_primary:${guardian.id}`);
+  }
+
+  inviteGuardian(guardian: Guardian): void {
+    this.guardianMenuOpen.set(null);
+    this.logAction(`guardian_invite:${guardian.id}`);
+  }
+
+  removeGuardian(guardian: Guardian): void {
+    this.guardianMenuOpen.set(null);
+    this.logAction(`guardian_remove:${guardian.id}`);
+  }
+
+  selectDetailTab(tab: DetailTabKey): void {
+    if (this.selectedDetailTab() === tab) {
+      return;
+    }
+    this.selectedDetailTab.set(tab);
+    this.detailMenuOpen.set(false);
+    this.persistDetailTab(tab);
+    this.loadDetailTabData(tab);
+    this.router.navigate([], {
+      queryParams: { tab },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  editPanelStudent(): void {
+    const student = this.panelStudent();
+    if (!student) {
+      return;
+    }
+    this.detailMenuOpen.set(false);
+    this.router.navigate(['/students', student.id, 'edit']);
+  }
+
+  openTransferFromPanel(): void {
+    const student = this.panelStudent();
+    if (!student) {
+      return;
+    }
+    this.detailMenuOpen.set(false);
+    this.logAction('student_transfer_opened');
+  }
+
+  openChangeSectionFromPanel(): void {
+    const student = this.panelStudent();
+    if (!student) {
+      return;
+    }
+    this.detailMenuOpen.set(false);
+    this.logAction('student_change_section_opened');
+  }
+
+  archivePanelStudent(): void {
+    const student = this.panelStudent();
+    if (!student) {
+      return;
+    }
+    this.detailMenuOpen.set(false);
+    this.openSingleArchive(student.id);
+  }
+
+  isDetailTabVisible(tab: DetailTab): boolean {
+    if (tab.moduleKey && !this.entitlements.isEnabled(tab.moduleKey)) {
+      return false;
+    }
+    if (tab.permission && !this.rbac.can(tab.permission as any)) {
+      return false;
+    }
+    return true;
+  }
+
+  formatDate(value?: Date | string | null): string {
+    if (!value) {
+      return '—';
+    }
+    const date = typeof value === 'string' ? new Date(value) : value;
+    return date.toLocaleDateString();
+  }
+
+  formatAddress(student: Student | null): string {
+    if (!student?.address) {
+      return '—';
+    }
+    const parts = [
+      student.address.street,
+      student.address.city,
+      student.address.state,
+      student.address.postalCode,
+      student.address.country
+    ].filter(Boolean);
+    return parts.length ? parts.join(', ') : '—';
+  }
+
+  detailFlags(student: Student | null): Array<{ label: string; note: string; action: string; tab: DetailTabKey }> {
+    if (!student) {
+      return [];
+    }
+    const flags: Array<{ label: string; note: string; action: string; tab: DetailTabKey }> = [];
+    if (this.hasMissingGuardian(student)) {
+      flags.push({
+        label: 'Missing guardian',
+        note: 'Add a primary guardian to complete the profile.',
+        action: 'Add guardian',
+        tab: 'guardians'
+      });
+    }
+    if (this.hasMissingDocs(student)) {
+      flags.push({
+        label: 'Missing documents',
+        note: 'Upload required documents for verification.',
+        action: 'Upload documents',
+        tab: 'documents'
+      });
+    }
+    if (student.status === StudentStatus.INACTIVE) {
+      flags.push({
+        label: 'Enrollment incomplete',
+        note: 'Complete the enrollment workflow for activation.',
+        action: 'Review enrollment',
+        tab: 'overview'
+      });
+    }
+    return flags;
+  }
+
+  private resolveDetailTab(tab: DetailTabKey | null): DetailTabKey | null {
+    if (!tab) {
+      return this.visibleDetailTabs()[0]?.key ?? 'overview';
+    }
+    const match = this.visibleDetailTabs().find((item) => item.key === tab);
+    return match ? match.key : this.visibleDetailTabs()[0]?.key ?? 'overview';
+  }
+
+  private persistDetailTab(tab: DetailTabKey): void {
+    try {
+      localStorage.setItem(this.detailTabStorageKey(), tab);
+    } catch {
+      // Ignore storage errors.
+    }
+  }
+
+  private loadStoredDetailTab(): DetailTabKey | null {
+    try {
+      const value = localStorage.getItem(this.detailTabStorageKey());
+      return (value as DetailTabKey) || null;
+    } catch {
+      return null;
+    }
+  }
+
+  private detailTabStorageKey(): string {
+    const tenantId = this.tenantContext.activeTenantId() || 'tenant';
+    const userId = this.rbac.getSession()?.userId || 'user';
+    return `students.detail.tab.${tenantId}.${userId}`;
+  }
+
   isActionEnabled(action: QuickAction): boolean {
     if (!this.panelStudent()) {
       return false;
@@ -1493,12 +2592,106 @@ export class StudentsListComponent implements OnInit {
       next: (student) => {
         this.selectedStudentDetail.set(student);
         this.detailLoading.set(false);
+        this.loadDetailTabData(this.selectedDetailTab());
       },
       error: () => {
         this.selectedStudentDetail.set(null);
         this.detailLoading.set(false);
       }
     });
+  }
+
+  loadDetailTabData(tab: DetailTabKey): void {
+    const studentId = this.selectedStudentId();
+    if (!studentId) {
+      return;
+    }
+    if (tab === 'guardians') {
+      this.guardiansLoading.set(true);
+      this.guardiansError.set(null);
+      this.guardiansSub?.unsubscribe();
+      this.guardiansSub = this.studentsService.getStudentGuardians(studentId).subscribe({
+        next: (items) => {
+          this.guardians.set(items);
+          this.guardiansLoading.set(false);
+        },
+        error: () => {
+          this.guardiansError.set('Unable to load guardians.');
+          this.guardiansLoading.set(false);
+        },
+      });
+      return;
+    }
+    if (tab === 'documents') {
+      this.documentsLoading.set(true);
+      this.documentsError.set(null);
+      this.documentsSub?.unsubscribe();
+      this.documentsSub = this.studentsService.getStudentDocuments(studentId).subscribe({
+        next: (items) => {
+          this.documents.set(items);
+          this.documentsLoading.set(false);
+        },
+        error: () => {
+          this.documentsError.set('Unable to load documents.');
+          this.documentsLoading.set(false);
+        },
+      });
+      return;
+    }
+    if (tab === 'notes') {
+      this.notesLoading.set(true);
+      this.notesError.set(null);
+      this.notesSub?.unsubscribe();
+      this.notesSub = this.studentsService.getStudentNotes(studentId).subscribe({
+        next: (items) => {
+          this.notes.set(items);
+          this.notesLoading.set(false);
+        },
+        error: () => {
+          this.notesError.set('Unable to load notes.');
+          this.notesLoading.set(false);
+        },
+      });
+      return;
+    }
+    if (tab === 'academics') {
+      this.academicsLoading.set(true);
+      this.academicsError.set(null);
+      this.academicsSub?.unsubscribe();
+      this.academicsSub = this.studentsService.getStudentAcademics(studentId).subscribe({
+        next: (data) => {
+          this.academicsSubjects.set(data.subjects || []);
+          this.academicsTerms.set(data.terms || []);
+          this.academicsLoading.set(false);
+        },
+        error: () => {
+          this.academicsError.set('Unable to load academics.');
+          this.academicsLoading.set(false);
+        },
+      });
+      return;
+    }
+    if (tab === 'fees') {
+      this.feesLoading.set(true);
+      this.feesError.set(null);
+      this.feesSub?.unsubscribe();
+      this.feesSub = this.studentsService.getStudentFees(studentId).subscribe({
+        next: (data) => {
+          this.feesSummary.set(data.summary || null);
+          this.feesInvoices.set(data.invoices || []);
+          this.feesPayments.set(data.payments || []);
+          this.feesLoading.set(false);
+        },
+        error: () => {
+          this.feesError.set('Unable to load fees.');
+          this.feesLoading.set(false);
+        },
+      });
+      return;
+    }
+    if (tab === 'activity') {
+      this.loadActivity(true);
+    }
   }
 
   setActivityFilter(filter: ActivityFilter): void {
@@ -1646,11 +2839,12 @@ export class StudentsListComponent implements OnInit {
     this.logAction(`student_primary_action:${this.primaryActionLabel(student)}`);
   }
 
-  formatUpdated(date: Date): string {
+  formatUpdated(date?: Date | string): string {
     if (!date) {
       return '—';
     }
-    return new Date(date).toLocaleDateString();
+    const value = typeof date === 'string' ? new Date(date) : date;
+    return value.toLocaleDateString();
   }
 
   initials(name: string): string {
@@ -1787,6 +2981,69 @@ export class StudentsListComponent implements OnInit {
     return true;
   }
 
+  openSingleArchive(studentId: string): void {
+    this.singleArchiveConfirmText = '';
+    this.singleArchiveImpact.set(null);
+    this.singleArchiveError.set(null);
+    this.singleArchiveLoading.set(true);
+    this.singleArchiveSubmitting.set(false);
+    this.singleArchiveOpen.set(true);
+    this.studentsService.previewArchive([studentId]).subscribe({
+      next: (impact) => {
+        this.singleArchiveImpact.set(impact);
+        this.singleArchiveLoading.set(false);
+      },
+      error: () => {
+        this.singleArchiveError.set('Unable to load impact preview.');
+        this.singleArchiveLoading.set(false);
+      },
+    });
+  }
+
+  closeSingleArchive(): void {
+    this.singleArchiveOpen.set(false);
+    this.singleArchiveSubmitting.set(false);
+  }
+
+  requiresSingleArchiveConfirm(): boolean {
+    const impact = this.singleArchiveImpact();
+    if (!impact) return false;
+    return impact.activeCount > 0 || impact.linkedAccountsCount > 0;
+  }
+
+  canConfirmSingleArchive(): boolean {
+    if (this.singleArchiveLoading() || this.singleArchiveSubmitting()) {
+      return false;
+    }
+    if (this.singleArchiveError()) {
+      return false;
+    }
+    if (this.requiresSingleArchiveConfirm()) {
+      return this.singleArchiveConfirmText === 'ARCHIVE';
+    }
+    return true;
+  }
+
+  confirmSingleArchive(): void {
+    const studentId = this.selectedStudentId();
+    if (!studentId || !this.canConfirmSingleArchive()) {
+      return;
+    }
+    this.singleArchiveSubmitting.set(true);
+    this.studentsService.bulkArchive([studentId]).subscribe({
+      next: () => {
+        this.singleArchiveSubmitting.set(false);
+        this.singleArchiveOpen.set(false);
+        this.logAction('student_archived');
+        this.loadStudents();
+      },
+      error: () => {
+        this.singleArchiveError.set('Unable to archive student.');
+        this.singleArchiveSubmitting.set(false);
+      },
+    });
+  }
+
   handleAddMenu(value: string): void {
     if (value === 'create') {
       this.openCreateModal();
@@ -1797,6 +3054,7 @@ export class StudentsListComponent implements OnInit {
   }
 
   rowKey = (student: Student) => student.id;
+  guardianRowKey = (guardian: Guardian) => guardian.id;
 
   rowClass = (student: Student) =>
     this.selectedStudentId() === student.id ? 'is-selected' : '';

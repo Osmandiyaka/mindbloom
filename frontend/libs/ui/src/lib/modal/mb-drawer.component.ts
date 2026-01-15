@@ -10,9 +10,15 @@ type MbDrawerPosition = 'right' | 'left';
     standalone: true,
     imports: [CommonModule, A11yModule, MbDrawerFooterDirective],
     template: `
-        <div class="mb-drawer-backdrop" *ngIf="open" (click)="onBackdropClick($event)">
+        <div
+            class="mb-drawer-backdrop"
+            *ngIf="open"
+            [ngClass]="backdropClass"
+            (click)="onBackdropClick($event)"
+        >
             <aside
                 class="mb-drawer"
+                [ngClass]="panelClass"
                 [class.mb-drawer--left]="position === 'left'"
                 role="dialog"
                 aria-modal="true"
@@ -47,6 +53,8 @@ export class MbDrawerComponent {
     @Input() position: MbDrawerPosition = 'right';
     @Input() hasFooter = false;
     @Input() closeOnBackdrop = true;
+    @Input() panelClass?: string | string[] | Set<string> | { [klass: string]: boolean };
+    @Input() backdropClass?: string | string[] | Set<string> | { [klass: string]: boolean };
     @Output() closed = new EventEmitter<void>();
 
     @ContentChild(MbDrawerFooterDirective) footerSlot?: MbDrawerFooterDirective;

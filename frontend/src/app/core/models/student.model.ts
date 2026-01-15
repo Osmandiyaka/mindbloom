@@ -154,6 +154,57 @@ export interface StudentFilters {
     sort?: string;
 }
 
+export interface StudentAcademicSubject {
+    id: string;
+    subject: string;
+    teacher?: string;
+    performance?: string;
+    status?: string;
+}
+
+export interface StudentAcademicTerm {
+    id: string;
+    year: string;
+    term: string;
+    average?: string;
+    rank?: string;
+}
+
+export interface StudentFeeSummary {
+    balance?: string;
+    paidYtd?: string;
+    outstandingCount?: number;
+}
+
+export interface StudentFeeInvoice {
+    id: string;
+    invoiceNumber: string;
+    period: string;
+    amount: string;
+    paid: string;
+    balance: string;
+    status: string;
+    dueDate: string;
+}
+
+export interface StudentFeePayment {
+    id: string;
+    date: string;
+    amount: string;
+    method: string;
+    reference?: string;
+    receivedBy?: string;
+}
+
+export interface StudentNote {
+    id: string;
+    title?: string;
+    content: string;
+    createdAt: string;
+    author?: string;
+    visibility?: 'internal' | 'staff';
+}
+
 export interface StudentFilterOption {
     value: string;
     count: number;

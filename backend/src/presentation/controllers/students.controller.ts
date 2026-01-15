@@ -317,6 +317,51 @@ export class StudentsController {
         return StudentResponseDto.fromDomain(student);
     }
 
+    @Get(':id/guardians')
+    @ApiOperation({ summary: 'Get student guardians' })
+    @ApiResponse({ status: 200, description: 'Student guardians' })
+    async getGuardians(@Param('id') id: string) {
+        const tenantId = this.tenantContext.tenantId;
+        const student = await this.getStudentByIdUseCase.execute(id, tenantId);
+        return student.guardians || [];
+    }
+
+    @Get(':id/documents')
+    @ApiOperation({ summary: 'Get student documents' })
+    @ApiResponse({ status: 200, description: 'Student documents' })
+    async getDocuments(@Param('id') id: string) {
+        const tenantId = this.tenantContext.tenantId;
+        const student = await this.getStudentByIdUseCase.execute(id, tenantId);
+        return student.documents || [];
+    }
+
+    @Get(':id/notes')
+    @ApiOperation({ summary: 'Get student notes' })
+    @ApiResponse({ status: 200, description: 'Student notes' })
+    async getNotes(@Param('id') id: string) {
+        const tenantId = this.tenantContext.tenantId;
+        await this.getStudentByIdUseCase.execute(id, tenantId);
+        return [];
+    }
+
+    @Get(':id/academics')
+    @ApiOperation({ summary: 'Get student academics' })
+    @ApiResponse({ status: 200, description: 'Student academics' })
+    async getAcademics(@Param('id') id: string) {
+        const tenantId = this.tenantContext.tenantId;
+        await this.getStudentByIdUseCase.execute(id, tenantId);
+        return { subjects: [], terms: [] };
+    }
+
+    @Get(':id/fees')
+    @ApiOperation({ summary: 'Get student fees summary' })
+    @ApiResponse({ status: 200, description: 'Student fees' })
+    async getFees(@Param('id') id: string) {
+        const tenantId = this.tenantContext.tenantId;
+        await this.getStudentByIdUseCase.execute(id, tenantId);
+        return { summary: { balance: null, paidYtd: null, outstandingCount: 0 }, invoices: [], payments: [] };
+    }
+
     @Patch(':id')
     @ApiOperation({ summary: 'Update student' })
     @ApiResponse({ status: 200, description: 'Student updated successfully', type: StudentResponseDto })

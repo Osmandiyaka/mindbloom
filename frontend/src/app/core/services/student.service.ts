@@ -9,7 +9,14 @@ import {
     StudentFilters,
     StudentActivityItem,
     StudentFilterResponse,
-    Guardian
+    Guardian,
+    Document,
+    StudentAcademicSubject,
+    StudentAcademicTerm,
+    StudentFeeInvoice,
+    StudentFeePayment,
+    StudentFeeSummary,
+    StudentNote
 } from '../models/student.model';
 import { STUDENT_COLUMN_SCHEMA, StudentColumnConfig } from '../../modules/students/config/student-columns.schema';
 
@@ -72,6 +79,30 @@ export class StudentService {
         if (filters?.page) params = params.set('page', String(filters.page));
         if (filters?.pageSize) params = params.set('pageSize', String(filters.pageSize));
         return this.http.get<StudentActivityItem[]>(`${this.apiUrl}/${id}/activity`, { params });
+    }
+
+    getStudentGuardians(id: string): Observable<Guardian[]> {
+        return this.http.get<Guardian[]>(`${this.apiUrl}/${id}/guardians`);
+    }
+
+    getStudentDocuments(id: string): Observable<Document[]> {
+        return this.http.get<Document[]>(`${this.apiUrl}/${id}/documents`);
+    }
+
+    getStudentNotes(id: string): Observable<StudentNote[]> {
+        return this.http.get<StudentNote[]>(`${this.apiUrl}/${id}/notes`);
+    }
+
+    getStudentAcademics(id: string): Observable<{ subjects: StudentAcademicSubject[]; terms: StudentAcademicTerm[] }> {
+        return this.http.get<{ subjects: StudentAcademicSubject[]; terms: StudentAcademicTerm[] }>(
+            `${this.apiUrl}/${id}/academics`
+        );
+    }
+
+    getStudentFees(id: string): Observable<{ summary: StudentFeeSummary; invoices: StudentFeeInvoice[]; payments: StudentFeePayment[] }> {
+        return this.http.get<{ summary: StudentFeeSummary; invoices: StudentFeeInvoice[]; payments: StudentFeePayment[] }>(
+            `${this.apiUrl}/${id}/fees`
+        );
     }
 
     previewArchive(ids: string[]): Observable<{ total: number; activeCount: number; linkedAccountsCount: number }> {
