@@ -40,6 +40,18 @@ interface ModuleDefinition {
     permissions: string[];
 }
 
+type OverrideFilter = 'all' | 'enabled' | 'disabled' | 'limits' | 'security';
+type OverrideType = 'enabled' | 'disabled' | 'limit' | 'security';
+
+interface EntitlementOverride {
+    module: string;
+    overrideType: OverrideType;
+    value: string;
+    reason: string;
+    updatedBy: string;
+    updatedAt: string;
+}
+
 @Component({
     selector: 'app-plan-entitlements',
     standalone: true,
@@ -60,6 +72,7 @@ export class PlanEntitlementsComponent implements OnInit {
     showRequestModal = signal(false);
     showOverridesDrawer = signal(false);
     activeLockInfo = signal<ModuleKey | null>(null);
+    overrideFilter = signal<OverrideFilter>('all');
     bulkReason = '';
     bulkEmail = '';
     bulkUrgency: 'normal' | 'urgent' = 'normal';
@@ -119,6 +132,35 @@ export class PlanEntitlementsComponent implements OnInit {
             summary: this.compareSummary(current, selected),
         };
     });
+
+    overrides = signal<EntitlementOverride[]>(DEFAULT_OVERRIDES);
+
+    overrideCount = computed(() => this.overrides().length);
+
+    filteredOverrides = computed(() => {
+        const filter = this.overrideFilter();
+        if (filter === 'all') {
+            return this.overrides();
+        }
+        return this.overrides().filter((override) => {
+            switch (filter) {
+                case 'enabled':
+                    return override.overrideType === 'enabled';
+                case 'disabled':
+                    return override.overrideType === 'disabled';
+                case 'limits':
+                    return override.overrideType === 'limit';
+                case 'security':
+                    return override.overrideType === 'security';
+                default:
+                    return true;
+            }
+        });
+    });
+
+    setOverrideFilter(filter: OverrideFilter): void {
+        this.overrideFilter.set(filter);
+    }
 
     planRank(plan: SubscriptionPlan | null | undefined): number {
         const order: Record<SubscriptionPlan, number> = {
@@ -602,5 +644,32 @@ const DEFAULT_EDITIONS: EditionPlan[] = [
             roles: { access: 'included' },
             dashboard: { access: 'included' },
         },
+    },
+];
+
+const DEFAULT_OVERRIDES: EntitlementOverride[] = [
+    {
+        module: 'Finance',
+        overrideType: 'disabled',
+        value: 'Disabled',
+        reason: 'Trial expired',
+        updatedBy: 'System',
+        updatedAt: 'Jan 12, 2026',
+    },
+    {
+        module: 'Users',
+        overrideType: 'limit',
+        value: 'Up to 200 users',
+        reason: 'Enterprise pilot',
+        updatedBy: 'Success Team',
+        updatedAt: 'Feb 03, 2026',
+    },
+    {
+        module: 'SSO',
+        overrideType: 'security',
+        value: 'Enabled',
+        reason: 'Security requirement',
+        updatedBy: 'Security Admin',
+        updatedAt: 'Feb 10, 2026',
     },
 ];

@@ -138,7 +138,20 @@
             </div>
 
             <div class="entitlement-source">
-                <span>Entitlements source: Edition + Tenant overrides</span>
+                <div>
+                    <p class="source-title">Source of truth</p>
+                    <div class="source-items">
+                        <div class="source-item">
+                            <span class="source-check">✓</span>
+                            <span>Edition baseline</span>
+                        </div>
+                        <div class="source-item">
+                            <span class="source-check">✓</span>
+                            <span>Tenant overrides</span>
+                            <span class="tag tag--not_configured">{{ overrideCount() }} overrides applied</span>
+                        </div>
+                    </div>
+                </div>
                 <ui-button size="sm" variant="ghost" (click)="openOverridesDrawer()">View overrides</ui-button>
             </div>
 
@@ -377,22 +390,39 @@
             <ui-button size="sm" variant="ghost" (click)="closeOverridesDrawer()">✕</ui-button>
         </div>
         <div class="drawer-body">
+            <div class="override-filters">
+                <ui-button size="sm" variant="ghost" [class.is-active]="overrideFilter() === 'all'" (click)="setOverrideFilter('all')">All</ui-button>
+                <ui-button size="sm" variant="ghost" [class.is-active]="overrideFilter() === 'enabled'" (click)="setOverrideFilter('enabled')">Enabled</ui-button>
+                <ui-button size="sm" variant="ghost" [class.is-active]="overrideFilter() === 'disabled'" (click)="setOverrideFilter('disabled')">Disabled</ui-button>
+                <ui-button size="sm" variant="ghost" [class.is-active]="overrideFilter() === 'limits'" (click)="setOverrideFilter('limits')">Limits</ui-button>
+                <ui-button size="sm" variant="ghost" [class.is-active]="overrideFilter() === 'security'" (click)="setOverrideFilter('security')">Security</ui-button>
+            </div>
+            @if (filteredOverrides().length === 0) {
+            <div class="override-empty">
+                <p>No overrides applied.</p>
+            </div>
+            } @else {
             <div class="override-table">
                 <div class="override-table__row header">
-                    <span>Module</span>
-                    <span>Override</span>
+                    <span>Module/Feature</span>
+                    <span>Override type</span>
+                    <span>Value</span>
                     <span>Reason</span>
-                    <span>By</span>
+                    <span>Updated by</span>
                     <span>Date</span>
                 </div>
+                @for (override of filteredOverrides(); track override.module + override.updatedAt) {
                 <div class="override-table__row">
-                    <span>Finance</span>
-                    <span>Disabled</span>
-                    <span>Trial expired</span>
-                    <span>System</span>
-                    <span>Jan 12, 2026</span>
+                    <span>{{ override.module }}</span>
+                    <span>{{ override.overrideType }}</span>
+                    <span>{{ override.value }}</span>
+                    <span>{{ override.reason }}</span>
+                    <span>{{ override.updatedBy }}</span>
+                    <span>{{ override.updatedAt }}</span>
                 </div>
+                }
             </div>
+            }
         </div>
     </div>
 </div>
