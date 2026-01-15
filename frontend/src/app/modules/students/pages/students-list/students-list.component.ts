@@ -557,13 +557,20 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                   </mb-button>
                   <div class="detail-actions-panel" *ngIf="detailMenuOpen()">
                     <mb-button size="sm" variant="tertiary" [fullWidth]="true" *can="'students.write'" (click)="openTransferFromPanel()">
-                      Transfer student
-                    </mb-button>
-                    <mb-button size="sm" variant="tertiary" [fullWidth]="true" *can="'students.write'" (click)="openChangeSectionFromPanel()">
                       Change section
                     </mb-button>
+                    <mb-button size="sm" variant="tertiary" [fullWidth]="true" *can="'students.write'" (click)="openTransferFromPanel()">
+                      Transfer student
+                    </mb-button>
+                    <mb-button size="sm" variant="tertiary" [fullWidth]="true">
+                      Print profile
+                    </mb-button>
+                    <mb-button size="sm" variant="tertiary" [fullWidth]="true">
+                      Export student
+                    </mb-button>
+                    <div class="detail-actions-divider" aria-hidden="true"></div>
                     <mb-button size="sm" variant="danger" [fullWidth]="true" *can="'students.delete'" (click)="archivePanelStudent()">
-                      Archive student
+                      Archive / Deactivate
                     </mb-button>
                   </div>
                 </div>
@@ -656,18 +663,10 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                             </div>
                           </div>
                         </div>
-                        <div class="detail-section">
-                          <div class="detail-section-header">
-                            <h4>Enrollment summary</h4>
-                            <div class="detail-section-actions">
-                              <mb-button size="sm" variant="tertiary" *can="'students.write'" (click)="openChangeSectionFromPanel()">
-                                Change section
-                              </mb-button>
-                              <mb-button size="sm" variant="tertiary" *can="'students.write'" (click)="openTransferFromPanel()">
-                                Transfer
-                              </mb-button>
-                            </div>
-                          </div>
+                      <div class="detail-section">
+                        <div class="detail-section-header">
+                          <h4>Enrollment summary</h4>
+                        </div>
                           <div class="detail-grid">
                             <div class="detail-item">
                               <span class="detail-label">Academic year</span>

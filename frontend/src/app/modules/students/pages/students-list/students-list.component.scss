@@ -646,6 +646,12 @@ tbody tr.is-selected {
   z-index: 3;
 }
 
+.detail-actions-divider {
+  height: 1px;
+  background: var(--mb-color-border-subtle);
+  margin: 4px 0;
+}
+
 .detail-summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
