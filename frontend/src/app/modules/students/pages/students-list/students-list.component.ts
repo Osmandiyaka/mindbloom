@@ -664,30 +664,6 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                       <div class="overview-grid">
                         <div class="overview-column">
                           <div class="overview-card">
-                            <div class="overview-card-title">Enrollment summary</div>
-                            <div class="detail-grid">
-                              <div class="detail-item">
-                                <span class="detail-label">Academic year</span>
-                                <span class="detail-value">{{ panelStudent()?.enrollment?.academicYear || '—' }}</span>
-                              </div>
-                              <div class="detail-item">
-                                <span class="detail-label">Class / Section</span>
-                                <span class="detail-value">
-                                  {{ panelStudent()?.enrollment?.class || '—' }}
-                                  {{ panelStudent()?.enrollment?.section ? ' · ' + panelStudent()?.enrollment?.section : '' }}
-                                </span>
-                              </div>
-                              <div class="detail-item">
-                                <span class="detail-label">Enrollment date</span>
-                                <span class="detail-value">{{ formatDate(panelStudent()?.enrollment?.admissionDate) }}</span>
-                              </div>
-                              <div class="detail-item">
-                                <span class="detail-label">Last updated</span>
-                                <span class="detail-value">Updated {{ formatUpdated(panelStudent()?.updatedAt) }}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="overview-card">
                             <div class="overview-card-title">Primary guardian</div>
                             @if (getPrimaryGuardian(panelStudent()); as guardian) {
                               <div class="detail-grid">
@@ -731,32 +707,12 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                             <div class="overview-card-title">Student details</div>
                             <div class="details-grid">
                               <div class="details-row">
-                                <span class="detail-label">Legal name</span>
-                                <span class="detail-value">{{ panelStudent()?.fullName || '—' }}</span>
-                              </div>
-                              <div class="details-row">
                                 <span class="detail-label">Date of birth</span>
                                 <span class="detail-value">{{ formatDate(panelStudent()?.dateOfBirth) }}</span>
                               </div>
                               <div class="details-row">
                                 <span class="detail-label">Gender</span>
                                 <span class="detail-value">{{ titleCase(panelStudent()?.gender || '') || '—' }}</span>
-                              </div>
-                              <div class="details-row">
-                                <span class="detail-label">Admission no.</span>
-                                <span class="detail-value detail-copy">
-                                  {{ panelStudent()?.enrollment?.admissionNumber || '—' }}
-                                  <mb-button
-                                    size="sm"
-                                    variant="tertiary"
-                                    class="detail-copy-button"
-                                    aria-label="Copy admission number"
-                                    appTooltip="Copy"
-                                    [disabled]="!panelStudent()?.enrollment?.admissionNumber"
-                                    (click)="copyToClipboard(panelStudent()?.enrollment?.admissionNumber)">
-                                    ⧉
-                                  </mb-button>
-                                </span>
                               </div>
                               <div class="details-row details-row-full">
                                 <span class="detail-label">Address</span>
