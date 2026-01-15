@@ -31,6 +31,7 @@ export class PermissionTreeComponent {
     private _selectedPermissions = signal<Set<string>>(new Set());
     search = signal('');
     viewSelectedOnly = signal(false);
+    viewMode = signal<'simple' | 'detailed'>('simple');
 
     get permissionTreeValue() {
         return this._permissionTree();
@@ -193,6 +194,15 @@ export class PermissionTreeComponent {
             return true;
         }
         return actions.includes(action);
+    }
+
+    isSensitive(permission: Permission): boolean {
+        const resource = (permission.resource || '').toLowerCase();
+        const sensitivePrefixes = ['finance', 'accounting', 'payroll', 'hr', 'system', 'admin', 'roles', 'security'];
+        if (sensitivePrefixes.some((prefix) => resource.startsWith(prefix))) {
+            return true;
+        }
+        return (permission.actions || []).includes(PermissionAction.MANAGE);
     }
 
     rowsForGroup(group: Permission): Array<{ permission: Permission; depth: number }> {

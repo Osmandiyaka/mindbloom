@@ -2,6 +2,18 @@
     <div class="permission-tree__toolbar">
         <app-search-input placeholder="Search permissions…" (search)="search.set($event)"></app-search-input>
         <div class="permission-tree__toolbar-actions">
+            <div class="permission-tree__view-toggle" role="group" aria-label="Permission view mode">
+                <button type="button" class="permission-tree__view-option"
+                    [class.is-active]="viewMode() === 'simple'"
+                    (click)="viewMode.set('simple')">
+                    Simple view
+                </button>
+                <button type="button" class="permission-tree__view-option"
+                    [class.is-active]="viewMode() === 'detailed'"
+                    (click)="viewMode.set('detailed')">
+                    Detailed view
+                </button>
+            </div>
             <button type="button" class="permission-tree__link" (click)="expandAll()">Expand all</button>
             <span class="permission-tree__divider">/</span>
             <button type="button" class="permission-tree__link" (click)="collapseAll()">Collapse all</button>
@@ -40,9 +52,10 @@
         @for (permission of displayedTree; track permission.id) {
         <div class="permission-item" [class.has-children]="hasChildren(permission)">
             <!-- Permission Header -->
-            <div class="permission-header" (click)="hasChildren(permission) && toggleNode(permission.id)">
+            <div class="permission-header"
+                (click)="viewMode() === 'detailed' && hasChildren(permission) && toggleNode(permission.id)">
                 <!-- Expand/Collapse Icon -->
-                @if (hasChildren(permission)) {
+                @if (hasChildren(permission) && viewMode() === 'detailed') {
                 <button class="expand-btn" type="button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" [class.expanded]="isExpanded(permission.id)">
@@ -102,7 +115,7 @@
             </div>
 
             <!-- Children -->
-            @if (hasChildren(permission) && isExpanded(permission.id)) {
+            @if (viewMode() === 'detailed' && hasChildren(permission) && isExpanded(permission.id)) {
             <div class="permission-children">
                 <div class="permission-matrix__header">
                     <div class="permission-matrix__cell permission-matrix__cell--name">Permission</div>
@@ -118,6 +131,9 @@
                             <span class="permission-icon">{{ row.permission.icon }}</span>
                             }
                             <span class="name-text">{{ row.permission.displayName }}</span>
+                            @if (isSensitive(row.permission)) {
+                            <span class="permission-risk" title="This permission grants access to sensitive data.">⚠</span>
+                            }
                         </div>
                         @if (row.permission.description) {
                         <div class="permission-matrix__desc">{{ row.permission.description }}</div>

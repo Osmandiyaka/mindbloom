@@ -376,13 +376,17 @@
 
         <div mbModalFooter class="role-form__footer">
             <div class="role-form__status">
-                <span class="role-form__dirty" *ngIf="roleFormDirty()">Unsaved changes</span>
+                <span class="role-form__dirty" *ngIf="roleFormDirty()">
+                    Unsaved changes — Your updates will be applied when you save.
+                </span>
                 <span class="role-form__hint">Changes are saved when you click save.</span>
             </div>
             <div class="role-form__actions">
                 <mb-button variant="secondary" (click)="requestCloseRoleForm()">Cancel</mb-button>
                 <mb-button variant="primary" [loading]="roleFormSaving()"
-                    [disabled]="roleFormSaving() || roleFormInvalid()" (click)="saveRole()">
+                    [disabled]="roleFormSaving() || roleFormInvalid()"
+                    [attr.title]="roleFormInvalid() ? 'Add a role name and select permissions to continue.' : null"
+                    (click)="saveRole()">
                     Save role
                 </mb-button>
             </div>
