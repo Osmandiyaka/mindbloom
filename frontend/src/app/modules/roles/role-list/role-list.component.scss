@@ -538,6 +538,26 @@
     gap: 20px;
 }
 
+.role-form__layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.role-form__sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.role-form__main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+}
+
 .role-form__section {
     display: flex;
     flex-direction: column;
@@ -563,6 +583,36 @@
     justify-content: space-between;
     align-items: center;
     gap: 12px;
+}
+
+:host ::ng-deep .role-form-modal .mb-modal {
+    width: 100%;
+    max-width: 920px;
+    height: min(84vh, 760px);
+    display: flex;
+    flex-direction: column;
+}
+
+:host ::ng-deep .role-form-modal .mb-modal__header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--mb-color-surface);
+    border-bottom: 1px solid var(--mb-color-border-subtle);
+}
+
+:host ::ng-deep .role-form-modal .mb-modal__body {
+    flex: 1 1 auto;
+    overflow: auto;
+    padding: 24px;
+}
+
+:host ::ng-deep .role-form-modal .mb-modal__footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: var(--mb-color-surface);
+    border-top: 1px solid var(--mb-color-border-subtle);
 }
 
 .role-form__hint {

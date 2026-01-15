@@ -246,47 +246,59 @@
         </ng-template>
     </ng-template>
 
-    <mb-modal [open]="roleFormOpen()"
+    <mb-modal class="role-form-modal" [open]="roleFormOpen()"
         title="{{ roleFormMode() === 'edit' ? 'Edit role' : (roleFormMode() === 'duplicate' ? 'Duplicate role' : 'Create role') }}"
         [closeable]="!roleFormSaving()" [closeOnBackdrop]="!roleFormSaving()" (closed)="closeRoleForm()">
         <div class="role-form">
-            <div class="role-form__section">
-                <div class="role-form__title">Identity</div>
-                <mb-form-field label="Role name" [controlId]="'role-name'">
-                    <mb-input id="role-name" [value]="roleFormName()"
-                        (valueChange)="roleFormName.set($event); markRoleFormDirty()"></mb-input>
-                </mb-form-field>
-                <mb-form-field label="Description" [controlId]="'role-description'">
-                    <mb-textarea id="role-description" [value]="roleFormDescription()"
-                        (valueChange)="roleFormDescription.set($event); markRoleFormDirty()"></mb-textarea>
-                </mb-form-field>
-            </div>
+            <div class="role-form__layout">
+                <aside class="role-form__sidebar">
+                    <div class="role-form__section">
+                        <div class="role-form__title">Identity</div>
+                        <mb-form-field label="Role name" [controlId]="'role-name'">
+                            <mb-input id="role-name" [value]="roleFormName()"
+                                (valueChange)="roleFormName.set($event); markRoleFormDirty()"></mb-input>
+                        </mb-form-field>
+                        <mb-form-field label="Description" [controlId]="'role-description'">
+                            <mb-textarea id="role-description" [value]="roleFormDescription()"
+                                (valueChange)="roleFormDescription.set($event); markRoleFormDirty()"></mb-textarea>
+                        </mb-form-field>
+                    </div>
 
-            <div class="role-form__section">
-                <div class="role-form__title">Scope</div>
-                <mb-select [value]="roleFormScopeType()" [options]="[
-                      { label: 'Workspace-wide', value: 'workspace' },
-                      { label: 'School-scoped', value: 'school' }
-                    ]" (valueChange)="handleScopeTypeChange($event)"></mb-select>
-            </div>
+                    <div class="role-form__section">
+                        <div class="role-form__title">Scope</div>
+                        <mb-select [value]="roleFormScopeType()" [options]="[
+                              { label: 'Workspace-wide', value: 'workspace' },
+                              { label: 'School-scoped', value: 'school' }
+                            ]" (valueChange)="handleScopeTypeChange($event)"></mb-select>
+                    </div>
 
-            <div class="role-form__section">
-                <div class="role-form__title">Permissions</div>
-                <div class="role-form__row">
-                    <mb-select [value]="roleFormTemplate()" [options]="[
-                          { label: 'Start from template', value: 'custom' },
-                          { label: 'Teacher', value: 'teacher' },
-                          { label: 'Finance officer', value: 'finance' },
-                          { label: 'Registrar', value: 'registrar' },
-                          { label: 'Principal', value: 'principal' }
-                        ]" (valueChange)="applyPermissionTemplate($event)"></mb-select>
-                    <mb-select [value]="roleFormStatus()" [options]="[
-                          { label: 'Active', value: 'active' },
-                          { label: 'Inactive', value: 'inactive' }
-                        ]" (valueChange)="handleStatusChange($event)"></mb-select>
-                </div>
-                <app-permission-matrix [permissions]="permissionTree()" [selectedPermissions]="roleFormPermissions()"
-                    (selectedPermissionsChange)="updateRolePermissions($event)"></app-permission-matrix>
+                    <div class="role-form__section">
+                        <div class="role-form__title">Status</div>
+                        <mb-select [value]="roleFormStatus()" [options]="[
+                              { label: 'Active', value: 'active' },
+                              { label: 'Inactive', value: 'inactive' }
+                            ]" (valueChange)="handleStatusChange($event)"></mb-select>
+                    </div>
+
+                    <div class="role-form__section">
+                        <div class="role-form__title">Template</div>
+                        <mb-select [value]="roleFormTemplate()" [options]="[
+                              { label: 'Start from template', value: 'custom' },
+                              { label: 'Teacher', value: 'teacher' },
+                              { label: 'Finance officer', value: 'finance' },
+                              { label: 'Registrar', value: 'registrar' },
+                              { label: 'Principal', value: 'principal' }
+                            ]" (valueChange)="applyPermissionTemplate($event)"></mb-select>
+                    </div>
+                </aside>
+
+                <section class="role-form__main">
+                    <div class="role-form__section">
+                        <div class="role-form__title">Permissions</div>
+                        <app-permission-matrix [permissions]="permissionTree()" [selectedPermissions]="roleFormPermissions()"
+                            (selectedPermissionsChange)="updateRolePermissions($event)"></app-permission-matrix>
+                    </div>
+                </section>
             </div>
 
             <div class="role-form__error" *ngIf="roleFormError()">{{ roleFormError() }}</div>
