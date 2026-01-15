@@ -21,11 +21,6 @@ import {
   MbTableComponent,
 } from '@mindbloom/ui';
 
-type QueueKey =
-  | 'all'
-  | 'needs-attention'
-  | 'active';
-
 type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
 
 @Component({
@@ -52,8 +47,8 @@ type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
     <div class="students-hub">
       <header class="hub-header">
         <div class="hub-title">
-          <h1>Student Workflow Center</h1>
-          <p>Process student records and resolve next actions.</p>
+          <h1>Students</h1>
+          <p>Search, manage, and process student records.</p>
         </div>
         <div class="hub-actions">
           <mb-button
@@ -102,6 +97,11 @@ type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
         </app-search-input>
         <div class="scope-filters">
           <mb-select
+            [options]="statusOptions"
+            [(ngModel)]="statusFilter"
+            (valueChange)="applyFilters()">
+          </mb-select>
+          <mb-select
             [options]="gradeOptions"
             [(ngModel)]="gradeFilter"
             (valueChange)="applyFilters()">
@@ -128,19 +128,6 @@ type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
 
       <div class="hub-body">
         <section class="list-panel" (keydown)="handleKeydown($event)">
-          <div class="queue-tabs">
-            <mb-button
-              class="queue-tab"
-              size="sm"
-              variant="tertiary"
-              *ngFor="let queue of queueItems()"
-              [class.active]="activeQueue() === queue.key"
-              (click)="setQueue(queue.key)">
-              {{ queue.label }}
-              <span class="queue-count">{{ queue.count }}</span>
-            </mb-button>
-          </div>
-
           <div class="attention-filters">
             <span class="attention-label">Attention filters</span>
             <div class="attention-list">
@@ -384,6 +371,7 @@ export class StudentsListComponent implements OnInit {
   students = signal<Student[]>([]);
 
   searchTerm = signal('');
+  statusFilter = '';
   gradeFilter = '';
   classFilter = '';
   yearFilter = '';
@@ -393,7 +381,6 @@ export class StudentsListComponent implements OnInit {
 
   selectedIds = signal<Set<string>>(new Set());
   selectedStudentId = signal<string | null>(null);
-  activeQueue = signal<QueueKey>('needs-attention');
   attentionFilters = signal<Set<AttentionFilter>>(new Set());
   workflowDrawerOpen = signal(false);
 
@@ -418,6 +405,10 @@ export class StudentsListComponent implements OnInit {
     { label: 'Import CSV', value: 'import' },
   ];
 
+  statusOptions: MbSelectOption[] = [
+    { label: 'All statuses', value: '' },
+    ...this.statuses.map((status) => ({ label: this.titleCase(status), value: status })),
+  ];
   gradeOptions: MbSelectOption[] = [
     { label: 'All grades', value: '' },
     ...this.grades.map((grade) => ({ label: grade, value: grade })),
@@ -438,16 +429,6 @@ export class StudentsListComponent implements OnInit {
     label: group,
     value: group,
   }));
-
-  queueItems = computed<Array<{ key: QueueKey; label: string; count: number }>>(() => {
-    const students = this.students();
-    const needsAttention = students.filter((student) => this.needsAction(student));
-    return [
-      { key: 'needs-attention', label: 'Needs attention', count: needsAttention.length },
-      { key: 'active', label: 'Active', count: students.filter((student) => student.status === StudentStatus.ACTIVE).length },
-      { key: 'all', label: 'All', count: students.length },
-    ];
-  });
 
   attentionFiltersList = computed(() => {
     const students = this.students();
@@ -509,6 +490,9 @@ export class StudentsListComponent implements OnInit {
         }
       }
 
+      if (this.statusFilter && student.status !== this.statusFilter) {
+        return false;
+      }
       if (this.gradeFilter && student.enrollment.class !== this.gradeFilter) {
         return false;
       }
@@ -519,10 +503,6 @@ export class StudentsListComponent implements OnInit {
         return false;
       }
 
-      if (!this.matchesQueue(student)) {
-        return false;
-      }
-
       if (!this.matchesAttentionFilters(student)) {
         return false;
       }
@@ -530,24 +510,6 @@ export class StudentsListComponent implements OnInit {
       return true;
     });
   });
-
-  setQueue(queue: QueueKey): void {
-    this.activeQueue.set(queue);
-    this.page.set(1);
-    this.selectedIds.set(new Set());
-    this.resetTableSelection();
-  }
-
-  matchesQueue(student: Student): boolean {
-    switch (this.activeQueue()) {
-      case 'active':
-        return student.status === StudentStatus.ACTIVE;
-      case 'needs-attention':
-        return this.needsAction(student);
-      default:
-        return true;
-    }
-  }
 
   toggleAttentionFilter(filter: AttentionFilter): void {
     const next = new Set(this.attentionFilters());
@@ -737,6 +699,7 @@ export class StudentsListComponent implements OnInit {
 
   clearFilters(): void {
     this.searchTerm.set('');
+    this.statusFilter = '';
     this.gradeFilter = '';
     this.classFilter = '';
     this.yearFilter = '';
@@ -745,7 +708,14 @@ export class StudentsListComponent implements OnInit {
   }
 
   hasFilters(): boolean {
-    return !!(this.searchTerm() || this.gradeFilter || this.classFilter || this.yearFilter || this.hasAttentionFilters());
+    return !!(
+      this.searchTerm() ||
+      this.statusFilter ||
+      this.gradeFilter ||
+      this.classFilter ||
+      this.yearFilter ||
+      this.hasAttentionFilters()
+    );
   }
 
   selectStudent(student: Student): void {

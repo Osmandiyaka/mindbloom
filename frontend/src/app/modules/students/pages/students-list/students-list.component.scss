@@ -90,25 +90,9 @@
   min-height: 640px;
 }
 
-.queue-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.queue-tab .mb-button {
-  gap: 6px;
-}
-
-.queue-tab.active .mb-button,
 .attention-pill.active .mb-button {
   background: rgba(37, 99, 235, 0.12);
   color: #1d4ed8;
-}
-
-.queue-count {
-  font-size: 11px;
-  color: var(--color-text-secondary);
 }
 
 .attention-filters {
@@ -125,6 +109,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.queue-count {
+  font-size: 11px;
+  color: var(--color-text-secondary);
 }
 
 .bulk-bar {
