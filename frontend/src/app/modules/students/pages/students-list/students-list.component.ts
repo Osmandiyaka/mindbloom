@@ -4,12 +4,21 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { StudentService } from '../../../../core/services/student.service';
 import { Student, StudentStatus } from '../../../../core/models/student.model';
-import { UiButtonComponent } from '../../../../shared/ui/buttons/ui-button.component';
-import { UiInputComponent } from '../../../../shared/ui/forms/ui-input.component';
-import { UiCheckboxComponent } from '../../../../shared/ui/forms/ui-checkbox.component';
-import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { StudentFormComponent } from '../../../setup/pages/students/student-form/student-form.component';
 import { CanDirective } from '../../../../shared/security/can.directive';
+import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
+import {
+  MbButtonComponent,
+  MbModalComponent,
+  MbModalFooterDirective,
+  MbSelectComponent,
+  MbSplitButtonComponent,
+  MbTableActionsDirective,
+  MbTableColumn,
+  MbTableComponent,
+  MbSelectOption,
+  MbSplitButtonItem,
+} from '@mindbloom/ui';
 
 @Component({
   selector: 'app-students-list',
@@ -18,11 +27,15 @@ import { CanDirective } from '../../../../shared/security/can.directive';
     CommonModule,
     RouterModule,
     FormsModule,
-    UiButtonComponent,
-    UiInputComponent,
-    UiCheckboxComponent,
-    ModalComponent,
+    MbButtonComponent,
+    MbSelectComponent,
+    MbSplitButtonComponent,
+    MbTableComponent,
+    MbTableActionsDirective,
+    MbModalComponent,
+    MbModalFooterDirective,
     StudentFormComponent,
+    SearchInputComponent,
     CanDirective,
   ],
   styleUrls: ['./students-list.component.scss'],
@@ -34,23 +47,33 @@ import { CanDirective } from '../../../../shared/security/can.directive';
           <p>Search, filter, and manage student records.</p>
         </div>
         <div class="header-actions">
-          <div class="split-button" [class.open]="addMenuOpen()">
-            <ui-button *can="'students.create'" size="sm" variant="primary" (click)="openCreateModal()">
-              Add student
-            </ui-button>
-            <button type="button" class="split-toggle" (click)="toggleAddMenu($event)">▾</button>
-            <div class="split-menu" *ngIf="addMenuOpen()">
-              <button type="button" *can="'students.create'" (click)="openCreateModal()">Add student</button>
-              <button type="button" *can="'students.create'" (click)="openImport()">Import CSV</button>
-            </div>
-          </div>
-          <ui-button size="sm" variant="ghost" (click)="toggleColumns()">Columns</ui-button>
+          <mb-split-button
+            *can="'students.create'"
+            label="Add student"
+            size="sm"
+            variant="primary"
+            [items]="addStudentItems"
+            (primaryClick)="openCreateModal()"
+            (itemSelect)="handleAddMenu($event)">
+          </mb-split-button>
+          <mb-button size="sm" variant="tertiary" (click)="toggleColumns()">Columns</mb-button>
           <div class="overflow" [class.open]="overflowOpen()">
-            <ui-button size="sm" variant="ghost" (click)="toggleOverflow($event)">•••</ui-button>
+            <mb-button size="sm" variant="tertiary" (click)="toggleOverflow($event)">•••</mb-button>
             <div class="overflow-menu" *ngIf="overflowOpen()">
-              <button type="button" *can="'students.export'" (click)="exportStudents()">Export CSV</button>
-              <button type="button" (click)="openSavedViews()">Saved views</button>
-              <button type="button" (click)="bulkHelp()">Bulk actions</button>
+              <mb-button
+                size="sm"
+                variant="tertiary"
+                [fullWidth]="true"
+                *can="'students.export'"
+                (click)="exportStudents()">
+                Export CSV
+              </mb-button>
+              <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="openSavedViews()">
+                Saved views
+              </mb-button>
+              <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="bulkHelp()">
+                Bulk actions
+              </mb-button>
             </div>
           </div>
         </div>
@@ -59,44 +82,52 @@ import { CanDirective } from '../../../../shared/security/can.directive';
       <div class="directory-layout">
         <section class="directory-panel" (keydown)="handleKeydown($event)">
           <div class="directory-filters">
-            <div class="search-field">
-              <ui-input
-                [value]="searchTerm()"
+            <div class="search-row">
+              <app-search-input
                 placeholder="Search by name, student ID, admission no., guardian phone/email"
-                (valueChange)="updateSearch($event)">
-              </ui-input>
+                (search)="updateSearch($event)">
+              </app-search-input>
               <span class="result-count">{{ filteredStudents().length }} students</span>
             </div>
             <div class="filter-row">
-              <select [(ngModel)]="statusFilter" (change)="applyFilters()">
-                <option value="">Status</option>
-                <option *ngFor="let status of statuses" [value]="status">{{ status | titlecase }}</option>
-              </select>
-              <select [(ngModel)]="gradeFilter" (change)="applyFilters()">
-                <option value="">Grade</option>
-                <option *ngFor="let grade of grades" [value]="grade">{{ grade }}</option>
-              </select>
-              <select [(ngModel)]="classFilter" (change)="applyFilters()">
-                <option value="">Class/Section</option>
-                <option *ngFor="let group of classSections" [value]="group">{{ group }}</option>
-              </select>
-              <select [(ngModel)]="yearFilter" (change)="applyFilters()">
-                <option value="">Academic year</option>
-                <option *ngFor="let year of academicYears" [value]="year">{{ year }}</option>
-              </select>
-              <button type="button" class="clear-filters" *ngIf="hasFilters()" (click)="clearFilters()">
+              <mb-select
+                [options]="statusOptions"
+                [(ngModel)]="statusFilter"
+                (valueChange)="applyFilters()">
+              </mb-select>
+              <mb-select
+                [options]="gradeOptions"
+                [(ngModel)]="gradeFilter"
+                (valueChange)="applyFilters()">
+              </mb-select>
+              <mb-select
+                [options]="classOptions"
+                [(ngModel)]="classFilter"
+                (valueChange)="applyFilters()">
+              </mb-select>
+              <mb-select
+                [options]="yearOptions"
+                [(ngModel)]="yearFilter"
+                (valueChange)="applyFilters()">
+              </mb-select>
+              <mb-button
+                class="clear-filters"
+                size="sm"
+                variant="tertiary"
+                *ngIf="hasFilters()"
+                (click)="clearFilters()">
                 Clear all
-              </button>
+              </mb-button>
             </div>
           </div>
 
           <div class="bulk-bar" *ngIf="selectedIds().size">
             <span>{{ selectedIds().size }} selected</span>
             <div class="bulk-actions">
-              <ui-button size="sm" variant="ghost" *can="'students.write'" (click)="bulkAssign()">Assign section</ui-button>
-              <ui-button size="sm" variant="ghost" *can="'students.write'" (click)="bulkStatus()">Update status</ui-button>
-              <ui-button size="sm" variant="ghost" *can="'students.export'" (click)="bulkExport()">Export selected</ui-button>
-              <ui-button size="sm" variant="danger" *can="'students.delete'" (click)="bulkArchive()">Archive</ui-button>
+              <mb-button size="sm" variant="tertiary" *can="'students.write'" (click)="bulkAssign()">Assign section</mb-button>
+              <mb-button size="sm" variant="tertiary" *can="'students.write'" (click)="bulkStatus()">Update status</mb-button>
+              <mb-button size="sm" variant="tertiary" *can="'students.export'" (click)="bulkExport()">Export selected</mb-button>
+              <mb-button size="sm" variant="danger" *can="'students.delete'" (click)="bulkArchive()">Archive</mb-button>
             </div>
           </div>
 
@@ -110,7 +141,7 @@ import { CanDirective } from '../../../../shared/security/can.directive';
           @if (error()) {
             <div class="state-block error">
               <p>{{ error() }}</p>
-              <ui-button size="sm" variant="ghost" (click)="loadStudents()">Retry</ui-button>
+              <mb-button size="sm" variant="tertiary" (click)="loadStudents()">Retry</mb-button>
             </div>
           }
 
@@ -120,84 +151,74 @@ import { CanDirective } from '../../../../shared/security/can.directive';
                 <p>No students found</p>
                 <span>Try adjusting your filters or search terms.</span>
                 <div class="empty-actions">
-                  <ui-button size="sm" variant="ghost" (click)="clearFilters()">Clear filters</ui-button>
-                  <ui-button size="sm" variant="primary" *can="'students.create'" (click)="openCreateModal()">Add student</ui-button>
+                  <mb-button size="sm" variant="tertiary" (click)="clearFilters()">Clear filters</mb-button>
+                  <mb-button size="sm" variant="primary" *can="'students.create'" (click)="openCreateModal()">Add student</mb-button>
                 </div>
               </div>
             } @else {
               <div class="table-wrapper">
-                <table>
-                  <thead>
-                    <tr>
-                      <th class="checkbox-col">
-                        <div (click)="$event.stopPropagation()">
-                          <ui-checkbox
-                            [checked]="allSelected()"
-                            (checkedChange)="toggleSelectAll($event)"
-                            [hideLabel]="true">
-                          </ui-checkbox>
-                        </div>
-                      </th>
-                      <th>Student</th>
-                      <th>Grade</th>
-                      <th>Class/Section</th>
-                      <th>Status</th>
-                      <th>Updated</th>
-                      <th class="actions-col">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      *ngFor="let student of pagedStudents(); let index = index"
-                      [class.is-selected]="selectedStudentId() === student.id"
-                      (click)="selectStudent(student)"
-                      tabindex="0">
-                      <td>
-                        <div (click)="$event.stopPropagation()">
-                          <ui-checkbox
-                            [checked]="isSelected(student.id)"
-                            (checkedChange)="toggleSelectRow(student.id, $event)"
-                            [hideLabel]="true">
-                          </ui-checkbox>
-                        </div>
-                      </td>
-                      <td>
-                        <div class="student-cell">
-                          <div class="avatar">{{ initials(student.fullName) }}</div>
-                          <div>
-                            <div class="student-name">{{ student.fullName }}</div>
-                            <div class="student-id">ID · {{ student.enrollment.admissionNumber || '—' }}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{{ student.enrollment.class || '—' }}</td>
-                      <td>{{ student.enrollment.class }}{{ student.enrollment.section ? ' · ' + student.enrollment.section : '' }}</td>
-                      <td>
-                        <span class="status-tag" [class]="'status-' + student.status">{{ student.status | titlecase }}</span>
-                      </td>
-                      <td>{{ formatUpdated(student.updatedAt) }}</td>
-                      <td class="actions-col">
-                        <div class="row-actions" [class.open]="rowMenuOpen() === student.id">
-                          <button type="button" (click)="toggleRowMenu($event, student.id)">•••</button>
-                          <div class="row-menu" *ngIf="rowMenuOpen() === student.id">
-                            <button type="button" (click)="selectStudent(student)">View details</button>
-                            <button type="button" *can="'students.update'" (click)="editStudent($event, student.id)">Edit student</button>
-                            <button type="button" *can="'students.write'" (click)="openTransfer($event, student)">Transfer student</button>
-                            <button type="button" *can="'students.write'" (click)="openPromote($event, student)">Promote student</button>
-                            <button type="button" class="danger" *can="'students.delete'" (click)="archiveStudent($event, student)">Archive</button>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <mb-table
+                  *ngIf="tableVisible()"
+                  [rows]="pagedStudents()"
+                  [columns]="tableColumns()"
+                  [rowKey]="rowKey"
+                  [rowClass]="rowClass"
+                  [selectable]="true"
+                  [sortLocal]="false"
+                  emptyMessage="No students available."
+                  (rowClick)="selectStudent($event)"
+                  (selectionChange)="onSelectionChange($event)"
+                >
+                  <ng-template mbTableActions let-student>
+                    <div class="row-actions" [class.open]="rowMenuOpen() === student.id">
+                      <mb-button size="sm" variant="tertiary" (click)="toggleRowMenu($event, student.id)">•••</mb-button>
+                      <div class="row-menu" *ngIf="rowMenuOpen() === student.id">
+                        <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="selectStudent(student)">
+                          View details
+                        </mb-button>
+                        <mb-button
+                          size="sm"
+                          variant="tertiary"
+                          [fullWidth]="true"
+                          *can="'students.update'"
+                          (click)="editStudent($event, student.id)">
+                          Edit student
+                        </mb-button>
+                        <mb-button
+                          size="sm"
+                          variant="tertiary"
+                          [fullWidth]="true"
+                          *can="'students.write'"
+                          (click)="openTransfer($event, student)">
+                          Transfer student
+                        </mb-button>
+                        <mb-button
+                          size="sm"
+                          variant="tertiary"
+                          [fullWidth]="true"
+                          *can="'students.write'"
+                          (click)="openPromote($event, student)">
+                          Promote student
+                        </mb-button>
+                        <mb-button
+                          size="sm"
+                          variant="danger"
+                          [fullWidth]="true"
+                          *can="'students.delete'"
+                          (click)="archiveStudent($event, student)">
+                          Archive
+                        </mb-button>
+                      </div>
+                    </div>
+                  </ng-template>
+                </mb-table>
               </div>
 
               <div class="pagination">
                 <span>Page {{ page() }} of {{ totalPages() }}</span>
                 <div class="pagination-actions">
-                  <button type="button" (click)="prevPage()" [disabled]="page() === 1">Previous</button>
-                  <button type="button" (click)="nextPage()" [disabled]="page() === totalPages()">Next</button>
+                  <mb-button size="sm" variant="tertiary" (click)="prevPage()" [disabled]="page() === 1">Previous</mb-button>
+                  <mb-button size="sm" variant="tertiary" (click)="nextPage()" [disabled]="page() === totalPages()">Next</mb-button>
                 </div>
               </div>
             }
@@ -214,18 +235,60 @@ import { CanDirective } from '../../../../shared/security/can.directive';
               </p>
             </div>
             <div class="detail-actions">
-              <ui-button size="sm" variant="ghost" *can="'students.update'" (click)="editStudent($event, student.id)">Edit</ui-button>
-              <ui-button size="sm" variant="ghost" (click)="closeDetail()">Close</ui-button>
+              <mb-button size="sm" variant="tertiary" *can="'students.update'" (click)="editStudent($event, student.id)">Edit</mb-button>
+              <mb-button size="sm" variant="tertiary" (click)="closeDetail()">Close</mb-button>
             </div>
           </div>
 
           <div class="detail-tabs">
-            <button type="button" [class.active]="activeTab() === 'overview'" (click)="activeTab.set('overview')">Overview</button>
-            <button type="button" [class.active]="activeTab() === 'enrollment'" (click)="activeTab.set('enrollment')">Enrollment</button>
-            <button type="button" [class.active]="activeTab() === 'guardians'" (click)="activeTab.set('guardians')">Guardians</button>
-            <button type="button" [class.active]="activeTab() === 'documents'" (click)="activeTab.set('documents')">Documents</button>
-            <button type="button" [class.active]="activeTab() === 'access'" (click)="activeTab.set('access')">Access</button>
-            <button type="button" [class.active]="activeTab() === 'audit'" (click)="activeTab.set('audit')">Audit</button>
+            <mb-button
+              class="tab-button"
+              size="sm"
+              variant="tertiary"
+              [class.active]="activeTab() === 'overview'"
+              (click)="activeTab.set('overview')">
+              Overview
+            </mb-button>
+            <mb-button
+              class="tab-button"
+              size="sm"
+              variant="tertiary"
+              [class.active]="activeTab() === 'enrollment'"
+              (click)="activeTab.set('enrollment')">
+              Enrollment
+            </mb-button>
+            <mb-button
+              class="tab-button"
+              size="sm"
+              variant="tertiary"
+              [class.active]="activeTab() === 'guardians'"
+              (click)="activeTab.set('guardians')">
+              Guardians
+            </mb-button>
+            <mb-button
+              class="tab-button"
+              size="sm"
+              variant="tertiary"
+              [class.active]="activeTab() === 'documents'"
+              (click)="activeTab.set('documents')">
+              Documents
+            </mb-button>
+            <mb-button
+              class="tab-button"
+              size="sm"
+              variant="tertiary"
+              [class.active]="activeTab() === 'access'"
+              (click)="activeTab.set('access')">
+              Access
+            </mb-button>
+            <mb-button
+              class="tab-button"
+              size="sm"
+              variant="tertiary"
+              [class.active]="activeTab() === 'audit'"
+              (click)="activeTab.set('audit')">
+              Audit
+            </mb-button>
           </div>
 
           <div class="detail-content">
@@ -392,88 +455,64 @@ import { CanDirective } from '../../../../shared/security/can.directive';
         </aside>
       </div>
 
-      <app-modal *ngIf="createModalOpen()" (close)="closeCreateModal()">
+      <mb-modal
+        [open]="createModalOpen()"
+        title="Add student"
+        (closed)="closeCreateModal()"
+        [hasFooter]="false">
         <app-student-form (close)="closeCreateModal()"></app-student-form>
-      </app-modal>
+      </mb-modal>
 
-      @if (bulkArchiveOpen()) {
-        <div class="modal-overlay" (click)="closeBulkModals()">
-          <div class="modal" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-              <div>
-                <h3>Archive students</h3>
-                <p>Archives {{ selectedIds().size }} student records.</p>
-              </div>
-              <ui-button size="sm" variant="ghost" (click)="closeBulkModals()">✕</ui-button>
-            </div>
-            <div class="modal-body">
-              <p>This removes students from active class rosters.</p>
-              <label>
-                Type ARCHIVE to confirm
-                <ui-input [(value)]="bulkConfirmText"></ui-input>
-              </label>
-            </div>
-            <div class="modal-footer">
-              <ui-button size="sm" variant="ghost" (click)="closeBulkModals()">Cancel</ui-button>
-              <ui-button size="sm" variant="danger" [disabled]="bulkConfirmText !== 'ARCHIVE'" (click)="confirmBulkArchive()">
-                Archive students
-              </ui-button>
-            </div>
-          </div>
+      <mb-modal
+        [open]="bulkArchiveOpen()"
+        title="Archive students"
+        (closed)="closeBulkModals()"
+        [hasFooter]="true">
+        <p>Archives {{ selectedIds().size }} student records.</p>
+        <p>This removes students from active class rosters.</p>
+        <label>
+          Type ARCHIVE to confirm
+          <mb-input [(ngModel)]="bulkConfirmText"></mb-input>
+        </label>
+        <div mbModalFooter>
+          <mb-button size="sm" variant="tertiary" (click)="closeBulkModals()">Cancel</mb-button>
+          <mb-button size="sm" variant="danger" [disabled]="bulkConfirmText !== 'ARCHIVE'" (click)="confirmBulkArchive()">
+            Archive students
+          </mb-button>
         </div>
-      }
+      </mb-modal>
 
-      @if (bulkStatusOpen()) {
-        <div class="modal-overlay" (click)="closeBulkModals()">
-          <div class="modal" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-              <div>
-                <h3>Update status</h3>
-                <p>Apply a new status to {{ selectedIds().size }} students.</p>
-              </div>
-              <ui-button size="sm" variant="ghost" (click)="closeBulkModals()">✕</ui-button>
-            </div>
-            <div class="modal-body">
-              <label>
-                Status
-                <select [(ngModel)]="bulkStatusValue">
-                  <option *ngFor="let status of statuses" [value]="status">{{ status | titlecase }}</option>
-                </select>
-              </label>
-            </div>
-            <div class="modal-footer">
-              <ui-button size="sm" variant="ghost" (click)="closeBulkModals()">Cancel</ui-button>
-              <ui-button size="sm" variant="primary" (click)="confirmBulkStatus()">Update status</ui-button>
-            </div>
-          </div>
+      <mb-modal
+        [open]="bulkStatusOpen()"
+        title="Update status"
+        (closed)="closeBulkModals()"
+        [hasFooter]="true">
+        <p>Apply a new status to {{ selectedIds().size }} students.</p>
+        <label>
+          Status
+          <mb-select [options]="bulkStatusOptions" [(ngModel)]="bulkStatusValue"></mb-select>
+        </label>
+        <div mbModalFooter>
+          <mb-button size="sm" variant="tertiary" (click)="closeBulkModals()">Cancel</mb-button>
+          <mb-button size="sm" variant="primary" (click)="confirmBulkStatus()">Update status</mb-button>
         </div>
-      }
+      </mb-modal>
 
-      @if (bulkAssignOpen()) {
-        <div class="modal-overlay" (click)="closeBulkModals()">
-          <div class="modal" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-              <div>
-                <h3>Assign section</h3>
-                <p>Assign a class/section to {{ selectedIds().size }} students.</p>
-              </div>
-              <ui-button size="sm" variant="ghost" (click)="closeBulkModals()">✕</ui-button>
-            </div>
-            <div class="modal-body">
-              <label>
-                Class/Section
-                <select [(ngModel)]="bulkSectionValue">
-                  <option *ngFor="let group of classSections" [value]="group">{{ group }}</option>
-                </select>
-              </label>
-            </div>
-            <div class="modal-footer">
-              <ui-button size="sm" variant="ghost" (click)="closeBulkModals()">Cancel</ui-button>
-              <ui-button size="sm" variant="primary" (click)="confirmBulkAssign()">Assign</ui-button>
-            </div>
-          </div>
+      <mb-modal
+        [open]="bulkAssignOpen()"
+        title="Assign section"
+        (closed)="closeBulkModals()"
+        [hasFooter]="true">
+        <p>Assign a class/section to {{ selectedIds().size }} students.</p>
+        <label>
+          Class/Section
+          <mb-select [options]="bulkClassOptions" [(ngModel)]="bulkSectionValue"></mb-select>
+        </label>
+        <div mbModalFooter>
+          <mb-button size="sm" variant="tertiary" (click)="closeBulkModals()">Cancel</mb-button>
+          <mb-button size="sm" variant="primary" (click)="confirmBulkAssign()">Assign</mb-button>
         </div>
-      }
+      </mb-modal>
     </div>
   `
 })
@@ -501,13 +540,13 @@ export class StudentsListComponent implements OnInit {
   selectedStudentId = signal<string | null>(null);
   activeTab = signal<'overview' | 'enrollment' | 'guardians' | 'documents' | 'access' | 'audit'>('overview');
 
-  addMenuOpen = signal(false);
   overflowOpen = signal(false);
   rowMenuOpen = signal<string | null>(null);
   createModalOpen = signal(false);
   bulkArchiveOpen = signal(false);
   bulkStatusOpen = signal(false);
   bulkAssignOpen = signal(false);
+  tableVisible = signal(true);
   bulkConfirmText = '';
   bulkStatusValue: StudentStatus = StudentStatus.ACTIVE;
   bulkSectionValue = '';
@@ -516,6 +555,72 @@ export class StudentsListComponent implements OnInit {
   grades = ['JSS1', 'JSS2', 'JSS3', 'SS1', 'SS2', 'SS3'];
   classSections = ['A', 'B', 'C', 'Blue', 'Red'];
   academicYears = ['2023/2024', '2024/2025', '2025/2026'];
+
+  addStudentItems: MbSplitButtonItem[] = [
+    { label: 'Add student', value: 'create' },
+    { label: 'Import CSV', value: 'import' },
+  ];
+
+  statusOptions: MbSelectOption[] = [
+    { label: 'All statuses', value: '' },
+    ...this.statuses.map((status) => ({ label: this.titleCase(status), value: status })),
+  ];
+  gradeOptions: MbSelectOption[] = [
+    { label: 'All grades', value: '' },
+    ...this.grades.map((grade) => ({ label: grade, value: grade })),
+  ];
+  classOptions: MbSelectOption[] = [
+    { label: 'All sections', value: '' },
+    ...this.classSections.map((group) => ({ label: group, value: group })),
+  ];
+  yearOptions: MbSelectOption[] = [
+    { label: 'All years', value: '' },
+    ...this.academicYears.map((year) => ({ label: year, value: year })),
+  ];
+  bulkStatusOptions: MbSelectOption[] = this.statuses.map((status) => ({
+    label: this.titleCase(status),
+    value: status,
+  }));
+  bulkClassOptions: MbSelectOption[] = this.classSections.map((group) => ({
+    label: group,
+    value: group,
+  }));
+
+  tableColumns = computed<MbTableColumn<Student>[]>(() => [
+    {
+      key: 'name',
+      label: 'Student',
+      sortable: true,
+      cell: (student) => ({
+        primary: student.fullName,
+        secondary: `ID · ${student.enrollment.admissionNumber || '—'}`,
+        icon: { symbol: this.initials(student.fullName), title: student.fullName },
+      }),
+    },
+    {
+      key: 'grade',
+      label: 'Grade',
+      cell: (student) => student.enrollment.class || '—',
+    },
+    {
+      key: 'section',
+      label: 'Class/Section',
+      cell: (student) =>
+        student.enrollment.class
+          ? `${student.enrollment.class}${student.enrollment.section ? ' · ' + student.enrollment.section : ''}`
+          : '—',
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      cell: (student) => this.titleCase(student.status),
+    },
+    {
+      key: 'updatedAt',
+      label: 'Updated',
+      cell: (student) => this.formatUpdated(student.updatedAt),
+    },
+  ]);
 
   filteredStudents = computed(() => {
     const term = this.searchTerm().toLowerCase();
@@ -662,11 +767,6 @@ export class StudentsListComponent implements OnInit {
     });
   }
 
-  toggleAddMenu(event: Event): void {
-    event.stopPropagation();
-    this.addMenuOpen.set(!this.addMenuOpen());
-  }
-
   toggleOverflow(event: Event): void {
     event.stopPropagation();
     this.overflowOpen.set(!this.overflowOpen());
@@ -679,7 +779,6 @@ export class StudentsListComponent implements OnInit {
 
   openCreateModal(): void {
     this.createModalOpen.set(true);
-    this.addMenuOpen.set(false);
     this.logAction('student_create_opened');
   }
 
@@ -688,7 +787,6 @@ export class StudentsListComponent implements OnInit {
   }
 
   openImport(): void {
-    this.addMenuOpen.set(false);
   }
 
   exportStudents(): void {
@@ -799,6 +897,7 @@ export class StudentsListComponent implements OnInit {
   confirmBulkArchive(): void {
     this.closeBulkModals();
     this.selectedIds.set(new Set());
+    this.resetTableSelection();
     this.logAction('students_bulk_archived');
   }
 
@@ -810,6 +909,35 @@ export class StudentsListComponent implements OnInit {
   confirmBulkAssign(): void {
     this.closeBulkModals();
     this.logAction('students_bulk_assigned');
+  }
+
+  handleAddMenu(value: string): void {
+    if (value === 'create') {
+      this.openCreateModal();
+    }
+    if (value === 'import') {
+      this.openImport();
+    }
+  }
+
+  rowKey = (student: Student) => student.id;
+
+  rowClass = (student: Student) =>
+    this.selectedStudentId() === student.id ? 'is-selected' : '';
+
+  onSelectionChange(selected: Student[]): void {
+    this.selectedIds.set(new Set(selected.map((student) => student.id)));
+  }
+
+  resetTableSelection(): void {
+    this.tableVisible.set(false);
+    setTimeout(() => this.tableVisible.set(true));
+  }
+
+  titleCase(value: string): string {
+    return value
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
   prevPage(): void {
