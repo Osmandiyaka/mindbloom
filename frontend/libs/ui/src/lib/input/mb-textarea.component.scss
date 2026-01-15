@@ -3,10 +3,14 @@
     min-height: calc(var(--mb-control-height) * 2);
     padding: var(--mb-control-padding-y) var(--mb-control-padding-x);
     border: none;
+    outline: none;
+    box-shadow: none;
     background: transparent;
     color: var(--mb-color-text);
     font-size: var(--mb-font-size-md);
     resize: vertical;
+    display: block;
+    flex: 1 1 auto;
 }
 
 .mb-textarea::placeholder {
@@ -16,4 +20,9 @@
 .mb-textarea:disabled {
     color: var(--mb-color-disabled-text);
     cursor: not-allowed;
+}
+
+.mb-textarea:focus {
+    outline: none;
+    box-shadow: none;
 }
