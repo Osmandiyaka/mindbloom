@@ -130,6 +130,17 @@ export interface Student {
     updatedAt: Date;
 }
 
+export type StudentActivityCategory = 'enrollment' | 'documents' | 'guardians' | 'system';
+
+export interface StudentActivityItem {
+    id: string;
+    title: string;
+    category: StudentActivityCategory;
+    createdAt: Date | string;
+    actor?: string;
+    metadata?: string;
+}
+
 export interface StudentFilters {
     search?: string;
     schoolId?: string;

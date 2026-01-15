@@ -240,6 +240,7 @@ tbody tr.is-selected {
   background: rgba(148, 163, 184, 0.04);
   display: grid;
   gap: 10px;
+  position: relative;
 }
 
 .workflow-header h3 {
@@ -268,6 +269,100 @@ tbody tr.is-selected {
 .actions-list {
   display: grid;
   gap: 6px;
+}
+
+.timeline-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.timeline-filters mb-button.active .mb-button {
+  background: rgba(15, 23, 42, 0.08);
+}
+
+.timeline-list {
+  display: grid;
+  gap: 8px;
+}
+
+.timeline-items {
+  display: grid;
+  gap: 6px;
+}
+
+.timeline-item .mb-button {
+  align-items: flex-start;
+}
+
+.timeline-item-text {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+}
+
+.timeline-title {
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+
+.timeline-meta {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.timeline-detail {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.timeline-load {
+  display: flex;
+  justify-content: center;
+}
+
+.timeline-empty,
+.timeline-error {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.activity-detail {
+  position: absolute;
+  inset: 12px;
+  background: white;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 10px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.15);
+  z-index: 3;
+}
+
+.activity-detail-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.activity-detail-header h4 {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+
+.activity-detail-header p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.activity-detail-meta,
+.activity-detail-body {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
 }
 
 .quick-actions-menu {

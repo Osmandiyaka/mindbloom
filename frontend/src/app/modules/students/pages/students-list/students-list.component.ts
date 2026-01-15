@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { StudentService } from '../../../../core/services/student.service';
-import { Student, StudentFilters, StudentStatus } from '../../../../core/models/student.model';
+import { Student, StudentActivityItem, StudentFilters, StudentStatus } from '../../../../core/models/student.model';
 import { StudentFormComponent } from '../../../setup/pages/students/student-form/student-form.component';
 import { CanDirective } from '../../../../shared/security/can.directive';
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
@@ -37,6 +37,7 @@ type QuickAction = {
   moduleKey: ModuleKey;
   primary: boolean;
 };
+type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system';
 
 @Component({
   selector: 'app-students-list',
@@ -349,12 +350,75 @@ type QuickAction = {
         </div>
         <div class="workflow-section">
           <div class="workflow-header">
-            <h3>Timeline & activity</h3>
-            @if (selectedStudent()) {
-              <p class="workflow-meta">No activity yet.</p>
+            <div class="workflow-header-text">
+              <h3>Timeline</h3>
+              @if (!selectedStudent()) {
+                <p class="workflow-meta">Select a student to view activity.</p>
+              }
+            </div>
+          </div>
+          <div class="timeline-filters">
+            <mb-button
+              size="sm"
+              variant="tertiary"
+              *ngFor="let filter of activityFilters"
+              [class.active]="activityFilter() === filter.value"
+              (click)="setActivityFilter(filter.value)">
+              {{ filter.label }}
+            </mb-button>
+          </div>
+          <div class="timeline-list">
+            @if (!selectedStudent()) {
+              <div class="timeline-empty">No activity to show.</div>
+            } @else if (activityLoading()) {
+              <div class="timeline-skeleton">
+                <div class="skeleton-row" *ngFor="let _ of skeletonRows"></div>
+              </div>
+            } @else if (activityError()) {
+              <div class="timeline-error">
+                <p>{{ activityError() }}</p>
+                <mb-button size="sm" variant="tertiary" (click)="loadActivity(true)">Retry</mb-button>
+              </div>
+            } @else if (activityItems().length === 0) {
+              <div class="timeline-empty">No activity recorded.</div>
             } @else {
-              <p class="workflow-meta">Select a student to view activity.</p>
+              <div class="timeline-items">
+                <mb-button
+                  *ngFor="let item of activityItems()"
+                  size="sm"
+                  variant="tertiary"
+                  [fullWidth]="true"
+                  class="timeline-item"
+                  (click)="openActivityDetail(item)">
+                  <div class="timeline-item-text">
+                    <div class="timeline-title">{{ item.title }}</div>
+                    <div class="timeline-meta">
+                      <span>{{ formatActivityTime(item.createdAt) }}</span>
+                      <span *ngIf="item.actor">· {{ item.actor }}</span>
+                    </div>
+                    <div class="timeline-detail" *ngIf="item.metadata">{{ item.metadata }}</div>
+                  </div>
+                </mb-button>
+              </div>
+              <div class="timeline-load" *ngIf="activityHasNext()">
+                <mb-button size="sm" variant="tertiary" (click)="loadMoreActivity()">Load more</mb-button>
+              </div>
             }
+          </div>
+          <div class="activity-detail" *ngIf="activityDetailOpen()">
+            <div class="activity-detail-header">
+              <div>
+                <h4>{{ selectedActivity()?.title }}</h4>
+                <p>{{ formatActivityTime(selectedActivity()?.createdAt) }}</p>
+              </div>
+              <mb-button size="sm" variant="tertiary" (click)="closeActivityDetail()">Close</mb-button>
+            </div>
+            <p class="activity-detail-meta" *ngIf="selectedActivity()?.actor">
+              Actor: {{ selectedActivity()?.actor }}
+            </p>
+            <p class="activity-detail-body" *ngIf="selectedActivity()?.metadata">
+              {{ selectedActivity()?.metadata }}
+            </p>
           </div>
         </div>
       </ng-template>
@@ -491,6 +555,14 @@ export class StudentsListComponent implements OnInit {
   workflowDrawerOpen = signal(false);
   detailDrawerOpen = signal(false);
   quickActionsMenuOpen = signal(false);
+  activityFilter = signal<ActivityFilter>('all');
+  activityItems = signal<StudentActivityItem[]>([]);
+  activityLoading = signal(false);
+  activityError = signal<string | null>(null);
+  activityPage = signal(1);
+  activityHasNext = signal(false);
+  activityDetailOpen = signal(false);
+  selectedActivity = signal<StudentActivityItem | null>(null);
 
   overflowOpen = signal(false);
   rowMenuOpen = signal<string | null>(null);
@@ -578,6 +650,14 @@ export class StudentsListComponent implements OnInit {
 
   primaryQuickActions = computed(() => this.quickActions().filter((action) => action.primary));
   secondaryQuickActions = computed(() => this.quickActions().filter((action) => !action.primary));
+
+  activityFilters = [
+    { label: 'All', value: 'all' as ActivityFilter },
+    { label: 'Enrollment', value: 'enrollment' as ActivityFilter },
+    { label: 'Documents', value: 'documents' as ActivityFilter },
+    { label: 'Guardians', value: 'guardians' as ActivityFilter },
+    { label: 'System', value: 'system' as ActivityFilter },
+  ];
 
   statusOptions = computed<MbSelectOption[]>(() => {
     const values = this.uniqueValues(this.filterSource().map((student) => student.status));
@@ -938,6 +1018,7 @@ export class StudentsListComponent implements OnInit {
           : new Set()
       );
       this.loadStudents();
+      this.loadActivity(true);
     });
     this.loadFilterOptions();
   }
@@ -1022,6 +1103,8 @@ export class StudentsListComponent implements OnInit {
 
   selectStudent(student: Student): void {
     this.selectedStudentId.set(student.id);
+    this.activityPage.set(1);
+    this.activityItems.set([]);
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { studentId: student.id },
@@ -1032,6 +1115,8 @@ export class StudentsListComponent implements OnInit {
   closeDetail(): void {
     this.selectedStudentId.set(null);
     this.detailDrawerOpen.set(false);
+    this.activityItems.set([]);
+    this.activityDetailOpen.set(false);
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { studentId: null },
@@ -1083,6 +1168,77 @@ export class StudentsListComponent implements OnInit {
     }
     this.quickActionsMenuOpen.set(false);
     this.logAction(`student_quick_action:${action.key}`);
+  }
+
+  setActivityFilter(filter: ActivityFilter): void {
+    if (this.activityFilter() === filter) {
+      return;
+    }
+    this.activityFilter.set(filter);
+    this.activityPage.set(1);
+    this.activityItems.set([]);
+    this.activityDetailOpen.set(false);
+    this.selectedActivity.set(null);
+    this.loadActivity(true);
+  }
+
+  loadActivity(reset = false): void {
+    const studentId = this.selectedStudentId();
+    if (!studentId) {
+      this.activityItems.set([]);
+      this.activityLoading.set(false);
+      this.activityError.set(null);
+      this.activityHasNext.set(false);
+      return;
+    }
+    if (reset) {
+      this.activityItems.set([]);
+      this.activityPage.set(1);
+    }
+    this.activityLoading.set(true);
+    this.activityError.set(null);
+    const page = this.activityPage();
+    const pageSize = 10;
+    this.studentsService
+      .getStudentActivity(studentId, { category: this.activityFilter(), page, pageSize })
+      .subscribe({
+        next: (items) => {
+          const nextItems = page === 1 ? items : [...this.activityItems(), ...items];
+          this.activityItems.set(nextItems);
+          this.activityHasNext.set(items.length === pageSize);
+          this.activityLoading.set(false);
+        },
+        error: () => {
+          this.activityError.set('Could not load activity.');
+          this.activityLoading.set(false);
+        }
+      });
+  }
+
+  loadMoreActivity(): void {
+    if (this.activityLoading() || !this.activityHasNext()) {
+      return;
+    }
+    this.activityPage.set(this.activityPage() + 1);
+    this.loadActivity();
+  }
+
+  openActivityDetail(item: StudentActivityItem): void {
+    this.selectedActivity.set(item);
+    this.activityDetailOpen.set(true);
+  }
+
+  closeActivityDetail(): void {
+    this.activityDetailOpen.set(false);
+    this.selectedActivity.set(null);
+  }
+
+  formatActivityTime(date?: Date | string): string {
+    if (!date) {
+      return '—';
+    }
+    const value = typeof date === 'string' ? new Date(date) : date;
+    return value.toLocaleString();
   }
 
   viewStudent(event: Event, student: Student): void {

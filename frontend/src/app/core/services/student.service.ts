@@ -7,6 +7,7 @@ import {
     CreateStudentDto,
     UpdateStudentDto,
     StudentFilters,
+    StudentActivityItem,
     Guardian
 } from '../models/student.model';
 
@@ -38,6 +39,19 @@ export class StudentService {
 
     getStudent(id: string): Observable<Student> {
         return this.http.get<Student>(`${this.apiUrl}/${id}`);
+    }
+
+    getStudentActivity(
+        id: string,
+        filters?: { category?: string; page?: number; pageSize?: number }
+    ): Observable<StudentActivityItem[]> {
+        let params = new HttpParams();
+        if (filters?.category && filters.category !== 'all') {
+            params = params.set('category', filters.category);
+        }
+        if (filters?.page) params = params.set('page', String(filters.page));
+        if (filters?.pageSize) params = params.set('pageSize', String(filters.pageSize));
+        return this.http.get<StudentActivityItem[]>(`${this.apiUrl}/${id}/activity`, { params });
     }
 
     createStudent(dto: CreateStudentDto): Observable<Student> {
