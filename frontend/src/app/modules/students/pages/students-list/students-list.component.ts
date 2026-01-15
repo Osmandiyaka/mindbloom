@@ -7,6 +7,11 @@ import { Student, StudentFilters, StudentStatus } from '../../../../core/models/
 import { StudentFormComponent } from '../../../setup/pages/students/student-form/student-form.component';
 import { CanDirective } from '../../../../shared/security/can.directive';
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
+import { TooltipDirective } from '../../../../shared/directives/tooltip.directive';
+import { EditionService } from '../../../../shared/services/entitlements.service';
+import { MODULE_KEYS, ModuleKey } from '../../../../shared/types/module-keys';
+import { RbacService } from '../../../../core/rbac/rbac.service';
+import { PERMISSIONS } from '../../../../core/rbac/permission.constants';
 import {
   MbButtonComponent,
   MbDrawerComponent,
@@ -23,6 +28,15 @@ import {
 
 type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
 type FilterChip = { key: string; label: string; type: 'search' | 'status' | 'grade' | 'section' | 'year' | 'attention' };
+type QuickAction = {
+  key: string;
+  label: string;
+  helper: string;
+  icon: string;
+  permission: string;
+  moduleKey: ModuleKey;
+  primary: boolean;
+};
 
 @Component({
   selector: 'app-students-list',
@@ -42,6 +56,7 @@ type FilterChip = { key: string; label: string; type: 'search' | 'status' | 'gra
     StudentFormComponent,
     SearchInputComponent,
     CanDirective,
+    TooltipDirective,
   ],
   styleUrls: ['./students-list.component.scss'],
   template: `
@@ -283,20 +298,53 @@ type FilterChip = { key: string; label: string; type: 'search' | 'status' | 'gra
       <ng-template #workflowPanel>
         <div class="workflow-section">
           <div class="workflow-header">
-            <h3>Quick actions</h3>
-            @if (selectedStudent()) {
-              <p class="workflow-meta">For {{ selectedStudent()?.fullName }}</p>
-            } @else {
-              <p class="workflow-meta">Select a student to enable actions.</p>
-            }
+            <div class="workflow-header-text">
+              <h3>Quick actions</h3>
+              @if (selectedStudent()) {
+                <p class="workflow-meta">For {{ selectedStudent()?.fullName }}</p>
+              } @else {
+                <p class="workflow-meta">Select a student to enable actions.</p>
+              }
+            </div>
+            <div class="quick-actions-menu" [class.open]="quickActionsMenuOpen()">
+              <mb-button size="sm" variant="tertiary" (click)="toggleQuickActionsMenu($event)">•••</mb-button>
+              <div class="quick-actions-menu-panel" *ngIf="quickActionsMenuOpen()">
+                <div
+                  class="quick-actions-menu-item"
+                  *ngFor="let action of secondaryQuickActions()"
+                  [appTooltip]="actionTooltip(action)"
+                  tooltipPosition="left">
+                  <mb-button
+                    size="sm"
+                    variant="tertiary"
+                    [fullWidth]="true"
+                    [disabled]="!isActionEnabled(action)"
+                    (click)="runQuickAction(action)">
+                    {{ action.label }}
+                  </mb-button>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="actions-list">
-            <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Print ID card</mb-button>
-            <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Generate admission letter</mb-button>
-            <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Move class/section</mb-button>
-            <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Update guardian</mb-button>
-            <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Add medical note</mb-button>
-            <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Add incident</mb-button>
+            <div
+              class="quick-action"
+              *ngFor="let action of primaryQuickActions()"
+              [appTooltip]="actionTooltip(action)"
+              tooltipPosition="left">
+              <mb-button
+                size="sm"
+                variant="tertiary"
+                [fullWidth]="true"
+                [disabled]="!isActionEnabled(action)"
+                (click)="runQuickAction(action)">
+                <span class="action-icon" aria-hidden="true">{{ action.icon }}</span>
+                <span class="action-text">
+                  <span class="action-label">{{ action.label }}</span>
+                  <span class="action-helper">{{ action.helper }}</span>
+                </span>
+              </mb-button>
+            </div>
           </div>
         </div>
         <div class="workflow-section">
@@ -418,6 +466,8 @@ export class StudentsListComponent implements OnInit {
     private readonly studentsService: StudentService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
+    private readonly rbac: RbacService,
+    private readonly entitlements: EditionService,
   ) {}
 
   loading = signal(true);
@@ -440,6 +490,7 @@ export class StudentsListComponent implements OnInit {
   attentionFilters = signal<Set<AttentionFilter>>(new Set());
   workflowDrawerOpen = signal(false);
   detailDrawerOpen = signal(false);
+  quickActionsMenuOpen = signal(false);
 
   overflowOpen = signal(false);
   rowMenuOpen = signal<string | null>(null);
@@ -467,6 +518,66 @@ export class StudentsListComponent implements OnInit {
     { label: 'Add student', value: 'create' },
     { label: 'Import CSV', value: 'import' },
   ];
+
+  quickActions = computed<QuickAction[]>(() => [
+    {
+      key: 'add-note',
+      label: 'Add note',
+      helper: 'Capture updates or context.',
+      icon: 'N',
+      permission: PERMISSIONS.students.write,
+      moduleKey: MODULE_KEYS.STUDENTS,
+      primary: true,
+    },
+    {
+      key: 'upload-doc',
+      label: 'Upload document',
+      helper: 'Attach student documents.',
+      icon: 'D',
+      permission: PERMISSIONS.students.write,
+      moduleKey: MODULE_KEYS.STUDENTS,
+      primary: true,
+    },
+    {
+      key: 'assign-guardian',
+      label: 'Assign guardian',
+      helper: 'Link parent or guardian.',
+      icon: 'G',
+      permission: PERMISSIONS.students.update,
+      moduleKey: MODULE_KEYS.STUDENTS,
+      primary: true,
+    },
+    {
+      key: 'change-section',
+      label: 'Change section',
+      helper: 'Move to another class.',
+      icon: 'S',
+      permission: PERMISSIONS.students.write,
+      moduleKey: MODULE_KEYS.STUDENTS,
+      primary: true,
+    },
+    {
+      key: 'start-transfer',
+      label: 'Start transfer',
+      helper: 'Begin transfer workflow.',
+      icon: 'T',
+      permission: PERMISSIONS.students.write,
+      moduleKey: MODULE_KEYS.STUDENTS,
+      primary: false,
+    },
+    {
+      key: 'invite-guardian',
+      label: 'Invite guardian',
+      helper: 'Create portal access.',
+      icon: 'A',
+      permission: PERMISSIONS.students.update,
+      moduleKey: MODULE_KEYS.STUDENTS,
+      primary: false,
+    },
+  ]);
+
+  primaryQuickActions = computed(() => this.quickActions().filter((action) => action.primary));
+  secondaryQuickActions = computed(() => this.quickActions().filter((action) => !action.primary));
 
   statusOptions = computed<MbSelectOption[]>(() => {
     const values = this.uniqueValues(this.filterSource().map((student) => student.status));
@@ -933,9 +1044,45 @@ export class StudentsListComponent implements OnInit {
     this.overflowOpen.set(!this.overflowOpen());
   }
 
+  toggleQuickActionsMenu(event: Event): void {
+    event.stopPropagation();
+    this.quickActionsMenuOpen.set(!this.quickActionsMenuOpen());
+  }
+
   toggleRowMenu(event: Event, id: string): void {
     event.stopPropagation();
     this.rowMenuOpen.set(this.rowMenuOpen() === id ? null : id);
+  }
+
+  isActionEnabled(action: QuickAction): boolean {
+    if (!this.selectedStudent()) {
+      return false;
+    }
+    if (!this.entitlements.isEnabled(action.moduleKey)) {
+      return false;
+    }
+    return this.rbac.can(action.permission as any);
+  }
+
+  actionTooltip(action: QuickAction): string {
+    if (!this.selectedStudent()) {
+      return 'Select a student';
+    }
+    if (!this.entitlements.isEnabled(action.moduleKey)) {
+      return 'Not available on your plan';
+    }
+    if (!this.rbac.can(action.permission as any)) {
+      return 'You do not have permission';
+    }
+    return '';
+  }
+
+  runQuickAction(action: QuickAction): void {
+    if (!this.isActionEnabled(action)) {
+      return;
+    }
+    this.quickActionsMenuOpen.set(false);
+    this.logAction(`student_quick_action:${action.key}`);
   }
 
   viewStudent(event: Event, student: Student): void {

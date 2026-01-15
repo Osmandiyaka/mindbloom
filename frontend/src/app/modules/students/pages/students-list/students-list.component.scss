@@ -247,6 +247,18 @@ tbody tr.is-selected {
   font-size: 13px;
 }
 
+.workflow-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.workflow-header-text {
+  display: grid;
+  gap: 2px;
+}
+
 .workflow-meta {
   margin: 4px 0 0;
   font-size: 12px;
@@ -256,6 +268,68 @@ tbody tr.is-selected {
 .actions-list {
   display: grid;
   gap: 6px;
+}
+
+.quick-actions-menu {
+  position: relative;
+}
+
+.quick-actions-menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: white;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 10px;
+  display: grid;
+  gap: 4px;
+  padding: 6px;
+  min-width: 180px;
+  z-index: 20;
+}
+
+.quick-actions-menu-panel mb-button {
+  width: 100%;
+}
+
+.quick-action {
+  position: relative;
+}
+
+:host ::ng-deep .quick-action .mb-button {
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.action-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(148, 163, 184, 0.18);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  flex: 0 0 auto;
+}
+
+.action-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.action-label {
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+
+.action-helper {
+  font-size: 11px;
+  color: var(--color-text-secondary);
 }
 
 .detail-panel {
