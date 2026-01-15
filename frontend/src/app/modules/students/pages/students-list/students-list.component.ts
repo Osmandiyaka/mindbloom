@@ -623,11 +623,6 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                     </span>
                   </div>
                   <div class="summary-item">
-                    <span class="summary-label">Primary guardian</span>
-                    <span class="summary-value">{{ primaryGuardianName(panelStudent()) || '—' }}</span>
-                    <span class="summary-sub">{{ primaryGuardianPhone(panelStudent()) || '—' }}</span>
-                  </div>
-                  <div class="summary-item">
                     <span class="summary-label">Last updated</span>
                     <span class="summary-value">{{ formatUpdated(panelStudent()?.updatedAt) }}</span>
                   </div>
@@ -668,23 +663,47 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                                 <span class="detail-value">{{ formatDate(panelStudent()?.enrollment?.admissionDate) }}</span>
                               </div>
                               <div class="detail-item">
-                                <span class="detail-label">Status</span>
-                                <span class="detail-value">{{ titleCase(panelStudent()?.status || '') || '—' }}</span>
+                                <span class="detail-label">Last updated</span>
+                                <span class="detail-value">Updated {{ formatUpdated(panelStudent()?.updatedAt) }}</span>
                               </div>
                             </div>
                           </div>
                           <div class="overview-card">
                             <div class="overview-card-title">Primary guardian</div>
-                            <div class="detail-grid">
-                              <div class="detail-item">
-                                <span class="detail-label">Name</span>
-                                <span class="detail-value">{{ primaryGuardianName(panelStudent()) || '—' }}</span>
+                            @if (getPrimaryGuardian(panelStudent()); as guardian) {
+                              <div class="detail-grid">
+                                <div class="detail-item">
+                                  <span class="detail-label">Name</span>
+                                  <span class="detail-value">{{ guardian.name || '—' }}</span>
+                                </div>
+                                <div class="detail-item">
+                                  <span class="detail-label">Phone</span>
+                                  <span class="detail-value guardian-phone">
+                                    {{ guardian.phone || '—' }}
+                                    <mb-button
+                                      size="sm"
+                                      variant="tertiary"
+                                      class="guardian-copy"
+                                      aria-label="Copy guardian phone"
+                                      [disabled]="!guardian.phone"
+                                      (click)="copyToClipboard(guardian.phone)">
+                                      ⧉
+                                    </mb-button>
+                                  </span>
+                                </div>
+                                <div class="detail-item detail-item-full" *ngIf="guardian.isEmergencyContact">
+                                  <span class="guardian-badge">Emergency contact</span>
+                                </div>
                               </div>
-                              <div class="detail-item">
-                                <span class="detail-label">Phone</span>
-                                <span class="detail-value">{{ primaryGuardianPhone(panelStudent()) || '—' }}</span>
+                            } @else {
+                              <div class="guardian-empty">
+                                <span class="guardian-empty-icon" aria-hidden="true">!</span>
+                                <span class="guardian-empty-text">No guardian assigned</span>
+                                <mb-button size="sm" variant="tertiary" *can="'students.write'" (click)="openGuardianModal()">
+                                  Add guardian
+                                </mb-button>
                               </div>
-                            </div>
+                            }
                           </div>
                         </div>
                         <div class="overview-column">
@@ -2906,18 +2925,31 @@ export class StudentsListComponent implements OnInit {
   }
 
   primaryGuardianName(student?: Student | null): string {
-    if (!student) return '—';
-    return student.primaryGuardian?.name || student.guardians?.[0]?.name || '—';
+    const guardian = this.getPrimaryGuardian(student);
+    return guardian?.name || '—';
   }
 
   primaryGuardianPhone(student?: Student | null): string {
-    if (!student) return '—';
-    return student.primaryGuardian?.phone || student.guardians?.[0]?.phone || '—';
+    const guardian = this.getPrimaryGuardian(student);
+    return guardian?.phone || '—';
   }
 
   primaryGuardianEmail(student?: Student | null): string {
-    if (!student) return '—';
-    return student.primaryGuardian?.email || student.guardians?.[0]?.email || '—';
+    const guardian = this.getPrimaryGuardian(student);
+    return guardian?.email || '—';
+  }
+
+  getPrimaryGuardian(student?: Student | null): Guardian | null {
+    if (!student) return null;
+    return student.primaryGuardian
+      || student.guardians?.find((guardian) => guardian.isPrimary)
+      || student.guardians?.[0]
+      || null;
+  }
+
+  copyToClipboard(value?: string | null): void {
+    if (!value || !navigator?.clipboard) return;
+    navigator.clipboard.writeText(value).catch(() => {});
   }
 
   handleKeydown(event: KeyboardEvent): void {

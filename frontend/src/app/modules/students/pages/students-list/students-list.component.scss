@@ -824,6 +824,56 @@ tbody tr.is-selected {
   color: var(--color-text-secondary);
 }
 
+.guardian-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.guardian-copy {
+  padding: 0 6px;
+  min-height: 22px;
+}
+
+.guardian-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(148, 163, 184, 0.12);
+  width: fit-content;
+}
+
+.guardian-empty {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.guardian-empty-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: var(--color-text-secondary);
+  background: rgba(148, 163, 184, 0.12);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.guardian-empty-text {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
 .overview-alerts .detail-flag {
   background: rgba(148, 163, 184, 0.06);
 }
