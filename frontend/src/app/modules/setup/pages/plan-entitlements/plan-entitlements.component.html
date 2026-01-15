@@ -82,25 +82,24 @@
                     </div>
                     <div class="plan-summary__actions">
                         <div class="plan-summary__buttons">
-                            @if (!isViewingCurrent()) {
                             <ui-button variant="primary" size="sm" (click)="openRequestModal()">
-                                {{ primaryCtaLabel() }}
+                                Request plan change
                             </ui-button>
-                            } @else {
-                            <span class="plan-summary__current-label">You're on {{ selectedEdition()?.name }}</span>
-                            }
                             @if (!isViewingCurrent()) {
                             <ui-button variant="ghost" size="sm" (click)="toggleCompare()">
                                 {{ compareMode() ? 'Exit compare' : 'Compare editions' }}
                             </ui-button>
                             }
-                            <ui-button variant="ghost" size="sm" (click)="openCompareModal()">Compare plans</ui-button>
                             <div class="plan-overflow">
                                 <ui-button variant="ghost" size="sm" (click)="toggleOverflow()">More</ui-button>
                                 @if (overflowOpen()) {
                                 <div class="plan-overflow__menu" role="menu">
-                                    <button type="button" (click)="downloadPlanSummary()">Download plan summary</button>
-                                    <button type="button" (click)="copyEntitlementSnapshot()">Copy entitlement snapshot</button>
+                                    <button type="button" (click)="viewPlanDetails()">View plan details</button>
+                                    <button type="button" (click)="downloadPlanSummary()">Download entitlement report (PDF)</button>
+                                    <button type="button" (click)="contactSupport()">Contact support</button>
+                                    @if (isDowngrade()) {
+                                    <button type="button" class="danger" (click)="openDowngradeModal()">Request downgrade</button>
+                                    }
                                 </div>
                                 }
                             </div>
@@ -392,8 +391,12 @@
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <div>
-                <h3>Request plan change</h3>
-                <p>Send a request to change your plan. We'll follow up to confirm details.</p>
+                <h3>{{ requestMode() === 'downgrade' ? 'Request downgrade' : 'Request plan change' }}</h3>
+                <p>
+                    {{ requestMode() === 'downgrade'
+                        ? 'Downgrading may disable some modules and restrict access for users.'
+                        : 'Send a request to change your plan. We will follow up to confirm details.' }}
+                </p>
             </div>
             <ui-button size="sm" variant="ghost" (click)="closeRequestModal()">✕</ui-button>
         </div>
@@ -402,17 +405,30 @@
                 Requested plan
                 <ui-input [value]="selectedEdition()?.name || ''" [disabled]="true"></ui-input>
             </label>
-            @if (isDowngrade() && downgradeImpacts().length > 0) {
+            @if (requestMode() === 'downgrade') {
             <div class="downgrade-warning">
-                <p>This change reduces access for the tenant.</p>
+                <strong>Impact summary</strong>
+                <p>This change disables {{ downgradeImpacts().length }} module{{ downgradeImpacts().length === 1 ? '' : 's' }}.</p>
+                @if (downgradeImpacts().length > 0) {
                 <ul>
                     @for (impact of downgradeImpacts(); track impact) {
                     <li>{{ impact }}</li>
                     }
                 </ul>
+                }
+                <p>Some data may become read-only.</p>
+                <ui-checkbox [(checked)]="downgradeAcknowledged">
+                    I understand some modules will be disabled
+                </ui-checkbox>
                 <label>
-                    Type DOWNGRADE to confirm
-                    <ui-input [(value)]="downgradeConfirmText"></ui-input>
+                    Reason (optional)
+                    <select [(ngModel)]="downgradeReason">
+                        <option value="">Select a reason</option>
+                        <option value="cost">Cost</option>
+                        <option value="not_needed">Not needed</option>
+                        <option value="temporary">Temporary</option>
+                        <option value="other">Other</option>
+                    </select>
                 </label>
             </div>
             }
@@ -437,9 +453,9 @@
             <ui-button
                 variant="primary"
                 size="sm"
-                [disabled]="isDowngrade() && downgradeImpacts().length > 0 && downgradeConfirmText !== 'DOWNGRADE'"
+                [disabled]="requestMode() === 'downgrade' && !downgradeAcknowledged"
                 (click)="submitRequest()">
-                Send request
+                {{ requestMode() === 'downgrade' ? 'Submit request' : 'Send request' }}
             </ui-button>
         </div>
     </div>

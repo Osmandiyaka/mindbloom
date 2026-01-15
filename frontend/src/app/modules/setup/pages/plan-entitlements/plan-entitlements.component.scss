@@ -367,6 +367,14 @@
     background: rgba(148, 163, 184, 0.12);
 }
 
+.plan-overflow__menu button.danger {
+    color: #b91c1c;
+}
+
+.plan-overflow__menu button.danger:hover {
+    background: rgba(248, 113, 113, 0.12);
+}
+
 .plan-summary__highlights {
     display: flex;
     flex-wrap: wrap;

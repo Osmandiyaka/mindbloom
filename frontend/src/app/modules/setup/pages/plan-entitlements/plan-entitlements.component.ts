@@ -95,7 +95,9 @@ export class PlanEntitlementsComponent implements OnInit {
     activeLockInfo = signal<ModuleKey | null>(null);
     overflowOpen = signal(false);
     overrideFilter = signal<OverrideFilter>('all');
-    downgradeConfirmText = '';
+    requestMode = signal<'change' | 'downgrade'>('change');
+    downgradeAcknowledged = false;
+    downgradeReason = '';
     bulkReason = '';
     bulkEmail = '';
     bulkUrgency: 'normal' | 'urgent' = 'normal';
@@ -591,11 +593,22 @@ export class PlanEntitlementsComponent implements OnInit {
     }
 
     openRequestModal(): void {
+        this.requestMode.set('change');
+        this.downgradeAcknowledged = false;
+        this.downgradeReason = '';
         this.showRequestModal.set(true);
     }
 
     closeRequestModal(): void {
         this.showRequestModal.set(false);
+    }
+
+    openDowngradeModal(): void {
+        this.closeOverflow();
+        this.requestMode.set('downgrade');
+        this.downgradeAcknowledged = false;
+        this.downgradeReason = '';
+        this.showRequestModal.set(true);
     }
 
     openCompareModal(): void {
@@ -615,6 +628,14 @@ export class PlanEntitlementsComponent implements OnInit {
     }
 
     copyEntitlementSnapshot(): void {
+        this.closeOverflow();
+    }
+
+    viewPlanDetails(): void {
+        this.closeOverflow();
+    }
+
+    contactSupport(): void {
         this.closeOverflow();
     }
 
