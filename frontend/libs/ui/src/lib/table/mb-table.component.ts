@@ -87,6 +87,7 @@ export type MbTableCellValue =
                                 [class.mb-table__cell--status]="isStatusColumn(column)"
                                 [class.mb-table__cell--link]="isNameColumn(column)"
                                 [class.is-inactive]="isStatusColumn(column) && isInactiveStatus(row)"
+                                [attr.title]="isStatusColumn(column) ? 'Enabled for assignment' : null"
                                 (click)="handleCellClick($event, row, column)"
                             >
                                 <ng-container *ngIf="getCellValue(row, column) as cell">

@@ -208,6 +208,10 @@
     background: transparent;
 }
 
+:host ::ng-deep .roles-table__list .mb-table .mb-table__cell[data-col='status'].is-inactive {
+    color: var(--mb-color-text-muted);
+}
+
 :host ::ng-deep .roles-table__list .mb-table .mb-table__cell[data-col='status']::before {
     content: '';
     width: 6px;
