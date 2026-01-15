@@ -91,27 +91,20 @@ export class PermissionTreeComponent {
         event.stopPropagation();
 
         const selected = new Set(this._selectedPermissions());
+        const hasChildren = this.hasChildren(permission);
+        const targetIds = hasChildren ? this.collectDescendantIds(permission) : [permission.id];
 
-        if (selected.has(permission.id)) {
-            // Unselect this permission and all children
-            selected.delete(permission.id);
-            this.removeChildPermissions(permission, selected);
-        } else {
-            // Select this permission
-            selected.add(permission.id);
-        }
+        const allSelected = targetIds.every((id) => selected.has(id));
+        targetIds.forEach((id) => {
+            if (allSelected) {
+                selected.delete(id);
+            } else {
+                selected.add(id);
+            }
+        });
 
         this._selectedPermissions.set(selected);
         this.permissionsChange.emit(Array.from(selected));
-    }
-
-    private removeChildPermissions(permission: Permission, selected: Set<string>) {
-        if (permission.children) {
-            permission.children.forEach(child => {
-                selected.delete(child.id);
-                this.removeChildPermissions(child, selected);
-            });
-        }
     }
 
     isSelected(permissionId: string): boolean {
@@ -119,14 +112,12 @@ export class PermissionTreeComponent {
     }
 
     isIndeterminate(permission: Permission): boolean {
-        if (!permission.children || permission.children.length === 0) {
+        if (!this.hasChildren(permission)) {
             return false;
         }
-
-        const selected = this._selectedPermissions();
-        const childrenSelected = permission.children.filter(child => selected.has(child.id)).length;
-
-        return childrenSelected > 0 && childrenSelected < permission.children.length;
+        const targetIds = this.collectDescendantIds(permission);
+        const selectedCount = targetIds.filter((id) => this._selectedPermissions().has(id)).length;
+        return selectedCount > 0 && selectedCount < targetIds.length;
     }
 
     hasChildren(permission: Permission): boolean {
@@ -138,26 +129,38 @@ export class PermissionTreeComponent {
     }
 
     moduleCoverage(permission: Permission): { enabled: number; total: number } {
-        const children = permission.children || [];
-        if (!children.length) {
+        if (!this.hasChildren(permission)) {
             return { enabled: this.isSelected(permission.id) ? 1 : 0, total: 1 };
         }
-        const enabled = children.filter((child) => this.isSelected(child.id)).length;
-        return { enabled, total: children.length };
+        const ids = this.collectDescendantIds(permission);
+        const enabled = ids.filter((id) => this.isSelected(id)).length;
+        return { enabled, total: ids.length };
     }
 
     moduleSelectionState(permission: Permission): { checked: boolean; indeterminate: boolean } {
-        const coverage = this.moduleCoverage(permission);
-        if (coverage.total === 0) {
-            return { checked: false, indeterminate: false };
+        if (!this.hasChildren(permission)) {
+            return { checked: this.isSelected(permission.id), indeterminate: false };
         }
+        const coverage = this.moduleCoverage(permission);
         return {
-            checked: coverage.enabled === coverage.total,
+            checked: coverage.enabled === coverage.total && coverage.total > 0,
             indeterminate: coverage.enabled > 0 && coverage.enabled < coverage.total,
         };
     }
 
     displayActions(actions: PermissionAction[]): PermissionAction[] {
         return actions.filter((action) => action !== PermissionAction.MANAGE);
+    }
+
+    private collectDescendantIds(permission: Permission): string[] {
+        const ids: string[] = [];
+        const walk = (node: Permission) => {
+            (node.children || []).forEach((child) => {
+                ids.push(child.id);
+                walk(child);
+            });
+        };
+        walk(permission);
+        return ids;
     }
 }

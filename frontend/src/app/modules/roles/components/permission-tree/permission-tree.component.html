@@ -59,15 +59,14 @@
                         <span class="permission-icon">{{ permission.icon }}</span>
                         }
                         <span class="name-text">{{ permission.displayName }}</span>
+                        @if (hasChildren(permission)) {
+                        <span class="permission-count-badge">
+                            {{ moduleCoverage(permission).enabled }}/{{ moduleCoverage(permission).total }}
+                        </span>
+                        }
                     </div>
                     @if (permission.description) {
                     <div class="permission-description">{{ permission.description }}</div>
-                    }
-                    @if (hasChildren(permission)) {
-                    <div class="permission-coverage">
-                        {{ permission.displayName }} · {{ moduleCoverage(permission).enabled }}/{{
-                        moduleCoverage(permission).total }} enabled
-                    </div>
                     }
                 </div>
 

@@ -1,5 +1,5 @@
 <div class="permission-matrix" [style.--action-count]="actionColumns().length">
-    <div class="permission-matrix__controls">
+    <div class="permission-matrix__controls" *ngIf="showControls">
         <div class="permission-matrix__title">
             <span>Permissions</span>
             <span class="permission-matrix__selected">{{ selectedIds().size }} selected</span>

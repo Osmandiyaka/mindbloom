@@ -328,7 +328,24 @@
                                   { label: 'Inactive', value: 'inactive' }
                                 ]" (valueChange)="handleStatusChange($event)"></mb-select>
                         </div>
+                        <div class="role-form__permissions-toolbar">
+                            <div class="role-form__permissions-search">
+                                <app-search-input placeholder="Search permissions…"
+                                    (search)="roleFormPermissionSearch.set($event)"></app-search-input>
+                            </div>
+                            <div class="role-form__permissions-tools">
+                                <button type="button" class="role-form__toolbar-btn"
+                                    (click)="expandRolePermissions()">Expand all</button>
+                                <button type="button" class="role-form__toolbar-btn"
+                                    (click)="collapseRolePermissions()">Collapse all</button>
+                                <button type="button" class="role-form__toolbar-btn"
+                                    [disabled]="!roleFormPermissions().length"
+                                    (click)="clearRolePermissions()">Clear selection</button>
+                                <span class="role-form__count-pill">{{ roleFormPermissions().length }} selected</span>
+                            </div>
+                        </div>
                         <app-permission-matrix [permissions]="permissionTree()" [selectedPermissions]="roleFormPermissions()"
+                            [searchTerm]="roleFormPermissionSearch()" [showControls]="false"
                             (selectedPermissionsChange)="updateRolePermissions($event)"></app-permission-matrix>
                     </div>
                 </section>

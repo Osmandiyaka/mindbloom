@@ -616,6 +616,64 @@
     gap: 12px;
 }
 
+.role-form__permissions-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: var(--mb-color-surface);
+    padding: 10px 0;
+}
+
+.role-form__permissions-search {
+    flex: 1;
+    min-width: 220px;
+    max-width: 320px;
+}
+
+.role-form__permissions-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.role-form__toolbar-btn {
+    border: 1px solid var(--mb-color-border-subtle);
+    background: var(--mb-color-surface);
+    color: var(--mb-color-text-muted);
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.role-form__toolbar-btn:hover:not(:disabled) {
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--mb-color-text);
+}
+
+.role-form__toolbar-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.role-form__count-pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--mb-color-text-muted);
+    white-space: nowrap;
+}
+
 .role-form__footer {
     display: flex;
     justify-content: space-between;

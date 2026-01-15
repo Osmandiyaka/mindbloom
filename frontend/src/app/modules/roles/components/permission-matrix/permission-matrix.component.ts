@@ -46,7 +46,12 @@ export class PermissionMatrixComponent {
     @Input() set selectedPermissions(value: string[]) {
         this.selectedIds.set(new Set(value || []));
     }
+    @Input() set searchTerm(value: string | null | undefined) {
+        if (value === undefined) return;
+        this.search.set(value ?? '');
+    }
     @Input() readOnly = false;
+    @Input() showControls = true;
     @Output() selectedPermissionsChange = new EventEmitter<string[]>();
 
     search = signal('');
