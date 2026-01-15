@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -136,7 +136,7 @@ export class RoleListComponent implements OnInit {
     readonly roleFormScopeSummary = computed(() => {
         const scope = this.roleFormScopeType();
         if (scope === 'workspace') {
-            return 'All schools';
+            return 'Workspace-wide';
         }
         if (scope === 'school') {
             const count = this.roleFormSchoolIds().size;
@@ -156,6 +156,17 @@ export class RoleListComponent implements OnInit {
         };
         return map[this.roleFormTemplate()] || 'None';
     });
+
+    @HostListener('document:keydown', ['$event'])
+    handleKeydown(event: KeyboardEvent): void {
+        if (!this.roleFormOpen()) return;
+        if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+            event.preventDefault();
+            if (!this.roleFormSaving() && !this.roleFormInvalid()) {
+                this.saveRole();
+            }
+        }
+    }
 
     deleteModalOpen = signal(false);
     deleteConfirmText = signal('');

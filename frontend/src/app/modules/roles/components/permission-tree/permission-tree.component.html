@@ -1,4 +1,6 @@
-<div class="permission-tree">
+<div class="permission-tree"
+    [class.density-compact]="densityMode() === 'compact'"
+    [class.density-comfortable]="densityMode() === 'comfortable'">
     <div class="permission-tree__toolbar">
         <app-search-input placeholder="Search permissions…" (search)="search.set($event)"></app-search-input>
         <div class="permission-tree__toolbar-actions">
@@ -14,6 +16,27 @@
                     Detailed view
                 </button>
             </div>
+            <div class="permission-tree__view-toggle" role="group" aria-label="Density mode">
+                <button type="button" class="permission-tree__view-option"
+                    [class.is-active]="densityMode() === 'comfortable'"
+                    (click)="setDensity('comfortable')">
+                    Comfortable
+                </button>
+                <button type="button" class="permission-tree__view-option"
+                    [class.is-active]="densityMode() === 'compact'"
+                    (click)="setDensity('compact')">
+                    Compact
+                </button>
+            </div>
+            <button type="button" class="permission-tree__link"
+                [disabled]="readOnly || displayedTree.length === 0"
+                (click)="selectVisibleResults()">
+                Select all results
+            </button>
+            <span class="permission-tree__divider">/</span>
+            <button type="button" class="permission-tree__link" [disabled]="readOnly" (click)="clearAllSelections()">
+                Clear all
+            </button>
             <button type="button" class="permission-tree__link" (click)="expandAll()">Expand all</button>
             <span class="permission-tree__divider">/</span>
             <button type="button" class="permission-tree__link" (click)="collapseAll()">Collapse all</button>
@@ -26,6 +49,11 @@
                 (change)="viewSelectedOnly.set($any($event.target).checked)" />
             <span>View selected only</span>
         </label>
+        @if (searchSummary) {
+        <div class="permission-tree__search-summary">
+            Showing {{ searchSummary.results }} results in {{ searchSummary.categories }} categories
+        </div>
+        }
         <div class="permission-tree__chips" *ngIf="selectedModuleChips.length">
             @for (chip of visibleModuleChips; track chip.id) {
             <button type="button" class="permission-tree__chip" (click)="clearModuleSelection(chip.id)">
@@ -43,16 +71,34 @@
     <div class="empty-state">
         <p>No permissions available</p>
     </div>
+    } @else if (viewSelectedOnly() && selectedCount === 0) {
+    <div class="empty-state">
+        <p class="empty-state__title">No permissions selected</p>
+        <p class="empty-state__body">Select permissions to build this role.</p>
+        <button type="button" class="empty-state__action" (click)="viewSelectedOnly.set(false)">Clear filter</button>
+    </div>
+    } @else if (displayedTree.length === 0 && search().trim().length) {
+    <div class="empty-state">
+        <p class="empty-state__title">No results</p>
+        <p class="empty-state__body">Try a different search term.</p>
+    </div>
     } @else if (displayedTree.length === 0) {
     <div class="empty-state">
         <p>No permissions match your search</p>
     </div>
     } @else {
-    <div class="permission-list">
+    <div class="permission-list" role="tree">
         @for (permission of displayedTree; track permission.id) {
-        <div class="permission-item" [class.has-children]="hasChildren(permission)">
+        <div class="permission-item" [class.has-children]="hasChildren(permission)" [class.is-expanded]="isExpanded(permission.id)">
             <!-- Permission Header -->
-            <div class="permission-header"
+            <div
+                #treeRow
+                class="permission-header permission-row"
+                role="treeitem"
+                [attr.aria-expanded]="hasChildren(permission) ? isExpanded(permission.id) : null"
+                [attr.aria-level]="1"
+                tabindex="0"
+                (keydown)="handleRowKeydown($event, permission, true)"
                 (click)="viewMode() === 'detailed' && hasChildren(permission) && toggleNode(permission.id)">
                 <!-- Expand/Collapse Icon -->
                 @if (hasChildren(permission) && viewMode() === 'detailed') {
@@ -87,27 +133,80 @@
                 <!-- Permission Info -->
                 <div class="permission-info">
                     <div class="permission-name">
-                        @if (permission.icon) {
-                        <span class="permission-icon">{{ permission.icon }}</span>
-                        }
-                        <span class="name-text">{{ permission.displayName }}</span>
+                        <span class="permission-icon">
+                            @switch (iconKey(permission)) {
+                            @case ('users') {
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M17 21a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            }
+                            @case ('book') {
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"></path>
+                                <path d="M8 2v15"></path>
+                            </svg>
+                            }
+                            @case ('calendar') {
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                                <path d="M16 2v4M8 2v4M3 10h18"></path>
+                            </svg>
+                            }
+                            @case ('settings') {
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c0 .66.39 1.26 1 1.51H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                            }
+                            @case ('shield') {
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                            }
+                            @case ('chart') {
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M3 3v18h18"></path>
+                                <rect x="7" y="12" width="3" height="6"></rect>
+                                <rect x="12" y="9" width="3" height="9"></rect>
+                                <rect x="17" y="6" width="3" height="12"></rect>
+                            </svg>
+                            }
+                            @default {
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            }
+                            }
+                        </span>
+                        <span class="name-text" [innerHTML]="highlightText(permission.displayName)"></span>
                         @if (hasChildren(permission)) {
-                        <span class="permission-count-badge">
-                            {{ moduleCoverage(permission).enabled }}/{{ moduleCoverage(permission).total }}
+                        <span class="permission-children-count">· {{ permissionCount(permission) }} permissions</span>
+                        <span class="permission-status" [class]="'permission-status--' + moduleStatus(permission).state">
+                            @if (moduleStatus(permission).state === 'all') {
+                            <svg viewBox="0 0 16 16" aria-hidden="true">
+                                <path d="M13.5 4.5l-6 6-3-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                            }
+                            <span>{{ moduleStatus(permission).label }}</span>
+                            <span class="permission-status__count">({{ moduleStatus(permission).count }})</span>
                         </span>
                         }
                     </div>
                     @if (permission.description) {
-                    <div class="permission-description">{{ permission.description }}</div>
+                    <div class="permission-description" [innerHTML]="highlightText(permission.description)"></div>
                     }
                 </div>
 
                 <!-- Action Badges -->
-                @if (!hasChildren(permission)) {
+                @if (!hasChildren(permission) && permission.actions?.length) {
                 <div class="permission-actions">
                     @for (action of displayActions(permission.actions); track action) {
                     <span class="action-badge" [class]="'action-' + action">
-                        {{ action }}
+                        {{ action | uppercase }}
                     </span>
                     }
                 </div>
@@ -116,38 +215,107 @@
 
             <!-- Children -->
             @if (viewMode() === 'detailed' && hasChildren(permission) && isExpanded(permission.id)) {
-            <div class="permission-children">
-                <div class="permission-matrix__header">
-                    <div class="permission-matrix__cell permission-matrix__cell--name">Permission</div>
-                    @for (action of actionColumns; track action) {
-                    <div class="permission-matrix__cell permission-matrix__cell--action">{{ action }}</div>
-                    }
-                </div>
+            <div class="permission-children" role="group">
                 @for (row of rowsForGroup(permission); track row.permission.id) {
-                <div class="permission-matrix__row" [class.is-nested]="row.depth > 0">
-                    <div class="permission-matrix__cell permission-matrix__cell--name">
-                        <div class="permission-matrix__name">
-                            @if (row.permission.icon) {
-                            <span class="permission-icon">{{ row.permission.icon }}</span>
-                            }
-                            <span class="name-text">{{ row.permission.displayName }}</span>
+                <div
+                    #treeRow
+                    class="permission-child-row permission-row"
+                    role="treeitem"
+                    [attr.aria-level]="row.depth + 2"
+                    tabindex="0"
+                    [class.is-nested]="row.depth > 0"
+                    (keydown)="handleRowKeydown($event, row.permission, false)"
+                >
+                    <label class="checkbox-container" (click)="$event.stopPropagation()">
+                        @if (hasChildren(row.permission)) {
+                        <input
+                            type="checkbox"
+                            [checked]="moduleSelectionState(row.permission).checked"
+                            [indeterminate]="moduleSelectionState(row.permission).indeterminate"
+                            [disabled]="readOnly"
+                            (change)="togglePermission(row.permission, $event)"
+                        />
+                        } @else {
+                        <input
+                            type="checkbox"
+                            [checked]="isSelected(row.permission.id)"
+                            [disabled]="readOnly"
+                            (change)="togglePermission(row.permission, $event)"
+                        />
+                        }
+                        <span class="checkmark"></span>
+                    </label>
+                    <div class="permission-child-info">
+                        <div class="permission-child-name">
+                            <span class="permission-icon">
+                                @switch (iconKey(row.permission)) {
+                                @case ('users') {
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M17 21a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                                }
+                                @case ('book') {
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                    <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"></path>
+                                    <path d="M8 2v15"></path>
+                                </svg>
+                                }
+                                @case ('calendar') {
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                                    <path d="M16 2v4M8 2v4M3 10h18"></path>
+                                </svg>
+                                }
+                                @case ('settings') {
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c0 .66.39 1.26 1 1.51H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                </svg>
+                                }
+                                @case ('shield') {
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                                }
+                                @case ('chart') {
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M3 3v18h18"></path>
+                                    <rect x="7" y="12" width="3" height="6"></rect>
+                                    <rect x="12" y="9" width="3" height="9"></rect>
+                                    <rect x="17" y="6" width="3" height="12"></rect>
+                                </svg>
+                                }
+                                @default {
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                }
+                                }
+                            </span>
+                            <span class="name-text" [innerHTML]="highlightText(row.permission.displayName)"></span>
                             @if (isSensitive(row.permission)) {
-                            <span class="permission-risk" title="This permission grants access to sensitive data.">⚠</span>
+                            <span class="permission-risk" title="This permission grants access to sensitive data.">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                    <path d="M12 9v4"></path>
+                                    <path d="M12 17h.01"></path>
+                                </svg>
+                            </span>
                             }
                         </div>
                         @if (row.permission.description) {
-                        <div class="permission-matrix__desc">{{ row.permission.description }}</div>
+                        <div class="permission-child-desc" [innerHTML]="highlightText(row.permission.description)"></div>
                         }
                     </div>
-                    @for (action of actionColumns; track action) {
-                    <div class="permission-matrix__cell permission-matrix__cell--action">
-                        <input
-                            type="checkbox"
-                            class="permission-matrix__checkbox"
-                            [checked]="isSelected(row.permission.id) && hasAction(row.permission, action)"
-                            [disabled]="readOnly || !hasAction(row.permission, action)"
-                            (click)="togglePermission(row.permission, $event)"
-                        />
+                    @if (row.permission.actions?.length) {
+                    <div class="permission-child-actions">
+                        @for (action of displayActions(row.permission.actions); track action) {
+                        <span class="permission-action-chip">{{ action | uppercase }}</span>
+                        }
                     </div>
                     }
                 </div>

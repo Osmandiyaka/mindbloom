@@ -22,6 +22,7 @@
     gap: 8px;
     font-size: 12px;
     color: var(--color-text-secondary);
+    flex-wrap: wrap;
 }
 
 .permission-tree__view-toggle {
@@ -61,6 +62,11 @@
     color: var(--color-text-primary);
 }
 
+.permission-tree__link:disabled {
+    color: var(--color-border);
+    cursor: not-allowed;
+}
+
 .permission-tree__divider {
     color: var(--color-border);
 }
@@ -79,6 +85,11 @@
     border-bottom: 1px solid rgba(148, 163, 184, 0.18);
     background: rgba(248, 250, 252, 0.8);
     flex-wrap: wrap;
+}
+
+.permission-tree__search-summary {
+    font-size: 11px;
+    color: var(--color-text-secondary);
 }
 
 .permission-tree__toggle {
@@ -139,6 +150,32 @@
     color: var(--color-text-secondary);
 }
 
+.empty-state__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0 0 6px;
+}
+
+.empty-state__body {
+    margin: 0 0 16px;
+    font-size: 13px;
+}
+
+.empty-state__action {
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: white;
+    color: var(--color-text-primary);
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.empty-state__action:hover {
+    background: rgba(148, 163, 184, 0.12);
+}
+
 .permission-list {
     max-height: 500px;
     overflow-y: auto;
@@ -160,6 +197,12 @@
             }
         }
     }
+
+    &.is-expanded {
+        .permission-header {
+            background: rgba(59, 130, 246, 0.06);
+        }
+    }
 }
 
 .permission-header {
@@ -168,6 +211,16 @@
     gap: 12px;
     padding: 16px;
     transition: background 0.2s ease;
+}
+
+.permission-row {
+    outline: none;
+}
+
+.permission-row:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.4);
+    outline-offset: -2px;
+    border-radius: 8px;
 }
 
 .expand-btn {
@@ -284,26 +337,76 @@
     color: var(--color-text-primary);
     margin-bottom: 4px;
 
-    .permission-icon {
-        font-size: 16px;
-    }
-
     .name-text {
         flex: 1;
     }
 }
 
-.permission-count-badge {
+.permission-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(148, 163, 184, 0.16);
+    color: var(--color-text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.6px;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+}
+
+.permission-children-count {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.permission-status {
     display: inline-flex;
     align-items: center;
     gap: 4px;
     padding: 2px 8px;
     border-radius: 999px;
-    background: rgba(148, 163, 184, 0.14);
-    color: var(--color-text-secondary);
     font-size: 11px;
     font-weight: 600;
     white-space: nowrap;
+
+    svg {
+        width: 12px;
+        height: 12px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2px;
+    }
+}
+
+.permission-status__count {
+    font-weight: 600;
+    color: inherit;
+}
+
+.permission-status--none {
+    background: rgba(148, 163, 184, 0.16);
+    color: var(--color-text-secondary);
+}
+
+.permission-status--partial {
+    background: rgba(59, 130, 246, 0.12);
+    color: #2563eb;
+}
+
+.permission-status--all {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
 }
 
 .permission-description {
@@ -368,44 +471,31 @@
     padding: 8px 0;
 }
 
-.permission-matrix__header,
-.permission-matrix__row {
+.permission-child-row {
     display: grid;
-    grid-template-columns: minmax(200px, 1fr) repeat(5, 72px);
-    align-items: center;
-    column-gap: 8px;
-}
-
-.permission-matrix__header {
-    padding: 8px 16px;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--color-text-secondary);
-}
-
-.permission-matrix__row {
-    min-height: 48px;
-    padding: 6px 16px;
+    grid-template-columns: 20px minmax(200px, 1fr) auto;
+    gap: 12px;
+    padding: 10px 16px;
     border-top: 1px solid rgba(148, 163, 184, 0.2);
+    align-items: center;
     background: transparent;
 }
 
-.permission-matrix__row.is-nested {
+.permission-child-row.is-nested {
     padding-left: 32px;
 }
 
-.permission-matrix__row:hover {
+.permission-child-row:hover {
     background: var(--color-surface-hover);
 }
 
-.permission-matrix__cell--name {
+.permission-child-info {
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
-.permission-matrix__name {
+.permission-child-name {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -415,25 +505,71 @@
 }
 
 .permission-risk {
-    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
     color: #b45309;
+
+    svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.8px;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
 }
 
-.permission-matrix__desc {
+.permission-child-desc {
     font-size: 12px;
     color: var(--color-text-secondary);
 }
 
-.permission-matrix__cell--action {
+.permission-child-actions {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
-.permission-matrix__checkbox {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--color-accent);
+.permission-action-chip {
+    padding: 2px 8px;
+    font-size: 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+}
+
+.permission-highlight {
+    background: rgba(59, 130, 246, 0.18);
+    color: inherit;
+    padding: 0 2px;
+    border-radius: 3px;
+}
+
+.permission-tree.density-compact {
+    .permission-header {
+        padding: 12px 14px;
+    }
+
+    .permission-children {
+        padding: 4px 0;
+    }
+
+    .permission-child-row {
+        padding: 8px 14px;
+    }
+
+    .permission-description {
+        font-size: 12px;
+    }
+
+    .permission-child-desc {
+        font-size: 11px;
+    }
 }
 
 // Dark mode adjustments
