@@ -143,6 +143,9 @@
             </div>
 
             @if (activeTab() === 'modules') {
+            <div class="modules-hint">
+                Access = edition entitlement. Status = tenant effective state.
+            </div>
             <div class="modules-table" [class.is-compare]="compareMode() && !isViewingCurrent()">
                 <div class="modules-table__header">
                     <span>Module</span>
@@ -155,7 +158,11 @@
                     <span></span>
                 </div>
                 @for (row of moduleRows(); track row.key) {
-                <div class="modules-table__row" (click)="openModuleDetail(row.key)">
+                <div
+                    class="modules-table__row"
+                    [class.is-unchanged]="row.isUnchanged && compareMode() && !isViewingCurrent()"
+                    [class.is-added]="row.isAdded && compareMode() && !isViewingCurrent()"
+                    (click)="openModuleDetail(row.key)">
                     <div class="module-cell">
                         <span class="module-icon" aria-hidden="true">
                             @switch (row.icon) {
@@ -196,8 +203,24 @@
                             <p class="module-desc">{{ row.description }}</p>
                         </div>
                     </div>
-                    <div class="pill pill--soft">{{ accessLabel(row.access) }}</div>
-                    <div class="pill" [class]="'pill--' + row.status">{{ statusLabel(row.status) }}</div>
+                    <div class="tag tag--access" [class]="'tag--' + row.access">{{ accessLabel(row.access) }}</div>
+                    <div class="status-cell">
+                        <span class="tag tag--status" [class]="'tag--' + row.status">{{ statusLabel(row.status) }}</span>
+                        @if (row.lockReason) {
+                        <button type="button" class="info-icon" (click)="toggleLockInfo(row.key, $event)" aria-label="Why locked?">
+                            <svg viewBox="0 0 16 16" aria-hidden="true">
+                                <circle cx="8" cy="8" r="7"></circle>
+                                <path d="M8 11v-3"></path>
+                                <path d="M8 5h.01"></path>
+                            </svg>
+                        </button>
+                        }
+                        @if (activeLockInfo() === row.key && row.lockReason) {
+                        <div class="lock-popover" role="tooltip">
+                            {{ row.lockReason }}
+                        </div>
+                        }
+                    </div>
                     <p class="notes">{{ row.notes || '—' }}</p>
                     @if (compareMode() && !isViewingCurrent()) {
                     <p class="compare">{{ row.change }}</p>

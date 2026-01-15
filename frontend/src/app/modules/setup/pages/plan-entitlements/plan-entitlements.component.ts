@@ -11,7 +11,7 @@ import { UiCheckboxComponent } from '../../../../shared/ui/forms/ui-checkbox.com
 import { UiInputComponent } from '../../../../shared/ui/forms/ui-input.component';
 
 type AccessType = 'included' | 'not_included' | 'add_on';
-type StatusType = 'enabled' | 'locked' | 'disabled';
+type StatusType = 'enabled' | 'locked_plan' | 'disabled_override' | 'not_configured';
 
 interface EditionModuleConfig {
     access: AccessType;
@@ -58,6 +58,7 @@ export class PlanEntitlementsComponent implements OnInit {
     drawerModuleKey = signal<ModuleKey | null>(null);
     showRequestModal = signal(false);
     showOverridesDrawer = signal(false);
+    activeLockInfo = signal<ModuleKey | null>(null);
     bulkReason = '';
     bulkEmail = '';
     bulkUrgency: 'normal' | 'urgent' = 'normal';
@@ -96,8 +97,26 @@ export class PlanEntitlementsComponent implements OnInit {
                 status,
                 notes: config.notes || this.statusNote(module.key, config.access, status),
                 change,
+                isAdded: change === '+ Added',
+                isUnchanged: change === 'No change',
+                lockReason: this.lockReason(module.key, config.access, status),
             };
         });
+    });
+
+    compareBanner = computed(() => {
+        if (!this.compareMode() || this.isViewingCurrent()) {
+            return null;
+        }
+        const current = this.currentEdition();
+        const selected = this.selectedEdition();
+        if (!current || !selected) {
+            return null;
+        }
+        return {
+            title: `Comparing ${current.name} \u2192 ${selected.name}`,
+            summary: this.compareSummary(current, selected),
+        };
     });
 
     planRank(plan: SubscriptionPlan | null | undefined): number {
@@ -203,30 +222,37 @@ export class PlanEntitlementsComponent implements OnInit {
         switch (status) {
             case 'enabled':
                 return 'Enabled';
-            case 'disabled':
-                return 'Disabled';
+            case 'disabled_override':
+                return 'Disabled (override)';
+            case 'not_configured':
+                return 'Not configured';
             default:
-                return 'Locked';
+                return 'Locked (plan)';
         }
     }
 
     moduleStatus(moduleKey: ModuleKey, access: AccessType): StatusType {
         if (!this.isViewingCurrent()) {
-            return access === 'included' ? 'locked' : 'locked';
+            return 'locked_plan';
         }
         if (access === 'included') {
             const entitlements = this.entitlements();
             if (!entitlements?.modules) {
-                return 'enabled';
+                return this.requiresConfiguration(moduleKey) ? 'not_configured' : 'enabled';
             }
-            return entitlements.modules[moduleKey] ? 'enabled' : 'disabled';
+            return entitlements.modules[moduleKey]
+                ? (this.requiresConfiguration(moduleKey) ? 'not_configured' : 'enabled')
+                : 'disabled_override';
         }
-        return 'locked';
+        return 'locked_plan';
     }
 
     statusNote(moduleKey: ModuleKey, access: AccessType, status: StatusType): string | undefined {
-        if (status === 'disabled') {
+        if (status === 'disabled_override') {
             return 'Disabled by admin override';
+        }
+        if (status === 'not_configured') {
+            return 'Setup required to activate';
         }
         if (!this.isViewingCurrent() && access === 'included') {
             return 'Switch to this plan to enable';
@@ -251,6 +277,88 @@ export class PlanEntitlementsComponent implements OnInit {
             return '– Removed';
         }
         return 'Changed';
+    }
+
+    requiresConfiguration(moduleKey: ModuleKey): boolean {
+        const requires = new Set<ModuleKey>([
+            'fees',
+            'accounting',
+            'library',
+            'transport',
+            'hr',
+            'payroll',
+        ]);
+        return requires.has(moduleKey);
+    }
+
+    lockReason(moduleKey: ModuleKey, access: AccessType, status: StatusType): string | null {
+        if (status === 'disabled_override') {
+            return 'This module is disabled by an admin override.';
+        }
+        if (status === 'not_configured') {
+            return 'Complete setup to enable this module for the tenant.';
+        }
+        if (status === 'locked_plan' && access === 'included' && !this.isViewingCurrent()) {
+            return 'This module is included in the selected plan. Switch plans to enable.';
+        }
+        if (access === 'add_on') {
+            return 'This module is available as an add-on. Contact sales to enable.';
+        }
+        if (access === 'not_included') {
+            const required = this.minimumPlanForModule(moduleKey);
+            if (required) {
+                return `This module requires ${required} or higher.`;
+            }
+            return 'This module is not included in the selected edition.';
+        }
+        return null;
+    }
+
+    minimumPlanForModule(moduleKey: ModuleKey): string | null {
+        const order: SubscriptionPlan[] = ['free', 'basic', 'premium', 'enterprise'];
+        for (const plan of order) {
+            const edition = this.editions().find((item) => item.id === plan);
+            if (edition?.modules?.[moduleKey]?.access === 'included') {
+                return edition.name;
+            }
+        }
+        return null;
+    }
+
+    toggleLockInfo(moduleKey: ModuleKey, event: Event): void {
+        event.stopPropagation();
+        this.activeLockInfo.set(this.activeLockInfo() === moduleKey ? null : moduleKey);
+    }
+
+    compareSummary(current: EditionPlan, selected: EditionPlan): string[] {
+        const currentModules = Object.entries(current.modules || {})
+            .filter(([, config]) => config?.access === 'included')
+            .map(([key]) => key);
+        const selectedModules = Object.entries(selected.modules || {})
+            .filter(([, config]) => config?.access === 'included')
+            .map(([key]) => key);
+        const addedCount = selectedModules.filter((key) => !currentModules.includes(key)).length;
+        const removedCount = currentModules.filter((key) => !selectedModules.includes(key)).length;
+        const items: string[] = [];
+        if (addedCount > 0) {
+            items.push(`+${addedCount} modules`);
+        }
+        if (removedCount > 0) {
+            items.push(`-${removedCount} modules`);
+        }
+        const selectedUsers = this.limitValue(selected, 'Users');
+        const currentUsers = this.limitValue(current, 'Users');
+        if (selectedUsers && selectedUsers !== currentUsers) {
+            items.push(`+${selectedUsers.toLowerCase()}`);
+        }
+        if (selected.id === 'enterprise' && current.id !== 'enterprise') {
+            items.push('+SSO');
+        }
+        return items;
+    }
+
+    limitValue(edition: EditionPlan, label: string): string | null {
+        return edition.limits.find((limit) => limit.label === label)?.value || null;
     }
 
     openModuleDetail(moduleKey: ModuleKey): void {

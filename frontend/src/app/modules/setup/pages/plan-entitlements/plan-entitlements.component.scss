@@ -90,19 +90,56 @@
     color: var(--color-text-secondary);
 }
 
-.pill--enabled {
-    background: rgba(16, 185, 129, 0.12);
-    color: #059669;
+.tag {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    color: var(--color-text-secondary);
+    background: rgba(148, 163, 184, 0.08);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
 }
 
-.pill--locked {
-    background: rgba(148, 163, 184, 0.16);
+.tag--included {
+    color: #0f766e;
+    border-color: rgba(13, 148, 136, 0.3);
+    background: rgba(13, 148, 136, 0.12);
+}
+
+.tag--add_on {
+    color: #92400e;
+    border-color: rgba(245, 158, 11, 0.4);
+    background: rgba(245, 158, 11, 0.12);
+}
+
+.tag--not_included {
     color: var(--color-text-secondary);
 }
 
-.pill--disabled {
-    background: rgba(251, 191, 36, 0.18);
+.tag--enabled {
+    color: #065f46;
+    border-color: rgba(5, 150, 105, 0.4);
+    background: rgba(16, 185, 129, 0.12);
+}
+
+.tag--locked_plan {
+    color: #475569;
+    border-color: rgba(100, 116, 139, 0.35);
+    background: rgba(148, 163, 184, 0.12);
+}
+
+.tag--disabled_override {
     color: #b45309;
+    border-color: rgba(251, 146, 60, 0.4);
+    background: rgba(251, 146, 60, 0.12);
+}
+
+.tag--not_configured {
+    color: #1d4ed8;
+    border-color: rgba(59, 130, 246, 0.35);
+    background: rgba(59, 130, 246, 0.12);
 }
 
 .plan-list__items {
@@ -316,6 +353,11 @@
     gap: 10px;
 }
 
+.modules-hint {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
 .modules-table__header,
 .modules-table__row {
     display: grid;
@@ -345,7 +387,17 @@
 }
 
 .modules-table__row:hover {
-    background: rgba(148, 163, 184, 0.1);
+    background: rgba(148, 163, 184, 0.08);
+    border-color: rgba(100, 116, 139, 0.35);
+}
+
+.modules-table__row.is-unchanged {
+    opacity: 0.55;
+}
+
+.modules-table__row.is-added {
+    border-color: rgba(16, 185, 129, 0.35);
+    background: rgba(16, 185, 129, 0.08);
 }
 
 .module-cell {
@@ -389,6 +441,52 @@
 .compare {
     font-size: 12px;
     color: var(--color-text-secondary);
+}
+
+.status-cell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.info-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: white;
+    color: var(--color-text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.info-icon svg {
+    width: 12px;
+    height: 12px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.5px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.lock-popover {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 5;
+    min-width: 200px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: white;
+    color: var(--color-text-secondary);
+    font-size: 11px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
 }
 
 .row-action {
