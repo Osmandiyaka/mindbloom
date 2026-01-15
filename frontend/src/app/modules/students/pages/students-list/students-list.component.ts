@@ -8,29 +8,25 @@ import { StudentFormComponent } from '../../../setup/pages/students/student-form
 import { CanDirective } from '../../../../shared/security/can.directive';
 import {
   MbButtonComponent,
+  MbDrawerComponent,
   MbInputComponent,
   MbModalComponent,
   MbModalFooterDirective,
   MbSelectComponent,
+  MbSelectOption,
   MbSplitButtonComponent,
+  MbSplitButtonItem,
   MbTableActionsDirective,
   MbTableColumn,
   MbTableComponent,
-  MbSelectOption,
-  MbSplitButtonItem,
 } from '@mindbloom/ui';
 
 type QueueKey =
   | 'all'
-  | 'action'
-  | 'missing-docs'
-  | 'missing-guardian'
-  | 'active'
-  | 'inactive'
-  | 'suspended'
-  | 'withdrawn'
-  | 'graduated'
-  | 'transferred';
+  | 'needs-attention'
+  | 'active';
+
+type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
 
 @Component({
   selector: 'app-students-list',
@@ -47,6 +43,7 @@ type QueueKey =
     MbTableActionsDirective,
     MbModalComponent,
     MbModalFooterDirective,
+    MbDrawerComponent,
     StudentFormComponent,
     CanDirective,
   ],
@@ -55,10 +52,17 @@ type QueueKey =
     <div class="students-hub">
       <header class="hub-header">
         <div class="hub-title">
-          <h1>Students</h1>
-          <p>Search and manage student workflows.</p>
+          <h1>Student Workflow Center</h1>
+          <p>Process student records and resolve next actions.</p>
         </div>
         <div class="hub-actions">
+          <mb-button
+            class="workflow-toggle"
+            size="sm"
+            variant="tertiary"
+            (click)="openWorkflowDrawer()">
+            Workflow panel
+          </mb-button>
           <mb-split-button
             *can="'students.create'"
             label="Add student"
@@ -91,39 +95,40 @@ type QueueKey =
         </div>
       </header>
 
-      <div class="metrics-strip">
-        <div class="metric">
-          <span>Active</span>
-          <strong>{{ metricCounts().active }}</strong>
-        </div>
-        <div class="metric">
-          <span>Action needed</span>
-          <strong>{{ metricCounts().actionNeeded }}</strong>
-        </div>
-        <div class="metric">
-          <span>Suspended</span>
-          <strong>{{ metricCounts().suspended }}</strong>
-        </div>
-        <div class="metric">
-          <span>Withdrawn</span>
-          <strong>{{ metricCounts().withdrawn }}</strong>
+      <div class="hub-controls">
+        <mb-input
+          [value]="searchTerm()"
+          placeholder="Search by name, student ID, admission no., guardian phone/email"
+          (valueChange)="updateSearch($event)">
+        </mb-input>
+        <div class="scope-filters">
+          <mb-select
+            [options]="gradeOptions"
+            [(ngModel)]="gradeFilter"
+            (valueChange)="applyFilters()">
+          </mb-select>
+          <mb-select
+            [options]="classOptions"
+            [(ngModel)]="classFilter"
+            (valueChange)="applyFilters()">
+          </mb-select>
+          <mb-select
+            [options]="yearOptions"
+            [(ngModel)]="yearFilter"
+            (valueChange)="applyFilters()">
+          </mb-select>
+          <mb-button
+            size="sm"
+            variant="tertiary"
+            *ngIf="hasFilters()"
+            (click)="clearFilters()">
+            Clear filters
+          </mb-button>
         </div>
       </div>
 
       <div class="hub-body">
-        <section class="queue-panel" (keydown)="handleKeydown($event)">
-          <div class="queue-top">
-            <div class="queue-title">
-              <h2>Student queue</h2>
-              <span>{{ filteredStudents().length }} students</span>
-            </div>
-            <mb-input
-              [value]="searchTerm()"
-              placeholder="Search by name, student ID, admission no., guardian phone/email"
-              (valueChange)="updateSearch($event)">
-            </mb-input>
-          </div>
-
+        <section class="list-panel" (keydown)="handleKeydown($event)">
           <div class="queue-tabs">
             <mb-button
               class="queue-tab"
@@ -137,28 +142,26 @@ type QueueKey =
             </mb-button>
           </div>
 
-          <div class="queue-filters">
-            <mb-select
-              [options]="gradeOptions"
-              [(ngModel)]="gradeFilter"
-              (valueChange)="applyFilters()">
-            </mb-select>
-            <mb-select
-              [options]="classOptions"
-              [(ngModel)]="classFilter"
-              (valueChange)="applyFilters()">
-            </mb-select>
-            <mb-select
-              [options]="yearOptions"
-              [(ngModel)]="yearFilter"
-              (valueChange)="applyFilters()">
-            </mb-select>
+          <div class="attention-filters">
+            <span class="attention-label">Attention filters</span>
+            <div class="attention-list">
+              <mb-button
+                class="attention-pill"
+                size="sm"
+                variant="tertiary"
+                *ngFor="let filter of attentionFiltersList()"
+                [class.active]="attentionFilters().has(filter.key)"
+                (click)="toggleAttentionFilter(filter.key)">
+                {{ filter.label }}
+                <span class="queue-count">{{ filter.count }}</span>
+              </mb-button>
+            </div>
             <mb-button
               size="sm"
               variant="tertiary"
-              *ngIf="hasFilters()"
-              (click)="clearFilters()">
-              Clear filters
+              *ngIf="hasAttentionFilters()"
+              (click)="clearAttentionFilters()">
+              Clear attention
             </mb-button>
           </div>
 
@@ -189,11 +192,11 @@ type QueueKey =
           @if (!loading() && !error()) {
             @if (filteredStudents().length === 0) {
               <div class="empty-state">
-                <p>No students found</p>
-                <span>Try adjusting your filters or search terms.</span>
+                <p>No students yet</p>
+                <span>Add your first student or import from Excel/CSV.</span>
                 <div class="empty-actions">
-                  <mb-button size="sm" variant="tertiary" (click)="clearFilters()">Clear filters</mb-button>
                   <mb-button size="sm" variant="primary" *can="'students.create'" (click)="openCreateModal()">Add student</mb-button>
+                  <mb-button size="sm" variant="tertiary" *can="'students.create'" (click)="openImport()">Import CSV</mb-button>
                 </div>
               </div>
             } @else {
@@ -266,131 +269,48 @@ type QueueKey =
           }
         </section>
 
-        <section class="preview-panel">
-          <ng-container *ngIf="selectedStudent() as student; else previewEmpty">
-            <div class="preview-header">
-              <div>
-                <h2>{{ student.fullName }}</h2>
-                <p>
-                  {{ student.enrollment.admissionNumber || '—' }} ·
-                  {{ student.enrollment.class }}{{ student.enrollment.section ? ' · ' + student.enrollment.section : '' }} ·
-                  {{ student.status | titlecase }}
-                </p>
-              </div>
-              <div class="preview-actions">
-                <mb-button size="sm" variant="primary" (click)="handlePrimaryAction(student)">
-                  {{ primaryActionLabel(student) }}
-                </mb-button>
-                <mb-button size="sm" variant="tertiary" *can="'students.update'" (click)="editStudent($event, student.id)">
-                  Edit
-                </mb-button>
-                <mb-button size="sm" variant="tertiary" (click)="closeDetail()">Clear</mb-button>
-              </div>
-            </div>
-
-            <div class="preview-flags" *ngIf="previewFlags(student).length">
-              <span class="flag" *ngFor="let flag of previewFlags(student)">{{ flag }}</span>
-            </div>
-
-            <div class="preview-grid">
-              <div class="preview-card">
-                <h3>Identity</h3>
-                <div class="preview-list">
-                  <div>
-                    <span>Full name</span>
-                    <strong>{{ student.fullName }}</strong>
-                  </div>
-                  <div>
-                    <span>Date of birth</span>
-                    <strong>{{ student.dateOfBirth | date }}</strong>
-                  </div>
-                  <div>
-                    <span>Gender</span>
-                    <strong>{{ student.gender | titlecase }}</strong>
-                  </div>
-                  <div>
-                    <span>Nationality</span>
-                    <strong>{{ student.nationality || '—' }}</strong>
-                  </div>
-                </div>
-              </div>
-
-              <div class="preview-card">
-                <h3>Enrollment</h3>
-                <div class="preview-list">
-                  <div>
-                    <span>Academic year</span>
-                    <strong>{{ student.enrollment.academicYear }}</strong>
-                  </div>
-                  <div>
-                    <span>Grade</span>
-                    <strong>{{ student.enrollment.class }}</strong>
-                  </div>
-                  <div>
-                    <span>Section</span>
-                    <strong>{{ student.enrollment.section || '—' }}</strong>
-                  </div>
-                  <div>
-                    <span>Status</span>
-                    <strong>{{ student.status | titlecase }}</strong>
-                  </div>
-                </div>
-              </div>
-
-              <div class="preview-card">
-                <h3>Primary guardian</h3>
-                <div class="preview-list">
-                  <div>
-                    <span>Name</span>
-                    <strong>{{ primaryGuardianName(student) }}</strong>
-                  </div>
-                  <div>
-                    <span>Phone</span>
-                    <strong>{{ primaryGuardianPhone(student) }}</strong>
-                  </div>
-                  <div>
-                    <span>Email</span>
-                    <strong>{{ primaryGuardianEmail(student) }}</strong>
-                  </div>
-                </div>
-              </div>
-
-              <div class="preview-card">
-                <h3>Next step</h3>
-                <p>{{ primaryActionHint(student) }}</p>
-              </div>
-            </div>
-          </ng-container>
-          <ng-template #previewEmpty>
-            <div class="preview-empty">
-              <p>Select a student to view their workflow.</p>
-            </div>
-          </ng-template>
-        </section>
-
-        <aside class="actions-panel">
-          <div class="actions-card">
-            <h3>Quick actions</h3>
-            <div class="actions-list">
-              <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Print ID card</mb-button>
-              <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Generate admission letter</mb-button>
-              <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Move class/section</mb-button>
-              <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Update guardian</mb-button>
-              <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Add medical note</mb-button>
-              <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Add incident</mb-button>
-            </div>
-          </div>
-
-          <div class="actions-card">
-            <h3>Activity timeline</h3>
-            @if (!selectedStudent()) {
-              <p class="timeline-empty">Select a student to view activity.</p>
-            } @else {
-              <p class="timeline-empty">No activity yet.</p>
-            }
-          </div>
+        <aside class="workflow-panel">
+          <ng-container *ngTemplateOutlet="workflowPanel"></ng-container>
         </aside>
       </div>
+
+      <ng-template #workflowPanel>
+        <div class="workflow-section">
+          <div class="workflow-header">
+            <h3>Quick actions</h3>
+            @if (selectedStudent()) {
+              <p class="workflow-meta">For {{ selectedStudent()?.fullName }}</p>
+            } @else {
+              <p class="workflow-meta">Select a student to enable actions.</p>
+            }
+          </div>
+          <div class="actions-list">
+            <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Print ID card</mb-button>
+            <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Generate admission letter</mb-button>
+            <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Move class/section</mb-button>
+            <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Update guardian</mb-button>
+            <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Add medical note</mb-button>
+            <mb-button size="sm" variant="tertiary" [disabled]="!selectedStudent()">Add incident</mb-button>
+          </div>
+        </div>
+        <div class="workflow-section">
+          <div class="workflow-header">
+            <h3>Timeline & activity</h3>
+            @if (selectedStudent()) {
+              <p class="workflow-meta">No activity yet.</p>
+            } @else {
+              <p class="workflow-meta">Select a student to view activity.</p>
+            }
+          </div>
+        </div>
+      </ng-template>
+
+      <mb-drawer
+        [open]="workflowDrawerOpen()"
+        title="Workflow panel"
+        (closed)="closeWorkflowDrawer()">
+        <ng-container *ngTemplateOutlet="workflowPanel"></ng-container>
+      </mb-drawer>
 
       <mb-modal
         [open]="createModalOpen()"
@@ -474,7 +394,9 @@ export class StudentsListComponent implements OnInit {
 
   selectedIds = signal<Set<string>>(new Set());
   selectedStudentId = signal<string | null>(null);
-  activeQueue = signal<QueueKey>('all');
+  activeQueue = signal<QueueKey>('needs-attention');
+  attentionFilters = signal<Set<AttentionFilter>>(new Set());
+  workflowDrawerOpen = signal(false);
 
   overflowOpen = signal(false);
   rowMenuOpen = signal<string | null>(null);
@@ -520,41 +442,21 @@ export class StudentsListComponent implements OnInit {
 
   queueItems = computed<Array<{ key: QueueKey; label: string; count: number }>>(() => {
     const students = this.students();
-    const counts = {
-      all: students.length,
-      action: students.filter((student) => this.needsAction(student)).length,
-      missingDocs: students.filter((student) => this.hasMissingDocs(student)).length,
-      missingGuardian: students.filter((student) => this.hasMissingGuardian(student)).length,
-      active: students.filter((student) => student.status === StudentStatus.ACTIVE).length,
-      inactive: students.filter((student) => student.status === StudentStatus.INACTIVE).length,
-      suspended: students.filter((student) => student.status === StudentStatus.SUSPENDED).length,
-      withdrawn: students.filter((student) => student.status === StudentStatus.WITHDRAWN).length,
-      graduated: students.filter((student) => student.status === StudentStatus.GRADUATED).length,
-      transferred: students.filter((student) => student.status === StudentStatus.TRANSFERRED).length,
-    };
-
+    const needsAttention = students.filter((student) => this.needsAction(student));
     return [
-      { key: 'all', label: 'All', count: counts.all },
-      { key: 'action', label: 'Action needed', count: counts.action },
-      { key: 'missing-docs', label: 'Missing documents', count: counts.missingDocs },
-      { key: 'missing-guardian', label: 'No guardian', count: counts.missingGuardian },
-      { key: 'active', label: 'Active', count: counts.active },
-      { key: 'inactive', label: 'Inactive', count: counts.inactive },
-      { key: 'suspended', label: 'Suspended', count: counts.suspended },
-      { key: 'withdrawn', label: 'Withdrawn', count: counts.withdrawn },
-      { key: 'graduated', label: 'Graduated', count: counts.graduated },
-      { key: 'transferred', label: 'Transferred', count: counts.transferred },
+      { key: 'needs-attention', label: 'Needs attention', count: needsAttention.length },
+      { key: 'active', label: 'Active', count: students.filter((student) => student.status === StudentStatus.ACTIVE).length },
+      { key: 'all', label: 'All', count: students.length },
     ];
   });
 
-  metricCounts = computed(() => {
+  attentionFiltersList = computed(() => {
     const students = this.students();
-    return {
-      active: students.filter((student) => student.status === StudentStatus.ACTIVE).length,
-      actionNeeded: students.filter((student) => this.needsAction(student)).length,
-      suspended: students.filter((student) => student.status === StudentStatus.SUSPENDED).length,
-      withdrawn: students.filter((student) => student.status === StudentStatus.WITHDRAWN).length,
-    };
+    return [
+      { key: 'missing-docs' as const, label: 'Missing documents', count: students.filter((student) => this.hasMissingDocs(student)).length },
+      { key: 'missing-guardian' as const, label: 'No guardian', count: students.filter((student) => this.hasMissingGuardian(student)).length },
+      { key: 'inactive' as const, label: 'Inactive', count: students.filter((student) => student.status === StudentStatus.INACTIVE).length },
+    ];
   });
 
   tableColumns = computed<MbTableColumn<Student>[]>(() => [
@@ -573,15 +475,15 @@ export class StudentsListComponent implements OnInit {
     },
     {
       key: 'status',
-      label: 'Stage',
+      label: 'Status',
       cell: (student) => this.titleCase(student.status),
     },
     {
       key: 'flags',
-      label: 'Flags',
+      label: 'Attention',
       cell: (student) => {
         const flags = this.previewFlags(student);
-        return flags.length ? flags.join(', ') : '—';
+        return flags.length ? flags.join(' · ') : '—';
       },
     },
     {
@@ -622,6 +524,10 @@ export class StudentsListComponent implements OnInit {
         return false;
       }
 
+      if (!this.matchesAttentionFilters(student)) {
+        return false;
+      }
+
       return true;
     });
   });
@@ -635,27 +541,50 @@ export class StudentsListComponent implements OnInit {
 
   matchesQueue(student: Student): boolean {
     switch (this.activeQueue()) {
-      case 'action':
-        return this.needsAction(student);
-      case 'missing-docs':
-        return this.hasMissingDocs(student);
-      case 'missing-guardian':
-        return this.hasMissingGuardian(student);
       case 'active':
         return student.status === StudentStatus.ACTIVE;
-      case 'inactive':
-        return student.status === StudentStatus.INACTIVE;
-      case 'suspended':
-        return student.status === StudentStatus.SUSPENDED;
-      case 'withdrawn':
-        return student.status === StudentStatus.WITHDRAWN;
-      case 'graduated':
-        return student.status === StudentStatus.GRADUATED;
-      case 'transferred':
-        return student.status === StudentStatus.TRANSFERRED;
+      case 'needs-attention':
+        return this.needsAction(student);
       default:
         return true;
     }
+  }
+
+  toggleAttentionFilter(filter: AttentionFilter): void {
+    const next = new Set(this.attentionFilters());
+    if (next.has(filter)) {
+      next.delete(filter);
+    } else {
+      next.add(filter);
+    }
+    this.attentionFilters.set(next);
+    this.page.set(1);
+  }
+
+  clearAttentionFilters(): void {
+    this.attentionFilters.set(new Set());
+    this.page.set(1);
+  }
+
+  hasAttentionFilters(): boolean {
+    return this.attentionFilters().size > 0;
+  }
+
+  matchesAttentionFilters(student: Student): boolean {
+    const filters = this.attentionFilters();
+    if (filters.size === 0) {
+      return true;
+    }
+    if (filters.has('missing-docs') && this.hasMissingDocs(student)) {
+      return true;
+    }
+    if (filters.has('missing-guardian') && this.hasMissingGuardian(student)) {
+      return true;
+    }
+    if (filters.has('inactive') && student.status === StudentStatus.INACTIVE) {
+      return true;
+    }
+    return false;
   }
 
   hasMissingDocs(student: Student): boolean {
@@ -704,6 +633,33 @@ export class StudentsListComponent implements OnInit {
       return 'View records';
     }
     return 'Update profile';
+  }
+
+  nextActions(student: Student): string[] {
+    if (this.hasMissingGuardian(student)) {
+      return ['Add a guardian', 'Verify guardian contact'];
+    }
+    if (this.hasMissingDocs(student)) {
+      return ['Request missing documents', 'Mark documents received'];
+    }
+    if (student.status === StudentStatus.INACTIVE) {
+      return ['Complete enrollment', 'Assign class/section'];
+    }
+    if (student.status === StudentStatus.SUSPENDED) {
+      return ['Review suspension', 'Add incident notes'];
+    }
+    if (student.status === StudentStatus.WITHDRAWN) {
+      return ['Confirm withdrawal details', 'Archive record'];
+    }
+    return ['Update profile details', 'Review guardians'];
+  }
+
+  openWorkflowDrawer(): void {
+    this.workflowDrawerOpen.set(true);
+  }
+
+  closeWorkflowDrawer(): void {
+    this.workflowDrawerOpen.set(false);
   }
 
   primaryActionHint(student: Student): string {
@@ -785,11 +741,12 @@ export class StudentsListComponent implements OnInit {
     this.gradeFilter = '';
     this.classFilter = '';
     this.yearFilter = '';
+    this.clearAttentionFilters();
     this.page.set(1);
   }
 
   hasFilters(): boolean {
-    return !!(this.searchTerm() || this.gradeFilter || this.classFilter || this.yearFilter);
+    return !!(this.searchTerm() || this.gradeFilter || this.classFilter || this.yearFilter || this.hasAttentionFilters());
   }
 
   selectStudent(student: Student): void {
