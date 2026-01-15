@@ -143,8 +143,13 @@
 }
 
 :host ::ng-deep .roles-table__list .mb-table tbody td {
-    padding-top: 16px;
-    padding-bottom: 16px;
+    padding-top: 13px;
+    padding-bottom: 13px;
+}
+
+:host ::ng-deep .roles-table__list .mb-table .mb-table__cell-secondary {
+    font-size: 11px;
+    color: var(--mb-color-text-subtle);
 }
 
 :host ::ng-deep .roles-table__list .mb-table .mb-table__cell-badges {
