@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -20,7 +20,6 @@ import {
     MbSelectComponent,
     MbCheckboxComponent,
 } from '@mindbloom/ui';
-import { PermissionMatrixComponent } from '../components/permission-matrix/permission-matrix.component';
 import { PermissionTreeComponent } from '../components/permission-tree/permission-tree.component';
 import { AccessScopePickerComponent } from '../components/access-scope-picker/access-scope-picker.component';
 import { SchoolService } from '../../../core/school/school.service';
@@ -48,7 +47,6 @@ type RoleFormMode = 'create' | 'edit' | 'duplicate';
         MbFormFieldComponent,
         MbSelectComponent,
         MbCheckboxComponent,
-        PermissionMatrixComponent,
         PermissionTreeComponent,
         AccessScopePickerComponent,
         SearchInputComponent,
@@ -57,7 +55,6 @@ type RoleFormMode = 'create' | 'edit' | 'duplicate';
     styleUrls: ['./role-list.component.scss'],
 })
 export class RoleListComponent implements OnInit {
-    @ViewChild(PermissionMatrixComponent) private permissionMatrix?: PermissionMatrixComponent;
     trackByRole = (_: number, role: Role) => role?.id ?? _;
     trackByUser = (_: number, user: User) => user?.id ?? _;
     private readonly roleService = inject(RoleService);
@@ -124,7 +121,6 @@ export class RoleListComponent implements OnInit {
     roleFormOrgUnitIds = signal<Set<string>>(new Set());
     roleFormStatus = signal<'active' | 'inactive'>('active');
     roleFormPermissions = signal<string[]>([]);
-    roleFormPermissionSearch = signal('');
     roleFormError = signal('');
     roleFormSaving = signal(false);
     roleFormDirty = signal(false);
@@ -407,7 +403,6 @@ export class RoleListComponent implements OnInit {
         this.roleFormOrgUnitIds.set(new Set());
         this.roleFormStatus.set('active');
         this.roleFormPermissions.set([]);
-        this.roleFormPermissionSearch.set('');
         this.roleFormTemplate.set('custom');
         this.roleFormError.set('');
         this.roleFormDirty.set(false);
@@ -468,7 +463,6 @@ export class RoleListComponent implements OnInit {
         this.roleFormOrgUnitIds.set(new Set(role.orgUnitIds || []));
         this.roleFormStatus.set(role.status || 'active');
         this.roleFormPermissions.set(role.permissions.map((perm) => perm.id || perm.resource));
-        this.roleFormPermissionSearch.set('');
         this.roleFormTemplate.set('custom');
         this.roleFormError.set('');
         this.roleFormDirty.set(false);
@@ -486,7 +480,6 @@ export class RoleListComponent implements OnInit {
         this.roleFormOrgUnitIds.set(new Set(role.orgUnitIds || []));
         this.roleFormStatus.set('active');
         this.roleFormPermissions.set(role.permissions.map((perm) => perm.id || perm.resource));
-        this.roleFormPermissionSearch.set('');
         this.roleFormTemplate.set('custom');
         this.roleFormError.set('');
         this.roleFormDirty.set(true);
@@ -504,7 +497,6 @@ export class RoleListComponent implements OnInit {
     closeRoleForm(): void {
         this.roleFormOpen.set(false);
         this.roleFormError.set('');
-        this.roleFormPermissionSearch.set('');
         this.roleFormDiscardOpen.set(false);
     }
 
@@ -526,18 +518,6 @@ export class RoleListComponent implements OnInit {
         this.roleFormDirty.set(true);
     }
 
-    expandRolePermissions(): void {
-        this.permissionMatrix?.expandAll();
-    }
-
-    collapseRolePermissions(): void {
-        this.permissionMatrix?.collapseAll();
-    }
-
-    clearRolePermissions(): void {
-        if (!this.roleFormPermissions().length) return;
-        this.updateRolePermissions([]);
-    }
 
     applyPermissionTemplate(templateId: string): void {
         this.roleFormTemplate.set(templateId);
