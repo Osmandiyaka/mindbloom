@@ -85,34 +85,36 @@
             <!-- Children -->
             @if (hasChildren(permission) && isExpanded(permission.id)) {
             <div class="permission-children">
-                @for (child of permission.children; track child.id) {
-                <div class="child-permission">
-                    <label class="checkbox-container">
-                        <input type="checkbox" [checked]="isSelected(child.id)"
-                            [disabled]="readOnly"
-                            (change)="togglePermission(child, $event)" />
-                        <span class="checkmark"></span>
-                    </label>
-
-                    <div class="permission-info">
-                        <div class="permission-name">
-                            @if (child.icon) {
-                            <span class="permission-icon">{{ child.icon }}</span>
+                <div class="permission-matrix__header">
+                    <div class="permission-matrix__cell permission-matrix__cell--name">Permission</div>
+                    @for (action of actionColumns; track action) {
+                    <div class="permission-matrix__cell permission-matrix__cell--action">{{ action }}</div>
+                    }
+                </div>
+                @for (row of rowsForGroup(permission); track row.permission.id) {
+                <div class="permission-matrix__row" [class.is-nested]="row.depth > 0">
+                    <div class="permission-matrix__cell permission-matrix__cell--name">
+                        <div class="permission-matrix__name">
+                            @if (row.permission.icon) {
+                            <span class="permission-icon">{{ row.permission.icon }}</span>
                             }
-                            <span class="name-text">{{ child.displayName }}</span>
+                            <span class="name-text">{{ row.permission.displayName }}</span>
                         </div>
-                        @if (child.description) {
-                        <div class="permission-description">{{ child.description }}</div>
+                        @if (row.permission.description) {
+                        <div class="permission-matrix__desc">{{ row.permission.description }}</div>
                         }
                     </div>
-
-                    <div class="permission-actions">
-                        @for (action of displayActions(child.actions); track action) {
-                        <span class="action-badge" [class]="'action-' + action">
-                            {{ action }}
-                        </span>
-                        }
+                    @for (action of actionColumns; track action) {
+                    <div class="permission-matrix__cell permission-matrix__cell--action">
+                        <input
+                            type="checkbox"
+                            class="permission-matrix__checkbox"
+                            [checked]="isSelected(row.permission.id) && hasAction(row.permission, action)"
+                            [disabled]="readOnly || !hasAction(row.permission, action)"
+                            (click)="togglePermission(row.permission, $event)"
+                        />
                     </div>
+                    }
                 </div>
                 }
             </div>

@@ -11,6 +11,13 @@ import { Permission, PermissionAction } from '../../../../core/models/role.model
     styleUrls: ['./permission-tree.component.scss']
 })
 export class PermissionTreeComponent {
+    readonly actionColumns: PermissionAction[] = [
+        PermissionAction.READ,
+        PermissionAction.CREATE,
+        PermissionAction.UPDATE,
+        PermissionAction.DELETE,
+        PermissionAction.APPROVE,
+    ];
     @Input() set permissionTree(value: Permission[]) {
         this._permissionTree.set(value);
     }
@@ -152,6 +159,18 @@ export class PermissionTreeComponent {
         return actions.filter((action) => action !== PermissionAction.MANAGE);
     }
 
+    hasAction(permission: Permission, action: PermissionAction): boolean {
+        const actions = permission.actions || [];
+        if (actions.includes(PermissionAction.MANAGE)) {
+            return true;
+        }
+        return actions.includes(action);
+    }
+
+    rowsForGroup(group: Permission): Array<{ permission: Permission; depth: number }> {
+        return this.collectRows(group.children || [], 0, []);
+    }
+
     private collectDescendantIds(permission: Permission): string[] {
         const ids: string[] = [];
         const walk = (node: Permission) => {
@@ -162,5 +181,19 @@ export class PermissionTreeComponent {
         };
         walk(permission);
         return ids;
+    }
+
+    private collectRows(
+        nodes: Permission[],
+        depth: number,
+        rows: Array<{ permission: Permission; depth: number }>
+    ): Array<{ permission: Permission; depth: number }> {
+        nodes.forEach((node) => {
+            rows.push({ permission: node, depth });
+            if (node.children?.length) {
+                this.collectRows(node.children, depth + 1, rows);
+            }
+        });
+        return rows;
     }
 }
