@@ -925,23 +925,7 @@ tbody tr.is-selected {
   padding: 16px 22px;
 }
 
-.student-detail-drawer {
-  width: min(620px, 94vw);
-}
-
 @media (max-width: 900px) {
-  .student-detail-drawer-backdrop {
-    align-items: flex-end;
-    justify-content: center;
-  }
-
-  .student-detail-drawer {
-    width: 100%;
-    height: auto;
-    max-height: 85vh;
-    border-radius: 18px 18px 0 0;
-  }
-
   .detail-grid {
     grid-template-columns: 1fr;
   }
