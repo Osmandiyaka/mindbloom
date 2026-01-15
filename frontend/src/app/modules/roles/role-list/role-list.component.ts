@@ -70,6 +70,7 @@ export class RoleListComponent implements OnInit {
 
     users = signal<User[]>([]);
     schools = signal<Array<{ id: string; name: string }>>([]);
+    orgUnits = signal<Array<{ id: string; name: string }>>([]);
 
     search = signal('');
     filters = signal<Set<RoleFilter>>(new Set(['all']));
@@ -117,7 +118,9 @@ export class RoleListComponent implements OnInit {
     roleFormId = signal<string | null>(null);
     roleFormName = signal('');
     roleFormDescription = signal('');
-    roleFormScopeType = signal<'workspace' | 'school'>('workspace');
+    roleFormScopeType = signal<'workspace' | 'school' | 'org'>('workspace');
+    roleFormSchoolIds = signal<Set<string>>(new Set());
+    roleFormOrgUnitIds = signal<Set<string>>(new Set());
     roleFormStatus = signal<'active' | 'inactive'>('active');
     roleFormPermissions = signal<string[]>([]);
     roleFormError = signal('');
@@ -349,6 +352,28 @@ export class RoleListComponent implements OnInit {
         return this.users().filter((user) => user.roleId === role.id);
     }
 
+    toggleRoleFormSchool(id: string): void {
+        const next = new Set(this.roleFormSchoolIds());
+        if (next.has(id)) {
+            next.delete(id);
+        } else {
+            next.add(id);
+        }
+        this.roleFormSchoolIds.set(next);
+        this.markRoleFormDirty();
+    }
+
+    toggleRoleFormOrgUnit(id: string): void {
+        const next = new Set(this.roleFormOrgUnitIds());
+        if (next.has(id)) {
+            next.delete(id);
+        } else {
+            next.add(id);
+        }
+        this.roleFormOrgUnitIds.set(next);
+        this.markRoleFormDirty();
+    }
+
     roleCategoryLabel(role: Role): string {
         const resources = role.permissions.map((perm) => perm.resource);
         if (resources.some((resource) => resource.startsWith('system') || resource.startsWith('admin'))) {
@@ -370,6 +395,8 @@ export class RoleListComponent implements OnInit {
         this.roleFormName.set('');
         this.roleFormDescription.set('');
         this.roleFormScopeType.set('workspace');
+        this.roleFormSchoolIds.set(new Set());
+        this.roleFormOrgUnitIds.set(new Set());
         this.roleFormStatus.set('active');
         this.roleFormPermissions.set([]);
         this.roleFormTemplate.set('custom');
@@ -379,7 +406,7 @@ export class RoleListComponent implements OnInit {
     }
 
     handleScopeTypeChange(value: string): void {
-        if (value === 'workspace' || value === 'school') {
+        if (value === 'workspace' || value === 'school' || value === 'org') {
             this.roleFormScopeType.set(value);
             this.markRoleFormDirty();
         }
@@ -428,6 +455,8 @@ export class RoleListComponent implements OnInit {
         this.roleFormName.set(role.name);
         this.roleFormDescription.set(role.description);
         this.roleFormScopeType.set(role.scopeType || 'workspace');
+        this.roleFormSchoolIds.set(new Set(role.schoolIds || []));
+        this.roleFormOrgUnitIds.set(new Set(role.orgUnitIds || []));
         this.roleFormStatus.set(role.status || 'active');
         this.roleFormPermissions.set(role.permissions.map((perm) => perm.id || perm.resource));
         this.roleFormTemplate.set('custom');
@@ -443,6 +472,8 @@ export class RoleListComponent implements OnInit {
         this.roleFormName.set(`${role.name} copy`);
         this.roleFormDescription.set(role.description);
         this.roleFormScopeType.set(role.scopeType || 'workspace');
+        this.roleFormSchoolIds.set(new Set(role.schoolIds || []));
+        this.roleFormOrgUnitIds.set(new Set(role.orgUnitIds || []));
         this.roleFormStatus.set('active');
         this.roleFormPermissions.set(role.permissions.map((perm) => perm.id || perm.resource));
         this.roleFormTemplate.set('custom');
@@ -509,6 +540,10 @@ export class RoleListComponent implements OnInit {
             scopeType: this.roleFormScopeType(),
             status: this.roleFormStatus(),
             permissions,
+            schoolIds:
+                this.roleFormScopeType() === 'school' ? Array.from(this.roleFormSchoolIds()) : undefined,
+            orgUnitIds:
+                this.roleFormScopeType() === 'org' ? Array.from(this.roleFormOrgUnitIds()) : undefined,
         };
 
         const request = this.roleFormMode() === 'edit' && this.roleFormId()
@@ -644,7 +679,10 @@ export class RoleListComponent implements OnInit {
     }
 
     roleScopeLabel(role: Role): string {
-        return (role.scopeType || 'workspace') === 'workspace' ? 'Workspace' : 'School';
+        const scope = role.scopeType || 'workspace';
+        if (scope === 'workspace') return 'Workspace';
+        if (scope === 'school') return 'School';
+        return 'Organizational units';
     }
 
     roleStatusLabel(role: Role): string {
@@ -682,9 +720,9 @@ export class RoleListComponent implements OnInit {
             teacher: (perm) => ['students', 'attendance', 'academics', 'grades', 'exams', 'timetable']
                 .some((key) => perm.resource.includes(key)),
             finance: (perm) => ['fees', 'finance', 'payments', 'reports'].some((key) => perm.resource.includes(key)),
-            registrar: (perm) => ['students', 'admissions', 'academics'].some((key) => perm.resource.includes(key)),
             principal: (perm) => ['students', 'attendance', 'academics', 'reports', 'finance', 'staff']
                 .some((key) => perm.resource.includes(key)),
+            admin: () => true,
             custom: () => false,
         };
     }

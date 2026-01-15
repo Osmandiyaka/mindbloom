@@ -45,9 +45,11 @@ export interface Role {
     name: string;
     description: string;
     isSystemRole: boolean;
-    scopeType?: 'workspace' | 'school';
+    scopeType?: 'workspace' | 'school' | 'org';
     status?: 'active' | 'inactive';
     permissions: Permission[];
+    schoolIds?: string[];
+    orgUnitIds?: string[];
     parentRoleId?: string;
     createdAt: Date;
     updatedAt: Date;
@@ -56,15 +58,19 @@ export interface Role {
 export interface CreateRoleDto {
     name: string;
     description: string;
-    scopeType?: 'workspace' | 'school';
+    scopeType?: 'workspace' | 'school' | 'org';
     status?: 'active' | 'inactive';
     permissions: Permission[];
+    schoolIds?: string[];
+    orgUnitIds?: string[];
 }
 
 export interface UpdateRoleDto {
     name?: string;
     description?: string;
-    scopeType?: 'workspace' | 'school';
+    scopeType?: 'workspace' | 'school' | 'org';
     status?: 'active' | 'inactive';
     permissions?: Permission[];
+    schoolIds?: string[];
+    orgUnitIds?: string[];
 }

@@ -268,33 +268,66 @@
                         <div class="role-form__title">Scope</div>
                         <mb-select [value]="roleFormScopeType()" [options]="[
                               { label: 'Workspace-wide', value: 'workspace' },
-                              { label: 'School-scoped', value: 'school' }
+                              { label: 'Selected schools', value: 'school' },
+                              { label: 'Selected organizational units', value: 'org' }
                             ]" (valueChange)="handleScopeTypeChange($event)"></mb-select>
-                    </div>
-
-                    <div class="role-form__section">
-                        <div class="role-form__title">Status</div>
-                        <mb-select [value]="roleFormStatus()" [options]="[
-                              { label: 'Active', value: 'active' },
-                              { label: 'Inactive', value: 'inactive' }
-                            ]" (valueChange)="handleStatusChange($event)"></mb-select>
+                        <div class="role-form__multiselect" *ngIf="roleFormScopeType() !== 'workspace'">
+                            <div class="role-form__multiselect-title">
+                                {{ roleFormScopeType() === 'school' ? 'Select schools' : 'Select organizational units' }}
+                            </div>
+                            <div class="role-form__multiselect-list" *ngIf="roleFormScopeType() === 'school'">
+                                <div class="role-form__multiselect-empty" *ngIf="!schools().length">
+                                    No schools available.
+                                </div>
+                                <div class="role-form__multiselect-item" *ngFor="let school of schools(); track school.id">
+                                    <mb-checkbox
+                                        [checked]="roleFormSchoolIds().has(school.id)"
+                                        (checkedChange)="toggleRoleFormSchool(school.id)"
+                                    >
+                                        {{ school.name }}
+                                    </mb-checkbox>
+                                </div>
+                            </div>
+                            <div class="role-form__multiselect-list" *ngIf="roleFormScopeType() === 'org'">
+                                <div class="role-form__multiselect-empty" *ngIf="!orgUnits().length">
+                                    No organizational units available.
+                                </div>
+                                <div class="role-form__multiselect-item" *ngFor="let unit of orgUnits(); track unit.id">
+                                    <mb-checkbox
+                                        [checked]="roleFormOrgUnitIds().has(unit.id)"
+                                        (checkedChange)="toggleRoleFormOrgUnit(unit.id)"
+                                    >
+                                        {{ unit.name }}
+                                    </mb-checkbox>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="role-form__section">
                         <div class="role-form__title">Template</div>
                         <mb-select [value]="roleFormTemplate()" [options]="[
-                              { label: 'Start from template', value: 'custom' },
+                              { label: 'None', value: 'custom' },
                               { label: 'Teacher', value: 'teacher' },
-                              { label: 'Finance officer', value: 'finance' },
-                              { label: 'Registrar', value: 'registrar' },
-                              { label: 'Principal', value: 'principal' }
+                              { label: 'Accountant', value: 'finance' },
+                              { label: 'Principal', value: 'principal' },
+                              { label: 'Tenant Admin', value: 'admin' }
                             ]" (valueChange)="applyPermissionTemplate($event)"></mb-select>
+                        <div class="role-form__helper" *ngIf="roleFormTemplate() !== 'custom'">
+                            Permissions will be prefilled based on the selected template.
+                        </div>
                     </div>
                 </aside>
 
                 <section class="role-form__main">
                     <div class="role-form__section">
                         <div class="role-form__title">Permissions</div>
+                        <div class="role-form__row">
+                            <mb-select [value]="roleFormStatus()" [options]="[
+                                  { label: 'Active', value: 'active' },
+                                  { label: 'Inactive', value: 'inactive' }
+                                ]" (valueChange)="handleStatusChange($event)"></mb-select>
+                        </div>
                         <app-permission-matrix [permissions]="permissionTree()" [selectedPermissions]="roleFormPermissions()"
                             (selectedPermissionsChange)="updateRolePermissions($event)"></app-permission-matrix>
                     </div>
