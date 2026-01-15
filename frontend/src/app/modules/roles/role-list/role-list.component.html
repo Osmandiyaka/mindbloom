@@ -174,13 +174,8 @@
                         </div>
 
                         <div class="roles-detail__body" *ngIf="detailTab() === 'permissions'">
-                            <div class="roles-detail__notice" *ngIf="detailRole.isSystemRole">
-                                <div class="roles-detail__notice-text">
-                                    System roles cannot be edited. Duplicate this role to create a custom version.
-                                </div>
-                            </div>
                             <div class="roles-expand__warning" *ngIf="roleHasAdminPerms(detailRole)">
-                                High privilege role — grants administrative access.
+                                System roles cannot be edited. Duplicate this role to create a custom version.
                             </div>
                             <app-permission-tree [permissionTree]="permissionTree()"
                                 [selectedPermissions]="rolePermissionIds(detailRole)"

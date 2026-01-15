@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
 import { Permission, PermissionAction } from '../../../../core/models/role.model';
 
 @Component({
     selector: 'app-permission-tree',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, SearchInputComponent],
     templateUrl: './permission-tree.component.html',
     styleUrls: ['./permission-tree.component.scss']
 })
@@ -21,12 +22,45 @@ export class PermissionTreeComponent {
 
     private _permissionTree = signal<Permission[]>([]);
     private _selectedPermissions = signal<Set<string>>(new Set());
+    search = signal('');
 
     get permissionTreeValue() {
         return this._permissionTree();
     }
 
-    expandedNodes = signal<Set<string>>(new Set()); toggleNode(permissionId: string) {
+    get selectedCount(): number {
+        return this._selectedPermissions().size;
+    }
+
+    get filteredTree(): Permission[] {
+        const term = this.search().trim().toLowerCase();
+        if (!term) {
+            return this.permissionTreeValue;
+        }
+        return this.permissionTreeValue
+            .map((module) => {
+                const matchesModule =
+                    module.displayName.toLowerCase().includes(term) ||
+                    (module.description || '').toLowerCase().includes(term);
+                const children = module.children || [];
+                const matchedChildren = children.filter((child) => {
+                    const text = `${child.displayName} ${child.description || ''}`.toLowerCase();
+                    return text.includes(term);
+                });
+                if (matchesModule) {
+                    return module;
+                }
+                if (matchedChildren.length) {
+                    return { ...module, children: matchedChildren };
+                }
+                return null;
+            })
+            .filter((module): module is Permission => !!module);
+    }
+
+    expandedNodes = signal<Set<string>>(new Set());
+
+    toggleNode(permissionId: string) {
         const expanded = this.expandedNodes();
         if (expanded.has(permissionId)) {
             expanded.delete(permissionId);
@@ -38,6 +72,14 @@ export class PermissionTreeComponent {
 
     isExpanded(permissionId: string): boolean {
         return this.expandedNodes().has(permissionId);
+    }
+
+    expandAll(): void {
+        this.expandedNodes.set(new Set(this.filteredTree.map((module) => module.id)));
+    }
+
+    collapseAll(): void {
+        this.expandedNodes.set(new Set());
     }
 
     togglePermission(permission: Permission, event: Event) {
@@ -93,5 +135,29 @@ export class PermissionTreeComponent {
 
     getActionBadges(actions: PermissionAction[]): string {
         return actions.map(a => a.toUpperCase()).join(', ');
+    }
+
+    moduleCoverage(permission: Permission): { enabled: number; total: number } {
+        const children = permission.children || [];
+        if (!children.length) {
+            return { enabled: this.isSelected(permission.id) ? 1 : 0, total: 1 };
+        }
+        const enabled = children.filter((child) => this.isSelected(child.id)).length;
+        return { enabled, total: children.length };
+    }
+
+    moduleSelectionState(permission: Permission): { checked: boolean; indeterminate: boolean } {
+        const coverage = this.moduleCoverage(permission);
+        if (coverage.total === 0) {
+            return { checked: false, indeterminate: false };
+        }
+        return {
+            checked: coverage.enabled === coverage.total,
+            indeterminate: coverage.enabled > 0 && coverage.enabled < coverage.total,
+        };
+    }
+
+    displayActions(actions: PermissionAction[]): PermissionAction[] {
+        return actions.filter((action) => action !== PermissionAction.MANAGE);
     }
 }
