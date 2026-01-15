@@ -65,6 +65,7 @@ export interface AuditQuery {
     severity?: string;
     result?: string;
     targetType?: string;
+    targetId?: string;
     dateFrom?: Date;
     dateTo?: Date;
     page?: number;

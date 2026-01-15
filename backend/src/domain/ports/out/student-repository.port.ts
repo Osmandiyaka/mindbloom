@@ -8,6 +8,9 @@ export interface StudentFilters {
     status?: string;
     academicYear?: string;
     gender?: string;
+    page?: number;
+    pageSize?: number;
+    sort?: string;
 }
 
 export interface IStudentRepository {
@@ -20,6 +23,12 @@ export interface IStudentRepository {
     delete(id: string, tenantId: string): Promise<void>;
     deleteMany(ids: string[], tenantId: string): Promise<number>;
     count(tenantId: string, filters?: StudentFilters): Promise<number>;
+    getFilterStats(tenantId: string, filters?: StudentFilters): Promise<{
+        grades: Array<{ value: string; count: number }>;
+        sections: Array<{ value: string; count: number }>;
+        years: Array<{ value: string; count: number }>;
+        statuses: Array<{ value: string; count: number }>;
+    }>;
 }
 
 export { STUDENT_REPOSITORY } from './repository.tokens';

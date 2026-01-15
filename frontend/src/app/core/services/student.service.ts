@@ -8,6 +8,7 @@ import {
     UpdateStudentDto,
     StudentFilters,
     StudentActivityItem,
+    StudentFilterResponse,
     Guardian
 } from '../models/student.model';
 import { STUDENT_COLUMN_SCHEMA, StudentColumnConfig } from '../../modules/students/config/student-columns.schema';
@@ -36,6 +37,20 @@ export class StudentService {
         }
 
         return this.http.get<Student[]>(this.apiUrl, { params });
+    }
+
+    getStudentFilters(filters?: StudentFilters): Observable<StudentFilterResponse> {
+        let params = new HttpParams();
+        if (filters) {
+            if (filters.search) params = params.set('search', filters.search);
+            if (filters.schoolId) params = params.set('schoolId', filters.schoolId);
+            if (filters.class) params = params.set('class', filters.class);
+            if (filters.section) params = params.set('section', filters.section);
+            if (filters.status) params = params.set('status', filters.status);
+            if (filters.academicYear) params = params.set('academicYear', filters.academicYear);
+            if (filters.gender) params = params.set('gender', filters.gender);
+        }
+        return this.http.get<StudentFilterResponse>(`${this.apiUrl}/filters`, { params });
     }
 
     getStudent(id: string): Observable<Student> {

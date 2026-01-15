@@ -94,6 +94,8 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
         const resolved = this.requireTenant(tenantId);
         const query: any = { tenantId: new Types.ObjectId(resolved) };
 
+        const { page, pageSize, sort } = filters || {};
+
         if (filters) {
             if (filters.search) {
                 query.$or = [
@@ -123,7 +125,12 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
             }
         }
 
-        const docs = await this.studentModel.find(query).sort({ firstName: 1, lastName: 1 });
+        const sortSpec = this.resolveSort(sort);
+        const cursor = this.studentModel.find(query).sort(sortSpec);
+        if (page && pageSize) {
+            cursor.skip((page - 1) * pageSize).limit(pageSize);
+        }
+        const docs = await cursor.exec();
         return docs.map(doc => this.toDomain(doc));
     }
 
@@ -215,6 +222,91 @@ export class MongooseStudentRepository extends TenantScopedRepository<StudentDoc
         }
 
         return this.studentModel.countDocuments(query);
+    }
+
+    async getFilterStats(tenantId: string, filters?: StudentFilters): Promise<{
+        grades: Array<{ value: string; count: number }>;
+        sections: Array<{ value: string; count: number }>;
+        years: Array<{ value: string; count: number }>;
+        statuses: Array<{ value: string; count: number }>;
+    }> {
+        const resolved = this.requireTenant(tenantId);
+        const match: any = { tenantId: new Types.ObjectId(resolved) };
+
+        if (filters?.search) {
+            match.$or = [
+                { firstName: { $regex: filters.search, $options: 'i' } },
+                { lastName: { $regex: filters.search, $options: 'i' } },
+                { 'enrollment.admissionNumber': { $regex: filters.search, $options: 'i' } },
+                { email: { $regex: filters.search, $options: 'i' } },
+            ];
+        }
+        if (filters?.schoolId) match.schoolId = filters.schoolId;
+        if (filters?.class) match['enrollment.class'] = filters.class;
+        if (filters?.section) match['enrollment.section'] = filters.section;
+        if (filters?.status) match.status = filters.status;
+        if (filters?.academicYear) match['enrollment.academicYear'] = filters.academicYear;
+        if (filters?.gender) match.gender = filters.gender;
+
+        const [result] = await this.studentModel.aggregate([
+            { $match: match },
+            {
+                $facet: {
+                    grades: [
+                        { $group: { _id: '$enrollment.class', count: { $sum: 1 } } },
+                        { $match: { _id: { $ne: null } } },
+                        { $sort: { _id: 1 } },
+                    ],
+                    sections: [
+                        { $group: { _id: '$enrollment.section', count: { $sum: 1 } } },
+                        { $match: { _id: { $ne: null } } },
+                        { $sort: { _id: 1 } },
+                    ],
+                    years: [
+                        { $group: { _id: '$enrollment.academicYear', count: { $sum: 1 } } },
+                        { $match: { _id: { $ne: null } } },
+                        { $sort: { _id: 1 } },
+                    ],
+                    statuses: [
+                        { $group: { _id: '$status', count: { $sum: 1 } } },
+                        { $match: { _id: { $ne: null } } },
+                        { $sort: { _id: 1 } },
+                    ],
+                },
+            },
+        ]);
+
+        const mapValues = (items: any[]) =>
+            (items || []).map((item) => ({ value: String(item._id), count: item.count }));
+
+        return {
+            grades: mapValues(result?.grades),
+            sections: mapValues(result?.sections),
+            years: mapValues(result?.years),
+            statuses: mapValues(result?.statuses),
+        };
+    }
+
+    private resolveSort(sort?: string): Record<string, 1 | -1> {
+        if (!sort) {
+            return { firstName: 1, lastName: 1 };
+        }
+        const [field, dir] = sort.split(':');
+        const direction = dir?.toLowerCase() === 'desc' ? -1 : 1;
+        switch (field) {
+            case 'updatedAt':
+                return { updatedAt: direction };
+            case 'firstName':
+                return { firstName: direction };
+            case 'lastName':
+                return { lastName: direction };
+            case 'status':
+                return { status: direction };
+            case 'class':
+                return { 'enrollment.class': direction };
+            default:
+                return { firstName: 1, lastName: 1 };
+        }
     }
 
     private toDomain(doc: StudentDoc): Student {

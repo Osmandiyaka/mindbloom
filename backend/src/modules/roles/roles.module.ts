@@ -15,6 +15,7 @@ import {
 import { GetPermissionTreeUseCase } from '../../application/services/rbac/get-permission-tree.use-case';
 import { AddPermissionsToRoleUseCase } from '../../application/services/rbac/add-permissions-to-role.use-case';
 import { RolesController, PermissionsController } from '../../presentation/controllers/roles.controller';
+import { PermissionsMeController } from '../../presentation/controllers/permissions-me.controller';
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { UsersModule } from '../users/users.module';
 import { PermissionGuard } from '../../common/guards/permission.guard';
@@ -48,7 +49,7 @@ class RolesInitializer implements OnApplicationBootstrap {
         MongooseModule.forFeature([{ name: 'Role', schema: RoleSchema }]),
         UsersModule,
     ],
-    controllers: [RolesController, PermissionsController],
+    controllers: [RolesController, PermissionsController, PermissionsMeController],
     providers: [
         // Repository
         {

@@ -154,6 +154,18 @@ export interface StudentFilters {
     sort?: string;
 }
 
+export interface StudentFilterOption {
+    value: string;
+    count: number;
+}
+
+export interface StudentFilterResponse {
+    grades: StudentFilterOption[];
+    sections: StudentFilterOption[];
+    years: StudentFilterOption[];
+    statuses: StudentFilterOption[];
+}
+
 export interface CreateStudentDto {
     schoolId: string;
     firstName: string;

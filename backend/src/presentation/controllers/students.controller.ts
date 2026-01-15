@@ -27,6 +27,7 @@ import {
     BulkDeleteStudentsUseCase,
     GetStudentArchiveImpactUseCase,
 } from '../../application/services/student';
+import { AuditService } from '../../application/services/audit/audit.service';
 import { AddGuardianToStudentUseCase } from '../../application/services/student/add-guardian-to-student.use-case';
 import { UpdateStudentEnrollmentUseCase } from '../../application/services/student/update-student-enrollment.use-case';
 import { CreateStudentDto } from '../dtos/requests/students/create-student.dto';
@@ -51,6 +52,7 @@ export class StudentsController {
         private readonly addGuardianUseCase: AddGuardianToStudentUseCase,
         private readonly updateEnrollmentUseCase: UpdateStudentEnrollmentUseCase,
         private readonly tenantContext: TenantContext,
+        private readonly auditService: AuditService,
     ) { }
 
     @Post()
@@ -83,6 +85,9 @@ export class StudentsController {
         @Query('status') status?: string,
         @Query('academicYear') academicYear?: string,
         @Query('gender') gender?: string,
+        @Query('page') page?: string,
+        @Query('pageSize') pageSize?: string,
+        @Query('sort') sort?: string,
     ): Promise<StudentResponseDto[]> {
         const tenantId = this.tenantContext.tenantId;
         const filters = {
@@ -93,9 +98,36 @@ export class StudentsController {
             status,
             academicYear,
             gender,
+            page: page ? Number(page) : undefined,
+            pageSize: pageSize ? Number(pageSize) : undefined,
+            sort,
         };
         const students = await this.getAllStudentsUseCase.execute(tenantId, filters);
         return students.map(StudentResponseDto.fromDomain);
+    }
+
+    @Get('filters')
+    @ApiOperation({ summary: 'Get student filter options with counts' })
+    async getFilters(
+        @Query('search') search?: string,
+        @Query('schoolId') schoolId?: string,
+        @Query('class') classFilter?: string,
+        @Query('section') section?: string,
+        @Query('status') status?: string,
+        @Query('academicYear') academicYear?: string,
+        @Query('gender') gender?: string,
+    ): Promise<any> {
+        const tenantId = this.tenantContext.tenantId;
+        const filters = {
+            search,
+            schoolId,
+            class: classFilter,
+            section,
+            status,
+            academicYear,
+            gender,
+        };
+        return this.getAllStudentsUseCase.getFilterStats(tenantId, filters);
     }
 
     @Get('export')
@@ -246,6 +278,33 @@ export class StudentsController {
         const tenantId = this.tenantContext.tenantId;
         const deleted = await this.bulkDeleteStudentsUseCase.execute(body.ids, tenantId);
         return { deleted };
+    }
+
+    @Get(':id/activity')
+    @ApiOperation({ summary: 'Get student activity feed' })
+    async activity(
+        @Param('id') id: string,
+        @Query('category') category?: string,
+        @Query('page') page?: string,
+        @Query('pageSize') pageSize?: string,
+    ): Promise<any[]> {
+        const tenantId = this.tenantContext.tenantId;
+        const results = await this.auditService.query({
+            tenantId,
+            targetType: 'student',
+            targetId: id,
+            category: category && category !== 'all' ? category : undefined,
+            page: page ? Number(page) : 1,
+            pageSize: pageSize ? Number(pageSize) : 20,
+        });
+        return results.items.map((event) => ({
+            id: event.id,
+            title: event.action,
+            category: event.category,
+            createdAt: event.timestamp,
+            actor: event.actorEmailSnapshot ?? 'System',
+            metadata: event.message ?? undefined,
+        }));
     }
 
     @Get(':id')

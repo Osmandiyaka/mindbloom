@@ -39,6 +39,7 @@ export class MongooseAuditRepository implements IAuditRepository {
         if (filters.severity) query.severity = filters.severity;
         if (filters.result) query.result = filters.result;
         if (filters.targetType) query.targetType = filters.targetType;
+        if (filters.targetId) query.targetId = filters.targetId;
 
         if (filters.dateFrom || filters.dateTo) {
             query.timestamp = {};

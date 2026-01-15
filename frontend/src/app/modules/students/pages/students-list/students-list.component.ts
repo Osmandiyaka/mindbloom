@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { Subscription } from 'rxjs';
 import { StudentService } from '../../../../core/services/student.service';
-import { Student, StudentActivityItem, StudentFilters, StudentStatus } from '../../../../core/models/student.model';
+import { Student, StudentActivityItem, StudentFilterResponse, StudentFilters, StudentStatus } from '../../../../core/models/student.model';
 import { StudentFormComponent } from '../../../setup/pages/students/student-form/student-form.component';
 import { CanDirective } from '../../../../shared/security/can.directive';
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
@@ -92,9 +93,11 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
             (primaryClick)="openCreateModal()"
             (itemSelect)="handleAddMenu($event)">
           </mb-split-button>
-          <mb-button size="sm" variant="tertiary" (click)="toggleColumns()">{{ headerCopy.columns }}</mb-button>
+          <mb-button size="sm" variant="tertiary" aria-label="Manage columns" (click)="toggleColumns()">
+            {{ headerCopy.columns }}
+          </mb-button>
           <div class="overflow" [class.open]="overflowOpen()">
-            <mb-button size="sm" variant="tertiary" (click)="toggleOverflow($event)">•••</mb-button>
+            <mb-button size="sm" variant="tertiary" aria-label="More actions" (click)="toggleOverflow($event)">•••</mb-button>
             <div class="overflow-menu" *ngIf="overflowOpen()">
               <mb-button
                 size="sm"
@@ -177,7 +180,7 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
       </div>
 
       <div class="hub-body">
-        <section class="list-panel" (keydown)="handleKeydown($event)">
+        <section class="list-panel" (keydown)="handleKeydown($event)" aria-label="Students list">
           <div class="attention-filters">
             <span class="attention-label">Attention filters</span>
             <div class="attention-list">
@@ -227,12 +230,19 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
           @if (!loading() && !error()) {
             @if (filteredStudents().length === 0) {
               <div class="empty-state">
-                <p>No students found</p>
-                <span>Try adjusting your filters or search terms.</span>
-                <div class="empty-actions">
-                  <mb-button size="sm" variant="tertiary" (click)="clearFilters()">Clear filters</mb-button>
-                  <mb-button size="sm" variant="primary" *can="'students.create'" (click)="openCreateModal()">Add student</mb-button>
-                </div>
+                @if (hasFilters()) {
+                  <p>No results</p>
+                  <div class="empty-actions">
+                    <mb-button size="sm" variant="tertiary" (click)="clearFilters()">Clear filters</mb-button>
+                    <mb-button size="sm" variant="primary" *can="'students.create'" (click)="openCreateModal()">Add student</mb-button>
+                  </div>
+                } @else {
+                  <p>No students yet</p>
+                  <div class="empty-actions">
+                    <mb-button size="sm" variant="tertiary" (click)="openImport()">Import CSV</mb-button>
+                    <mb-button size="sm" variant="primary" *can="'students.create'" (click)="openCreateModal()">Add student</mb-button>
+                  </div>
+                }
               </div>
             } @else {
               <div class="table-wrapper">
@@ -250,7 +260,7 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                 >
                   <ng-template mbTableActions let-student>
                     <div class="row-actions" [class.open]="rowMenuOpen() === student.id">
-                      <mb-button size="sm" variant="tertiary" (click)="toggleRowMenu($event, student.id)">•••</mb-button>
+                      <mb-button size="sm" variant="tertiary" aria-label="Row actions" (click)="toggleRowMenu($event, student.id)">•••</mb-button>
                       <div class="row-menu" *ngIf="rowMenuOpen() === student.id">
                         <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="viewStudent($event, student)">
                           View student
@@ -337,7 +347,7 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
               }
             </div>
             <div class="quick-actions-menu" [class.open]="quickActionsMenuOpen()">
-              <mb-button size="sm" variant="tertiary" (click)="toggleQuickActionsMenu($event)">•••</mb-button>
+              <mb-button size="sm" variant="tertiary" aria-label="Quick actions menu" (click)="toggleQuickActionsMenu($event)">•••</mb-button>
               <div class="quick-actions-menu-panel" *ngIf="quickActionsMenuOpen()">
                 <div
                   class="quick-actions-menu-item"
@@ -618,7 +628,7 @@ export class StudentsListComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   students = signal<Student[]>([]);
-  filterSource = signal<Student[]>([]);
+  filterOptions = signal<StudentFilterResponse | null>(null);
 
   searchTerm = signal('');
   statusFilter = '';
@@ -665,6 +675,10 @@ export class StudentsListComponent implements OnInit {
   bulkStatusValue: StudentStatus = StudentStatus.ACTIVE;
   bulkSectionValue = '';
   private searchDebounce?: ReturnType<typeof setTimeout>;
+  private studentsSub?: Subscription;
+  private filtersSub?: Subscription;
+  private activitySub?: Subscription;
+  private detailSub?: Subscription;
 
   skeletonRows = Array.from({ length: 8 });
 
@@ -673,8 +687,6 @@ export class StudentsListComponent implements OnInit {
     { label: '50 / page', value: '50' },
     { label: '100 / page', value: '100' },
   ];
-
-  statuses = Object.values(StudentStatus);
 
   headerCopy = {
     title: 'Students',
@@ -768,40 +780,42 @@ export class StudentsListComponent implements OnInit {
   ];
 
   statusOptions = computed<MbSelectOption[]>(() => {
-    const values = this.uniqueValues(this.filterSource().map((student) => student.status));
-    const options = values.length ? values : this.statuses;
-    return [{ label: 'All statuses', value: '' }, ...options.map((status) => ({ label: this.titleCase(status), value: status }))];
+    const options = this.filterOptions()?.statuses || [];
+    return [
+      { label: 'All statuses', value: '' },
+      ...options.map((status) => ({ label: this.titleCase(status.value), value: status.value })),
+    ];
   });
 
   gradeOptions = computed<MbSelectOption[]>(() => {
-    const values = this.uniqueValues(this.filterSource().map((student) => student.enrollment.class));
-    return [{ label: 'All grades', value: '' }, ...values.map((grade) => ({ label: grade, value: grade }))];
+    const options = this.filterOptions()?.grades || [];
+    return [{ label: 'All grades', value: '' }, ...options.map((grade) => ({ label: grade.value, value: grade.value }))];
   });
 
   classOptions = computed<MbSelectOption[]>(() => {
-    const values = this.uniqueValues(this.filterSource().map((student) => student.enrollment.section).filter(Boolean) as string[]);
-    return [{ label: 'All sections', value: '' }, ...values.map((section) => ({ label: section, value: section }))];
+    const options = this.filterOptions()?.sections || [];
+    return [{ label: 'All sections', value: '' }, ...options.map((section) => ({ label: section.value, value: section.value }))];
   });
 
   yearOptions = computed<MbSelectOption[]>(() => {
-    const values = this.uniqueValues(this.filterSource().map((student) => student.enrollment.academicYear));
-    return [{ label: 'All years', value: '' }, ...values.map((year) => ({ label: year, value: year }))];
+    const options = this.filterOptions()?.years || [];
+    return [{ label: 'All years', value: '' }, ...options.map((year) => ({ label: year.value, value: year.value }))];
   });
 
   bulkStatusOptions = computed<MbSelectOption[]>(() =>
-    (this.uniqueValues(this.filterSource().map((student) => student.status)).length
-      ? this.uniqueValues(this.filterSource().map((student) => student.status))
-      : this.statuses
-    ).map((status) => ({ label: this.titleCase(status), value: status })),
+    (this.filterOptions()?.statuses || []).map((status) => ({
+      label: this.titleCase(status.value),
+      value: status.value,
+    })),
   );
 
   bulkClassOptions = computed<MbSelectOption[]>(() => {
-    const values = this.uniqueValues(this.filterSource().map((student) => student.enrollment.section).filter(Boolean) as string[]);
-    return values.map((section) => ({ label: section, value: section }));
+    const values = this.filterOptions()?.sections || [];
+    return values.map((section) => ({ label: section.value, value: section.value }));
   });
 
   attentionFiltersList = computed(() => {
-    const students = this.filterSource();
+    const students = this.students();
     return [
       { key: 'missing-docs' as const, label: 'Missing documents', count: students.filter((student) => this.hasMissingDocs(student)).length },
       { key: 'missing-guardian' as const, label: 'No guardian', count: students.filter((student) => this.hasMissingGuardian(student)).length },
@@ -925,6 +939,16 @@ export class StudentsListComponent implements OnInit {
     };
   }
 
+  private buildFilterParams(): StudentFilters {
+    return {
+      search: this.searchTerm() || undefined,
+      status: this.statusFilter || undefined,
+      class: this.gradeFilter || undefined,
+      section: this.classFilter || undefined,
+      academicYear: this.yearFilter || undefined,
+    };
+  }
+
   private updateQueryParams(): void {
     const attention = this.serializeAttentionFilters();
     this.router.navigate([], {
@@ -950,10 +974,6 @@ export class StudentsListComponent implements OnInit {
 
   private isAttentionFilter(value: string): value is AttentionFilter {
     return value === 'missing-docs' || value === 'missing-guardian' || value === 'inactive';
-  }
-
-  private uniqueValues(values: string[]): string[] {
-    return Array.from(new Set(values.filter(Boolean))).sort();
   }
 
   hasMissingDocs(student: Student): boolean {
@@ -1117,15 +1137,16 @@ export class StudentsListComponent implements OnInit {
       );
       this.loadStudents();
       this.loadActivity(true);
+      this.loadFilterOptions();
     });
-    this.loadFilterOptions();
     this.loadColumnConfig();
   }
 
   loadStudents(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.studentsService.getStudents(this.buildStudentFilters()).subscribe({
+    this.studentsSub?.unsubscribe();
+    this.studentsSub = this.studentsService.getStudents(this.buildStudentFilters()).subscribe({
       next: (students) => {
         this.students.set(students);
         if (this.selectedStudentId() && !students.some((student) => student.id === this.selectedStudentId())) {
@@ -1146,12 +1167,13 @@ export class StudentsListComponent implements OnInit {
   }
 
   loadFilterOptions(): void {
-    this.studentsService.getStudents().subscribe({
-      next: (students) => {
-        this.filterSource.set(students);
+    this.filtersSub?.unsubscribe();
+    this.filtersSub = this.studentsService.getStudentFilters(this.buildFilterParams()).subscribe({
+      next: (options) => {
+        this.filterOptions.set(options);
       },
       error: () => {
-        this.filterSource.set([]);
+        this.filterOptions.set(null);
       }
     });
   }
@@ -1466,7 +1488,8 @@ export class StudentsListComponent implements OnInit {
 
   loadSelectedStudentDetail(id: string): void {
     this.detailLoading.set(true);
-    this.studentsService.getStudent(id).subscribe({
+    this.detailSub?.unsubscribe();
+    this.detailSub = this.studentsService.getStudent(id).subscribe({
       next: (student) => {
         this.selectedStudentDetail.set(student);
         this.detailLoading.set(false);
@@ -1507,7 +1530,8 @@ export class StudentsListComponent implements OnInit {
     this.activityError.set(null);
     const page = this.activityPage();
     const pageSize = 10;
-    this.studentsService
+    this.activitySub?.unsubscribe();
+    this.activitySub = this.studentsService
       .getStudentActivity(studentId, { category: this.activityFilter(), page, pageSize })
       .subscribe({
         next: (items) => {
@@ -1671,6 +1695,9 @@ export class StudentsListComponent implements OnInit {
     }
     if (event.key === 'Escape') {
       this.closeDetail();
+    }
+    if (event.key === 'Enter' && this.selectedStudent()) {
+      this.openDetailDrawer();
     }
   }
 

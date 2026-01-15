@@ -12,4 +12,8 @@ export class GetAllStudentsUseCase {
     async execute(tenantId: string, filters?: StudentFilters): Promise<Student[]> {
         return await this.studentRepository.findAll(tenantId, filters);
     }
+
+    async getFilterStats(tenantId: string, filters?: StudentFilters) {
+        return this.studentRepository.getFilterStats(tenantId, filters);
+    }
 }

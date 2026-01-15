@@ -9,6 +9,8 @@ import { map, tap, catchError, finalize } from 'rxjs/operators';
 import { TenantContextService, TenantMembership } from './tenant-context.service';
 import { SchoolContextService } from '../school/school-context.service';
 import { EditionService } from '../../shared/services/entitlements.service';
+import { PermissionsService } from '../services/permissions.service';
+import { RbacService } from '../rbac/rbac.service';
 
 export type BootstrapStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -19,6 +21,8 @@ export class TenantBootstrapService {
     private readonly tenantContext = inject(TenantContextService);
     private readonly schoolContext = inject(SchoolContextService);
     private readonly entitlements = inject(EditionService);
+    private readonly permissionsService = inject(PermissionsService);
+    private readonly rbacService = inject(RbacService);
 
     // Bootstrap loading state
     readonly status = signal<BootstrapStatus>('idle');
@@ -60,19 +64,26 @@ export class TenantBootstrapService {
 
     /**
      * Reload permissions for tenant
-     * TODO: Integrate with actual PermissionsService when implemented
      */
     private reloadPermissions(tenantId: string): Observable<void> {
         console.log('[TenantBootstrap] Reloading permissions for tenant:', tenantId);
 
-        // Placeholder - replace with actual permission loading
-        // Example: return this.permissionsService.loadForTenant(tenantId);
-
-        return of(void 0).pipe(
-            tap(() => {
-                // Clear any cached permissions
+        return this.permissionsService.loadPermissions().pipe(
+            tap((permissions) => {
+                const session = this.rbacService.getSession();
+                if (session) {
+                    this.rbacService.setSession({
+                        ...session,
+                        permissionOverrides: { allow: permissions },
+                    });
+                }
                 console.log('[TenantBootstrap] Permissions reloaded');
-            })
+            }),
+            map(() => void 0),
+            catchError((error) => {
+                console.warn('[TenantBootstrap] Failed to reload permissions', error);
+                return of(void 0);
+            }),
         );
     }
 

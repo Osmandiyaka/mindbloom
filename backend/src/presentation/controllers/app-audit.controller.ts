@@ -26,6 +26,7 @@ export class AppAuditController {
             severity: query.severity,
             result: query.result,
             targetType: query.targetType,
+            targetId: query.targetId,
             dateFrom: query.dateFrom ? new Date(query.dateFrom) : undefined,
             dateTo: query.dateTo ? new Date(query.dateTo) : undefined,
             page: query.page ? Number(query.page) : 1,

@@ -24,6 +24,7 @@ import { GetStudentNotesUseCase } from '../../application/services/student-notes
 import { TenantLimitEnforcementService } from '../../application/services/tenant/tenant-limit-enforcement.service';
 import { TenantModule } from '../tenant/tenant.module';
 import { PluginsModule } from '../plugins/plugins.module';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
     imports: [
@@ -33,6 +34,7 @@ import { PluginsModule } from '../plugins/plugins.module';
         ]),
         TenantModule,
         PluginsModule,
+        AuditModule,
     ],
     controllers: [StudentsController, StudentNotesController],
     providers: [

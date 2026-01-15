@@ -97,6 +97,7 @@
   grid-template-columns: minmax(0, 1fr) minmax(220px, 0.35fr);
   gap: 16px;
   align-items: start;
+  position: relative;
 }
 
 .list-panel,
@@ -105,6 +106,10 @@
   border-radius: 12px;
   background: white;
   padding: 16px;
+}
+
+.workflow-panel {
+  border-left-color: rgba(148, 163, 184, 0.3);
 }
 
 .list-panel {
@@ -160,6 +165,14 @@
   overflow-x: auto;
 }
 
+.table-wrapper :is(tbody tr) {
+  transition: background 120ms ease;
+}
+
+.table-wrapper :is(tbody tr:hover) {
+  background: rgba(148, 163, 184, 0.08);
+}
+
 .table-skeleton {
   display: grid;
   gap: 8px;
@@ -199,6 +212,14 @@ tbody tr.is-selected {
   padding: 6px;
   min-width: 180px;
   z-index: 20;
+}
+
+.row-menu mb-button .mb-button {
+  transition: background 120ms ease;
+}
+
+.row-menu mb-button .mb-button:hover {
+  background: rgba(148, 163, 184, 0.12);
 }
 
 .overflow-menu mb-button,
@@ -559,13 +580,11 @@ tbody tr.is-selected {
 }
 
 .empty-state {
-  border: 1px dashed rgba(148, 163, 184, 0.3);
-  border-radius: 12px;
   padding: 18px;
   text-align: center;
   color: var(--color-text-secondary);
   display: grid;
-  gap: 6px;
+  gap: 10px;
 }
 
 .empty-actions {
