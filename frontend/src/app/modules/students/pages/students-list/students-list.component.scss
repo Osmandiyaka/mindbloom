@@ -233,6 +233,47 @@ tbody tr.is-selected {
   top: 120px;
 }
 
+.columns-drawer {
+  display: grid;
+  gap: 12px;
+}
+
+.columns-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.columns-list {
+  display: grid;
+  gap: 8px;
+}
+
+.columns-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: white;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.columns-item.cdk-drag-preview {
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+}
+
+.columns-item.cdk-drag-placeholder {
+  opacity: 0.4;
+}
+
 .workflow-summary {
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 10px;

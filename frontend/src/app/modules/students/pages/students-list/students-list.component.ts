@@ -2,6 +2,7 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { StudentService } from '../../../../core/services/student.service';
 import { Student, StudentActivityItem, StudentFilters, StudentStatus } from '../../../../core/models/student.model';
 import { StudentFormComponent } from '../../../setup/pages/students/student-form/student-form.component';
@@ -12,9 +13,13 @@ import { EditionService } from '../../../../shared/services/entitlements.service
 import { MODULE_KEYS, ModuleKey } from '../../../../shared/types/module-keys';
 import { RbacService } from '../../../../core/rbac/rbac.service';
 import { PERMISSIONS } from '../../../../core/rbac/permission.constants';
+import { TenantContextService } from '../../../../core/tenant/tenant-context.service';
+import { StudentColumnConfig } from '../../config/student-columns.schema';
 import {
   MbButtonComponent,
+  MbCheckboxComponent,
   MbDrawerComponent,
+  MbInputComponent,
   MbModalComponent,
   MbModalFooterDirective,
   MbSelectComponent,
@@ -46,7 +51,9 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
     CommonModule,
     RouterModule,
     FormsModule,
+    DragDropModule,
     MbButtonComponent,
+    MbCheckboxComponent,
     MbSelectComponent,
     MbSplitButtonComponent,
     MbTableComponent,
@@ -54,6 +61,7 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
     MbModalComponent,
     MbModalFooterDirective,
     MbDrawerComponent,
+    MbInputComponent,
     StudentFormComponent,
     SearchInputComponent,
     CanDirective,
@@ -64,8 +72,8 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
     <div class="students-hub">
       <header class="hub-header">
         <div class="hub-title">
-          <h1>Students</h1>
-          <p>Search, manage, and process student records.</p>
+          <h1>{{ headerCopy.title }}</h1>
+          <p>{{ headerCopy.subtitle }}</p>
         </div>
         <div class="hub-actions">
           <mb-button
@@ -77,14 +85,14 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
           </mb-button>
           <mb-split-button
             *can="'students.create'"
-            label="Add student"
+            [label]="headerCopy.addStudent"
             size="sm"
             variant="primary"
             [items]="addStudentItems"
             (primaryClick)="openCreateModal()"
             (itemSelect)="handleAddMenu($event)">
           </mb-split-button>
-          <mb-button size="sm" variant="tertiary" (click)="toggleColumns()">Columns</mb-button>
+          <mb-button size="sm" variant="tertiary" (click)="toggleColumns()">{{ headerCopy.columns }}</mb-button>
           <div class="overflow" [class.open]="overflowOpen()">
             <mb-button size="sm" variant="tertiary" (click)="toggleOverflow($event)">•••</mb-button>
             <div class="overflow-menu" *ngIf="overflowOpen()">
@@ -94,13 +102,18 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                 [fullWidth]="true"
                 *can="'students.export'"
                 (click)="exportStudents()">
-                Export CSV
+                {{ headerCopy.exportCsv }}
               </mb-button>
               <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="openSavedViews()">
-                Saved views
+                {{ headerCopy.savedViews }}
               </mb-button>
-              <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="bulkHelp()">
-                Bulk actions
+              <mb-button
+                size="sm"
+                variant="tertiary"
+                [fullWidth]="true"
+                *can="'setup.write'"
+                (click)="manageStudentIds()">
+                {{ headerCopy.manageStudentIds }}
               </mb-button>
             </div>
           </div>
@@ -447,6 +460,31 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
       </mb-drawer>
 
       <mb-drawer
+        [open]="columnsDrawerOpen()"
+        [title]="columnCopy.title"
+        (closed)="closeColumnsDrawer()">
+        <div class="columns-drawer">
+          <app-search-input
+            [value]="columnSearch()"
+            [placeholder]="columnCopy.searchPlaceholder"
+            (search)="updateColumnSearch($event)">
+          </app-search-input>
+          <div class="columns-actions">
+            <mb-button size="sm" variant="tertiary" (click)="resetColumns()">{{ columnCopy.reset }}</mb-button>
+            <mb-button size="sm" variant="primary" (click)="saveColumns()">{{ columnCopy.saveDefault }}</mb-button>
+          </div>
+          <div class="columns-list" cdkDropList (cdkDropListDropped)="onColumnDrop($event)">
+            <div class="columns-item" *ngFor="let col of filteredColumns()" cdkDrag>
+              <span class="drag-handle" cdkDragHandle>⋮⋮</span>
+              <mb-checkbox [checked]="col.visible" (checkedChange)="toggleColumn(col.key)">
+                {{ col.label }}
+              </mb-checkbox>
+            </div>
+          </div>
+        </div>
+      </mb-drawer>
+
+      <mb-drawer
         [open]="detailDrawerOpen()"
         title="Student details"
         (closed)="closeDetailDrawer()">
@@ -548,6 +586,7 @@ export class StudentsListComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly rbac: RbacService,
     private readonly entitlements: EditionService,
+    private readonly tenantContext: TenantContextService,
   ) {}
 
   loading = signal(true);
@@ -587,6 +626,10 @@ export class StudentsListComponent implements OnInit {
   bulkArchiveOpen = signal(false);
   bulkStatusOpen = signal(false);
   bulkAssignOpen = signal(false);
+  columnsDrawerOpen = signal(false);
+  columnSearch = signal('');
+  columnSchema = signal<StudentColumnConfig[]>([]);
+  columnConfig = signal<Array<StudentColumnConfig & { visible: boolean }>>([]);
   tableVisible = signal(true);
   bulkConfirmText = '';
   bulkStatusValue: StudentStatus = StudentStatus.ACTIVE;
@@ -603,9 +646,27 @@ export class StudentsListComponent implements OnInit {
 
   statuses = Object.values(StudentStatus);
 
+  headerCopy = {
+    title: 'Students',
+    subtitle: 'Search, manage, and process student records.',
+    addStudent: 'Add student',
+    importCsv: 'Import CSV',
+    columns: 'Columns',
+    exportCsv: 'Export CSV',
+    savedViews: 'Saved views',
+    manageStudentIds: 'Manage student IDs',
+  };
+
+  columnCopy = {
+    title: 'Columns',
+    searchPlaceholder: 'Search columns',
+    reset: 'Reset',
+    saveDefault: 'Save as default',
+  };
+
   addStudentItems: MbSplitButtonItem[] = [
-    { label: 'Add student', value: 'create' },
-    { label: 'Import CSV', value: 'import' },
+    { label: this.headerCopy.addStudent, value: 'create' },
+    { label: this.headerCopy.importCsv, value: 'import' },
   ];
 
   quickActions = computed<QuickAction[]>(() => [
@@ -718,39 +779,12 @@ export class StudentsListComponent implements OnInit {
     ];
   });
 
-  tableColumns = computed<MbTableColumn<Student>[]>(() => [
-    {
-      key: 'name',
-      label: 'Student',
-      sortable: true,
-      cell: (student) => ({
-        primary: student.fullName,
-        secondary: `ID · ${student.enrollment.admissionNumber || '—'}`,
-        meta: student.enrollment.class
-          ? `${student.enrollment.class}${student.enrollment.section ? ' · ' + student.enrollment.section : ''}`
-          : '—',
-        icon: { symbol: this.initials(student.fullName), title: student.fullName },
-      }),
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      cell: (student) => this.titleCase(student.status),
-    },
-    {
-      key: 'flags',
-      label: 'Attention',
-      cell: (student) => {
-        const flags = this.previewFlags(student);
-        return flags.length ? flags.join(' · ') : '—';
-      },
-    },
-    {
-      key: 'updatedAt',
-      label: 'Updated',
-      cell: (student) => this.formatUpdated(student.updatedAt),
-    },
-  ]);
+  tableColumns = computed<MbTableColumn<Student>[]>(() => {
+    const columns = this.columnConfig().length ? this.columnConfig() : this.defaultColumnConfig();
+    return columns
+      .filter((column) => column.visible)
+      .map((column) => this.buildColumn(column));
+  });
 
   filteredStudents = computed(() => {
     return this.students().filter((student) => {
@@ -1055,6 +1089,7 @@ export class StudentsListComponent implements OnInit {
       this.loadActivity(true);
     });
     this.loadFilterOptions();
+    this.loadColumnConfig();
   }
 
   loadStudents(): void {
@@ -1171,6 +1206,193 @@ export class StudentsListComponent implements OnInit {
     this.overflowOpen.set(!this.overflowOpen());
   }
 
+  toggleColumns(): void {
+    this.columnsDrawerOpen.set(true);
+  }
+
+  closeColumnsDrawer(): void {
+    this.columnsDrawerOpen.set(false);
+  }
+
+  updateColumnSearch(value: string): void {
+    this.columnSearch.set(value);
+  }
+
+  filteredColumns = computed(() => {
+    const term = this.columnSearch().trim().toLowerCase();
+    const columns = this.columnConfig().length ? this.columnConfig() : this.defaultColumnConfig();
+    if (!term) {
+      return columns;
+    }
+    return columns.filter((column) => column.label.toLowerCase().includes(term));
+  });
+
+  toggleColumn(key: string): void {
+    const next = this.columnConfig().length ? [...this.columnConfig()] : this.defaultColumnConfig();
+    const index = next.findIndex((column) => column.key === key);
+    if (index === -1) {
+      return;
+    }
+    next[index] = { ...next[index], visible: !next[index].visible };
+    this.columnConfig.set(next);
+  }
+
+  onColumnDrop(event: CdkDragDrop<Array<StudentColumnConfig & { visible: boolean }>>): void {
+    const next = [...this.columnConfig()];
+    moveItemInArray(next, event.previousIndex, event.currentIndex);
+    this.columnConfig.set(next);
+  }
+
+  saveColumns(): void {
+    this.persistColumns(this.columnConfig());
+    this.columnsDrawerOpen.set(false);
+  }
+
+  resetColumns(): void {
+    const defaults = this.defaultColumnConfig();
+    this.columnConfig.set(defaults);
+    this.persistColumns(defaults);
+  }
+
+  loadColumnConfig(): void {
+    this.studentsService.getStudentColumns().subscribe({
+      next: (schema) => {
+        this.columnSchema.set(schema);
+        const saved = this.readPersistedColumns(schema);
+        this.columnConfig.set(saved);
+      },
+      error: () => {
+        const stored = this.readStoredColumns();
+        if (stored?.length) {
+          this.columnConfig.set(stored);
+        } else {
+          this.columnConfig.set(this.defaultColumnConfig());
+        }
+      }
+    });
+  }
+
+  private defaultColumnConfig(): Array<StudentColumnConfig & { visible: boolean }> {
+    const schema = this.columnSchema();
+    if (!schema.length) {
+      return this.columnConfig().length ? this.columnConfig() : [];
+    }
+    return schema.map((column) => ({ ...column, visible: column.defaultVisible }));
+  }
+
+  private buildColumn(column: StudentColumnConfig): MbTableColumn<Student> {
+    switch (column.key) {
+      case 'name':
+        return {
+          key: 'name',
+          label: column.label,
+          sortable: true,
+          cell: (student) => ({
+            primary: student.fullName,
+            secondary: `ID · ${student.enrollment.admissionNumber || '—'}`,
+            meta: student.enrollment.class
+              ? `${student.enrollment.class}${student.enrollment.section ? ' · ' + student.enrollment.section : ''}`
+              : '—',
+            icon: { symbol: this.initials(student.fullName), title: student.fullName },
+          }),
+        };
+      case 'grade':
+        return {
+          key: 'grade',
+          label: column.label,
+          cell: (student) => student.enrollment.class || '—',
+        };
+      case 'section':
+        return {
+          key: 'section',
+          label: column.label,
+          cell: (student) => student.enrollment.section || '—',
+        };
+      case 'status':
+        return {
+          key: 'status',
+          label: column.label,
+          cell: (student) => this.titleCase(student.status),
+        };
+      case 'flags':
+        return {
+          key: 'flags',
+          label: column.label,
+          cell: (student) => {
+            const flags = this.previewFlags(student);
+            return flags.length ? flags.join(' · ') : '—';
+          },
+        };
+      case 'updated':
+        return {
+          key: 'updated',
+          label: column.label,
+          cell: (student) => this.formatUpdated(student.updatedAt),
+        };
+      default:
+        return {
+          key: column.key,
+          label: column.label,
+          cell: () => '—',
+        };
+    }
+  }
+
+  private persistColumns(columns: Array<StudentColumnConfig & { visible: boolean }>): void {
+    try {
+      const storageKey = this.columnsStorageKey();
+      localStorage.setItem(storageKey, JSON.stringify(columns));
+    } catch (error) {
+      console.warn('[Students] Failed to save column preferences', error);
+    }
+  }
+
+  private readPersistedColumns(schema: StudentColumnConfig[]): Array<StudentColumnConfig & { visible: boolean }> {
+    const defaults = schema.map((column) => ({ ...column, visible: column.defaultVisible }));
+    try {
+      const stored = localStorage.getItem(this.columnsStorageKey());
+      if (!stored) {
+        return defaults;
+      }
+      const parsed = JSON.parse(stored) as Array<StudentColumnConfig & { visible: boolean }>;
+      const schemaMap = new Map(schema.map((column) => [column.key, column]));
+      const ordered: Array<StudentColumnConfig & { visible: boolean }> = [];
+      parsed.forEach((storedColumn) => {
+        const schemaColumn = schemaMap.get(storedColumn.key);
+        if (schemaColumn) {
+          ordered.push({ ...schemaColumn, visible: storedColumn.visible ?? schemaColumn.defaultVisible });
+          schemaMap.delete(storedColumn.key);
+        }
+      });
+      schemaMap.forEach((column) => {
+        ordered.push({ ...column, visible: column.defaultVisible });
+      });
+      return ordered;
+    } catch (error) {
+      console.warn('[Students] Failed to load column preferences', error);
+      return defaults;
+    }
+  }
+
+  private readStoredColumns(): Array<StudentColumnConfig & { visible: boolean }> | null {
+    try {
+      const stored = localStorage.getItem(this.columnsStorageKey());
+      if (!stored) {
+        return null;
+      }
+      const parsed = JSON.parse(stored) as Array<StudentColumnConfig & { visible: boolean }>;
+      return Array.isArray(parsed) ? parsed : null;
+    } catch (error) {
+      console.warn('[Students] Failed to read stored columns', error);
+      return null;
+    }
+  }
+
+  private columnsStorageKey(): string {
+    const tenantId = this.tenantContext.activeTenantId() || 'tenant';
+    const userId = this.rbac.getSession()?.userId || 'user';
+    return `students.columns.${tenantId}.${userId}`;
+  }
   toggleQuickActionsMenu(event: Event): void {
     event.stopPropagation();
     this.quickActionsMenuOpen.set(!this.quickActionsMenuOpen());
@@ -1324,7 +1546,7 @@ export class StudentsListComponent implements OnInit {
     this.overflowOpen.set(false);
   }
 
-  bulkHelp(): void {
+  manageStudentIds(): void {
     this.overflowOpen.set(false);
   }
 
@@ -1417,7 +1639,6 @@ export class StudentsListComponent implements OnInit {
     }
   }
 
-  toggleColumns(): void {}
 
   closeBulkModals(): void {
     this.bulkArchiveOpen.set(false);
