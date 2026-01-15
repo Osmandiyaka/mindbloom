@@ -27,6 +27,9 @@ export class StudentService {
             if (filters.status) params = params.set('status', filters.status);
             if (filters.academicYear) params = params.set('academicYear', filters.academicYear);
             if (filters.gender) params = params.set('gender', filters.gender);
+            if (filters.page) params = params.set('page', String(filters.page));
+            if (filters.pageSize) params = params.set('pageSize', String(filters.pageSize));
+            if (filters.sort) params = params.set('sort', filters.sort);
         }
 
         return this.http.get<Student[]>(this.apiUrl, { params });

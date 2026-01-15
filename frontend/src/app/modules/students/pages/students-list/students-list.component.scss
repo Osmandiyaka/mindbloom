@@ -160,6 +160,19 @@
   overflow-x: auto;
 }
 
+.table-skeleton {
+  display: grid;
+  gap: 8px;
+}
+
+.skeleton-row {
+  height: 42px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.15), rgba(148, 163, 184, 0.3), rgba(148, 163, 184, 0.15));
+  background-size: 200% 100%;
+  animation: shimmer 1.3s ease-in-out infinite;
+}
+
 tbody tr.is-selected {
   background: rgba(59, 130, 246, 0.08);
 }
@@ -291,5 +304,14 @@ tbody tr.is-selected {
 
   .workflow-toggle {
     display: inline-flex;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }

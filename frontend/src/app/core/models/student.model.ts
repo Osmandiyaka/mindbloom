@@ -136,6 +136,9 @@ export interface StudentFilters {
     status?: string;
     academicYear?: string;
     gender?: string;
+    page?: number;
+    pageSize?: number;
+    sort?: string;
 }
 
 export interface CreateStudentDto {

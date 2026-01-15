@@ -118,6 +118,11 @@ type FilterChip = { key: string; label: string; type: 'search' | 'status' | 'gra
             [(ngModel)]="yearFilter"
             (valueChange)="applyFilters()">
           </mb-select>
+          <mb-select
+            [options]="pageSizeOptions"
+            [(ngModel)]="pageSizeValue"
+            (valueChange)="setPageSize($event)">
+          </mb-select>
           <mb-button
             size="sm"
             variant="tertiary"
@@ -178,9 +183,8 @@ type FilterChip = { key: string; label: string; type: 'search' | 'status' | 'gra
           </div>
 
           @if (loading()) {
-            <div class="state-block">
-              <div class="spinner"></div>
-              <p>Loading students...</p>
+            <div class="table-skeleton">
+              <div class="skeleton-row" *ngFor="let _ of skeletonRows"></div>
             </div>
           }
 
@@ -194,18 +198,18 @@ type FilterChip = { key: string; label: string; type: 'search' | 'status' | 'gra
           @if (!loading() && !error()) {
             @if (filteredStudents().length === 0) {
               <div class="empty-state">
-                <p>No students yet</p>
-                <span>Add your first student or import from Excel/CSV.</span>
+                <p>No students found</p>
+                <span>Try adjusting your filters or search terms.</span>
                 <div class="empty-actions">
+                  <mb-button size="sm" variant="tertiary" (click)="clearFilters()">Clear filters</mb-button>
                   <mb-button size="sm" variant="primary" *can="'students.create'" (click)="openCreateModal()">Add student</mb-button>
-                  <mb-button size="sm" variant="tertiary" *can="'students.create'" (click)="openImport()">Import CSV</mb-button>
                 </div>
               </div>
             } @else {
               <div class="table-wrapper">
                 <mb-table
                   *ngIf="tableVisible()"
-                  [rows]="pagedStudents()"
+                  [rows]="filteredStudents()"
                   [columns]="tableColumns()"
                   [rowKey]="rowKey"
                   [rowClass]="rowClass"
@@ -261,10 +265,10 @@ type FilterChip = { key: string; label: string; type: 'search' | 'status' | 'gra
               </div>
 
               <div class="pagination">
-                <span>Page {{ page() }} of {{ totalPages() }}</span>
+                <span>Page {{ page() }}</span>
                 <div class="pagination-actions">
                   <mb-button size="sm" variant="tertiary" (click)="prevPage()" [disabled]="page() === 1">Previous</mb-button>
-                  <mb-button size="sm" variant="tertiary" (click)="nextPage()" [disabled]="page() === totalPages()">Next</mb-button>
+                  <mb-button size="sm" variant="tertiary" (click)="nextPage()" [disabled]="!hasNextPage()">Next</mb-button>
                 </div>
               </div>
             }
@@ -395,6 +399,7 @@ export class StudentsListComponent implements OnInit {
 
   page = signal(1);
   pageSize = signal(25);
+  pageSizeValue = '25';
 
   selectedIds = signal<Set<string>>(new Set());
   selectedStudentId = signal<string | null>(null);
@@ -412,6 +417,14 @@ export class StudentsListComponent implements OnInit {
   bulkStatusValue: StudentStatus = StudentStatus.ACTIVE;
   bulkSectionValue = '';
   private searchDebounce?: ReturnType<typeof setTimeout>;
+
+  skeletonRows = Array.from({ length: 8 });
+
+  pageSizeOptions: MbSelectOption[] = [
+    { label: '25 / page', value: '25' },
+    { label: '50 / page', value: '50' },
+    { label: '100 / page', value: '100' },
+  ];
 
   statuses = Object.values(StudentStatus);
 
@@ -600,6 +613,8 @@ export class StudentsListComponent implements OnInit {
       class: this.gradeFilter || undefined,
       section: this.classFilter || undefined,
       academicYear: this.yearFilter || undefined,
+      page: this.page(),
+      pageSize: this.pageSize(),
     };
   }
 
@@ -613,6 +628,8 @@ export class StudentsListComponent implements OnInit {
         grade: this.gradeFilter || null,
         section: this.classFilter || null,
         year: this.yearFilter || null,
+        page: this.page(),
+        pageSize: this.pageSize(),
         attention: attention || null,
       },
       queryParamsHandling: 'merge',
@@ -729,16 +746,6 @@ export class StudentsListComponent implements OnInit {
     return 'Keep the profile up to date and assign next actions.';
   }
 
-  pagedStudents = computed(() => {
-    const start = (this.page() - 1) * this.pageSize();
-    return this.filteredStudents().slice(start, start + this.pageSize());
-  });
-
-  totalPages = computed(() => {
-    const total = Math.max(this.filteredStudents().length, 1);
-    return Math.ceil(total / this.pageSize());
-  });
-
   selectedStudent = computed(() => {
     const id = this.selectedStudentId();
     if (!id) {
@@ -756,6 +763,15 @@ export class StudentsListComponent implements OnInit {
       this.gradeFilter = params.get('grade') || '';
       this.classFilter = params.get('section') || '';
       this.yearFilter = params.get('year') || '';
+      const pageParam = Number(params.get('page'));
+      const pageSizeParam = Number(params.get('pageSize'));
+      if (!Number.isNaN(pageParam) && pageParam > 0) {
+        this.page.set(pageParam);
+      }
+      if (!Number.isNaN(pageSizeParam) && pageSizeParam > 0) {
+        this.pageSize.set(pageSizeParam);
+        this.pageSizeValue = String(pageSizeParam);
+      }
       const attention = params.get('attention');
       this.attentionFilters.set(
         attention
@@ -833,6 +849,21 @@ export class StudentsListComponent implements OnInit {
       this.yearFilter ||
       this.hasAttentionFilters()
     );
+  }
+
+  setPageSize(value: string): void {
+    const size = Number(value);
+    if (Number.isNaN(size) || size <= 0) {
+      return;
+    }
+    this.pageSize.set(size);
+    this.pageSizeValue = value;
+    this.page.set(1);
+    this.updateQueryParams();
+  }
+
+  hasNextPage(): boolean {
+    return this.students().length === this.pageSize();
   }
 
   selectStudent(student: Student): void {
@@ -957,19 +988,19 @@ export class StudentsListComponent implements OnInit {
   }
 
   handleKeydown(event: KeyboardEvent): void {
-    if (!this.pagedStudents().length) {
+    if (!this.filteredStudents().length) {
       return;
     }
-    const currentIndex = this.pagedStudents().findIndex((student) => student.id === this.selectedStudentId());
+    const currentIndex = this.filteredStudents().findIndex((student) => student.id === this.selectedStudentId());
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      const nextIndex = currentIndex === -1 ? 0 : Math.min(currentIndex + 1, this.pagedStudents().length - 1);
-      this.selectStudent(this.pagedStudents()[nextIndex]);
+      const nextIndex = currentIndex === -1 ? 0 : Math.min(currentIndex + 1, this.filteredStudents().length - 1);
+      this.selectStudent(this.filteredStudents()[nextIndex]);
     }
     if (event.key === 'ArrowUp') {
       event.preventDefault();
       const nextIndex = currentIndex <= 0 ? 0 : currentIndex - 1;
-      this.selectStudent(this.pagedStudents()[nextIndex]);
+      this.selectStudent(this.filteredStudents()[nextIndex]);
     }
     if (event.key === 'Escape') {
       this.closeDetail();
@@ -1031,11 +1062,18 @@ export class StudentsListComponent implements OnInit {
   }
 
   prevPage(): void {
-    this.page.set(Math.max(1, this.page() - 1));
+    const next = Math.max(1, this.page() - 1);
+    if (next !== this.page()) {
+      this.page.set(next);
+      this.updateQueryParams();
+    }
   }
 
   nextPage(): void {
-    this.page.set(Math.min(this.totalPages(), this.page() + 1));
+    if (this.hasNextPage()) {
+      this.page.set(this.page() + 1);
+      this.updateQueryParams();
+    }
   }
 
   logAction(action: string): void {
