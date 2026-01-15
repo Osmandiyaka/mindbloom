@@ -90,17 +90,17 @@
                     <p>{{ selectedEdition()?.description }}</p>
                 </div>
                 <div class="plan-summary__actions">
-                    @if (isViewingCurrent()) {
-                    <ui-button variant="primary" size="sm">Manage subscription</ui-button>
-                    <ui-button variant="ghost" size="sm" (click)="openRequestModal()">Request plan change</ui-button>
-                    } @else {
-                    <ui-button variant="primary" size="sm">
-                        {{ selectedEdition()?.requiresSales ? 'Request Enterprise' : 'Upgrade to ' + selectedEdition()?.name }}
+                    <ui-button
+                        variant="primary"
+                        size="sm"
+                        [disabled]="isViewingCurrent()">
+                        {{ primaryCtaLabel() }}
                     </ui-button>
+                    <ui-button variant="ghost" size="sm" (click)="openRequestModal()">Request plan change</ui-button>
                     <ui-button variant="ghost" size="sm" (click)="toggleCompare()">Compare with current</ui-button>
-                    }
                     <ui-button variant="ghost" size="sm">⋯</ui-button>
                 </div>
+                <p class="plan-summary__helper">Changes apply at the tenant level. Billing handled by admin.</p>
             </div>
 
             <div class="plan-summary__highlights">

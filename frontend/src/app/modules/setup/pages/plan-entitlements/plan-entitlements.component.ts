@@ -100,6 +100,44 @@ export class PlanEntitlementsComponent implements OnInit {
         });
     });
 
+    planRank(plan: SubscriptionPlan | null | undefined): number {
+        const order: Record<SubscriptionPlan, number> = {
+            free: 0,
+            basic: 1,
+            premium: 2,
+            enterprise: 3,
+        };
+        if (!plan) {
+            return -1;
+        }
+        return order[plan];
+    }
+
+    isHigherPlan(selected: SubscriptionPlan, current: SubscriptionPlan): boolean {
+        return this.planRank(selected) > this.planRank(current);
+    }
+
+    isLowerPlan(selected: SubscriptionPlan, current: SubscriptionPlan): boolean {
+        return this.planRank(selected) < this.planRank(current);
+    }
+
+    primaryCtaLabel(): string {
+        const selected = this.selectedEdition()?.id;
+        const current = this.currentPlanId();
+        if (!selected) {
+            return 'Select a plan';
+        }
+        if (selected === current) {
+            return 'Current plan';
+        }
+        if (selected === 'enterprise') {
+            return 'Contact sales';
+        }
+        if (this.isLowerPlan(selected, current)) {
+            return 'Downgrade request';
+        }
+        return `Upgrade to ${this.selectedEdition()?.name || ''}`.trim();
+    }
     ngOnInit(): void {
         this.reload();
     }
