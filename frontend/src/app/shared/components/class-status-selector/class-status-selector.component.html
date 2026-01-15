@@ -1,0 +1,49 @@
+<div class="mb-class-status-selector" [class.is-disabled]="disabled">
+    <div class="mb-class-status-selector__header">
+        <div>
+            <div class="mb-class-status-selector__title">{{ title }}</div>
+            <div class="mb-class-status-selector__subtitle">{{ subtitle }}</div>
+        </div>
+    </div>
+
+    <div class="mb-class-status-selector__grid">
+        <div class="mb-class-status-selector__field">
+            <label class="mb-class-status-selector__label">Class</label>
+            <mb-class-selector
+                [options]="classes"
+                [value]="classId"
+                [placeholder]="isLoadingClasses ? 'Loading classes...' : classPlaceholder"
+                [searchPlaceholder]="searchPlaceholder"
+                [emptyText]="emptyText"
+                [disabled]="disabled || isLoadingClasses"
+                [allowClear]="allowClear"
+                (valueChange)="handleClassChange($event)"
+            ></mb-class-selector>
+        </div>
+
+        <div class="mb-class-status-selector__field" *ngIf="showSection">
+            <label class="mb-class-status-selector__label">Section</label>
+            <mb-select
+                [options]="sections"
+                [value]="sectionId || ''"
+                [placeholder]="sectionPlaceholder"
+                [disabled]="sectionDisabled"
+                (valueChange)="handleSectionChange($event || null)"
+            ></mb-select>
+            <div class="mb-class-status-selector__hint" *ngIf="sectionHint">
+                {{ sectionHint }}
+            </div>
+        </div>
+
+        <div class="mb-class-status-selector__field" *ngIf="showStatus">
+            <label class="mb-class-status-selector__label">Status</label>
+            <mb-select
+                [options]="statusSelectOptions"
+                [value]="status || ''"
+                [placeholder]="statusPlaceholder"
+                [disabled]="statusDisabled"
+                (valueChange)="handleStatusChange($event || null)"
+            ></mb-select>
+        </div>
+    </div>
+</div>

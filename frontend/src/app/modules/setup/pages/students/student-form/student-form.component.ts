@@ -8,11 +8,12 @@ import { TenantService, Tenant } from '../../../../../core/services/tenant.servi
 import { TenantSettingsService } from '../../../../../core/services/tenant-settings.service';
 import { IconRegistryService } from '../../../../../shared/services/icon-registry.service';
 import { SchoolContextService } from '../../../../../core/school/school-context.service';
+import { MbClassStatusSelection, MbClassStatusSelectorComponent } from '../../../../../shared/components/class-status-selector/class-status-selector.component';
 
 @Component({
     selector: 'app-student-form',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, MbClassStatusSelectorComponent],
     templateUrl: './student-form.component.html',
     styleUrls: ['./student-form.component.scss']
 })
@@ -28,6 +29,8 @@ export class StudentFormComponent implements OnInit {
     photoFile: File | null = null;
     templateSettings: Tenant['idTemplates'] | null = null;
     schoolId = signal<string | null>(null);
+    selectedClassId = signal<string | null>(null);
+    selectedSectionId = signal<string | null>(null);
 
     // Enums for templates
     Gender = Gender;
@@ -222,6 +225,8 @@ export class StudentFormComponent implements OnInit {
                 previousClass: student.enrollment.previousClass
             }
         });
+        this.selectedClassId.set(student.enrollment.class || null);
+        this.selectedSectionId.set(student.enrollment.section || null);
 
         // Guardians
         student.guardians.forEach(guardian => {
@@ -250,6 +255,14 @@ export class StudentFormComponent implements OnInit {
                 this.addArrayItem('medications', medication);
             });
         }
+    }
+
+    applyPlacement(selection: MbClassStatusSelection): void {
+        const enrollmentGroup = this.enrollmentForm.get('enrollment') as FormGroup;
+        enrollmentGroup.patchValue({
+            class: selection.classLabel || '',
+            section: selection.sectionLabel || ''
+        });
     }
 
     // Guardian Management

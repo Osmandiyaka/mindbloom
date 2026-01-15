@@ -311,13 +311,20 @@
                                     </span>
                                     }
                                 </div>
+                            </div>
 
-                                <div class="form-field">
-                                    <label>Class <span class="required">*</span></label>
-                                    <select formControlName="class">
-                                        <option value="">Select class</option>
-                                        <option *ngFor="let c of classes" [value]="c">{{ c }}</option>
-                                    </select>
+                            <div class="form-row">
+                                <div class="form-field full-width">
+                                    <mb-class-status-selector
+                                        [classId]="selectedClassId()"
+                                        [sectionId]="selectedSectionId()"
+                                        [showStatus]="false"
+                                        title="Class placement"
+                                        subtitle="Set class and section for enrollment."
+                                        (classIdChange)="selectedClassId.set($event)"
+                                        (sectionIdChange)="selectedSectionId.set($event)"
+                                        (selectionChange)="applyPlacement($event)"
+                                    ></mb-class-status-selector>
                                     @if (enrollmentForm.get('enrollment.class')?.invalid &&
                                     enrollmentForm.get('enrollment.class')?.touched) {
                                     <span class="field-error">
@@ -332,14 +339,6 @@
                             </div>
 
                             <div class="form-row">
-                                <div class="form-field">
-                                    <label>Section</label>
-                                    <select formControlName="section">
-                                        <option value="">Select section</option>
-                                        <option *ngFor="let s of sections" [value]="s">{{ s }}</option>
-                                    </select>
-                                </div>
-
                                 <div class="form-field">
                                     <label>Roll Number</label>
                                     <div class="input-with-action">
