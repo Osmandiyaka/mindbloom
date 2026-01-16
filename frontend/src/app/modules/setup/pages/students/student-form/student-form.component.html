@@ -190,13 +190,15 @@
                 </div>
                 <div class="field-grid two-cols">
                     <mb-form-field class="form-field" label="Class">
-                        <mb-select
+                        <mb-class-selector
                             [placeholder]="classLoading() ? 'Loading classes...' : 'Select class'"
-                            [options]="classOptions()"
+                            [searchPlaceholder]="'Search classes...'"
+                            [emptyText]="classLoading() ? 'Loading classes...' : 'No classes found'"
+                            [options]="classSelectorOptions()"
                             [disabled]="!canManageEnrollment() || classLoading()"
-                            [value]="selectedClassId() || ''"
+                            [value]="selectedClassId() || null"
                             (valueChange)="handleClassSelect($event)">
-                        </mb-select>
+                        </mb-class-selector>
                     </mb-form-field>
                     <mb-form-field
                         class="form-field"

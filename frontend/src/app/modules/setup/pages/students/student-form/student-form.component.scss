@@ -268,6 +268,31 @@
     transform: translateY(-50%);
 }
 
+:host ::ng-deep .form-field .mb-class-selector__field {
+    height: var(--student-control-height);
+    padding: 0 var(--student-control-padding-icon) 0 var(--student-control-padding-x);
+}
+
+:host ::ng-deep .form-field .mb-class-selector__name,
+:host ::ng-deep .form-field .mb-class-selector__placeholder {
+    font-size: var(--student-control-font-size);
+    line-height: var(--student-control-line-height);
+}
+
+:host ::ng-deep .form-field .mb-class-selector__meta {
+    font-size: 11px;
+    line-height: 16px;
+}
+
+:host ::ng-deep .form-field .mb-class-selector__chevron {
+    font-size: 16px;
+}
+
+:host ::ng-deep .form-field .mb-class-selector__clear {
+    font-size: 16px;
+    line-height: 1;
+}
+
 :host ::ng-deep .form-field input[type="date"].mb-input {
     padding-right: var(--student-control-padding-icon);
 }

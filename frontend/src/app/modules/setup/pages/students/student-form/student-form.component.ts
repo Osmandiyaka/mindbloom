@@ -11,7 +11,7 @@ import { TenantSettingsService } from '../../../../../core/services/tenant-setti
 import { IconRegistryService } from '../../../../../shared/services/icon-registry.service';
 import { SchoolContextService } from '../../../../../core/school/school-context.service';
 import { ClassSectionService, ClassResponse, SectionResponse } from '../../../../../core/services/class-section.service';
-import { MbButtonComponent, MbFormFieldComponent, MbInputComponent, MbSelectComponent, MbSelectOption, MbTextareaComponent } from '@mindbloom/ui';
+import { MbButtonComponent, MbClassSelectorComponent, MbClassSelectorOption, MbFormFieldComponent, MbInputComponent, MbSelectComponent, MbSelectOption, MbTextareaComponent } from '@mindbloom/ui';
 
 @Component({
     selector: 'app-student-form',
@@ -21,6 +21,7 @@ import { MbButtonComponent, MbFormFieldComponent, MbInputComponent, MbSelectComp
         ReactiveFormsModule,
         MbInputComponent,
         MbSelectComponent,
+        MbClassSelectorComponent,
         MbTextareaComponent,
         MbFormFieldComponent,
         MbButtonComponent
@@ -53,6 +54,7 @@ export class StudentFormComponent implements OnInit {
     academicYearOptions: MbSelectOption[] = [];
     academicYearLoading = signal(true);
     classOptions = signal<MbSelectOption[]>([]);
+    classSelectorOptions = signal<MbClassSelectorOption[]>([]);
     sectionOptions = signal<MbSelectOption[]>([]);
     classLoading = signal(false);
     sectionLoading = signal(false);
@@ -308,15 +310,23 @@ export class StudentFormComponent implements OnInit {
         this.classLoading.set(true);
         this.classSectionService.listClasses().subscribe({
             next: (items) => {
+                const selectorOptions = items.map((item) => ({
+                    id: item.id || item._id || item.name,
+                    name: item.name,
+                    code: item.code,
+                    levelType: item.levelType
+                }));
                 const options = items.map((item) => ({
                     label: item.name,
                     value: item.id || item._id || item.name
                 }));
+                this.classSelectorOptions.set(selectorOptions);
                 this.classOptions.set(options);
                 this.classLoading.set(false);
                 this.reconcileClassSelection();
             },
             error: () => {
+                this.classSelectorOptions.set([]);
                 this.classOptions.set([]);
                 this.classLoading.set(false);
             }
@@ -492,9 +502,10 @@ export class StudentFormComponent implements OnInit {
         }
     }
 
-    handleClassSelect(value: string): void {
-        this.selectedClassId.set(value);
-        const selected = this.findClassById(value);
+    handleClassSelect(value: string | null): void {
+        const nextValue = value || '';
+        this.selectedClassId.set(nextValue || null);
+        const selected = this.findClassById(nextValue);
         const enrollmentGroup = this.enrollmentForm.get('enrollment') as FormGroup;
         enrollmentGroup.patchValue({
             class: selected?.name || ''
@@ -502,8 +513,8 @@ export class StudentFormComponent implements OnInit {
         this.sectionOptions.set([]);
         this.selectedSectionId.set(null);
         enrollmentGroup.patchValue({ section: '' });
-        if (value) {
-            this.loadSections(value);
+        if (nextValue) {
+            this.loadSections(nextValue);
         }
     }
 
