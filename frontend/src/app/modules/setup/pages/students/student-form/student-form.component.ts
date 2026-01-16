@@ -11,7 +11,7 @@ import { TenantSettingsService } from '../../../../../core/services/tenant-setti
 import { IconRegistryService } from '../../../../../shared/services/icon-registry.service';
 import { SchoolContextService } from '../../../../../core/school/school-context.service';
 import { ClassSectionService, ClassResponse, SectionResponse } from '../../../../../core/services/class-section.service';
-import { MbButtonComponent, MbInputComponent, MbSelectComponent, MbSelectOption, MbTextareaComponent } from '@mindbloom/ui';
+import { MbButtonComponent, MbFormFieldComponent, MbInputComponent, MbSelectComponent, MbSelectOption, MbTextareaComponent } from '@mindbloom/ui';
 
 @Component({
     selector: 'app-student-form',
@@ -22,6 +22,7 @@ import { MbButtonComponent, MbInputComponent, MbSelectComponent, MbSelectOption,
         MbInputComponent,
         MbSelectComponent,
         MbTextareaComponent,
+        MbFormFieldComponent,
         MbButtonComponent
     ],
     templateUrl: './student-form.component.html',
