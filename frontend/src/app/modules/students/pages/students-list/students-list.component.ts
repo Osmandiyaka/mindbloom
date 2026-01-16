@@ -1216,9 +1216,20 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
           </app-student-form>
         </div>
         <div mbModalFooter>
-          <mb-button size="sm" variant="tertiary" (click)="closeCreateModal()">Cancel</mb-button>
-          <mb-button size="sm" variant="tertiary" (click)="submitCreateStudent(true)">Save & add another</mb-button>
-          <mb-button size="sm" variant="primary" (click)="submitCreateStudent()">Save student</mb-button>
+          <div class="create-modal-footer">
+            <div class="footer-left">
+              <mb-button size="sm" variant="tertiary" (click)="closeCreateModal()">Cancel</mb-button>
+            </div>
+            <div class="footer-status">
+              @if (isCreateDirty()) {
+              <span>Unsaved changes</span>
+              }
+            </div>
+            <div class="footer-actions">
+              <mb-button size="sm" variant="tertiary" (click)="submitCreateStudent(true)">Save & add another</mb-button>
+              <mb-button size="sm" variant="primary" (click)="submitCreateStudent()">Save student</mb-button>
+            </div>
+          </div>
         </div>
       </mb-modal>
 

@@ -39,7 +39,8 @@
 
 .section-title h3 {
     margin: 0;
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: 600;
 }
 
 .section-title p {
@@ -177,6 +178,18 @@
     color: var(--color-text-secondary);
 }
 
+.section-empty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+}
+
+.section-empty .text-link {
+    font-size: 11px;
+}
+
 .text-link {
     background: transparent;
     border: none;
@@ -185,6 +198,15 @@
     font-size: 12px;
     cursor: pointer;
     text-align: left;
+}
+
+.advanced-toggle {
+    margin-top: 4px;
+}
+
+.advanced-block {
+    display: grid;
+    gap: 16px;
 }
 
 .duplicate-panel {

@@ -85,31 +85,38 @@
                         [error]="isFieldInvalid(personalInfoForm, 'phone') ? fieldError(personalInfoForm, 'phone', 'Phone') : ''">
                         <mb-input type="tel" formControlName="phone" placeholder="e.g. +233 20 000 0000" [invalid]="isFieldInvalid(personalInfoForm, 'phone')"></mb-input>
                     </mb-form-field>
-                    <mb-form-field class="form-field" label="Nationality">
-                        <mb-input formControlName="nationality" placeholder="e.g. Ghanaian"></mb-input>
-                    </mb-form-field>
                 </div>
                 <div formGroupName="address" class="field-grid">
                     <mb-form-field class="form-field full" label="Address line 1">
                         <mb-input formControlName="street" placeholder="Street address"></mb-input>
                     </mb-form-field>
                 </div>
-                <div formGroupName="address" class="field-grid two-cols">
-                    <mb-form-field class="form-field" label="City">
-                        <mb-input formControlName="city" placeholder="City"></mb-input>
+                <button type="button" class="text-link advanced-toggle" (click)="toggleAdvanced()">
+                    {{ advancedOpen() ? 'Hide advanced' : 'Show advanced' }}
+                </button>
+                @if (advancedOpen()) {
+                <div class="advanced-block">
+                    <mb-form-field class="form-field" label="Nationality">
+                        <mb-input formControlName="nationality" placeholder="e.g. Ghanaian"></mb-input>
                     </mb-form-field>
-                    <mb-form-field class="form-field" label="State">
-                        <mb-input formControlName="state" placeholder="State/Region"></mb-input>
-                    </mb-form-field>
+                    <div formGroupName="address" class="field-grid two-cols">
+                        <mb-form-field class="form-field" label="City">
+                            <mb-input formControlName="city" placeholder="City"></mb-input>
+                        </mb-form-field>
+                        <mb-form-field class="form-field" label="State">
+                            <mb-input formControlName="state" placeholder="State/Region"></mb-input>
+                        </mb-form-field>
+                    </div>
+                    <div formGroupName="address" class="field-grid two-cols">
+                        <mb-form-field class="form-field" label="Postal code">
+                            <mb-input formControlName="postalCode" placeholder="Postal code"></mb-input>
+                        </mb-form-field>
+                        <mb-form-field class="form-field" label="Country">
+                            <mb-input formControlName="country" placeholder="Country"></mb-input>
+                        </mb-form-field>
+                    </div>
                 </div>
-                <div formGroupName="address" class="field-grid two-cols">
-                    <mb-form-field class="form-field" label="Postal code">
-                        <mb-input formControlName="postalCode" placeholder="Postal code"></mb-input>
-                    </mb-form-field>
-                    <mb-form-field class="form-field" label="Country">
-                        <mb-input formControlName="country" placeholder="Country"></mb-input>
-                    </mb-form-field>
-                </div>
+                }
             </div>
 
             @if (duplicateLoading()) {
@@ -189,7 +196,7 @@
                     </mb-form-field>
                     <mb-form-field class="form-field" label="Section">
                         <mb-select
-                            [placeholder]="sectionLoading() ? 'Loading sections...' : 'Select section'"
+                            [placeholder]="!selectedClassId() ? 'Select a class first' : (sectionLoading() ? 'Loading sections...' : 'Select section')"
                             [options]="sectionOptions()"
                             [disabled]="!canManageEnrollment() || sectionLoading() || !selectedClassId()"
                             [value]="selectedSectionId() || ''"
@@ -197,7 +204,14 @@
                         </mb-select>
                     </mb-form-field>
                 </div>
+                @if (!selectedClassId()) {
                 <p class="field-helper">Select a class to load sections.</p>
+                } @else if (!sectionLoading() && !sectionOptions().length) {
+                <div class="section-empty">
+                    <span>No sections exist for this class yet.</span>
+                    <button type="button" class="text-link" (click)="openCreateSection()">Create section</button>
+                </div>
+                }
                 @if (!academicYearLoading() && !academicYearOptions.length) {
                 <p class="permission-note">No academic year configured yet.</p>
                 }

@@ -71,6 +71,7 @@ export class StudentFormComponent implements OnInit {
     canManageGuardians = computed(() => this.rbac.can(PERMISSIONS.students.write));
     guardianExpanded = signal(false);
     guardianDetailsExpanded = signal(false);
+    advancedOpen = signal(false);
     schoolOptions = computed(() => this.schoolContext.schools().map((school) => ({
         label: school.name,
         value: school.id
@@ -530,6 +531,14 @@ export class StudentFormComponent implements OnInit {
         enrollmentGroup.patchValue({
             section: selected?.name || ''
         });
+    }
+
+    toggleAdvanced(): void {
+        this.advancedOpen.set(!this.advancedOpen());
+    }
+
+    openCreateSection(): void {
+        this.router.navigate(['/setup/first-login']);
     }
 
     private reconcileClassSelection(): void {
