@@ -1776,6 +1776,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             this.selectedClassId.set(remaining.length ? remaining[0].id : null);
         }
         this.toast.success(`Class "${target.name}" deleted.`);
+        this.classDeleteSubmitting.set(false);
         this.requestCloseClassDelete();
     }
 
@@ -1914,6 +1915,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.sectionDeleteSubmitting.set(true);
         this.sectionRows.update(items => items.filter(section => section.id !== target.id));
         this.toast.success(`Section "${target.name}" deleted.`);
+        this.sectionDeleteSubmitting.set(false);
         this.requestCloseSectionDelete();
     }
 
