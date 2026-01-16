@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { StudentService } from '../../../../../core/services/student.service';
-import { Student, Gender, BloodGroup, RelationshipType } from '../../../../../core/models/student.model';
+import { Student, Gender } from '../../../../../core/models/student.model';
 import { RbacService } from '../../../../../core/rbac/rbac.service';
 import { PERMISSIONS } from '../../../../../core/rbac/permission.constants';
 import { TenantService, Tenant } from '../../../../../core/services/tenant.service';
@@ -63,10 +63,7 @@ export class StudentFormComponent implements OnInit {
     duplicateMatches = signal<Student[]>([]);
     duplicateLoading = signal(false);
     duplicateError = signal<string | null>(null);
-    guardianRelationshipSelectOptions = computed(() => {
-        const options = this.guardianRelationshipOptions();
-        return options.length ? options : this.relationshipOptions;
-    });
+    guardianRelationshipSelectOptions = computed(() => this.guardianRelationshipOptions());
     canManageEnrollment = computed(() => this.rbac.can(PERMISSIONS.students.write));
     canManageGuardians = computed(() => this.rbac.can(PERMISSIONS.students.write));
     guardianExpanded = signal(false);
@@ -80,25 +77,11 @@ export class StudentFormComponent implements OnInit {
 
     // Enums for templates
     Gender = Gender;
-    BloodGroup = BloodGroup;
-    RelationshipType = RelationshipType;
-
     // Dropdown data
-    academicYears: string[] = ['2024-2025', '2025-2026', '2026-2027'];
-    classes: string[] = ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'];
-    sections: string[] = ['A', 'B', 'C', 'D'];
     genderOptions: MbSelectOption[] = [
         { label: 'Male', value: Gender.MALE },
         { label: 'Female', value: Gender.FEMALE },
         { label: 'Other', value: Gender.OTHER }
-    ];
-    relationshipOptions: MbSelectOption[] = [
-        { label: 'Father', value: RelationshipType.FATHER },
-        { label: 'Mother', value: RelationshipType.MOTHER },
-        { label: 'Guardian', value: RelationshipType.GUARDIAN },
-        { label: 'Sibling', value: RelationshipType.SIBLING },
-        { label: 'Grandparent', value: RelationshipType.GRANDPARENT },
-        { label: 'Other', value: RelationshipType.OTHER }
     ];
 
     // Form groups

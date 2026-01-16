@@ -71,34 +71,38 @@
                             [invalid]="isFieldInvalid(personalInfoForm, 'gender')">
                         </mb-select>
                     </mb-form-field>
-                    <mb-form-field
-                        class="form-field"
-                        label="Email"
-                        [error]="isFieldInvalid(personalInfoForm, 'email') ? fieldError(personalInfoForm, 'email', 'Email') : ''">
-                        <mb-input type="email" formControlName="email" placeholder="e.g. ama@school.com" [invalid]="isFieldInvalid(personalInfoForm, 'email')"></mb-input>
-                    </mb-form-field>
+                    <div class="field-spacer" aria-hidden="true"></div>
                 </div>
                 <div class="field-grid two-cols">
                     <mb-form-field
                         class="form-field"
                         label="Phone"
+                        [required]="isRequiredField('phone')"
                         [error]="isFieldInvalid(personalInfoForm, 'phone') ? fieldError(personalInfoForm, 'phone', 'Phone') : ''">
                         <mb-input type="tel" formControlName="phone" placeholder="e.g. +233 20 000 0000" [invalid]="isFieldInvalid(personalInfoForm, 'phone')"></mb-input>
                     </mb-form-field>
-                </div>
-                <div formGroupName="address" class="field-grid">
-                    <mb-form-field class="form-field full" label="Address line 1">
-                        <mb-input formControlName="street" placeholder="Street address"></mb-input>
-                    </mb-form-field>
+                    <div class="field-spacer" aria-hidden="true"></div>
                 </div>
                 <button type="button" class="text-link advanced-toggle" (click)="toggleAdvanced()">
-                    {{ advancedOpen() ? 'Hide advanced' : 'Show advanced' }}
+                    {{ advancedOpen() ? 'Hide more details' : 'Show more details' }}
                 </button>
                 @if (advancedOpen()) {
                 <div class="advanced-block">
+                    <mb-form-field
+                        class="form-field"
+                        label="Email"
+                        [required]="isRequiredField('email')"
+                        [error]="isFieldInvalid(personalInfoForm, 'email') ? fieldError(personalInfoForm, 'email', 'Email') : ''">
+                        <mb-input type="email" formControlName="email" placeholder="e.g. ama@school.com" [invalid]="isFieldInvalid(personalInfoForm, 'email')"></mb-input>
+                    </mb-form-field>
                     <mb-form-field class="form-field" label="Nationality">
                         <mb-input formControlName="nationality" placeholder="e.g. Ghanaian"></mb-input>
                     </mb-form-field>
+                    <div formGroupName="address" class="field-grid">
+                        <mb-form-field class="form-field full" label="Address line 1">
+                            <mb-input formControlName="street" placeholder="Street address"></mb-input>
+                        </mb-form-field>
+                    </div>
                     <div formGroupName="address" class="field-grid two-cols">
                         <mb-form-field class="form-field" label="City">
                             <mb-input formControlName="city" placeholder="City"></mb-input>
@@ -151,7 +155,8 @@
 
         <div class="modal-column">
             <div class="section-title">
-                <h3>Enrollment (optional)</h3>
+                <h3>Enrollment</h3>
+                <p>Assign placement now or later.</p>
             </div>
             <div class="section-body" [formGroup]="enrollmentForm">
                 @if (!canManageEnrollment()) {
@@ -218,13 +223,21 @@
             </div>
 
             <div class="section-title guardian-title">
-                <button type="button" class="accordion-toggle" (click)="toggleGuardianAccordion()">
-                    <span>Primary guardian (optional)</span>
-                    <span class="chevron" [class.open]="guardianExpanded()">▾</span>
-                </button>
+                <div class="section-header">
+                    <div>
+                        <h3>Primary guardian</h3>
+                        <p>Add guardian details if available.</p>
+                    </div>
+                    <button type="button" class="accordion-toggle" (click)="toggleGuardianAccordion()">
+                        <span class="toggle-text">{{ guardianExpanded() ? 'Hide' : 'Add primary guardian' }}</span>
+                        <span class="chevron" [class.open]="guardianExpanded()">▾</span>
+                    </button>
+                </div>
             </div>
             @if (!guardianExpanded()) {
-            <p class="guardian-empty">Add guardian details if needed.</p>
+            <div class="guardian-collapsed">
+                <mb-button size="sm" variant="tertiary" (click)="toggleGuardianAccordion()">Add primary guardian</mb-button>
+            </div>
             } @else {
             <div class="section-body" [formGroup]="guardiansForm">
                 @if (!canManageGuardians()) {

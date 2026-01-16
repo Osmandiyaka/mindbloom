@@ -1217,17 +1217,15 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
         </div>
         <div mbModalFooter>
           <div class="create-modal-footer">
-            <div class="footer-left">
-              <mb-button size="sm" variant="tertiary" (click)="closeCreateModal()">Cancel</mb-button>
-            </div>
             <div class="footer-status">
               @if (isCreateDirty()) {
               <span>Unsaved changes</span>
               }
             </div>
             <div class="footer-actions">
-              <mb-button size="sm" variant="tertiary" (click)="submitCreateStudent(true)">Save & add another</mb-button>
-              <mb-button size="sm" variant="primary" (click)="submitCreateStudent()">Save student</mb-button>
+              <mb-button size="sm" variant="tertiary" (click)="closeCreateModal()">Cancel</mb-button>
+              <mb-button size="sm" variant="tertiary" [disabled]="isCreateSubmitDisabled()" (click)="submitCreateStudent(true)">Save & add another</mb-button>
+              <mb-button size="sm" variant="primary" [disabled]="isCreateSubmitDisabled()" (click)="submitCreateStudent()">Save student</mb-button>
             </div>
           </div>
         </div>
@@ -3123,6 +3121,14 @@ export class StudentsListComponent implements OnInit {
       || form.guardiansForm?.dirty
       || form.medicalForm?.dirty
     );
+  }
+
+  isCreateSubmitDisabled(): boolean {
+    const form = this.studentForm;
+    if (!form) return true;
+    const guardiansInvalid = form.guardianEnabled() && form.guardiansForm?.invalid;
+    const invalid = form.personalInfoForm?.invalid || form.enrollmentForm?.invalid || guardiansInvalid;
+    return Boolean(form.submitting() || invalid);
   }
 
   openImport(): void {
