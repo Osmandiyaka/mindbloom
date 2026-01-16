@@ -114,9 +114,37 @@
   gap: 16px;
 }
 
-.create-modal-description {
+.create-modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  background: color-mix(in srgb, var(--color-surface, #ffffff) 92%, #f1f5f9);
+}
+
+.create-modal-header-text h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+.create-modal-header-text p {
+  margin: 0;
   font-size: 13px;
   color: var(--color-text-secondary);
+}
+
+.create-modal-close {
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--color-text-secondary);
+  cursor: pointer;
 }
 
 :host ::ng-deep .create-student-modal .form-grid {

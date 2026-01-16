@@ -1197,12 +1197,16 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
       <mb-modal
         class="create-student-modal"
         [open]="createModalOpen()"
-        title="Add student"
+        [closeable]="false"
         (closed)="closeCreateModal()"
         [hasFooter]="true">
         <div class="create-modal-body">
-          <div class="create-modal-description">
-            Create a student record. Enrollment and guardians are optional.
+          <div class="create-modal-header">
+            <div class="create-modal-header-text">
+              <h2>Add student</h2>
+              <p>Create a student record. Enrollment and guardians are optional.</p>
+            </div>
+            <button type="button" class="create-modal-close" (click)="closeCreateModal()" aria-label="Close dialog">×</button>
           </div>
           <app-student-form
             [embedded]="true"
