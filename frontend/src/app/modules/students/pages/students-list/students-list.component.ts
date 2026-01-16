@@ -1195,19 +1195,22 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
       </mb-modal>
 
       <mb-modal
+        class="create-student-modal"
         [open]="createModalOpen()"
         title="Add student"
         (closed)="closeCreateModal()"
         [hasFooter]="true">
-        <div class="modal-description">
-          Create a student record. Enrollment and guardians are optional.
+        <div class="create-modal-body">
+          <div class="create-modal-description">
+            Create a student record. Enrollment and guardians are optional.
+          </div>
+          <app-student-form
+            [embedded]="true"
+            (saved)="handleStudentCreated($event)"
+            (savedAndNew)="handleStudentCreatedAndContinue($event)"
+            (viewStudent)="openStudentFromCreate($event)">
+          </app-student-form>
         </div>
-        <app-student-form
-          [embedded]="true"
-          (saved)="handleStudentCreated($event)"
-          (savedAndNew)="handleStudentCreatedAndContinue($event)"
-          (viewStudent)="openStudentFromCreate($event)">
-        </app-student-form>
         <div mbModalFooter>
           <mb-button size="sm" variant="tertiary" (click)="closeCreateModal()">Cancel</mb-button>
           <mb-button size="sm" variant="tertiary" (click)="submitCreateStudent(true)">Save & add another</mb-button>
@@ -3010,7 +3013,7 @@ export class StudentsListComponent implements OnInit {
   }
 
   openCreateModal(): void {
-    this.createModalOpen.set(true);
+    this.setCreateModalOpen(true);
     this.logAction('student_create_opened');
   }
 
@@ -3019,13 +3022,13 @@ export class StudentsListComponent implements OnInit {
       this.createCloseConfirmOpen.set(true);
       return;
     }
-    this.createModalOpen.set(false);
+    this.setCreateModalOpen(false);
     this.focusAddStudentButton();
   }
 
   confirmCloseCreateModal(): void {
     this.createCloseConfirmOpen.set(false);
-    this.createModalOpen.set(false);
+    this.setCreateModalOpen(false);
     this.focusAddStudentButton();
   }
 
@@ -3038,7 +3041,7 @@ export class StudentsListComponent implements OnInit {
   }
 
   handleStudentCreated(student: Student): void {
-    this.createModalOpen.set(false);
+    this.setCreateModalOpen(false);
     this.createCloseConfirmOpen.set(false);
     this.loadStudents();
     this.selectStudent(student);
@@ -3064,7 +3067,7 @@ export class StudentsListComponent implements OnInit {
     if (!studentId) {
       return;
     }
-    this.createModalOpen.set(false);
+    this.setCreateModalOpen(false);
     this.createCloseConfirmOpen.set(false);
     this.openStudentById(studentId);
   }
@@ -3089,6 +3092,11 @@ export class StudentsListComponent implements OnInit {
     const root = this.addStudentButton?.root?.nativeElement;
     const button = root?.querySelector('button');
     button?.focus();
+  }
+
+  private setCreateModalOpen(open: boolean): void {
+    this.createModalOpen.set(open);
+    document.body.classList.toggle('create-student-modal-open', open);
   }
 
   isCreateDirty(): boolean {
