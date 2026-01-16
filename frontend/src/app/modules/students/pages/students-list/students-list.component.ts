@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, computed, signal } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -1203,8 +1203,25 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
         <div class="create-modal-body">
           <div class="create-modal-header">
             <div class="create-modal-header-text">
-              <h2>Add student</h2>
-              <p>Create a student record. Enrollment and guardians are optional.</p>
+              <div class="create-modal-title">
+                <span class="create-modal-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path
+                      d="M16 19v-1a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v1M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6M19 8v6M22 11h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
+                <div>
+                  <h2>Add student</h2>
+                  <p>Create a student record. Enrollment and guardians are optional.</p>
+                  <p class="create-modal-helper">Fields marked * are required.</p>
+                </div>
+              </div>
             </div>
             <button type="button" class="create-modal-close" (click)="closeCreateModal()" aria-label="Close dialog">×</button>
           </div>
@@ -1219,9 +1236,15 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
           <div class="create-modal-footer">
             <div class="footer-left">
               <mb-button size="sm" variant="tertiary" (click)="closeCreateModal()">Cancel</mb-button>
-              <div class="footer-status">
-                @if (isCreateDirty()) {
-                <span>Unsaved changes</span>
+              <div class="footer-messages">
+                <div class="footer-hint">Changes are saved when you click Save.</div>
+                <div class="footer-status">
+                  @if (isCreateDirty()) {
+                  <span>Unsaved changes</span>
+                  }
+                </div>
+                @if (createSubmitHint()) {
+                <div class="footer-warning">{{ createSubmitHint() }}</div>
                 }
               </div>
             </div>
@@ -3131,6 +3154,65 @@ export class StudentsListComponent implements OnInit {
     const guardiansInvalid = form.guardianEnabled() && form.guardiansForm?.invalid;
     const invalid = form.personalInfoForm?.invalid || form.enrollmentForm?.invalid || guardiansInvalid;
     return Boolean(form.submitting() || invalid);
+  }
+
+  createSubmitHint(): string {
+    if (!this.createModalOpen() || !this.isCreateSubmitDisabled()) {
+      return '';
+    }
+    const form = this.studentForm;
+    if (!form) return '';
+    const missing: string[] = [];
+    const personal = form.personalInfoForm;
+    const enrollment = form.enrollmentForm;
+
+    const requiredChecks: Array<{ key: string; label: string }> = [
+      { key: 'firstName', label: 'First name' },
+      { key: 'lastName', label: 'Last name' },
+      { key: 'dateOfBirth', label: 'Date of birth' },
+      { key: 'gender', label: 'Gender' },
+      { key: 'email', label: 'Email' },
+      { key: 'phone', label: 'Phone' },
+    ];
+
+    requiredChecks.forEach(({ key, label }) => {
+      if (!form.isRequiredField(key)) return;
+      if (personal.get(key)?.hasError('required')) {
+        missing.push(label);
+      }
+    });
+
+    if (enrollment.get('enrollment.academicYear')?.hasError('required')) {
+      missing.push('Academic year');
+    }
+    if (enrollment.get('enrollment.admissionDate')?.hasError('required')) {
+      missing.push('Enrollment date');
+    }
+    if (enrollment.get('enrollment.class')?.hasError('required')) {
+      missing.push('Class');
+    }
+
+    if (missing.length) {
+      return `Missing: ${missing.join(', ')}.`;
+    }
+    return 'Complete required fields to enable save.';
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleCreateModalKeydown(event: KeyboardEvent): void {
+    if (!this.createModalOpen()) return;
+    const target = event.target as HTMLElement | null;
+    if (target && target.closest('[data-ignore-submit]')) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeCreateModal();
+      return;
+    }
+    if (event.key !== 'Enter') return;
+    if (target instanceof HTMLTextAreaElement) return;
+    if (this.isCreateSubmitDisabled()) return;
+    event.preventDefault();
+    this.submitCreateStudent();
   }
 
   openImport(): void {

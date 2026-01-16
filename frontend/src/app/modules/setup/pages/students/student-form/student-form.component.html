@@ -232,7 +232,7 @@
                         <p>Add guardian details if available.</p>
                     </div>
                     <button type="button" class="text-link guardian-link" (click)="toggleGuardianAccordion()">
-                        <span>{{ guardianExpanded() ? 'Hide' : 'Add' }}</span>
+                        <span>{{ guardianExpanded() ? 'Hide' : 'Add details' }}</span>
                     </button>
                 </div>
             </div>
@@ -243,7 +243,7 @@
                     <span class="guardian-empty-title">No guardian added</span>
                     <span class="guardian-empty-sub">You can add this later from the student profile.</span>
                 </div>
-                <mb-button size="sm" variant="tertiary" (click)="toggleGuardianAccordion()">Add guardian</mb-button>
+                <mb-button size="sm" variant="secondary" (click)="toggleGuardianAccordion()">Add guardian</mb-button>
             </div>
             } @else {
             <div class="section-body" [formGroup]="guardiansForm">
