@@ -873,60 +873,50 @@
                                         <h2>Classes & sections</h2>
                                         <p>Set up the classes/grades and sections your institution uses for enrollment,
                                             attendance, and reporting.</p>
-                                        <div class="classes-filter" *ngIf="hasMultipleSchools()">
-                                            <div class="classes-filter__pill">
-                                                <span class="classes-filter__label">School:</span>
-                                                <mb-select class="classes-filter__select" id="class-school-filter"
-                                                    [value]="classSchoolFilter()"
-                                                    (valueChange)="classSchoolFilter.set($event)">
-                                                    <option value="all">All schools</option>
-                                                    <option *ngFor="let school of activeSchoolNames()" [value]="school">
-                                                        {{ school }}
-                                                    </option>
-                                                </mb-select>
-                                            </div>
-                                            <div class="classes-filter__helper" *ngIf="classSchoolFilter() === 'all'">
-                                                Changes apply to all schools.
-                                            </div>
-                                        </div>
                                     </div>
                                     <div class="classes-header__actions">
-                                        <ng-container *ngIf="selectedClass() as selectedClass; else addClassOnly">
-                                            <mb-button variant="primary" (click)="openAddSection(selectedClass)">Add
-                                                section</mb-button>
-                                            <mb-button variant="tertiary" (click)="openAddClass()">Add class</mb-button>
-                                            <button type="button" class="classes-header__menu" #classHeaderMenuOrigin
-                                                aria-label="Class actions" [attr.aria-expanded]="classHeaderMenuOpen()"
-                                                (click)="toggleClassHeaderMenu($event)">⋯</button>
-                                            <mb-popover [open]="classHeaderMenuOpen()" [origin]="classHeaderMenuOrigin"
-                                                [hasBackdrop]="true"
-                                                [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'classes-header__menu-panel']"
-                                                (closed)="closeClassHeaderMenu()">
-                                                <div class="classes-header__menu-content" role="menu">
-                                                    <button type="button" class="classes-header__menu-item"
-                                                        (click)="openEditClass(selectedClass); closeClassHeaderMenu()">
-                                                        Rename class
-                                                    </button>
-                                                    <button type="button" class="classes-header__menu-item"
-                                                        (click)="duplicateClass(selectedClass); closeClassHeaderMenu()">
-                                                        Duplicate class
-                                                    </button>
-                                                    <button type="button" class="classes-header__menu-item"
-                                                        (click)="toggleClassActive(selectedClass); closeClassHeaderMenu()">
-                                                        {{ selectedClass.active ? 'Archive class' : 'Restore class' }}
-                                                    </button>
-                                                    <div class="classes-header__menu-divider"></div>
-                                                    <button type="button"
-                                                        class="classes-header__menu-item classes-header__menu-item--danger"
-                                                        (click)="openClassDelete(selectedClass); closeClassHeaderMenu()">
-                                                        Delete class
-                                                    </button>
-                                                </div>
-                                            </mb-popover>
-                                        </ng-container>
-                                        <ng-template #addClassOnly>
-                                            <mb-button variant="primary" (click)="openAddClass()">Add class</mb-button>
-                                        </ng-template>
+                                        <mb-button variant="primary" (click)="openAddClass()">Add class</mb-button>
+                                        <button type="button" class="classes-header__menu" #classHeaderMenuOrigin
+                                            aria-label="Class actions" [attr.aria-expanded]="classHeaderMenuOpen()"
+                                            (click)="toggleClassHeaderMenu($event)">⋯</button>
+                                        <mb-popover [open]="classHeaderMenuOpen()" [origin]="classHeaderMenuOrigin"
+                                            [hasBackdrop]="true"
+                                            [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'classes-header__menu-panel']"
+                                            (closed)="closeClassHeaderMenu()">
+                                            <div class="classes-header__menu-content" role="menu">
+                                                <button type="button" class="classes-header__menu-item"
+                                                    (click)="openImportModal('classes'); closeClassHeaderMenu()">
+                                                    Import classes
+                                                </button>
+                                                <button type="button" class="classes-header__menu-item"
+                                                    (click)="downloadImportTemplate('classes'); closeClassHeaderMenu()">
+                                                    Create from template
+                                                </button>
+                                                <div class="classes-header__menu-divider"></div>
+                                                <button type="button" class="classes-header__menu-item"
+                                                    (click)="openClassReorder(); closeClassHeaderMenu()">
+                                                    Bulk actions
+                                                </button>
+                                            </div>
+                                        </mb-popover>
+                                    </div>
+                                </div>
+                                <div class="classes-filter-row" *ngIf="hasMultipleSchools()">
+                                    <div class="classes-filter">
+                                        <div class="classes-filter__pill">
+                                            <span class="classes-filter__label">School:</span>
+                                            <mb-select class="classes-filter__select" id="class-school-filter"
+                                                [value]="classSchoolFilter()"
+                                                (valueChange)="classSchoolFilter.set($event)">
+                                                <option value="all">All schools</option>
+                                                <option *ngFor="let school of activeSchoolNames()" [value]="school">
+                                                    {{ school }}
+                                                </option>
+                                            </mb-select>
+                                        </div>
+                                        <div class="classes-filter__helper" *ngIf="classSchoolFilter() === 'all'">
+                                            Changes apply to all schools.
+                                        </div>
                                     </div>
                                 </div>
 
@@ -941,12 +931,13 @@
                                                         (search)="classSearch.set($event)">
                                                     </app-search-input>
                                                 </div>
-                                                <div class="classes-panel__meta">
-                                                    <span>{{ filteredClassRows().length }} classes</span>
+                                                <div class="classes-panel__meta-row">
+                                                    <span>{{ filteredClassRows().length }} class{{ filteredClassRows().length === 1 ? '' : 'es' }}</span>
                                                     <mb-select class="classes-panel__sort" id="class-sort"
                                                         [value]="classSort()" (valueChange)="setClassSort($event)">
                                                         <option value="az">A–Z</option>
-                                                        <option value="recent">Recently updated</option>
+                                                        <option value="recent">Recently added</option>
+                                                        <option value="sections">Most sections</option>
                                                     </mb-select>
                                                 </div>
                                             </div>
@@ -1028,23 +1019,57 @@
                                         <div class="classes-panel classes-panel--detail">
                                             <ng-container *ngIf="selectedClass() as selected; else emptySectionState">
                                                 <div class="sections-detail__header">
-                                                    <div>
+                                                    <div class="sections-detail__title-row">
                                                         <div class="sections-detail__title">{{ selected.name }}</div>
-                                                        <div class="sections-detail__meta">
-                                                            {{ sectionCountForSelectedClass() }} sections ·
+                                                        <span class="sections-detail__status"
+                                                            [class.sections-detail__status--archived]="!selected.active">
                                                             {{ selected.active ? 'Active' : 'Archived' }}
-                                                        </div>
+                                                        </span>
                                                     </div>
-                                                    <div class="sections-detail__actions"
-                                                        *ngIf="filteredSections().length">
-                                                        <mb-button variant="primary"
-                                                            (click)="openAddSection(selected)">Add section</mb-button>
-                                                        <button type="button" class="sections-detail__link"
-                                                            (click)="openSectionGenerator()">Create
-                                                            automatically</button>
+                                                    <div class="sections-detail__meta">
+                                                        {{ sectionCountForSelectedClass() }} section{{ sectionCountForSelectedClass() === 1 ? '' : 's' }} • Updated today
+                                                    </div>
+                                                    <div class="sections-detail__actions-row" *ngIf="filteredSections().length">
+                                                        <div class="sections-detail__actions">
+                                                            <mb-button variant="primary"
+                                                                (click)="openAddSection(selected)">Add section</mb-button>
+                                                            <button type="button" class="sections-detail__link"
+                                                                (click)="openSectionGenerator()">Create automatically</button>
+                                                        </div>
+                                                        <button type="button" class="sections-detail__menu"
+                                                            #sectionsMenuOrigin aria-label="Class actions"
+                                                            [attr.aria-expanded]="sectionsMenuOpen()"
+                                                            (click)="toggleSectionsMenu($event)">⋯</button>
+                                                        <mb-popover [open]="sectionsMenuOpen()" [origin]="sectionsMenuOrigin"
+                                                            [hasBackdrop]="true"
+                                                            [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'sections-detail__menu-panel']"
+                                                            (closed)="closeSectionsMenu()">
+                                                            <div class="sections-detail__menu-content" role="menu">
+                                                                <button type="button" class="sections-detail__menu-item"
+                                                                    (click)="openEditClass(selected); closeSectionsMenu()">
+                                                                    Rename class
+                                                                </button>
+                                                                <button type="button" class="sections-detail__menu-item"
+                                                                    (click)="toggleClassActive(selected); closeSectionsMenu()">
+                                                                    {{ selected.active ? 'Archive class' : 'Restore class' }}
+                                                                </button>
+                                                                <div class="sections-detail__menu-divider"></div>
+                                                                <button type="button"
+                                                                    class="sections-detail__menu-item sections-detail__menu-item--danger"
+                                                                    (click)="openClassDelete(selected); closeSectionsMenu()">
+                                                                    Delete class
+                                                                </button>
+                                                            </div>
+                                                        </mb-popover>
                                                     </div>
                                                 </div>
 
+                                                <div class="sections-toolbar" *ngIf="filteredSections().length">
+                                                    <app-search-input [value]="sectionSearch()"
+                                                        placeholder="Search sections..."
+                                                        (search)="sectionSearch.set($event)">
+                                                    </app-search-input>
+                                                </div>
                                                 <div class="sections-table"
                                                     *ngIf="!isLoading() && filteredSections().length; else sectionsState">
                                                     <div class="sections-table__header">
@@ -1115,28 +1140,57 @@
                                                     <div class="sections-empty">
                                                         <div class="sections-empty__title">No sections yet</div>
                                                         <div class="sections-empty__text">
-                                                            Create at least one section to enroll students and take
-                                                            attendance.
+                                                            Create at least one section for enrollment and attendance.
                                                         </div>
-                                                        <div class="sections-empty__actions">
-                                                            <mb-button variant="primary"
-                                                                (click)="openAddSection(selected)">Add
-                                                                section</mb-button>
-                                                            <button type="button" class="sections-empty__link"
-                                                                (click)="openSectionGenerator()">Create sections
-                                                                automatically</button>
-                                                        </div>
-                                                        <div class="sections-empty__helper">
-                                                            Sections are typically labels like A, B, Blue, Gold.
+                                                        <div class="sections-detail__actions-row sections-detail__actions-row--empty">
+                                                            <div class="sections-detail__actions">
+                                                                <mb-button variant="primary"
+                                                                    (click)="openAddSection(selected)">Add section</mb-button>
+                                                                <button type="button" class="sections-empty__link"
+                                                                    (click)="openSectionGenerator()">Create automatically</button>
+                                                            </div>
+                                                            <button type="button" class="sections-detail__menu"
+                                                                #sectionsMenuOrigin aria-label="Class actions"
+                                                                [attr.aria-expanded]="sectionsMenuOpen()"
+                                                                (click)="toggleSectionsMenu($event)">⋯</button>
+                                                            <mb-popover [open]="sectionsMenuOpen()" [origin]="sectionsMenuOrigin"
+                                                                [hasBackdrop]="true"
+                                                                [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'sections-detail__menu-panel']"
+                                                                (closed)="closeSectionsMenu()">
+                                                                <div class="sections-detail__menu-content" role="menu">
+                                                                    <button type="button" class="sections-detail__menu-item"
+                                                                        (click)="openEditClass(selected); closeSectionsMenu()">
+                                                                        Rename class
+                                                                    </button>
+                                                                    <button type="button" class="sections-detail__menu-item"
+                                                                        (click)="toggleClassActive(selected); closeSectionsMenu()">
+                                                                        {{ selected.active ? 'Archive class' : 'Restore class' }}
+                                                                    </button>
+                                                                    <div class="sections-detail__menu-divider"></div>
+                                                                    <button type="button"
+                                                                        class="sections-detail__menu-item sections-detail__menu-item--danger"
+                                                                        (click)="openClassDelete(selected); closeSectionsMenu()">
+                                                                        Delete class
+                                                                    </button>
+                                                                </div>
+                                                            </mb-popover>
                                                         </div>
                                                     </div>
                                                 </ng-template>
                                             </ng-container>
                                             <ng-template #emptySectionState>
                                                 <div class="sections-placeholder">
-                                                    <div class="sections-placeholder__title">Select a class</div>
+                                                    <div class="sections-placeholder__icon" aria-hidden="true">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                            <rect x="3" y="4" width="7" height="7" rx="1"></rect>
+                                                            <rect x="14" y="4" width="7" height="7" rx="1"></rect>
+                                                            <rect x="3" y="13" width="7" height="7" rx="1"></rect>
+                                                            <path d="M14 16h7"></path>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="sections-placeholder__title">Select a class to manage sections</div>
                                                     <div class="sections-placeholder__text">
-                                                        Choose a class on the left to manage its sections.
+                                                        Choose a class on the left to view and manage its sections.
                                                     </div>
                                                 </div>
                                             </ng-template>

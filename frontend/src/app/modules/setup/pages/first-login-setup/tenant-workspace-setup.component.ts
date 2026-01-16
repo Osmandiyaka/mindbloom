@@ -279,7 +279,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     sectionRows = signal<SectionRow[]>([]);
     selectedClassId = signal<string | null>(null);
     classSearch = signal('');
-    classSort = signal<'az' | 'recent'>('az');
+    classSort = signal<'az' | 'recent' | 'sections'>('az');
     classSchoolFilter = signal<string>('all');
     classFormOpen = signal(false);
     classFormMode = signal<'add' | 'edit' | 'view'>('add');
@@ -480,9 +480,15 @@ export class TenantWorkspaceSetupComponent implements OnInit {
                 || (row.code || '').toLowerCase().includes(query);
         });
         const sort = this.classSort();
+        const sectionCounts = this.classSectionCountMap();
         return [...rows].sort((a, b) => {
             if (sort === 'recent') {
                 return (b.sortOrder ?? 0) - (a.sortOrder ?? 0);
+            }
+            if (sort === 'sections') {
+                const countA = sectionCounts.get(a.id) || 0;
+                const countB = sectionCounts.get(b.id) || 0;
+                if (countA !== countB) return countB - countA;
             }
             return a.name.localeCompare(b.name);
         });
@@ -1825,7 +1831,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     }
 
     setClassSort(value: string): void {
-        if (value === 'az' || value === 'recent') {
+        if (value === 'az' || value === 'recent' || value === 'sections') {
             this.classSort.set(value);
         }
     }
