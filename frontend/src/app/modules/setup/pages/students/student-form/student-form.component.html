@@ -41,7 +41,7 @@
                     </mb-form-field>
                 </div>
                 <div class="field-grid two-cols">
-                    <mb-form-field class="form-field" label="Preferred name" hint="Optional">
+                    <mb-form-field class="form-field optional-field" label="Preferred name" hint="Optional">
                         <mb-input formControlName="middleName"></mb-input>
                     </mb-form-field>
                     <mb-form-field
@@ -198,9 +198,13 @@
                             (valueChange)="handleClassSelect($event)">
                         </mb-select>
                     </mb-form-field>
-                    <mb-form-field class="form-field" label="Section">
+                    <mb-form-field
+                        class="form-field"
+                        [class.is-disabled]="!canManageEnrollment() || sectionLoading() || !selectedClassId()"
+                        label="Section"
+                        [hint]="!selectedClassId() ? 'Select a class to enable sections.' : ''">
                         <mb-select
-                            [placeholder]="!selectedClassId() ? 'Select a class first' : (sectionLoading() ? 'Loading sections...' : 'Select section')"
+                            [placeholder]="!selectedClassId() ? 'Select a class to enable sections.' : (sectionLoading() ? 'Loading sections...' : 'Select section')"
                             [options]="sectionOptions()"
                             [disabled]="!canManageEnrollment() || sectionLoading() || !selectedClassId()"
                             [value]="selectedSectionId() || ''"
@@ -208,9 +212,7 @@
                         </mb-select>
                     </mb-form-field>
                 </div>
-                @if (!selectedClassId()) {
-                <p class="field-helper">Select a class first</p>
-                } @else if (!sectionLoading() && !sectionOptions().length) {
+                @if (!sectionLoading() && selectedClassId() && !sectionOptions().length) {
                 <div class="section-empty">
                     <span>No sections exist for this class yet.</span>
                     <button type="button" class="text-link" (click)="openCreateSection()">Create section</button>
@@ -227,9 +229,8 @@
                         <h3>Primary guardian</h3>
                         <p>Add guardian details if available.</p>
                     </div>
-                    <button type="button" class="accordion-toggle guardian-cta" (click)="toggleGuardianAccordion()">
-                        <span class="toggle-text">{{ guardianExpanded() ? 'Hide form' : 'Add guardian' }}</span>
-                        <span class="chevron" [class.open]="guardianExpanded()">▾</span>
+                    <button type="button" class="text-link guardian-link" (click)="toggleGuardianAccordion()">
+                        <span>{{ guardianExpanded() ? 'Hide' : 'Add' }}</span>
                     </button>
                 </div>
             </div>
@@ -238,7 +239,7 @@
                 <span class="guardian-empty-icon" aria-hidden="true"></span>
                 <div class="guardian-empty-text">
                     <span class="guardian-empty-title">No guardian added</span>
-                    <span class="guardian-empty-sub">Add a primary guardian now or later.</span>
+                    <span class="guardian-empty-sub">You can add this later from the student profile.</span>
                 </div>
                 <mb-button size="sm" variant="tertiary" (click)="toggleGuardianAccordion()">Add guardian</mb-button>
             </div>

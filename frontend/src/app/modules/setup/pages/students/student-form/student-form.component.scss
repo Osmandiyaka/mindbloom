@@ -1,6 +1,19 @@
 .student-form {
     display: grid;
     gap: 16px;
+    --student-control-height: 44px;
+    --student-control-radius: 12px;
+    --student-control-padding-x: 14px;
+    --student-control-padding-icon: 40px;
+    --student-control-font-size: 14px;
+    --student-control-line-height: 20px;
+    --student-control-border: #e6eaed;
+    --student-control-hover: rgba(16, 24, 40, 0.2);
+    --student-control-focus: rgba(37, 99, 235, 0.18);
+    --mb-control-height: var(--student-control-height);
+    --mb-control-radius: var(--student-control-radius);
+    --mb-control-padding-x: var(--student-control-padding-x);
+    --mb-font-size-md: var(--student-control-font-size);
 }
 
 .form-error {
@@ -29,12 +42,11 @@
 
 .modal-column {
     display: grid;
-    gap: 24px;
+    gap: 16px;
 }
 
 .section-title {
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(16, 24, 40, 0.06);
+    padding-bottom: 0;
 }
 
 .section-title h3 {
@@ -92,6 +104,15 @@
     background: rgba(16, 24, 40, 0.02);
 }
 
+.guardian-link {
+    color: var(--color-text-secondary);
+    font-weight: 600;
+}
+
+.guardian-link:hover {
+    color: var(--color-primary, #2563eb);
+}
+
 .accordion-toggle .chevron {
     transition: transform 0.2s ease;
     color: var(--color-text-secondary);
@@ -106,7 +127,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 14px;
+    padding: 10px 12px;
     border-radius: 12px;
     border: 1px solid rgba(16, 24, 40, 0.06);
     background: rgba(16, 24, 40, 0.02);
@@ -152,7 +173,7 @@
 }
 
 .field-spacer {
-    min-height: 44px;
+    min-height: var(--student-control-height);
 }
 
 .form-field {
@@ -170,15 +191,22 @@
     display: block;
 }
 
+:host ::ng-deep .form-field .mb-form-field {
+    gap: 6px;
+}
+
 :host ::ng-deep .form-field .mb-input-shell,
 :host ::ng-deep .form-field .mb-select-shell {
-    height: 44px;
+    height: var(--student-control-height);
 }
 
 :host ::ng-deep .form-field .mb-input,
 :host ::ng-deep .form-field .mb-select {
-    font-size: 14px;
+    height: var(--student-control-height);
+    padding: 0 var(--student-control-padding-icon) 0 var(--student-control-padding-x);
+    font-size: var(--student-control-font-size);
     font-weight: 400;
+    line-height: var(--student-control-line-height);
 }
 
 :host ::ng-deep .form-field .mb-form-field__label {
@@ -194,17 +222,20 @@
 
 :host ::ng-deep .form-field .mb-form-field__control {
     background: #ffffff;
-    border: 1px solid #e6eaed;
+    border: 1px solid var(--student-control-border);
     box-shadow: none;
+    min-height: var(--student-control-height);
+    padding: 0;
+    border-radius: var(--student-control-radius);
 }
 
 :host ::ng-deep .form-field .mb-form-field__control:hover {
-    border-color: rgba(16, 24, 40, 0.2);
+    border-color: var(--student-control-hover);
 }
 
 :host ::ng-deep .form-field .mb-form-field__control:focus-within {
     border-color: var(--mb-color-primary);
-    box-shadow: 0 0 0 1px var(--mb-color-primary);
+    box-shadow: 0 0 0 1px var(--student-control-focus);
 }
 
 :host ::ng-deep .form-field .mb-form-field--error .mb-form-field__control {
@@ -231,11 +262,64 @@
 }
 
 :host ::ng-deep .form-field .mb-select__chevron {
-    font-size: 12px;
+    right: 14px;
+    font-size: 16px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 :host ::ng-deep .form-field input[type="date"].mb-input {
-    padding-right: 36px;
+    padding-right: var(--student-control-padding-icon);
+}
+
+:host ::ng-deep .form-field.is-disabled .mb-form-field__control {
+    background: rgba(15, 23, 42, 0.03);
+    border-color: rgba(15, 23, 42, 0.08);
+}
+
+:host ::ng-deep .form-field.is-disabled .mb-select {
+    color: rgba(16, 24, 40, 0.35);
+}
+
+:host ::ng-deep .form-field.is-disabled .mb-select__chevron {
+    color: rgba(16, 24, 40, 0.35);
+}
+
+:host ::ng-deep .optional-field .mb-form-field {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+        "label hint"
+        "control control"
+        "error error";
+    column-gap: 12px;
+    row-gap: 6px;
+}
+
+:host ::ng-deep .optional-field .mb-form-field__label {
+    grid-area: label;
+}
+
+:host ::ng-deep .optional-field .mb-form-field__control {
+    grid-area: control;
+}
+
+:host ::ng-deep .optional-field .mb-form-field__hint {
+    grid-area: hint;
+    justify-self: end;
+    align-self: center;
+    margin: 0;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    background: rgba(148, 163, 184, 0.12);
+    font-size: 11px;
+    line-height: 16px;
+    color: var(--color-text-secondary);
+}
+
+:host ::ng-deep .optional-field .mb-form-field__error {
+    grid-area: error;
 }
 
 .required {
@@ -253,10 +337,14 @@
     margin-top: 8px;
 }
 
+.extra-guardians {
+    display: grid;
+    gap: 16px;
+}
+
 .extra-guardian {
-    border-top: 1px solid rgba(16, 24, 40, 0.06);
-    margin-top: 12px;
-    padding-top: 12px;
+    margin-top: 0;
+    padding-top: 0;
     display: grid;
     gap: 8px;
 }
@@ -322,9 +410,9 @@
 }
 
 .advanced-divider {
-    padding-top: 12px;
-    margin-top: 4px;
-    border-top: 1px solid rgba(16, 24, 40, 0.06);
+    padding-top: 0;
+    margin-top: 0;
+    border-top: none;
 }
 
 .advanced-toggle .chevron {
