@@ -187,32 +187,28 @@
     font-size: 12px;
 }
 
-.form-grid {
+.modal-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: 24px;
 }
 
-.form-column {
+.modal-column {
     display: grid;
-    gap: 16px;
+    gap: 20px;
 }
 
-.form-section {
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    background: var(--color-surface, #ffffff);
-    border-radius: 12px;
-    padding: 16px;
-    display: grid;
-    gap: 12px;
+.section-title {
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
 }
 
-.section-header h3 {
+.section-title h3 {
     margin: 0;
     font-size: 14px;
 }
 
-.section-header p {
+.section-title p {
     margin: 4px 0 0;
     font-size: 12px;
     color: var(--color-text-secondary);
@@ -220,21 +216,52 @@
 
 .section-body {
     display: grid;
-    gap: 12px;
+    gap: 16px;
+}
+
+.guardian-title {
+    margin-top: 4px;
+}
+
+.accordion-toggle {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    cursor: pointer;
+}
+
+.accordion-toggle .chevron {
+    transition: transform 0.2s ease;
+    color: var(--color-text-secondary);
+}
+
+.accordion-toggle .chevron.open {
+    transform: rotate(180deg);
 }
 
 .field-grid {
     display: grid;
-    gap: 12px;
+    gap: 16px;
 }
 
 .field-grid.two-cols {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.field-grid .form-field.full {
+    grid-column: 1 / -1;
+}
+
 .form-field {
     display: grid;
-    gap: 6px;
+    gap: 8px;
     font-size: 12px;
     color: var(--color-text-secondary);
 }
@@ -244,6 +271,28 @@
 :host ::ng-deep .form-field mb-textarea {
     width: 100%;
     display: block;
+}
+
+:host ::ng-deep .form-field .mb-input-shell,
+:host ::ng-deep .form-field .mb-select-shell {
+    height: 44px;
+}
+
+:host ::ng-deep .form-field .mb-input,
+:host ::ng-deep .form-field .mb-select {
+    font-size: 14px;
+}
+
+:host ::ng-deep .form-field .mb-select__chevron {
+    font-size: 12px;
+}
+
+:host ::ng-deep .form-field input[type="date"].mb-input {
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M6 2v3M14 2v3M4 7h12M5 5h10a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z' stroke='%2394a3b8' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 14px 14px;
 }
 
 .required {
@@ -276,22 +325,6 @@
     color: var(--color-text-secondary);
 }
 
-.guardian-toggle {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 12px;
-    color: var(--color-text-secondary);
-}
-
-.guardian-required {
-    font-size: 11px;
-    color: var(--color-text-secondary);
-    background: rgba(148, 163, 184, 0.15);
-    padding: 2px 8px;
-    border-radius: 999px;
-}
-
 .guardian-empty {
     margin: 0;
     font-size: 12px;
@@ -302,6 +335,22 @@
     margin: 0;
     font-size: 12px;
     color: var(--color-text-secondary);
+}
+
+.field-helper {
+    margin: 0;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+}
+
+.text-link {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--color-primary, #2563eb);
+    font-size: 12px;
+    cursor: pointer;
+    text-align: left;
 }
 
 .duplicate-panel {
@@ -370,7 +419,7 @@
 }
 
 @media (max-width: 900px) {
-    .form-grid {
+    .modal-grid {
         grid-template-columns: 1fr;
     }
 

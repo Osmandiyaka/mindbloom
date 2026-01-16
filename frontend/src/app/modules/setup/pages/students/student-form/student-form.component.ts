@@ -10,8 +10,8 @@ import { TenantService, Tenant } from '../../../../../core/services/tenant.servi
 import { TenantSettingsService } from '../../../../../core/services/tenant-settings.service';
 import { IconRegistryService } from '../../../../../shared/services/icon-registry.service';
 import { SchoolContextService } from '../../../../../core/school/school-context.service';
-import { MbClassStatusSelection, MbClassStatusSelectorComponent } from '../../../../../shared/components/class-status-selector/class-status-selector.component';
-import { MbButtonComponent, MbCheckboxComponent, MbInputComponent, MbSelectComponent, MbSelectOption, MbTextareaComponent } from '@mindbloom/ui';
+import { ClassSectionService, ClassResponse, SectionResponse } from '../../../../../core/services/class-section.service';
+import { MbButtonComponent, MbInputComponent, MbSelectComponent, MbSelectOption, MbTextareaComponent } from '@mindbloom/ui';
 
 @Component({
     selector: 'app-student-form',
@@ -19,12 +19,10 @@ import { MbButtonComponent, MbCheckboxComponent, MbInputComponent, MbSelectCompo
     imports: [
         CommonModule,
         ReactiveFormsModule,
-        MbClassStatusSelectorComponent,
         MbInputComponent,
         MbSelectComponent,
         MbTextareaComponent,
-        MbButtonComponent,
-        MbCheckboxComponent
+        MbButtonComponent
     ],
     templateUrl: './student-form.component.html',
     styleUrls: ['./student-form.component.scss']
@@ -53,7 +51,11 @@ export class StudentFormComponent implements OnInit {
     studentSchema = signal<Record<string, boolean> | null>(null);
     academicYearOptions: MbSelectOption[] = [];
     academicYearLoading = signal(true);
-    guardianEnabled = signal(true);
+    classOptions = signal<MbSelectOption[]>([]);
+    sectionOptions = signal<MbSelectOption[]>([]);
+    classLoading = signal(false);
+    sectionLoading = signal(false);
+    guardianEnabled = signal(false);
     guardianRequired = signal(false);
     guardianRelationshipsLoading = signal(false);
     guardianRelationshipOptions = signal<MbSelectOption[]>([]);
@@ -66,6 +68,8 @@ export class StudentFormComponent implements OnInit {
     });
     canManageEnrollment = computed(() => this.rbac.can(PERMISSIONS.students.write));
     canManageGuardians = computed(() => this.rbac.can(PERMISSIONS.students.write));
+    guardianExpanded = signal(false);
+    guardianDetailsExpanded = signal(false);
     schoolOptions = computed(() => this.schoolContext.schools().map((school) => ({
         label: school.name,
         value: school.id
@@ -109,6 +113,7 @@ export class StudentFormComponent implements OnInit {
         private tenantService: TenantService,
         private tenantSettingsService: TenantSettingsService,
         private schoolContext: SchoolContextService,
+        private classSectionService: ClassSectionService,
         private rbac: RbacService,
         public iconRegistry: IconRegistryService,
     ) {
@@ -140,6 +145,10 @@ export class StudentFormComponent implements OnInit {
         if (tenantSettings?.extras?.['guardianRequired']) {
             this.guardianRequired.set(Boolean(tenantSettings.extras['guardianRequired']));
             this.guardianEnabled.set(Boolean(tenantSettings.extras['guardianRequired']));
+            this.guardianExpanded.set(Boolean(tenantSettings.extras['guardianRequired']));
+            if (this.guardianRequired() && this.guardians.length === 0) {
+                this.addGuardian();
+            }
         }
         if (tenantSettings?.academicYear) {
             this.setAcademicYearOptions(this.buildAcademicYearOptions(tenantSettings.academicYear));
@@ -154,6 +163,10 @@ export class StudentFormComponent implements OnInit {
                     if (tenant.extras?.['guardianRequired']) {
                         this.guardianRequired.set(Boolean(tenant.extras['guardianRequired']));
                         this.guardianEnabled.set(Boolean(tenant.extras['guardianRequired']));
+                        this.guardianExpanded.set(Boolean(tenant.extras['guardianRequired']));
+                        if (this.guardianRequired() && this.guardians.length === 0) {
+                            this.addGuardian();
+                        }
                     }
                     if (tenant.academicYear) {
                         this.setAcademicYearOptions(this.buildAcademicYearOptions(tenant.academicYear));
@@ -171,6 +184,7 @@ export class StudentFormComponent implements OnInit {
         this.loadGuardianRelationships();
         this.syncGuardianValidators();
         this.ensureEnrollmentDefaults();
+        this.loadClasses();
     }
 
     private get currentTenant(): Tenant | null {
@@ -303,6 +317,43 @@ export class StudentFormComponent implements OnInit {
     private setAcademicYearOptions(options: MbSelectOption[]): void {
         this.academicYearOptions = options;
         this.academicYearLoading.set(false);
+    }
+
+    private loadClasses(): void {
+        this.classLoading.set(true);
+        this.classSectionService.listClasses().subscribe({
+            next: (items) => {
+                const options = items.map((item) => ({
+                    label: item.name,
+                    value: item.id || item._id || item.name
+                }));
+                this.classOptions.set(options);
+                this.classLoading.set(false);
+                this.reconcileClassSelection();
+            },
+            error: () => {
+                this.classOptions.set([]);
+                this.classLoading.set(false);
+            }
+        });
+    }
+
+    private loadSections(classId: string): void {
+        this.sectionLoading.set(true);
+        this.classSectionService.listSections(classId).subscribe({
+            next: (items) => {
+                const options = items.map((item) => ({
+                    label: item.name,
+                    value: item.id || item._id || item.name
+                }));
+                this.sectionOptions.set(options);
+                this.sectionLoading.set(false);
+            },
+            error: () => {
+                this.sectionOptions.set([]);
+                this.sectionLoading.set(false);
+            }
+        });
     }
 
     private loadGuardianRelationships(): void {
@@ -456,12 +507,54 @@ export class StudentFormComponent implements OnInit {
         }
     }
 
-    applyPlacement(selection: MbClassStatusSelection): void {
+    handleClassSelect(value: string): void {
+        this.selectedClassId.set(value);
+        const selected = this.findClassById(value);
         const enrollmentGroup = this.enrollmentForm.get('enrollment') as FormGroup;
         enrollmentGroup.patchValue({
-            class: selection.classLabel || '',
-            section: selection.sectionLabel || ''
+            class: selected?.name || ''
         });
+        this.sectionOptions.set([]);
+        this.selectedSectionId.set(null);
+        enrollmentGroup.patchValue({ section: '' });
+        if (value) {
+            this.loadSections(value);
+        }
+    }
+
+    handleSectionSelect(value: string): void {
+        this.selectedSectionId.set(value);
+        const selected = this.findSectionById(value);
+        const enrollmentGroup = this.enrollmentForm.get('enrollment') as FormGroup;
+        enrollmentGroup.patchValue({
+            section: selected?.name || ''
+        });
+    }
+
+    private reconcileClassSelection(): void {
+        const enrollmentGroup = this.enrollmentForm.get('enrollment') as FormGroup;
+        const currentClass = enrollmentGroup.get('class')?.value;
+        if (!currentClass || this.selectedClassId()) {
+            return;
+        }
+        const match = this.classOptions().find(option => option.label.toLowerCase() === String(currentClass).toLowerCase());
+        if (!match) {
+            return;
+        }
+        this.selectedClassId.set(match.value);
+        this.loadSections(match.value);
+    }
+
+    private findClassById(id: string): ClassResponse | null {
+        const matches = this.classOptions().find(option => option.value === id);
+        if (!matches) return null;
+        return { name: matches.label, id: matches.value };
+    }
+
+    private findSectionById(id: string): SectionResponse | null {
+        const matches = this.sectionOptions().find(option => option.value === id);
+        if (!matches) return null;
+        return { name: matches.label, id: matches.value, classId: this.selectedClassId() || '' };
     }
 
     // Guardian Management
@@ -534,6 +627,22 @@ export class StudentFormComponent implements OnInit {
             this.addGuardian();
         }
         this.syncGuardianValidators();
+    }
+
+    toggleGuardianAccordion(): void {
+        if (this.guardianRequired()) {
+            this.guardianExpanded.set(true);
+            this.guardianEnabled.set(true);
+            return;
+        }
+        const next = !this.guardianExpanded();
+        this.guardianExpanded.set(next);
+        this.guardianDetailsExpanded.set(false);
+        this.setGuardianEnabled(next);
+    }
+
+    toggleGuardianDetails(): void {
+        this.guardianDetailsExpanded.set(!this.guardianDetailsExpanded());
     }
 
     private syncGuardianValidators(): void {

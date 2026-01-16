@@ -6,115 +6,120 @@
     <div class="form-success">{{ saveNotice() }}</div>
     }
 
-    <div class="form-grid">
-        <div class="form-column">
-            <section class="form-section">
-                <div class="section-header">
-                    <h3>Student identity</h3>
-                    <p>Core identity details.</p>
+    <div class="modal-grid">
+        <div class="modal-column">
+            <div class="section-title">
+                <h3>Student identity</h3>
+                <p>Core identity details.</p>
+            </div>
+            <div class="section-body" [formGroup]="personalInfoForm">
+                <div class="field-grid two-cols">
+                    <label class="form-field">
+                        First name <span class="required" *ngIf="isRequiredField('firstName')">*</span>
+                        <mb-input
+                            formControlName="firstName"
+                            [invalid]="isFieldInvalid(personalInfoForm, 'firstName')"
+                            placeholder="e.g. Ama"
+                            [autofocus]="true"
+                            (blurEvent)="onDuplicateFieldBlur()">
+                        </mb-input>
+                        <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'firstName')">
+                            {{ fieldError(personalInfoForm, 'firstName', 'First name') }}
+                        </span>
+                    </label>
+                    <label class="form-field">
+                        Last name <span class="required" *ngIf="isRequiredField('lastName')">*</span>
+                        <mb-input
+                            formControlName="lastName"
+                            [invalid]="isFieldInvalid(personalInfoForm, 'lastName')"
+                            placeholder="e.g. Mensah"
+                            (blurEvent)="onDuplicateFieldBlur()">
+                        </mb-input>
+                        <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'lastName')">
+                            {{ fieldError(personalInfoForm, 'lastName', 'Last name') }}
+                        </span>
+                    </label>
                 </div>
-                <div class="section-body" [formGroup]="personalInfoForm">
-                    <div class="field-grid two-cols">
-                        <label class="form-field">
-                            First name <span class="required" *ngIf="isRequiredField('firstName')">*</span>
-                            <mb-input
-                                formControlName="firstName"
-                                [invalid]="isFieldInvalid(personalInfoForm, 'firstName')"
-                                [autofocus]="true"
-                                (blurEvent)="onDuplicateFieldBlur()">
-                            </mb-input>
-                            <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'firstName')">
-                                {{ fieldError(personalInfoForm, 'firstName', 'First name') }}
-                            </span>
-                        </label>
-                        <label class="form-field">
-                            Last name <span class="required" *ngIf="isRequiredField('lastName')">*</span>
-                            <mb-input
-                                formControlName="lastName"
-                                [invalid]="isFieldInvalid(personalInfoForm, 'lastName')"
-                                (blurEvent)="onDuplicateFieldBlur()">
-                            </mb-input>
-                            <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'lastName')">
-                                {{ fieldError(personalInfoForm, 'lastName', 'Last name') }}
-                            </span>
-                        </label>
-                    </div>
-                    <div class="field-grid two-cols">
-                        <label class="form-field">
-                            Preferred name
-                            <mb-input formControlName="middleName"></mb-input>
-                        </label>
-                        <label class="form-field">
-                            Date of birth <span class="required" *ngIf="isRequiredField('dateOfBirth')">*</span>
-                            <mb-input
-                                type="date"
-                                formControlName="dateOfBirth"
-                                [invalid]="isFieldInvalid(personalInfoForm, 'dateOfBirth')"
-                                (blurEvent)="onDuplicateFieldBlur()">
-                            </mb-input>
-                            <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'dateOfBirth')">
-                                {{ fieldError(personalInfoForm, 'dateOfBirth', 'Date of birth') }}
-                            </span>
-                        </label>
-                    </div>
-                    <div class="field-grid two-cols">
-                        <label class="form-field">
-                            Gender <span class="required" *ngIf="isRequiredField('gender')">*</span>
-                            <mb-select
-                                placeholder="Select gender"
-                                [options]="genderOptions"
-                                formControlName="gender"
-                                [invalid]="isFieldInvalid(personalInfoForm, 'gender')">
-                            </mb-select>
-                            <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'gender')">
-                                {{ fieldError(personalInfoForm, 'gender', 'Gender') }}
-                            </span>
-                        </label>
-                        <label class="form-field">
-                            Email
-                            <mb-input type="email" formControlName="email" [invalid]="isFieldInvalid(personalInfoForm, 'email')"></mb-input>
-                            <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'email')">
-                                {{ fieldError(personalInfoForm, 'email', 'Email') }}
-                            </span>
-                        </label>
-                    </div>
-                    <div class="field-grid two-cols">
-                        <label class="form-field">
-                            Phone
-                            <mb-input type="tel" formControlName="phone" [invalid]="isFieldInvalid(personalInfoForm, 'phone')"></mb-input>
-                            <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'phone')">
-                                {{ fieldError(personalInfoForm, 'phone', 'Phone') }}
-                            </span>
-                        </label>
-                        <label class="form-field">
-                            Nationality
-                            <mb-input formControlName="nationality"></mb-input>
-                        </label>
-                    </div>
-                    <div formGroupName="address" class="field-grid two-cols">
-                        <label class="form-field">
-                            Street
-                            <mb-input formControlName="street"></mb-input>
-                        </label>
-                        <label class="form-field">
-                            City
-                            <mb-input formControlName="city"></mb-input>
-                        </label>
-                        <label class="form-field">
-                            State
-                            <mb-input formControlName="state"></mb-input>
-                        </label>
-                        <label class="form-field">
-                            Postal code
-                            <mb-input formControlName="postalCode"></mb-input>
-                        </label>
-                        <label class="form-field">
-                            Country
-                            <mb-input formControlName="country"></mb-input>
-                        </label>
-                    </div>
+                <div class="field-grid two-cols">
+                    <label class="form-field">
+                        Preferred name
+                        <mb-input formControlName="middleName" placeholder="Optional"></mb-input>
+                    </label>
+                    <label class="form-field">
+                        Date of birth <span class="required" *ngIf="isRequiredField('dateOfBirth')">*</span>
+                        <mb-input
+                            type="date"
+                            formControlName="dateOfBirth"
+                            [invalid]="isFieldInvalid(personalInfoForm, 'dateOfBirth')"
+                            placeholder="DD/MM/YYYY"
+                            (blurEvent)="onDuplicateFieldBlur()">
+                        </mb-input>
+                        <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'dateOfBirth')">
+                            {{ fieldError(personalInfoForm, 'dateOfBirth', 'Date of birth') }}
+                        </span>
+                    </label>
                 </div>
-            </section>
+                <div class="field-grid two-cols">
+                    <label class="form-field">
+                        Gender <span class="required" *ngIf="isRequiredField('gender')">*</span>
+                        <mb-select
+                            placeholder="Select gender"
+                            [options]="genderOptions"
+                            formControlName="gender"
+                            [invalid]="isFieldInvalid(personalInfoForm, 'gender')">
+                        </mb-select>
+                        <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'gender')">
+                            {{ fieldError(personalInfoForm, 'gender', 'Gender') }}
+                        </span>
+                    </label>
+                    <label class="form-field">
+                        Email
+                        <mb-input type="email" formControlName="email" placeholder="e.g. ama@school.com" [invalid]="isFieldInvalid(personalInfoForm, 'email')"></mb-input>
+                        <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'email')">
+                            {{ fieldError(personalInfoForm, 'email', 'Email') }}
+                        </span>
+                    </label>
+                </div>
+                <div class="field-grid two-cols">
+                    <label class="form-field">
+                        Phone
+                        <mb-input type="tel" formControlName="phone" placeholder="e.g. +233 20 000 0000" [invalid]="isFieldInvalid(personalInfoForm, 'phone')"></mb-input>
+                        <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'phone')">
+                            {{ fieldError(personalInfoForm, 'phone', 'Phone') }}
+                        </span>
+                    </label>
+                    <label class="form-field">
+                        Nationality
+                        <mb-input formControlName="nationality" placeholder="e.g. Ghanaian"></mb-input>
+                    </label>
+                </div>
+                <div formGroupName="address" class="field-grid">
+                    <label class="form-field full">
+                        Address line 1
+                        <mb-input formControlName="street" placeholder="Street address"></mb-input>
+                    </label>
+                </div>
+                <div formGroupName="address" class="field-grid two-cols">
+                    <label class="form-field">
+                        City
+                        <mb-input formControlName="city" placeholder="City"></mb-input>
+                    </label>
+                    <label class="form-field">
+                        State
+                        <mb-input formControlName="state" placeholder="State/Region"></mb-input>
+                    </label>
+                </div>
+                <div formGroupName="address" class="field-grid two-cols">
+                    <label class="form-field">
+                        Postal code
+                        <mb-input formControlName="postalCode" placeholder="Postal code"></mb-input>
+                    </label>
+                    <label class="form-field">
+                        Country
+                        <mb-input formControlName="country" placeholder="Country"></mb-input>
+                    </label>
+                </div>
+            </div>
 
             @if (duplicateLoading()) {
             <div class="duplicate-panel is-loading">
@@ -144,174 +149,184 @@
                 </div>
             </div>
             }
-
-            <section class="form-section">
-                <div class="section-header">
-                    <h3>Identifiers</h3>
-                    <p>Record identifiers.</p>
-                </div>
-                <div class="section-body" [formGroup]="enrollmentForm">
-                    <div formGroupName="enrollment" class="field-grid two-cols">
-                        <label class="form-field">
-                            Admission number
-                            <mb-input formControlName="admissionNumber"></mb-input>
-                        </label>
-                        <label class="form-field">
-                            Roll number
-                            <mb-input formControlName="rollNumber"></mb-input>
-                        </label>
-                    </div>
-                </div>
-            </section>
         </div>
 
-        <div class="form-column">
-            <section class="form-section">
-                <div class="section-header">
-                    <h3>Enrollment</h3>
-                    <p>Current-year placement.</p>
-                </div>
-                <div class="section-body" [formGroup]="enrollmentForm">
-                    @if (!canManageEnrollment()) {
-                    <p class="permission-note">You do not have permission to edit enrollment.</p>
-                    }
-                    @if (showSchoolSelector()) {
-                    <div class="field-grid">
-                        <label class="form-field">
-                            School <span class="required">*</span>
-                            <mb-select
-                                placeholder="Select school"
-                                [options]="schoolOptions()"
-                                [value]="schoolId() || ''"
-                                [disabled]="!canManageEnrollment()"
-                                (valueChange)="handleSchoolChange($event)">
-                            </mb-select>
-                        </label>
-                    </div>
-                    }
-                    <div formGroupName="enrollment" class="field-grid two-cols">
-                        <label class="form-field">
-                            Academic year <span class="required">*</span>
-                            <mb-select
-                                [placeholder]="academicYearLoading() ? 'Loading academic years...' : 'Select academic year'"
-                                [options]="academicYearOptions"
-                                [disabled]="!canManageEnrollment() || academicYearLoading()"
-                                formControlName="academicYear"
-                                (valueChange)="onDuplicateFieldBlur()">
-                            </mb-select>
-                        </label>
-                        <label class="form-field">
-                            Enrollment date <span class="required">*</span>
-                            <mb-input type="date" [disabled]="!canManageEnrollment()" formControlName="admissionDate"></mb-input>
-                        </label>
-                    </div>
-                    <div class="field-grid">
-                        <mb-class-status-selector
-                            [classId]="selectedClassId()"
-                            [sectionId]="selectedSectionId()"
-                            [showStatus]="false"
+        <div class="modal-column">
+            <div class="section-title">
+                <h3>Enrollment (optional)</h3>
+            </div>
+            <div class="section-body" [formGroup]="enrollmentForm">
+                @if (!canManageEnrollment()) {
+                <p class="permission-note">You do not have permission to edit enrollment.</p>
+                }
+                @if (showSchoolSelector()) {
+                <div class="field-grid">
+                    <label class="form-field">
+                        School <span class="required">*</span>
+                        <mb-select
+                            placeholder="Select school"
+                            [options]="schoolOptions()"
+                            [value]="schoolId() || ''"
                             [disabled]="!canManageEnrollment()"
-                            [title]="'Class & section'"
-                            [subtitle]="'Select a class to load sections.'"
-                            (classIdChange)="selectedClassId.set($event)"
-                            (sectionIdChange)="selectedSectionId.set($event)"
-                            (selectionChange)="applyPlacement($event)">
-                        </mb-class-status-selector>
-                    </div>
-                    @if (!academicYearLoading() && !academicYearOptions.length) {
-                    <p class="permission-note">No academic year configured yet.</p>
-                    }
+                            (valueChange)="handleSchoolChange($event)">
+                        </mb-select>
+                    </label>
                 </div>
-            </section>
+                }
+                <div formGroupName="enrollment" class="field-grid two-cols">
+                    <label class="form-field">
+                        Academic year <span class="required">*</span>
+                        <mb-select
+                            [placeholder]="academicYearLoading() ? 'Loading academic years...' : 'Select academic year'"
+                            [options]="academicYearOptions"
+                            [disabled]="!canManageEnrollment() || academicYearLoading()"
+                            formControlName="academicYear"
+                            (valueChange)="onDuplicateFieldBlur()">
+                        </mb-select>
+                    </label>
+                    <label class="form-field">
+                        Enrollment date <span class="required">*</span>
+                        <mb-input type="date" [disabled]="!canManageEnrollment()" formControlName="admissionDate" placeholder="DD/MM/YYYY"></mb-input>
+                    </label>
+                </div>
+                <div class="field-grid two-cols">
+                    <label class="form-field">
+                        Class
+                        <mb-select
+                            [placeholder]="classLoading() ? 'Loading classes...' : 'Select class'"
+                            [options]="classOptions()"
+                            [disabled]="!canManageEnrollment() || classLoading()"
+                            [value]="selectedClassId() || ''"
+                            (valueChange)="handleClassSelect($event)">
+                        </mb-select>
+                    </label>
+                    <label class="form-field">
+                        Section
+                        <mb-select
+                            [placeholder]="sectionLoading() ? 'Loading sections...' : 'Select section'"
+                            [options]="sectionOptions()"
+                            [disabled]="!canManageEnrollment() || sectionLoading() || !selectedClassId()"
+                            [value]="selectedSectionId() || ''"
+                            (valueChange)="handleSectionSelect($event)">
+                        </mb-select>
+                    </label>
+                </div>
+                <p class="field-helper">Select a class to load sections.</p>
+                @if (!academicYearLoading() && !academicYearOptions.length) {
+                <p class="permission-note">No academic year configured yet.</p>
+                }
+            </div>
 
-            <section class="form-section">
-                <div class="section-header">
-                    <h3>Guardian (primary)</h3>
-                    <p>Primary guardian details.</p>
-                </div>
-                <div class="section-body" [formGroup]="guardiansForm">
-                    @if (!canManageGuardians()) {
-                    <p class="guardian-empty">You do not have permission to add guardians.</p>
-                    } @else {
-                    <div class="guardian-toggle">
-                        <mb-checkbox
-                            [checked]="guardianEnabled()"
-                            [disabled]="guardianRequired()"
-                            (checkedChange)="setGuardianEnabled($event)">
-                            Add primary guardian now
-                        </mb-checkbox>
-                        @if (guardianRequired()) {
-                        <span class="guardian-required">Required by policy</span>
-                        }
+            <div class="section-title guardian-title">
+                <button type="button" class="accordion-toggle" (click)="toggleGuardianAccordion()">
+                    <span>Primary guardian (optional)</span>
+                    <span class="chevron" [class.open]="guardianExpanded()">▾</span>
+                </button>
+            </div>
+            @if (!guardianExpanded()) {
+            <p class="guardian-empty">Add guardian details if needed.</p>
+            } @else {
+            <div class="section-body" [formGroup]="guardiansForm">
+                @if (!canManageGuardians()) {
+                <p class="guardian-empty">You do not have permission to add guardians.</p>
+                } @else {
+                <div formArrayName="guardians">
+                    <div class="field-grid two-cols" *ngIf="guardians.length" [formGroupName]="0">
+                        <label class="form-field">
+                            Full name <span class="required">*</span>
+                            <mb-input formControlName="name" placeholder="Guardian name"></mb-input>
+                        </label>
+                        <label class="form-field">
+                            Relationship <span class="required">*</span>
+                            <mb-select
+                                [placeholder]="guardianRelationshipsLoading() ? 'Loading relationships...' : 'Select relationship'"
+                                [options]="guardianRelationshipSelectOptions()"
+                                [disabled]="guardianRelationshipsLoading()"
+                                formControlName="relationship">
+                            </mb-select>
+                        </label>
                     </div>
-                    @if (!guardianEnabled()) {
-                    <p class="guardian-empty">Add guardians later from the Guardians tab.</p>
-                    } @else {
-                    <div formArrayName="guardians">
-                        <div class="field-grid two-cols" *ngIf="guardians.length" [formGroupName]="0">
+                    <div class="field-grid two-cols" *ngIf="guardians.length" [formGroupName]="0">
+                        <label class="form-field">
+                            Phone <span class="required">*</span>
+                            <mb-input type="tel" formControlName="phone" placeholder="Phone number"></mb-input>
+                        </label>
+                        <label class="form-field">
+                            Email
+                            <mb-input type="email" formControlName="email" placeholder="Email address"></mb-input>
+                        </label>
+                    </div>
+                    <button type="button" class="text-link" (click)="toggleGuardianDetails()">Add more details</button>
+                    @if (guardianDetailsExpanded()) {
+                    <div class="field-grid two-cols" *ngIf="guardians.length" [formGroupName]="0">
+                        <label class="form-field">
+                            Occupation
+                            <mb-input formControlName="occupation" placeholder="Occupation"></mb-input>
+                        </label>
+                    </div>
+                    <div *ngIf="guardians.length" [formGroupName]="0">
+                        <div class="field-grid two-cols" formGroupName="address">
                             <label class="form-field">
-                                Full name <span class="required">*</span>
-                                <mb-input formControlName="name"></mb-input>
+                                Street
+                                <mb-input formControlName="street" placeholder="Street"></mb-input>
                             </label>
                             <label class="form-field">
-                                Relationship <span class="required">*</span>
-                                <mb-select
-                                    [placeholder]="guardianRelationshipsLoading() ? 'Loading relationships...' : 'Select relationship'"
-                                    [options]="guardianRelationshipSelectOptions()"
-                                    [disabled]="guardianRelationshipsLoading()"
-                                    formControlName="relationship">
-                                </mb-select>
+                                City
+                                <mb-input formControlName="city" placeholder="City"></mb-input>
                             </label>
                             <label class="form-field">
-                                Phone <span class="required">*</span>
-                                <mb-input type="tel" formControlName="phone"></mb-input>
+                                State
+                                <mb-input formControlName="state" placeholder="State/Region"></mb-input>
                             </label>
                             <label class="form-field">
-                                Email
-                                <mb-input type="email" formControlName="email"></mb-input>
+                                Postal code
+                                <mb-input formControlName="postalCode" placeholder="Postal code"></mb-input>
                             </label>
                         </div>
-                        <div class="guardian-actions">
-                            <mb-button size="sm" variant="tertiary" (click)="addGuardian()">Add another guardian</mb-button>
-                        </div>
-                        <div class="extra-guardians" *ngIf="guardians.length > 1">
-                            <div class="extra-guardian" *ngFor="let guardian of guardians.controls; let i = index" [formGroupName]="i">
-                                @if (i > 0) {
-                                <div class="extra-header">
-                                    <span>Guardian {{ i + 1 }}</span>
-                                    <mb-button size="sm" variant="tertiary" (click)="removeGuardian(i)">Remove</mb-button>
-                                </div>
-                                <div class="field-grid two-cols">
-                                    <label class="form-field">
-                                        Full name
-                                        <mb-input formControlName="name"></mb-input>
-                                    </label>
-                                    <label class="form-field">
-                                        Relationship
-                                        <mb-select
-                                            [placeholder]="guardianRelationshipsLoading() ? 'Loading relationships...' : 'Select relationship'"
-                                            [options]="guardianRelationshipSelectOptions()"
-                                            [disabled]="guardianRelationshipsLoading()"
-                                            formControlName="relationship">
-                                        </mb-select>
-                                    </label>
-                                    <label class="form-field">
-                                        Phone
-                                        <mb-input type="tel" formControlName="phone"></mb-input>
-                                    </label>
-                                    <label class="form-field">
-                                        Email
-                                        <mb-input type="email" formControlName="email"></mb-input>
-                                    </label>
-                                </div>
-                                }
+                    </div>
+                    }
+                    <div class="guardian-actions">
+                        <mb-button size="sm" variant="tertiary" (click)="addGuardian()">+ Add another guardian</mb-button>
+                    </div>
+                    <div class="extra-guardians" *ngIf="guardians.length > 1">
+                        <div class="extra-guardian" *ngFor="let guardian of guardians.controls; let i = index" [formGroupName]="i">
+                            @if (i > 0) {
+                            <div class="extra-header">
+                                <span>Guardian {{ i + 1 }}</span>
+                                <mb-button size="sm" variant="tertiary" (click)="removeGuardian(i)">Remove</mb-button>
                             </div>
+                            <div class="field-grid two-cols">
+                                <label class="form-field">
+                                    Full name
+                                    <mb-input formControlName="name"></mb-input>
+                                </label>
+                                <label class="form-field">
+                                    Relationship
+                                    <mb-select
+                                        [placeholder]="guardianRelationshipsLoading() ? 'Loading relationships...' : 'Select relationship'"
+                                        [options]="guardianRelationshipSelectOptions()"
+                                        [disabled]="guardianRelationshipsLoading()"
+                                        formControlName="relationship">
+                                    </mb-select>
+                                </label>
+                            </div>
+                            <div class="field-grid two-cols">
+                                <label class="form-field">
+                                    Phone
+                                    <mb-input type="tel" formControlName="phone"></mb-input>
+                                </label>
+                                <label class="form-field">
+                                    Email
+                                    <mb-input type="email" formControlName="email"></mb-input>
+                                </label>
+                            </div>
+                            }
                         </div>
                     </div>
-                    }
-                    }
                 </div>
-            </section>
+                }
+            </div>
+            }
         </div>
     </div>
 </div>
