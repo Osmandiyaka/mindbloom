@@ -108,8 +108,8 @@
   bottom: 0;
   z-index: 2;
   padding: 16px 24px;
-  border-top: 1px solid rgba(148, 163, 184, 0.12);
-  background: var(--surface-0, #fcfdfd);
+  border-top: 1px solid rgba(16, 24, 40, 0.08);
+  background: #fafbfc;
 }
 
 .create-modal-footer {
@@ -132,6 +132,10 @@
   min-height: 16px;
 }
 
+:host ::ng-deep .create-modal-footer mb-button button {
+  min-height: 40px;
+}
+
 .create-modal-body {
   display: grid;
   gap: 16px;
@@ -152,7 +156,8 @@
 
 .create-modal-header-text h2 {
   margin: 0 0 4px;
-  font-size: 20px;
+  font-size: 21px;
+  font-weight: 600;
 }
 
 .create-modal-header-text p {
