@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EmbeddedViewRef, EventEmitter, HostListener, Input, Output, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ElementRef, EmbeddedViewRef, EventEmitter, HostListener, Input, OnDestroy, Output, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { CdkOverlayOrigin } from '@angular/cdk/overlay';
 
 @Component({
@@ -23,7 +23,7 @@ import { CdkOverlayOrigin } from '@angular/cdk/overlay';
     `,
     styleUrls: ['./mb-popover.component.scss']
 })
-export class MbPopoverComponent {
+export class MbPopoverComponent implements OnDestroy {
     private overlayElement?: HTMLElement;
     private overlayView?: EmbeddedViewRef<unknown>;
     private backdropElement?: HTMLElement;
@@ -192,6 +192,10 @@ export class MbPopoverComponent {
             this.backdropElement.remove();
             this.backdropElement = undefined;
         }
+    }
+
+    ngOnDestroy(): void {
+        this.detachOverlay();
     }
 
     private resolveOriginElement(): HTMLElement | null {

@@ -1895,10 +1895,10 @@
                                             <div class="users-table__actions">
                                                 <button type="button" class="users-menu__toggle" #userMenuOrigin
                                                     aria-label="Actions"
-                                                    [attr.aria-expanded]="userMenuOpenId() === row.id"
-                                                    (click)="toggleUserMenu(row.id, $event)">⋯</button>
+                                                    [attr.aria-expanded]="userMenuOpenId() === userMenuKey(row)"
+                                                    (click)="toggleUserMenu(userMenuKey(row), $event)">⋯</button>
                                                 <mb-popover
-                                                    [open]="userMenuOpenId() === row.id"
+                                                    [open]="userMenuOpenId() === userMenuKey(row)"
                                                     [origin]="userMenuOrigin"
                                                     [hasBackdrop]="true"
                                                     [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'users-menu__panel']"

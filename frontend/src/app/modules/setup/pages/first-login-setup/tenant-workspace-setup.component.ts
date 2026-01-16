@@ -986,6 +986,10 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.userMenuOpenId.set(next);
     }
 
+    userMenuKey(row: UserRow): string {
+        return row.id;
+    }
+
     closeUserMenu(): void {
         this.userMenuOpenId.set(null);
     }
@@ -3131,7 +3135,9 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             };
             this.gradingScales.set([defaultScale]);
         }
-        this.users.set(data.users?.length ? data.users : this.users());
+        if (data.users?.length) {
+            this.users.set(this.normalizeUserRows(data.users));
+        }
         this.usersStepSkipped.set(!!data.usersStepSkipped);
         this.syncClassCounter();
         this.syncSectionCounter();
@@ -3495,6 +3501,29 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     private nextUserId(): string {
         this.userCounter += 1;
         return `user-${this.userCounter}`;
+    }
+
+    private normalizeUserRows(rows: UserRow[]): UserRow[] {
+        let maxCounter = 0;
+        for (const row of rows) {
+            const match = row.id?.match(/^user-(\d+)$/);
+            if (match) {
+                const value = Number(match[1]);
+                if (!Number.isNaN(value)) {
+                    maxCounter = Math.max(maxCounter, value);
+                }
+            }
+        }
+        this.userCounter = Math.max(this.userCounter, maxCounter);
+        const seen = new Set<string>();
+        return rows.map(row => {
+            let id = row.id?.trim() || '';
+            if (!id || seen.has(id)) {
+                id = this.nextUserId();
+            }
+            seen.add(id);
+            return { ...row, id };
+        });
     }
 
     schoolAccessLabel(user: UserRow): string {

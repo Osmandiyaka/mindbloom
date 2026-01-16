@@ -63,7 +63,7 @@ export type MbTableCellValue =
                 </thead>
                 <tbody *ngIf="displayRows.length; else emptyState">
                     <tr
-                        *ngFor="let row of displayRows; trackBy: trackByKey"
+                        *ngFor="let row of displayRows; let rowIndex = index; trackBy: trackByKey"
                         [class]="rowClass?.(row) || null"
                         (click)="handleRowClick($event, row)"
                     >
@@ -135,7 +135,9 @@ export type MbTableCellValue =
                             </span>
                         </td>
                         <td *ngIf="actionsTemplate" class="mb-table__actions">
-                            <ng-container *ngTemplateOutlet="actionsTemplate.template; context: { $implicit: row }"></ng-container>
+                            <ng-container
+                                *ngTemplateOutlet="actionsTemplate.template; context: { $implicit: row, rowIndex: rowIndex }"
+                            ></ng-container>
                         </td>
                     </tr>
                 </tbody>
