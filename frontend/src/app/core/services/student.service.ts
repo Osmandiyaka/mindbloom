@@ -10,6 +10,7 @@ import {
     StudentActivityItem,
     StudentFilterResponse,
     Guardian,
+    GuardianRelationshipOption,
     Document,
     StudentAcademicSubject,
     StudentAcademicTerm,
@@ -26,6 +27,7 @@ import { STUDENT_COLUMN_SCHEMA, StudentColumnConfig } from '../../modules/studen
 export class StudentService {
     private http = inject(HttpClient);
     private apiUrl = `${environment.apiUrl}/students`;
+    private baseUrl = environment.apiUrl;
 
     getStudents(filters?: StudentFilters): Observable<Student[]> {
         let params = new HttpParams();
@@ -62,6 +64,20 @@ export class StudentService {
 
     getStudent(id: string): Observable<Student> {
         return this.http.get<Student>(`${this.apiUrl}/${id}`);
+    }
+
+    getGuardianRelationships(): Observable<GuardianRelationshipOption[]> {
+        return this.http.get<GuardianRelationshipOption[]>(`${this.baseUrl}/guardian-relationships`);
+    }
+
+    checkDuplicates(params: { firstName?: string; lastName?: string; dateOfBirth?: string; schoolId?: string; academicYear?: string }): Observable<Student[]> {
+        let query = new HttpParams();
+        if (params.firstName) query = query.set('firstName', params.firstName);
+        if (params.lastName) query = query.set('lastName', params.lastName);
+        if (params.dateOfBirth) query = query.set('dateOfBirth', params.dateOfBirth);
+        if (params.schoolId) query = query.set('schoolId', params.schoolId);
+        if (params.academicYear) query = query.set('academicYear', params.academicYear);
+        return this.http.get<Student[]>(`${this.apiUrl}/duplicates`, { params: query });
     }
 
     getStudentColumns(): Observable<StudentColumnConfig[]> {

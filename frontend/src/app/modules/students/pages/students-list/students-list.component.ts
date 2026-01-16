@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -32,6 +32,8 @@ import { RbacService } from '../../../../core/rbac/rbac.service';
 import { PERMISSIONS } from '../../../../core/rbac/permission.constants';
 import { TenantContextService } from '../../../../core/tenant/tenant-context.service';
 import { StudentColumnConfig } from '../../config/student-columns.schema';
+import { LockedPopoverComponent } from '../../../../shared/components/entitlements/locked-popover/locked-popover.component';
+import { LockCtaType, LockReason } from '../../../../shared/types/entitlement-lock';
 import {
   MbButtonComponent,
   MbCheckboxComponent,
@@ -92,6 +94,7 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
     SearchInputComponent,
     CanDirective,
     TooltipDirective,
+    LockedPopoverComponent,
   ],
   styleUrls: ['./students-list.component.scss'],
   template: `
@@ -109,15 +112,34 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
             (click)="openWorkflowDrawer()">
             Workflow panel
           </mb-button>
-          <mb-split-button
-            *can="'students.create'"
-            [label]="headerCopy.addStudent"
-            size="sm"
-            variant="primary"
-            [items]="addStudentItems"
-            (primaryClick)="openCreateModal()"
-            (itemSelect)="handleAddMenu($event)">
-          </mb-split-button>
+          <div class="create-action" [class.locked]="isCreateLocked()">
+            <mb-split-button
+              [label]="headerCopy.addStudent"
+              size="sm"
+              variant="primary"
+              [disabled]="isCreateLocked()"
+              [items]="addStudentItems"
+              (primaryClick)="openCreateModal()"
+              (itemSelect)="handleAddMenu($event)">
+            </mb-split-button>
+            @if (isCreateLocked()) {
+              <mb-button
+                size="sm"
+                variant="tertiary"
+                aria-label="Why is this locked?"
+                class="lock-info"
+                (click)="toggleCreateLock($event)">
+                Why?
+              </mb-button>
+              <app-locked-popover
+                class="create-lock-popover"
+                [open]="createLockOpen()"
+                [reason]="createLockReason()!"
+                [context]="createLockContext()"
+                (action)="handleCreateLockAction($event)">
+              </app-locked-popover>
+            }
+          </div>
           <mb-button size="sm" variant="tertiary" aria-label="Manage columns" (click)="toggleColumns()">
             {{ headerCopy.columns }}
           </mb-button>
@@ -259,13 +281,27 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                   <p>No results</p>
                   <div class="empty-actions">
                     <mb-button size="sm" variant="tertiary" (click)="clearFilters()">Clear filters</mb-button>
-                    <mb-button size="sm" variant="primary" *can="'students.create'" (click)="openCreateModal()">Add student</mb-button>
+                    <mb-button
+                      size="sm"
+                      variant="primary"
+                      [disabled]="isCreateLocked()"
+                      [attr.title]="createLockHint()"
+                      (click)="openCreateModal()">
+                      Add student
+                    </mb-button>
                   </div>
                 } @else {
                   <p>No students yet</p>
                   <div class="empty-actions">
                     <mb-button size="sm" variant="tertiary" (click)="openImport()">Import CSV</mb-button>
-                    <mb-button size="sm" variant="primary" *can="'students.create'" (click)="openCreateModal()">Add student</mb-button>
+                    <mb-button
+                      size="sm"
+                      variant="primary"
+                      [disabled]="isCreateLocked()"
+                      [attr.title]="createLockHint()"
+                      (click)="openCreateModal()">
+                      Add student
+                    </mb-button>
                   </div>
                 }
               </div>
@@ -1162,8 +1198,61 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
         [open]="createModalOpen()"
         title="Add student"
         (closed)="closeCreateModal()"
-        [hasFooter]="false">
-        <app-student-form (close)="closeCreateModal()"></app-student-form>
+        [hasFooter]="true">
+        <div class="modal-description">
+          Create a student record. Enrollment and guardians are optional.
+        </div>
+        <app-student-form
+          [embedded]="true"
+          (saved)="handleStudentCreated($event)"
+          (savedAndNew)="handleStudentCreatedAndContinue($event)"
+          (viewStudent)="openStudentFromCreate($event)">
+        </app-student-form>
+        <div mbModalFooter>
+          <mb-button size="sm" variant="tertiary" (click)="closeCreateModal()">Cancel</mb-button>
+          <mb-button size="sm" variant="tertiary" (click)="submitCreateStudent(true)">Save & add another</mb-button>
+          <mb-button size="sm" variant="primary" (click)="submitCreateStudent()">Save student</mb-button>
+        </div>
+      </mb-modal>
+
+      <mb-modal
+        [open]="createRequestAccessOpen()"
+        title="Request access"
+        (closed)="closeCreateRequestAccess()"
+        [hasFooter]="true">
+        <div class="modal-description">
+          Ask for access to create student records.
+        </div>
+        <div class="modal-form">
+          <label>
+            Module
+            <mb-input [value]="'Students'" [disabled]="true"></mb-input>
+          </label>
+          <label>
+            Request
+            <mb-input [value]="'Create students'" [disabled]="true"></mb-input>
+          </label>
+          <label>
+            Reason
+            <mb-textarea [(ngModel)]="createRequestAccessReason" placeholder="Add context for the admin..."></mb-textarea>
+          </label>
+        </div>
+        <div mbModalFooter>
+          <mb-button size="sm" variant="tertiary" (click)="closeCreateRequestAccess()">Cancel</mb-button>
+          <mb-button size="sm" variant="primary" (click)="submitCreateRequestAccess()">Send request</mb-button>
+        </div>
+      </mb-modal>
+
+      <mb-modal
+        [open]="createCloseConfirmOpen()"
+        title="Discard changes?"
+        (closed)="cancelCloseCreateModal()"
+        [hasFooter]="true">
+        <p>Discarding now will remove any unsaved changes.</p>
+        <div mbModalFooter>
+          <mb-button size="sm" variant="tertiary" (click)="cancelCloseCreateModal()">Keep editing</mb-button>
+          <mb-button size="sm" variant="danger" (click)="confirmCloseCreateModal()">Discard changes</mb-button>
+        </div>
       </mb-modal>
 
       <mb-modal
@@ -1290,6 +1379,9 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
   `
 })
 export class StudentsListComponent implements OnInit {
+  @ViewChild(StudentFormComponent) studentForm?: StudentFormComponent;
+  @ViewChild(MbSplitButtonComponent) addStudentButton?: MbSplitButtonComponent;
+
   constructor(
     private readonly studentsService: StudentService,
     private readonly router: Router,
@@ -1393,6 +1485,10 @@ export class StudentsListComponent implements OnInit {
   ];
   visibleDetailTabs = computed(() => this.detailTabs.filter((tab) => this.isDetailTabVisible(tab)));
   createModalOpen = signal(false);
+  createCloseConfirmOpen = signal(false);
+  createRequestAccessOpen = signal(false);
+  createRequestAccessReason = '';
+  createLockOpen = signal(false);
   bulkArchiveOpen = signal(false);
   bulkImpactLoading = signal(false);
   bulkImpactError = signal<string | null>(null);
@@ -1450,6 +1546,28 @@ export class StudentsListComponent implements OnInit {
     reset: 'Reset',
     saveDefault: 'Save as default',
   };
+
+  isCreateLocked = computed(() => {
+    if (!this.entitlements.isEnabled(MODULE_KEYS.STUDENTS)) {
+      return true;
+    }
+    return !this.rbac.can(PERMISSIONS.students.create);
+  });
+
+  createLockReason = computed<LockReason | null>(() => {
+    if (!this.entitlements.isEnabled(MODULE_KEYS.STUDENTS)) {
+      return 'NOT_IN_PLAN';
+    }
+    if (!this.rbac.can(PERMISSIONS.students.create)) {
+      return 'INSUFFICIENT_ROLE_PERMISSIONS';
+    }
+    return null;
+  });
+
+  createLockContext = computed(() => ({
+    moduleName: 'Students',
+    isBillingAdmin: this.rbac.can(PERMISSIONS.setup.write),
+  }));
 
   guardianRelationshipOptions: MbSelectOption[] = [
     { label: 'Father', value: RelationshipType.FATHER },
@@ -2897,10 +3015,130 @@ export class StudentsListComponent implements OnInit {
   }
 
   closeCreateModal(): void {
+    if (this.isCreateDirty()) {
+      this.createCloseConfirmOpen.set(true);
+      return;
+    }
     this.createModalOpen.set(false);
+    this.focusAddStudentButton();
+  }
+
+  confirmCloseCreateModal(): void {
+    this.createCloseConfirmOpen.set(false);
+    this.createModalOpen.set(false);
+    this.focusAddStudentButton();
+  }
+
+  cancelCloseCreateModal(): void {
+    this.createCloseConfirmOpen.set(false);
+  }
+
+  submitCreateStudent(saveAndNew: boolean = false): void {
+    void this.studentForm?.submit(saveAndNew);
+  }
+
+  handleStudentCreated(student: Student): void {
+    this.createModalOpen.set(false);
+    this.createCloseConfirmOpen.set(false);
+    this.loadStudents();
+    this.selectStudent(student);
+    this.openDetailDrawer();
+  }
+
+  handleStudentCreatedAndContinue(_student: Student): void {
+    this.loadStudents();
+    this.toast.success('Student created.');
+  }
+
+  closeCreateRequestAccess(): void {
+    this.createRequestAccessOpen.set(false);
+  }
+
+  submitCreateRequestAccess(): void {
+    this.toast.success('Request sent.');
+    this.createRequestAccessReason = '';
+    this.closeCreateRequestAccess();
+  }
+
+  openStudentFromCreate(studentId: string): void {
+    if (!studentId) {
+      return;
+    }
+    this.createModalOpen.set(false);
+    this.createCloseConfirmOpen.set(false);
+    this.openStudentById(studentId);
+  }
+
+  openStudentById(studentId: string): void {
+    this.selectedStudentId.set(studentId);
+    this.selectedStudentDetail.set(null);
+    this.detailDrawerOpen.set(true);
+    this.detailLoading.set(true);
+    this.activityItems.set([]);
+    this.activityPage.set(1);
+    this.loadSelectedStudentDetail(studentId);
+    this.loadActivity(true);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { studentId },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  private focusAddStudentButton(): void {
+    const root = this.addStudentButton?.root?.nativeElement;
+    const button = root?.querySelector('button');
+    button?.focus();
+  }
+
+  isCreateDirty(): boolean {
+    const form = this.studentForm;
+    if (!form) return false;
+    return Boolean(
+      form.personalInfoForm?.dirty
+      || form.enrollmentForm?.dirty
+      || form.guardiansForm?.dirty
+      || form.medicalForm?.dirty
+    );
   }
 
   openImport(): void {
+  }
+
+  toggleCreateLock(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.createLockOpen.set(!this.createLockOpen());
+  }
+
+  createLockHint(): string {
+    const reason = this.createLockReason();
+    if (reason === 'NOT_IN_PLAN') {
+      return 'Requires a higher plan';
+    }
+    if (reason === 'INSUFFICIENT_ROLE_PERMISSIONS') {
+      return 'You do not have permission';
+    }
+    return '';
+  }
+
+  handleCreateLockAction(action: LockCtaType): void {
+    this.createLockOpen.set(false);
+    if (action === 'view_plans' || action === 'request_change') {
+      this.router.navigate(['/setup/plan-entitlements']);
+      return;
+    }
+    if (action === 'view_permissions') {
+      this.toast.success('Ask an administrator for access.');
+      return;
+    }
+    if (action === 'request_access') {
+      this.createRequestAccessOpen.set(true);
+      return;
+    }
+    if (action === 'copy_details') {
+      this.copyToClipboard('Students: Create student');
+    }
   }
 
   exportStudents(): void {

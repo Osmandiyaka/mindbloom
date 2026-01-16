@@ -1,23 +1,40 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { StudentService } from '../../../../../core/services/student.service';
 import { Student, Gender, BloodGroup, RelationshipType } from '../../../../../core/models/student.model';
+import { RbacService } from '../../../../../core/rbac/rbac.service';
+import { PERMISSIONS } from '../../../../../core/rbac/permission.constants';
 import { TenantService, Tenant } from '../../../../../core/services/tenant.service';
 import { TenantSettingsService } from '../../../../../core/services/tenant-settings.service';
 import { IconRegistryService } from '../../../../../shared/services/icon-registry.service';
 import { SchoolContextService } from '../../../../../core/school/school-context.service';
 import { MbClassStatusSelection, MbClassStatusSelectorComponent } from '../../../../../shared/components/class-status-selector/class-status-selector.component';
+import { MbButtonComponent, MbCheckboxComponent, MbInputComponent, MbSelectComponent, MbSelectOption, MbTextareaComponent } from '@mindbloom/ui';
 
 @Component({
     selector: 'app-student-form',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, MbClassStatusSelectorComponent],
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        MbClassStatusSelectorComponent,
+        MbInputComponent,
+        MbSelectComponent,
+        MbTextareaComponent,
+        MbButtonComponent,
+        MbCheckboxComponent
+    ],
     templateUrl: './student-form.component.html',
     styleUrls: ['./student-form.component.scss']
 })
 export class StudentFormComponent implements OnInit {
+    @Input() embedded = false;
+    @Output() saved = new EventEmitter<Student>();
+    @Output() savedAndNew = new EventEmitter<Student>();
+    @Output() viewStudent = new EventEmitter<string>();
+
     currentStep = signal(1);
     totalSteps = 6;
     isEditMode = signal(false);
@@ -25,12 +42,35 @@ export class StudentFormComponent implements OnInit {
     loading = signal(false);
     submitting = signal(false);
     error = signal<string | null>(null);
+    submitAttempted = signal(false);
+    saveNotice = signal<string | null>(null);
     photoPreview = signal<string | null>(null);
     photoFile: File | null = null;
     templateSettings: Tenant['idTemplates'] | null = null;
     schoolId = signal<string | null>(null);
     selectedClassId = signal<string | null>(null);
     selectedSectionId = signal<string | null>(null);
+    studentSchema = signal<Record<string, boolean> | null>(null);
+    academicYearOptions: MbSelectOption[] = [];
+    academicYearLoading = signal(true);
+    guardianEnabled = signal(true);
+    guardianRequired = signal(false);
+    guardianRelationshipsLoading = signal(false);
+    guardianRelationshipOptions = signal<MbSelectOption[]>([]);
+    duplicateMatches = signal<Student[]>([]);
+    duplicateLoading = signal(false);
+    duplicateError = signal<string | null>(null);
+    guardianRelationshipSelectOptions = computed(() => {
+        const options = this.guardianRelationshipOptions();
+        return options.length ? options : this.relationshipOptions;
+    });
+    canManageEnrollment = computed(() => this.rbac.can(PERMISSIONS.students.write));
+    canManageGuardians = computed(() => this.rbac.can(PERMISSIONS.students.write));
+    schoolOptions = computed(() => this.schoolContext.schools().map((school) => ({
+        label: school.name,
+        value: school.id
+    })));
+    showSchoolSelector = computed(() => this.schoolOptions().length > 1);
 
     // Enums for templates
     Gender = Gender;
@@ -41,6 +81,19 @@ export class StudentFormComponent implements OnInit {
     academicYears: string[] = ['2024-2025', '2025-2026', '2026-2027'];
     classes: string[] = ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'];
     sections: string[] = ['A', 'B', 'C', 'D'];
+    genderOptions: MbSelectOption[] = [
+        { label: 'Male', value: Gender.MALE },
+        { label: 'Female', value: Gender.FEMALE },
+        { label: 'Other', value: Gender.OTHER }
+    ];
+    relationshipOptions: MbSelectOption[] = [
+        { label: 'Father', value: RelationshipType.FATHER },
+        { label: 'Mother', value: RelationshipType.MOTHER },
+        { label: 'Guardian', value: RelationshipType.GUARDIAN },
+        { label: 'Sibling', value: RelationshipType.SIBLING },
+        { label: 'Grandparent', value: RelationshipType.GRANDPARENT },
+        { label: 'Other', value: RelationshipType.OTHER }
+    ];
 
     // Form groups
     personalInfoForm!: FormGroup;
@@ -56,12 +109,17 @@ export class StudentFormComponent implements OnInit {
         private tenantService: TenantService,
         private tenantSettingsService: TenantSettingsService,
         private schoolContext: SchoolContextService,
+        private rbac: RbacService,
         public iconRegistry: IconRegistryService,
     ) {
         this.initializeForms();
     }
 
     ngOnInit(): void {
+        const activeSchool = this.schoolContext.activeSchool();
+        if (activeSchool?.id) {
+            this.schoolId.set(activeSchool.id);
+        }
         const id = this.route.snapshot.paramMap.get('id');
         if (id && id !== 'new') {
             this.isEditMode.set(true);
@@ -69,16 +127,50 @@ export class StudentFormComponent implements OnInit {
             this.loadStudent(id);
         } else {
             // Add one guardian by default
-            this.addGuardian();
+            if (this.guardianEnabled()) {
+                this.addGuardian();
+            }
         }
         // hydrate template settings from cached tenant or API
         this.templateSettings = this.tenantService.getCurrentTenantValue()?.idTemplates || null;
-        if (!this.templateSettings) {
+        const tenantSettings = this.tenantService.getCurrentTenantValue();
+        if (tenantSettings?.extras?.['studentSchema']) {
+            this.applyStudentSchema(tenantSettings.extras['studentSchema']);
+        }
+        if (tenantSettings?.extras?.['guardianRequired']) {
+            this.guardianRequired.set(Boolean(tenantSettings.extras['guardianRequired']));
+            this.guardianEnabled.set(Boolean(tenantSettings.extras['guardianRequired']));
+        }
+        if (tenantSettings?.academicYear) {
+            this.setAcademicYearOptions(this.buildAcademicYearOptions(tenantSettings.academicYear));
+        }
+        if (!this.templateSettings || !this.studentSchema()) {
             this.tenantSettingsService.getSettings().subscribe({
-                next: (tenant) => this.templateSettings = tenant.idTemplates || null,
-                error: () => { /* ignore */ }
+                next: (tenant) => {
+                    this.templateSettings = tenant.idTemplates || null;
+                    if (tenant.extras?.['studentSchema']) {
+                        this.applyStudentSchema(tenant.extras['studentSchema']);
+                    }
+                    if (tenant.extras?.['guardianRequired']) {
+                        this.guardianRequired.set(Boolean(tenant.extras['guardianRequired']));
+                        this.guardianEnabled.set(Boolean(tenant.extras['guardianRequired']));
+                    }
+                    if (tenant.academicYear) {
+                        this.setAcademicYearOptions(this.buildAcademicYearOptions(tenant.academicYear));
+                    }
+                    this.academicYearLoading.set(false);
+                },
+                error: () => {
+                    this.academicYearLoading.set(false);
+                }
             });
         }
+        if (this.academicYearOptions.length) {
+            this.academicYearLoading.set(false);
+        }
+        this.loadGuardianRelationships();
+        this.syncGuardianValidators();
+        this.ensureEnrollmentDefaults();
     }
 
     private get currentTenant(): Tenant | null {
@@ -119,11 +211,11 @@ export class StudentFormComponent implements OnInit {
     initializeForms(): void {
         // Personal Information
         this.personalInfoForm = this.fb.group({
-            firstName: ['', Validators.required],
-            lastName: ['', Validators.required],
+            firstName: [''],
+            lastName: [''],
             middleName: [''],
-            dateOfBirth: ['', Validators.required],
-            gender: ['', Validators.required],
+            dateOfBirth: [''],
+            gender: [''],
             nationality: [''],
             religion: [''],
             caste: [''],
@@ -173,6 +265,113 @@ export class StudentFormComponent implements OnInit {
                 insuranceNumber: ['']
             })
         });
+    }
+
+    setSchoolId(value: string | null): void {
+        this.schoolId.set(value);
+    }
+
+    handleSchoolChange(value: string | null): void {
+        this.setSchoolId(value);
+        this.onDuplicateFieldBlur();
+    }
+
+    private ensureEnrollmentDefaults(): void {
+        const enrollmentGroup = this.enrollmentForm.get('enrollment') as FormGroup;
+        if (!enrollmentGroup.get('admissionDate')?.value) {
+            enrollmentGroup.patchValue({ admissionDate: new Date().toISOString().slice(0, 10) });
+        }
+    }
+
+    private buildAcademicYearOptions(academicYear: Tenant['academicYear']): MbSelectOption[] {
+        if (!academicYear) return [];
+        const name = academicYear.name
+            || this.formatAcademicYearRange(academicYear.start, academicYear.end);
+        return name ? [{ label: name, value: name }] : [];
+    }
+
+    private formatAcademicYearRange(start?: string | Date, end?: string | Date): string | null {
+        if (!start || !end) return null;
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+            return null;
+        }
+        return `${startDate.getFullYear()}-${endDate.getFullYear()}`;
+    }
+
+    private setAcademicYearOptions(options: MbSelectOption[]): void {
+        this.academicYearOptions = options;
+        this.academicYearLoading.set(false);
+    }
+
+    private loadGuardianRelationships(): void {
+        this.guardianRelationshipsLoading.set(true);
+        this.studentService.getGuardianRelationships().subscribe({
+            next: (options) => {
+                const normalized = options.map((option) => ({
+                    label: option.label,
+                    value: option.value
+                }));
+                this.guardianRelationshipOptions.set(normalized);
+                this.guardianRelationshipsLoading.set(false);
+            },
+            error: () => {
+                this.guardianRelationshipOptions.set([]);
+                this.guardianRelationshipsLoading.set(false);
+            }
+        });
+    }
+
+    applyStudentSchema(schema: Record<string, boolean>): void {
+        this.studentSchema.set(schema);
+        this.applySchemaValidators();
+    }
+
+    applySchemaValidators(): void {
+        const required = this.studentSchema();
+        if (!required) {
+            return;
+        }
+        this.setRequiredValidator(this.personalInfoForm, 'firstName', required['firstName']);
+        this.setRequiredValidator(this.personalInfoForm, 'lastName', required['lastName']);
+        this.setRequiredValidator(this.personalInfoForm, 'dateOfBirth', required['dateOfBirth']);
+        this.setRequiredValidator(this.personalInfoForm, 'gender', required['gender']);
+        this.setRequiredValidator(this.personalInfoForm, 'email', required['email']);
+        this.setRequiredValidator(this.personalInfoForm, 'phone', required['phone']);
+    }
+
+    private setRequiredValidator(form: FormGroup, controlName: string, isRequired?: boolean): void {
+        const control = form.get(controlName);
+        if (!control) return;
+        const validators = control.validator ? [control.validator] : [];
+        if (isRequired) {
+            control.setValidators([Validators.required, ...validators]);
+        } else {
+            control.setValidators(validators);
+        }
+        control.updateValueAndValidity({ emitEvent: false });
+    }
+
+    isRequiredField(key: string): boolean {
+        return Boolean(this.studentSchema()?.[key]);
+    }
+
+    isFieldInvalid(form: FormGroup, controlName: string): boolean {
+        const control = form.get(controlName);
+        return !!control && control.invalid && (control.touched || this.submitAttempted());
+    }
+
+    fieldError(form: FormGroup, controlName: string, label: string): string {
+        const control = form.get(controlName);
+        if (!control || !control.errors) return '';
+        if (control.errors['required']) {
+            return `${label} is required`;
+        }
+        if (control.errors['email']) {
+            return 'Enter a valid email';
+        }
+        return `${label} is invalid`;
     }
 
     loadStudent(id: string): void {
@@ -289,12 +488,14 @@ export class StudentFormComponent implements OnInit {
         });
 
         this.guardians.push(guardianGroup);
+        this.syncGuardianValidators();
     }
 
     removeGuardian(index: number): void {
         if (this.guardians.length > 1) {
             this.guardians.removeAt(index);
         }
+        this.syncGuardianValidators();
     }
 
     copyStudentAddress(index: number): void {
@@ -314,6 +515,86 @@ export class StudentFormComponent implements OnInit {
         this.guardians.controls.forEach((control, i) => {
             control.get('isPrimary')?.setValue(i === index);
         });
+    }
+
+    setGuardianEnabled(value: boolean): void {
+        if (!this.canManageGuardians()) {
+            this.guardianEnabled.set(false);
+            this.syncGuardianValidators();
+            return;
+        }
+        if (this.guardianRequired()) {
+            this.guardianEnabled.set(true);
+            return;
+        }
+        this.guardianEnabled.set(value);
+        if (!value) {
+            this.guardians.clear();
+        } else if (!this.guardians.length) {
+            this.addGuardian();
+        }
+        this.syncGuardianValidators();
+    }
+
+    private syncGuardianValidators(): void {
+        const guardiansArray = this.guardians;
+        if (!this.guardianEnabled()) {
+            guardiansArray.clearValidators();
+            guardiansArray.controls.forEach((control) => {
+                control.get('name')?.clearValidators();
+                control.get('relationship')?.clearValidators();
+                control.get('phone')?.clearValidators();
+            });
+            guardiansArray.updateValueAndValidity({ emitEvent: false });
+            return;
+        }
+        guardiansArray.setValidators(Validators.required);
+        guardiansArray.controls.forEach((control) => {
+            control.get('name')?.setValidators(Validators.required);
+            control.get('relationship')?.setValidators(Validators.required);
+            control.get('phone')?.setValidators(Validators.required);
+        });
+        guardiansArray.updateValueAndValidity({ emitEvent: false });
+    }
+
+    onDuplicateFieldBlur(): void {
+        const firstName = this.personalInfoForm.get('firstName')?.value?.trim();
+        const lastName = this.personalInfoForm.get('lastName')?.value?.trim();
+        const dateOfBirth = this.personalInfoForm.get('dateOfBirth')?.value;
+        const academicYear = this.enrollmentForm.get('enrollment.academicYear')?.value;
+        const schoolId = this.schoolId() || this.schoolContext.activeSchool()?.id || this.currentTenant?.metadata?.['schoolId'];
+        if (!firstName || !lastName || !dateOfBirth || !schoolId) {
+            this.clearDuplicates();
+            return;
+        }
+        this.duplicateLoading.set(true);
+        this.duplicateError.set(null);
+        this.studentService.checkDuplicates({
+            firstName,
+            lastName,
+            dateOfBirth,
+            schoolId,
+            academicYear
+        }).subscribe({
+            next: (students) => {
+                this.duplicateMatches.set(students.slice(0, 5));
+                this.duplicateLoading.set(false);
+            },
+            error: () => {
+                this.duplicateError.set('Could not check duplicates.');
+                this.duplicateLoading.set(false);
+            }
+        });
+    }
+
+    clearDuplicates(): void {
+        this.duplicateMatches.set([]);
+        this.duplicateError.set(null);
+        this.duplicateLoading.set(false);
+    }
+
+    openDuplicate(student: Student): void {
+        this.viewStudent.emit(student.id);
     }
 
     // Array Items Management
@@ -373,6 +654,9 @@ export class StudentFormComponent implements OnInit {
                 }
                 return true;
             case 4:
+                if (!this.guardianEnabled()) {
+                    return true;
+                }
                 // Check if there are any guardians
                 if (this.guardians.length === 0) {
                     this.error.set('Please add at least one guardian');
@@ -431,8 +715,15 @@ export class StudentFormComponent implements OnInit {
         }
 
         // Validate all forms
-        if (this.personalInfoForm.invalid || this.enrollmentForm.invalid || this.guardiansForm.invalid) {
-            alert('Please fill in all required fields');
+        this.submitAttempted.set(true);
+        const guardiansInvalid = this.guardianEnabled() && this.guardiansForm.invalid;
+        if (this.personalInfoForm.invalid || this.enrollmentForm.invalid || guardiansInvalid) {
+            this.error.set('Please fix the highlighted fields.');
+            this.markFormGroupTouched(this.personalInfoForm);
+            this.markFormGroupTouched(this.enrollmentForm);
+            if (this.guardianEnabled()) {
+                this.markFormGroupTouched(this.guardiansForm);
+            }
             return;
         }
 
@@ -440,7 +731,7 @@ export class StudentFormComponent implements OnInit {
         this.error.set(null);
 
         // Transform guardians data to match backend expectations
-        const transformedGuardians = this.guardians.value.map((g: any) => {
+        const transformedGuardians = this.guardianEnabled() ? this.guardians.value.map((g: any) => {
             // Remove id field if present
             const { id, _id, ...guardianData } = g;
 
@@ -454,7 +745,7 @@ export class StudentFormComponent implements OnInit {
             );
 
             const guardian: any = {
-                name: `${guardianData.firstName} ${guardianData.lastName}`.trim(),
+                name: guardianData.name?.trim(),
                 relationship: guardianData.relationship,
                 phone: guardianData.phone,
                 isPrimary: guardianData.isPrimary,
@@ -467,7 +758,7 @@ export class StudentFormComponent implements OnInit {
             if (hasGuardianAddress) guardian.address = guardianData.address;
 
             return guardian;
-        });
+        }) : [];
 
         // Get personal info and exclude id fields
         const { id, _id, ...personalInfo } = this.personalInfoForm.value;
@@ -491,7 +782,7 @@ export class StudentFormComponent implements OnInit {
             dateOfBirth: personalInfo.dateOfBirth,
             gender: personalInfo.gender,
             enrollment: enrollmentData,
-            guardians: transformedGuardians,
+            guardians: transformedGuardians.length ? transformedGuardians : undefined,
         };
 
         // Only add optional personal info fields if they have values
@@ -534,8 +825,17 @@ export class StudentFormComponent implements OnInit {
             : this.studentService.createStudent(studentData);
 
         operation.subscribe({
-            next: () => {
+            next: (savedStudent) => {
                 this.submitting.set(false);
+                if (this.embedded) {
+                    if (saveAndNew) {
+                        this.savedAndNew.emit(savedStudent);
+                        this.resetForAnotherStudent();
+                        return;
+                    }
+                    this.saved.emit(savedStudent);
+                    return;
+                }
                 if (saveAndNew) {
                     // Reset all forms for new entry
                     this.initializeForms();
@@ -555,6 +855,33 @@ export class StudentFormComponent implements OnInit {
                 console.error('Error message:', err.message);
             }
         });
+    }
+
+    private resetForAnotherStudent(): void {
+        const retainedSchoolId = this.schoolId();
+        const retainedYear = this.enrollmentForm.get('enrollment.academicYear')?.value;
+        const guardianOn = this.guardianEnabled();
+        this.initializeForms();
+        this.submitAttempted.set(false);
+        this.error.set(null);
+        this.saveNotice.set('Student created.');
+        this.clearDuplicates();
+        this.applySchemaValidators();
+        this.syncGuardianValidators();
+        this.ensureEnrollmentDefaults();
+        if (guardianOn) {
+            this.guardians.clear();
+            this.addGuardian();
+        }
+        if (retainedSchoolId) {
+            this.schoolId.set(retainedSchoolId);
+        }
+        if (retainedYear) {
+            this.enrollmentForm.patchValue({
+                enrollment: { academicYear: retainedYear }
+            });
+        }
+        setTimeout(() => this.saveNotice.set(null), 3000);
     }
 
     cancel(): void {

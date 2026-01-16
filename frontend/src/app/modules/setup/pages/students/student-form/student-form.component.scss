@@ -160,6 +160,225 @@
     margin-top: 0.35rem;
 }
 
+// ========================================
+// CREATE MODAL FORM LAYOUT
+// ========================================
+
+.student-form {
+    display: grid;
+    gap: 16px;
+}
+
+.form-error {
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    background: rgba(239, 68, 68, 0.08);
+    color: #b91c1c;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+.form-success {
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.1);
+    color: #047857;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.form-column {
+    display: grid;
+    gap: 16px;
+}
+
+.form-section {
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: var(--color-surface, #ffffff);
+    border-radius: 12px;
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 14px;
+}
+
+.section-header p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.section-body {
+    display: grid;
+    gap: 12px;
+}
+
+.field-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.field-grid.two-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-field {
+    display: grid;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+:host ::ng-deep .form-field mb-input,
+:host ::ng-deep .form-field mb-select,
+:host ::ng-deep .form-field mb-textarea {
+    width: 100%;
+    display: block;
+}
+
+.required {
+    color: #b91c1c;
+}
+
+.field-error {
+    font-size: 11px;
+    color: #b91c1c;
+    min-height: 12px;
+}
+
+.guardian-actions {
+    margin-top: 8px;
+}
+
+.extra-guardian {
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
+    margin-top: 12px;
+    padding-top: 12px;
+    display: grid;
+    gap: 8px;
+}
+
+.extra-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.guardian-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.guardian-required {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    background: rgba(148, 163, 184, 0.15);
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+
+.guardian-empty {
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.permission-note {
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.duplicate-panel {
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: color-mix(in srgb, var(--color-primary, #2563eb) 6%, transparent);
+    display: grid;
+    gap: 12px;
+
+    h4 {
+        margin: 0;
+        font-size: 13px;
+        color: var(--color-text-primary);
+    }
+
+    p {
+        margin: 4px 0 0;
+        font-size: 11px;
+        color: var(--color-text-secondary);
+    }
+}
+
+.duplicate-panel.is-loading,
+.duplicate-panel.is-error {
+    background: rgba(148, 163, 184, 0.12);
+}
+
+.duplicate-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.duplicate-list {
+    display: grid;
+    gap: 8px;
+}
+
+.duplicate-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--color-surface, #ffffff);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.duplicate-meta {
+    display: grid;
+    gap: 2px;
+}
+
+.duplicate-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.duplicate-sub {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+}
+
+@media (max-width: 900px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .field-grid.two-cols {
+        grid-template-columns: 1fr;
+    }
+}
+
 // Explicit modal overrides to avoid soft-glass tint in dark mode
 :host-context([data-theme="mindbloom-dark"]) {
     .modal,

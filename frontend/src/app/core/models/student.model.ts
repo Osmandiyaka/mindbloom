@@ -53,6 +53,11 @@ export interface Guardian {
     isEmergencyContact: boolean;
 }
 
+export interface GuardianRelationshipOption {
+    label: string;
+    value: string;
+}
+
 export interface MedicalInfo {
     bloodGroup?: BloodGroup;
     allergies?: string[];
@@ -231,7 +236,7 @@ export interface CreateStudentDto {
     email?: string;
     phone?: string;
     address?: Address;
-    guardians: Omit<Guardian, 'id'>[];
+    guardians?: Omit<Guardian, 'id'>[];
     medicalInfo?: MedicalInfo;
     enrollment: EnrollmentInfo;
     photo?: string;

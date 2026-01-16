@@ -1,826 +1,317 @@
-<div class="wizard-container">
-    <!-- Left Sidebar - Progress Steps -->
-    <div class="progress-steps">
+<div class="student-form">
+    @if (error()) {
+    <div class="form-error">{{ error() }}</div>
+    }
+    @if (saveNotice()) {
+    <div class="form-success">{{ saveNotice() }}</div>
+    }
 
-        <div class="step" [class.completed]="currentStep() > 1" [class.active]="currentStep() === 1">
-            <div class="step-circle">1</div>
-            <div class="step-info">
-                <div class="step-title">Personal Info</div>
-                <div class="step-status">{{ currentStep() > 1 ? 'Completed' : currentStep() === 1 ? 'In Progress' :
-                    'Pending' }}</div>
+    <div class="form-grid">
+        <div class="form-column">
+            <section class="form-section">
+                <div class="section-header">
+                    <h3>Student identity</h3>
+                    <p>Core identity details.</p>
+                </div>
+                <div class="section-body" [formGroup]="personalInfoForm">
+                    <div class="field-grid two-cols">
+                        <label class="form-field">
+                            First name <span class="required" *ngIf="isRequiredField('firstName')">*</span>
+                            <mb-input
+                                formControlName="firstName"
+                                [invalid]="isFieldInvalid(personalInfoForm, 'firstName')"
+                                [autofocus]="true"
+                                (blurEvent)="onDuplicateFieldBlur()">
+                            </mb-input>
+                            <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'firstName')">
+                                {{ fieldError(personalInfoForm, 'firstName', 'First name') }}
+                            </span>
+                        </label>
+                        <label class="form-field">
+                            Last name <span class="required" *ngIf="isRequiredField('lastName')">*</span>
+                            <mb-input
+                                formControlName="lastName"
+                                [invalid]="isFieldInvalid(personalInfoForm, 'lastName')"
+                                (blurEvent)="onDuplicateFieldBlur()">
+                            </mb-input>
+                            <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'lastName')">
+                                {{ fieldError(personalInfoForm, 'lastName', 'Last name') }}
+                            </span>
+                        </label>
+                    </div>
+                    <div class="field-grid two-cols">
+                        <label class="form-field">
+                            Preferred name
+                            <mb-input formControlName="middleName"></mb-input>
+                        </label>
+                        <label class="form-field">
+                            Date of birth <span class="required" *ngIf="isRequiredField('dateOfBirth')">*</span>
+                            <mb-input
+                                type="date"
+                                formControlName="dateOfBirth"
+                                [invalid]="isFieldInvalid(personalInfoForm, 'dateOfBirth')"
+                                (blurEvent)="onDuplicateFieldBlur()">
+                            </mb-input>
+                            <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'dateOfBirth')">
+                                {{ fieldError(personalInfoForm, 'dateOfBirth', 'Date of birth') }}
+                            </span>
+                        </label>
+                    </div>
+                    <div class="field-grid two-cols">
+                        <label class="form-field">
+                            Gender <span class="required" *ngIf="isRequiredField('gender')">*</span>
+                            <mb-select
+                                placeholder="Select gender"
+                                [options]="genderOptions"
+                                formControlName="gender"
+                                [invalid]="isFieldInvalid(personalInfoForm, 'gender')">
+                            </mb-select>
+                            <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'gender')">
+                                {{ fieldError(personalInfoForm, 'gender', 'Gender') }}
+                            </span>
+                        </label>
+                        <label class="form-field">
+                            Email
+                            <mb-input type="email" formControlName="email" [invalid]="isFieldInvalid(personalInfoForm, 'email')"></mb-input>
+                            <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'email')">
+                                {{ fieldError(personalInfoForm, 'email', 'Email') }}
+                            </span>
+                        </label>
+                    </div>
+                    <div class="field-grid two-cols">
+                        <label class="form-field">
+                            Phone
+                            <mb-input type="tel" formControlName="phone" [invalid]="isFieldInvalid(personalInfoForm, 'phone')"></mb-input>
+                            <span class="field-error" *ngIf="isFieldInvalid(personalInfoForm, 'phone')">
+                                {{ fieldError(personalInfoForm, 'phone', 'Phone') }}
+                            </span>
+                        </label>
+                        <label class="form-field">
+                            Nationality
+                            <mb-input formControlName="nationality"></mb-input>
+                        </label>
+                    </div>
+                    <div formGroupName="address" class="field-grid two-cols">
+                        <label class="form-field">
+                            Street
+                            <mb-input formControlName="street"></mb-input>
+                        </label>
+                        <label class="form-field">
+                            City
+                            <mb-input formControlName="city"></mb-input>
+                        </label>
+                        <label class="form-field">
+                            State
+                            <mb-input formControlName="state"></mb-input>
+                        </label>
+                        <label class="form-field">
+                            Postal code
+                            <mb-input formControlName="postalCode"></mb-input>
+                        </label>
+                        <label class="form-field">
+                            Country
+                            <mb-input formControlName="country"></mb-input>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            @if (duplicateLoading()) {
+            <div class="duplicate-panel is-loading">
+                <p>Checking for possible duplicates…</p>
             </div>
-        </div>
-
-        <div class="step" [class.completed]="currentStep() > 2" [class.active]="currentStep() === 2">
-            <div class="step-circle">2</div>
-            <div class="step-info">
-                <div class="step-title">Address</div>
-                <div class="step-status">{{ currentStep() > 2 ? 'Completed' : currentStep() === 2 ? 'In Progress' :
-                    'Pending' }}</div>
+            } @else if (duplicateError()) {
+            <div class="duplicate-panel is-error">
+                <p>{{ duplicateError() }}</p>
             </div>
-        </div>
-
-        <div class="step" [class.completed]="currentStep() > 3" [class.active]="currentStep() === 3">
-            <div class="step-circle">3</div>
-            <div class="step-info">
-                <div class="step-title">Enrollment</div>
-                <div class="step-status">{{ currentStep() > 3 ? 'Completed' : currentStep() === 3 ? 'In Progress' :
-                    'Pending' }}</div>
-            </div>
-        </div>
-
-        <div class="step" [class.completed]="currentStep() > 4" [class.active]="currentStep() === 4">
-            <div class="step-circle">4</div>
-            <div class="step-info">
-                <div class="step-title">Guardians</div>
-                <div class="step-status">{{ currentStep() > 4 ? 'Completed' : currentStep() === 4 ? 'In Progress' :
-                    'Pending' }}</div>
-            </div>
-        </div>
-
-        <div class="step" [class.completed]="currentStep() > 5" [class.active]="currentStep() === 5">
-            <div class="step-circle">5</div>
-            <div class="step-info">
-                <div class="step-title">Medical Info</div>
-                <div class="step-status">{{ currentStep() > 5 ? 'Completed' : currentStep() === 5 ? 'In Progress' :
-                    'Pending' }}</div>
-            </div>
-        </div>
-
-        <div class="step" [class.completed]="currentStep() > 6" [class.active]="currentStep() === 6">
-            <div class="step-circle">6</div>
-            <div class="step-info">
-                <div class="step-title">Review</div>
-                <div class="step-status">{{ currentStep() > 6 ? 'Completed' : currentStep() === 6 ? 'In Progress' :
-                    'Pending' }}</div>
-            </div>
-        </div>
-
-        <div class="progress-bar">
-            <div class="progress-fill" [style.width.%]="(currentStep() / totalSteps) * 100"></div>
-        </div>
-        <div class="progress-text">{{ currentStep() }} of {{ totalSteps }} steps completed</div>
-    </div>
-
-    <!-- Right Content Area -->
-    <div class="wizard-content">
-        @if (error()) {
-        <div class="error-alert">
-            <span>{{ error() }}</span>
-        </div>
-        }
-
-        <div class="form-content">
-            <div class="content-with-sidebar">
-                <div class="main-form-area">
-                    <!-- Step 1: Personal Information -->
-                    @if (currentStep() === 1) {
-                    <form [formGroup]="personalInfoForm" class="wizard-form">
-                        <div class="form-row three-cols">
-                            <div class="form-field">
-                                <label>First Name <span class="required">*</span></label>
-                                <input type="text" formControlName="firstName" />
-                                @if (personalInfoForm.get('firstName')?.invalid &&
-                                personalInfoForm.get('firstName')?.touched) {
-                                <span class="field-error">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
-                                    </svg>
-                                    First name is required
-                                </span>
-                                }
-                            </div>
-
-                            <div class="form-field">
-                                <label>Middle Name</label>
-                                <input type="text" formControlName="middleName"
-                                    />
-                            </div>
-
-                            <div class="form-field">
-                                <label>Last Name <span class="required">*</span></label>
-                                <input type="text" formControlName="lastName" />
-                                @if (personalInfoForm.get('lastName')?.invalid &&
-                                personalInfoForm.get('lastName')?.touched) {
-                                <span class="field-error">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
-                                    </svg>
-                                    Last name is required
-                                </span>
-                                }
-                            </div>
+            } @else if (duplicateMatches().length) {
+            <div class="duplicate-panel">
+                <div class="duplicate-header">
+                    <div>
+                        <h4>Possible duplicates found</h4>
+                        <p>Review matches before creating a new record.</p>
+                    </div>
+                    <mb-button size="sm" variant="tertiary" (click)="clearDuplicates()">Create anyway</mb-button>
+                </div>
+                <div class="duplicate-list">
+                    <div class="duplicate-row" *ngFor="let match of duplicateMatches()">
+                        <div class="duplicate-meta">
+                            <span class="duplicate-name">{{ match.fullName }}</span>
+                            <span class="duplicate-sub">{{ match.enrollment.class }} {{ match.enrollment.section }} • {{ match.status }}</span>
                         </div>
+                        <mb-button size="sm" variant="tertiary" (click)="openDuplicate(match)">View student</mb-button>
+                    </div>
+                </div>
+            </div>
+            }
 
-                        <div class="form-row two-cols">
-                            <div class="form-field">
-                                <label>Email Address <span class="required">*</span></label>
-                                <input type="email" formControlName="email"
-                                    />
-                                @if (personalInfoForm.get('email')?.invalid && personalInfoForm.get('email')?.touched) {
-                                <span class="field-error">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
-                                    </svg>
-                                    Valid email is required
-                                </span>
-                                }
-                            </div>
+            <section class="form-section">
+                <div class="section-header">
+                    <h3>Identifiers</h3>
+                    <p>Record identifiers.</p>
+                </div>
+                <div class="section-body" [formGroup]="enrollmentForm">
+                    <div formGroupName="enrollment" class="field-grid two-cols">
+                        <label class="form-field">
+                            Admission number
+                            <mb-input formControlName="admissionNumber"></mb-input>
+                        </label>
+                        <label class="form-field">
+                            Roll number
+                            <mb-input formControlName="rollNumber"></mb-input>
+                        </label>
+                    </div>
+                </div>
+            </section>
+        </div>
 
-                            <div class="form-field">
-                                <label>Phone Number</label>
-                                <input type="tel" formControlName="phone"
-                                    />
-                            </div>
-                        </div>
-
-                        <div class="form-row three-cols">
-                            <div class="form-field">
-                                <label>Date of Birth <span class="required">*</span></label>
-                                <input type="date" formControlName="dateOfBirth" />
-                                @if (personalInfoForm.get('dateOfBirth')?.invalid &&
-                                personalInfoForm.get('dateOfBirth')?.touched) {
-                                <span class="field-error">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
-                                    </svg>
-                                    Date of birth is required
-                                </span>
-                                }
-                            </div>
-
-                            <div class="form-field">
-                                <label>Gender <span class="required">*</span></label>
-                                <select formControlName="gender">
-                                    <option value="">Select gender</option>
-                                    <option [value]="Gender.MALE">Male</option>
-                                    <option [value]="Gender.FEMALE">Female</option>
-                                    <option [value]="Gender.OTHER">Other</option>
-                                </select>
-                                @if (personalInfoForm.get('gender')?.invalid && personalInfoForm.get('gender')?.touched)
-                                {
-                                <span class="field-error">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
-                                    </svg>
-                                    Gender is required
-                                </span>
-                                }
-                            </div>
-
-                            <div class="form-field">
-                                <!-- spacer to keep grid alignment -->
-                            </div>
-                        </div>
-
-                        <div class="form-row two-cols">
-                            <div class="form-field">
-                                <label>Religion</label>
-                                <select formControlName="religion">
-                                    <option value="">Select religion</option>
-                                    <option value="Christianity">Christianity</option>
-                                    <option value="Islam">Islam</option>
-                                    <option value="Hinduism">Hinduism</option>
-                                    <option value="Buddhism">Buddhism</option>
-                                    <option value="Traditional">Traditional</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-                            <div class="form-field">
-                                <label>Nationality</label>
-                                <select formControlName="nationality">
-                                    <option value="">Select nationality</option>
-                                    <option value="Nigeria">Nigeria</option>
-                                    <option value="Ghana">Ghana</option>
-                                    <option value="Kenya">Kenya</option>
-                                    <option value="South Africa">South Africa</option>
-                                    <option value="United States">United States</option>
-                                    <option value="United Kingdom">United Kingdom</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-field full-width">
-                                <label>Notes</label>
-                                <textarea formControlName="notes" rows="2"
-                                   ></textarea>
-                            </div>
-                        </div>
-                    </form>
+        <div class="form-column">
+            <section class="form-section">
+                <div class="section-header">
+                    <h3>Enrollment</h3>
+                    <p>Current-year placement.</p>
+                </div>
+                <div class="section-body" [formGroup]="enrollmentForm">
+                    @if (!canManageEnrollment()) {
+                    <p class="permission-note">You do not have permission to edit enrollment.</p>
                     }
-
-                    <!-- Step 2: Address -->
-                    @if (currentStep() === 2) {
-                    <form [formGroup]="personalInfoForm" class="wizard-form">
-                        <div formGroupName="address" class="address-section">
-                            <div class="form-row">
-                                <div class="form-field full-width">
-                                    <label>Street Address</label>
-                                    <input type="text" formControlName="street" />
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>City</label>
-                                    <input type="text" formControlName="city" />
-                                </div>
-                                <div class="form-field">
-                                    <label>State/Province</label>
-                                    <input type="text" formControlName="state" />
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Postal Code</label>
-                                    <input type="text" formControlName="postalCode" />
-                                </div>
-                                <div class="form-field">
-                                    <label>Country</label>
-                                    <input type="text" formControlName="country" />
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                    }
-
-                    <!-- Step 3: Enrollment Information -->
-                    @if (currentStep() === 3) {
-                    <form [formGroup]="enrollmentForm" class="wizard-form">
-
-                        <div formGroupName="enrollment" class="enrollment-section">
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Admission Number <span class="required">*</span></label>
-                                    <div class="input-with-action">
-                                        <input type="text" formControlName="admissionNumber" />
-                                        <button type="button" class="btn primary small" (click)="generateAdmissionNumber()">
-                                            <span class="icon" [innerHTML]="iconRegistry.icon('sparkle')"></span>
-                                            Auto-generate
-                                        </button>
-                                    </div>
-                                    @if (enrollmentForm.get('enrollment.admissionNumber')?.invalid &&
-                                    enrollmentForm.get('enrollment.admissionNumber')?.touched) {
-                                    <span class="field-error">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
-                                        </svg>
-                                        Admission number is required
-                                    </span>
-                                    }
-                                </div>
-
-                                <div class="form-field">
-                                    <label>Admission Date <span class="required">*</span></label>
-                                    <input type="date" formControlName="admissionDate" />
-                                    @if (enrollmentForm.get('enrollment.admissionDate')?.invalid &&
-                                    enrollmentForm.get('enrollment.admissionDate')?.touched) {
-                                    <span class="field-error">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
-                                        </svg>
-                                        Admission date is required
-                                    </span>
-                                    }
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Academic Year <span class="required">*</span></label>
-                                    <select formControlName="academicYear">
-                                        <option value="">Select academic year</option>
-                                        <option *ngFor="let yr of academicYears" [value]="yr">{{ yr }}</option>
-                                    </select>
-                                    @if (enrollmentForm.get('enrollment.academicYear')?.invalid &&
-                                    enrollmentForm.get('enrollment.academicYear')?.touched) {
-                                    <span class="field-error">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
-                                        </svg>
-                                        Academic year is required
-                                    </span>
-                                    }
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-field full-width">
-                                    <mb-class-status-selector
-                                        [classId]="selectedClassId()"
-                                        [sectionId]="selectedSectionId()"
-                                        [showStatus]="false"
-                                        title="Class placement"
-                                        subtitle="Set class and section for enrollment."
-                                        (classIdChange)="selectedClassId.set($event)"
-                                        (sectionIdChange)="selectedSectionId.set($event)"
-                                        (selectionChange)="applyPlacement($event)"
-                                    ></mb-class-status-selector>
-                                    @if (enrollmentForm.get('enrollment.class')?.invalid &&
-                                    enrollmentForm.get('enrollment.class')?.touched) {
-                                    <span class="field-error">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <path d="M12 8v4m0 4h.01" stroke="white" stroke-width="2"></path>
-                                        </svg>
-                                        Class is required
-                                    </span>
-                                    }
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Roll Number</label>
-                                    <div class="input-with-action">
-                                        <input type="text" formControlName="rollNumber" />
-                                        <button type="button" class="btn primary small" (click)="generateRollNumber()">
-                                            <span class="icon" [innerHTML]="iconRegistry.icon('sparkle')"></span>
-                                            Auto-generate
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Previous School</label>
-                                    <input type="text" formControlName="previousSchool"
-                                        />
-                                </div>
-
-                                <div class="form-field">
-                                    <label>Previous Class</label>
-                                    <select formControlName="previousClass">
-                                        <option value="">Select previous class</option>
-                                        <option *ngFor="let c of classes" [value]="c">{{ c }}</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                    }
-
-                    <!-- Step 4: Guardians -->
-                    @if (currentStep() === 4) {
-                    <form [formGroup]="guardiansForm" class="wizard-form">
-                        <h2 class="form-heading">Guardian Information</h2>
-                        <p class="form-description">Add at least one guardian or parent</p>
-
-                        <div formArrayName="guardians">
-                            <ng-container *ngFor="let guardian of guardians.controls; let i = index">
-                                <div [formGroupName]="i" class="guardian-card">
-                                    <div class="card-header">
-                                        <h3>Guardian {{ i + 1 }}</h3>
-                                        <div class="card-actions">
-                                            @if (!guardian.get('isPrimary')?.value && guardians.length > 1) {
-                                            <button type="button" class="btn-text" (click)="setPrimaryGuardian(i)">
-                                                Set as Primary
-                                            </button>
-                                            }
-                                            @if (guardian.get('isPrimary')?.value) {
-                                            <span class="primary-badge">Primary</span>
-                                            }
-                                            @if (guardians.length > 1) {
-                                            <button type="button" class="btn-icon-danger" (click)="removeGuardian(i)">
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2">
-                                                    <path d="M18 6L6 18M6 6l12 12"></path>
-                                                </svg>
-                                            </button>
-                                            }
-                                            <button type="button" class="btn-text" (click)="copyStudentAddress(i)">
-                                                Copy Student Address
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-row">
-                                        <div class="form-field full-width">
-                                            <label>Full Name <span class="required">*</span></label>
-                                            <input type="text" formControlName="name" />
-                                        </div>
-                                    </div>
-
-                                    <div class="form-row three-cols">
-                                        <div class="form-field">
-                                            <label>Relationship <span class="required">*</span></label>
-                                            <select formControlName="relationship">
-                                                <option value="">Select relationship</option>
-                                                <option [value]="RelationshipType.FATHER">Father</option>
-                                                <option [value]="RelationshipType.MOTHER">Mother</option>
-                                                <option [value]="RelationshipType.GUARDIAN">Guardian</option>
-                                                <option [value]="RelationshipType.SIBLING">Sibling</option>
-                                                <option [value]="RelationshipType.GRANDPARENT">Grandparent</option>
-                                                <option [value]="RelationshipType.OTHER">Other</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="form-field">
-                                            <label>Phone <span class="required">*</span></label>
-                                            <input type="tel" formControlName="phone" placeholder="e.g. +234 801 234 5678" />
-                                        </div>
-
-                                        <div class="form-field">
-                                            <label>Email</label>
-                                            <input type="email" formControlName="email"
-                                                placeholder="guardian@email.com" />
-                                        </div>
-                                    </div>
-
-                                    <div formGroupName="address">
-                                        <div class="form-row">
-                                            <div class="form-field full-width">
-                                                <label>Street Address</label>
-                                                <input type="text" formControlName="street" />
-                                            </div>
-                                        </div>
-
-                                        <div class="form-row two-cols">
-                                            <div class="form-field">
-                                                <label>City</label>
-                                                <input type="text" formControlName="city" />
-                                            </div>
-                                            <div class="form-field">
-                                                <label>State/Province</label>
-                                                <input type="text" formControlName="state" />
-                                            </div>
-                                        </div>
-
-                                        <div class="form-row two-cols">
-                                            <div class="form-field">
-                                                <label>Postal Code</label>
-                                                <input type="text" formControlName="postalCode" />
-                                            </div>
-                                            <div class="form-field">
-                                                <label>Country</label>
-                                                <input type="text" formControlName="country" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-row two-cols">
-                                        <div class="form-field">
-                                            <label>Occupation</label>
-                                            <input type="text" formControlName="occupation" />
-                                        </div>
-                                        <div class="form-field tags-row">
-                                            <label>Status</label>
-                                            <div class="tag-toggle">
-                                                <button type="button" [class.active]="guardian.get('isPrimary')?.value" (click)="setPrimaryGuardian(i)">Primary</button>
-                                                <button type="button" [class.active]="guardian.get('isEmergencyContact')?.value" (click)="guardian.get('isEmergencyContact')?.setValue(!guardian.get('isEmergencyContact')?.value)">Emergency</button>
-                                            </div>
-                                            <small class="field-hint">Set primary or emergency contact</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </ng-container>
-                        </div>
-
-                        <button type="button" class="btn-add-guardian" (click)="addGuardian()">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M12 5v14m-7-7h14"></path>
-                            </svg>
-                            Add Another Guardian
-                        </button>
-                    </form>
-                    }
-
-                    <!-- Step 5: Medical Information & Review -->
-                    @if (currentStep() === 5) {
-                    <form [formGroup]="medicalForm" class="wizard-form">
-                        <h2 class="form-heading">Medical Information</h2>
-                        <p class="form-description">Health and medical details (optional)</p>
-
-                        <div formGroupName="medicalInfo">
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Blood Group</label>
-                                    <select formControlName="bloodGroup">
-                                        <option value="">Select blood group</option>
-                                        <option [value]="BloodGroup.A_POSITIVE">A+</option>
-                                        <option [value]="BloodGroup.A_NEGATIVE">A-</option>
-                                        <option [value]="BloodGroup.B_POSITIVE">B+</option>
-                                        <option [value]="BloodGroup.B_NEGATIVE">B-</option>
-                                        <option [value]="BloodGroup.AB_POSITIVE">AB+</option>
-                                        <option [value]="BloodGroup.AB_NEGATIVE">AB-</option>
-                                        <option [value]="BloodGroup.O_POSITIVE">O+</option>
-                                        <option [value]="BloodGroup.O_NEGATIVE">O-</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Doctor Name</label>
-                                    <input type="text" formControlName="doctorName" />
-                                </div>
-
-                                <div class="form-field">
-                                    <label>Doctor Phone</label>
-                                    <input type="tel" formControlName="doctorPhone"
-                                        />
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label>Insurance Provider</label>
-                                    <input type="text" formControlName="insuranceProvider"
-                                        />
-                                </div>
-
-                                <div class="form-field">
-                                    <label>Insurance Number</label>
-                                    <input type="text" formControlName="insuranceNumber"
-                                        />
-                                </div>
-                            </div>
-
-                            <div class="medical-lists">
-                                <div class="medical-list-section">
-                                    <label>Allergies</label>
-                                    <div class="list-items">
-                                        @for (item of getArrayItems('allergies').controls; let i = $index; track i) {
-                                        <div class="list-item">
-                                            <input type="text" [formControl]="$any(item)" />
-                                            <button type="button" class="btn-remove-item"
-                                                (click)="removeArrayItem('allergies', i)">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2">
-                                                    <path d="M18 6L6 18M6 6l12 12"></path>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        }
-                                    </div>
-                                    <button type="button" class="btn-add-item" (click)="addArrayItem('allergies')">+ Add
-                                        Allergy</button>
-                                </div>
-
-                                <div class="medical-list-section">
-                                    <label>Medical Conditions</label>
-                                    <div class="list-items">
-                                        @for (item of getArrayItems('medicalConditions').controls; let i = $index; track
-                                        i) {
-                                        <div class="list-item">
-                                            <input type="text" [formControl]="$any(item)"
-                                                />
-                                            <button type="button" class="btn-remove-item"
-                                                (click)="removeArrayItem('medicalConditions', i)">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2">
-                                                    <path d="M18 6L6 18M6 6l12 12"></path>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        }
-                                    </div>
-                                    <button type="button" class="btn-add-item"
-                                        (click)="addArrayItem('medicalConditions')">+ Add
-                                        Condition</button>
-                                </div>
-
-                                <div class="medical-list-section">
-                                    <label>Current Medications</label>
-                                    <div class="list-items">
-                                        @for (item of getArrayItems('medications').controls; let i = $index; track i) {
-                                        <div class="list-item">
-                                            <input type="text" [formControl]="$any(item)"
-                                                />
-                                            <button type="button" class="btn-remove-item"
-                                                (click)="removeArrayItem('medications', i)">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2">
-                                                    <path d="M18 6L6 18M6 6l12 12"></path>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        }
-                                    </div>
-                                    <button type="button" class="btn-add-item" (click)="addArrayItem('medications')">+
-                                        Add
-                                        Medication</button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                    }
-
-                    <!-- Step 6: Review -->
-                    @if (currentStep() === 6) {
-                    <div class="wizard-form">
-                        <h2 class="form-heading">Review & Submit</h2>
-                        <p class="form-description">Please review all information before submitting</p>
-
-                        <div class="review-section">
-                            <div class="review-group">
-                                <h3 class="review-group-title">Personal Information</h3>
-                                <div class="review-grid">
-                                    <div class="review-item">
-                                        <span class="review-label">Name:</span>
-                                        <span class="review-value">{{ personalInfoForm.value.firstName }} {{
-                                            personalInfoForm.value.middleName }} {{ personalInfoForm.value.lastName
-                                            }}</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span class="review-label">Date of Birth:</span>
-                                        <span class="review-value">{{ personalInfoForm.value.dateOfBirth }}</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span class="review-label">Gender:</span>
-                                        <span class="review-value">{{ personalInfoForm.value.gender }}</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span class="review-label">Email:</span>
-                                        <span class="review-value">{{ personalInfoForm.value.email }}</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span class="review-label">Phone:</span>
-                                        <span class="review-value">{{ personalInfoForm.value.phone }}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="review-group">
-                                <h3 class="review-group-title">Address</h3>
-                                <div class="review-grid">
-                                    <div class="review-item full">
-                                        <span class="review-label">Street:</span>
-                                        <span class="review-value">{{ personalInfoForm.value.address?.street }}</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span class="review-label">City:</span>
-                                        <span class="review-value">{{ personalInfoForm.value.address?.city }}</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span class="review-label">State:</span>
-                                        <span class="review-value">{{ personalInfoForm.value.address?.state }}</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span class="review-label">Postal Code:</span>
-                                        <span class="review-value">{{ personalInfoForm.value.address?.postalCode }}</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span class="review-label">Country:</span>
-                                        <span class="review-value">{{ personalInfoForm.value.address?.country }}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="review-group">
-                                <h3 class="review-group-title">Enrollment Information</h3>
-                                <div class="review-grid">
-                                    <div class="review-item">
-                                        <span class="review-label">Admission Number:</span>
-                                        <span class="review-value">{{ enrollmentForm.value.enrollment?.admissionNumber
-                                            }}</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span class="review-label">Admission Date:</span>
-                                        <span class="review-value">{{ enrollmentForm.value.enrollment?.admissionDate
-                                            }}</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span class="review-label">Academic Year:</span>
-                                        <span class="review-value">{{ enrollmentForm.value.enrollment?.academicYear
-                                            }}</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span class="review-label">Class:</span>
-                                        <span class="review-value">{{ enrollmentForm.value.enrollment?.class }}</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span class="review-label">Section:</span>
-                                        <span class="review-value">{{ enrollmentForm.value.enrollment?.section || 'N/A'
-                                            }}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="review-group">
-                                <h3 class="review-group-title">Guardians</h3>
-                                @for (guardian of guardians.controls; let i = $index; track i) {
-                                <div class="review-guardian">
-                                    <strong>Guardian {{ i + 1 }}{{ guardian.value.isPrimary ? ' (Primary)' : ''
-                                        }}</strong>
-                                    <div class="review-grid">
-                                        <div class="review-item">
-                                            <span class="review-label">Name:</span>
-                                            <span class="review-value">{{ guardian.value.firstName }} {{
-                                                guardian.value.lastName }}</span>
-                                        </div>
-                                        <div class="review-item">
-                                            <span class="review-label">Relationship:</span>
-                                            <span class="review-value">{{ guardian.value.relationship }}</span>
-                                        </div>
-                                        <div class="review-item">
-                                            <span class="review-label">Phone:</span>
-                                            <span class="review-value">{{ guardian.value.phone }}</span>
-                                        </div>
-                                        <div class="review-item">
-                                            <span class="review-label">Email:</span>
-                                            <span class="review-value">{{ guardian.value.email || 'N/A' }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                }
-                            </div>
-                        </div>
+                    @if (showSchoolSelector()) {
+                    <div class="field-grid">
+                        <label class="form-field">
+                            School <span class="required">*</span>
+                            <mb-select
+                                placeholder="Select school"
+                                [options]="schoolOptions()"
+                                [value]="schoolId() || ''"
+                                [disabled]="!canManageEnrollment()"
+                                (valueChange)="handleSchoolChange($event)">
+                            </mb-select>
+                        </label>
                     </div>
                     }
+                    <div formGroupName="enrollment" class="field-grid two-cols">
+                        <label class="form-field">
+                            Academic year <span class="required">*</span>
+                            <mb-select
+                                [placeholder]="academicYearLoading() ? 'Loading academic years...' : 'Select academic year'"
+                                [options]="academicYearOptions"
+                                [disabled]="!canManageEnrollment() || academicYearLoading()"
+                                formControlName="academicYear"
+                                (valueChange)="onDuplicateFieldBlur()">
+                            </mb-select>
+                        </label>
+                        <label class="form-field">
+                            Enrollment date <span class="required">*</span>
+                            <mb-input type="date" [disabled]="!canManageEnrollment()" formControlName="admissionDate"></mb-input>
+                        </label>
+                    </div>
+                    <div class="field-grid">
+                        <mb-class-status-selector
+                            [classId]="selectedClassId()"
+                            [sectionId]="selectedSectionId()"
+                            [showStatus]="false"
+                            [disabled]="!canManageEnrollment()"
+                            [title]="'Class & section'"
+                            [subtitle]="'Select a class to load sections.'"
+                            (classIdChange)="selectedClassId.set($event)"
+                            (sectionIdChange)="selectedSectionId.set($event)"
+                            (selectionChange)="applyPlacement($event)">
+                        </mb-class-status-selector>
+                    </div>
+                    @if (!academicYearLoading() && !academicYearOptions.length) {
+                    <p class="permission-note">No academic year configured yet.</p>
+                    }
                 </div>
+            </section>
 
-                <!-- Photo Sidebar -->
-                <div class="photo-sidebar">
-                    <h3 class="photo-title">Student Photo</h3>
-                    <div class="photo-preview-box compact">
-                        @if (photoPreview()) {
-                        <img [src]="photoPreview()" alt="Student photo preview" />
-                        } @else {
-                        <div class="photo-placeholder">
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5">
-                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                            <span>No photo uploaded</span>
-                        </div>
+            <section class="form-section">
+                <div class="section-header">
+                    <h3>Guardian (primary)</h3>
+                    <p>Primary guardian details.</p>
+                </div>
+                <div class="section-body" [formGroup]="guardiansForm">
+                    @if (!canManageGuardians()) {
+                    <p class="guardian-empty">You do not have permission to add guardians.</p>
+                    } @else {
+                    <div class="guardian-toggle">
+                        <mb-checkbox
+                            [checked]="guardianEnabled()"
+                            [disabled]="guardianRequired()"
+                            (checkedChange)="setGuardianEnabled($event)">
+                            Add primary guardian now
+                        </mb-checkbox>
+                        @if (guardianRequired()) {
+                        <span class="guardian-required">Required by policy</span>
                         }
                     </div>
-                    <div class="photo-button-group">
-                        <button type="button" class="btn-photo-upload" (click)="fileInput.click()">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4m14-7l-5-5-5 5m5-5v12"></path>
-                            </svg>
-                            Upload Photo
-                        </button>
-                    </div>
-                    <p class="photo-guideline">
-                        Recommended: 300x300px, JPG or PNG, max 2MB
-                    </p>
-                    <input type="file" #fileInput accept="image/*" (change)="onPhotoSelected($event)"
-                        style="display: none" />
-                </div>
-            </div>
-        </div>
-
-        <!-- Navigation -->
-        <div class="form-actions">
-            <div class="left-actions">
-                <button type="button" class="btn-cancel" (click)="cancel()">Cancel</button>
-            </div>
-            <div class="right-actions">
-                @if (currentStep() < totalSteps) { @if (currentStep()> 1) {
-                    <button type="button" class="btn-back" (click)="previousStep()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M19 12H5m7 7l-7-7 7-7"></path>
-                        </svg>
-                        Back
-                    </button>
-                    }
-                    <button type="button" class="btn-next" (click)="nextStep()">
-                        Next
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M5 12h14m-7-7l7 7-7 7"></path>
-                        </svg>
-                    </button>
+                    @if (!guardianEnabled()) {
+                    <p class="guardian-empty">Add guardians later from the Guardians tab.</p>
                     } @else {
-                    <button type="button" class="btn-back" (click)="previousStep()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M19 12H5m7 7l-7-7 7-7"></path>
-                        </svg>
-                        Back
-                    </button>
-                    <button type="button" class="btn-save-new" (click)="submit(true)" [disabled]="submitting()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M12 5v14m-7-7h14"></path>
-                        </svg>
-                        Save & New
-                    </button>
-                    <button type="button" class="btn-save" (click)="submit(false)" [disabled]="submitting()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path>
-                            <path d="M7 3v5h8M17 21v-8H7v8"></path>
-                        </svg>
-                        {{ submitting() ? 'Saving...' : 'Save' }}
-                    </button>
+                    <div formArrayName="guardians">
+                        <div class="field-grid two-cols" *ngIf="guardians.length" [formGroupName]="0">
+                            <label class="form-field">
+                                Full name <span class="required">*</span>
+                                <mb-input formControlName="name"></mb-input>
+                            </label>
+                            <label class="form-field">
+                                Relationship <span class="required">*</span>
+                                <mb-select
+                                    [placeholder]="guardianRelationshipsLoading() ? 'Loading relationships...' : 'Select relationship'"
+                                    [options]="guardianRelationshipSelectOptions()"
+                                    [disabled]="guardianRelationshipsLoading()"
+                                    formControlName="relationship">
+                                </mb-select>
+                            </label>
+                            <label class="form-field">
+                                Phone <span class="required">*</span>
+                                <mb-input type="tel" formControlName="phone"></mb-input>
+                            </label>
+                            <label class="form-field">
+                                Email
+                                <mb-input type="email" formControlName="email"></mb-input>
+                            </label>
+                        </div>
+                        <div class="guardian-actions">
+                            <mb-button size="sm" variant="tertiary" (click)="addGuardian()">Add another guardian</mb-button>
+                        </div>
+                        <div class="extra-guardians" *ngIf="guardians.length > 1">
+                            <div class="extra-guardian" *ngFor="let guardian of guardians.controls; let i = index" [formGroupName]="i">
+                                @if (i > 0) {
+                                <div class="extra-header">
+                                    <span>Guardian {{ i + 1 }}</span>
+                                    <mb-button size="sm" variant="tertiary" (click)="removeGuardian(i)">Remove</mb-button>
+                                </div>
+                                <div class="field-grid two-cols">
+                                    <label class="form-field">
+                                        Full name
+                                        <mb-input formControlName="name"></mb-input>
+                                    </label>
+                                    <label class="form-field">
+                                        Relationship
+                                        <mb-select
+                                            [placeholder]="guardianRelationshipsLoading() ? 'Loading relationships...' : 'Select relationship'"
+                                            [options]="guardianRelationshipSelectOptions()"
+                                            [disabled]="guardianRelationshipsLoading()"
+                                            formControlName="relationship">
+                                        </mb-select>
+                                    </label>
+                                    <label class="form-field">
+                                        Phone
+                                        <mb-input type="tel" formControlName="phone"></mb-input>
+                                    </label>
+                                    <label class="form-field">
+                                        Email
+                                        <mb-input type="email" formControlName="email"></mb-input>
+                                    </label>
+                                </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
                     }
-            </div>
+                    }
+                </div>
+            </section>
         </div>
+    </div>
+</div>
