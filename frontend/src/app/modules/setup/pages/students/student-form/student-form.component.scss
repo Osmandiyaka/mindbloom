@@ -203,8 +203,8 @@
 }
 
 :host ::ng-deep .form-field .mb-form-field__control:focus-within {
-    border-color: rgba(16, 24, 40, 0.28);
-    box-shadow: 0 0 0 1px rgba(16, 24, 40, 0.18);
+    border-color: var(--mb-color-primary);
+    box-shadow: 0 0 0 1px var(--mb-color-primary);
 }
 
 :host ::ng-deep .form-field .mb-form-field--error .mb-form-field__control {
@@ -212,11 +212,11 @@
     box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25);
 }
 
-:host ::ng-deep .form-field .mb-input:focus-visible,
-:host ::ng-deep .form-field .mb-select:focus-visible {
-    outline: 2px solid rgba(37, 99, 235, 0.28);
-    outline-offset: 2px;
-}
+// :host ::ng-deep .form-field .mb-input:focus-visible,
+// :host ::ng-deep .form-field .mb-select:focus-visible {
+//     outline: 2px solid rgba(37, 99, 235, 0.28);
+//     outline-offset: 2px;
+// }
 
 :host ::ng-deep .form-field .mb-input::placeholder {
     color: rgba(16, 24, 40, 0.35);
