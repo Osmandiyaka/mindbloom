@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 type MbButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'danger';
@@ -27,6 +27,7 @@ type MbButtonSize = 'sm' | 'md' | 'lg';
             [attr.aria-label]="ariaLabel || null"
             [attr.aria-busy]="loading"
             [attr.aria-disabled]="disabled || loading"
+            (click)="handleClick($event)"
         >
             <span class="mb-button__content">
                 <span class="mb-button__spinner" *ngIf="loading" aria-hidden="true"></span>
@@ -47,4 +48,14 @@ export class MbButtonComponent {
     @Input() disabled = false;
     @Input() loading = false;
     @Input() ariaLabel?: string;
+    @Output() click = new EventEmitter<MouseEvent>();
+
+    handleClick(event: MouseEvent): void {
+        if (this.disabled || this.loading) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+        this.click.emit(event);
+    }
 }

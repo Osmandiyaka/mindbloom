@@ -94,11 +94,9 @@
                                                         (click)="toggleSchoolMenu(getSchoolRowIndex(row), $event)">⋯</button>
                                                     <mb-popover
                                                         [open]="schoolMenuOpenIndex() === getSchoolRowIndex(row)"
-                                                        [origin]="schoolMenuOrigin"
-                                                        [hasBackdrop]="true"
+                                                        [origin]="schoolMenuOrigin" [hasBackdrop]="true"
                                                         [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'schools-menu__panel']"
-                                                        (closed)="closeSchoolMenu()"
-                                                    >
+                                                        (closed)="closeSchoolMenu()">
                                                         <div class="schools-menu__panel-content" role="menu">
                                                             <button type="button" class="schools-menu__item"
                                                                 (click)="openEditSchool(getSchoolRowIndex(row)); closeSchoolMenu()">
@@ -233,8 +231,7 @@
                                     <div class="setup-footer__hint">You can change this later from Settings.</div>
                                 </div>
                             </div>
-                            <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are
-                                saved automatically.</div>
+                            <div class="setup-auto-save"><span aria-hidden="true">✓</span> Saved automatically.</div>
                         </div>
 
                         <div class="setup-body" *ngIf="step() === 3">
@@ -291,16 +288,12 @@
                                                         (click)="startAddChildUnit()">Add child unit</mb-button>
                                                     <button type="button" class="ou-actions-menu__toggle"
                                                         #ouActionsMenuOrigin aria-label="More actions"
-                                                        title="More actions"
-                                                        [attr.aria-expanded]="ouActionsMenuOpen()"
+                                                        title="More actions" [attr.aria-expanded]="ouActionsMenuOpen()"
                                                         (click)="toggleOuActionsMenu($event)">⋯</button>
-                                                    <mb-popover
-                                                        [open]="ouActionsMenuOpen()"
-                                                        [origin]="ouActionsMenuOrigin"
-                                                        [hasBackdrop]="true"
+                                                    <mb-popover [open]="ouActionsMenuOpen()"
+                                                        [origin]="ouActionsMenuOrigin" [hasBackdrop]="true"
                                                         [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'ou-actions-menu__panel']"
-                                                        (closed)="closeOuActionsMenu()"
-                                                    >
+                                                        (closed)="closeOuActionsMenu()">
                                                         <div class="ou-actions-menu__panel-content" role="menu">
                                                             <button type="button" class="ou-actions-menu__item"
                                                                 [disabled]="!selectedOrgUnit()"
@@ -341,13 +334,15 @@
                                                     [class.is-active]="activeOrgUnitTab() === 'members'" role="tab"
                                                     [attr.aria-selected]="activeOrgUnitTab() === 'members'"
                                                     (click)="setOrgUnitTab('members')">
-                                                    Members <span class="ou-tab__count">({{ selectedOrgUnitMemberCount() }})</span>
+                                                    Members <span class="ou-tab__count">({{ selectedOrgUnitMemberCount()
+                                                        }})</span>
                                                 </button>
                                                 <button type="button" class="ou-tab"
                                                     [class.is-active]="activeOrgUnitTab() === 'roles'" role="tab"
                                                     [attr.aria-selected]="activeOrgUnitTab() === 'roles'"
                                                     (click)="setOrgUnitTab('roles')">
-                                                    Roles <span class="ou-tab__count">({{ selectedOrgUnitRoleCount() }})</span>
+                                                    Roles <span class="ou-tab__count">({{ selectedOrgUnitRoleCount()
+                                                        }})</span>
                                                 </button>
                                             </div>
 
@@ -422,7 +417,8 @@
                                                                 </span>
                                                             </div>
                                                             <div class="ou-members-table__actions">
-                                                                <button type="button" class="ou-row-action ou-row-action--subtle"
+                                                                <button type="button"
+                                                                    class="ou-row-action ou-row-action--subtle"
                                                                     title="Remove from unit (does not delete user)"
                                                                     (click)="confirmRemoveMemberFromOrgUnit(member)">
                                                                     Remove
@@ -497,7 +493,8 @@
                                                         <div class="ou-empty__text">
                                                             Assign roles to control access for this unit.
                                                         </div>
-                                                        <mb-button variant="secondary" (click)="openAssignRoles()">Assign roles</mb-button>
+                                                        <mb-button variant="secondary"
+                                                            (click)="openAssignRoles()">Assign roles</mb-button>
                                                     </div>
                                                 </ng-template>
                                                 <div class="ou-helper">
@@ -520,8 +517,7 @@
                                 </div>
 
                                 <ng-template #orgUnitNode let-node let-depth="depth">
-                                    <button type="button" class="ou-tree__node"
-                                        [style.--ou-depth]="depth"
+                                    <button type="button" class="ou-tree__node" [style.--ou-depth]="depth"
                                         [class.ou-tree__node--child]="depth > 0"
                                         [class.is-active]="activeOrgUnitId() === node.id" role="treeitem"
                                         [attr.aria-expanded]="node.children.length ? isOrgUnitExpanded(node.id) : null"
@@ -531,7 +527,8 @@
                                             {{ isOrgUnitExpanded(node.id) ? '▾' : '▸' }}
                                         </span>
                                         <span class="ou-tree__spacer" *ngIf="!node.children.length"></span>
-                                        <span class="ou-tree__indent" *ngIf="depth > 0 && !node.children.length">›</span>
+                                        <span class="ou-tree__indent"
+                                            *ngIf="depth > 0 && !node.children.length">›</span>
                                         <span class="ou-tree__label">{{ node.name }}</span>
                                         <span class="ou-tree__badge" *ngIf="node.children.length">
                                             {{ node.children.length }}
@@ -653,8 +650,7 @@
                                         </div>
 
                                         <mb-form-field *ngIf="orgUnitDeleteRequiresConfirm()"
-                                            label="Type the unit name to confirm"
-                                            [controlId]="'ou-delete-confirm'"
+                                            label="Type the unit name to confirm" [controlId]="'ou-delete-confirm'"
                                             hint="Enter '{{ orgUnitDeleteTarget()?.name }}' to enable deletion.">
                                             <mb-input id="ou-delete-confirm" [value]="orgUnitDeleteConfirm()"
                                                 (valueChange)="orgUnitDeleteConfirm.set($event)"
@@ -705,8 +701,7 @@
 
                                 <mb-modal [open]="isOrgUnitMoveOpen()" title="Move organizational unit" size="sm"
                                     [hasFooter]="true" [closeable]="!orgUnitMoveSubmitting()"
-                                    [closeOnBackdrop]="!orgUnitMoveSubmitting()"
-                                    (closed)="requestCloseMoveOrgUnit()">
+                                    [closeOnBackdrop]="!orgUnitMoveSubmitting()" (closed)="requestCloseMoveOrgUnit()">
                                     <div class="ou-move">
                                         <div class="ou-move__subtitle">
                                             Choose a new parent for this unit.
@@ -767,8 +762,8 @@
                                     </div>
                                 </mb-modal>
 
-                                <mb-modal [open]="isOrgUnitDeactivateOpen()" title="Deactivate organizational unit" size="sm"
-                                    [hasFooter]="true" [closeable]="!orgUnitDeactivateSubmitting()"
+                                <mb-modal [open]="isOrgUnitDeactivateOpen()" title="Deactivate organizational unit"
+                                    size="sm" [hasFooter]="true" [closeable]="!orgUnitDeactivateSubmitting()"
                                     [closeOnBackdrop]="!orgUnitDeactivateSubmitting()"
                                     (closed)="requestCloseDeactivateOrgUnit()">
                                     <div class="ou-deactivate">
@@ -874,265 +869,277 @@
                         <div class="setup-body" *ngIf="step() === 5">
                             <div class="setup-section">
                                 <div class="classes-header">
-                                    <div>
+                                    <div class="classes-header__content">
                                         <h2>Classes & sections</h2>
                                         <p>Set up the classes/grades and sections your institution uses for enrollment,
                                             attendance, and reporting.</p>
                                         <div class="classes-filter" *ngIf="hasMultipleSchools()">
-                                            <span class="classes-filter__label">School:</span>
-                                            <mb-select class="classes-filter__select" id="class-school-filter"
-                                                [value]="classSchoolFilter()"
-                                                (valueChange)="classSchoolFilter.set($event)">
-                                                <option value="all">All schools</option>
-                                                <option *ngFor="let school of activeSchoolNames()" [value]="school">
-                                                    {{ school }}
-                                                </option>
-                                            </mb-select>
+                                            <div class="classes-filter__pill">
+                                                <span class="classes-filter__label">School:</span>
+                                                <mb-select class="classes-filter__select" id="class-school-filter"
+                                                    [value]="classSchoolFilter()"
+                                                    (valueChange)="classSchoolFilter.set($event)">
+                                                    <option value="all">All schools</option>
+                                                    <option *ngFor="let school of activeSchoolNames()" [value]="school">
+                                                        {{ school }}
+                                                    </option>
+                                                </mb-select>
+                                            </div>
+                                            <div class="classes-filter__helper" *ngIf="classSchoolFilter() === 'all'">
+                                                Changes apply to all schools.
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="classes-header__actions">
-                                        <mb-button variant="primary" (click)="openAddClass()">Add class</mb-button>
+                                        <ng-container *ngIf="selectedClass() as selectedClass; else addClassOnly">
+                                            <mb-button variant="primary" (click)="openAddSection(selectedClass)">Add
+                                                section</mb-button>
+                                            <mb-button variant="tertiary" (click)="openAddClass()">Add class</mb-button>
+                                            <button type="button" class="classes-header__menu" #classHeaderMenuOrigin
+                                                aria-label="Class actions" [attr.aria-expanded]="classHeaderMenuOpen()"
+                                                (click)="toggleClassHeaderMenu($event)">⋯</button>
+                                            <mb-popover [open]="classHeaderMenuOpen()" [origin]="classHeaderMenuOrigin"
+                                                [hasBackdrop]="true"
+                                                [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'classes-header__menu-panel']"
+                                                (closed)="closeClassHeaderMenu()">
+                                                <div class="classes-header__menu-content" role="menu">
+                                                    <button type="button" class="classes-header__menu-item"
+                                                        (click)="openEditClass(selectedClass); closeClassHeaderMenu()">
+                                                        Rename class
+                                                    </button>
+                                                    <button type="button" class="classes-header__menu-item"
+                                                        (click)="duplicateClass(selectedClass); closeClassHeaderMenu()">
+                                                        Duplicate class
+                                                    </button>
+                                                    <button type="button" class="classes-header__menu-item"
+                                                        (click)="toggleClassActive(selectedClass); closeClassHeaderMenu()">
+                                                        {{ selectedClass.active ? 'Archive class' : 'Restore class' }}
+                                                    </button>
+                                                    <div class="classes-header__menu-divider"></div>
+                                                    <button type="button"
+                                                        class="classes-header__menu-item classes-header__menu-item--danger"
+                                                        (click)="openClassDelete(selectedClass); closeClassHeaderMenu()">
+                                                        Delete class
+                                                    </button>
+                                                </div>
+                                            </mb-popover>
+                                        </ng-container>
+                                        <ng-template #addClassOnly>
+                                            <mb-button variant="primary" (click)="openAddClass()">Add class</mb-button>
+                                        </ng-template>
                                     </div>
                                 </div>
 
                                 <div class="classes-shell">
                                     <div class="classes-split">
                                         <div class="classes-panel classes-panel--list">
-                                        <div class="classes-panel__header">
-                                            <div class="classes-panel__title">Classes</div>
-                                            <mb-input [value]="classSearch()" (valueChange)="classSearch.set($event)"
-                                                placeholder="Search classes..."></mb-input>
-                                        </div>
-
-                                        <div class="classes-list" *ngIf="filteredClassRows().length; else emptyClasses">
-                                            <div class="class-row" role="button" tabindex="0"
-                                                *ngFor="let row of filteredClassRows(); trackBy: trackClassRow"
-                                                [class.is-active]="selectedClassId() === row.id"
-                                                (click)="selectClass(row)"
-                                                (keydown.enter)="selectClass(row)"
-                                                (keydown.space)="selectClass(row); $event.preventDefault()">
-                                                <div class="class-row__content">
-                                                    <div class="class-row__name">{{ row.name }}</div>
-                                                    <div class="class-row__code" *ngIf="row.code || row.levelType">
-                                                        {{ row.code || row.levelType }}
-                                                    </div>
+                                            <div class="classes-panel__toolbar"
+                                                *ngIf="isLoading() || classRows().length">
+                                                <div class="classes-panel__search">
+                                                    <app-search-input [value]="classSearch()"
+                                                        placeholder="Search classes..."
+                                                        (search)="classSearch.set($event)">
+                                                    </app-search-input>
                                                 </div>
-                                                <div class="class-row__badge">
-                                                    {{ classSectionCountMap().get(row.id) || 0 }}
-                                                </div>
-                                                <div class="class-row__actions">
-                                                    <button type="button" class="class-row__action"
-                                                        (click)="openEditClass(row); $event.stopPropagation()"
-                                                        aria-label="Edit class">
-                                                        ✎
-                                                    </button>
-                                                    <button type="button" class="class-row__action"
-                                                        #classMenuOrigin aria-label="More actions"
-                                                        [attr.aria-expanded]="classMenuOpenId() === row.id"
-                                                        (click)="toggleClassMenu(row.id, $event)">⋯</button>
-                                                    <mb-popover
-                                                        [open]="classMenuOpenId() === row.id"
-                                                        [origin]="classMenuOrigin"
-                                                        [hasBackdrop]="true"
-                                                        [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'class-row__menu-panel']"
-                                                        (closed)="closeClassMenu()"
-                                                    >
-                                                        <div class="class-row__menu-content" role="menu">
-                                                            <button type="button" class="class-row__menu-item"
-                                                                (click)="openViewClass(row); closeClassMenu()">
-                                                                View details
-                                                            </button>
-                                                            <button type="button" class="class-row__menu-item"
-                                                                (click)="openEditClass(row); closeClassMenu()">
-                                                                Edit class
-                                                            </button>
-                                                            <button type="button" class="class-row__menu-item"
-                                                                (click)="duplicateClass(row); closeClassMenu()">
-                                                                Duplicate class
-                                                            </button>
-                                                            <button type="button" class="class-row__menu-item"
-                                                                (click)="openClassReorder(); closeClassMenu()">
-                                                                Reorder classes
-                                                            </button>
-                                                            <button type="button" class="class-row__menu-item"
-                                                                (click)="toggleClassActive(row); closeClassMenu()">
-                                                                {{ row.active ? 'Deactivate class' : 'Activate class' }}
-                                                            </button>
-                                                            <div class="class-row__menu-divider"></div>
-                                                            <button type="button"
-                                                                class="class-row__menu-item class-row__menu-item--danger"
-                                                                (click)="openClassDelete(row); closeClassMenu()">
-                                                                Delete class
-                                                            </button>
-                                                        </div>
-                                                    </mb-popover>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <ng-template #emptyClasses>
-                                            <div class="classes-empty">
-                                                <div class="classes-empty__title">No classes yet</div>
-                                                <div class="classes-empty__text">
-                                                    Classes describe grade levels. Sections are groups within a class.
-                                                </div>
-                                                <mb-button variant="primary" (click)="openAddClass()">Add class</mb-button>
-                                            </div>
-                                        </ng-template>
-                                        </div>
-
-                                        <div class="classes-panel classes-panel--detail">
-                                        <ng-container *ngIf="selectedClass() as selected; else emptySectionState">
-                                            <div class="sections-header">
-                                                <div>
-                                                    <div class="sections-header__title">{{ selected.name }}</div>
-                                                    <div class="sections-header__meta">
-                                                        {{ selected.levelType || 'Grade' }} ·
-                                                        {{ selected.active ? 'Active' : 'Inactive' }} ·
-                                                        {{ sectionCountForSelectedClass() }} sections
-                                                    </div>
-                                                </div>
-                                                <div class="sections-header__actions">
-                                                    <mb-button variant="secondary" (click)="openAddSection(selected)">Add
-                                                        section</mb-button>
-                                                    <button type="button" class="sections-menu__toggle"
-                                                        #sectionsMenuOrigin aria-label="More actions"
-                                                        title="More actions"
-                                                        [attr.aria-expanded]="sectionsMenuOpen()"
-                                                        (click)="toggleSectionsMenu($event)">⋯</button>
-                                                    <mb-popover
-                                                        [open]="sectionsMenuOpen()"
-                                                        [origin]="sectionsMenuOrigin"
-                                                        [hasBackdrop]="true"
-                                                        [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'sections-menu__panel']"
-                                                        (closed)="closeSectionsMenu()"
-                                                    >
-                                                        <div class="sections-menu__panel-content" role="menu">
-                                                            <button type="button" class="sections-menu__item"
-                                                                (click)="openImportModal('classes'); closeSectionsMenu()">
-                                                                Import CSV
-                                                            </button>
-                                                            <button type="button" class="sections-menu__item"
-                                                                (click)="downloadImportTemplate('classes'); closeSectionsMenu()">
-                                                                Download template
-                                                            </button>
-                                                            <button type="button" class="sections-menu__item"
-                                                                (click)="exportCsv('classes'); closeSectionsMenu()">
-                                                                Export CSV
-                                                            </button>
-                                                            <div class="sections-menu__divider"></div>
-                                                            <button type="button" class="sections-menu__item"
-                                                                (click)="openSectionGenerator(); closeSectionsMenu()">
-                                                                Create multiple sections
-                                                            </button>
-                                                            <button type="button" class="sections-menu__item"
-                                                                (click)="openSectionReorder(); closeSectionsMenu()">
-                                                                Reorder sections
-                                                            </button>
-                                                            <button type="button" class="sections-menu__item"
-                                                                (click)="openEditClass(selected); closeSectionsMenu()">
-                                                                Edit class
-                                                            </button>
-                                                            <button type="button" class="sections-menu__item"
-                                                                (click)="toggleClassActive(selected); closeSectionsMenu()">
-                                                                {{ selected.active ? 'Deactivate class' : 'Activate class' }}
-                                                            </button>
-                                                            <div class="sections-menu__divider"></div>
-                                                            <button type="button"
-                                                                class="sections-menu__item sections-menu__item--danger"
-                                                                (click)="openClassDelete(selected); closeSectionsMenu()">
-                                                                Delete class
-                                                            </button>
-                                                        </div>
-                                                    </mb-popover>
+                                                <div class="classes-panel__meta">
+                                                    <span>{{ filteredClassRows().length }} classes</span>
+                                                    <mb-select class="classes-panel__sort" id="class-sort"
+                                                        [value]="classSort()" (valueChange)="setClassSort($event)">
+                                                        <option value="az">A–Z</option>
+                                                        <option value="recent">Recently updated</option>
+                                                    </mb-select>
                                                 </div>
                                             </div>
 
-                                            <div class="sections-table" *ngIf="filteredSections().length; else emptySections">
-                                                <div class="sections-table__header">
-                                                    <div>Section</div>
-                                                    <div class="sections-table__capacity">Capacity</div>
-                                                    <div>Homeroom teacher</div>
-                                                    <div>Status</div>
-                                                    <div class="sections-table__actions">Actions</div>
-                                                </div>
-                                                <div class="sections-table__row"
-                                                    *ngFor="let section of filteredSections(); trackBy: trackSectionRow">
-                                                    <div class="sections-table__name">
-                                                        <div class="sections-table__name-text">{{ section.name }}</div>
-                                                        <div class="sections-table__code" *ngIf="section.code">
-                                                            {{ section.code }}
+                                            <div class="classes-list"
+                                                *ngIf="!isLoading() && filteredClassRows().length; else classListState">
+                                                <div class="class-row" role="button" tabindex="0"
+                                                    *ngFor="let row of filteredClassRows(); trackBy: trackClassRow"
+                                                    [class.is-active]="selectedClassId() === row.id"
+                                                    (click)="selectClass(row)" (keydown.enter)="selectClass(row)"
+                                                    (keydown.space)="selectClass(row); $event.preventDefault()">
+                                                    <div class="class-row__content">
+                                                        <div class="class-row__name">{{ row.name }}</div>
+                                                        <div class="class-row__meta">
+                                                            <span>{{ classSectionCountMap().get(row.id) || 0 }}
+                                                                sections</span>
+                                                            <span class="class-row__status"
+                                                                [class.is-archived]="!row.active">
+                                                                {{ row.active ? 'Active' : 'Archived' }}
+                                                            </span>
                                                         </div>
                                                     </div>
-                                                    <div class="sections-table__capacity">
-                                                        {{ section.capacity ?? '—' }}
-                                                    </div>
-                                                    <div class="sections-table__teacher">
-                                                        {{ teacherLabel(section.homeroomTeacherId) }}
-                                                    </div>
-                                                    <div>
-                                                        <span class="ou-status-pill"
-                                                            [class.ou-status-pill--active]="section.active">
-                                                            {{ section.active ? 'Active' : 'Inactive' }}
-                                                        </span>
-                                                    </div>
-                                                    <div class="sections-table__actions">
-                                                        <button type="button" class="sections-row-menu__toggle"
-                                                            #sectionMenuOrigin aria-label="Row actions"
-                                                            [attr.aria-expanded]="sectionMenuOpenId() === section.id"
-                                                            (click)="toggleSectionMenu(section.id, $event)">⋯</button>
-                                                        <mb-popover
-                                                            [open]="sectionMenuOpenId() === section.id"
-                                                            [origin]="sectionMenuOrigin"
-                                                            [hasBackdrop]="true"
-                                                            [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'sections-row-menu__panel']"
-                                                            (closed)="closeSectionMenu()"
-                                                        >
-                                                            <div class="sections-row-menu__panel-content" role="menu">
-                                                                <button type="button" class="sections-row-menu__item"
-                                                                    (click)="openViewSection(section); closeSectionMenu()">
-                                                                    View
+                                                    <div class="class-row__actions">
+                                                        <button type="button" class="class-row__action"
+                                                            (click)="openEditClass(row); $event.stopPropagation()"
+                                                            aria-label="Edit class">
+                                                            ✎
+                                                        </button>
+                                                        <button type="button" class="class-row__action" #classMenuOrigin
+                                                            aria-label="More actions"
+                                                            [attr.aria-expanded]="classMenuOpenId() === row.id"
+                                                            (click)="toggleClassMenu(row.id, $event)">⋯</button>
+                                                        <mb-popover [open]="classMenuOpenId() === row.id"
+                                                            [origin]="classMenuOrigin" [hasBackdrop]="true"
+                                                            [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'class-row__menu-panel']"
+                                                            (closed)="closeClassMenu()">
+                                                            <div class="class-row__menu-content" role="menu">
+                                                                <button type="button" class="class-row__menu-item"
+                                                                    (click)="openEditClass(row); closeClassMenu()">
+                                                                    Rename class
                                                                 </button>
-                                                                <button type="button" class="sections-row-menu__item"
-                                                                    (click)="openEditSection(section); closeSectionMenu()">
-                                                                    Edit
+                                                                <button type="button" class="class-row__menu-item"
+                                                                    (click)="duplicateClass(row); closeClassMenu()">
+                                                                    Duplicate class
                                                                 </button>
-                                                                <button type="button" class="sections-row-menu__item"
-                                                                    (click)="openEditSection(section); closeSectionMenu()">
-                                                                    Assign homeroom teacher
+                                                                <button type="button" class="class-row__menu-item"
+                                                                    (click)="toggleClassActive(row); closeClassMenu()">
+                                                                    {{ row.active ? 'Archive class' : 'Restore class' }}
                                                                 </button>
-                                                                <button type="button" class="sections-row-menu__item"
-                                                                    (click)="toggleSectionActive(section); closeSectionMenu()">
-                                                                    {{ section.active ? 'Deactivate' : 'Activate' }}
-                                                                </button>
-                                                                <div class="sections-row-menu__divider"></div>
+                                                                <div class="class-row__menu-divider"></div>
                                                                 <button type="button"
-                                                                    class="sections-row-menu__item sections-row-menu__item--danger"
-                                                                    (click)="openSectionDelete(section); closeSectionMenu()">
-                                                                    Delete section
+                                                                    class="class-row__menu-item class-row__menu-item--danger"
+                                                                    (click)="openClassDelete(row); closeClassMenu()">
+                                                                    Delete class
                                                                 </button>
                                                             </div>
                                                         </mb-popover>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <ng-template #emptySections>
-                                                <div class="sections-empty">
-                                                    <div class="sections-empty__title">No sections yet</div>
-                                                    <div class="sections-empty__text">
-                                                        Add at least one section so you can enroll students and take
-                                                        attendance.
+                                            <ng-template #classListState>
+                                                <div class="classes-skeleton" *ngIf="isLoading(); else emptyClasses">
+                                                    <div class="classes-skeleton__row"
+                                                        *ngFor="let item of skeletonRows"></div>
+                                                </div>
+                                            </ng-template>
+                                            <ng-template #emptyClasses>
+                                                <div class="classes-empty">
+                                                    <div class="classes-empty__title">No classes yet</div>
+                                                    <div class="classes-empty__text">
+                                                        Add your grade levels to begin creating sections.
+                                                    </div>
+                                                    <mb-button variant="primary" (click)="openAddClass()">Add
+                                                        class</mb-button>
+                                                </div>
+                                            </ng-template>
+                                        </div>
+
+                                        <div class="classes-panel classes-panel--detail">
+                                            <ng-container *ngIf="selectedClass() as selected; else emptySectionState">
+                                                <div class="sections-detail__header">
+                                                    <div>
+                                                        <div class="sections-detail__title">{{ selected.name }}</div>
+                                                        <div class="sections-detail__meta">
+                                                            {{ sectionCountForSelectedClass() }} sections ·
+                                                            {{ selected.active ? 'Active' : 'Archived' }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="sections-detail__actions"
+                                                        *ngIf="filteredSections().length">
+                                                        <mb-button variant="primary"
+                                                            (click)="openAddSection(selected)">Add section</mb-button>
+                                                        <button type="button" class="sections-detail__link"
+                                                            (click)="openSectionGenerator()">Create
+                                                            automatically</button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="sections-table"
+                                                    *ngIf="!isLoading() && filteredSections().length; else sectionsState">
+                                                    <div class="sections-table__header">
+                                                        <div>Section</div>
+                                                        <div class="sections-table__students">Students</div>
+                                                        <div>Status</div>
+                                                        <div class="sections-table__actions">Actions</div>
+                                                    </div>
+                                                    <div class="sections-table__row"
+                                                        *ngFor="let section of filteredSections(); trackBy: trackSectionRow">
+                                                        <div class="sections-table__name">
+                                                            <div class="sections-table__name-text">{{ section.name }}
+                                                            </div>
+                                                            <div class="sections-table__code" *ngIf="section.code">
+                                                                {{ section.code }}
+                                                            </div>
+                                                        </div>
+                                                        <div class="sections-table__students">
+                                                            {{ section.capacity ?? '—' }}
+                                                        </div>
+                                                        <div>
+                                                            <span class="ou-status-pill"
+                                                                [class.ou-status-pill--active]="section.active">
+                                                                {{ section.active ? 'Active' : 'Archived' }}
+                                                            </span>
+                                                        </div>
+                                                        <div class="sections-table__actions">
+                                                            <button type="button" class="sections-row-menu__toggle"
+                                                                #sectionMenuOrigin aria-label="Row actions"
+                                                                [attr.aria-expanded]="sectionMenuOpenId() === section.id"
+                                                                (click)="toggleSectionMenu(section.id, $event)">⋯</button>
+                                                            <mb-popover [open]="sectionMenuOpenId() === section.id"
+                                                                [origin]="sectionMenuOrigin" [hasBackdrop]="true"
+                                                                [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'sections-row-menu__panel']"
+                                                                (closed)="closeSectionMenu()">
+                                                                <div class="sections-row-menu__panel-content"
+                                                                    role="menu">
+                                                                    <button type="button"
+                                                                        class="sections-row-menu__item"
+                                                                        (click)="openEditSection(section); closeSectionMenu()">
+                                                                        Rename section
+                                                                    </button>
+                                                                    <button type="button"
+                                                                        class="sections-row-menu__item"
+                                                                        (click)="toggleSectionActive(section); closeSectionMenu()">
+                                                                        {{ section.active ? 'Archive section' : 'Restore
+                                                                        section' }}
+                                                                    </button>
+                                                                    <div class="sections-row-menu__divider"></div>
+                                                                    <button type="button"
+                                                                        class="sections-row-menu__item sections-row-menu__item--danger"
+                                                                        (click)="openSectionDelete(section); closeSectionMenu()">
+                                                                        Delete section
+                                                                    </button>
+                                                                </div>
+                                                            </mb-popover>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <ng-template #sectionsState>
+                                                    <div class="sections-skeleton"
+                                                        *ngIf="isLoading(); else emptySections">
+                                                        <div class="sections-skeleton__row"
+                                                            *ngFor="let item of skeletonRows"></div>
+                                                    </div>
+                                                </ng-template>
+                                                <ng-template #emptySections>
+                                                    <div class="sections-empty">
+                                                        <div class="sections-empty__title">No sections yet</div>
+                                                        <div class="sections-empty__text">
+                                                            Create at least one section to enroll students and take
+                                                            attendance.
+                                                        </div>
+                                                        <div class="sections-empty__actions">
+                                                            <mb-button variant="primary"
+                                                                (click)="openAddSection(selected)">Add
+                                                                section</mb-button>
+                                                            <button type="button" class="sections-empty__link"
+                                                                (click)="openSectionGenerator()">Create sections
+                                                                automatically</button>
+                                                        </div>
+                                                        <div class="sections-empty__helper">
+                                                            Sections are typically labels like A, B, Blue, Gold.
+                                                        </div>
+                                                    </div>
+                                                </ng-template>
+                                            </ng-container>
+                                            <ng-template #emptySectionState>
+                                                <div class="sections-placeholder">
+                                                    <div class="sections-placeholder__title">Select a class</div>
+                                                    <div class="sections-placeholder__text">
+                                                        Choose a class on the left to manage its sections.
                                                     </div>
                                                 </div>
                                             </ng-template>
-                                        </ng-container>
-                                        <ng-template #emptySectionState>
-                                            <div class="sections-empty sections-empty--detail">
-                                                <div class="sections-empty__title">Select a class</div>
-                                                <div class="sections-empty__text">
-                                                    Choose a class to manage its sections.
-                                                </div>
-                                            </div>
-                                        </ng-template>
                                         </div>
                                     </div>
                                 </div>
@@ -1152,17 +1159,19 @@
                             <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are
                                 saved automatically.</div>
 
-                            <mb-modal [open]="classFormOpen()" [title]="classFormMode() === 'add' ? 'Add class' : (classFormMode() === 'edit' ? 'Edit class' : 'Class details')"
+                            <mb-modal [open]="classFormOpen()"
+                                [title]="classFormMode() === 'add' ? 'Add class' : (classFormMode() === 'edit' ? 'Edit class' : 'Class details')"
                                 size="md" [hasFooter]="true" (closed)="requestCloseClassForm()">
                                 <div class="class-modal">
                                     <div class="class-modal__subtitle">
-                                        {{ classFormMode() === 'add' ? 'Create a class/grade level. You can add sections next.' : 'Update class details.' }}
+                                        {{ classFormMode() === 'add' ? 'Create a class/grade level. You can add sections
+                                        next.' : 'Update class details.' }}
                                     </div>
-                                    <mb-alert *ngIf="classFormError()" variant="danger">{{ classFormError() }}</mb-alert>
+                                    <mb-alert *ngIf="classFormError()" variant="danger">{{ classFormError()
+                                        }}</mb-alert>
                                     <mb-form-field label="Class name" [controlId]="'class-name'">
                                         <mb-input id="class-name" [value]="classFormName()"
-                                            [disabled]="classFormMode() === 'view'"
-                                            cdkFocusInitial
+                                            [disabled]="classFormMode() === 'view'" cdkFocusInitial
                                             (valueChange)="classFormName.set($event)"></mb-input>
                                     </mb-form-field>
                                     <mb-form-field label="Code" [controlId]="'class-code'"
@@ -1203,8 +1212,7 @@
                                                 <span>Specific schools</span>
                                             </label>
                                         </div>
-                                        <div class="class-modal__schools"
-                                            *ngIf="classFormSchoolScope() === 'specific'">
+                                        <div class="class-modal__schools" *ngIf="classFormSchoolScope() === 'specific'">
                                             <mb-checkbox *ngFor="let school of activeSchoolNames()"
                                                 [checked]="classFormSchoolIds().includes(school)"
                                                 [disabled]="classFormMode() === 'view'"
@@ -1228,31 +1236,30 @@
                                 <div mbModalFooter class="class-modal__footer">
                                     <mb-button variant="secondary" (click)="requestCloseClassForm()">Cancel</mb-button>
                                     <mb-button variant="primary" *ngIf="classFormMode() !== 'view'"
-                                        [loading]="classFormSubmitting()"
-                                        [disabled]="classFormSubmitting()"
+                                        [loading]="classFormSubmitting()" [disabled]="classFormSubmitting()"
                                         (click)="saveClassForm()">Save class</mb-button>
                                 </div>
                             </mb-modal>
 
-                            <mb-modal [open]="sectionFormOpen()" [title]="sectionFormMode() === 'add' ? 'Add section' : (sectionFormMode() === 'edit' ? 'Edit section' : 'Section details')"
+                            <mb-modal [open]="sectionFormOpen()"
+                                [title]="sectionFormMode() === 'add' ? 'Add section' : (sectionFormMode() === 'edit' ? 'Edit section' : 'Section details')"
                                 size="md" [hasFooter]="true" (closed)="requestCloseSectionForm()">
                                 <div class="section-modal">
                                     <div class="section-modal__subtitle">
-                                        {{ sectionFormMode() === 'add' ? 'Create a section under the selected class.' : 'Update section details.' }}
+                                        {{ sectionFormMode() === 'add' ? 'Create a section under the selected class.' :
+                                        'Update section details.' }}
                                     </div>
-                                    <mb-alert *ngIf="sectionFormError()" variant="danger">{{ sectionFormError() }}</mb-alert>
+                                    <mb-alert *ngIf="sectionFormError()" variant="danger">{{ sectionFormError()
+                                        }}</mb-alert>
                                     <mb-form-field label="Class" [controlId]="'section-class'">
-                                        <mb-class-selector
-                                            [value]="sectionFormClassId()"
-                                            [options]="classSelectorOptions()"
-                                            [disabled]="sectionFormMode() === 'view'"
+                                        <mb-class-selector [value]="sectionFormClassId()"
+                                            [options]="classSelectorOptions()" [disabled]="sectionFormMode() === 'view'"
                                             (valueChange)="sectionFormClassId.set($event)">
                                         </mb-class-selector>
                                     </mb-form-field>
                                     <mb-form-field label="Section name" [controlId]="'section-name'">
                                         <mb-input id="section-name" [value]="sectionFormName()"
-                                            [disabled]="sectionFormMode() === 'view'"
-                                            cdkFocusInitial
+                                            [disabled]="sectionFormMode() === 'view'" cdkFocusInitial
                                             (valueChange)="sectionFormName.set($event)"></mb-input>
                                     </mb-form-field>
                                     <mb-form-field label="Section code" [controlId]="'section-code'">
@@ -1267,12 +1274,9 @@
                                             placeholder="Optional"></mb-input>
                                     </mb-form-field>
                                     <mb-form-field label="Homeroom teacher" [controlId]="'section-teacher'">
-                                        <mb-staff-selector
-                                            [value]="sectionFormTeacherId()"
-                                            [options]="staffSelectorOptions()"
-                                            [disabled]="sectionFormMode() === 'view'"
-                                            placeholder="Unassigned"
-                                            (valueChange)="sectionFormTeacherId.set($event)">
+                                        <mb-staff-selector [value]="sectionFormTeacherId()"
+                                            [options]="staffSelectorOptions()" [disabled]="sectionFormMode() === 'view'"
+                                            placeholder="Unassigned" (valueChange)="sectionFormTeacherId.set($event)">
                                         </mb-staff-selector>
                                     </mb-form-field>
                                     <label class="section-modal__toggle">
@@ -1283,7 +1287,8 @@
                                     </label>
                                 </div>
                                 <div mbModalFooter class="section-modal__footer">
-                                    <mb-button variant="secondary" (click)="requestCloseSectionForm()">Cancel</mb-button>
+                                    <mb-button variant="secondary"
+                                        (click)="requestCloseSectionForm()">Cancel</mb-button>
                                     <mb-button variant="primary" *ngIf="sectionFormMode() !== 'view'"
                                         (click)="saveSectionForm()">Save section</mb-button>
                                 </div>
@@ -1295,7 +1300,8 @@
                                     <div class="class-delete__subtitle">
                                         Deleting a class deletes its sections.
                                     </div>
-                                    <mb-alert *ngIf="classDeleteError()" variant="danger">{{ classDeleteError() }}</mb-alert>
+                                    <mb-alert *ngIf="classDeleteError()" variant="danger">{{ classDeleteError()
+                                        }}</mb-alert>
                                     <div class="class-delete__impact">
                                         <div>
                                             <div class="class-delete__label">Class</div>
@@ -1310,7 +1316,8 @@
                                     </div>
                                 </div>
                                 <div mbModalFooter class="class-delete__footer">
-                                    <mb-button variant="secondary" (click)="requestCloseClassDelete()">Cancel</mb-button>
+                                    <mb-button variant="secondary"
+                                        (click)="requestCloseClassDelete()">Cancel</mb-button>
                                     <mb-button variant="danger" (click)="deleteClass()">Delete class</mb-button>
                                 </div>
                             </mb-modal>
@@ -1321,14 +1328,16 @@
                                     <div class="section-delete__subtitle">
                                         This action cannot be undone.
                                     </div>
-                                    <mb-alert *ngIf="sectionDeleteError()" variant="danger">{{ sectionDeleteError() }}</mb-alert>
+                                    <mb-alert *ngIf="sectionDeleteError()" variant="danger">{{ sectionDeleteError()
+                                        }}</mb-alert>
                                     <div class="section-delete__impact">
                                         <div class="section-delete__label">Section</div>
                                         <div class="section-delete__value">{{ sectionDeleteTarget()?.name }}</div>
                                     </div>
                                 </div>
                                 <div mbModalFooter class="section-delete__footer">
-                                    <mb-button variant="secondary" (click)="requestCloseSectionDelete()">Cancel</mb-button>
+                                    <mb-button variant="secondary"
+                                        (click)="requestCloseSectionDelete()">Cancel</mb-button>
                                     <mb-button variant="danger" (click)="deleteSection()">Delete section</mb-button>
                                 </div>
                             </mb-modal>
@@ -1350,14 +1359,14 @@
                                             <option value="custom">Custom list</option>
                                         </mb-select>
                                     </mb-form-field>
-                                    <mb-form-field *ngIf="sectionGeneratorPattern() !== 'custom'"
-                                        label="Range" [controlId]="'section-range'">
+                                    <mb-form-field *ngIf="sectionGeneratorPattern() !== 'custom'" label="Range"
+                                        [controlId]="'section-range'">
                                         <mb-input id="section-range" [value]="sectionGeneratorRange()"
                                             (valueChange)="sectionGeneratorRange.set($event)"
                                             placeholder="A-F or 1-10"></mb-input>
                                     </mb-form-field>
-                                    <mb-form-field *ngIf="sectionGeneratorPattern() === 'custom'"
-                                        label="Custom list" [controlId]="'section-custom'">
+                                    <mb-form-field *ngIf="sectionGeneratorPattern() === 'custom'" label="Custom list"
+                                        [controlId]="'section-custom'">
                                         <mb-textarea id="section-custom" [value]="sectionGeneratorCustom()"
                                             (valueChange)="sectionGeneratorCustom.set($event)"
                                             placeholder="A, B, C"></mb-textarea>
@@ -1378,7 +1387,8 @@
                                 <div mbModalFooter class="section-generator__footer">
                                     <mb-button variant="secondary"
                                         (click)="requestCloseSectionGenerator()">Cancel</mb-button>
-                                    <mb-button variant="primary" (click)="createGeneratedSections()">Create sections</mb-button>
+                                    <mb-button variant="primary" (click)="createGeneratedSections()">Create
+                                        sections</mb-button>
                                 </div>
                             </mb-modal>
 
@@ -1387,21 +1397,21 @@
                                 <div class="reorder-modal">
                                     <div class="reorder-modal__list" cdkDropList
                                         (cdkDropListDropped)="handleClassReorderDrop($event)">
-                                        <div class="reorder-modal__row" *ngFor="let row of classReorderDraft()"
-                                            cdkDrag>
+                                        <div class="reorder-modal__row" *ngFor="let row of classReorderDraft()" cdkDrag>
                                             <span class="reorder-modal__handle" cdkDragHandle>⋮⋮</span>
                                             <span>{{ row.name }}</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div mbModalFooter class="reorder-modal__footer">
-                                    <mb-button variant="secondary" (click)="requestCloseClassReorder()">Cancel</mb-button>
+                                    <mb-button variant="secondary"
+                                        (click)="requestCloseClassReorder()">Cancel</mb-button>
                                     <mb-button variant="primary" (click)="saveClassReorder()">Save order</mb-button>
                                 </div>
                             </mb-modal>
 
-                            <mb-modal [open]="sectionReorderOpen()" title="Reorder sections" size="sm" [hasFooter]="true"
-                                (closed)="requestCloseSectionReorder()">
+                            <mb-modal [open]="sectionReorderOpen()" title="Reorder sections" size="sm"
+                                [hasFooter]="true" (closed)="requestCloseSectionReorder()">
                                 <div class="reorder-modal">
                                     <div class="reorder-modal__list" cdkDropList
                                         (cdkDropListDropped)="handleSectionReorderDrop($event)">
@@ -1413,7 +1423,8 @@
                                     </div>
                                 </div>
                                 <div mbModalFooter class="reorder-modal__footer">
-                                    <mb-button variant="secondary" (click)="requestCloseSectionReorder()">Cancel</mb-button>
+                                    <mb-button variant="secondary"
+                                        (click)="requestCloseSectionReorder()">Cancel</mb-button>
                                     <mb-button variant="primary" (click)="saveSectionReorder()">Save order</mb-button>
                                 </div>
                             </mb-modal>
@@ -1445,7 +1456,8 @@
                                     </div>
                                 </div>
                                 <div mbModalFooter class="import-modal__footer">
-                                    <mb-button variant="secondary" (click)="requestCloseImportModal()">Cancel</mb-button>
+                                    <mb-button variant="secondary"
+                                        (click)="requestCloseImportModal()">Cancel</mb-button>
                                     <mb-button variant="primary" [disabled]="!classImportRows().length"
                                         (click)="confirmImport()">Import</mb-button>
                                 </div>
@@ -1474,11 +1486,10 @@
                                         <mb-button variant="primary" (click)="openNewGradingScale()">Add grading
                                             scale</mb-button>
                                         <button type="button" class="grading-menu__toggle" #gradingHeaderMenuOrigin
-                                            aria-label="More actions"
-                                            [attr.aria-expanded]="gradingHeaderMenuOpen()"
+                                            aria-label="More actions" [attr.aria-expanded]="gradingHeaderMenuOpen()"
                                             (click)="toggleGradingHeaderMenu()">⋯</button>
-                                        <mb-popover [open]="gradingHeaderMenuOpen()"
-                                            [origin]="gradingHeaderMenuOrigin" [hasBackdrop]="true"
+                                        <mb-popover [open]="gradingHeaderMenuOpen()" [origin]="gradingHeaderMenuOrigin"
+                                            [hasBackdrop]="true"
                                             [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'grading-menu__panel']"
                                             (closed)="closeGradingHeaderMenu()">
                                             <div class="grading-menu__panel-content">
@@ -1520,7 +1531,8 @@
                                                                 {{ scale.status }}
                                                             </span>
                                                             <span class="grading-scale__usage">
-                                                                {{ scale.schoolIds?.length ? (scale.schoolIds?.length + ' schools') : 'All schools' }}
+                                                                {{ scale.schoolIds?.length ? (scale.schoolIds?.length +
+                                                                ' schools') : 'All schools' }}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -1538,7 +1550,8 @@
                                         </div>
 
                                         <div class="grading-panel grading-panel--detail">
-                                            <ng-container *ngIf="selectedGradingScale() as scale; else emptyGradingDetail">
+                                            <ng-container
+                                                *ngIf="selectedGradingScale() as scale; else emptyGradingDetail">
                                                 <div class="grading-detail__header">
                                                     <div>
                                                         <div class="grading-detail__title">{{ scale.name }}</div>
@@ -1563,7 +1576,8 @@
                                                                     (click)="duplicateGradingScale()">Duplicate</button>
                                                                 <button type="button" class="grading-menu__item"
                                                                     (click)="archiveGradingScale()">
-                                                                    {{ scale.status === 'Archived' ? 'Restore' : 'Archive' }}
+                                                                    {{ scale.status === 'Archived' ? 'Restore' :
+                                                                    'Archive' }}
                                                                 </button>
                                                             </div>
                                                         </mb-popover>
@@ -1581,7 +1595,8 @@
 
                                                 <div *ngIf="gradingActiveTab() === 'bands'" class="grading-bands">
                                                     <div class="grading-bands__actions">
-                                                        <mb-button variant="secondary" (click)="openAddGradeBand()">+ Add
+                                                        <mb-button variant="secondary" (click)="openAddGradeBand()">+
+                                                            Add
                                                             grade band</mb-button>
                                                     </div>
                                                     <div class="grading-bands__table"
@@ -1606,8 +1621,7 @@
                                                                 </span>
                                                             </div>
                                                             <div class="grading-bands__actions-cell">
-                                                                <button type="button"
-                                                                    class="grading-bands__menu-toggle"
+                                                                <button type="button" class="grading-bands__menu-toggle"
                                                                     #gradingBandMenuOrigin aria-label="Row actions"
                                                                     [attr.aria-expanded]="gradingBandMenuOpenId() === band.id"
                                                                     (click)="toggleGradingBandMenu(band.id, $event)">⋯</button>
@@ -1647,7 +1661,7 @@
                                                         <div class="grading-settings__row">
                                                             <mb-form-field label="Pass mark threshold"
                                                                 [controlId]="'grading-pass-mark'">
-                                                            <mb-input id="grading-pass-mark"
+                                                                <mb-input id="grading-pass-mark"
                                                                     [value]="(scale.settings.passMark ?? '').toString()"
                                                                     placeholder="Optional"
                                                                     (valueChange)="setGradingPassMark($event)"></mb-input>
@@ -1657,8 +1671,7 @@
                                                                     (checkedChange)="updateSelectedScaleSettings({ allowDecimals: $event })">
                                                                     Allow decimals
                                                                 </mb-checkbox>
-                                                                <mb-checkbox
-                                                                    [checked]="scale.settings.preventOverlap"
+                                                                <mb-checkbox [checked]="scale.settings.preventOverlap"
                                                                     (checkedChange)="updateSelectedScaleSettings({ preventOverlap: $event })">
                                                                     Prevent overlapping ranges
                                                                 </mb-checkbox>
@@ -1712,7 +1725,8 @@
                                                                     [value]="scale.settings.transcriptFormat"
                                                                     (valueChange)="setGradingTranscriptFormat($event)">
                                                                     <option value="Letter">Letter</option>
-                                                                    <option value="Letter + Percent">Letter + Percent</option>
+                                                                    <option value="Letter + Percent">Letter + Percent
+                                                                    </option>
                                                                     <option value="Percent">Percent only</option>
                                                                 </mb-select>
                                                             </mb-form-field>
@@ -1747,8 +1761,7 @@
 
                             <mb-modal [open]="gradingScaleFormOpen()"
                                 [title]="gradingScaleFormMode() === 'add' ? 'New grading scale' : 'Edit grading scale'"
-                                size="md"
-                                [hasFooter]="true" (closed)="requestCloseGradingScaleForm()">
+                                size="md" [hasFooter]="true" (closed)="requestCloseGradingScaleForm()">
                                 <div class="grading-modal">
                                     <div class="grading-modal__subtitle">Create a grading scale for reporting and
                                         calculations.</div>
@@ -1760,8 +1773,7 @@
                                             (valueChange)="gradingScaleFormName.set($event)"></mb-input>
                                     </mb-form-field>
                                     <mb-form-field label="Template (optional)" [controlId]="'grading-scale-template'">
-                                        <mb-select id="grading-scale-template"
-                                            [value]="gradingScaleFormTemplate()"
+                                        <mb-select id="grading-scale-template" [value]="gradingScaleFormTemplate()"
                                             (valueChange)="selectGradingTemplate($event)">
                                             <option value="">None</option>
                                             <option *ngFor="let option of gradingTemplateOptions()" [value]="option.id">
@@ -1802,8 +1814,7 @@
                                         </div>
                                     </div>
                                     <mb-form-field label="Default pass mark" [controlId]="'grading-pass-mark-default'">
-                                        <mb-input id="grading-pass-mark-default"
-                                            [value]="gradingScaleFormPassMark()"
+                                        <mb-input id="grading-pass-mark-default" [value]="gradingScaleFormPassMark()"
                                             placeholder="Optional"
                                             (valueChange)="gradingScaleFormPassMark.set($event)"></mb-input>
                                     </mb-form-field>
@@ -1819,8 +1830,7 @@
 
                             <mb-modal [open]="gradingBandFormOpen()"
                                 [title]="gradingBandFormMode() === 'add' ? 'Add grade band' : 'Edit grade band'"
-                                size="sm"
-                                [hasFooter]="true" (closed)="requestCloseGradeBandForm()">
+                                size="sm" [hasFooter]="true" (closed)="requestCloseGradeBandForm()">
                                 <div class="grading-modal">
                                     <div class="grading-modal__subtitle">Define the score range and status for this
                                         grade band.</div>
@@ -1897,13 +1907,10 @@
                                                     aria-label="Actions"
                                                     [attr.aria-expanded]="userMenuOpenId() === userMenuKey(row)"
                                                     (click)="toggleUserMenu(userMenuKey(row), $event)">⋯</button>
-                                                <mb-popover
-                                                    [open]="userMenuOpenId() === userMenuKey(row)"
-                                                    [origin]="userMenuOrigin"
-                                                    [hasBackdrop]="true"
+                                                <mb-popover [open]="userMenuOpenId() === userMenuKey(row)"
+                                                    [origin]="userMenuOrigin" [hasBackdrop]="true"
                                                     [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'users-menu__panel']"
-                                                    (closed)="closeUserMenu()"
-                                                >
+                                                    (closed)="closeUserMenu()">
                                                     <div class="users-menu__panel-content" role="menu">
                                                         <button type="button" class="users-menu__item"
                                                             (click)="openEditUser(getUserRowIndex(row)); closeUserMenu()">
@@ -2057,8 +2064,7 @@
                                             {{ inviteMessageOpen() ? 'Hide message' : '+ Add optional message' }}
                                         </button>
                                         <mb-form-field *ngIf="inviteMessageOpen()" class="users-textarea-field"
-                                            label="Optional message"
-                                            [controlId]="'invite-message'">
+                                            label="Optional message" [controlId]="'invite-message'">
                                             <mb-textarea id="invite-message" [value]="inviteMessage()"
                                                 (valueChange)="inviteMessage.set($event)"
                                                 placeholder="Add a short note to include in the invitation email."></mb-textarea>
@@ -2314,8 +2320,7 @@
                                         <p>Confirm your workspace configuration before activation. You can update these
                                             settings anytime from Settings.</p>
                                     </div>
-                                    <span class="review-status-pill"
-                                        [class.is-ready]="reviewReady()"
+                                    <span class="review-status-pill" [class.is-ready]="reviewReady()"
                                         [class.is-warning]="!reviewReady()">
                                         {{ reviewReady() ? 'Ready to activate' : 'Action required' }}
                                     </span>
@@ -2328,7 +2333,8 @@
                                     <div class="review-card">
                                         <div class="review-card__top">
                                             <span class="review-card__label">Schools</span>
-                                            <button type="button" class="review-link" (click)="goToStep(1)">Edit</button>
+                                            <button type="button" class="review-link"
+                                                (click)="goToStep(1)">Edit</button>
                                         </div>
                                         <div class="review-value">{{ schoolRows().length }} schools</div>
                                         <div class="review-details">
@@ -2343,7 +2349,8 @@
                                     <div class="review-card">
                                         <div class="review-card__top">
                                             <span class="review-card__label">Academic levels</span>
-                                            <button type="button" class="review-link" (click)="goToStep(4)">Edit</button>
+                                            <button type="button" class="review-link"
+                                                (click)="goToStep(4)">Edit</button>
                                         </div>
                                         <div class="review-value">{{ levels().length }} levels</div>
                                         <div class="review-details">
@@ -2358,7 +2365,8 @@
                                     <div class="review-card">
                                         <div class="review-card__top">
                                             <span class="review-card__label">Grading system</span>
-                                            <button type="button" class="review-link" (click)="goToStep(6)">Edit</button>
+                                            <button type="button" class="review-link"
+                                                (click)="goToStep(6)">Edit</button>
                                         </div>
                                         <div class="review-value">{{ gradingModel() | titlecase }}</div>
                                         <div class="review-details">
@@ -2373,7 +2381,8 @@
                                     <div class="review-card">
                                         <div class="review-card__top">
                                             <span class="review-card__label">Staff &amp; users</span>
-                                            <button type="button" class="review-link" (click)="goToStep(2)">Edit</button>
+                                            <button type="button" class="review-link"
+                                                (click)="goToStep(2)">Edit</button>
                                         </div>
                                         <div class="review-value">{{ userCount() }} users</div>
                                         <div class="review-details">
@@ -2402,7 +2411,8 @@
 
                             <div class="setup-actions review-actions">
                                 <mb-button variant="secondary" (click)="back()">Back</mb-button>
-                                <mb-button variant="primary" [loading]="isSaving()" [disabled]="isSaving()" (click)="next()">
+                                <mb-button variant="primary" [loading]="isSaving()" [disabled]="isSaving()"
+                                    (click)="next()">
                                     Activate workspace
                                 </mb-button>
                             </div>
@@ -2432,15 +2442,16 @@
                             </p>
                             <div class="setup-complete__actions">
                                 <mb-button variant="primary" (click)="finish()">Go to dashboard</mb-button>
-                                <mb-button variant="secondary" (click)="goToStep(1)">Review workspace settings</mb-button>
+                                <mb-button variant="secondary" (click)="goToStep(1)">Review workspace
+                                    settings</mb-button>
                                 <mb-button variant="tertiary" (click)="goToStep(2)">Invite users</mb-button>
                             </div>
                             <div class="setup-complete__next">
                                 <div class="setup-complete__next-title">Next steps</div>
                                 <div class="setup-complete__next-links">
                                     <a class="setup-complete__next-link" routerLink="/students">Enroll students</a>
-                                    <button type="button" class="setup-complete__next-link"
-                                        (click)="goToStep(2)">Assign staff to schools</button>
+                                    <button type="button" class="setup-complete__next-link" (click)="goToStep(2)">Assign
+                                        staff to schools</button>
                                     <a class="setup-complete__next-link" routerLink="/academics">Set up timetables</a>
                                 </div>
                             </div>
@@ -2468,7 +2479,8 @@
                             </div>
                             <div class="setup-complete__summary-row">
                                 <span>Grading system</span>
-                                <span>{{ gradingScales().length ? (gradingScales().length + ' scales') : 'Not set' }}</span>
+                                <span>{{ gradingScales().length ? (gradingScales().length + ' scales') : 'Not set'
+                                    }}</span>
                             </div>
                         </div>
                     </div>

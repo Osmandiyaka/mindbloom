@@ -28,6 +28,7 @@ import {
 import { AddressComponent, AddressValue } from '../../../../shared/components/address/address.component';
 import { COUNTRY_OPTIONS, CountrySelectComponent } from '../../../../shared/components/country-select/country-select.component';
 import { TIMEZONE_OPTIONS, TimezoneSelectComponent } from '../../../../shared/components/timezone-select/timezone-select.component';
+import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
 import { TenantSettingsService } from '../../../../core/services/tenant-settings.service';
 import { TenantService } from '../../../../core/services/tenant.service';
 import { SchoolService } from '../../../../core/school/school.service';
@@ -190,6 +191,7 @@ interface FirstLoginSetupData {
         AddressComponent,
         CountrySelectComponent,
         TimezoneSelectComponent,
+        SearchInputComponent,
     ],
     templateUrl: './tenant-workspace-setup.component.html',
     styleUrls: ['./tenant-workspace-setup.component.scss']
@@ -277,10 +279,12 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     sectionRows = signal<SectionRow[]>([]);
     selectedClassId = signal<string | null>(null);
     classSearch = signal('');
+    classSort = signal<'az' | 'recent'>('az');
     classSchoolFilter = signal<string>('all');
     classFormOpen = signal(false);
     classFormMode = signal<'add' | 'edit' | 'view'>('add');
     classMenuOpenId = signal<string | null>(null);
+    classHeaderMenuOpen = signal(false);
     sectionsMenuOpen = signal(false);
     sectionMenuOpenId = signal<string | null>(null);
     classFormId = signal<string | null>(null);
@@ -465,7 +469,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     readonly filteredClassRows = computed(() => {
         const query = this.classSearch().trim().toLowerCase();
         const schoolFilter = this.classSchoolFilter();
-        return this.sortedClassRows().filter(row => {
+        const rows = this.classRows().filter(row => {
             if (schoolFilter !== 'all') {
                 if (row.schoolIds !== null && !row.schoolIds.includes(schoolFilter)) {
                     return false;
@@ -474,6 +478,13 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             if (!query) return true;
             return row.name.toLowerCase().includes(query)
                 || (row.code || '').toLowerCase().includes(query);
+        });
+        const sort = this.classSort();
+        return [...rows].sort((a, b) => {
+            if (sort === 'recent') {
+                return (b.sortOrder ?? 0) - (a.sortOrder ?? 0);
+            }
+            return a.name.localeCompare(b.name);
         });
     });
     readonly selectedClass = computed(() => {
@@ -487,6 +498,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         });
         return counts;
     });
+    readonly skeletonRows = Array.from({ length: 5 });
     readonly filteredSections = computed(() => {
         const selected = this.selectedClassId();
         if (!selected) return [];
@@ -1629,6 +1641,17 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.classMenuOpenId.set(null);
     }
 
+    toggleClassHeaderMenu(event?: MouseEvent): void {
+        event?.stopPropagation();
+        const next = !this.classHeaderMenuOpen();
+        this.closeAllActionMenus();
+        this.classHeaderMenuOpen.set(next);
+    }
+
+    closeClassHeaderMenu(): void {
+        this.classHeaderMenuOpen.set(false);
+    }
+
     toggleSectionsMenu(event?: MouseEvent): void {
         event?.stopPropagation();
         const next = !this.sectionsMenuOpen();
@@ -1799,6 +1822,12 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             ? { ...item, active: !item.active }
             : item));
         this.toast.success(`Class "${row.name}" ${row.active ? 'deactivated' : 'activated'}.`);
+    }
+
+    setClassSort(value: string): void {
+        if (value === 'az' || value === 'recent') {
+            this.classSort.set(value);
+        }
     }
 
     openAddSection(selectedClass?: ClassRow | null): void {
@@ -2335,6 +2364,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
         this.schoolMenuOpenIndex.set(null);
         this.ouActionsMenuOpen.set(false);
         this.classMenuOpenId.set(null);
+        this.classHeaderMenuOpen.set(false);
         this.sectionsMenuOpen.set(false);
         this.sectionMenuOpenId.set(null);
         this.userMenuOpenId.set(null);
