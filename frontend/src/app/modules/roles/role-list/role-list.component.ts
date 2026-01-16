@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { OverlayModule } from '@angular/cdk/overlay';
 import { firstValueFrom } from 'rxjs';
 import { RoleService } from '../../../core/services/role.service';
 import { UserService, User } from '../../../core/services/user.service';
@@ -35,6 +36,7 @@ type RoleFormMode = 'create' | 'edit' | 'duplicate';
     imports: [
         CommonModule,
         FormsModule,
+        OverlayModule,
         MbButtonComponent,
         MbCardComponent,
         MbInputComponent,
@@ -274,7 +276,7 @@ export class RoleListComponent implements OnInit {
             this.detailRoleId.set(list[0].id);
             this.detailTab.set('permissions');
         }
-    });
+    }, { allowSignalWrites: true });
 
     ngOnInit(): void {
         this.roleService.getRoles().subscribe();

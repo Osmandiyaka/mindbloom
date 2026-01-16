@@ -56,11 +56,11 @@
                             (rowClick)="openRoleDetails($event.id, 'permissions')">
                             <ng-template mbTableActions let-row>
                                 <div class="roles-table__actions">
-                                    <button type="button" class="roles-menu__trigger" #roleMenuOrigin
+                                    <button type="button" class="roles-menu__trigger" cdkOverlayOrigin #roleMenuOrigin="cdkOverlayOrigin"
                                         aria-label="Role actions" (click)="toggleRoleMenu(row.id, $event)">
                                         ⋯
                                     </button>
-                                    <mb-popover [open]="roleMenuOpenId() === row.id" [origin]="roleMenuOrigin"
+                                    <mb-popover [open]="roleMenuOpenId() === row.id" [origin]="roleMenuOrigin" [debug]="true"
                                         [hasBackdrop]="true"
                                         [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'roles-menu__panel']"
                                         (closed)="closeRoleMenu()">
@@ -127,11 +127,11 @@
                                     (click)="openDuplicateRole(detailRole)">
                                     Duplicate role
                                 </mb-button>
-                                <button type="button" class="roles-menu__trigger" #detailMenuOrigin
+                                <button type="button" class="roles-menu__trigger" cdkOverlayOrigin #detailMenuOrigin="cdkOverlayOrigin"
                                     aria-label="More actions" (click)="toggleDetailMenu()">
                                     ⋯
                                 </button>
-                                <mb-popover [open]="detailMenuOpen()" [origin]="detailMenuOrigin" [hasBackdrop]="true"
+                                <mb-popover [open]="detailMenuOpen()" [origin]="detailMenuOrigin" [debug]="true" [hasBackdrop]="true"
                                     [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'roles-menu__panel']"
                                     (closed)="closeDetailMenu()">
                                     <div class="roles-menu__panel-content" role="menu">

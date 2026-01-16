@@ -7,11 +7,11 @@
     box-shadow: var(--mb-shadow-2);
 }
 
-.mb-popover-panel {
+:host ::ng-deep .mb-popover-panel {
     z-index: var(--mb-layer-popover);
 }
 
-.mb-popover-panel--above-modal {
+:host ::ng-deep .mb-popover-panel--above-modal {
     z-index: calc(var(--mb-layer-modal) + 1);
 }
 
@@ -23,7 +23,19 @@
     box-shadow: none;
 }
 
-.cdk-overlay-backdrop.mb-popover-backdrop {
+:host ::ng-deep .cdk-overlay-backdrop.mb-popover-backdrop {
     background: transparent;
     backdrop-filter: none;
+}
+
+.mb-popover-debug {
+    position: fixed;
+    z-index: calc(var(--mb-layer-popover) + 1);
+    transform: translateY(8px);
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(16, 24, 40, 0.8);
+    color: #fff;
+    font-size: 11px;
+    pointer-events: none;
 }

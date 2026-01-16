@@ -4,3 +4,11 @@
 .cdk-overlay-container {
     z-index: 1300;
 }
+
+.cdk-overlay-pane.mb-popover-panel {
+    z-index: var(--mb-layer-popover);
+}
+
+.cdk-overlay-pane.mb-popover-panel--above-modal {
+    z-index: calc(var(--mb-layer-modal) + 1);
+}
