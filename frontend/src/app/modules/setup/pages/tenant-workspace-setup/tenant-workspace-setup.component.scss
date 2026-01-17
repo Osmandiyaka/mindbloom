@@ -497,6 +497,11 @@
     background: color-mix(in srgb, var(--mb-color-border) 35%, transparent);
 }
 
+.schools-status.is-archived {
+    color: var(--mb-color-text-muted);
+    background: color-mix(in srgb, var(--mb-color-border) 35%, transparent);
+}
+
 .schools-status__dot {
     width: 6px;
     height: 6px;
@@ -3964,5 +3969,358 @@
         width: 100%;
         left: 50%;
         max-height: calc(100vh - 96px);
+    }
+}
+
+.schools-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.schools-header__main h2 {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--mb-color-text);
+}
+
+.schools-header__main p {
+    margin: 0;
+    color: var(--mb-color-text-muted);
+    font-size: 14px;
+}
+
+.schools-header__summary {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--mb-color-text-subtle);
+}
+
+.schools-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.schools-header__menu,
+.schools-bulk__menu {
+    border: 1px solid var(--mb-color-border-subtle);
+    background: var(--mb-color-surface);
+    color: var(--mb-color-text-muted);
+    border-radius: 10px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.schools-header__menu:hover,
+.schools-bulk__menu:hover {
+    color: var(--mb-color-text);
+    border-color: var(--mb-color-border);
+}
+
+.schools-header__menu:focus-visible,
+.schools-bulk__menu:focus-visible,
+.schools-density__button:focus-visible,
+.schools-pagination__page:focus-visible,
+.schools-pagination__nav:focus-visible,
+.schools-menu__toggle:focus-visible {
+    outline: 2px solid var(--mb-color-primary);
+    outline-offset: 2px;
+}
+
+.schools-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.schools-controls__left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.schools-controls__right {
+    margin-left: auto;
+}
+
+.schools-controls__count {
+    font-size: 12px;
+    color: var(--mb-color-text-subtle);
+}
+
+.schools-density {
+    display: inline-flex;
+    gap: 6px;
+    border: 1px solid var(--mb-color-border-subtle);
+    border-radius: 10px;
+    padding: 2px;
+    background: var(--mb-color-surface);
+}
+
+.schools-density__button {
+    border: none;
+    background: transparent;
+    padding: 6px 10px;
+    font-size: 12px;
+    color: var(--mb-color-text-muted);
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.schools-density__button.is-active {
+    background: var(--mb-color-surface-2);
+    color: var(--mb-color-text);
+    font-weight: 600;
+}
+
+.schools-bulk {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--mb-color-border-subtle);
+    background: var(--mb-color-surface-2);
+    margin-bottom: 12px;
+}
+
+.schools-bulk__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mb-color-text);
+}
+
+.schools-bulk__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.schools-table-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+:host ::ng-deep .schools-table .mb-table {
+    border: 1px solid var(--mb-color-border-subtle);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+:host ::ng-deep .schools-table .mb-table thead th {
+    background: var(--mb-color-surface-2);
+    font-size: 12px;
+}
+
+:host ::ng-deep .schools-table .mb-table tbody td {
+    padding: 12px 16px;
+}
+
+:host ::ng-deep .schools-table.is-compact .mb-table tbody td,
+:host ::ng-deep .schools-table.is-compact .mb-table thead th {
+    padding: 8px 12px;
+}
+
+:host ::ng-deep .schools-table .mb-table__cell--link {
+    cursor: pointer;
+}
+
+:host ::ng-deep .schools-row--selected {
+    background: color-mix(in srgb, var(--mb-color-primary) 8%, transparent);
+}
+
+:host ::ng-deep .schools-row--selected:hover {
+    background: color-mix(in srgb, var(--mb-color-primary) 12%, transparent);
+}
+
+:host ::ng-deep .schools-row--archived .mb-table__cell--status {
+    color: var(--mb-color-text-muted);
+    background: color-mix(in srgb, var(--mb-color-border) 30%, transparent);
+}
+
+.schools-menu__divider {
+    height: 1px;
+    background: var(--mb-color-border-subtle);
+    margin: 4px 0;
+}
+
+.schools-menu__item--submenu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+:host ::ng-deep .schools-menu__panel--submenu .mb-popover {
+    min-width: 180px;
+}
+
+.schools-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.schools-pagination__meta {
+    font-size: 12px;
+    color: var(--mb-color-text-muted);
+}
+
+.schools-pagination__controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.schools-pagination__page,
+.schools-pagination__nav {
+    border: 1px solid var(--mb-color-border-subtle);
+    background: var(--mb-color-surface);
+    color: var(--mb-color-text);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.schools-pagination__page.is-active {
+    border-color: var(--mb-color-primary);
+    color: var(--mb-color-primary);
+    font-weight: 600;
+}
+
+.schools-pagination__nav:disabled {
+    cursor: not-allowed;
+    color: var(--mb-color-text-muted);
+}
+
+.schools-pagination__size {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--mb-color-text-muted);
+}
+
+.schools-empty {
+    border: 1px dashed var(--mb-color-border-subtle);
+    border-radius: 16px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    color: var(--mb-color-text);
+}
+
+.schools-empty__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--mb-color-surface-2);
+}
+
+.schools-empty__title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.schools-empty__text {
+    font-size: 13px;
+    color: var(--mb-color-text-muted);
+}
+
+.schools-empty__actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+:host ::ng-deep .schools-drawer {
+    width: 420px;
+}
+
+.schools-drawer__title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.schools-drawer__section {
+    padding: 12px 0;
+    border-top: 1px solid var(--mb-color-border-subtle);
+}
+
+.schools-drawer__section-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--mb-color-text-muted);
+    margin-bottom: 10px;
+}
+
+.schools-drawer__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px 20px;
+}
+
+.schools-drawer__label {
+    font-size: 12px;
+    color: var(--mb-color-text-subtle);
+}
+
+.schools-drawer__value {
+    font-size: 14px;
+    color: var(--mb-color-text);
+    font-weight: 500;
+}
+
+.schools-drawer__footer {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.schools-confirm__title {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.schools-confirm__text {
+    font-size: 13px;
+    color: var(--mb-color-text-muted);
+    margin-bottom: 12px;
+}
+
+.schools-confirm__error {
+    color: var(--mb-color-danger);
+    font-size: 12px;
+}
+
+@media (max-width: 900px) {
+    .schools-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .schools-header__actions {
+        width: 100%;
+        justify-content: flex-start;
     }
 }

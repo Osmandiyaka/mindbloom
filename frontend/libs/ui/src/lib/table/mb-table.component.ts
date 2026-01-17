@@ -38,6 +38,7 @@ export type MbTableCellValue =
                             <input
                                 type="checkbox"
                                 [checked]="allSelected"
+                                [indeterminate]="isIndeterminate"
                                 [disabled]="selectionDisabled"
                                 (change)="toggleAll($event)"
                                 aria-label="Select all rows"
@@ -65,7 +66,10 @@ export type MbTableCellValue =
                     <tr
                         *ngFor="let row of displayRows; let rowIndex = index; trackBy: trackByKey"
                         [class]="rowClass?.(row) || null"
+                        [attr.aria-selected]="selectable ? isSelected(row) : null"
                         (click)="handleRowClick($event, row)"
+                        (keydown)="handleRowKeydown($event, row)"
+                        tabindex="0"
                     >
                         <td *ngIf="selectable" class="mb-table__checkbox">
                             <input
@@ -188,6 +192,10 @@ export class MbTableComponent<T extends Record<string, any>> {
         return this.rows.length > 0 && this.rows.every(row => this.selectedKeys.has(this.resolveKey(row)));
     }
 
+    get isIndeterminate(): boolean {
+        return this.selectedKeys.size > 0 && !this.allSelected;
+    }
+
     toggleSort(column: MbTableColumn<T>): void {
         if (!column.sortable) {
             return;
@@ -279,7 +287,10 @@ export class MbTableComponent<T extends Record<string, any>> {
 
     isInactiveStatus(row: T): boolean {
         const status = row['status' as keyof T];
-        return status === 'Inactive' || status === 'Suspended';
+        return status === 'Inactive'
+            || status === 'Suspended'
+            || status === 'Archived'
+            || status === 'archived';
     }
 
     isNameColumn(column: MbTableColumn<T>): boolean {
@@ -301,5 +312,17 @@ export class MbTableComponent<T extends Record<string, any>> {
             return;
         }
         this.rowClick.emit(row);
+    }
+
+    handleRowKeydown(event: KeyboardEvent, row: T): void {
+        if (event.key !== 'Enter' && event.key !== ' ') {
+            return;
+        }
+        const target = event.target as HTMLElement | null;
+        if (target && target.closest('button, a, input, [role=\"button\"]')) {
+            return;
+        }
+        event.preventDefault();
+        this.handleRowClick(event, row);
     }
 }

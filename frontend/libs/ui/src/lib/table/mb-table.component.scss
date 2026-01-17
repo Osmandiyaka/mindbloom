@@ -123,6 +123,11 @@
     background: color-mix(in srgb, var(--mb-color-surface-2) 65%, transparent);
 }
 
+.mb-table tbody tr:focus-visible {
+    outline: 2px solid var(--mb-color-primary);
+    outline-offset: -2px;
+}
+
 .mb-table__checkbox {
     width: 40px;
 }

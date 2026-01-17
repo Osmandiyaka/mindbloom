@@ -1,34 +1,83 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
-import { MbTableColumn } from '@mindbloom/ui';
+import { Component, ViewChild, computed, inject, signal } from '@angular/core';
+import { MbSelectOption, MbTableColumn, MbTableComponent } from '@mindbloom/ui';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from './tenant-workspace-setup.shared';
-import { TenantSettingsService } from '../../../../core/services/tenant-settings.service';
-import { ApiClient } from '../../../../core/http/api-client.service';
 import { ToastService } from '../../../../core/ui/toast/toast.service';
-import { AddressValue } from '../../../../shared/components/address/address.component';
-import { COUNTRY_OPTIONS } from '../../../../shared/components/country-select/country-select.component';
-import { TIMEZONE_OPTIONS } from '../../../../shared/components/timezone-select/timezone-select.component';
-import type { School } from '../../../../core/school/school.models';
-import { SchoolRow } from './tenant-workspace-setup.models';
 
-const DEFAULT_TIMEZONE = 'UTC';
-const SCHOOL_TYPE = 'mixed';
-const SCHOOL_CODE_REGEX = /^[a-z0-9-]+$/;
-const SCHOOL_STATUS_MAP: Record<SchoolRow['status'], 'pending_setup' | 'active' | 'inactive' | 'archived'> = {
-    Active: 'active',
-    Inactive: 'inactive',
-    Archived: 'archived',
+const DEFAULT_PAGE_SIZE = 10;
+const PAGE_SIZES = [10, 25, 50];
+
+const STATUS_LABELS: Record<SchoolStatus, string> = {
+    active: 'Active',
+    archived: 'Archived',
 };
-const TIMEZONE_VALUES = TIMEZONE_OPTIONS.map(option => option.value);
-const COUNTRY_LABELS = COUNTRY_OPTIONS.map(option => option.label.toLowerCase());
 
-type SchoolCreatePayload = {
+const SEED_SCHOOLS: WorkspaceSchool[] = [
+    {
+        id: 'sch-001',
+        name: 'Brookfield Academy',
+        code: 'brookfield',
+        locationCountry: 'United States',
+        timeZone: 'America/New_York',
+        status: 'active',
+        createdAt: new Date('2022-05-16T09:15:00Z'),
+        updatedAt: new Date('2024-02-12T14:20:00Z'),
+    },
+    {
+        id: 'sch-002',
+        name: 'Evergreen International',
+        code: 'evergreen-intl',
+        locationCountry: 'United Kingdom',
+        timeZone: 'Europe/London',
+        status: 'active',
+        createdAt: new Date('2023-01-09T10:40:00Z'),
+        updatedAt: new Date('2024-03-01T08:00:00Z'),
+    },
+    {
+        id: 'sch-003',
+        name: 'Maple Ridge School',
+        code: 'maple-ridge',
+        locationCountry: 'Canada',
+        timeZone: 'America/Toronto',
+        status: 'archived',
+        createdAt: new Date('2021-10-20T12:00:00Z'),
+        updatedAt: new Date('2023-11-05T12:00:00Z'),
+    },
+    {
+        id: 'sch-004',
+        name: 'Lagoonview College',
+        code: 'lagoonview',
+        locationCountry: 'Nigeria',
+        timeZone: 'Africa/Lagos',
+        status: 'active',
+        createdAt: new Date('2024-01-15T09:30:00Z'),
+        updatedAt: new Date('2024-02-18T15:45:00Z'),
+    },
+    {
+        id: 'sch-005',
+        name: 'Sunrise STEM Institute',
+        code: 'sunrise-stem',
+        locationCountry: 'Kenya',
+        timeZone: 'Africa/Nairobi',
+        status: 'active',
+        createdAt: new Date('2022-07-04T08:00:00Z'),
+        updatedAt: new Date('2023-08-14T16:10:00Z'),
+    },
+];
+
+type SchoolStatus = 'active' | 'archived';
+type StatusFilter = 'all' | SchoolStatus;
+type SortOption = 'name-asc' | 'name-desc' | 'created-desc' | 'created-asc';
+type DensityOption = 'comfortable' | 'compact';
+
+type WorkspaceSchool = {
+    id: string;
     name: string;
-    code?: string;
-    type: string;
-    status: 'pending_setup' | 'active' | 'inactive' | 'archived';
-    address?: AddressValue & { country?: string };
-    settings?: { timezone?: string };
+    code: string;
+    locationCountry: string;
+    timeZone: string;
+    status: SchoolStatus;
+    createdAt: Date;
+    updatedAt?: Date;
 };
 
 @Component({
@@ -38,427 +87,533 @@ type SchoolCreatePayload = {
     templateUrl: './school-setup.component.html',
     styleUrls: ['./school-setup.component.scss']
 })
-export class TenantSchoolsComponent implements OnInit {
-    private readonly tenantSettings = inject(TenantSettingsService);
-    private readonly api = inject(ApiClient);
+export class TenantSchoolsComponent {
     private readonly toast = inject(ToastService);
 
-    isLoading = signal(true);
-    isSaving = signal(false);
-    errorMessage = signal<string | null>(null);
-    tenantAddress = signal<AddressValue | null>(null);
-    country = signal('');
-    defaultTimezone = signal(DEFAULT_TIMEZONE);
+    @ViewChild(MbTableComponent) table?: MbTableComponent<WorkspaceSchool>;
 
-    schoolRows = signal<SchoolRow[]>([]);
+    schools = signal<WorkspaceSchool[]>(SEED_SCHOOLS);
+    searchQuery = signal('');
+    statusFilter = signal<StatusFilter>('all');
+    sortBy = signal<SortOption>('name-asc');
+    density = signal<DensityOption>('comfortable');
+    pageSize = signal(DEFAULT_PAGE_SIZE);
+    pageIndex = signal(1);
+    selectedSchoolIds = signal(new Set<string>());
+
+    headerMenuOpen = signal(false);
+    bulkMenuOpen = signal(false);
+    rowMenuOpenId = signal<string | null>(null);
+    rowDangerMenuOpenId = signal<string | null>(null);
+
+    drawerSchoolId = signal<string | null>(null);
+
     isSchoolModalOpen = signal(false);
+    editingSchoolId = signal<string | null>(null);
     schoolFormName = signal('');
     schoolFormCode = signal('');
     schoolFormCountry = signal('');
     schoolFormTimezone = signal('');
     schoolFormTouched = signal(false);
-    schoolFormCodeTouched = signal(false);
-    schoolFormAddress = signal<AddressValue>({});
-    schoolMenuOpenId = signal<string | null>(null);
-    editingSchoolId = signal<string | null>(null);
-    editingSchoolStatus = signal<SchoolRow['status']>('Active');
 
-    readonly schoolTableColumns: MbTableColumn<SchoolRow>[] = [
+    archiveConfirmOpen = signal(false);
+    archiveTargetId = signal<string | null>(null);
+
+    deleteConfirmOpen = signal(false);
+    deleteConfirmInput = signal('');
+    deleteConfirmTouched = signal(false);
+    deleteTargetIds = signal<string[]>([]);
+
+    private lastActiveElement: HTMLElement | null = null;
+
+    readonly statusOptions: MbSelectOption[] = [
+        { label: 'All', value: 'all' },
+        { label: 'Active', value: 'active' },
+        { label: 'Archived', value: 'archived' },
+    ];
+
+    readonly sortOptions: MbSelectOption[] = [
+        { label: 'Name (A-Z)', value: 'name-asc' },
+        { label: 'Name (Z-A)', value: 'name-desc' },
+        { label: 'Created (Newest)', value: 'created-desc' },
+        { label: 'Created (Oldest)', value: 'created-asc' },
+    ];
+
+    readonly pageSizeOptions: MbSelectOption[] = PAGE_SIZES.map(value => ({
+        label: String(value),
+        value: String(value),
+    }));
+
+    readonly schoolTableColumns: MbTableColumn<WorkspaceSchool>[] = [
         {
             key: 'name',
-            label: 'School name',
-            cell: row => row.name
+            label: 'School',
+            cell: row => ({
+                primary: row.name,
+                secondary: `Code: ${row.code || '--'} | ${row.locationCountry || '--'}`,
+            })
         },
         {
-            key: 'code',
-            label: 'Code',
-            cell: row => row.code
-        },
-        {
-            key: 'location',
+            key: 'locationCountry',
             label: 'Location',
-            cell: row => this.formatSchoolLocation(row)
+            cell: row => row.locationCountry || '--'
         },
         {
-            key: 'timezone',
+            key: 'timeZone',
             label: 'Time zone',
-            cell: row => row.timezone
+            cell: row => row.timeZone || '--'
         },
         {
             key: 'status',
             label: 'Status',
-            cell: row => row.status
+            cell: row => this.statusLabel(row.status)
         }
     ];
 
-    readonly schoolsValid = computed(() => {
-        const rows = this.schoolRows().filter(row => row.status === 'Active');
-        if (!rows.length) return false;
-        return rows.every(row =>
-            !!row.name.trim()
-            && !!row.code.trim()
-            && !!row.country.trim()
-            && !!row.timezone.trim()
-        );
+    readonly totalCount = computed(() => this.schools().length);
+    readonly activeCount = computed(() => this.schools().filter(school => school.status === 'active').length);
+    readonly archivedCount = computed(() => this.schools().filter(school => school.status === 'archived').length);
+
+    readonly filteredSchools = computed(() => {
+        const query = this.searchQuery().trim().toLowerCase();
+        const statusFilter = this.statusFilter();
+        return this.schools().filter((school) => {
+            if (statusFilter !== 'all' && school.status !== statusFilter) {
+                return false;
+            }
+            if (!query) {
+                return true;
+            }
+            const haystack = `${school.name} ${school.code} ${school.locationCountry}`.toLowerCase();
+            return haystack.includes(query);
+        });
     });
 
-    readonly canSaveSchool = computed(() => {
-        const code = this.schoolFormCode().trim();
-        return !!this.schoolFormName().trim()
-            && !!code
-            && SCHOOL_CODE_REGEX.test(code)
-            && !!this.schoolFormCountry().trim()
-            && this.isValidCountry(this.schoolFormCountry())
-            && !!this.schoolFormTimezone().trim()
-            && this.isValidTimezone(this.schoolFormTimezone());
+    readonly sortedSchools = computed(() => {
+        const sorted = [...this.filteredSchools()];
+        const sortBy = this.sortBy();
+        sorted.sort((a, b) => {
+            switch (sortBy) {
+                case 'name-desc':
+                    return b.name.localeCompare(a.name);
+                case 'created-desc':
+                    return b.createdAt.getTime() - a.createdAt.getTime();
+                case 'created-asc':
+                    return a.createdAt.getTime() - b.createdAt.getTime();
+                default:
+                    return a.name.localeCompare(b.name);
+            }
+        });
+        return sorted;
     });
 
-    ngOnInit(): void {
-        this.loadInitialState();
-        this.loadSchools();
+    readonly pageCount = computed(() => Math.max(1, Math.ceil(this.sortedSchools().length / this.pageSize())));
+
+    readonly pagedSchools = computed(() => {
+        const start = (this.pageIndex() - 1) * this.pageSize();
+        return this.sortedSchools().slice(start, start + this.pageSize());
+    });
+
+    readonly filteredCount = computed(() => this.sortedSchools().length);
+
+    readonly hasFilters = computed(() => !!this.searchQuery().trim() || this.statusFilter() !== 'all');
+
+    readonly selectedCount = computed(() => this.selectedSchoolIds().size);
+
+    readonly pageSizeValue = computed(() => String(this.pageSize()));
+
+    readonly drawerSchool = computed(() => {
+        const id = this.drawerSchoolId();
+        return id ? this.schools().find(school => school.id === id) ?? null : null;
+    });
+
+    readonly archiveTargetName = computed(() => {
+        const id = this.archiveTargetId();
+        return this.schools().find(school => school.id === id)?.name || 'school';
+    });
+
+    readonly deleteConfirmRequiredText = computed(() => {
+        const targets = this.deleteTargetIds();
+        if (targets.length === 1) {
+            return this.schools().find(school => school.id === targets[0])?.code ?? '';
+        }
+        return 'DELETE';
+    });
+
+    readonly deleteConfirmReady = computed(() => {
+        const required = this.deleteConfirmRequiredText();
+        if (!required) return false;
+        return this.deleteConfirmInput().trim() === required;
+    });
+
+    readonly pageNumbers = computed(() => this.buildPageNumbers());
+
+    readonly rowKey = (row: WorkspaceSchool) => row.id;
+
+    readonly rowClass = (row: WorkspaceSchool) => {
+        const classes: string[] = [];
+        if (row.status === 'archived') {
+            classes.push('schools-row--archived');
+        }
+        if (this.selectedSchoolIds().has(row.id)) {
+            classes.push('schools-row--selected');
+        }
+        return classes.join(' ');
+    };
+
+    handleSearch(term: string): void {
+        this.searchQuery.set(term);
+        this.pageIndex.set(1);
+        this.clearSelection();
+    }
+
+    updateStatusFilter(value: string): void {
+        this.statusFilter.set((value as StatusFilter) || 'all');
+        this.pageIndex.set(1);
+        this.clearSelection();
+    }
+
+    updateSort(value: string): void {
+        this.sortBy.set((value as SortOption) || 'name-asc');
+        this.pageIndex.set(1);
+        this.clearSelection();
+    }
+
+    updatePageSize(value: string): void {
+        const nextSize = Number(value) || DEFAULT_PAGE_SIZE;
+        this.pageSize.set(nextSize);
+        this.pageIndex.set(1);
+        this.clearSelection();
+    }
+
+    updatePage(index: number): void {
+        const next = Math.min(Math.max(1, index), this.pageCount());
+        this.pageIndex.set(next);
+        this.clearSelection();
+    }
+
+    toggleDensity(option: DensityOption): void {
+        this.density.set(option);
+    }
+
+    handleSelectionChange(selected: WorkspaceSchool[]): void {
+        this.selectedSchoolIds.set(new Set(selected.map((school) => school.id)));
+    }
+
+    clearSelection(): void {
+        this.selectedSchoolIds.set(new Set());
+        this.closeBulkMenu();
+        if (this.table) {
+            this.table.selectedKeys.clear();
+            this.table.selectionChange.emit([]);
+        }
+    }
+
+    toggleHeaderMenu(): void {
+        this.headerMenuOpen.set(!this.headerMenuOpen());
+    }
+
+    closeHeaderMenu(): void {
+        this.headerMenuOpen.set(false);
+    }
+
+    toggleBulkMenu(): void {
+        this.bulkMenuOpen.set(!this.bulkMenuOpen());
+    }
+
+    closeBulkMenu(): void {
+        this.bulkMenuOpen.set(false);
+    }
+
+    toggleRowMenu(row: WorkspaceSchool, event?: MouseEvent): void {
+        event?.stopPropagation();
+        const next = this.rowMenuOpenId() === row.id ? null : row.id;
+        this.rowMenuOpenId.set(next);
+        this.rowDangerMenuOpenId.set(null);
+    }
+
+    closeRowMenu(): void {
+        this.rowMenuOpenId.set(null);
+        this.rowDangerMenuOpenId.set(null);
+    }
+
+    toggleRowDangerMenu(row: WorkspaceSchool, event?: MouseEvent): void {
+        event?.stopPropagation();
+        const next = this.rowDangerMenuOpenId() === row.id ? null : row.id;
+        this.rowDangerMenuOpenId.set(next);
+    }
+
+    openDrawer(row: WorkspaceSchool): void {
+        this.lastActiveElement = document.activeElement as HTMLElement | null;
+        this.drawerSchoolId.set(row.id);
+        this.closeRowMenu();
+    }
+
+    closeDrawer(): void {
+        this.drawerSchoolId.set(null);
+        this.closeRowMenu();
+        if (this.lastActiveElement) {
+            this.lastActiveElement.focus();
+            this.lastActiveElement = null;
+        }
     }
 
     openAddSchool(): void {
         this.editingSchoolId.set(null);
-        this.editingSchoolStatus.set('Active');
         this.schoolFormName.set('');
         this.schoolFormCode.set('');
-        this.schoolFormCountry.set(this.country());
-        this.schoolFormTimezone.set(this.defaultTimezone());
-        this.schoolFormAddress.set({});
+        this.schoolFormCountry.set('');
+        this.schoolFormTimezone.set('');
         this.schoolFormTouched.set(false);
-        this.schoolFormCodeTouched.set(false);
-        this.errorMessage.set(null);
+        this.isSchoolModalOpen.set(true);
+    }
+
+    openEditSchool(row: WorkspaceSchool): void {
+        this.editingSchoolId.set(row.id);
+        this.schoolFormName.set(row.name);
+        this.schoolFormCode.set(row.code);
+        this.schoolFormCountry.set(row.locationCountry);
+        this.schoolFormTimezone.set(row.timeZone);
+        this.schoolFormTouched.set(false);
         this.isSchoolModalOpen.set(true);
     }
 
     closeSchoolModal(): void {
         this.isSchoolModalOpen.set(false);
-        this.editingSchoolId.set(null);
-        this.schoolFormTouched.set(false);
-        this.schoolFormCodeTouched.set(false);
     }
 
-    copySchoolCode(row: SchoolRow): void {
-        const code = row.code?.trim();
-        if (!code) {
-            this.toast.warning('No school code available.');
-            return;
-        }
-        if (!navigator?.clipboard) {
-            this.toast.error('Clipboard is unavailable in this browser.');
-            return;
-        }
-        navigator.clipboard.writeText(code).then(() => {
-            this.toast.info('School code copied.', 1500);
-        }).catch(() => {
-            this.toast.error('Unable to copy school code.');
-        });
-    }
-
-    async saveSchool(): Promise<void> {
+    saveSchool(): void {
         if (!this.canSaveSchool()) {
             this.schoolFormTouched.set(true);
             return;
         }
-        this.isSaving.set(true);
-        this.errorMessage.set(null);
-        const draft = this.buildSchoolRow();
+        const payload = this.buildSchoolPayload();
         const editingId = this.editingSchoolId();
-        try {
-            if (editingId) {
-                const saved = await firstValueFrom(
-                    this.api.patch<School>(`schools/${editingId}`, this.buildSchoolPayload(draft))
-                );
-                const savedRow = this.toSchoolRow(saved, draft);
-                this.schoolRows.update(rows => rows.map(row => row.id === editingId ? savedRow : row));
-                this.toast.success('School updated.');
-            } else {
-                const saved = await firstValueFrom(
-                    this.api.post<School>('schools', this.buildSchoolPayload(draft))
-                );
-                const savedRow = this.toSchoolRow(saved, draft);
-                this.schoolRows.update(rows => [...rows, savedRow]);
-                this.toast.success('School added.');
-            }
-            this.closeSchoolModal();
-        } catch (error) {
-            this.errorMessage.set('Unable to save school. Please try again.');
-        } finally {
-            this.isSaving.set(false);
+        if (editingId) {
+            this.schools.update(list => list.map(school => school.id === editingId ? {
+                ...school,
+                ...payload,
+                updatedAt: new Date(),
+            } : school));
+            this.toast.success('School updated.');
+        } else {
+            this.schools.update(list => [
+                ...list,
+                {
+                    id: this.generateId(),
+                    ...payload,
+                    createdAt: new Date(),
+                }
+            ]);
+            this.toast.success('School added.');
         }
+        this.closeSchoolModal();
     }
 
-    openEditSchool(row: SchoolRow): void {
-        if (!row) return;
-        this.editingSchoolId.set(row.id ?? null);
-        this.editingSchoolStatus.set(row.status);
-        this.schoolFormName.set(row.name);
-        this.schoolFormCode.set(row.code);
-        this.schoolFormCountry.set(row.country);
-        this.schoolFormTimezone.set(row.timezone);
-        this.schoolFormAddress.set(row.address || {});
-        this.schoolFormTouched.set(false);
-        this.schoolFormCodeTouched.set(true);
-        this.errorMessage.set(null);
-        this.isSchoolModalOpen.set(true);
-    }
-
-    cloneSchool(row: SchoolRow): void {
-        if (!row) return;
-        const name = `${row.name} Copy`;
-        const code = row.code ? `${row.code}-copy` : this.generateSchoolCode(name);
+    duplicateSchool(row: WorkspaceSchool): void {
         this.editingSchoolId.set(null);
-        this.editingSchoolStatus.set('Active');
+        const name = `${row.name} Copy`;
+        const code = row.code ? `${row.code}-copy` : this.generateCode(name);
         this.schoolFormName.set(name);
         this.schoolFormCode.set(code);
-        this.schoolFormCountry.set(row.country);
-        this.schoolFormTimezone.set(row.timezone);
-        this.schoolFormAddress.set(row.address || {});
+        this.schoolFormCountry.set(row.locationCountry);
+        this.schoolFormTimezone.set(row.timeZone);
         this.schoolFormTouched.set(false);
-        this.schoolFormCodeTouched.set(true);
-        this.errorMessage.set(null);
         this.isSchoolModalOpen.set(true);
     }
 
-    async archiveSchool(row: SchoolRow): Promise<void> {
-        if (!row?.id) return;
-        this.isSaving.set(true);
-        try {
-            const saved = await firstValueFrom(
-                this.api.patch<School>(`schools/${row.id}`, { status: 'archived' })
-            );
-            const savedRow = this.toSchoolRow(saved, { ...row, status: 'Archived' });
-            this.schoolRows.update(rows => rows.map(item => item.id === row.id ? savedRow : item));
-            this.toast.success(`"${row.name}" archived.`);
-        } catch {
-            this.toast.error('Unable to archive school. Please try again.');
-        } finally {
-            this.isSaving.set(false);
+    openArchiveConfirm(row: WorkspaceSchool): void {
+        this.archiveTargetId.set(row.id);
+        this.archiveConfirmOpen.set(true);
+    }
+
+    closeArchiveConfirm(): void {
+        this.archiveConfirmOpen.set(false);
+        this.archiveTargetId.set(null);
+    }
+
+    confirmArchive(): void {
+        const targetId = this.archiveTargetId();
+        if (!targetId) return;
+        this.schools.update(list => list.map(school => school.id === targetId ? {
+            ...school,
+            status: 'archived',
+            updatedAt: new Date(),
+        } : school));
+        this.toast.success('School archived.');
+        this.closeArchiveConfirm();
+    }
+
+    restoreSchool(row: WorkspaceSchool): void {
+        this.schools.update(list => list.map(school => school.id === row.id ? {
+            ...school,
+            status: 'active',
+            updatedAt: new Date(),
+        } : school));
+        this.toast.success('School restored.');
+    }
+
+    openDeleteConfirm(targets: WorkspaceSchool[]): void {
+        this.deleteTargetIds.set(targets.map(school => school.id));
+        this.deleteConfirmInput.set('');
+        this.deleteConfirmTouched.set(false);
+        this.deleteConfirmOpen.set(true);
+    }
+
+    closeDeleteConfirm(): void {
+        this.deleteConfirmOpen.set(false);
+        this.deleteTargetIds.set([]);
+        this.deleteConfirmInput.set('');
+        this.deleteConfirmTouched.set(false);
+    }
+
+    confirmDelete(): void {
+        if (!this.deleteConfirmReady()) {
+            this.deleteConfirmTouched.set(true);
+            return;
         }
+        const ids = new Set(this.deleteTargetIds());
+        this.schools.update(list => list.filter(school => !ids.has(school.id)));
+        this.toast.success(ids.size > 1 ? 'Schools deleted.' : 'School deleted.');
+        this.clearSelection();
+        this.ensurePageInRange();
+        this.closeDeleteConfirm();
     }
 
-    async deleteSchool(row: SchoolRow): Promise<void> {
-        if (!row?.id) return;
-        this.isSaving.set(true);
-        try {
-            await firstValueFrom(this.api.delete<void>(`schools/${row.id}`));
-            this.schoolRows.update(rows => rows.filter(item => item.id !== row.id));
-            this.toast.success(`"${row.name}" deleted.`);
-        } catch {
-            this.toast.error('Unable to delete school. Please try again.');
-        } finally {
-            this.isSaving.set(false);
-        }
+    bulkArchive(): void {
+        const ids = this.selectedSchoolIds();
+        if (!ids.size) return;
+        this.schools.update(list => list.map(school => ids.has(school.id) ? {
+            ...school,
+            status: 'archived',
+            updatedAt: new Date(),
+        } : school));
+        this.toast.success('Schools archived.');
+        this.clearSelection();
+        this.closeBulkMenu();
     }
 
-    toggleSchoolMenu(row: SchoolRow, event?: MouseEvent): void {
-        event?.stopPropagation();
-        const key = this.schoolMenuKey(row);
-        const next = this.schoolMenuOpenId() === key ? null : key;
-        this.schoolMenuOpenId.set(next);
+    bulkExport(): void {
+        this.toast.info('Export queued.');
     }
 
-    closeSchoolMenu(): void {
-        this.schoolMenuOpenId.set(null);
+    headerExport(): void {
+        this.toast.info('Export queued.');
+        this.closeHeaderMenu();
     }
 
-    schoolMenuKey(row: SchoolRow): string {
-        return row.id ?? row.code ?? row.name;
+    headerImport(): void {
+        this.toast.info('Import CSV coming soon.');
+        this.closeHeaderMenu();
     }
 
-    onSchoolFormNameChange(value: string): void {
-        this.schoolFormName.set(value);
-        if (this.schoolFormCodeTouched()) return;
-        this.schoolFormCode.set(this.generateSchoolCode(value));
+    viewArchived(): void {
+        this.statusFilter.set('archived');
+        this.pageIndex.set(1);
+        this.clearSelection();
+        this.closeHeaderMenu();
     }
 
-    onSchoolFormCodeChange(value: string): void {
-        this.schoolFormCodeTouched.set(true);
-        const normalized = value
-            .toLowerCase()
-            .replace(/[^a-z0-9-]/g, '-')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '');
-        this.schoolFormCode.set(normalized);
+    clearFilters(): void {
+        this.searchQuery.set('');
+        this.statusFilter.set('all');
+        this.pageIndex.set(1);
+        this.clearSelection();
     }
 
-    onSchoolFormCountryChange(value: string): void {
-        this.schoolFormCountry.set(value);
-        if (!this.schoolFormTimezone().trim()) {
-            this.schoolFormTimezone.set(this.defaultTimezone());
-        }
+    openBulkDelete(): void {
+        const targets = this.schools().filter(school => this.selectedSchoolIds().has(school.id));
+        if (!targets.length) return;
+        this.openDeleteConfirm(targets);
+        this.closeBulkMenu();
     }
 
-    onSchoolFormAddressChange(value: AddressValue): void {
-        this.schoolFormAddress.set(value);
+    statusLabel(status: SchoolStatus): string {
+        return STATUS_LABELS[status] ?? '--';
     }
 
-    onSchoolFormTimezoneChange(value: string): void {
-        this.schoolFormTimezone.set(value);
+    formatDate(value?: Date): string {
+        if (!value) return '--';
+        return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(value);
     }
 
-    copySchoolAddressFromTenant(): void {
-        const tenantAddress = this.tenantAddress();
-        if (!tenantAddress) return;
-        this.schoolFormAddress.set({ ...tenantAddress });
-        if (!this.schoolFormCountry().trim() && this.country().trim()) {
-            this.schoolFormCountry.set(this.country());
-        }
+    canSaveSchool(): boolean {
+        return !!this.schoolFormName().trim()
+            && !!this.schoolFormCode().trim()
+            && !!this.schoolFormCountry().trim()
+            && !!this.schoolFormTimezone().trim();
     }
 
-    markSchoolFormTouched(): void {
-        this.schoolFormTouched.set(true);
-    }
-
-    schoolFormCodeError(): string {
-        if (!this.schoolFormTouched()) return '';
-        const code = this.schoolFormCode().trim();
-        if (!code) return 'School code is required.';
-        if (!SCHOOL_CODE_REGEX.test(code)) return 'Use lowercase letters, numbers, and hyphens only.';
-        return '';
-    }
-
-    schoolFormCountryError(): string {
-        if (!this.schoolFormTouched()) return '';
-        const value = this.schoolFormCountry().trim();
-        if (!value) return 'Country is required.';
-        if (!this.isValidCountry(value)) return 'Select a valid country.';
-        return '';
-    }
-
-    schoolFormTimezoneError(): string {
-        if (!this.schoolFormTouched()) return '';
-        const value = this.schoolFormTimezone().trim();
-        if (!value) return 'Time zone is required.';
-        if (!this.isValidTimezone(value)) return 'Select a valid time zone.';
-        return '';
-    }
-
-    private loadInitialState(): void {
-        this.isLoading.set(true);
-        this.tenantSettings.getSettings().subscribe({
-            next: (tenant: any) => {
-                const tenantAddress = tenant.contactInfo?.address || {};
-                const hasTenantAddress = !!(
-                    tenantAddress.street ||
-                    tenantAddress.city ||
-                    tenantAddress.state ||
-                    tenantAddress.postalCode
-                );
-                this.tenantAddress.set(hasTenantAddress ? {
-                    street: tenantAddress.street || '',
-                    city: tenantAddress.city || '',
-                    state: tenantAddress.state || '',
-                    postalCode: tenantAddress.postalCode || '',
-                } : null);
-                this.country.set(tenantAddress.country || '');
-                this.defaultTimezone.set(tenant.timezone || this.defaultTimeZone());
-
-                this.isLoading.set(false);
-            },
-            error: () => {
-                this.isLoading.set(false);
-            }
-        });
-    }
-
-    private loadSchools(): void {
-        this.isLoading.set(true);
-        this.api.get<School[]>('schools').subscribe({
-            next: (schools) => {
-                this.schoolRows.set(schools.map((school) => this.toSchoolRow(school)));
-                this.isLoading.set(false);
-            },
-            error: () => {
-                this.isLoading.set(false);
-            }
-        });
-    }
-
-    private generateSchoolCode(name: string): string {
-        const trimmed = name.trim().toLowerCase();
-        if (!trimmed) return '';
-        return trimmed
-            .replace(/[^a-z0-9\s-]/g, '')
-            .trim()
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .slice(0, 32);
-    }
-
-    private formatSchoolLocation(row: SchoolRow): string {
-        if (row.address?.city) {
-            return `${row.address.city}, ${row.country || '—'}`;
-        }
-        return row.country || '—';
-    }
-
-    private isValidCountry(value: string): boolean {
-        const trimmed = value.trim().toLowerCase();
-        if (!trimmed) return false;
-        return COUNTRY_LABELS.includes(trimmed);
-    }
-
-    private isValidTimezone(value: string): boolean {
-        const trimmed = value.trim();
-        if (!trimmed) return false;
-        return TIMEZONE_VALUES.includes(trimmed);
-    }
-
-    private defaultTimeZone(): string {
-        try {
-            return Intl.DateTimeFormat().resolvedOptions().timeZone || DEFAULT_TIMEZONE;
-        } catch {
-            return DEFAULT_TIMEZONE;
-        }
-    }
-
-    private buildSchoolRow(): SchoolRow {
+    buildSchoolPayload(): Omit<WorkspaceSchool, 'id' | 'createdAt'> {
+        const editingId = this.editingSchoolId();
+        const existingStatus = editingId
+            ? this.schools().find(school => school.id === editingId)?.status
+            : undefined;
         return {
             name: this.schoolFormName().trim(),
             code: this.schoolFormCode().trim(),
-            country: this.schoolFormCountry().trim(),
-            timezone: this.schoolFormTimezone().trim(),
-            status: this.editingSchoolStatus(),
-            address: this.schoolFormAddress(),
+            locationCountry: this.schoolFormCountry().trim(),
+            timeZone: this.schoolFormTimezone().trim(),
+            status: existingStatus ?? 'active',
+            updatedAt: new Date(),
         };
     }
 
-    private buildSchoolPayload(row: SchoolRow): SchoolCreatePayload {
-        return {
-            name: row.name.trim(),
-            code: row.code.trim() || undefined,
-            type: SCHOOL_TYPE,
-            status: SCHOOL_STATUS_MAP[row.status] ?? 'pending_setup',
-            address: {
-                ...(row.address || {}),
-                country: row.country || undefined,
-            }
-            ,
-            settings: row.timezone ? { timezone: row.timezone } : undefined,
-        };
+    schoolNameError(): string {
+        if (!this.schoolFormTouched()) return '';
+        if (!this.schoolFormName().trim()) return 'School name is required.';
+        return '';
     }
 
-    private toSchoolRow(school: School, fallback?: SchoolRow): SchoolRow {
-        const status = school.status === 'archived'
-            ? 'Archived'
-            : school.status === 'inactive'
-                ? 'Inactive'
-                : 'Active';
-        const address = school.address ?? fallback?.address ?? {};
-        const country = school.address?.country ?? fallback?.country ?? '';
-        const timezone = (school.settings as { timezone?: string } | undefined)?.timezone
-            ?? fallback?.timezone
-            ?? this.defaultTimezone();
-        return {
-            id: school.id,
-            name: school.name,
-            code: school.code ?? fallback?.code ?? '',
-            country,
-            timezone,
-            status,
-            address,
-        };
+    schoolCodeError(): string {
+        if (!this.schoolFormTouched()) return '';
+        if (!this.schoolFormCode().trim()) return 'School code is required.';
+        return '';
+    }
+
+    schoolCountryError(): string {
+        if (!this.schoolFormTouched()) return '';
+        if (!this.schoolFormCountry().trim()) return 'Country is required.';
+        return '';
+    }
+
+    schoolTimezoneError(): string {
+        if (!this.schoolFormTouched()) return '';
+        if (!this.schoolFormTimezone().trim()) return 'Time zone is required.';
+        return '';
+    }
+
+    private buildPageNumbers(): number[] {
+        const total = this.pageCount();
+        const current = this.pageIndex();
+        const windowSize = 5;
+        if (total <= windowSize) {
+            return Array.from({ length: total }, (_, i) => i + 1);
+        }
+        const start = Math.max(1, current - 2);
+        const end = Math.min(total, start + windowSize - 1);
+        const adjustedStart = Math.max(1, end - windowSize + 1);
+        return Array.from({ length: end - adjustedStart + 1 }, (_, i) => adjustedStart + i);
+    }
+
+    private generateId(): string {
+        return `sch-${Math.random().toString(36).slice(2, 9)}`;
+    }
+
+    private ensurePageInRange(): void {
+        const max = this.pageCount();
+        if (this.pageIndex() > max) {
+            this.pageIndex.set(max);
+        }
+    }
+
+    private generateCode(name: string): string {
+        return name
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9\\s-]/g, '')
+            .replace(/\\s+/g, '-')
+            .replace(/-+/g, '-')
+            .slice(0, 32) || 'school';
     }
 }
