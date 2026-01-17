@@ -1,0 +1,23 @@
+<div class="setup-entry">
+    <div class="setup-header">
+        <div class="setup-entry-title">
+            <span class="setup-icon" aria-hidden="true">✓</span>
+            <h1>Finish setting up your workspace</h1>
+        </div>
+        <p class="setup-entry-body">
+            Set up your schools, academic structure, and staff so your team can start working right away.
+        </p>
+        <p class="setup-entry-meta">Takes about 5–10 minutes · You can pause and continue anytime from
+            Settings.</p>
+    </div>
+
+    <div class="setup-body">
+        <div class="setup-actions setup-entry-actions">
+            <mb-button variant="primary" (click)="vm.startSetup()">Start setup</mb-button>
+            <div class="setup-skip-block">
+                <mb-button variant="tertiary" (click)="vm.skipSetup()">Skip for now</mb-button>
+                <p class="setup-skip-hint">Resume later from Settings → Workspace setup.</p>
+            </div>
+        </div>
+    </div>
+</div>

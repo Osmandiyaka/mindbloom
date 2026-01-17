@@ -1,0 +1,36 @@
+<mb-card class="setup-nav-card">
+    <div class="setup-progress__content">
+        <div class="setup-progress__header">
+            <div class="setup-progress__kicker">Workspace configuration</div>
+            <h2>Setup progress</h2>
+            <p>Complete the setup to enable all features. You can return at any time from Settings.
+            </p>
+        </div>
+        <div class="setup-progress__meta">Step {{ vm.progressIndex() < 0 ? 0 : vm.progressIndex() + 1 }}
+            of {{ vm.stepLabels.length }}</div>
+        <div class="setup-progress__bar" aria-hidden="true">
+            <div class="setup-progress__bar-fill" [style.width.%]="vm.progressPercent()"></div>
+        </div>
+        <div class="setup-progress__list">
+            <button type="button" class="setup-progress__item"
+                *ngFor="let label of vm.stepLabels; let i = index"
+                [class.is-complete]="i < vm.progressIndex()"
+                [class.is-current]="i === vm.progressIndex()" (click)="vm.goToStep(i + 1)">
+                <span class="setup-progress__icon" aria-hidden="true">{{ i < vm.progressIndex()
+                        ? '✓' : (i===vm.progressIndex() ? '●' : '○' ) }}</span>
+                <span class="setup-progress__label">{{ label }}</span>
+            </button>
+        </div>
+        <div class="setup-progress__actions">
+            <mb-button variant="primary" (click)="vm.continueFromPanel()">Continue
+                setup</mb-button>
+            <button type="button" class="setup-progress__dismiss"
+                (click)="vm.skipSetup()">Dismiss for now</button>
+            <span class="setup-progress__hint">
+                You can resume anytime from Settings → Workspace setup.
+                <span class="setup-progress__info" aria-hidden="true"
+                    title="Setup is saved automatically.">i</span>
+            </span>
+        </div>
+    </div>
+</mb-card>

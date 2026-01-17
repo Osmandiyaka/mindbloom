@@ -1,0 +1,106 @@
+<div class="setup-body">
+    <div class="setup-section">
+        <div class="review-header">
+            <div>
+                <h2>Review &amp; activate</h2>
+                <p>Confirm your workspace configuration before activation. You can update these
+                    settings anytime from Settings.</p>
+            </div>
+            <span class="review-status-pill" [class.is-ready]="vm.reviewReady()"
+                [class.is-warning]="!vm.reviewReady()">
+                {{ vm.reviewReady() ? 'Ready to activate' : 'Action required' }}
+            </span>
+        </div>
+
+        <div class="review-progress">{{ vm.reviewCompletedCount() }} of {{ vm.stepLabels.length }}
+            completed</div>
+
+        <div class="review-grid">
+            <div class="review-card">
+                <div class="review-card__top">
+                    <span class="review-card__label">Schools</span>
+                    <button type="button" class="review-link"
+                        (click)="vm.goToStep(1)">Edit</button>
+                </div>
+                <div class="review-value">{{ vm.schoolRows().length }} schools</div>
+                <div class="review-details">
+                    <span>Active: {{ vm.activeSchoolNames().length }}</span>
+                    <span>Default timezone: {{ vm.defaultTimezone() || 'Not set' }}</span>
+                </div>
+                <span class="review-status" [class.is-complete]="vm.schoolsValid()"
+                    [class.is-warning]="!vm.schoolsValid()">
+                    {{ vm.schoolsValid() ? 'Complete' : 'Needs attention' }}
+                </span>
+            </div>
+            <div class="review-card">
+                <div class="review-card__top">
+                    <span class="review-card__label">Academic levels</span>
+                    <button type="button" class="review-link"
+                        (click)="vm.goToStep(4)">Edit</button>
+                </div>
+                <div class="review-value">{{ vm.levels().length }} levels</div>
+                <div class="review-details">
+                    <span>Template: {{ vm.levelsTemplate() | titlecase }}</span>
+                    <span>{{ vm.levels().length ? 'Sequence defined' : 'No levels added' }}</span>
+                </div>
+                <span class="review-status" [class.is-complete]="vm.levels().length > 0"
+                    [class.is-warning]="vm.levels().length === 0">
+                    {{ vm.levels().length > 0 ? 'Complete' : 'Needs attention' }}
+                </span>
+            </div>
+            <div class="review-card">
+                <div class="review-card__top">
+                    <span class="review-card__label">Grading system</span>
+                    <button type="button" class="review-link"
+                        (click)="vm.goToStep(6)">Edit</button>
+                </div>
+                <div class="review-value">{{ vm.gradingModel() | titlecase }}</div>
+                <div class="review-details">
+                    <span>{{ vm.gradingScales().length }} scale(s)</span>
+                    <span>{{ vm.gradingScaleUsageLabel() }}</span>
+                </div>
+                <span class="review-status" [class.is-complete]="vm.gradingScales().length > 0"
+                    [class.is-warning]="vm.gradingScales().length === 0">
+                    {{ vm.gradingScales().length > 0 ? 'Complete' : 'Needs attention' }}
+                </span>
+            </div>
+            <div class="review-card">
+                <div class="review-card__top">
+                    <span class="review-card__label">Staff &amp; users</span>
+                    <button type="button" class="review-link"
+                        (click)="vm.goToStep(2)">Edit</button>
+                </div>
+                <div class="review-value">{{ vm.userCount() }} users</div>
+                <div class="review-details">
+                    <span>{{ vm.usersStepSkipped() ? 'Invites skipped' : 'Invites sent' }}</span>
+                    <span>{{ vm.userCount() ? 'Access assigned' : 'No users added' }}</span>
+                </div>
+                <span class="review-status" [class.is-complete]="vm.canContinueUsersStep()"
+                    [class.is-warning]="!vm.canContinueUsersStep()">
+                    {{ vm.canContinueUsersStep() ? 'Complete' : 'Needs attention' }}
+                </span>
+            </div>
+        </div>
+
+        <div class="review-info">
+            <div class="review-info__icon" aria-hidden="true">i</div>
+            <div>
+                <div class="review-info__title">After activation</div>
+                <ul>
+                    <li>Your workspace becomes available to all assigned users.</li>
+                    <li>You can enroll students, take attendance, and generate reports.</li>
+                    <li>Settings can still be updated later from Workspace Setup.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="setup-actions review-actions">
+        <mb-button variant="secondary" (click)="vm.back()">Back</mb-button>
+        <mb-button variant="primary" [loading]="vm.isSaving()" [disabled]="vm.isSaving()"
+            (click)="vm.next()">
+            Activate workspace
+        </mb-button>
+    </div>
+    <div class="review-helper">Configuration changes are saved automatically.</div>
+</div>

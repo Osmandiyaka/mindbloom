@@ -1,0 +1,163 @@
+<div class="setup-body" id="setup-step-content">
+    <div class="setup-section">
+        <h2>Schools</h2>
+        <p>Manage the schools under your organization. You can add, edit, or deactivate schools
+            at any time.</p>
+
+        <div class="schools-grid">
+            <div class="schools-table-wrap">
+                <div class="schools-table__titlebar">
+                    <div class="schools-table__title">Schools</div>
+                    <mb-button variant="primary" (click)="vm.openAddSchool()">+ Add
+                        school</mb-button>
+                </div>
+                <mb-table class="schools-table" *ngIf="vm.schoolRows().length; else emptySchools"
+                    [columns]="vm.schoolTableColumns" [rows]="vm.schoolRows()"
+                    (cellClick)="vm.handleSchoolCellClick($event)">
+                    <ng-template mbTableActions let-row>
+                        <div class="schools-table__actions">
+                            <button type="button" class="schools-menu__toggle" #schoolMenuOrigin
+                                aria-label="More actions"
+                                [attr.aria-expanded]="vm.schoolMenuOpenIndex() === vm.getSchoolRowIndex(row)"
+                                (click)="vm.toggleSchoolMenu(vm.getSchoolRowIndex(row), $event)">⋯</button>
+                            <mb-popover
+                                [open]="vm.schoolMenuOpenIndex() === vm.getSchoolRowIndex(row)"
+                                [origin]="schoolMenuOrigin" [hasBackdrop]="true"
+                                [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'schools-menu__panel']"
+                                (closed)="vm.closeSchoolMenu()">
+                                <div class="schools-menu__panel-content" role="menu">
+                                    <button type="button" class="schools-menu__item"
+                                        (click)="vm.openEditSchool(vm.getSchoolRowIndex(row)); vm.closeSchoolMenu()">
+                                        Edit school
+                                    </button>
+                                    <button type="button" class="schools-menu__item"
+                                        (click)="vm.toggleSchoolStatus(vm.getSchoolRowIndex(row)); vm.closeSchoolMenu()">
+                                        {{ row.status === 'Active' ? 'Deactivate school' :
+                                        'Activate school' }}
+                                    </button>
+                                    <button type="button" class="schools-menu__item"
+                                        (click)="vm.deleteSchool(vm.getSchoolRowIndex(row)); vm.closeSchoolMenu()">
+                                        Delete school
+                                    </button>
+                                </div>
+                            </mb-popover>
+                        </div>
+                    </ng-template>
+                </mb-table>
+
+                <ng-template #emptySchools>
+                    <div class="schools-empty">
+                        <div class="schools-empty__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                <path
+                                    d="M4 10.5l8-5 8 5v8.5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8.5Z"
+                                    fill="none" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linejoin="round" />
+                                <path d="M9 20v-6h6v6" fill="none" stroke="currentColor"
+                                    stroke-width="1.5" stroke-linecap="round" />
+                            </svg>
+                        </div>
+                        <div class="schools-empty__title">No schools added yet</div>
+                        <div class="schools-empty__text">
+                            Add your first school to continue setup.
+                        </div>
+                        <mb-button variant="primary" (click)="vm.openAddSchool()">+ Add
+                            school</mb-button>
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+        <div class="schools-modal" *ngIf="vm.isSchoolModalOpen()" role="presentation">
+            <div class="schools-modal__backdrop"></div>
+            <div class="schools-modal__dialog" role="dialog" aria-modal="true"
+                aria-labelledby="school-modal-title" tabindex="0"
+                (keydown.escape)="vm.closeSchoolModal()">
+                <div class="schools-modal__header">
+                    <div>
+                        <div id="school-modal-title" class="schools-modal__title">
+                            {{ vm.editingSchoolIndex() === null ? 'Add school' : 'Edit school' }}
+                        </div>
+                        <div class="schools-modal__subtitle">
+                            Add a school to your organization. You can update details later.
+                        </div>
+                    </div>
+                    <button type="button" class="schools-modal__close"
+                        (click)="vm.closeSchoolModal()" aria-label="Close dialog">×</button>
+                </div>
+                <div class="schools-modal__body">
+                    <div class="schools-modal__section">
+                        <div class="schools-modal__section-title">Identity</div>
+                        <mb-form-field label="School name" [controlId]="'school-form-name'"
+                            hint="This is the name shown across the platform."
+                            [error]="vm.schoolFormTouched() && !vm.schoolFormName().trim() ? 'School name is required.' : ''">
+                            <mb-input id="school-form-name" [value]="vm.schoolFormName()"
+                                (valueChange)="vm.onSchoolFormNameChange($event)"
+                                (blur)="vm.markSchoolFormTouched()"></mb-input>
+                        </mb-form-field>
+
+                        <mb-form-field label="School code" [controlId]="'school-form-code'"
+                            hint="Used internally for identifiers and integrations."
+                            [error]="vm.schoolFormCodeError()">
+                            <mb-input id="school-form-code" [value]="vm.schoolFormCode()"
+                                (valueChange)="vm.onSchoolFormCodeChange($event)"
+                                (blur)="vm.markSchoolFormTouched()"></mb-input>
+                        </mb-form-field>
+                    </div>
+
+                    <div class="schools-modal__section">
+                        <div class="schools-modal__section-title">Location & time</div>
+                        <mb-form-field label="Country or region"
+                            [controlId]="'school-form-country'"
+                            [error]="vm.schoolFormCountryError()">
+                            <app-country-select id="school-form-country"
+                                [value]="vm.schoolFormCountry()"
+                                (valueChange)="vm.onSchoolFormCountryChange($event)"
+                                (blurEvent)="vm.markSchoolFormTouched()"></app-country-select>
+                        </mb-form-field>
+
+                        <app-address [value]="vm.schoolFormAddress()"
+                            [showCopy]="!!vm.tenantAddress()"
+                            [copyLabel]="'Copy from organization'" [title]="'Address'"
+                            [controlPrefix]="'school-form-address'"
+                            (valueChange)="vm.schoolFormAddress.set($event)"
+                            (copyFromTenant)="vm.copySchoolAddressFromTenant()"></app-address>
+
+                        <mb-form-field label="Time zone" [controlId]="'school-form-timezone'"
+                            hint="Used for schedules, attendance, and reports."
+                            [error]="vm.schoolFormTimezoneError()">
+                            <app-timezone-select id="school-form-timezone"
+                                [value]="vm.schoolFormTimezone()"
+                                (valueChange)="vm.schoolFormTimezone.set($event)"
+                                (blurEvent)="vm.markSchoolFormTouched()"></app-timezone-select>
+                        </mb-form-field>
+                    </div>
+                </div>
+                <div class="schools-modal__footer">
+                    <div class="schools-modal__hint">Configuration changes are saved
+                        automatically.</div>
+                    <div class="schools-modal__actions">
+                        <mb-button variant="secondary"
+                            (click)="vm.closeSchoolModal()">Cancel</mb-button>
+                        <mb-button variant="primary" [disabled]="!vm.canSaveSchool()"
+                            (click)="vm.saveSchool()">
+                            {{ vm.editingSchoolIndex() === null ? 'Add school' : 'Save changes' }}
+                        </mb-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="setup-footer">
+        <div class="setup-footer__actions">
+            <mb-button variant="secondary" (click)="vm.back()">Back</mb-button>
+            <mb-button variant="primary" [disabled]="!vm.canContinue()"
+                (click)="vm.next()">Continue</mb-button>
+        </div>
+        <div class="setup-footer__aside">
+            <button type="button" class="setup-skip-link" (click)="vm.skipSetup()">Skip for
+                now</button>
+            <div class="setup-footer__hint">You can change this later from Settings.</div>
+        </div>
+    </div>
+    <div class="setup-auto-save"><span aria-hidden="true">✓</span> Saved automatically.</div>
+</div>
