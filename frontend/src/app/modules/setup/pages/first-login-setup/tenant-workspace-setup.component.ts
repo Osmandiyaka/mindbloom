@@ -32,7 +32,7 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
 import { TenantSettingsService } from '../../../../core/services/tenant-settings.service';
 import { TenantService } from '../../../../core/services/tenant.service';
 import { SchoolService } from '../../../../core/school/school.service';
-import { FirstLoginSetupService, FirstLoginSetupState } from '../../../../core/services/first-login-setup.service';
+import type { FirstLoginSetupState } from '../../../../core/types/first-login-setup-state';
 import { ToastService } from '../../../../core/ui/toast/toast.service';
 import { ClassSectionService } from '../../../../core/services/class-section.service';
 
@@ -200,7 +200,6 @@ export class TenantWorkspaceSetupComponent implements OnInit {
     private readonly tenantSettings = inject(TenantSettingsService);
     private readonly tenantService = inject(TenantService);
     private readonly schoolService = inject(SchoolService);
-    private readonly setupStore = inject(FirstLoginSetupService);
     private readonly router = inject(Router);
     private readonly injector = inject(EnvironmentInjector);
     private readonly toast = inject(ToastService);
@@ -3063,9 +3062,7 @@ export class TenantWorkspaceSetupComponent implements OnInit {
                     this.schoolRows.set([this.defaultSchoolRow(defaultName)]);
                 }
 
-                const serverState = tenant.extras?.setupProgram as FirstLoginSetupState | undefined;
-                const localState = tenantId ? this.setupStore.load(tenantId) : null;
-                const state = serverState || localState;
+                const state = tenant.extras?.setupProgram as FirstLoginSetupState | undefined;
 
                 if (state && state.status === 'in_progress') {
                     this.applyState(state);
@@ -3213,7 +3210,6 @@ export class TenantWorkspaceSetupComponent implements OnInit {
             }
         };
 
-        this.setupStore.save(tenantId, payload);
         this.tenantSettings.updateSettings({
             extras: {
                 setupProgram: payload
