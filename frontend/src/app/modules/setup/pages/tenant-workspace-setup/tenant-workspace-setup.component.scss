@@ -1028,6 +1028,10 @@
     background: color-mix(in srgb, var(--mb-color-border) 30%, transparent);
 }
 
+.schools-menu__item--danger {
+    color: var(--mb-color-danger);
+}
+
 .schools-empty {
     border: 1px dashed var(--mb-color-border-subtle);
     border-radius: 12px;

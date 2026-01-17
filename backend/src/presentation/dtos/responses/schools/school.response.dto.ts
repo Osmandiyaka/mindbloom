@@ -20,6 +20,15 @@ export class SchoolResponseDto {
     @ApiPropertyOptional()
     domain?: string;
 
+    @ApiPropertyOptional()
+    address?: School['address'];
+
+    @ApiPropertyOptional()
+    contact?: School['contact'];
+
+    @ApiPropertyOptional()
+    settings?: School['settings'];
+
     static fromDomain(school: School): SchoolResponseDto {
         return {
             id: school.id,
@@ -28,6 +37,9 @@ export class SchoolResponseDto {
             type: school.type,
             status: school.status,
             domain: school.contact?.website,
+            address: school.address,
+            contact: school.contact,
+            settings: school.settings,
         };
     }
 }

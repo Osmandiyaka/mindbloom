@@ -6,7 +6,7 @@ export interface SchoolRow {
     code: string;
     country: string;
     timezone: string;
-    status: 'Active' | 'Inactive';
+    status: 'Active' | 'Inactive' | 'Archived';
     address?: AddressValue;
 }
 

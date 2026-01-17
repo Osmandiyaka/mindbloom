@@ -100,6 +100,17 @@ export class MongooseSchoolRepository extends TenantScopedRepository<SchoolDocum
         return this.toDomain(doc);
     }
 
+    async delete(id: string, tenantId: string): Promise<void> {
+        const resolved = this.requireTenant(tenantId);
+        const result = await this.schoolModel.deleteOne({
+            _id: new Types.ObjectId(id),
+            tenantId: new Types.ObjectId(resolved),
+        });
+        if (result.deletedCount === 0) {
+            throw new Error('School not found');
+        }
+    }
+
     async count(tenantId: string): Promise<number> {
         const resolved = this.requireTenant(tenantId);
         return this.schoolModel.countDocuments({ tenantId: new Types.ObjectId(resolved) });

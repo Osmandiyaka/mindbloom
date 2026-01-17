@@ -17,6 +17,7 @@ const SCHOOL_CODE_REGEX = /^[a-z0-9-]+$/;
 const SCHOOL_STATUS_MAP: Record<SchoolRow['status'], 'pending_setup' | 'active' | 'inactive' | 'archived'> = {
     Active: 'active',
     Inactive: 'inactive',
+    Archived: 'archived',
 };
 const TIMEZONE_VALUES = TIMEZONE_OPTIONS.map(option => option.value);
 const COUNTRY_LABELS = COUNTRY_OPTIONS.map(option => option.label.toLowerCase());
@@ -58,6 +59,9 @@ export class TenantSchoolsComponent implements OnInit {
     schoolFormTouched = signal(false);
     schoolFormCodeTouched = signal(false);
     schoolFormAddress = signal<AddressValue>({});
+    schoolMenuOpenId = signal<string | null>(null);
+    editingSchoolId = signal<string | null>(null);
+    editingSchoolStatus = signal<SchoolRow['status']>('Active');
 
     readonly schoolTableColumns: MbTableColumn<SchoolRow>[] = [
         {
@@ -115,6 +119,8 @@ export class TenantSchoolsComponent implements OnInit {
     }
 
     openAddSchool(): void {
+        this.editingSchoolId.set(null);
+        this.editingSchoolStatus.set('Active');
         this.schoolFormName.set('');
         this.schoolFormCode.set('');
         this.schoolFormCountry.set(this.country());
@@ -128,6 +134,7 @@ export class TenantSchoolsComponent implements OnInit {
 
     closeSchoolModal(): void {
         this.isSchoolModalOpen.set(false);
+        this.editingSchoolId.set(null);
         this.schoolFormTouched.set(false);
         this.schoolFormCodeTouched.set(false);
     }
@@ -157,16 +164,107 @@ export class TenantSchoolsComponent implements OnInit {
         this.isSaving.set(true);
         this.errorMessage.set(null);
         const draft = this.buildSchoolRow();
+        const editingId = this.editingSchoolId();
         try {
-            const saved = await firstValueFrom(this.api.post<School>('schools', this.buildSchoolPayload(draft)));
-            const savedRow = this.toSchoolRow(saved, draft);
-            this.schoolRows.update(rows => [...rows, savedRow]);
+            if (editingId) {
+                const saved = await firstValueFrom(
+                    this.api.patch<School>(`schools/${editingId}`, this.buildSchoolPayload(draft))
+                );
+                const savedRow = this.toSchoolRow(saved, draft);
+                this.schoolRows.update(rows => rows.map(row => row.id === editingId ? savedRow : row));
+                this.toast.success('School updated.');
+            } else {
+                const saved = await firstValueFrom(
+                    this.api.post<School>('schools', this.buildSchoolPayload(draft))
+                );
+                const savedRow = this.toSchoolRow(saved, draft);
+                this.schoolRows.update(rows => [...rows, savedRow]);
+                this.toast.success('School added.');
+            }
             this.closeSchoolModal();
         } catch (error) {
             this.errorMessage.set('Unable to save school. Please try again.');
         } finally {
             this.isSaving.set(false);
         }
+    }
+
+    openEditSchool(row: SchoolRow): void {
+        if (!row) return;
+        this.editingSchoolId.set(row.id ?? null);
+        this.editingSchoolStatus.set(row.status);
+        this.schoolFormName.set(row.name);
+        this.schoolFormCode.set(row.code);
+        this.schoolFormCountry.set(row.country);
+        this.schoolFormTimezone.set(row.timezone);
+        this.schoolFormAddress.set(row.address || {});
+        this.schoolFormTouched.set(false);
+        this.schoolFormCodeTouched.set(true);
+        this.errorMessage.set(null);
+        this.isSchoolModalOpen.set(true);
+    }
+
+    cloneSchool(row: SchoolRow): void {
+        if (!row) return;
+        const name = `${row.name} Copy`;
+        const code = row.code ? `${row.code}-copy` : this.generateSchoolCode(name);
+        this.editingSchoolId.set(null);
+        this.editingSchoolStatus.set('Active');
+        this.schoolFormName.set(name);
+        this.schoolFormCode.set(code);
+        this.schoolFormCountry.set(row.country);
+        this.schoolFormTimezone.set(row.timezone);
+        this.schoolFormAddress.set(row.address || {});
+        this.schoolFormTouched.set(false);
+        this.schoolFormCodeTouched.set(true);
+        this.errorMessage.set(null);
+        this.isSchoolModalOpen.set(true);
+    }
+
+    async archiveSchool(row: SchoolRow): Promise<void> {
+        if (!row?.id) return;
+        this.isSaving.set(true);
+        try {
+            const saved = await firstValueFrom(
+                this.api.patch<School>(`schools/${row.id}`, { status: 'archived' })
+            );
+            const savedRow = this.toSchoolRow(saved, { ...row, status: 'Archived' });
+            this.schoolRows.update(rows => rows.map(item => item.id === row.id ? savedRow : item));
+            this.toast.success(`"${row.name}" archived.`);
+        } catch {
+            this.toast.error('Unable to archive school. Please try again.');
+        } finally {
+            this.isSaving.set(false);
+        }
+    }
+
+    async deleteSchool(row: SchoolRow): Promise<void> {
+        if (!row?.id) return;
+        this.isSaving.set(true);
+        try {
+            await firstValueFrom(this.api.delete<void>(`schools/${row.id}`));
+            this.schoolRows.update(rows => rows.filter(item => item.id !== row.id));
+            this.toast.success(`"${row.name}" deleted.`);
+        } catch {
+            this.toast.error('Unable to delete school. Please try again.');
+        } finally {
+            this.isSaving.set(false);
+        }
+    }
+
+    toggleSchoolMenu(row: SchoolRow, event?: MouseEvent): void {
+        event?.stopPropagation();
+        const key = this.schoolMenuKey(row);
+        const next = this.schoolMenuOpenId() === key ? null : key;
+        this.schoolMenuOpenId.set(next);
+    }
+
+    closeSchoolMenu(): void {
+        this.schoolMenuOpenId.set(null);
+    }
+
+    schoolMenuKey(row: SchoolRow): string {
+        return row.id ?? row.code ?? row.name;
     }
 
     onSchoolFormNameChange(value: string): void {
@@ -322,7 +420,7 @@ export class TenantSchoolsComponent implements OnInit {
             code: this.schoolFormCode().trim(),
             country: this.schoolFormCountry().trim(),
             timezone: this.schoolFormTimezone().trim(),
-            status: 'Active',
+            status: this.editingSchoolStatus(),
             address: this.schoolFormAddress(),
         };
     }
@@ -343,15 +441,24 @@ export class TenantSchoolsComponent implements OnInit {
     }
 
     private toSchoolRow(school: School, fallback?: SchoolRow): SchoolRow {
-        const status = school.status === 'inactive' ? 'Inactive' : 'Active';
+        const status = school.status === 'archived'
+            ? 'Archived'
+            : school.status === 'inactive'
+                ? 'Inactive'
+                : 'Active';
+        const address = school.address ?? fallback?.address ?? {};
+        const country = school.address?.country ?? fallback?.country ?? '';
+        const timezone = (school.settings as { timezone?: string } | undefined)?.timezone
+            ?? fallback?.timezone
+            ?? this.defaultTimezone();
         return {
             id: school.id,
             name: school.name,
             code: school.code ?? fallback?.code ?? '',
-            country: fallback?.country ?? '',
-            timezone: fallback?.timezone ?? this.defaultTimezone(),
+            country,
+            timezone,
             status,
-            address: fallback?.address ?? {},
+            address,
         };
     }
 }

@@ -16,7 +16,34 @@
                     [columns]="schoolTableColumns" [rows]="schoolRows()">
                     <ng-template mbTableActions let-row>
                         <div class="schools-table__actions">
-                            <mb-button size="sm" variant="tertiary" (click)="copySchoolCode(row)">Copy code</mb-button>
+                            <button type="button" class="schools-menu__toggle" #schoolMenuOrigin
+                                aria-label="Actions"
+                                [attr.aria-expanded]="schoolMenuOpenId() === schoolMenuKey(row)"
+                                (click)="toggleSchoolMenu(row, $event)">⋯</button>
+                            <mb-popover [open]="schoolMenuOpenId() === schoolMenuKey(row)"
+                                [origin]="schoolMenuOrigin" [hasBackdrop]="true"
+                                [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'schools-menu__panel']"
+                                (closed)="closeSchoolMenu()">
+                                <div class="schools-menu__panel-content" role="menu">
+                                    <button type="button" class="schools-menu__item"
+                                        (click)="openEditSchool(row); closeSchoolMenu()">
+                                        Update
+                                    </button>
+                                    <button type="button" class="schools-menu__item"
+                                        (click)="cloneSchool(row); closeSchoolMenu()">
+                                        Clone
+                                    </button>
+                                    <button type="button" class="schools-menu__item"
+                                        (click)="archiveSchool(row); closeSchoolMenu()">
+                                        Archive
+                                    </button>
+                                    <button type="button"
+                                        class="schools-menu__item schools-menu__item--danger"
+                                        (click)="deleteSchool(row); closeSchoolMenu()">
+                                        Delete
+                                    </button>
+                                </div>
+                            </mb-popover>
                         </div>
                     </ng-template>
                 </mb-table>

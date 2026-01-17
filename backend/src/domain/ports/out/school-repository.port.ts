@@ -7,6 +7,7 @@ export interface ISchoolRepository {
     findByCode(code: string, tenantId: string): Promise<School | null>;
     create(school: School): Promise<School>;
     update(school: School): Promise<School>;
+    delete(id: string, tenantId: string): Promise<void>;
     count(tenantId: string): Promise<number>;
 }
 
