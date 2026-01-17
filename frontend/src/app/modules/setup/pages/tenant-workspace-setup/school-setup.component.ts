@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { MbSelectOption, MbTableColumn, MbTableComponent } from '@mindbloom/ui';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from './tenant-workspace-setup.shared';
 import { ToastService } from '../../../../core/ui/toast/toast.service';
@@ -12,6 +12,9 @@ const STATUS_LABELS: Record<SchoolStatus, string> = {
     active: 'Active',
     archived: 'Archived',
 };
+
+const CODE_MIN_LENGTH = 3;
+const CODE_MAX_LENGTH = 50;
 
 type SchoolStatus = 'active' | 'archived';
 type StatusFilter = 'all' | SchoolStatus;
@@ -27,6 +30,30 @@ type WorkspaceSchool = {
     status: SchoolStatus;
     createdAt: Date;
     updatedAt?: Date;
+    shortName?: string;
+    city?: string;
+    contactEmail?: string;
+    contactPhone?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    state?: string;
+    postalCode?: string;
+};
+
+type SchoolFormSnapshot = {
+    name: string;
+    code: string;
+    country: string;
+    timezone: string;
+    status: SchoolStatus;
+    shortName: string;
+    city: string;
+    contactEmail: string;
+    contactPhone: string;
+    addressLine1: string;
+    addressLine2: string;
+    state: string;
+    postalCode: string;
 };
 
 @Component({
@@ -64,7 +91,29 @@ export class TenantSchoolsComponent implements OnInit {
     schoolFormCode = signal('');
     schoolFormCountry = signal('');
     schoolFormTimezone = signal('');
-    schoolFormTouched = signal(false);
+    schoolFormStatus = signal<SchoolStatus>('active');
+    schoolFormShortName = signal('');
+    schoolFormCity = signal('');
+    schoolFormContactEmail = signal('');
+    schoolFormContactPhone = signal('');
+    schoolFormAddressLine1 = signal('');
+    schoolFormAddressLine2 = signal('');
+    schoolFormState = signal('');
+    schoolFormPostalCode = signal('');
+    schoolFormAdvancedOpen = signal(false);
+
+    schoolFormSubmitAttempted = signal(false);
+    schoolFormNameTouched = signal(false);
+    schoolFormCodeTouched = signal(false);
+    schoolFormCountryTouched = signal(false);
+    schoolFormTimezoneTouched = signal(false);
+    schoolFormCodeEdited = signal(false);
+    schoolFormSnapshot = signal<SchoolFormSnapshot | null>(null);
+    discardConfirmOpen = signal(false);
+
+    lastUsedCountry = signal('');
+    lastUsedTimezone = signal('');
+    isSaving = signal(false);
 
     archiveConfirmOpen = signal(false);
     archiveTargetId = signal<string | null>(null);
@@ -78,6 +127,11 @@ export class TenantSchoolsComponent implements OnInit {
 
     readonly statusOptions: MbSelectOption[] = [
         { label: 'All', value: 'all' },
+        { label: 'Active', value: 'active' },
+        { label: 'Archived', value: 'archived' },
+    ];
+
+    readonly formStatusOptions: MbSelectOption[] = [
         { label: 'Active', value: 'active' },
         { label: 'Archived', value: 'archived' },
     ];
@@ -134,7 +188,7 @@ export class TenantSchoolsComponent implements OnInit {
             if (!query) {
                 return true;
             }
-            const haystack = `${school.name} ${school.code} ${school.locationCountry}`.toLowerCase();
+            const haystack = `${school.name} ${school.code} ${school.locationCountry} ${school.city ?? ''}`.toLowerCase();
             return haystack.includes(query);
         });
     });
@@ -196,6 +250,47 @@ export class TenantSchoolsComponent implements OnInit {
         return this.deleteConfirmInput().trim() === required;
     });
 
+    readonly suggestedCode = computed(() => {
+        const name = this.schoolFormName().trim();
+        return name ? this.generateCode(name) : '';
+    });
+
+    readonly codeResetAvailable = computed(() => {
+        if (!this.schoolFormCodeEdited()) return false;
+        const suggested = this.suggestedCode();
+        return !!suggested && suggested !== this.schoolFormCode();
+    });
+
+    readonly formDirty = computed(() => {
+        const snapshot = this.schoolFormSnapshot();
+        if (!snapshot) return false;
+        const current = this.currentFormState();
+        return Object.keys(snapshot).some((key) => {
+            const k = key as keyof SchoolFormSnapshot;
+            return snapshot[k] !== current[k];
+        });
+    });
+
+    readonly invalidFields = computed(() => {
+        if (!this.schoolFormSubmitAttempted()) return [];
+        const errors: Array<{ id: string; label: string; message: string }> = [];
+        const nameError = this.schoolNameError(true);
+        const codeError = this.schoolCodeError(true);
+        const countryError = this.schoolCountryError(true);
+        const timezoneError = this.schoolTimezoneError(true);
+        if (nameError) errors.push({ id: 'school-form-name', label: 'School name', message: nameError });
+        if (codeError) errors.push({ id: 'school-form-code', label: 'Code', message: codeError });
+        if (countryError) errors.push({ id: 'school-form-country', label: 'Country', message: countryError });
+        if (timezoneError) errors.push({ id: 'school-form-timezone', label: 'Time zone', message: timezoneError });
+        return errors;
+    });
+
+    readonly errorSummaryText = computed(() => {
+        const count = this.invalidFields().length;
+        if (!count) return '';
+        return `Fix ${count} field${count === 1 ? '' : 's'} to continue.`;
+    });
+
     readonly pageNumbers = computed(() => this.buildPageNumbers());
 
     readonly rowKey = (row: WorkspaceSchool) => row.id;
@@ -213,6 +308,13 @@ export class TenantSchoolsComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadSchools();
+    }
+
+    @HostListener('document:keydown.escape')
+    handleEscape(): void {
+        if (this.isSchoolModalOpen()) {
+            this.requestCloseSchoolModal();
+        }
     }
 
     handleSearch(term: string): void {
@@ -314,33 +416,95 @@ export class TenantSchoolsComponent implements OnInit {
 
     openAddSchool(): void {
         this.editingSchoolId.set(null);
-        this.schoolFormName.set('');
-        this.schoolFormCode.set('');
-        this.schoolFormCountry.set('');
-        this.schoolFormTimezone.set('');
-        this.schoolFormTouched.set(false);
+        const country = this.lastUsedCountry();
+        const timezone = this.lastUsedTimezone();
+        this.applyFormState({
+            name: '',
+            code: '',
+            country,
+            timezone,
+            status: 'active',
+            shortName: '',
+            city: '',
+            contactEmail: '',
+            contactPhone: '',
+            addressLine1: '',
+            addressLine2: '',
+            state: '',
+            postalCode: '',
+        });
+        this.schoolFormCodeEdited.set(false);
+        this.schoolFormAdvancedOpen.set(false);
+        this.schoolFormSubmitAttempted.set(false);
+        this.discardConfirmOpen.set(false);
+        this.resetFormTouched();
+        this.setFormSnapshot();
         this.isSchoolModalOpen.set(true);
     }
 
     openEditSchool(row: WorkspaceSchool): void {
         this.editingSchoolId.set(row.id);
-        this.schoolFormName.set(row.name);
-        this.schoolFormCode.set(row.code);
-        this.schoolFormCountry.set(row.locationCountry);
-        this.schoolFormTimezone.set(row.timeZone);
-        this.schoolFormTouched.set(false);
+        this.applyFormState({
+            name: row.name,
+            code: row.code,
+            country: row.locationCountry,
+            timezone: row.timeZone,
+            status: row.status,
+            shortName: row.shortName ?? '',
+            city: row.city ?? '',
+            contactEmail: row.contactEmail ?? '',
+            contactPhone: row.contactPhone ?? '',
+            addressLine1: row.addressLine1 ?? '',
+            addressLine2: row.addressLine2 ?? '',
+            state: row.state ?? '',
+            postalCode: row.postalCode ?? '',
+        });
+        this.schoolFormCodeEdited.set(true);
+        this.schoolFormAdvancedOpen.set(this.hasAdvancedFields());
+        this.schoolFormSubmitAttempted.set(false);
+        this.discardConfirmOpen.set(false);
+        this.resetFormTouched();
+        this.setFormSnapshot();
         this.isSchoolModalOpen.set(true);
+    }
+
+    requestCloseSchoolModal(): void {
+        if (this.formDirty()) {
+            this.discardConfirmOpen.set(true);
+            return;
+        }
+        this.closeSchoolModal();
     }
 
     closeSchoolModal(): void {
         this.isSchoolModalOpen.set(false);
+        this.schoolFormSnapshot.set(null);
+        this.schoolFormSubmitAttempted.set(false);
+        this.schoolFormAdvancedOpen.set(false);
+        this.schoolFormCodeEdited.set(false);
+        this.discardConfirmOpen.set(false);
     }
 
-    saveSchool(): void {
+    confirmDiscardChanges(): void {
+        this.discardConfirmOpen.set(false);
+        this.closeSchoolModal();
+    }
+
+    closeDiscardConfirm(): void {
+        this.discardConfirmOpen.set(false);
+    }
+
+    saveAndAddAnother(): void {
+        this.saveSchool(true);
+    }
+
+    saveSchool(keepOpen = false): void {
         if (!this.canSaveSchool()) {
-            this.schoolFormTouched.set(true);
+            this.schoolFormSubmitAttempted.set(true);
             return;
         }
+        this.schoolFormSubmitAttempted.set(false);
+        this.isSaving.set(true);
         const payload = this.buildSchoolPayload();
         const editingId = this.editingSchoolId();
         if (editingId) {
@@ -361,19 +525,89 @@ export class TenantSchoolsComponent implements OnInit {
             ]);
             this.toast.success('School added.');
         }
-        this.closeSchoolModal();
+        this.lastUsedCountry.set(this.schoolFormCountry().trim());
+        this.lastUsedTimezone.set(this.schoolFormTimezone().trim());
+        this.isSaving.set(false);
+        if (keepOpen) {
+            this.openAddSchool();
+        } else {
+            this.closeSchoolModal();
+        }
     }
 
     duplicateSchool(row: WorkspaceSchool): void {
         this.editingSchoolId.set(null);
         const name = `${row.name} Copy`;
         const code = row.code ? `${row.code}-copy` : this.generateCode(name);
-        this.schoolFormName.set(name);
-        this.schoolFormCode.set(code);
-        this.schoolFormCountry.set(row.locationCountry);
-        this.schoolFormTimezone.set(row.timeZone);
-        this.schoolFormTouched.set(false);
+        this.applyFormState({
+            name,
+            code,
+            country: row.locationCountry,
+            timezone: row.timeZone,
+            status: 'active',
+            shortName: row.shortName ?? '',
+            city: row.city ?? '',
+            contactEmail: row.contactEmail ?? '',
+            contactPhone: row.contactPhone ?? '',
+            addressLine1: row.addressLine1 ?? '',
+            addressLine2: row.addressLine2 ?? '',
+            state: row.state ?? '',
+            postalCode: row.postalCode ?? '',
+        });
+        this.schoolFormCodeEdited.set(true);
+        this.schoolFormAdvancedOpen.set(this.hasAdvancedFields());
+        this.schoolFormSubmitAttempted.set(false);
+        this.discardConfirmOpen.set(false);
+        this.resetFormTouched();
+        this.setFormSnapshot();
         this.isSchoolModalOpen.set(true);
+    }
+
+    onSchoolNameChange(value: string): void {
+        this.schoolFormName.set(value);
+        if (!this.schoolFormCodeEdited()) {
+            this.schoolFormCode.set(this.suggestedCode());
+        }
+    }
+
+    onSchoolCodeChange(value: string): void {
+        const normalized = value
+            .toLowerCase()
+            .replace(/[^a-z0-9-]/g, '-')
+            .slice(0, CODE_MAX_LENGTH);
+        this.schoolFormCode.set(normalized);
+        this.schoolFormCodeEdited.set(true);
+    }
+
+    resetCodeSuggestion(): void {
+        const suggested = this.suggestedCode();
+        if (!suggested) return;
+        this.schoolFormCode.set(suggested);
+        this.schoolFormCodeEdited.set(false);
+    }
+
+    onSchoolCountryChange(value: string): void {
+        this.schoolFormCountry.set(value);
+        if (!this.schoolFormTimezone().trim() && this.lastUsedTimezone()) {
+            this.schoolFormTimezone.set(this.lastUsedTimezone());
+        }
+    }
+
+    onSchoolStatusChange(value: string): void {
+        this.schoolFormStatus.set(value as SchoolStatus);
+    }
+
+    onSchoolTimezoneChange(value: string): void {
+        this.schoolFormTimezone.set(value);
+    }
+
+    toggleAdvanced(): void {
+        this.schoolFormAdvancedOpen.update(value => !value);
+    }
+
+    focusField(id: string): void {
+        const element = document.getElementById(id) as HTMLElement | null;
+        element?.focus();
     }
 
     openArchiveConfirm(row: WorkspaceSchool): void {
@@ -492,49 +726,138 @@ export class TenantSchoolsComponent implements OnInit {
     }
 
     canSaveSchool(): boolean {
-        return !!this.schoolFormName().trim()
-            && !!this.schoolFormCode().trim()
-            && !!this.schoolFormCountry().trim()
-            && !!this.schoolFormTimezone().trim();
+        return !this.schoolNameError(true)
+            && !this.schoolCodeError(true)
+            && !this.schoolCountryError(true)
+            && !this.schoolTimezoneError(true);
     }
 
     buildSchoolPayload(): Omit<WorkspaceSchool, 'id' | 'createdAt'> {
         const editingId = this.editingSchoolId();
-        const existingStatus = editingId
-            ? this.schools().find(school => school.id === editingId)?.status
-            : undefined;
         return {
             name: this.schoolFormName().trim(),
             code: this.schoolFormCode().trim(),
             locationCountry: this.schoolFormCountry().trim(),
             timeZone: this.schoolFormTimezone().trim(),
-            status: existingStatus ?? 'active',
+            status: this.schoolFormStatus(),
             updatedAt: new Date(),
+            shortName: this.schoolFormShortName().trim(),
+            city: this.schoolFormCity().trim(),
+            contactEmail: this.schoolFormContactEmail().trim(),
+            contactPhone: this.schoolFormContactPhone().trim(),
+            addressLine1: this.schoolFormAddressLine1().trim(),
+            addressLine2: this.schoolFormAddressLine2().trim(),
+            state: this.schoolFormState().trim(),
+            postalCode: this.schoolFormPostalCode().trim(),
         };
     }
 
-    schoolNameError(): string {
-        if (!this.schoolFormTouched()) return '';
+    schoolNameError(force = false): string {
+        if (!this.shouldShowError(this.schoolFormNameTouched(), force)) return '';
         if (!this.schoolFormName().trim()) return 'School name is required.';
         return '';
     }
 
-    schoolCodeError(): string {
-        if (!this.schoolFormTouched()) return '';
-        if (!this.schoolFormCode().trim()) return 'School code is required.';
+    schoolCodeError(force = false): string {
+        if (!this.shouldShowError(this.schoolFormCodeTouched(), force)) return '';
+        const code = this.schoolFormCode().trim();
+        if (!code) return 'School code is required.';
+        if (code.length < CODE_MIN_LENGTH || code.length > CODE_MAX_LENGTH) {
+            return `Use ${CODE_MIN_LENGTH}-${CODE_MAX_LENGTH} characters.`;
+        }
+        if (!/^[a-z0-9-]+$/.test(code)) {
+            return 'Use lowercase letters, numbers, and hyphens only.';
+        }
+        if (code.startsWith('-') || code.endsWith('-')) {
+            return 'Do not start or end with a hyphen.';
+        }
+        if (code.includes('--')) {
+            return 'Avoid double hyphens.';
+        }
+        if (this.codeExists(code)) {
+            return 'Code already in use.';
+        }
         return '';
     }
 
-    schoolCountryError(): string {
-        if (!this.schoolFormTouched()) return '';
+    schoolCountryError(force = false): string {
+        if (!this.shouldShowError(this.schoolFormCountryTouched(), force)) return '';
         if (!this.schoolFormCountry().trim()) return 'Country is required.';
         return '';
     }
 
-    schoolTimezoneError(): string {
-        if (!this.schoolFormTouched()) return '';
+    schoolTimezoneError(force = false): string {
+        if (!this.shouldShowError(this.schoolFormTimezoneTouched(), force)) return '';
         if (!this.schoolFormTimezone().trim()) return 'Time zone is required.';
         return '';
+    }
+
+    private shouldShowError(touched: boolean, force: boolean): boolean {
+        return force || this.schoolFormSubmitAttempted() || touched;
+    }
+
+    private codeExists(code: string): boolean {
+        const normalized = code.trim().toLowerCase();
+        if (!normalized) return false;
+        const editingId = this.editingSchoolId();
+        return this.schools().some((school) => {
+            if (editingId && school.id === editingId) return false;
+            return school.code?.toLowerCase() === normalized;
+        });
+    }
+
+    private applyFormState(state: SchoolFormSnapshot): void {
+        this.schoolFormName.set(state.name);
+        this.schoolFormCode.set(state.code);
+        this.schoolFormCountry.set(state.country);
+        this.schoolFormTimezone.set(state.timezone);
+        this.schoolFormStatus.set(state.status);
+        this.schoolFormShortName.set(state.shortName);
+        this.schoolFormCity.set(state.city);
+        this.schoolFormContactEmail.set(state.contactEmail);
+        this.schoolFormContactPhone.set(state.contactPhone);
+        this.schoolFormAddressLine1.set(state.addressLine1);
+        this.schoolFormAddressLine2.set(state.addressLine2);
+        this.schoolFormState.set(state.state);
+        this.schoolFormPostalCode.set(state.postalCode);
+    }
+
+    private resetFormTouched(): void {
+        this.schoolFormNameTouched.set(false);
+        this.schoolFormCodeTouched.set(false);
+        this.schoolFormCountryTouched.set(false);
+        this.schoolFormTimezoneTouched.set(false);
+    }
+
+    private setFormSnapshot(): void {
+        this.schoolFormSnapshot.set(this.currentFormState());
+    }
+
+    private currentFormState(): SchoolFormSnapshot {
+        return {
+            name: this.schoolFormName(),
+            code: this.schoolFormCode(),
+            country: this.schoolFormCountry(),
+            timezone: this.schoolFormTimezone(),
+            status: this.schoolFormStatus(),
+            shortName: this.schoolFormShortName(),
+            city: this.schoolFormCity(),
+            contactEmail: this.schoolFormContactEmail(),
+            contactPhone: this.schoolFormContactPhone(),
+            addressLine1: this.schoolFormAddressLine1(),
+            addressLine2: this.schoolFormAddressLine2(),
+            state: this.schoolFormState(),
+            postalCode: this.schoolFormPostalCode(),
+        };
+    }
+
+    private hasAdvancedFields(): boolean {
+        return !!this.schoolFormContactEmail().trim()
+            || !!this.schoolFormContactPhone().trim()
+            || !!this.schoolFormAddressLine1().trim()
+            || !!this.schoolFormAddressLine2().trim()
+            || !!this.schoolFormState().trim()
+            || !!this.schoolFormPostalCode().trim();
     }
 
     private buildPageNumbers(): number[] {
@@ -558,7 +881,16 @@ export class TenantSchoolsComponent implements OnInit {
         this.api.get<School[]>('schools').subscribe({
             next: (schools) => {
                 const list = Array.isArray(schools) ? schools : [];
-                this.schools.set(list.map((school) => this.toWorkspaceSchool(school)));
+                const mapped = list.map((school) => this.toWorkspaceSchool(school));
+                this.schools.set(mapped);
+                if (mapped.length) {
+                    if (!this.lastUsedCountry()) {
+                        this.lastUsedCountry.set(mapped[0].locationCountry || '');
+                    }
+                    if (!this.lastUsedTimezone()) {
+                        this.lastUsedTimezone.set(mapped[0].timeZone || '');
+                    }
+                }
             },
             error: () => {
                 this.toast.error('Unable to load schools. Please try again.');
@@ -583,16 +915,26 @@ export class TenantSchoolsComponent implements OnInit {
             status: school.status === 'archived' ? 'archived' : 'active',
             createdAt: school.createdAt ? new Date(school.createdAt) : new Date(),
             updatedAt: school.updatedAt ? new Date(school.updatedAt) : undefined,
+            shortName: (school.settings as { shortName?: string } | undefined)?.shortName ?? '',
+            city: school.address?.city ?? '',
+            contactEmail: school.contact?.email ?? '',
+            contactPhone: school.contact?.phone ?? '',
+            addressLine1: school.address?.street ?? '',
+            addressLine2: '',
+            state: school.address?.state ?? '',
+            postalCode: school.address?.postalCode ?? '',
         };
     }
 
     private generateCode(name: string): string {
-        return name
+        const normalized = name
             .trim()
             .toLowerCase()
             .replace(/[^a-z0-9\\s-]/g, '')
             .replace(/\\s+/g, '-')
             .replace(/-+/g, '-')
-            .slice(0, 32) || 'school';
+            .replace(/^-+|-+$/g, '')
+            .slice(0, CODE_MAX_LENGTH);
+        return normalized || 'school';
     }
 }

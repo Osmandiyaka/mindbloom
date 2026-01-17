@@ -4324,6 +4324,235 @@
     font-size: 12px;
 }
 
+.schools-confirm__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.schools-modal__layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.schools-modal__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px 12px;
+    border-bottom: 1px solid var(--mb-color-border-subtle);
+    background: var(--mb-color-surface);
+}
+
+.schools-modal__header-main {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.schools-modal__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--mb-color-primary) 10%, transparent);
+}
+
+.schools-modal__title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--mb-color-text);
+}
+
+.schools-modal__subtitle {
+    font-size: 13px;
+    color: var(--mb-color-text-muted);
+}
+
+.schools-modal__close {
+    border: 1px solid var(--mb-color-border-subtle);
+    background: var(--mb-color-surface);
+    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    color: var(--mb-color-text-muted);
+}
+
+.schools-modal__close:focus-visible {
+    outline: 2px solid var(--mb-color-primary);
+    outline-offset: 2px;
+}
+
+.schools-modal__error {
+    margin: 12px 24px 0;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--mb-color-danger) 40%, transparent);
+    background: color-mix(in srgb, var(--mb-color-danger) 8%, transparent);
+}
+
+.schools-modal__error-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--mb-color-danger);
+    margin-bottom: 6px;
+}
+
+.schools-modal__error-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.schools-modal__error-link {
+    border: none;
+    background: transparent;
+    color: var(--mb-color-text);
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.schools-modal__scroll {
+    padding: 16px 24px 20px;
+    flex: 1;
+    overflow: auto;
+}
+
+.schools-modal__columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.schools-modal__section-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mb-color-text-subtle);
+    margin-bottom: 6px;
+}
+
+.schools-modal__section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--mb-color-text);
+}
+
+.schools-modal__section-helper {
+    font-size: 12px;
+    color: var(--mb-color-text-muted);
+    margin: 4px 0 12px;
+}
+
+.schools-modal__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
+}
+
+.schools-modal__field--full {
+    grid-column: span 2;
+}
+
+.schools-modal__suffix {
+    border: none;
+    background: transparent;
+    color: var(--mb-color-text-muted);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.schools-modal__advanced-toggle {
+    margin-top: 12px;
+    border: none;
+    background: transparent;
+    color: var(--mb-color-text-muted);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.schools-modal__divider {
+    height: 1px;
+    background: var(--mb-color-border-subtle);
+    margin: 12px 0;
+}
+
+.schools-modal__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 24px;
+    border-top: 1px solid var(--mb-color-border-subtle);
+    background: var(--mb-color-surface);
+}
+
+.schools-modal__footer-note {
+    font-size: 12px;
+    color: var(--mb-color-text-muted);
+}
+
+.schools-modal__footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.schools-modal__link {
+    border: none;
+    background: transparent;
+    color: var(--mb-color-text-muted);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.schools-modal__link:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+:host ::ng-deep mb-modal.schools-modal-shell .mb-modal {
+    width: min(1040px, 92vw);
+    max-height: min(720px, 88vh);
+    height: min(720px, 88vh);
+    display: flex;
+    flex-direction: column;
+}
+
+:host ::ng-deep mb-modal.schools-modal-shell .mb-modal__body {
+    padding: 0;
+    overflow: hidden;
+    flex: 1;
+}
+
+:host ::ng-deep mb-modal.schools-modal-shell .mb-form-field__label {
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+:host ::ng-deep mb-modal.schools-modal-shell .mb-form-field__hint,
+:host ::ng-deep mb-modal.schools-modal-shell .mb-form-field__error {
+    font-size: 11px;
+}
+
+@media (max-width: 960px) {
+    .schools-modal__columns {
+        grid-template-columns: 1fr;
+    }
+
+    .schools-modal__field--full {
+        grid-column: span 1;
+    }
+
+    .schools-modal__footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
 @media (max-width: 900px) {
     .schools-header {
         flex-direction: column;

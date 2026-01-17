@@ -223,31 +223,193 @@
             </ng-container>
         </mb-drawer>
 
-        <mb-modal [open]="isSchoolModalOpen()" [title]="editingSchoolId() ? 'Edit school' : 'Add school'" size="md"
-            (closed)="closeSchoolModal()">
-            <div class="schools-modal">
-                <mb-form-field label="School name" [controlId]="'school-form-name'" [error]="schoolNameError()">
-                    <mb-input id="school-form-name" [value]="schoolFormName()"
-                        (valueChange)="schoolFormName.set($event)" (blurEvent)="schoolFormTouched.set(true)"></mb-input>
-                </mb-form-field>
-                <mb-form-field label="School code" [controlId]="'school-form-code'" [error]="schoolCodeError()">
-                    <mb-input id="school-form-code" [value]="schoolFormCode()"
-                        (valueChange)="schoolFormCode.set($event)" (blurEvent)="schoolFormTouched.set(true)"></mb-input>
-                </mb-form-field>
-                <mb-form-field label="Country" [controlId]="'school-form-country'" [error]="schoolCountryError()">
-                    <mb-input id="school-form-country" [value]="schoolFormCountry()"
-                        (valueChange)="schoolFormCountry.set($event)" (blurEvent)="schoolFormTouched.set(true)"></mb-input>
-                </mb-form-field>
-                <mb-form-field label="Time zone" [controlId]="'school-form-timezone'" [error]="schoolTimezoneError()">
-                    <mb-input id="school-form-timezone" [value]="schoolFormTimezone()"
-                        (valueChange)="schoolFormTimezone.set($event)" (blurEvent)="schoolFormTouched.set(true)"></mb-input>
-                </mb-form-field>
+        <mb-modal class="schools-modal-shell" [open]="isSchoolModalOpen()" [closeable]="false" size="lg"
+            (closed)="requestCloseSchoolModal()">
+            <div class="schools-modal__layout">
+                <div class="schools-modal__header">
+                    <div class="schools-modal__header-main">
+                        <div class="schools-modal__icon" aria-hidden="true"></div>
+                        <div>
+                            <div class="schools-modal__title">
+                                {{ editingSchoolId() ? 'Edit school' : 'Add school' }}
+                            </div>
+                            <div class="schools-modal__subtitle">
+                                Add a school under this organization. You can edit details later.
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="schools-modal__close"
+                        aria-label="Close modal" (click)="requestCloseSchoolModal()">x</button>
+                </div>
+
+                <div class="schools-modal__error" *ngIf="errorSummaryText()">
+                    <div class="schools-modal__error-title">{{ errorSummaryText() }}</div>
+                    <div class="schools-modal__error-actions">
+                        <button type="button" class="schools-modal__error-link"
+                            *ngFor="let field of invalidFields()" (click)="focusField(field.id)">
+                            {{ field.label }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="schools-modal__scroll">
+                    <div class="schools-modal__columns">
+                        <div class="schools-modal__section">
+                            <div class="schools-modal__section-label">IDENTITY</div>
+                            <div class="schools-modal__section-title">School identity</div>
+                            <div class="schools-modal__section-helper">
+                                Core identifiers used across the workspace.
+                            </div>
+                            <div class="schools-modal__grid">
+                                <mb-form-field class="schools-modal__field schools-modal__field--full"
+                                    label="School name" [required]="true" [controlId]="'school-form-name'"
+                                    [error]="schoolNameError()"
+                                    hint="Appears across the platform and reports.">
+                                    <mb-input id="school-form-name" cdkFocusInitial [value]="schoolFormName()"
+                                        placeholder="e.g. Bolgatanga Secondary School"
+                                        (valueChange)="onSchoolNameChange($event)"
+                                        (blurEvent)="schoolFormNameTouched.set(true)"></mb-input>
+                                </mb-form-field>
+
+                                <mb-form-field class="schools-modal__field schools-modal__field--full"
+                                    label="Code / slug" [required]="true" [controlId]="'school-form-code'"
+                                    [error]="schoolCodeError()"
+                                    hint="Used in URLs and imports. Lowercase letters, numbers, hyphens. 3-50 chars.">
+                                    <mb-input id="school-form-code" [value]="schoolFormCode()"
+                                        placeholder="bolgatanga-secondary-school"
+                                        (valueChange)="onSchoolCodeChange($event)"
+                                        (blurEvent)="schoolFormCodeTouched.set(true)"></mb-input>
+                                    <button type="button" mbSuffix class="schools-modal__suffix"
+                                        *ngIf="codeResetAvailable()" (click)="resetCodeSuggestion()">
+                                        Reset
+                                    </button>
+                                </mb-form-field>
+
+                                <mb-form-field class="schools-modal__field"
+                                    label="Short name" [controlId]="'school-form-short-name'"
+                                    hint="Appears on compact views and reports.">
+                                    <mb-input id="school-form-short-name" [value]="schoolFormShortName()"
+                                        placeholder="e.g. Bolga Sec"
+                                        (valueChange)="schoolFormShortName.set($event)"></mb-input>
+                                </mb-form-field>
+
+                                <mb-form-field class="schools-modal__field"
+                                    label="Status" [controlId]="'school-form-status'">
+                                    <mb-select id="school-form-status" ariaLabel="School status"
+                                        [options]="formStatusOptions" [value]="schoolFormStatus()"
+                                        (valueChange)="onSchoolStatusChange($event)"></mb-select>
+                                </mb-form-field>
+                            </div>
+
+                            <button type="button" class="schools-modal__advanced-toggle"
+                                (click)="toggleAdvanced()">
+                                {{ schoolFormAdvancedOpen() ? 'Hide advanced' : 'Show advanced' }}
+                            </button>
+
+                            <div class="schools-modal__advanced" *ngIf="schoolFormAdvancedOpen()">
+                                <div class="schools-modal__divider"></div>
+                                <div class="schools-modal__grid">
+                                    <mb-form-field class="schools-modal__field"
+                                        label="Contact email" [controlId]="'school-form-contact-email'">
+                                        <mb-input id="school-form-contact-email" type="email"
+                                            [value]="schoolFormContactEmail()"
+                                            (valueChange)="schoolFormContactEmail.set($event)"></mb-input>
+                                    </mb-form-field>
+                                    <mb-form-field class="schools-modal__field"
+                                        label="Contact phone" [controlId]="'school-form-contact-phone'">
+                                        <mb-input id="school-form-contact-phone" type="tel"
+                                            [value]="schoolFormContactPhone()"
+                                            (valueChange)="schoolFormContactPhone.set($event)"></mb-input>
+                                    </mb-form-field>
+                                    <mb-form-field class="schools-modal__field schools-modal__field--full"
+                                        label="Address line 1" [controlId]="'school-form-address-line-1'">
+                                        <mb-input id="school-form-address-line-1" [value]="schoolFormAddressLine1()"
+                                            (valueChange)="schoolFormAddressLine1.set($event)"></mb-input>
+                                    </mb-form-field>
+                                    <mb-form-field class="schools-modal__field schools-modal__field--full"
+                                        label="Address line 2" [controlId]="'school-form-address-line-2'">
+                                        <mb-input id="school-form-address-line-2" [value]="schoolFormAddressLine2()"
+                                            (valueChange)="schoolFormAddressLine2.set($event)"></mb-input>
+                                    </mb-form-field>
+                                    <mb-form-field class="schools-modal__field"
+                                        label="State / region" [controlId]="'school-form-state'">
+                                        <mb-input id="school-form-state" [value]="schoolFormState()"
+                                            (valueChange)="schoolFormState.set($event)"></mb-input>
+                                    </mb-form-field>
+                                    <mb-form-field class="schools-modal__field"
+                                        label="Postal code" [controlId]="'school-form-postal'">
+                                        <mb-input id="school-form-postal" [value]="schoolFormPostalCode()"
+                                            (valueChange)="schoolFormPostalCode.set($event)"></mb-input>
+                                    </mb-form-field>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="schools-modal__section">
+                            <div class="schools-modal__section-label">SETTINGS</div>
+                            <div class="schools-modal__section-title">Operational settings</div>
+                            <div class="schools-modal__section-helper">
+                                Defaults for time-based workflows and regional settings.
+                            </div>
+                            <div class="schools-modal__grid">
+                                <mb-form-field class="schools-modal__field"
+                                    label="Country" [required]="true" [controlId]="'school-form-country'"
+                                    [error]="schoolCountryError()">
+                                    <app-country-select id="school-form-country" ariaLabel="Country"
+                                        [value]="schoolFormCountry()" [invalid]="!!schoolCountryError()"
+                                        placeholder="Select country"
+                                        (valueChange)="onSchoolCountryChange($event)"
+                                        (blurEvent)="schoolFormCountryTouched.set(true)">
+                                    </app-country-select>
+                                </mb-form-field>
+
+                                <mb-form-field class="schools-modal__field"
+                                    label="City" [controlId]="'school-form-city'">
+                                    <mb-input id="school-form-city" [value]="schoolFormCity()"
+                                        (valueChange)="schoolFormCity.set($event)"></mb-input>
+                                </mb-form-field>
+
+                                <mb-form-field class="schools-modal__field"
+                                    label="Time zone" [required]="true" [controlId]="'school-form-timezone'"
+                                    [error]="schoolTimezoneError()">
+                                    <app-timezone-select id="school-form-timezone" ariaLabel="Time zone"
+                                        [value]="schoolFormTimezone()" [invalid]="!!schoolTimezoneError()"
+                                        placeholder="Select time zone"
+                                        (valueChange)="onSchoolTimezoneChange($event)"
+                                        (blurEvent)="schoolFormTimezoneTouched.set(true)">
+                                    </app-timezone-select>
+                                </mb-form-field>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="schools-modal__footer">
+                    <div class="schools-modal__footer-note">Changes are saved when you click Save.</div>
+                    <div class="schools-modal__footer-actions">
+                        <button *ngIf="!editingSchoolId()" type="button" class="schools-modal__link"
+                            [disabled]="!canSaveSchool() || isSaving()"
+                            (click)="saveAndAddAnother()">
+                            Save & add another
+                        </button>
+                        <mb-button variant="secondary" (click)="requestCloseSchoolModal()">Cancel</mb-button>
+                        <mb-button variant="primary" [disabled]="!canSaveSchool() || isSaving()" (click)="saveSchool()">
+                            {{ isSaving() ? 'Saving...' : 'Save school' }}
+                        </mb-button>
+                    </div>
+                </div>
             </div>
-            <div mbModalFooter class="schools-modal__footer">
-                <mb-button variant="secondary" (click)="closeSchoolModal()">Cancel</mb-button>
-                <mb-button variant="primary" [disabled]="!canSaveSchool()" (click)="saveSchool()">
-                    {{ editingSchoolId() ? 'Update school' : 'Add school' }}
-                </mb-button>
+        </mb-modal>
+
+        <mb-modal [open]="discardConfirmOpen()" title="Discard changes?" size="sm" (closed)="closeDiscardConfirm()">
+            <div class="schools-confirm">
+                <div class="schools-confirm__text">
+                    You have unsaved changes. Discard them?
+                </div>
+            </div>
+            <div mbModalFooter class="schools-confirm__footer">
+                <mb-button variant="secondary" (click)="closeDiscardConfirm()">Cancel</mb-button>
+                <mb-button variant="danger" (click)="confirmDiscardChanges()">Discard</mb-button>
             </div>
         </mb-modal>
 
@@ -258,7 +420,7 @@
                 </div>
                 <div class="schools-confirm__text">You can restore this school later.</div>
             </div>
-            <div mbModalFooter class="schools-modal__footer">
+            <div mbModalFooter class="schools-confirm__footer">
                 <mb-button variant="secondary" (click)="closeArchiveConfirm()">Cancel</mb-button>
                 <mb-button variant="primary" (click)="confirmArchive()">Archive</mb-button>
             </div>
@@ -280,7 +442,7 @@
                     Enter the exact confirmation text to continue.
                 </div>
             </div>
-            <div mbModalFooter class="schools-modal__footer">
+            <div mbModalFooter class="schools-confirm__footer">
                 <mb-button variant="secondary" (click)="closeDeleteConfirm()">Cancel</mb-button>
                 <mb-button variant="danger" [disabled]="!deleteConfirmReady()" (click)="confirmDelete()">
                     Delete
