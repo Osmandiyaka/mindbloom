@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { TenantContext } from '../../common/tenant/tenant.context';
+import { ClassEntity } from '../../domain/academics/entities/class.entity';
+import { SectionEntity } from '../../domain/academics/entities/section.entity';
+import { CLASS_REPOSITORY, IClassRepository } from '../../domain/ports/out/class-repository.port';
 import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { CreateSectionDto } from './dto/create-section.dto';
@@ -10,108 +11,129 @@ import { UpdateSectionDto } from './dto/update-section.dto';
 @Injectable()
 export class ClassesService {
     constructor(
-        @InjectModel('ClassDefinition') private classModel: Model<any>,
-        @InjectModel('SectionDefinition') private sectionModel: Model<any>,
+        @Inject(CLASS_REPOSITORY) private readonly classRepository: IClassRepository,
         private readonly tenantContext: TenantContext,
     ) { }
 
     async listClasses() {
         const tenantId = this.tenantContext.tenantId;
-        return this.classModel.find({ tenantId }).sort({ sortOrder: 1 }).lean().exec();
+        const classes = await this.classRepository.listClasses(tenantId);
+        return classes.map(item => item.toPrimitives());
     }
 
     async listSections(classId?: string) {
         const tenantId = this.tenantContext.tenantId;
-        const filter: any = { tenantId };
-        if (classId) filter.classId = classId;
-        return this.sectionModel.find(filter).sort({ sortOrder: 1 }).lean().exec();
+        const sections = await this.classRepository.listSections(tenantId, classId);
+        return sections.map(item => item.toPrimitives());
     }
 
     async createClass(dto: CreateClassDto) {
         const tenantId = this.tenantContext.tenantId;
-        if (!dto.name?.trim()) throw new BadRequestException('Class name is required');
-        const sortOrder = dto.sortOrder ?? (await this.classModel.countDocuments({ tenantId })) + 1;
-        const created = new this.classModel({
+        const name = this.normalizeText(dto.name);
+        if (!name) throw new BadRequestException('Class name is required');
+        const sortOrder = dto.sortOrder ?? (await this.classRepository.countClasses(tenantId)) + 1;
+        const created = new ClassEntity({
+            id: '',
             tenantId,
-            name: dto.name.trim(),
-            code: dto.code?.trim() || undefined,
-            levelType: dto.levelType?.trim() || undefined,
+            name,
+            code: this.normalizeText(dto.code) || undefined,
+            levelType: this.normalizeText(dto.levelType) || undefined,
             sortOrder,
             active: dto.active ?? true,
             schoolIds: dto.schoolIds ?? null,
-            notes: dto.notes?.trim() || undefined,
+            notes: this.normalizeText(dto.notes) || undefined,
         });
-        return created.save();
+        const saved = await this.classRepository.createClass(created);
+        return saved.toPrimitives();
     }
 
     async updateClass(id: string, dto: UpdateClassDto) {
         const tenantId = this.tenantContext.tenantId;
-        const update: any = {};
-        if (dto.name !== undefined) update.name = dto.name.trim();
-        if (dto.code !== undefined) update.code = dto.code?.trim() || undefined;
-        if (dto.levelType !== undefined) update.levelType = dto.levelType?.trim() || undefined;
-        if (dto.sortOrder !== undefined) update.sortOrder = dto.sortOrder;
-        if (dto.active !== undefined) update.active = dto.active;
-        if (dto.schoolIds !== undefined) update.schoolIds = dto.schoolIds;
-        if (dto.notes !== undefined) update.notes = dto.notes?.trim() || undefined;
-        const updated = await this.classModel
-            .findOneAndUpdate({ _id: id, tenantId }, { $set: update }, { new: true })
-            .lean()
-            .exec();
-        if (!updated) throw new NotFoundException('Class not found');
-        return updated;
+        const current = await this.classRepository.findClassById(id, tenantId);
+        if (!current) throw new NotFoundException('Class not found');
+        if (dto.name !== undefined && !this.normalizeText(dto.name)) {
+            throw new BadRequestException('Class name is required');
+        }
+        const updatedEntity = current.withUpdates({
+            name: dto.name !== undefined ? this.normalizeText(dto.name) || current.name : current.name,
+            code: dto.code !== undefined ? this.normalizeText(dto.code) || undefined : current.code,
+            levelType: dto.levelType !== undefined ? this.normalizeText(dto.levelType) || undefined : current.levelType,
+            sortOrder: dto.sortOrder !== undefined ? dto.sortOrder : current.sortOrder,
+            active: dto.active !== undefined ? dto.active : current.active,
+            schoolIds: dto.schoolIds !== undefined ? dto.schoolIds : current.schoolIds,
+            notes: dto.notes !== undefined ? this.normalizeText(dto.notes) || undefined : current.notes,
+        });
+        const saved = await this.classRepository.updateClass(updatedEntity);
+        return saved.toPrimitives();
     }
 
     async deleteClass(id: string) {
         const tenantId = this.tenantContext.tenantId;
-        await this.sectionModel.deleteMany({ tenantId, classId: id });
-        const result = await this.classModel.deleteOne({ _id: id, tenantId }).exec();
-        if (!result.deletedCount) throw new NotFoundException('Class not found');
+        const current = await this.classRepository.findClassById(id, tenantId);
+        if (!current) throw new NotFoundException('Class not found');
+        await this.classRepository.deleteSectionsByClassId(id, tenantId);
+        await this.classRepository.deleteClass(id, tenantId);
     }
 
     async createSection(dto: CreateSectionDto) {
         const tenantId = this.tenantContext.tenantId;
         if (!dto.classId) throw new BadRequestException('Class is required');
-        if (!dto.name?.trim()) throw new BadRequestException('Section name is required');
-        const classExists = await this.classModel.exists({ _id: dto.classId, tenantId });
+        const name = this.normalizeText(dto.name);
+        if (!name) throw new BadRequestException('Section name is required');
+        const classExists = await this.classRepository.findClassById(dto.classId, tenantId);
         if (!classExists) throw new BadRequestException('Class not found');
-        const sortOrder = dto.sortOrder ?? (await this.sectionModel.countDocuments({ tenantId, classId: dto.classId })) + 1;
-        const created = new this.sectionModel({
+        const sortOrder = dto.sortOrder ?? (await this.classRepository.countSections(tenantId, dto.classId)) + 1;
+        const created = new SectionEntity({
+            id: '',
             tenantId,
             classId: dto.classId,
-            name: dto.name.trim(),
-            code: dto.code?.trim() || undefined,
+            name,
+            code: this.normalizeText(dto.code) || undefined,
             capacity: dto.capacity ?? undefined,
             homeroomTeacherId: dto.homeroomTeacherId || undefined,
             active: dto.active ?? true,
             sortOrder,
         });
-        return created.save();
+        const saved = await this.classRepository.createSection(created);
+        return saved.toPrimitives();
     }
 
     async updateSection(id: string, dto: UpdateSectionDto) {
         const tenantId = this.tenantContext.tenantId;
-        const update: any = {};
-        if (dto.classId !== undefined) update.classId = dto.classId;
-        if (dto.name !== undefined) update.name = dto.name.trim();
-        if (dto.code !== undefined) update.code = dto.code?.trim() || undefined;
-        if (dto.capacity !== undefined) update.capacity = dto.capacity ?? undefined;
-        if (dto.homeroomTeacherId !== undefined) {
-            update.homeroomTeacherId = dto.homeroomTeacherId || undefined;
+        const current = await this.classRepository.findSectionById(id, tenantId);
+        if (!current) throw new NotFoundException('Section not found');
+        if (dto.name !== undefined && !this.normalizeText(dto.name)) {
+            throw new BadRequestException('Section name is required');
         }
-        if (dto.active !== undefined) update.active = dto.active;
-        if (dto.sortOrder !== undefined) update.sortOrder = dto.sortOrder;
-        const updated = await this.sectionModel
-            .findOneAndUpdate({ _id: id, tenantId }, { $set: update }, { new: true })
-            .lean()
-            .exec();
-        if (!updated) throw new NotFoundException('Section not found');
-        return updated;
+        if (dto.classId !== undefined) {
+            const classExists = await this.classRepository.findClassById(dto.classId, tenantId);
+            if (!classExists) throw new BadRequestException('Class not found');
+        }
+        const updatedEntity = current.withUpdates({
+            classId: dto.classId !== undefined ? dto.classId : current.classId,
+            name: dto.name !== undefined ? this.normalizeText(dto.name) || current.name : current.name,
+            code: dto.code !== undefined ? this.normalizeText(dto.code) || undefined : current.code,
+            capacity: dto.capacity !== undefined ? dto.capacity ?? undefined : current.capacity,
+            homeroomTeacherId: dto.homeroomTeacherId !== undefined
+                ? dto.homeroomTeacherId || undefined
+                : current.homeroomTeacherId,
+            active: dto.active !== undefined ? dto.active : current.active,
+            sortOrder: dto.sortOrder !== undefined ? dto.sortOrder : current.sortOrder,
+        });
+        const saved = await this.classRepository.updateSection(updatedEntity);
+        return saved.toPrimitives();
     }
 
     async deleteSection(id: string) {
         const tenantId = this.tenantContext.tenantId;
-        const result = await this.sectionModel.deleteOne({ _id: id, tenantId }).exec();
-        if (!result.deletedCount) throw new NotFoundException('Section not found');
+        const current = await this.classRepository.findSectionById(id, tenantId);
+        if (!current) throw new NotFoundException('Section not found');
+        await this.classRepository.deleteSection(id, tenantId);
+    }
+
+    private normalizeText(value?: string | null): string | null {
+        if (value === undefined || value === null) return null;
+        const trimmed = value.trim();
+        return trimmed ? trimmed : null;
     }
 }
