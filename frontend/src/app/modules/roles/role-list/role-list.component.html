@@ -11,9 +11,6 @@
     </div>
 
     <mb-card class="roles-card">
-        <div class="roles-loading" *ngIf="loading()">Loading roles…</div>
-        <div class="roles-error" *ngIf="error()">{{ error() }}</div>
-
         <div class="roles-split">
             <div class="roles-split__table">
                 <div class="roles-table">
@@ -50,54 +47,63 @@
                         </div>
                     </div>
 
-                    <ng-container *ngIf="filteredRoles().length; else rolesEmpty">
-                        <mb-table class="roles-table__list" [columns]="roleTableColumns" [rows]="filteredRoles()"
-                            [rowKey]="roleRowKey" [rowClass]="roleRowClass"
-                            (rowClick)="openRoleDetails($event.id, 'permissions')">
-                            <ng-template mbTableActions let-row>
-                                <div class="roles-table__actions">
-                                    <button type="button" class="roles-menu__trigger" cdkOverlayOrigin #roleMenuOrigin="cdkOverlayOrigin"
-                                        aria-label="Role actions" (click)="toggleRoleMenu(row.id, $event)">
-                                        ⋯
-                                    </button>
-                                    <mb-popover [open]="roleMenuOpenId() === row.id" [origin]="roleMenuOrigin" [debug]="true"
-                                        [hasBackdrop]="true"
-                                        [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'roles-menu__panel']"
-                                        (closed)="closeRoleMenu()">
-                                        <div class="roles-menu__panel-content" role="menu">
-                                            <button type="button" class="roles-menu__item"
-                                                (click)="openRoleDetails(row.id, 'permissions'); closeRoleMenu()">
-                                                View permissions
-                                            </button>
-                                            <button type="button" class="roles-menu__item"
-                                                (click)="openRoleDetails(row.id, 'assignments'); closeRoleMenu()">
-                                                View assigned users
-                                            </button>
-                                            <button type="button" class="roles-menu__item" *ngIf="!row.isSystemRole"
-                                                (click)="openEditRole(row); closeRoleMenu()">
-                                                Edit role
-                                            </button>
-                                            <button type="button" class="roles-menu__item"
-                                                (click)="openDuplicateRole(row); closeRoleMenu()">
-                                                Duplicate role
-                                            </button>
-                                            <button type="button" class="roles-menu__item" *ngIf="!row.isSystemRole"
-                                                (click)="toggleRoleStatus(row); closeRoleMenu()">
-                                                {{ (row.status || 'active') === 'active' ? 'Deactivate role' : 'Activate
-                                                role' }}
-                                            </button>
-                                            <div class="roles-menu__divider" *ngIf="!row.isSystemRole"></div>
-                                            <button type="button" class="roles-menu__item roles-menu__item--danger"
-                                                *ngIf="!row.isSystemRole"
-                                                (click)="requestDeleteRole(row); closeRoleMenu()">
-                                                Delete role
-                                            </button>
-                                        </div>
-                                    </mb-popover>
-                                </div>
-                            </ng-template>
-                        </mb-table>
-                    </ng-container>
+                    <mb-table
+                        class="roles-table__list"
+                        [columns]="roleTableColumns"
+                        [rows]="filteredRoles()"
+                        [rowKey]="roleRowKey"
+                        [rowClass]="roleRowClass"
+                        [isLoading]="loading()"
+                        [isError]="!!error()"
+                        [isFiltered]="isFiltered()"
+                        [emptyState]="tableEmptyState()"
+                        [onRetry]="onRetry"
+                        (emptyAction)="handleEmptyAction($event)"
+                        (rowClick)="openRoleDetails($event.id, 'permissions')"
+                    >
+                        <ng-template mbTableActions let-row>
+                            <div class="roles-table__actions">
+                                <button type="button" class="roles-menu__trigger" cdkOverlayOrigin #roleMenuOrigin="cdkOverlayOrigin"
+                                    aria-label="Role actions" (click)="toggleRoleMenu(row.id, $event)">
+                                    ⋯
+                                </button>
+                                <mb-popover [open]="roleMenuOpenId() === row.id" [origin]="roleMenuOrigin" [debug]="true"
+                                    [hasBackdrop]="true"
+                                    [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'roles-menu__panel']"
+                                    (closed)="closeRoleMenu()">
+                                    <div class="roles-menu__panel-content" role="menu">
+                                        <button type="button" class="roles-menu__item"
+                                            (click)="openRoleDetails(row.id, 'permissions'); closeRoleMenu()">
+                                            View permissions
+                                        </button>
+                                        <button type="button" class="roles-menu__item"
+                                            (click)="openRoleDetails(row.id, 'assignments'); closeRoleMenu()">
+                                            View assigned users
+                                        </button>
+                                        <button type="button" class="roles-menu__item" *ngIf="!row.isSystemRole"
+                                            (click)="openEditRole(row); closeRoleMenu()">
+                                            Edit role
+                                        </button>
+                                        <button type="button" class="roles-menu__item"
+                                            (click)="openDuplicateRole(row); closeRoleMenu()">
+                                            Duplicate role
+                                        </button>
+                                        <button type="button" class="roles-menu__item" *ngIf="!row.isSystemRole"
+                                            (click)="toggleRoleStatus(row); closeRoleMenu()">
+                                            {{ (row.status || 'active') === 'active' ? 'Deactivate role' : 'Activate
+                                            role' }}
+                                        </button>
+                                        <div class="roles-menu__divider" *ngIf="!row.isSystemRole"></div>
+                                        <button type="button" class="roles-menu__item roles-menu__item--danger"
+                                            *ngIf="!row.isSystemRole"
+                                            (click)="requestDeleteRole(row); closeRoleMenu()">
+                                            Delete role
+                                        </button>
+                                    </div>
+                                </mb-popover>
+                            </div>
+                        </ng-template>
+                    </mb-table>
                 </div>
             </div>
 
@@ -241,21 +247,6 @@
             </div>
         </div>
     </mb-card>
-
-    <ng-template #rolesEmpty>
-        <div class="roles-empty" *ngIf="roles().length; else noRoles">
-            <div class="roles-empty__title">No roles match the selected filters</div>
-            <div class="roles-empty__text">Try removing some filters to see more roles.</div>
-            <mb-button variant="secondary" (click)="clearFilters()">Clear filters</mb-button>
-        </div>
-        <ng-template #noRoles>
-            <div class="roles-empty">
-                <div class="roles-empty__title">No roles yet</div>
-                <div class="roles-empty__text">Create a custom role to start managing access.</div>
-                <mb-button variant="primary" (click)="openCreateRole()">Create custom role</mb-button>
-            </div>
-        </ng-template>
-    </ng-template>
 
     <mb-modal class="role-form-modal" [open]="roleFormOpen()"
         title="{{ roleFormMode() === 'edit' ? 'Edit role' : (roleFormMode() === 'duplicate' ? 'Duplicate role' : 'Create role') }}"

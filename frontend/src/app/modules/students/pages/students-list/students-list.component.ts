@@ -49,6 +49,7 @@ import {
   MbTableActionsDirective,
   MbTableColumn,
   MbTableComponent,
+  MbTableEmptyState,
 } from '@mindbloom/ui';
 
 type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
@@ -261,117 +262,77 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
             </div>
           </div>
 
-          @if (loading()) {
-            <div class="table-skeleton">
-              <div class="skeleton-row" *ngFor="let _ of skeletonRows"></div>
-            </div>
-          }
-
-          @if (error()) {
-            <div class="state-block error">
-              <p>{{ error() }}</p>
-              <mb-button size="sm" variant="tertiary" (click)="loadStudents()">Retry</mb-button>
-            </div>
-          }
-
-          @if (!loading() && !error()) {
-            @if (filteredStudents().length === 0) {
-              <div class="empty-state">
-                @if (hasFilters()) {
-                  <p>No results</p>
-                  <div class="empty-actions">
-                    <mb-button size="sm" variant="tertiary" (click)="clearFilters()">Clear filters</mb-button>
+          <div class="table-wrapper">
+            <mb-table
+              *ngIf="tableVisible()"
+              [rows]="filteredStudents()"
+              [columns]="tableColumns()"
+              [rowKey]="rowKey"
+              [rowClass]="rowClass"
+              [selectable]="true"
+              [sortLocal]="false"
+              [isLoading]="loading()"
+              [isError]="!!error()"
+              [isFiltered]="hasFilters()"
+              [emptyState]="tableEmptyState()"
+              [onRetry]="onRetry"
+              (emptyAction)="handleEmptyAction($event)"
+              (rowClick)="selectStudent($event)"
+              (selectionChange)="onSelectionChange($event)"
+            >
+              <ng-template mbTableActions let-student>
+                <div class="row-actions" [class.open]="rowMenuOpen() === student.id">
+                  <mb-button size="sm" variant="tertiary" aria-label="Row actions" (click)="toggleRowMenu($event, student.id)">•••</mb-button>
+                  <div class="row-menu" *ngIf="rowMenuOpen() === student.id">
+                    <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="viewStudent($event, student)">
+                      View student
+                    </mb-button>
                     <mb-button
                       size="sm"
-                      variant="primary"
-                      [disabled]="isCreateLocked()"
-                      [attr.title]="createLockHint()"
-                      (click)="openCreateModal()">
-                      Add student
+                      variant="tertiary"
+                      [fullWidth]="true"
+                      *can="'students.update'"
+                      (click)="editStudent($event, student.id)">
+                      Edit student
                     </mb-button>
-                  </div>
-                } @else {
-                  <p>No students yet</p>
-                  <div class="empty-actions">
-                    <mb-button size="sm" variant="tertiary" (click)="openImport()">Import CSV</mb-button>
                     <mb-button
                       size="sm"
-                      variant="primary"
-                      [disabled]="isCreateLocked()"
-                      [attr.title]="createLockHint()"
-                      (click)="openCreateModal()">
-                      Add student
+                      variant="tertiary"
+                      [fullWidth]="true"
+                      *can="'students.write'"
+                      (click)="openTransfer($event, student)">
+                      Transfer student
+                    </mb-button>
+                    <mb-button
+                      size="sm"
+                      variant="tertiary"
+                      [fullWidth]="true"
+                      *can="'students.write'"
+                      (click)="openChangeSection($event, student)">
+                      Change section
+                    </mb-button>
+                    <mb-button
+                      size="sm"
+                      variant="danger"
+                      [fullWidth]="true"
+                      *can="'students.delete'"
+                      (click)="archiveStudent($event, student)">
+                      Archive
                     </mb-button>
                   </div>
-                }
-              </div>
-            } @else {
-              <div class="table-wrapper">
-                <mb-table
-                  *ngIf="tableVisible()"
-                  [rows]="filteredStudents()"
-                  [columns]="tableColumns()"
-                  [rowKey]="rowKey"
-                  [rowClass]="rowClass"
-                  [selectable]="true"
-                  [sortLocal]="false"
-                  emptyMessage="No students available."
-                  (rowClick)="selectStudent($event)"
-                  (selectionChange)="onSelectionChange($event)"
-                >
-                  <ng-template mbTableActions let-student>
-                    <div class="row-actions" [class.open]="rowMenuOpen() === student.id">
-                      <mb-button size="sm" variant="tertiary" aria-label="Row actions" (click)="toggleRowMenu($event, student.id)">•••</mb-button>
-                      <div class="row-menu" *ngIf="rowMenuOpen() === student.id">
-                        <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="viewStudent($event, student)">
-                          View student
-                        </mb-button>
-                        <mb-button
-                          size="sm"
-                          variant="tertiary"
-                          [fullWidth]="true"
-                          *can="'students.update'"
-                          (click)="editStudent($event, student.id)">
-                          Edit student
-                        </mb-button>
-                        <mb-button
-                          size="sm"
-                          variant="tertiary"
-                          [fullWidth]="true"
-                          *can="'students.write'"
-                          (click)="openTransfer($event, student)">
-                          Transfer student
-                        </mb-button>
-                        <mb-button
-                          size="sm"
-                          variant="tertiary"
-                          [fullWidth]="true"
-                          *can="'students.write'"
-                          (click)="openChangeSection($event, student)">
-                          Change section
-                        </mb-button>
-                        <mb-button
-                          size="sm"
-                          variant="danger"
-                          [fullWidth]="true"
-                          *can="'students.delete'"
-                          (click)="archiveStudent($event, student)">
-                          Archive
-                        </mb-button>
-                      </div>
-                    </div>
-                  </ng-template>
-                </mb-table>
-              </div>
-
-              <div class="pagination">
-                <span>Page {{ page() }}</span>
-                <div class="pagination-actions">
-                  <mb-button size="sm" variant="tertiary" (click)="prevPage()" [disabled]="page() === 1">Previous</mb-button>
-                  <mb-button size="sm" variant="tertiary" (click)="nextPage()" [disabled]="!hasNextPage()">Next</mb-button>
                 </div>
+              </ng-template>
+            </mb-table>
+          </div>
+
+          @if (!loading() && filteredStudents().length) {
+            <div class="pagination">
+              <span>Page {{ page() }}</span>
+              <div class="pagination-actions">
+                <mb-button size="sm" variant="tertiary" (click)="prevPage()" [disabled]="page() === 1">Previous</mb-button>
+                <mb-button size="sm" variant="tertiary" (click)="nextPage()" [disabled]="!hasNextPage()">Next</mb-button>
               </div>
-            }
+            </div>
           }
         </section>
 
@@ -1437,6 +1398,7 @@ export class StudentsListComponent implements OnInit {
   error = signal<string | null>(null);
   students = signal<Student[]>([]);
   filterOptions = signal<StudentFilterResponse | null>(null);
+  readonly onRetry = () => this.loadStudents();
 
   searchTerm = signal('');
   statusFilter = '';
@@ -2277,6 +2239,60 @@ export class StudentsListComponent implements OnInit {
       this.yearFilter ||
       this.hasAttentionFilters()
     );
+  }
+
+  tableEmptyState(): MbTableEmptyState {
+    if (this.hasFilters()) {
+      return {
+        variant: 'filtered',
+        title: 'No results found',
+        description: 'Try adjusting your search or clearing filters.',
+        actions: [
+          { id: 'clearFilters', label: 'Clear filters', variant: 'primary' },
+          { id: 'resetSearch', label: 'Reset search', variant: 'secondary' },
+        ],
+      };
+    }
+
+    const actions: MbTableEmptyState['actions'] = [
+      { id: 'importCsv', label: 'Import CSV', variant: 'secondary' },
+    ];
+    if (!this.isCreateLocked()) {
+      actions.unshift({ id: 'addStudent', label: 'Add student', variant: 'primary' });
+    }
+    return {
+      variant: 'default',
+      title: 'No students yet',
+      description: 'Add your first student to start managing records and assignments.',
+      actions,
+    };
+  }
+
+  handleEmptyAction(actionId: string): void {
+    switch (actionId) {
+      case 'addStudent':
+        if (!this.isCreateLocked()) {
+          this.openCreateModal();
+        }
+        break;
+      case 'importCsv':
+        this.openImport();
+        break;
+      case 'clearFilters':
+        this.clearFilters();
+        break;
+      case 'resetSearch':
+        this.resetSearch();
+        break;
+      default:
+        break;
+    }
+  }
+
+  resetSearch(): void {
+    this.searchTerm.set('');
+    this.page.set(1);
+    this.updateQueryParams();
   }
 
   setPageSize(value: string): void {

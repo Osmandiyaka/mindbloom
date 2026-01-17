@@ -15,6 +15,7 @@ import {
     MbModalFooterDirective,
     MbPopoverComponent,
     MbTableComponent,
+    type MbTableEmptyState,
     type MbTableColumn,
     MbTableActionsDirective,
     MbFormFieldComponent,
@@ -216,6 +217,29 @@ export class RoleListComponent implements OnInit {
         return filters.size;
     });
 
+    readonly isFiltered = computed(() => !!this.search().trim() || this.activeFilterCount() > 0);
+    readonly tableEmptyState = computed<MbTableEmptyState>(() => {
+        if (this.isFiltered()) {
+            return {
+                variant: 'filtered',
+                title: 'No results found',
+                description: 'Try adjusting your search or clearing filters.',
+                actions: [
+                    { id: 'clearFilters', label: 'Clear filters', variant: 'primary' },
+                    { id: 'resetSearch', label: 'Reset search', variant: 'secondary' },
+                ],
+            };
+        }
+        return {
+            variant: 'default',
+            title: 'No roles yet',
+            description: 'Create a custom role to start managing access.',
+            actions: [{ id: 'createRole', label: 'Create custom role', variant: 'primary' }],
+        };
+    });
+
+    readonly onRetry = () => this.roleService.getRoles().subscribe();
+
     readonly selectedRole = computed(() => {
         const roleId = this.selectedRoleId();
         const list = this.filteredRoles();
@@ -324,6 +348,26 @@ export class RoleListComponent implements OnInit {
 
     clearFilters(): void {
         this.filters.set(new Set(['all']));
+    }
+
+    resetSearch(): void {
+        this.search.set('');
+    }
+
+    handleEmptyAction(actionId: string): void {
+        switch (actionId) {
+            case 'createRole':
+                this.openCreateRole();
+                break;
+            case 'clearFilters':
+                this.clearFilters();
+                break;
+            case 'resetSearch':
+                this.resetSearch();
+                break;
+            default:
+                break;
+        }
     }
 
     roleUserCount(roleId: string): number {
