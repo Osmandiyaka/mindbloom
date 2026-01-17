@@ -22,7 +22,6 @@ export interface UserRow {
     status: UserStatus;
     jobTitle?: string;
     department?: string;
-    staffId?: string;
     gender?: string;
     dateOfBirth?: string;
     phone?: string;

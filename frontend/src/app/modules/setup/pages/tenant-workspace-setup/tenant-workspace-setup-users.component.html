@@ -2,8 +2,8 @@
     <div class="setup-section">
         <div class="users-header">
             <div>
-                <h2>Staff & users</h2>
-                <p>Add staff who will access the workspace. You can invite now and assign roles
+                <h2>Users</h2>
+                <p>Add users who will access the workspace. You can invite now and assign roles
                     later.</p>
 
             </div>
@@ -76,7 +76,7 @@
                             stroke-width="2" stroke-linecap="round"></path>
                     </svg>
                 </div>
-                <div class="users-empty__title">No staff or users yet</div>
+                <div class="users-empty__title">No users yet</div>
                 <div class="users-empty__text">
                     Add users to give your team access to the workspace.
                 </div>
@@ -218,8 +218,7 @@
             <div class="users-modal__header">
                 <div>
                     <div id="edit-user-title" class="users-modal__title">Edit user</div>
-                    <div class="users-modal__subtitle">Update role, access, and employment
-                        details.</div>
+                <div class="users-modal__subtitle">Update role, access, and profile details.</div>
                 </div>
                 <button type="button" class="users-modal__close" (click)="vm.closeEditUser()"
                     aria-label="Close dialog">×</button>
@@ -268,7 +267,7 @@
                 </div>
 
                 <div class="users-modal__section">
-                    <div class="users-modal__section-title">Employment details</div>
+                    <div class="users-modal__section-title">Profile details</div>
                     <mb-form-field label="Job title" [controlId]="'edit-user-job'">
                         <mb-input id="edit-user-job" [value]="vm.editJobTitle()"
                             (valueChange)="vm.editJobTitle.set($event)"></mb-input>
@@ -276,11 +275,6 @@
                     <mb-form-field label="Department" [controlId]="'edit-user-dept'">
                         <mb-input id="edit-user-dept" [value]="vm.editDepartment()"
                             (valueChange)="vm.editDepartment.set($event)"></mb-input>
-                    </mb-form-field>
-                    <mb-form-field label="Staff ID (optional)"
-                        [controlId]="'edit-user-staff-id'">
-                        <mb-input id="edit-user-staff-id" [value]="vm.editStaffId()"
-                            (valueChange)="vm.editStaffId.set($event)"></mb-input>
                     </mb-form-field>
                 </div>
             </div>

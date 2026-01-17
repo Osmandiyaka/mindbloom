@@ -46,7 +46,6 @@ type CreateUserSnapshot = {
     selectedSchools: string[];
     jobTitle: string;
     department: string;
-    staffId: string;
     gender: string;
     dateOfBirth: string;
     phone: string;
@@ -274,7 +273,6 @@ export class TenantWorkspaceSetupFacade {
     editSelectedSchools = signal<string[]>([]);
     editJobTitle = signal('');
     editDepartment = signal('');
-    editStaffId = signal('');
     editTouched = signal(false);
 
     isCreateUserModalOpen = signal(false);
@@ -285,7 +283,6 @@ export class TenantWorkspaceSetupFacade {
     createSelectedSchools = signal<string[]>([]);
     createJobTitle = signal('');
     createDepartment = signal('');
-    createStaffId = signal('');
     createGender = signal('');
     createDateOfBirth = signal('');
     createPhone = signal('');
@@ -553,7 +550,7 @@ export class TenantWorkspaceSetupFacade {
 
     readonly stepLabels = [
         'Schools',
-        'Staff & users',
+        'Users',
         'Organizational units',
         'Academic structure',
         'Classes & sections',
@@ -2763,7 +2760,6 @@ export class TenantWorkspaceSetupFacade {
         this.createSelectedSchools.set([]);
         this.createJobTitle.set('');
         this.createDepartment.set('');
-        this.createStaffId.set('');
         this.createGender.set('');
         this.createDateOfBirth.set('');
         this.createPhone.set('');
@@ -2951,7 +2947,6 @@ export class TenantWorkspaceSetupFacade {
         this.editSelectedSchools.set(Array.isArray(user.schoolAccess) ? [...user.schoolAccess] : []);
         this.editJobTitle.set(user.jobTitle || '');
         this.editDepartment.set(user.department || '');
-        this.editStaffId.set(user.staffId || '');
         this.editTouched.set(false);
         this.isEditUserModalOpen.set(true);
     }
@@ -2988,7 +2983,6 @@ export class TenantWorkspaceSetupFacade {
                 schoolAccess,
                 jobTitle: this.editJobTitle().trim() || undefined,
                 department: this.editDepartment().trim() || undefined,
-                staffId: this.editStaffId().trim() || undefined,
             };
         }));
         this.closeEditUser();
@@ -3120,7 +3114,6 @@ export class TenantWorkspaceSetupFacade {
                 status: this.createStatus(),
                 jobTitle: this.createJobTitle().trim() || undefined,
                 department: this.createDepartment().trim() || undefined,
-                staffId: this.createStaffId().trim() || undefined,
                 gender: this.createGender().trim() || undefined,
                 dateOfBirth: this.createDateOfBirth().trim() || undefined,
                 phone: this.createPhone().trim() || undefined,
@@ -3731,7 +3724,6 @@ export class TenantWorkspaceSetupFacade {
             selectedSchools: [...this.createSelectedSchools()].sort(),
             jobTitle: this.createJobTitle(),
             department: this.createDepartment(),
-            staffId: this.createStaffId(),
             gender: this.createGender(),
             dateOfBirth: this.createDateOfBirth(),
             phone: this.createPhone(),
