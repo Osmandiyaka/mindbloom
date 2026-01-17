@@ -5,15 +5,18 @@
         *ngIf="enableSearch"
         class="search-box"
         [placeholder]="searchPlaceholder"
+        [value]="searchTerm"
         (search)="onSearch($event)">
       </app-search-input>
       <ng-content select="[table-filters]"></ng-content>
     </div>
     <div class="toolbar-right">
-      <div class="density-toggle" title="Toggle density">
-        <button type="button" (click)="toggleDensity()">
-          <span class="icon">⇅</span>
-          <span class="muted">{{ dense ? 'Compact' : 'Comfortable' }}</span>
+      <div class="density-toggle" role="group" aria-label="Table density">
+        <button type="button" [class.active]="!dense" (click)="setDensity('comfortable')" title="Comfortable">
+          <span class="icon">▦</span>
+        </button>
+        <button type="button" [class.active]="dense" (click)="setDensity('compact')" title="Compact">
+          <span class="icon">▤</span>
         </button>
       </div>
       <div class="columns-toggle" *ngIf="columns?.length">
@@ -34,7 +37,7 @@
           <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
         </select>
       </div>
-      <div class="export-controls">
+      <div class="export-controls" *ngIf="enableExportControls">
         <button type="button" (click)="openPrint()" title="Print table">
           <span class="icon">🖨</span>
           Print

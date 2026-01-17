@@ -1,106 +1,184 @@
-<div class="hr-directory">
-  <header class="page-header">
-    <div>
-      <p class="eyebrow">Human Resources</p>
-      <h1>Staff Directory</h1>
-      <p class="muted">Search, filter, and manage staff profiles.</p>
-    </div>
-    <div class="header-actions">
-      <app-button variant="secondary" size="sm" (click)="exportSelected()">Export</app-button>
-      <app-button variant="primary" size="sm" (click)="openAdd()">Add Staff</app-button>
-    </div>
-  </header>
+<mb-stack gap="var(--mb-space-3)">
+  <host-page-header
+    title="Staff directory"
+    description="Search, filter, and manage staff profiles."
+  >
+    <mb-inline gap="var(--mb-space-2)" align="center" justify="end" [wrap]="true">
+      <mb-button size="sm" variant="secondary" cdkOverlayOrigin #exportOrigin="cdkOverlayOrigin"
+        (click)="exportMenuOpen = !exportMenuOpen">
+        Export
+      </mb-button>
+      <mb-popover
+        [open]="exportMenuOpen"
+        [origin]="exportOrigin"
+        [hasBackdrop]="true"
+        (closed)="closeExportMenu()"
+        [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal']"
+      >
+        <mb-stack gap="var(--mb-space-2)">
+          <mb-button size="sm" variant="tertiary" (click)="onExportAction('CSV')">Export CSV</mb-button>
+          <mb-button size="sm" variant="tertiary" (click)="onExportAction('Excel')">Export Excel</mb-button>
+          <mb-button size="sm" variant="tertiary" (click)="onExportAction('PDF')">Export PDF</mb-button>
+          <mb-button size="sm" variant="tertiary" (click)="onExportAction('Print')">Print</mb-button>
+        </mb-stack>
+      </mb-popover>
+      <mb-button size="sm" variant="primary" (click)="openAdd()">+ Add staff</mb-button>
+    </mb-inline>
+  </host-page-header>
 
-  <app-card class="filters-card">
-    <div class="filters-header">
-      <div>
-        <p class="eyebrow small">Filters</p>
-        <p class="muted small">Narrow the directory by status or search.</p>
+  <mb-inline *ngIf="showSummary" class="staff-summary" gap="var(--mb-space-2)" align="center" [wrap]="true">
+    <ng-container *ngFor="let item of summaryItems; let i = index">
+      <span>{{ item }}</span>
+      <span *ngIf="i < summaryItems.length - 1">•</span>
+    </ng-container>
+  </mb-inline>
+
+  <mb-card style="--mb-card-padding: 16px;">
+    <mb-alert *ngIf="error" variant="danger">
+      {{ error }}
+      <mb-button size="sm" variant="tertiary" (click)="reload()">Retry</mb-button>
+    </mb-alert>
+
+    <mb-stack gap="var(--mb-space-3)">
+      <div class="staff-toolbar">
+        <mb-inline gap="var(--mb-space-2)" align="center" class="staff-toolbar__left" [wrap]="true">
+          <app-search-input
+            class="staff-toolbar__search"
+            [value]="searchValue"
+            [debounceMs]="300"
+            placeholder="Search staff by name, staff code, or email…"
+            (search)="onSearch($event)"
+          ></app-search-input>
+          <mb-inline gap="var(--mb-space-2)" align="center">
+            <span class="staff-toolbar__label">Status</span>
+            <mb-select
+              ariaLabel="Filter by status"
+              [options]="statusOptions"
+              [value]="filters.status"
+              (valueChange)="onStatusChange($event)"
+            ></mb-select>
+          </mb-inline>
+        </mb-inline>
+        <mb-inline gap="var(--mb-space-2)" align="center" class="staff-toolbar__right" [wrap]="true">
+          <div class="staff-density" role="group" aria-label="Table density">
+            <mb-button size="sm" variant="tertiary" [class.is-active]="density === 'comfortable'"
+              (click)="onDensityChange('comfortable')">Comfortable</mb-button>
+            <mb-button size="sm" variant="tertiary" [class.is-active]="density === 'compact'"
+              (click)="onDensityChange('compact')">Compact</mb-button>
+          </div>
+          <mb-button size="sm" variant="tertiary" cdkOverlayOrigin #columnsOrigin="cdkOverlayOrigin"
+            (click)="columnsMenuOpen = !columnsMenuOpen">☰ Columns</mb-button>
+          <mb-popover
+            [open]="columnsMenuOpen"
+            [origin]="columnsOrigin"
+            [hasBackdrop]="true"
+            (closed)="closeColumnsMenu()"
+            [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal']"
+          >
+            <mb-stack gap="var(--mb-space-2)">
+              <mb-checkbox
+                *ngFor="let col of staffTableColumns"
+                [checked]="isColumnVisible(col)"
+                (checkedChange)="toggleColumn(columnKey(col))"
+              >
+                {{ col.label }}
+              </mb-checkbox>
+            </mb-stack>
+          </mb-popover>
+          <mb-select
+            ariaLabel="Rows per page"
+            [options]="rowsPerPageOptions"
+            [value]="pageSize.toString()"
+            (valueChange)="changePageSize($event)"
+          ></mb-select>
+          <mb-button size="sm" variant="tertiary" *ngIf="hasActiveFilters" (click)="clearFilters()">
+            Clear filters
+          </mb-button>
+        </mb-inline>
       </div>
-      <div class="filter-chips" *ngIf="hasActiveFilters">
-        <span class="chip" *ngIf="filters.status">Status: {{ filters.status }}</span>
-        <span class="chip" *ngIf="filters.search">Search: “{{ filters.search }}”</span>
-        <button type="button" class="link" (click)="clearFilters()" [disabled]="loading">Clear all</button>
-      </div>
-    </div>
-    <div class="filter-row">
-      <label>
-        Status
-        <select [(ngModel)]="filters.status" (change)="reload()" [disabled]="loading">
-          <option value="">All</option>
-          <option value="draft">Draft</option>
-          <option value="pending">Pending</option>
-          <option value="active">Active</option>
-          <option value="onLeave">On Leave</option>
-          <option value="suspended">Suspended</option>
-          <option value="archived">Archived</option>
-          <option value="terminated">Terminated</option>
-        </select>
-      </label>
-    </div>
-  </app-card>
 
-  <div class="table-meta">
-    <span class="muted small">Showing {{ staffList.length }} of {{ hr.staff().length || 0 }} staff</span>
-  </div>
+      <mb-inline class="staff-table-meta" justify="end" *ngIf="helperText">
+        {{ helperText }}
+      </mb-inline>
+      <div *ngIf="loading">Loading staff…</div>
 
-  <div class="toast" *ngIf="toast">{{ toast }}</div>
-
-  <ng-container *ngIf="!loading; else directoryLoading">
-    <app-data-table
-      class="hr-table"
-      [columns]="columns"
-      [data]="staffList"
-      [pageSizeOptions]="[10, 25, 50]"
-      [pageSize]="pageSize"
-      [searchableKeys]="['firstName','lastName','preferredName','staffCode']"
-      searchPlaceholder="Search staff..."
-      (searchChange)="onSearch($event)"
-      (printRequest)="notify('Preparing print view…')"
-      (exportRequest)="notify('Preparing export…')"
-    >
-      <ng-template #rowTemplate let-staff>
-        <tr class="row-clickable" (click)="viewProfile(staff)">
-          <td><input type="checkbox" [checked]="selectedIds.has(staff.id || staff._id || '')" (click)="toggleSelect($event, staff.id || staff._id || '')" /></td>
-          <td class="name-cell">
-            <span class="avatar">{{ initials(staff) }}</span>
-            <div>
-              <p class="strong">{{ displayName(staff) }}</p>
-              <p class="muted small">Code {{ staff.staffCode || '—' }}</p>
-            </div>
-          </td>
-          <td>{{ staff.staffCode || '—' }}</td>
-          <td><span class="hr-badge">{{ staff.status || 'active' }}</span></td>
-          <td>{{ staff.updatedAt ? (staff.updatedAt | date:'mediumDate') : '—' }}</td>
-          <td>
-            <div class="cell-actions">
-              <button type="button" (click)="viewProfile(staff)" title="Open profile">
-                <span class="icon">➔</span>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-
-      <ng-template #emptyState>
-        <div class="empty-state">
-          <p class="strong">No staff found</p>
-          <p class="muted small">Try adjusting filters or search terms.</p>
-          <div class="empty-actions">
-            <app-button variant="secondary" size="sm" (click)="reload()">Retry</app-button>
-            <button type="button" class="link" *ngIf="hasActiveFilters" (click)="clearFilters()">Clear filters</button>
+      <ng-container *ngIf="!loading">
+        <div class="staff-table-shell" [class.is-compact]="density === 'compact'">
+          <mb-table
+            [columns]="visibleColumns"
+            [rows]="pagedStaff"
+            [rowKey]="rowKey"
+            [rowClass]="rowClass"
+            [selectable]="true"
+            [sortLocal]="true"
+            [emptyMessage]="''"
+            (rowClick)="viewProfile($event)"
+            (selectionChange)="onSelectionChange($event)"
+            [style.--mb-space-3]="density === 'compact' ? '8px' : null"
+            [style.--mb-space-4]="density === 'compact' ? '12px' : null"
+          >
+            <ng-template mbTableActions let-row>
+              <mb-inline gap="var(--mb-space-2)" align="center">
+                <mb-button size="sm" variant="tertiary" class="staff-action-kebab" ariaLabel="Row actions"
+                  cdkOverlayOrigin #rowMenuOrigin="cdkOverlayOrigin" (click)="toggleRowMenu($event, row)">
+                  ⋯
+                </mb-button>
+                <mb-popover
+                  [open]="openRowMenuId === (row.id || row._id)"
+                  [origin]="rowMenuOrigin"
+                  [hasBackdrop]="true"
+                  (closed)="closeRowMenu()"
+                  [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal']"
+                >
+                  <mb-stack gap="var(--mb-space-2)">
+                    <mb-button size="sm" variant="tertiary" (click)="viewProfile(row); closeRowMenu()">View profile</mb-button>
+                    <mb-button size="sm" variant="tertiary" (click)="notify('Edit staff coming soon.'); closeRowMenu()">Edit</mb-button>
+                    <mb-button size="sm" variant="tertiary"
+                      (click)="notify(statusToggleLabel(row) + ' staff coming soon.'); closeRowMenu()">
+                      {{ statusToggleLabel(row) }}
+                    </mb-button>
+                    <mb-button size="sm" variant="danger" (click)="notify('Archive staff coming soon.'); closeRowMenu()">Archive</mb-button>
+                    <mb-button size="sm" variant="danger" (click)="notify('Delete staff coming soon.'); closeRowMenu()">Delete</mb-button>
+                  </mb-stack>
+                </mb-popover>
+              </mb-inline>
+            </ng-template>
+          </mb-table>
+          <div class="staff-table-empty" *ngIf="isEmptyDirectory">
+            <mb-stack gap="var(--mb-space-2)">
+              <div class="staff-empty-icon">👥</div>
+              <div>No staff members yet</div>
+              <div>Add your first staff member to start managing HR profiles and assignments.</div>
+              <mb-inline gap="var(--mb-space-2)" align="center" [wrap]="true">
+                <mb-button size="sm" variant="primary" (click)="openAdd()">Add staff</mb-button>
+                <mb-button size="sm" variant="tertiary" (click)="notify('Import flow coming soon.')">Import CSV</mb-button>
+                <mb-button size="sm" variant="tertiary" (click)="notify('Learn more coming soon.')">Learn more</mb-button>
+              </mb-inline>
+            </mb-stack>
+          </div>
+          <div class="staff-table-empty" *ngIf="isNoResults">
+            <mb-stack gap="var(--mb-space-2)">
+              <div class="staff-empty-icon">🔍</div>
+              <div>No results found</div>
+              <div>Try a different search or clear filters.</div>
+              <mb-inline gap="var(--mb-space-2)" align="center" [wrap]="true">
+                <mb-button size="sm" variant="secondary" (click)="clearFilters()">Clear filters</mb-button>
+                <mb-button size="sm" variant="tertiary" (click)="resetSearch()">Reset search</mb-button>
+              </mb-inline>
+            </mb-stack>
           </div>
         </div>
-      </ng-template>
-    </app-data-table>
-  </ng-container>
 
-  <ng-template #directoryLoading>
-    <app-card class="table-skeleton">
-      <div class="skeleton-row header"></div>
-      <div class="skeleton-row" *ngFor="let i of [1,2,3,4,5]"></div>
-    </app-card>
-  </ng-template>
+        <mb-inline *ngIf="staffList.length" gap="var(--mb-space-2)" align="center" justify="space-between" [wrap]="true">
+          <div>Page {{ pageIndex }} of {{ pageCount }}</div>
+          <mb-inline gap="var(--mb-space-2)" align="center">
+            <mb-button size="sm" variant="tertiary" [disabled]="pageIndex === 1" (click)="prevPage()">Prev</mb-button>
+            <mb-button size="sm" variant="tertiary" [disabled]="pageIndex === pageCount" (click)="nextPage()">Next</mb-button>
+          </mb-inline>
+        </mb-inline>
+      </ng-container>
+    </mb-stack>
+  </mb-card>
 
-  <div class="alert" *ngIf="error">{{ error }}</div>
-</div>
+  <div *ngIf="toast">{{ toast }}</div>
+</mb-stack>

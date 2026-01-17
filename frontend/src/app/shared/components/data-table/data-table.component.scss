@@ -75,7 +75,6 @@
   min-width: min(320px, 100%);
 }
 
-.density-toggle button,
 .columns-toggle>button {
   display: inline-flex;
   align-items: center;
@@ -90,6 +89,28 @@
 
   .muted {
     color: var(--dt-muted);
+  }
+}
+
+.density-toggle {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.2rem;
+  border-radius: 10px;
+  border: 1px solid var(--dt-border);
+  background: color-mix(in srgb, var(--dt-surface) 90%, transparent);
+
+  button {
+    padding: 0.35rem 0.45rem;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    color: var(--dt-muted);
+
+    &.active {
+      background: color-mix(in srgb, var(--dt-accent) 16%, transparent);
+      color: var(--dt-text);
+    }
   }
 }
 
@@ -222,11 +243,17 @@ th {
     gap: 2px;
     font-size: 0.65rem;
     color: var(--dt-muted);
+    opacity: 0;
+    transition: opacity 0.15s ease;
 
     span.active {
       color: var(--dt-accent);
     }
   }
+}
+
+th.sortable:hover .sort-indicator {
+  opacity: 1;
 }
 
 tbody tr {

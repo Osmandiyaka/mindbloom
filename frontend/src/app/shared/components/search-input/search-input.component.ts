@@ -21,6 +21,7 @@ import { CommonModule } from '@angular/common';
 export class SearchInputComponent {
   @Input() placeholder = 'Search...';
   @Input() value = '';
+  @Input() debounceMs = 300;
   @Output() search = new EventEmitter<string>();
   private debounceTimer?: any;
 
@@ -28,6 +29,6 @@ export class SearchInputComponent {
     const term = (event.target as HTMLInputElement).value;
     this.value = term;
     clearTimeout(this.debounceTimer);
-    this.debounceTimer = setTimeout(() => this.search.emit(term), 200);
+    this.debounceTimer = setTimeout(() => this.search.emit(term), this.debounceMs);
   }
 }

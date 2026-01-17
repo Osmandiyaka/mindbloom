@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
+import { Component, ContentChild, EventEmitter, Input, OnChanges, Output, SimpleChanges, TemplateRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '../button/button.component';
 import { SearchInputComponent } from '../search-input/search-input.component';
@@ -20,7 +20,7 @@ export interface TableColumn {
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.scss']
 })
-export class DataTableComponent<T = any> {
+export class DataTableComponent<T = any> implements OnChanges {
   @Input() columns: TableColumn[] = [];
   @Input() data: T[] = [];
   @Input() pageSizeOptions = [10, 25, 50];
@@ -28,9 +28,12 @@ export class DataTableComponent<T = any> {
   @Input() enableSearch = true;
   @Input() searchPlaceholder = 'Search...';
   @Input() searchableKeys: string[] = [];
+  @Input() searchValue = '';
   @Input() title = '';
   @Input() enableNativeExport = true;
+  @Input() enableExportControls = true;
   @Input() defaultDensity: 'comfortable' | 'compact' = 'comfortable';
+  @Input() hiddenColumnsInput: string[] | null = null;
 
   @Output() sortChange = new EventEmitter<{ key: string; direction: 'asc' | 'desc' }>();
   @Output() pageChange = new EventEmitter<{ pageIndex: number; pageSize: number }>();
@@ -38,6 +41,8 @@ export class DataTableComponent<T = any> {
   @Output() rowClick = new EventEmitter<T>();
   @Output() printRequest = new EventEmitter<void>();
   @Output() exportRequest = new EventEmitter<void>();
+  @Output() densityChange = new EventEmitter<'comfortable' | 'compact'>();
+  @Output() columnsChange = new EventEmitter<string[]>();
 
   @ContentChild('rowTemplate') rowTemplate?: TemplateRef<any>;
   @ContentChild('emptyState') emptyState?: TemplateRef<any>;
@@ -153,6 +158,14 @@ export class DataTableComponent<T = any> {
 
   toggleDensity() {
     this.dense = !this.dense;
+    this.densityChange.emit(this.dense ? 'compact' : 'comfortable');
+  }
+
+  setDensity(mode: 'comfortable' | 'compact') {
+    const nextDense = mode === 'compact';
+    if (this.dense === nextDense) return;
+    this.dense = nextDense;
+    this.densityChange.emit(mode);
   }
 
   toggleColumn(key: string) {
@@ -163,6 +176,7 @@ export class DataTableComponent<T = any> {
       next.add(key);
     }
     this.hiddenColumns = next;
+    this.columnsChange.emit(this.visibleColumns.map(col => col.key));
   }
 
   private applySearch(list: T[]): T[] {
@@ -187,5 +201,17 @@ export class DataTableComponent<T = any> {
       .map(row => `<tr>${this.columns.map(c => `<td>${this.resolve(row, c.key) ?? ''}</td>`).join('')}</tr>`)
       .join('');
     return `<table><thead><tr>${header}</tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['defaultDensity']) {
+      this.dense = this.defaultDensity === 'compact';
+    }
+    if (changes['searchValue'] && typeof this.searchValue === 'string') {
+      this.searchTerm = this.searchValue.trim();
+    }
+    if (changes['hiddenColumnsInput'] && Array.isArray(this.hiddenColumnsInput)) {
+      this.hiddenColumns = new Set(this.hiddenColumnsInput);
+    }
   }
 }
