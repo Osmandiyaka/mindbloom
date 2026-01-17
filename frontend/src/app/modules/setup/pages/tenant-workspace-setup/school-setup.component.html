@@ -228,7 +228,14 @@
             <div class="schools-modal__layout">
                 <div class="schools-modal__header">
                     <div class="schools-modal__header-main">
-                        <div class="schools-modal__icon" aria-hidden="true"></div>
+                        <div class="schools-modal__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false">
+                                <path
+                                    d="M3 9.5L12 5l9 4.5M5 10.5v8m4-6v6m6-6v6m4-8v8M3 18.5h18"
+                                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </div>
                         <div>
                             <div class="schools-modal__title">
                                 {{ editingSchoolId() ? 'Edit school' : 'Add school' }}
@@ -266,7 +273,7 @@
                                     [error]="schoolNameError()"
                                     hint="Appears across the platform and reports.">
                                     <mb-input id="school-form-name" cdkFocusInitial [value]="schoolFormName()"
-                                        placeholder="e.g. Bolgatanga Secondary School"
+                                        placeholder="e.g. International School of Paris"
                                         (valueChange)="onSchoolNameChange($event)"
                                         (blurEvent)="schoolFormNameTouched.set(true)"></mb-input>
                                 </mb-form-field>
