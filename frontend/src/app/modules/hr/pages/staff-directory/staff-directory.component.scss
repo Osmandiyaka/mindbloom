@@ -76,7 +76,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.6) 100%);
+  background: transparent;
 }
 
 .staff-table-empty mb-stack {
@@ -91,9 +91,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--mb-color-primary) 12%, transparent);
-  color: var(--mb-color-primary);
-  font-size: 16px;
+  background: color-mix(in srgb, var(--mb-color-border-subtle) 35%, transparent);
+  color: var(--mb-color-text-muted);
+}
+
+.staff-empty-icon svg {
+  width: 22px;
+  height: 22px;
 }
 
 :host ::ng-deep .staff-table-shell .mb-table thead th {
@@ -114,6 +118,13 @@
 :host ::ng-deep .staff-table-shell .mb-table__actions {
   color: transparent;
   width: 48px;
+}
+
+:host ::ng-deep .staff-table-shell .mb-table__actions::after {
+  content: '⋯';
+  color: var(--mb-color-text-muted);
+  font-size: 16px;
+  letter-spacing: 2px;
 }
 
 :host ::ng-deep .staff-toolbar .mb-select,

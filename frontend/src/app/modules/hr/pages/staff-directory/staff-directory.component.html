@@ -146,7 +146,14 @@
           </mb-table>
           <div class="staff-table-empty" *ngIf="isEmptyDirectory">
             <mb-stack gap="var(--mb-space-2)">
-              <div class="staff-empty-icon">👥</div>
+              <div class="staff-empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 11a4 4 0 1 0-8 0" />
+                  <path d="M12 15c-3.3 0-6 2.2-6 5h12c0-2.8-2.7-5-6-5Z" />
+                  <path d="M18 8a3 3 0 1 0-3-3" />
+                  <path d="M22 20c0-2.1-2-3.9-4.5-4.4" />
+                </svg>
+              </div>
               <div>No staff members yet</div>
               <div>Add your first staff member to start managing HR profiles and assignments.</div>
               <mb-inline gap="var(--mb-space-2)" align="center" [wrap]="true">
@@ -158,7 +165,12 @@
           </div>
           <div class="staff-table-empty" *ngIf="isNoResults">
             <mb-stack gap="var(--mb-space-2)">
-              <div class="staff-empty-icon">🔍</div>
+              <div class="staff-empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="7" />
+                  <line x1="21" y1="21" x2="16.6" y2="16.6" />
+                </svg>
+              </div>
               <div>No results found</div>
               <div>Try a different search or clear filters.</div>
               <mb-inline gap="var(--mb-space-2)" align="center" [wrap]="true">
