@@ -12,37 +12,7 @@
                         school</mb-button>
                 </div>
                 <mb-table class="schools-table" *ngIf="schoolRows().length; else emptySchools"
-                    [columns]="schoolTableColumns" [rows]="schoolRows()"
-                    (cellClick)="handleSchoolCellClick($event)">
-                    <ng-template mbTableActions let-row>
-                        <div class="schools-table__actions">
-                            <button type="button" class="schools-menu__toggle" #schoolMenuOrigin
-                                aria-label="More actions"
-                                [attr.aria-expanded]="schoolMenuOpenIndex() === getSchoolRowIndex(row)"
-                                (click)="toggleSchoolMenu(getSchoolRowIndex(row), $event)">⋯</button>
-                            <mb-popover
-                                [open]="schoolMenuOpenIndex() === getSchoolRowIndex(row)"
-                                [origin]="schoolMenuOrigin" [hasBackdrop]="true"
-                                [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'schools-menu__panel']"
-                                (closed)="closeSchoolMenu()">
-                                <div class="schools-menu__panel-content" role="menu">
-                                    <button type="button" class="schools-menu__item"
-                                        (click)="openEditSchool(getSchoolRowIndex(row)); closeSchoolMenu()">
-                                        Edit school
-                                    </button>
-                                    <button type="button" class="schools-menu__item"
-                                        (click)="toggleSchoolStatus(getSchoolRowIndex(row)); closeSchoolMenu()">
-                                        {{ row.status === 'Active' ? 'Deactivate school' :
-                                        'Activate school' }}
-                                    </button>
-                                    <button type="button" class="schools-menu__item"
-                                        (click)="deleteSchool(getSchoolRowIndex(row)); closeSchoolMenu()">
-                                        Delete school
-                                    </button>
-                                </div>
-                            </mb-popover>
-                        </div>
-                    </ng-template>
+                    [columns]="schoolTableColumns" [rows]="schoolRows()">
                 </mb-table>
 
                 <ng-template #emptySchools>
@@ -75,7 +45,7 @@
                 <div class="schools-modal__header">
                     <div>
                         <div id="school-modal-title" class="schools-modal__title">
-                            {{ editingSchoolIndex() === null ? 'Add school' : 'Edit school' }}
+                            Add school
                         </div>
                         <div class="schools-modal__subtitle">
                             Add a school to your organization. You can update details later.
@@ -138,26 +108,13 @@
                     <div class="schools-modal__actions">
                         <mb-button variant="secondary"
                             (click)="closeSchoolModal()">Cancel</mb-button>
-                        <mb-button variant="primary" [disabled]="!canSaveSchool()"
+                        <mb-button variant="primary" [disabled]="!canSaveSchool() || isSaving()"
                             (click)="saveSchool()">
-                            {{ editingSchoolIndex() === null ? 'Add school' : 'Save changes' }}
+                            {{ isSaving() ? 'Saving...' : 'Add school' }}
                         </mb-button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="setup-footer">
-        <div class="setup-footer__actions">
-            <mb-button variant="secondary" (click)="back()">Back</mb-button>
-            <mb-button variant="primary" [disabled]="!canContinue()"
-                (click)="next()">Continue</mb-button>
-        </div>
-        <div class="setup-footer__aside">
-            <button type="button" class="setup-skip-link" (click)="skipSetup()">Skip for
-                now</button>
-            <div class="setup-footer__hint">You can change this later from Settings.</div>
-        </div>
-    </div>
-    <div class="setup-auto-save"><span aria-hidden="true">✓</span> Saved automatically.</div>
 </div>
