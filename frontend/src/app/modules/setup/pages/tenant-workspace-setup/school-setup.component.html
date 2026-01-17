@@ -9,7 +9,9 @@
                 </div>
             </div>
             <div class="schools-header__actions">
-                <mb-button variant="primary" (click)="openAddSchool()">Add school</mb-button>
+                <mb-button size="sm" class="schools-header__add" variant="primary" (click)="openAddSchool()">
+                    Add school
+                </mb-button>
                 <button type="button" class="schools-header__menu" #headerMenuOrigin
                     aria-label="More actions" (click)="toggleHeaderMenu()">
                     ...

@@ -4005,6 +4005,17 @@
     gap: 10px;
 }
 
+.schools-header__add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+}
+
 .schools-header__menu,
 .schools-bulk__menu {
     border: 1px solid var(--mb-color-border-subtle);
