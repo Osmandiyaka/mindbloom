@@ -24,4 +24,6 @@ export interface School {
     address?: SchoolAddress;
     contact?: SchoolContact;
     settings?: SchoolSettings;
+    createdAt?: string | Date;
+    updatedAt?: string | Date;
 }

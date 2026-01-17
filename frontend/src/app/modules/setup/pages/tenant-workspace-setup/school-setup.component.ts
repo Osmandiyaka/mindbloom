@@ -1,7 +1,9 @@
-import { Component, ViewChild, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { MbSelectOption, MbTableColumn, MbTableComponent } from '@mindbloom/ui';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from './tenant-workspace-setup.shared';
 import { ToastService } from '../../../../core/ui/toast/toast.service';
+import { ApiClient } from '../../../../core/http/api-client.service';
+import type { School } from '../../../../core/school/school.models';
 
 const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZES = [10, 25, 50];
@@ -10,59 +12,6 @@ const STATUS_LABELS: Record<SchoolStatus, string> = {
     active: 'Active',
     archived: 'Archived',
 };
-
-const SEED_SCHOOLS: WorkspaceSchool[] = [
-    {
-        id: 'sch-001',
-        name: 'Brookfield Academy',
-        code: 'brookfield',
-        locationCountry: 'United States',
-        timeZone: 'America/New_York',
-        status: 'active',
-        createdAt: new Date('2022-05-16T09:15:00Z'),
-        updatedAt: new Date('2024-02-12T14:20:00Z'),
-    },
-    {
-        id: 'sch-002',
-        name: 'Evergreen International',
-        code: 'evergreen-intl',
-        locationCountry: 'United Kingdom',
-        timeZone: 'Europe/London',
-        status: 'active',
-        createdAt: new Date('2023-01-09T10:40:00Z'),
-        updatedAt: new Date('2024-03-01T08:00:00Z'),
-    },
-    {
-        id: 'sch-003',
-        name: 'Maple Ridge School',
-        code: 'maple-ridge',
-        locationCountry: 'Canada',
-        timeZone: 'America/Toronto',
-        status: 'archived',
-        createdAt: new Date('2021-10-20T12:00:00Z'),
-        updatedAt: new Date('2023-11-05T12:00:00Z'),
-    },
-    {
-        id: 'sch-004',
-        name: 'Lagoonview College',
-        code: 'lagoonview',
-        locationCountry: 'Nigeria',
-        timeZone: 'Africa/Lagos',
-        status: 'active',
-        createdAt: new Date('2024-01-15T09:30:00Z'),
-        updatedAt: new Date('2024-02-18T15:45:00Z'),
-    },
-    {
-        id: 'sch-005',
-        name: 'Sunrise STEM Institute',
-        code: 'sunrise-stem',
-        locationCountry: 'Kenya',
-        timeZone: 'Africa/Nairobi',
-        status: 'active',
-        createdAt: new Date('2022-07-04T08:00:00Z'),
-        updatedAt: new Date('2023-08-14T16:10:00Z'),
-    },
-];
 
 type SchoolStatus = 'active' | 'archived';
 type StatusFilter = 'all' | SchoolStatus;
@@ -87,12 +36,13 @@ type WorkspaceSchool = {
     templateUrl: './school-setup.component.html',
     styleUrls: ['./school-setup.component.scss']
 })
-export class TenantSchoolsComponent {
+export class TenantSchoolsComponent implements OnInit {
     private readonly toast = inject(ToastService);
+    private readonly api = inject(ApiClient);
 
     @ViewChild(MbTableComponent) table?: MbTableComponent<WorkspaceSchool>;
 
-    schools = signal<WorkspaceSchool[]>(SEED_SCHOOLS);
+    schools = signal<WorkspaceSchool[]>([]);
     searchQuery = signal('');
     statusFilter = signal<StatusFilter>('all');
     sortBy = signal<SortOption>('name-asc');
@@ -260,6 +210,10 @@ export class TenantSchoolsComponent {
         }
         return classes.join(' ');
     };
+
+    ngOnInit(): void {
+        this.loadSchools();
+    }
 
     handleSearch(term: string): void {
         this.searchQuery.set(term);
@@ -600,11 +554,36 @@ export class TenantSchoolsComponent {
         return `sch-${Math.random().toString(36).slice(2, 9)}`;
     }
 
+    private loadSchools(): void {
+        this.api.get<School[]>('schools').subscribe({
+            next: (schools) => {
+                const list = Array.isArray(schools) ? schools : [];
+                this.schools.set(list.map((school) => this.toWorkspaceSchool(school)));
+            },
+            error: () => {
+                this.toast.error('Unable to load schools. Please try again.');
+            },
+        });
+    }
+
     private ensurePageInRange(): void {
         const max = this.pageCount();
         if (this.pageIndex() > max) {
             this.pageIndex.set(max);
         }
+    }
+
+    private toWorkspaceSchool(school: School): WorkspaceSchool {
+        return {
+            id: school.id,
+            name: school.name,
+            code: school.code ?? '',
+            locationCountry: school.address?.country ?? '',
+            timeZone: (school.settings as { timezone?: string } | undefined)?.timezone ?? '',
+            status: school.status === 'archived' ? 'archived' : 'active',
+            createdAt: school.createdAt ? new Date(school.createdAt) : new Date(),
+            updatedAt: school.updatedAt ? new Date(school.updatedAt) : undefined,
+        };
     }
 
     private generateCode(name: string): string {
