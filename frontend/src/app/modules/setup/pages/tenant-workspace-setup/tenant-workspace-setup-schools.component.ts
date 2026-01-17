@@ -4,14 +4,28 @@ import { firstValueFrom } from 'rxjs';
 import { MbTableColumn } from '@mindbloom/ui';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from './tenant-workspace-setup.shared';
 import { TenantSettingsService } from '../../../../core/services/tenant-settings.service';
-import { TenantService } from '../../../../core/services/tenant.service';
-import { SchoolService } from '../../../../core/school/school.service';
 import { AuthService } from '../../../../core/auth/auth.service';
+import { ApiClient } from '../../../../core/http/api-client.service';
 import { AddressValue } from '../../../../shared/components/address/address.component';
 import { COUNTRY_OPTIONS } from '../../../../shared/components/country-select/country-select.component';
 import { TIMEZONE_OPTIONS } from '../../../../shared/components/timezone-select/timezone-select.component';
 import type { FirstLoginSetupState } from '../../../../core/types/first-login-setup-state';
+import type { School } from '../../../../core/school/school.models';
 import { SchoolRow } from './tenant-workspace-setup.models';
+
+const SETUP_ROUTE = '/setup/workspace';
+const STEP_ENTRY = 0;
+const STEP_SCHOOLS = 1;
+const STEP_USERS = 2;
+const DEFAULT_TIMEZONE = 'UTC';
+const SCHOOL_TYPE = 'mixed';
+const SCHOOL_CODE_REGEX = /^[a-z0-9-]+$/;
+const SCHOOL_STATUS_MAP: Record<SchoolRow['status'], 'pending_setup' | 'active' | 'inactive' | 'archived'> = {
+    Active: 'active',
+    Inactive: 'inactive',
+};
+const TIMEZONE_VALUES = TIMEZONE_OPTIONS.map(option => option.value);
+const COUNTRY_LABELS = COUNTRY_OPTIONS.map(option => option.label.toLowerCase());
 
 @Component({
     selector: 'app-tenant-workspace-setup-schools',
@@ -22,9 +36,8 @@ import { SchoolRow } from './tenant-workspace-setup.models';
 })
 export class TenantWorkspaceSetupSchoolsComponent implements OnInit {
     private readonly tenantSettings = inject(TenantSettingsService);
-    private readonly tenantService = inject(TenantService);
-    private readonly schoolService = inject(SchoolService);
     private readonly authService = inject(AuthService);
+    private readonly api = inject(ApiClient);
     private readonly router = inject(Router);
 
     private tenantExtras: Record<string, any> = {};
@@ -32,7 +45,7 @@ export class TenantWorkspaceSetupSchoolsComponent implements OnInit {
     isLoading = signal(true);
     tenantAddress = signal<AddressValue | null>(null);
     country = signal('');
-    defaultTimezone = signal('UTC');
+    defaultTimezone = signal(DEFAULT_TIMEZONE);
 
     schoolRows = signal<SchoolRow[]>([]);
     isSchoolModalOpen = signal(false);
@@ -89,7 +102,7 @@ export class TenantWorkspaceSetupSchoolsComponent implements OnInit {
         const code = this.schoolFormCode().trim();
         return !!this.schoolFormName().trim()
             && !!code
-            && /^[a-z0-9-]+$/.test(code)
+            && SCHOOL_CODE_REGEX.test(code)
             && !!this.schoolFormCountry().trim()
             && this.isValidCountry(this.schoolFormCountry())
             && !!this.schoolFormTimezone().trim()
@@ -135,7 +148,7 @@ export class TenantWorkspaceSetupSchoolsComponent implements OnInit {
         this.schoolFormCodeTouched.set(false);
     }
 
-    saveSchool(): void {
+    async saveSchool(): Promise<void> {
         if (!this.canSaveSchool()) {
             this.schoolFormTouched.set(true);
             return;
@@ -150,6 +163,13 @@ export class TenantWorkspaceSetupSchoolsComponent implements OnInit {
         };
         const editIndex = this.editingSchoolIndex();
         if (editIndex === null) {
+            try {
+                const saved = await firstValueFrom(this.api.post<School>('schools', this.buildSchoolPayload(nextRow)));
+                const savedId = (saved as any).id || (saved as any)._id;
+                nextRow.id = savedId || nextRow.id;
+            } catch {
+                // Allow local save even if backend fails.
+            }
             this.schoolRows.update(rows => [...rows, nextRow]);
         } else {
             this.schoolRows.update(rows => rows.map((row, i) => i === editIndex ? { ...row, ...nextRow } : row));
@@ -158,7 +178,6 @@ export class TenantWorkspaceSetupSchoolsComponent implements OnInit {
         this.editingSchoolIndex.set(null);
         this.schoolFormTouched.set(false);
         this.schoolFormCodeTouched.set(false);
-        this.persistState('in_progress');
     }
 
     toggleSchoolStatus(index: number): void {
@@ -167,12 +186,10 @@ export class TenantWorkspaceSetupSchoolsComponent implements OnInit {
             const status = row.status === 'Active' ? 'Inactive' : 'Active';
             return { ...row, status };
         }));
-        this.persistState('in_progress');
     }
 
     deleteSchool(index: number): void {
         this.schoolRows.update(rows => rows.filter((_, i) => i !== index));
-        this.persistState('in_progress');
     }
 
     getSchoolRowIndex(row: SchoolRow): number {
@@ -245,7 +262,7 @@ export class TenantWorkspaceSetupSchoolsComponent implements OnInit {
         if (!this.schoolFormTouched()) return '';
         const code = this.schoolFormCode().trim();
         if (!code) return 'School code is required.';
-        if (!/^[a-z0-9-]+$/.test(code)) return 'Use lowercase letters, numbers, and hyphens only.';
+        if (!SCHOOL_CODE_REGEX.test(code)) return 'Use lowercase letters, numbers, and hyphens only.';
         return '';
     }
 
@@ -271,16 +288,42 @@ export class TenantWorkspaceSetupSchoolsComponent implements OnInit {
             return;
         }
         await this.saveSchoolsToApi();
-        this.persistState('in_progress');
-        this.router.navigate(['/setup/workspace'], { queryParams: { step: 2 } });
+        this.router.navigate([SETUP_ROUTE], { queryParams: { step: STEP_USERS } });
     }
 
     back(): void {
-        this.router.navigate(['/setup/workspace'], { queryParams: { step: 0 } });
+        this.router.navigate([SETUP_ROUTE], { queryParams: { step: STEP_ENTRY } });
     }
 
     skipSetup(): void {
-        this.persistState('skipped', { dismissUser: true });
+        const existing = this.tenantExtras['setupProgram'] as FirstLoginSetupState | undefined;
+        const data = { ...(existing?.data || {}), schoolRows: this.schoolRows() };
+        const payload: FirstLoginSetupState = {
+            status: 'skipped',
+            step: STEP_SCHOOLS,
+            startedAt: existing?.startedAt,
+            skippedAt: new Date().toISOString(),
+            completedAt: existing?.completedAt,
+            data
+        };
+
+        const extras: Record<string, any> = {
+            ...this.tenantExtras,
+            setupProgram: payload
+        };
+
+        const userId = this.authService.session()?.user?.id;
+        if (userId) {
+            const dismissed = { ...(extras['userSetupDismissed'] || {}) };
+            dismissed[userId] = true;
+            extras['userSetupDismissed'] = dismissed;
+        }
+
+        this.tenantSettings.updateSettings({ extras }).subscribe({
+            next: () => {
+                this.tenantExtras = extras;
+            }
+        });
         this.router.navigateByUrl('/dashboard');
     }
 
@@ -331,11 +374,7 @@ export class TenantWorkspaceSetupSchoolsComponent implements OnInit {
             if (row.id) continue;
             const name = row.name.trim();
             if (!name) continue;
-            const code = row.code.trim();
-            const saved = await firstValueFrom(this.schoolService.createSchool({
-                name,
-                code: code || undefined
-            }));
+            const saved = await firstValueFrom(this.api.post<School>('schools', this.buildSchoolPayload(row)));
             const savedId = (saved as any).id || (saved as any)._id;
             nextRows[index] = {
                 ...row,
@@ -343,48 +382,6 @@ export class TenantWorkspaceSetupSchoolsComponent implements OnInit {
             };
         }
         this.schoolRows.set(nextRows);
-    }
-
-    private persistState(status: 'in_progress' | 'skipped' | 'completed', options?: { dismissUser?: boolean }): void {
-        const tenantId = this.tenantService.getTenantId() || '';
-        if (!tenantId) return;
-
-        const existing = this.tenantExtras['setupProgram'] as FirstLoginSetupState | undefined;
-        const data = { ...(existing?.data || {}), schoolRows: this.schoolRows() };
-        const payload: FirstLoginSetupState = {
-            status,
-            step: 1,
-            startedAt: existing?.startedAt || (status === 'in_progress' ? new Date().toISOString() : undefined),
-            skippedAt: status === 'skipped' ? new Date().toISOString() : existing?.skippedAt,
-            completedAt: status === 'completed' ? new Date().toISOString() : existing?.completedAt,
-            data
-        };
-
-        const tenantSetupStatus = {
-            ...(this.tenantExtras['tenantSetupStatus'] || {}),
-            schools: this.schoolsValid(),
-        };
-
-        const extras: Record<string, any> = {
-            ...this.tenantExtras,
-            setupProgram: payload,
-            tenantSetupStatus,
-        };
-
-        if (options?.dismissUser) {
-            const userId = this.authService.session()?.user?.id;
-            if (userId) {
-                const dismissed = { ...(extras['userSetupDismissed'] || {}) };
-                dismissed[userId] = true;
-                extras['userSetupDismissed'] = dismissed;
-            }
-        }
-
-        this.tenantSettings.updateSettings({ extras }).subscribe({
-            next: () => {
-                this.tenantExtras = extras;
-            }
-        });
     }
 
     private defaultSchoolRow(name: string): SchoolRow {
@@ -431,20 +428,39 @@ export class TenantWorkspaceSetupSchoolsComponent implements OnInit {
     private isValidCountry(value: string): boolean {
         const trimmed = value.trim().toLowerCase();
         if (!trimmed) return false;
-        return COUNTRY_OPTIONS.some(option => option.label.toLowerCase() === trimmed);
+        return COUNTRY_LABELS.includes(trimmed);
     }
 
     private isValidTimezone(value: string): boolean {
         const trimmed = value.trim();
         if (!trimmed) return false;
-        return TIMEZONE_OPTIONS.map(option => option.value).includes(trimmed);
+        return TIMEZONE_VALUES.includes(trimmed);
     }
 
     private defaultTimeZone(): string {
         try {
-            return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+            return Intl.DateTimeFormat().resolvedOptions().timeZone || DEFAULT_TIMEZONE;
         } catch {
-            return 'UTC';
+            return DEFAULT_TIMEZONE;
         }
+    }
+
+    private buildSchoolPayload(row: SchoolRow): {
+        name: string;
+        code?: string;
+        type: string;
+        status: 'pending_setup' | 'active' | 'inactive' | 'archived';
+        address?: AddressValue & { country?: string };
+    } {
+        return {
+            name: row.name.trim(),
+            code: row.code.trim() || undefined,
+            type: SCHOOL_TYPE,
+            status: SCHOOL_STATUS_MAP[row.status] ?? 'pending_setup',
+            address: {
+                ...(row.address || {}),
+                country: row.country || undefined,
+            }
+        };
     }
 }

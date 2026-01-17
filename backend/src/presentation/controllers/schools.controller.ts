@@ -36,6 +36,9 @@ export class SchoolsController {
             type: dto.type,
             status: dto.status,
             domain: dto.domain,
+            address: dto.address,
+            contact: dto.contact,
+            settings: dto.settings,
         });
         return SchoolResponseDto.fromDomain(school);
     }

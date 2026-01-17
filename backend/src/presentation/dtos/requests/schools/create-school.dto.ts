@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
-import { SchoolStatus, SchoolType } from '../../../../domain/school/entities/school.entity';
+import { IsEnum, IsObject, IsOptional, IsString, MinLength } from 'class-validator';
+import { SchoolAddress, SchoolContact, SchoolSettings, SchoolStatus, SchoolType } from '../../../../domain/school/entities/school.entity';
 
 export class CreateSchoolDto {
     @ApiProperty({ description: 'School name' })
@@ -27,4 +27,19 @@ export class CreateSchoolDto {
     @IsOptional()
     @IsString()
     domain?: string;
+
+    @ApiPropertyOptional({ description: 'School address' })
+    @IsOptional()
+    @IsObject()
+    address?: SchoolAddress;
+
+    @ApiPropertyOptional({ description: 'School contact information' })
+    @IsOptional()
+    @IsObject()
+    contact?: SchoolContact;
+
+    @ApiPropertyOptional({ description: 'School settings' })
+    @IsOptional()
+    @IsObject()
+    settings?: SchoolSettings;
 }

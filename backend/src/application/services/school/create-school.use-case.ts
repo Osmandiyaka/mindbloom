@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ISchoolRepository, SCHOOL_REPOSITORY } from '../../../domain/ports/out/school-repository.port';
 import { ITenantRepository, TENANT_REPOSITORY } from '../../../domain/ports/out/tenant-repository.port';
-import { School, SchoolStatus, SchoolType } from '../../../domain/school/entities/school.entity';
+import { School, SchoolAddress, SchoolContact, SchoolSettings, SchoolStatus, SchoolType } from '../../../domain/school/entities/school.entity';
 
 @Injectable()
 export class CreateSchoolUseCase {
@@ -19,10 +19,19 @@ export class CreateSchoolUseCase {
         type?: SchoolType;
         status?: SchoolStatus;
         domain?: string;
+        address?: SchoolAddress;
+        contact?: SchoolContact;
+        settings?: SchoolSettings;
     }): Promise<School> {
         const code = input.code?.trim() || await this.generateCode(input.tenantId);
         const existing = await this.schoolRepository.findByCode(code, input.tenantId);
         if (existing) {
+            const nextContact = input.contact
+                ? { ...existing.contact, ...input.contact }
+                : existing.contact;
+            const contactWithDomain = input.domain
+                ? { ...(nextContact || {}), website: input.domain }
+                : nextContact;
             const updated = School.create({
                 id: existing.id,
                 tenantId: existing.tenantId,
@@ -30,23 +39,27 @@ export class CreateSchoolUseCase {
                 code,
                 type: input.type ?? existing.type,
                 status: input.status ?? existing.status,
-                address: existing.address,
-                contact: input.domain
-                    ? { ...existing.contact, website: input.domain }
-                    : existing.contact,
-                settings: existing.settings,
+                address: input.address ?? existing.address,
+                contact: contactWithDomain,
+                settings: input.settings ?? existing.settings,
                 createdAt: existing.createdAt,
                 updatedAt: new Date(),
             });
             return this.schoolRepository.update(updated);
         }
+        const baseContact = input.contact ? { ...input.contact } : undefined;
+        const contactWithDomain = input.domain
+            ? { ...(baseContact || {}), website: input.domain }
+            : baseContact;
         const school = School.create({
             tenantId: input.tenantId,
             name: input.name,
             code,
             type: input.type,
             status: input.status,
-            contact: input.domain ? { website: input.domain } : undefined,
+            address: input.address,
+            contact: contactWithDomain,
+            settings: input.settings,
         });
 
         return this.schoolRepository.create(school);
