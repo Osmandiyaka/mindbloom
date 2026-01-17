@@ -4522,6 +4522,12 @@
     flex-direction: column;
 }
 
+:host ::ng-deep mb-modal.schools-modal-shell .mb-modal-backdrop {
+    padding-left: var(--sidebar-width, 0px);
+    padding-right: 0;
+    box-sizing: border-box;
+}
+
 :host ::ng-deep mb-modal.schools-modal-shell .mb-modal__body {
     padding: 0;
     overflow: hidden;
@@ -4550,6 +4556,12 @@
     .schools-modal__footer {
         flex-direction: column;
         align-items: flex-start;
+    }
+}
+
+@media (max-width: 768px) {
+    :host ::ng-deep mb-modal.schools-modal-shell .mb-modal-backdrop {
+        padding-left: 0;
     }
 }
 
