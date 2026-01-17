@@ -295,6 +295,10 @@ export class TenantWorkspaceSetupFacade {
     createAdvancedOpen = signal(false);
     createRolePreviewOpen = signal(false);
     createDiscardOpen = signal(false);
+    createNotesOpen = signal(false);
+    createRequirePasswordReset = signal(true);
+    createSendInviteEmail = signal(true);
+    createForceMfa = signal(false);
     createFormSnapshot = signal<CreateUserSnapshot | null>(null);
     createSubmitting = signal(false);
     lastCreateRole = signal<UserRole>('Staff');
@@ -2766,6 +2770,10 @@ export class TenantWorkspaceSetupFacade {
         this.createProfilePicture.set(null);
         this.createStatus.set('Active');
         this.createNotes.set('');
+        this.createNotesOpen.set(false);
+        this.createRequirePasswordReset.set(true);
+        this.createSendInviteEmail.set(true);
+        this.createForceMfa.set(false);
         this.createSubmitAttempted.set(false);
         this.createNameTouched.set(false);
         this.createEmailTouched.set(false);
@@ -3017,6 +3025,10 @@ export class TenantWorkspaceSetupFacade {
 
     toggleCreateAdvanced(): void {
         this.createAdvancedOpen.update(value => !value);
+    }
+
+    toggleCreateNotes(): void {
+        this.createNotesOpen.update(value => !value);
     }
 
     toggleCreateRolePreview(): void {

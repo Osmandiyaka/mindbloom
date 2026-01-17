@@ -360,15 +360,15 @@
                         </svg>
                     </div>
                     <div>
-                        <div id="create-user-title" class="users-modal__title">Create user</div>
-                        <div class="users-modal__subtitle">
-                            Create an account for this workspace.
-                            <button type="button" class="users-modal__tooltip"
-                                mbTooltip="Users need a role and school access to use the platform."
-                                aria-label="Users need a role and school access to use the platform.">
-                                ?
-                            </button>
-                        </div>
+                    <div id="create-user-title" class="users-modal__title">Create user account</div>
+                    <div class="users-modal__subtitle">
+                        Create a login account and assign access to schools and features.
+                        <button type="button" class="users-modal__tooltip"
+                            mbTooltip="This creates a login account for the workspace."
+                            aria-label="This creates a login account for the workspace.">
+                            ?
+                        </button>
+                    </div>
                     </div>
                 </div>
                 <button type="button" class="users-modal__close"
@@ -387,13 +387,13 @@
 
             <div class="users-modal__body users-modal__body--scroll">
                 <div class="users-create__grid">
-                    <div class="users-create__card">
-                        <div class="users-create__card-header">
+                    <section class="users-create__panel users-create__panel--left">
+                        <div class="users-create__panel-header">
                             <div>
-                                <div class="users-create__card-title">User details</div>
-                                <div class="users-create__card-helper">Basic profile information for this person.</div>
+                                <div class="users-create__panel-title">Account information</div>
+                                <div class="users-create__panel-helper">Basic identity details for this user account.</div>
                             </div>
-                            <div class="users-create__avatar">
+                            <div class="users-create__avatar users-create__avatar--compact">
                                 <div class="users-create__avatar-preview"
                                     [style.background-image]="vm.createProfilePicture() ? 'url(' + vm.createProfilePicture() + ')' : 'none'">
                                     <span *ngIf="!vm.createProfilePicture()">{{ vm.createUserInitials() }}</span>
@@ -402,24 +402,32 @@
                                     <input #createUserPhotoInput type="file" accept="image/*"
                                         (change)="vm.onCreateProfilePictureChange($event)" hidden />
                                     <button type="button" class="users-create__avatar-button"
-                                        mbTooltip="JPG, PNG, or GIF up to 2MB."
                                         (click)="createUserPhotoInput.click()">Upload</button>
+                                    <div class="users-create__avatar-caption">JPG/PNG up to 2MB.</div>
                                     <button *ngIf="vm.createProfilePicture()" type="button"
                                         class="users-create__avatar-link"
                                         (click)="vm.removeCreateProfilePicture()">Remove</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="users-create__card-body">
-                            <div class="users-create__row users-create__row--two">
-                                <mb-form-field label="Full name" [required]="true" [controlId]="'create-user-name'"
+                        <div class="users-create__panel-body">
+                            <div class="users-create__form-grid">
+                                <mb-form-field class="users-create__field users-create__field--span-6"
+                                    label="Full name" [required]="true" [controlId]="'create-user-name'"
                                     [error]="vm.createNameError()">
                                     <mb-input id="create-user-name" cdkFocusInitial [value]="vm.createName()"
                                         placeholder="e.g. Ama Mensah"
                                         (valueChange)="vm.createName.set($event)"
                                         (blurEvent)="vm.createNameTouched.set(true)"></mb-input>
                                 </mb-form-field>
-                                <mb-form-field label="Email" [required]="true" [controlId]="'create-user-email'"
+                                <mb-form-field class="users-create__field users-create__field--span-2"
+                                    label="Phone" [controlId]="'create-user-phone'">
+                                    <mb-input id="create-user-phone" [value]="vm.createPhone()"
+                                        placeholder="e.g. +233 20 000 0000"
+                                        (valueChange)="vm.createPhone.set($event)"></mb-input>
+                                </mb-form-field>
+                                <mb-form-field class="users-create__field users-create__field--span-8"
+                                    label="Email" [required]="true" [controlId]="'create-user-email'"
                                     [error]="vm.createEmailError()">
                                     <mb-input id="create-user-email" type="email" [value]="vm.createEmail()"
                                         placeholder="name@school.com"
@@ -427,43 +435,18 @@
                                         (blurEvent)="vm.createEmailTouched.set(true)"></mb-input>
                                 </mb-form-field>
                             </div>
-                            <div class="users-create__row users-create__row--two">
-                                <mb-form-field label="Phone" [controlId]="'create-user-phone'">
-                                    <mb-input id="create-user-phone" [value]="vm.createPhone()"
-                                        placeholder="e.g. +233 20 000 0000"
-                                        (valueChange)="vm.createPhone.set($event)"></mb-input>
-                                </mb-form-field>
-                                <mb-form-field label="Job title" [controlId]="'create-user-job'">
-                                    <mb-input id="create-user-job" [value]="vm.createJobTitle()"
-                                        placeholder="e.g. Front desk officer"
-                                        (valueChange)="vm.createJobTitle.set($event)"></mb-input>
-                                </mb-form-field>
-                            </div>
-                            <div class="users-create__row users-create__row--two">
-                                <mb-form-field label="Gender" [controlId]="'create-user-gender'">
-                                    <mb-select id="create-user-gender" [value]="vm.createGender()"
-                                        placeholder="Select gender"
-                                        [options]="vm.genderOptions"
-                                        (valueChange)="vm.createGender.set($event)">
-                                    </mb-select>
-                                </mb-form-field>
-                                <mb-form-field label="Date of birth" [controlId]="'create-user-dob'">
-                                    <mb-input id="create-user-dob" type="date" [value]="vm.createDateOfBirth()"
-                                        (valueChange)="vm.createDateOfBirth.set($event)"></mb-input>
-                                </mb-form-field>
-                            </div>
                         </div>
-                    </div>
+                    </section>
 
-                    <div class="users-create__card">
-                        <div class="users-create__card-header">
+                    <section class="users-create__panel users-create__panel--right">
+                        <div class="users-create__panel-header">
                             <div>
-                                <div class="users-create__card-title">Access & security</div>
-                                <div class="users-create__card-helper">Define what this user can access in the school system.</div>
+                                <div class="users-create__panel-title">Access</div>
+                                <div class="users-create__panel-helper">Assign a role and school scope.</div>
                             </div>
                         </div>
-                        <div class="users-create__card-body">
-                            <div class="users-create__card-section">
+                        <div class="users-create__panel-body">
+                            <div class="users-create__block">
                                 <div class="users-create__label-row">
                                     <div class="users-create__label">Role*</div>
                                     <button type="button" class="users-create__role-preview" #rolePreviewOrigin
@@ -489,12 +472,13 @@
                                         </app-role-dropdown>
                                     </div>
                                 </mb-form-field>
+                                <div class="users-create__role-helper">Controls what the user can view and manage.</div>
                                 <div class="users-create__role-warning" *ngIf="vm.createRoleIsHighPrivilege()">
                                     High privilege role — grants administrative access.
                                 </div>
                             </div>
 
-                            <div class="users-create__card-section">
+                            <div class="users-create__block">
                                 <div class="users-create__label-row">
                                     <div class="users-create__label">School access*</div>
                                 </div>
@@ -516,8 +500,8 @@
                                         Selected schools
                                     </button>
                                 </div>
-                                <div class="users-create__school-note" *ngIf="vm.createSchoolAccess() === 'all'">
-                                    User can access all schools in this workspace.
+                                <div class="users-create__school-summary" *ngIf="vm.createSchoolAccess() === 'all'">
+                                    Applies to all schools in this workspace.
                                 </div>
                                 <div class="users-create__school-access" *ngIf="vm.createSchoolAccess() === 'selected'">
                                     <app-school-selector
@@ -532,48 +516,60 @@
                                 </div>
                             </div>
 
+                            <div class="users-create__block">
+                                <div class="users-create__label-row">
+                                    <div class="users-create__label">Account status</div>
+                                </div>
+                                <mb-form-field [controlId]="'create-user-status'">
+                                    <mb-select id="create-user-status" [value]="vm.createStatus()"
+                                        [options]="vm.accountStatusOptions"
+                                        (valueChange)="vm.setCreateStatus($event)">
+                                    </mb-select>
+                                </mb-form-field>
+                                <div class="users-create__role-helper">Suspended users cannot sign in.</div>
+                            </div>
+
+                            <div class="users-create__block">
+                                <button type="button" class="users-create__note-toggle"
+                                    (click)="vm.toggleCreateNotes()">
+                                    {{ vm.createNotesOpen() ? 'Hide internal note' : 'Add internal note' }}
+                                </button>
+                                <mb-form-field *ngIf="vm.createNotesOpen()" label="Internal note"
+                                    [controlId]="'create-user-notes'">
+                                    <mb-textarea id="create-user-notes" [value]="vm.createNotes()"
+                                        placeholder="Optional internal notes"
+                                        (valueChange)="vm.setCreateNotes($event)"></mb-textarea>
+                                </mb-form-field>
+                            </div>
+
                             <button type="button" class="users-create__advanced-toggle"
                                 (click)="vm.toggleCreateAdvanced()">
-                                {{ vm.createAdvancedOpen() ? 'Hide advanced' : 'Show advanced' }}
+                                Advanced options
                             </button>
 
                             <div class="users-create__advanced" *ngIf="vm.createAdvancedOpen()">
                                 <div class="users-create__divider"></div>
-                                <div class="users-create__card-section">
-                                    <div class="users-create__label-row">
-                                        <div class="users-create__label">Account status</div>
-                                    </div>
-                                    <mb-form-field [controlId]="'create-user-status'">
-                                        <mb-select id="create-user-status" [value]="vm.createStatus()"
-                                            [options]="vm.accountStatusOptions"
-                                            (valueChange)="vm.setCreateStatus($event)">
-                                        </mb-select>
-                                    </mb-form-field>
-                                    <mb-form-field label="Notes" [controlId]="'create-user-notes'">
-                                        <mb-textarea id="create-user-notes" [value]="vm.createNotes()"
-                                            placeholder="Optional internal notes"
-                                            (valueChange)="vm.setCreateNotes($event)"></mb-textarea>
-                                    </mb-form-field>
-                                </div>
-                                <div class="users-create__card-section">
-                                    <div class="users-create__label-row">
-                                        <div class="users-create__label">Department</div>
-                                    </div>
-                                    <mb-form-field [controlId]="'create-user-dept'">
-                                        <app-department-selector
-                                            [options]="vm.departmentOptions()"
-                                            [value]="vm.createDepartment()"
-                                            (valueChange)="vm.setCreateDepartment($event)">
-                                        </app-department-selector>
-                                    </mb-form-field>
+                                <div class="users-create__advanced-options">
+                                    <mb-checkbox [checked]="vm.createRequirePasswordReset()"
+                                        (checkedChange)="vm.createRequirePasswordReset.set($event)">
+                                        Require password reset on first login
+                                    </mb-checkbox>
+                                    <mb-checkbox [checked]="vm.createSendInviteEmail()"
+                                        (checkedChange)="vm.createSendInviteEmail.set($event)">
+                                        Send invite email
+                                    </mb-checkbox>
+                                    <mb-checkbox [checked]="vm.createForceMfa()"
+                                        (checkedChange)="vm.createForceMfa.set($event)">
+                                        Force MFA for this user
+                                    </mb-checkbox>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
             </div>
             <div class="users-modal__footer users-modal__footer--sticky">
-                <div class="users-modal__hint">You can set a password later.</div>
+                <div class="users-modal__hint">Password can be set later.</div>
                 <div class="users-modal__actions">
                     <mb-button variant="secondary"
                         (click)="vm.requestCloseCreateUserModal()" [disabled]="vm.createSubmitting()">Cancel</mb-button>

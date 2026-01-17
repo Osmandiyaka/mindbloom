@@ -42,15 +42,24 @@ import type { School } from '../../../core/school/school.models';
                 </span>
             </div>
             <div class="school-selector__list" role="group" [attr.aria-label]="'Select schools'">
-                <mb-checkbox *ngFor="let name of filteredSchools"
-                    [checked]="selected.includes(name)"
-                    [disabled]="disabled"
-                    (checkedChange)="toggleSchool(name, $event)">
-                    {{ name }}
-                </mb-checkbox>
-                <div class="school-selector__empty" *ngIf="!filteredSchools.length">
-                    {{ isLoading ? 'Loading schools...' : 'No schools found.' }}
+                <div class="school-selector__skeleton" *ngIf="isLoading">
+                    <span class="school-selector__skeleton-row" *ngFor="let _ of skeletonRows"></span>
                 </div>
+                <ng-container *ngIf="!isLoading">
+                    <mb-checkbox *ngFor="let name of filteredSchools"
+                        [checked]="selected.includes(name)"
+                        [disabled]="disabled"
+                        (checkedChange)="toggleSchool(name, $event)">
+                        {{ name }}
+                    </mb-checkbox>
+                    <div class="school-selector__empty" *ngIf="!filteredSchools.length">
+                        <div>No schools found.</div>
+                        <button type="button" class="school-selector__empty-action" *ngIf="search"
+                            (click)="clearSearch()" [disabled]="disabled">
+                            Clear search
+                        </button>
+                    </div>
+                </ng-container>
             </div>
         </div>
     `,
@@ -68,6 +77,7 @@ export class SchoolSelectorComponent implements OnInit {
 
     search = '';
     isLoading = false;
+    skeletonRows = Array.from({ length: 5 });
 
     get filteredSchools(): string[] {
         const query = this.search.trim().toLowerCase();
@@ -107,6 +117,11 @@ export class SchoolSelectorComponent implements OnInit {
 
     clearAll(): void {
         this.selectedChange.emit([]);
+        this.interaction.emit();
+    }
+
+    clearSearch(): void {
+        this.search = '';
         this.interaction.emit();
     }
 
