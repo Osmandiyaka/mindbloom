@@ -1,4 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { TenantWorkspaceSetupFacade } from './tenant-workspace-setup.facade';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from './tenant-workspace-setup.shared';
 import { TenantWorkspaceSetupEntryComponent } from './tenant-workspace-setup-entry.component';
@@ -34,8 +35,17 @@ import { TenantWorkspaceSetupCompleteComponent } from './tenant-workspace-setup-
 })
 export class TenantWorkspaceSetupComponent implements OnInit {
     readonly vm = inject(TenantWorkspaceSetupFacade);
+    private readonly route = inject(ActivatedRoute);
 
     ngOnInit(): void {
         this.vm.init();
+        this.route.queryParamMap.subscribe(params => {
+            const stepParam = Number(params.get('step'));
+            if (!Number.isFinite(stepParam) || stepParam <= 0) {
+                this.vm.step.set(0);
+                return;
+            }
+            this.vm.goToStep(stepParam);
+        });
     }
 }
