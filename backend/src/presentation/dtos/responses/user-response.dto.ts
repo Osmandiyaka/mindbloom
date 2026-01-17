@@ -20,6 +20,15 @@ export class UserResponseDto {
     @ApiProperty()
     profilePicture: string | null;
 
+    @ApiProperty({ required: false })
+    gender?: string | null;
+
+    @ApiProperty({ required: false })
+    dateOfBirth?: Date | null;
+
+    @ApiProperty({ required: false })
+    phone?: string | null;
+
     @ApiProperty()
     createdAt: Date;
 
@@ -37,6 +46,9 @@ export class UserResponseDto {
             permissions: user.role.permissions
         } : null;
         dto.profilePicture = user.profilePicture;
+        dto.gender = user.gender ?? null;
+        dto.dateOfBirth = user.dateOfBirth ?? null;
+        dto.phone = user.phone ?? null;
         dto.createdAt = user.createdAt;
         return dto;
     }

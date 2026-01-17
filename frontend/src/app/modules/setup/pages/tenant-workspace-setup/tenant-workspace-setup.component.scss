@@ -1101,6 +1101,36 @@
     margin-top: 12px;
 }
 
+.users-create__avatar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.users-create__avatar-preview {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--mb-color-border-subtle) 60%, transparent);
+    display: grid;
+    place-items: center;
+    font-weight: 600;
+    color: var(--mb-color-text);
+    background-size: cover;
+    background-position: center;
+}
+
+.users-create__avatar-actions {
+    display: grid;
+    gap: 6px;
+}
+
+.users-create__avatar-hint {
+    font-size: 11px;
+    color: var(--mb-color-text-muted);
+}
+
 .users-create__advanced-toggle {
     margin-top: 12px;
     border: none;

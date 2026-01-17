@@ -27,6 +27,9 @@ export class CreateUserUseCase {
             roleId: command.roleId || null,
             role: null, // Will be populated by repository
             profilePicture: command.profilePicture || null,
+            gender: command.gender || null,
+            dateOfBirth: command.dateOfBirth || null,
+            phone: command.phone || null,
             forcePasswordReset: command.forcePasswordReset ?? false,
             mfaEnabled: command.mfaEnabled ?? false,
         });

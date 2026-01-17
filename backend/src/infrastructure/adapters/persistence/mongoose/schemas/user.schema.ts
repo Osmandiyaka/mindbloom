@@ -24,6 +24,15 @@ export class UserDocument extends Document {
     @Prop({ type: String, default: null })
     profilePicture: string | null;
 
+    @Prop({ type: String, default: null })
+    gender: string | null;
+
+    @Prop({ type: Date, default: null })
+    dateOfBirth: Date | null;
+
+    @Prop({ type: String, default: null })
+    phone: string | null;
+
     @Prop({ type: Boolean, default: false })
     forcePasswordReset: boolean;
 

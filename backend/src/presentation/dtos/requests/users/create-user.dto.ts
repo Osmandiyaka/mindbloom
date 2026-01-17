@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsBoolean } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, IsBoolean, IsDateString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
@@ -24,6 +24,21 @@ export class CreateUserDto {
     @IsOptional()
     @IsString()
     profilePicture?: string;
+
+    @ApiProperty({ example: 'female', required: false })
+    @IsOptional()
+    @IsString()
+    gender?: string;
+
+    @ApiProperty({ example: '1998-06-10', required: false })
+    @IsOptional()
+    @IsDateString()
+    dateOfBirth?: string;
+
+    @ApiProperty({ example: '+233 20 000 0000', required: false })
+    @IsOptional()
+    @IsString()
+    phone?: string;
 
     @ApiProperty({ example: true, required: false })
     @IsOptional()

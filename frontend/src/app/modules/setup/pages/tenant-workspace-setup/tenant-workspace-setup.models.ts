@@ -23,6 +23,10 @@ export interface UserRow {
     jobTitle?: string;
     department?: string;
     staffId?: string;
+    gender?: string;
+    dateOfBirth?: string;
+    phone?: string;
+    profilePicture?: string | null;
     lastLogin?: string;
     createdAt?: string;
 }

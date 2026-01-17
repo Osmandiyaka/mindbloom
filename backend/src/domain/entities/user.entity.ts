@@ -11,6 +11,9 @@ export class User {
         public readonly role: Role | null = null,
         public readonly permissions: Permission[] = [],
         public readonly profilePicture: string | null = null,
+        public readonly gender: string | null = null,
+        public readonly dateOfBirth: Date | null = null,
+        public readonly phone: string | null = null,
         public readonly forcePasswordReset: boolean = false,
         public readonly mfaEnabled: boolean = false,
         public readonly createdAt: Date = new Date(),
@@ -52,6 +55,9 @@ export class User {
                 this.role,
                 [...this.permissions, permission],
                 this.profilePicture,
+                this.gender,
+                this.dateOfBirth,
+                this.phone,
                 this.forcePasswordReset,
                 this.mfaEnabled,
                 this.createdAt,
@@ -74,6 +80,9 @@ export class User {
             this.role,
             this.permissions.filter(p => p.id !== permissionId),
             this.profilePicture,
+            this.gender,
+            this.dateOfBirth,
+            this.phone,
             this.forcePasswordReset,
             this.mfaEnabled,
             this.createdAt,
@@ -90,6 +99,9 @@ export class User {
         role?: Role | null;
         permissions?: Permission[];
         profilePicture?: string | null;
+        gender?: string | null;
+        dateOfBirth?: Date | null;
+        phone?: string | null;
         forcePasswordReset?: boolean;
         mfaEnabled?: boolean;
         createdAt?: Date;
@@ -104,6 +116,9 @@ export class User {
             data.role || null,
             data.permissions || [],
             data.profilePicture || null,
+            data.gender ?? null,
+            data.dateOfBirth ?? null,
+            data.phone ?? null,
             data.forcePasswordReset ?? false,
             data.mfaEnabled ?? false,
             data.createdAt || new Date(),

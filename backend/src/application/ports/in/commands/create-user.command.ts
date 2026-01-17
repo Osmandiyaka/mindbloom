@@ -5,6 +5,9 @@ export interface CreateUserCommand {
     password: string;
     roleId?: string;
     profilePicture?: string;
+    gender?: string;
+    dateOfBirth?: Date;
+    phone?: string;
     forcePasswordReset?: boolean;
     mfaEnabled?: boolean;
 }

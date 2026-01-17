@@ -403,6 +403,21 @@
                     <div class="users-create__section">
                         <div class="users-create__section-title">Identity</div>
                         <div class="users-create__section-helper">Basic account information.</div>
+                        <div class="users-create__avatar">
+                            <div class="users-create__avatar-preview"
+                                [style.background-image]="vm.createProfilePicture() ? 'url(' + vm.createProfilePicture() + ')' : 'none'">
+                                <span *ngIf="!vm.createProfilePicture()">{{ vm.createUserInitials() }}</span>
+                            </div>
+                            <div class="users-create__avatar-actions">
+                                <input #createUserPhotoInput type="file" accept="image/*"
+                                    (change)="vm.onCreateProfilePictureChange($event)" hidden />
+                                <mb-button variant="secondary" size="sm"
+                                    (click)="createUserPhotoInput.click()">Upload photo</mb-button>
+                                <mb-button *ngIf="vm.createProfilePicture()" variant="tertiary" size="sm"
+                                    (click)="vm.removeCreateProfilePicture()">Remove</mb-button>
+                                <div class="users-create__avatar-hint">JPG, PNG, or GIF up to 2MB.</div>
+                            </div>
+                        </div>
                         <div class="users-create__fields">
                             <mb-form-field label="Full name" [required]="true" [controlId]="'create-user-name'"
                                 [error]="vm.createNameError()"
@@ -440,6 +455,22 @@
                         <div class="users-create__advanced" *ngIf="vm.createAdvancedOpen()">
                             <div class="users-create__divider"></div>
                             <div class="users-create__fields">
+                                <mb-form-field label="Gender" [controlId]="'create-user-gender'">
+                                    <mb-select id="create-user-gender" [value]="vm.createGender()"
+                                        placeholder="Select gender"
+                                        [options]="vm.genderOptions"
+                                        (valueChange)="vm.createGender.set($event)">
+                                    </mb-select>
+                                </mb-form-field>
+                                <mb-form-field label="Date of birth" [controlId]="'create-user-dob'">
+                                    <mb-input id="create-user-dob" type="date" [value]="vm.createDateOfBirth()"
+                                        (valueChange)="vm.createDateOfBirth.set($event)"></mb-input>
+                                </mb-form-field>
+                                <mb-form-field label="Phone" [controlId]="'create-user-phone'">
+                                    <mb-input id="create-user-phone" [value]="vm.createPhone()"
+                                        placeholder="+233 20 000 0000"
+                                        (valueChange)="vm.createPhone.set($event)"></mb-input>
+                                </mb-form-field>
                                 <mb-form-field label="Department" [controlId]="'create-user-dept'">
                                     <mb-input id="create-user-dept" [value]="vm.createDepartment()"
                                         (valueChange)="vm.createDepartment.set($event)"></mb-input>

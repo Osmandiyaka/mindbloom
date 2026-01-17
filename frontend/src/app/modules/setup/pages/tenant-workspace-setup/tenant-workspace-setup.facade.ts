@@ -2,7 +2,7 @@ import { EnvironmentInjector, Injectable, computed, effect, inject, runInInjecti
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { MbTableColumn } from '@mindbloom/ui';
+import { MbSelectOption, MbTableColumn } from '@mindbloom/ui';
 import { AddressValue } from '../../../../shared/components/address/address.component';
 import { COUNTRY_OPTIONS } from '../../../../shared/components/country-select/country-select.component';
 import { TIMEZONE_OPTIONS } from '../../../../shared/components/timezone-select/timezone-select.component';
@@ -47,6 +47,10 @@ type CreateUserSnapshot = {
     jobTitle: string;
     department: string;
     staffId: string;
+    gender: string;
+    dateOfBirth: string;
+    phone: string;
+    profilePicture: string | null;
 };
 
 const HIGH_PRIVILEGE_ROLES: UserRole[] = ['Owner', 'Administrator'];
@@ -281,6 +285,10 @@ export class TenantWorkspaceSetupFacade {
     createJobTitle = signal('');
     createDepartment = signal('');
     createStaffId = signal('');
+    createGender = signal('');
+    createDateOfBirth = signal('');
+    createPhone = signal('');
+    createProfilePicture = signal<string | null>(null);
     createSubmitAttempted = signal(false);
     createNameTouched = signal(false);
     createEmailTouched = signal(false);
@@ -311,6 +319,13 @@ export class TenantWorkspaceSetupFacade {
         'Grade',
         'Section',
         'Custom'
+    ];
+
+    readonly genderOptions: MbSelectOption[] = [
+        { label: 'Male', value: 'male' },
+        { label: 'Female', value: 'female' },
+        { label: 'Other', value: 'other' },
+        { label: 'Prefer not to say', value: 'prefer_not_to_say' },
     ];
 
     readonly orgUnitTree = computed(() => this.buildOrgUnitTree(this.orgUnits()));
@@ -2735,6 +2750,10 @@ export class TenantWorkspaceSetupFacade {
         this.createJobTitle.set('');
         this.createDepartment.set('');
         this.createStaffId.set('');
+        this.createGender.set('');
+        this.createDateOfBirth.set('');
+        this.createPhone.set('');
+        this.createProfilePicture.set(null);
         this.createSubmitAttempted.set(false);
         this.createNameTouched.set(false);
         this.createEmailTouched.set(false);
@@ -3021,6 +3040,28 @@ export class TenantWorkspaceSetupFacade {
         this.createSchoolAccessTouched.set(true);
     }
 
+    onCreateProfilePictureChange(event: Event): void {
+        const input = event.target as HTMLInputElement | null;
+        const file = input?.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            this.createProfilePicture.set(typeof reader.result === 'string' ? reader.result : null);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    removeCreateProfilePicture(): void {
+        this.createProfilePicture.set(null);
+    }
+
+    createUserInitials(): string {
+        const name = this.createName().trim();
+        if (!name) return 'U';
+        const parts = name.split(' ').filter(Boolean);
+        return parts.map(part => part[0]).join('').slice(0, 2).toUpperCase();
+    }
+
     createRoleIsHighPrivilege(): boolean {
         return HIGH_PRIVILEGE_ROLES.includes(this.createRole());
     }
@@ -3073,6 +3114,10 @@ export class TenantWorkspaceSetupFacade {
                 jobTitle: this.createJobTitle().trim() || undefined,
                 department: this.createDepartment().trim() || undefined,
                 staffId: this.createStaffId().trim() || undefined,
+                gender: this.createGender().trim() || undefined,
+                dateOfBirth: this.createDateOfBirth().trim() || undefined,
+                phone: this.createPhone().trim() || undefined,
+                profilePicture: this.createProfilePicture(),
                 createdAt: new Date().toISOString(),
             }
         ]);
@@ -3679,6 +3724,10 @@ export class TenantWorkspaceSetupFacade {
             jobTitle: this.createJobTitle(),
             department: this.createDepartment(),
             staffId: this.createStaffId(),
+            gender: this.createGender(),
+            dateOfBirth: this.createDateOfBirth(),
+            phone: this.createPhone(),
+            profilePicture: this.createProfilePicture(),
         };
     }
 

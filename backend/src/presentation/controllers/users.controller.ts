@@ -60,6 +60,9 @@ export class UsersController {
                 actions: p.actions,
             })),
             profilePicture: user.profilePicture,
+            gender: user.gender ?? null,
+            dateOfBirth: user.dateOfBirth ?? null,
+            phone: user.phone ?? null,
             createdAt: user.createdAt,
         }));
     }
@@ -73,6 +76,9 @@ export class UsersController {
             password: dto.password,
             roleId: dto.roleId,
             profilePicture: dto.profilePicture,
+            gender: dto.gender,
+            dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined,
+            phone: dto.phone,
             forcePasswordReset: dto.forcePasswordReset,
             mfaEnabled: dto.mfaEnabled,
         });
@@ -104,6 +110,9 @@ export class UsersController {
                 actions: p.actions,
             })),
             profilePicture: user.profilePicture,
+            gender: user.gender ?? null,
+            dateOfBirth: user.dateOfBirth ?? null,
+            phone: user.phone ?? null,
             createdAt: user.createdAt,
         };
     }
@@ -116,6 +125,9 @@ export class UsersController {
             name: dto.name,
             roleId: dto.roleId,
             profilePicture: dto.profilePicture,
+            gender: dto.gender,
+            dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined,
+            phone: dto.phone,
             forcePasswordReset: dto.forcePasswordReset,
             mfaEnabled: dto.mfaEnabled,
         });

@@ -29,6 +29,9 @@ export class UpdateUserUseCase {
             role: user.role,
             permissions: user.permissions,
             profilePicture: command.profilePicture !== undefined ? command.profilePicture : user.profilePicture,
+            gender: command.gender !== undefined ? command.gender : user.gender,
+            dateOfBirth: command.dateOfBirth !== undefined ? command.dateOfBirth : user.dateOfBirth,
+            phone: command.phone !== undefined ? command.phone : user.phone,
             forcePasswordReset: command.forcePasswordReset !== undefined ? command.forcePasswordReset : user.forcePasswordReset,
             mfaEnabled: command.mfaEnabled !== undefined ? command.mfaEnabled : user.mfaEnabled,
         });

@@ -106,6 +106,9 @@ export interface TenantUser {
     roleId: string | null;
     role?: { id: string; name: string; description?: string; isSystemRole?: boolean } | null;
     profilePicture?: string | null;
+    gender?: string | null;
+    dateOfBirth?: string | Date | null;
+    phone?: string | null;
     createdAt?: string | Date;
 }
 

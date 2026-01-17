@@ -11,6 +11,9 @@ export interface User {
     role: { id: string; name: string } | null;
     permissions: Permission[];
     profilePicture: string | null;
+    gender?: string | null;
+    dateOfBirth?: string | Date | null;
+    phone?: string | null;
     createdAt: Date;
     forcePasswordReset?: boolean;
     mfaEnabled?: boolean;
@@ -22,6 +25,9 @@ export interface CreateUserDto {
     password: string;
     roleId?: string;
     profilePicture?: string;
+    gender?: string;
+    dateOfBirth?: string | Date;
+    phone?: string;
     forcePasswordReset?: boolean;
     mfaEnabled?: boolean;
 }
@@ -31,6 +37,9 @@ export interface UpdateUserDto {
     name?: string;
     roleId?: string | null;
     profilePicture?: string;
+    gender?: string;
+    dateOfBirth?: string | Date;
+    phone?: string;
     forcePasswordReset?: boolean;
     mfaEnabled?: boolean;
 }

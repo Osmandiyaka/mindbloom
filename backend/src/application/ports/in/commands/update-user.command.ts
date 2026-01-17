@@ -4,6 +4,9 @@ export interface UpdateUserCommand {
     name?: string;
     roleId?: string;
     profilePicture?: string;
+    gender?: string;
+    dateOfBirth?: Date;
+    phone?: string;
     forcePasswordReset?: boolean;
     mfaEnabled?: boolean;
 }
