@@ -1,16 +1,15 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { Role, CreateRoleDto, UpdateRoleDto, Permission } from '../models/role.model';
-import { environment } from '../../../environments/environment';
+import { ApiClient } from '../http/api-client.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class RoleService {
-    private http = inject(HttpClient);
-    private apiUrl = `${environment.apiUrl}/roles`;
-    private permissionsApiUrl = `${environment.apiUrl}/permissions`;
+    private api = inject(ApiClient);
+    private basePath = 'roles';
+    private permissionsPath = 'permissions';
 
     // Signals for reactive state management
     roles = signal<Role[]>([]);
@@ -25,7 +24,7 @@ export class RoleService {
         this.loading.set(true);
         this.error.set(null);
 
-        return this.http.get<Role[]>(this.apiUrl).pipe(
+        return this.api.get<Role[]>(this.basePath).pipe(
             tap({
                 next: (roles) => {
                     const safeRoles = (roles || []).filter((role) => !!role && !!role.id);
@@ -44,7 +43,7 @@ export class RoleService {
      * Get role by ID
      */
     getRoleById(id: string): Observable<Role> {
-        return this.http.get<Role>(`${this.apiUrl}/${id}`);
+        return this.api.get<Role>(`${this.basePath}/${id}`);
     }
 
     /**
@@ -54,7 +53,7 @@ export class RoleService {
         this.loading.set(true);
         this.error.set(null);
 
-        return this.http.post<Role>(this.apiUrl, dto).pipe(
+        return this.api.post<Role>(this.basePath, dto).pipe(
             tap({
                 next: (newRole) => {
                     this.roles.update(roles => [...roles, newRole]);
@@ -75,7 +74,7 @@ export class RoleService {
         this.loading.set(true);
         this.error.set(null);
 
-        return this.http.put<Role>(`${this.apiUrl}/${id}`, dto).pipe(
+        return this.api.put<Role>(`${this.basePath}/${id}`, dto).pipe(
             tap({
                 next: (updatedRole) => {
                     this.roles.update(roles =>
@@ -98,7 +97,7 @@ export class RoleService {
         this.loading.set(true);
         this.error.set(null);
 
-        return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+        return this.api.delete<void>(`${this.basePath}/${id}`).pipe(
             tap({
                 next: () => {
                     this.roles.update(roles => roles.filter(r => r.id !== id));
@@ -133,7 +132,7 @@ export class RoleService {
         this.loading.set(true);
         this.error.set(null);
 
-        return this.http.get<Permission[]>(`${this.permissionsApiUrl}/tree`).pipe(
+        return this.api.get<Permission[]>(`${this.permissionsPath}/tree`).pipe(
             tap({
                 next: (tree) => {
                     this.permissionTree.set(this.sanitizePermissionTree(tree || []));
@@ -154,7 +153,7 @@ export class RoleService {
         this.loading.set(true);
         this.error.set(null);
 
-        return this.http.post<Role>(`${this.apiUrl}/${roleId}/permissions`, { permissionIds }).pipe(
+        return this.api.post<Role>(`${this.basePath}/${roleId}/permissions`, { permissionIds }).pipe(
             tap({
                 next: (updatedRole) => {
                     this.roles.update(roles =>

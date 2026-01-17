@@ -145,6 +145,7 @@ export class TenantWorkspaceSetupFacade {
     sectionFormTeacherId = signal<string | null>(null);
     sectionFormActive = signal(true);
     sectionFormError = signal('');
+    sectionFormSubmitting = signal(false);
     classDeleteOpen = signal(false);
     classDeleteTarget = signal<ClassRow | null>(null);
     classDeleteError = signal('');
@@ -657,22 +658,28 @@ export class TenantWorkspaceSetupFacade {
         this.persistState('in_progress');
     }
 
-    next(): void {
+    async next(): Promise<void> {
         if (!this.canContinue()) {
             this.attemptedContinue.set(true);
             return;
         }
         if (this.step() < 7) {
+            const saved = await this.saveCurrentStep();
+            if (!saved) return;
             this.step.set(this.step() + 1);
             this.attemptedContinue.set(false);
             this.persistState('in_progress');
             return;
         }
-        this.completeSetup();
+        await this.completeSetup();
     }
 
-    goToStep(index: number): void {
+    async goToStep(index: number): Promise<void> {
         const target = Math.min(Math.max(index, 1), 7);
+        if (target > this.step()) {
+            const saved = await this.saveCurrentStep();
+            if (!saved) return;
+        }
         this.step.set(target);
         this.attemptedContinue.set(false);
         this.persistState('in_progress');
@@ -684,6 +691,19 @@ export class TenantWorkspaceSetupFacade {
         this.step.set(target);
         this.attemptedContinue.set(false);
         this.scrollToCurrent();
+    }
+
+    private async saveCurrentStep(): Promise<boolean> {
+        this.errorMessage.set('');
+        try {
+            if (this.step() === 1) {
+                await this.saveSchoolsToApi();
+            }
+            return true;
+        } catch {
+            this.errorMessage.set('Unable to save changes. Please try again.');
+            return false;
+        }
     }
 
     private scrollToCurrent(): void {
@@ -780,6 +800,30 @@ export class TenantWorkspaceSetupFacade {
         this.editingSchoolIndex.set(null);
         this.schoolFormTouched.set(false);
         this.schoolFormCodeTouched.set(false);
+    }
+
+    private async saveSchoolsToApi(): Promise<void> {
+        const rows = this.schoolRows();
+        if (!rows.length) return;
+        const nextRows = [...rows];
+        for (let index = 0; index < rows.length; index += 1) {
+            const row = rows[index];
+            if (row.status !== 'Active') continue;
+            if (row.id) continue;
+            const name = row.name.trim();
+            if (!name) continue;
+            const code = row.code.trim();
+            const saved = await firstValueFrom(this.schoolService.createSchool({
+                name,
+                code: code || undefined
+            }));
+            const savedId = (saved as any).id || (saved as any)._id;
+            nextRows[index] = {
+                ...row,
+                id: savedId || row.id
+            };
+        }
+        this.schoolRows.set(nextRows);
     }
 
     toggleSchoolStatus(index: number): void {
@@ -1631,40 +1675,66 @@ export class TenantWorkspaceSetupFacade {
         this.classDeleteError.set('');
     }
 
-    deleteClass(): void {
+    async deleteClass(): Promise<void> {
         const target = this.classDeleteTarget();
         if (!target || this.classDeleteSubmitting()) return;
         this.classDeleteSubmitting.set(true);
-        this.sectionRows.update(items => items.filter(section => section.classId !== target.id));
-        this.classRows.update(items => items.filter(row => row.id !== target.id));
-        if (this.selectedClassId() === target.id) {
-            const remaining = this.classRows();
-            this.selectedClassId.set(remaining.length ? remaining[0].id : null);
+        this.classDeleteError.set('');
+        try {
+            await firstValueFrom(this.classSectionService.deleteClass(target.id));
+            this.sectionRows.update(items => items.filter(section => section.classId !== target.id));
+            this.classRows.update(items => items.filter(row => row.id !== target.id));
+            if (this.selectedClassId() === target.id) {
+                const remaining = this.classRows();
+                this.selectedClassId.set(remaining.length ? remaining[0].id : null);
+            }
+            this.toast.success(`Class "${target.name}" deleted.`);
+            this.requestCloseClassDelete();
+        } catch {
+            this.classDeleteError.set('Unable to delete class. Please try again.');
+        } finally {
+            this.classDeleteSubmitting.set(false);
         }
-        this.toast.success(`Class "${target.name}" deleted.`);
-        this.classDeleteSubmitting.set(false);
-        this.requestCloseClassDelete();
     }
 
-    duplicateClass(row: ClassRow): void {
-        const id = this.nextClassId();
+    async duplicateClass(row: ClassRow): Promise<void> {
         const sortOrder = this.classRows().length + 1;
         const name = `${row.name} copy`;
-        const newRow: ClassRow = {
-            ...row,
-            id,
-            name,
-            sortOrder
-        };
-        this.classRows.update(items => [...items, newRow]);
-        this.toast.success(`Class "${row.name}" duplicated.`);
+        try {
+            const saved = await firstValueFrom(this.classSectionService.createClass({
+                name,
+                code: row.code,
+                levelType: row.levelType || undefined,
+                sortOrder,
+                active: row.active,
+                schoolIds: row.schoolIds,
+                notes: row.notes
+            }));
+            const id = saved.id || saved._id || this.nextClassId();
+            const newRow: ClassRow = {
+                ...row,
+                id,
+                name,
+                sortOrder
+            };
+            this.classRows.update(items => [...items, newRow]);
+            this.toast.success(`Class "${row.name}" duplicated.`);
+        } catch {
+            this.toast.error('Unable to duplicate class. Please try again.');
+        }
     }
 
-    toggleClassActive(row: ClassRow): void {
-        this.classRows.update(items => items.map(item => item.id === row.id
-            ? { ...item, active: !item.active }
-            : item));
-        this.toast.success(`Class "${row.name}" ${row.active ? 'deactivated' : 'activated'}.`);
+    async toggleClassActive(row: ClassRow): Promise<void> {
+        const nextActive = !row.active;
+        try {
+            await firstValueFrom(this.classSectionService.updateClass(row.id, { active: nextActive }));
+            this.classRows.update(items => items.map(item => item.id === row.id
+                ? { ...item, active: nextActive }
+                : item));
+            this.toast.success(`Class "${row.name}" ${row.active ? 'deactivated' : 'activated'}.`);
+        } catch {
+            this.toast.error('Unable to update class status. Please try again.');
+        }
     }
 
     setClassSort(value: string): void {
@@ -1721,7 +1791,8 @@ export class TenantWorkspaceSetupFacade {
         this.sectionFormError.set('');
     }
 
-    saveSectionForm(): void {
+    async saveSectionForm(): Promise<void> {
+        if (this.sectionFormSubmitting()) return;
         if (this.sectionFormMode() === 'view') {
             this.sectionFormOpen.set(false);
             return;
@@ -1751,20 +1822,47 @@ export class TenantWorkspaceSetupFacade {
             homeroomTeacherId: this.sectionFormTeacherId(),
             active: this.sectionFormActive()
         };
-        if (this.sectionFormMode() === 'edit' && this.sectionFormId()) {
-            const id = this.sectionFormId()!;
-            this.sectionRows.update(items => items.map(section => section.id === id
-                ? { ...section, ...payload }
-                : section));
-            this.toast.success(`Section "${name}" updated.`);
-        } else {
-            const id = this.nextSectionId();
-            const sortOrder = this.sectionRows().filter(section => section.classId === classId).length + 1;
-            const newSection: SectionRow = { id, sortOrder, ...payload };
-            this.sectionRows.update(items => [...items, newSection]);
-            this.toast.success(`Section "${name}" added.`);
+        this.sectionFormSubmitting.set(true);
+        this.sectionFormError.set('');
+        try {
+            if (this.sectionFormMode() === 'edit' && this.sectionFormId()) {
+                const id = this.sectionFormId()!;
+                const saved = await firstValueFrom(this.classSectionService.updateSection(id, payload));
+                const savedId = saved.id || saved._id || id;
+                this.sectionRows.update(items => items.map(section => section.id === savedId
+                    ? { ...section, ...payload, id: savedId }
+                    : section));
+                this.toast.success(`Section "${name}" updated.`);
+            } else {
+                const sortOrder = this.sectionRows().filter(section => section.classId === classId).length + 1;
+                const saved = await firstValueFrom(this.classSectionService.createSection({
+                    ...payload,
+                    sortOrder
+                }));
+                const id = saved.id || saved._id || this.nextSectionId();
+                const newSection: SectionRow = {
+                    id,
+                    sortOrder: saved.sortOrder ?? sortOrder,
+                    classId: saved.classId || classId,
+                    name: saved.name || name,
+                    code: saved.code ?? payload.code,
+                    capacity: saved.capacity ?? payload.capacity,
+                    homeroomTeacherId: saved.homeroomTeacherId ?? payload.homeroomTeacherId ?? null,
+                    active: saved.active ?? payload.active
+                };
+                this.sectionRows.update(items => [...items, newSection]);
+                this.toast.success(`Section "${name}" added.`);
+            }
+            this.sectionFormOpen.set(false);
+        } catch (error: any) {
+            const rawMessage = error?.error?.message;
+            const message = Array.isArray(rawMessage)
+                ? rawMessage.join(' ')
+                : (rawMessage || 'Unable to save section. Please try again.');
+            this.sectionFormError.set(message);
+        } finally {
+            this.sectionFormSubmitting.set(false);
         }
-        this.sectionFormOpen.set(false);
     }
 
     openSectionDelete(section: SectionRow): void {
@@ -1781,21 +1879,34 @@ export class TenantWorkspaceSetupFacade {
         this.sectionDeleteError.set('');
     }
 
-    deleteSection(): void {
+    async deleteSection(): Promise<void> {
         const target = this.sectionDeleteTarget();
         if (!target || this.sectionDeleteSubmitting()) return;
         this.sectionDeleteSubmitting.set(true);
-        this.sectionRows.update(items => items.filter(section => section.id !== target.id));
-        this.toast.success(`Section "${target.name}" deleted.`);
-        this.sectionDeleteSubmitting.set(false);
-        this.requestCloseSectionDelete();
+        this.sectionDeleteError.set('');
+        try {
+            await firstValueFrom(this.classSectionService.deleteSection(target.id));
+            this.sectionRows.update(items => items.filter(section => section.id !== target.id));
+            this.toast.success(`Section "${target.name}" deleted.`);
+            this.requestCloseSectionDelete();
+        } catch {
+            this.sectionDeleteError.set('Unable to delete section. Please try again.');
+        } finally {
+            this.sectionDeleteSubmitting.set(false);
+        }
     }
 
-    toggleSectionActive(section: SectionRow): void {
-        this.sectionRows.update(items => items.map(item => item.id === section.id
-            ? { ...item, active: !item.active }
-            : item));
-        this.toast.success(`Section "${section.name}" ${section.active ? 'deactivated' : 'activated'}.`);
+    async toggleSectionActive(section: SectionRow): Promise<void> {
+        const nextActive = !section.active;
+        try {
+            await firstValueFrom(this.classSectionService.updateSection(section.id, { active: nextActive }));
+            this.sectionRows.update(items => items.map(item => item.id === section.id
+                ? { ...item, active: nextActive }
+                : item));
+            this.toast.success(`Section "${section.name}" ${section.active ? 'deactivated' : 'activated'}.`);
+        } catch {
+            this.toast.error('Unable to update section status. Please try again.');
+        }
     }
 
     openSectionGenerator(): void {
@@ -1840,7 +1951,7 @@ export class TenantWorkspaceSetupFacade {
         return Array.from({ length: endNum - startNum + 1 }, (_, i) => `${startNum + i}`);
     }
 
-    createGeneratedSections(): void {
+    async createGeneratedSections(): Promise<void> {
         const classId = this.selectedClassId();
         if (!classId) {
             this.sectionGeneratorError.set('Select a class first.');
@@ -1862,23 +1973,41 @@ export class TenantWorkspaceSetupFacade {
             .map(section => section.name.toLowerCase()));
         const toCreate = preview.filter(name => !existingNames.has(name.toLowerCase()));
         const startIndex = this.sectionRows().filter(section => section.classId === classId).length;
-        const newSections = toCreate.map((name, index) => ({
-            id: this.nextSectionId(),
-            classId,
-            name,
-            code: '',
-            capacity: capacityValue ? capacityNumber : null,
-            homeroomTeacherId: null,
-            active: true,
-            sortOrder: startIndex + index + 1
-        }));
-        if (!newSections.length) {
+        if (!toCreate.length) {
             this.sectionGeneratorError.set('All generated sections already exist.');
             return;
         }
-        this.sectionRows.update(items => [...items, ...newSections]);
-        this.toast.success(`Created ${newSections.length} sections.`);
-        this.requestCloseSectionGenerator();
+        const newSections: SectionRow[] = [];
+        try {
+            for (const [index, name] of toCreate.entries()) {
+                const sortOrder = startIndex + index + 1;
+                const saved = await firstValueFrom(this.classSectionService.createSection({
+                    classId,
+                    name,
+                    code: '',
+                    capacity: capacityValue ? capacityNumber : null,
+                    homeroomTeacherId: null,
+                    active: true,
+                    sortOrder
+                }));
+                const id = saved.id || saved._id || this.nextSectionId();
+                newSections.push({
+                    id,
+                    classId: saved.classId || classId,
+                    name: saved.name || name,
+                    code: saved.code || '',
+                    capacity: saved.capacity ?? (capacityValue ? capacityNumber : null),
+                    homeroomTeacherId: saved.homeroomTeacherId ?? null,
+                    active: saved.active ?? true,
+                    sortOrder: saved.sortOrder ?? sortOrder
+                });
+            }
+            this.sectionRows.update(items => [...items, ...newSections]);
+            this.toast.success(`Created ${newSections.length} sections.`);
+            this.requestCloseSectionGenerator();
+        } catch {
+            this.sectionGeneratorError.set('Unable to create sections. Please try again.');
+        }
     }
 
     openNewGradingScale(): void {
@@ -2229,19 +2358,26 @@ export class TenantWorkspaceSetupFacade {
         this.classReorderDraft.set(draft);
     }
 
-    saveClassReorder(): void {
+    async saveClassReorder(): Promise<void> {
         const draft = this.classReorderDraft();
         if (!draft.length) {
             this.requestCloseClassReorder();
             return;
         }
         const orderMap = new Map(draft.map((row, index) => [row.id, index + 1]));
-        this.classRows.update(items => items.map(row => ({
-            ...row,
-            sortOrder: orderMap.get(row.id) ?? row.sortOrder
-        })));
-        this.toast.success('Class order updated.');
-        this.requestCloseClassReorder();
+        try {
+            await Promise.all(draft.map((row, index) =>
+                firstValueFrom(this.classSectionService.updateClass(row.id, { sortOrder: index + 1 }))
+            ));
+            this.classRows.update(items => items.map(row => ({
+                ...row,
+                sortOrder: orderMap.get(row.id) ?? row.sortOrder
+            })));
+            this.toast.success('Class order updated.');
+            this.requestCloseClassReorder();
+        } catch {
+            this.toast.error('Unable to update class order. Please try again.');
+        }
     }
 
     openSectionReorder(): void {
@@ -2262,19 +2398,26 @@ export class TenantWorkspaceSetupFacade {
         this.sectionReorderDraft.set(draft);
     }
 
-    saveSectionReorder(): void {
+    async saveSectionReorder(): Promise<void> {
         const draft = this.sectionReorderDraft();
         if (!draft.length) {
             this.requestCloseSectionReorder();
             return;
         }
         const orderMap = new Map(draft.map((row, index) => [row.id, index + 1]));
-        this.sectionRows.update(items => items.map(row => ({
-            ...row,
-            sortOrder: orderMap.get(row.id) ?? row.sortOrder
-        })));
-        this.toast.success('Section order updated.');
-        this.requestCloseSectionReorder();
+        try {
+            await Promise.all(draft.map((row, index) =>
+                firstValueFrom(this.classSectionService.updateSection(row.id, { sortOrder: index + 1 }))
+            ));
+            this.sectionRows.update(items => items.map(row => ({
+                ...row,
+                sortOrder: orderMap.get(row.id) ?? row.sortOrder
+            })));
+            this.toast.success('Section order updated.');
+            this.requestCloseSectionReorder();
+        } catch {
+            this.toast.error('Unable to update section order. Please try again.');
+        }
     }
 
     openImportModal(type: 'classes' | 'sections'): void {
@@ -2852,18 +2995,6 @@ export class TenantWorkspaceSetupFacade {
     private async completeSetup(): Promise<void> {
         this.isSaving.set(true);
         try {
-            const schools = this.schoolRows()
-                .filter(row => row.status === 'Active')
-                .map(row => ({
-                    name: row.name.trim(),
-                    code: row.code.trim() || undefined
-                }));
-
-            for (const school of schools) {
-                if (!school.name) continue;
-                await firstValueFrom(this.schoolService.createSchool(school));
-            }
-
             this.persistState('completed');
             this.step.set(8);
         } catch {

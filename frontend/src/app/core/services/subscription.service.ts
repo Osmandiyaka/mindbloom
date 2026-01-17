@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { ApiClient } from '../http/api-client.service';
 
 export type SubscriptionPlan = 'free' | 'basic' | 'premium' | 'enterprise';
 
@@ -24,15 +23,15 @@ export interface Subscription {
 
 @Injectable({ providedIn: 'root' })
 export class SubscriptionService {
-    private http = inject(HttpClient);
-    private baseUrl = `${environment.apiUrl}/subscriptions`;
+    private api = inject(ApiClient);
+    private basePath = 'subscriptions';
 
     getCurrent(): Observable<Subscription> {
-        return this.http.get<Subscription>(`${this.baseUrl}/current`);
+        return this.api.get<Subscription>(`${this.basePath}/current`);
     }
 
     changePlan(plan: SubscriptionPlan, billingEmail: string, paymentMethodLast4?: string, paymentBrand?: string): Observable<Subscription> {
-        return this.http.post<Subscription>(`${this.baseUrl}/change-plan`, {
+        return this.api.post<Subscription>(`${this.basePath}/change-plan`, {
             plan,
             billingEmail,
             paymentMethodLast4,

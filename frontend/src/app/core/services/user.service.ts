@@ -1,8 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import { Permission, Role } from '../models/role.model';
+import { ApiClient } from '../http/api-client.service';
 
 export interface User {
     id: string;
@@ -40,32 +39,32 @@ export interface UpdateUserDto {
     providedIn: 'root'
 })
 export class UserService {
-    private readonly http = inject(HttpClient);
-    private readonly apiUrl = `${environment.apiUrl}/users`;
+    private readonly api = inject(ApiClient);
+    private readonly basePath = 'users';
 
     getUsers(): Observable<User[]> {
-        return this.http.get<User[]>(this.apiUrl);
+        return this.api.get<User[]>(this.basePath);
     }
 
     getUser(id: string): Observable<User> {
-        return this.http.get<User>(`${this.apiUrl}/${id}`);
+        return this.api.get<User>(`${this.basePath}/${id}`);
     }
 
     createUser(dto: CreateUserDto): Observable<User> {
-        return this.http.post<User>(this.apiUrl, dto);
+        return this.api.post<User>(this.basePath, dto);
     }
 
     updateUser(id: string, dto: UpdateUserDto): Observable<User> {
-        return this.http.patch<User>(`${this.apiUrl}/${id}`, dto);
+        return this.api.patch<User>(`${this.basePath}/${id}`, dto);
     }
 
     addPermissionsToUser(userId: string, permissionIds: string[]): Observable<User> {
-        return this.http.post<User>(`${this.apiUrl}/${userId}/permissions`, {
+        return this.api.post<User>(`${this.basePath}/${userId}/permissions`, {
             permissionIds
         });
     }
 
     deleteUser(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.apiUrl}/${id}`);
+        return this.api.delete<void>(`${this.basePath}/${id}`);
     }
 }

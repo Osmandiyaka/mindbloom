@@ -1,6 +1,7 @@
 import { AddressValue } from '../../../../shared/components/address/address.component';
 
 export interface SchoolRow {
+    id?: string;
     name: string;
     code: string;
     country: string;

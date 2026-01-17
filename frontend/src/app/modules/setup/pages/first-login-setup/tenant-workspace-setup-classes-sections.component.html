@@ -472,6 +472,7 @@
             <mb-button variant="secondary"
                 (click)="vm.requestCloseSectionForm()">Cancel</mb-button>
             <mb-button variant="primary" *ngIf="vm.sectionFormMode() !== 'view'"
+                [loading]="vm.sectionFormSubmitting()" [disabled]="vm.sectionFormSubmitting()"
                 (click)="vm.saveSectionForm()">Save section</mb-button>
         </div>
     </mb-modal>

@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { ApiClient } from '../http/api-client.service';
 
 export type InvitationStatus = 'pending' | 'accepted' | 'expired' | 'revoked' | 'sent';
 
@@ -21,23 +20,23 @@ export interface Invitation {
 
 @Injectable({ providedIn: 'root' })
 export class InvitationService {
-    private http = inject(HttpClient);
-    private baseUrl = `${environment.apiUrl}/invitations`;
+    private api = inject(ApiClient);
+    private basePath = 'invitations';
     private httpOptions = { withCredentials: true };
 
     list(): Observable<Invitation[]> {
-        return this.http.get<Invitation[]>(this.baseUrl, this.httpOptions);
+        return this.api.get<Invitation[]>(this.basePath, this.httpOptions);
     }
 
     create(email: string, roles: string[], expiresAt?: string): Observable<Invitation> {
-        return this.http.post<Invitation>(this.baseUrl, { email, roles, expiresAt }, this.httpOptions);
+        return this.api.post<Invitation>(this.basePath, { email, roles, expiresAt }, this.httpOptions);
     }
 
     resend(id: string): Observable<Invitation> {
-        return this.http.post<Invitation>(`${this.baseUrl}/${id}/resend`, {}, this.httpOptions);
+        return this.api.post<Invitation>(`${this.basePath}/${id}/resend`, {}, this.httpOptions);
     }
 
     revoke(id: string): Observable<Invitation> {
-        return this.http.delete<Invitation>(`${this.baseUrl}/${id}`, this.httpOptions);
+        return this.api.delete<Invitation>(`${this.basePath}/${id}`, this.httpOptions);
     }
 }

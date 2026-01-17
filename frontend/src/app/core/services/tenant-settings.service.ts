@@ -1,6 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
+import { ApiClient } from '../http/api-client.service';
 import { Observable } from 'rxjs';
 
 import { Tenant } from './tenant.service';
@@ -41,11 +40,11 @@ export interface TenantSettingsUpdate {
     providedIn: 'root'
 })
 export class TenantSettingsService {
-    private http = inject(HttpClient);
-    private baseUrl = `${environment.apiUrl}/tenants/settings`;
+    private api = inject(ApiClient);
+    private basePath = 'tenants/settings';
 
     getSettings(): Observable<Tenant> {
-        return this.http.get<Tenant>(this.baseUrl);
+        return this.api.get<Tenant>(this.basePath);
     }
 
     updateSettings(payload: TenantSettingsUpdate): Observable<Tenant> {
@@ -63,6 +62,6 @@ export class TenantSettingsService {
         };
         delete body.customization;
         delete body.academicYear;
-        return this.http.put<Tenant>(this.baseUrl, body);
+        return this.api.put<Tenant>(this.basePath, body);
     }
 }

@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpEvent } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
+import { Injectable, inject } from '@angular/core';
+import { HttpEvent } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ApiClient } from '../http/api-client.service';
 
 export interface SchoolSettings {
     schoolName: string;
@@ -28,28 +28,29 @@ export interface SchoolSettings {
 
 @Injectable({ providedIn: 'root' })
 export class SchoolSettingsService {
-    private base = `${environment.apiUrl}/setup/school`;
-    constructor(private http: HttpClient) {}
+    private basePath = 'setup/school';
+    private api = inject(ApiClient);
 
     getSettings(): Observable<SchoolSettings> {
-        return this.http.get<SchoolSettings>(this.base);
+        return this.api.get<SchoolSettings>(this.basePath);
     }
 
     save(settings: SchoolSettings) {
-        return this.http.put(this.base, settings);
+        return this.api.put<SchoolSettings>(this.basePath, settings);
     }
 
     uploadAsset(type: 'logo' | 'favicon', file: File) {
         const formData = new FormData();
         formData.append('file', file);
-        return this.http.post<{ url?: string; key?: string }>(
-            `${this.base}/upload`,
-            formData,
+        return this.api.requestEvents<{ url?: string; key?: string }>(
+            'POST',
+            `${this.basePath}/upload`,
             {
+                body: formData,
                 params: { type },
                 reportProgress: true,
                 observe: 'events'
             }
-        ) as unknown as Observable<HttpEvent<{ url?: string; key?: string }>>;
+        );
     }
 }

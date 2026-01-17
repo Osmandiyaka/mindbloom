@@ -26,6 +26,8 @@ export interface SectionResponse {
     code?: string;
     capacity?: number;
     active?: boolean;
+    homeroomTeacherId?: string | null;
+    sortOrder?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -51,5 +53,37 @@ export class ClassSectionService {
             params = params.set('classId', classId);
         }
         return this.http.get<SectionResponse[]>(`${this.baseUrl}/sections`, { params });
+    }
+
+    createSection(payload: {
+        classId: string;
+        name: string;
+        code?: string;
+        capacity?: number | null;
+        homeroomTeacherId?: string | null;
+        active?: boolean;
+        sortOrder?: number;
+    }): Observable<SectionResponse> {
+        return this.http.post<SectionResponse>(`${this.baseUrl}/sections`, payload);
+    }
+
+    updateSection(id: string, payload: Partial<{
+        classId: string;
+        name: string;
+        code?: string;
+        capacity?: number | null;
+        homeroomTeacherId?: string | null;
+        active?: boolean;
+        sortOrder?: number;
+    }>): Observable<SectionResponse> {
+        return this.http.patch<SectionResponse>(`${this.baseUrl}/sections/${id}`, payload);
+    }
+
+    deleteSection(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.baseUrl}/sections/${id}`);
+    }
+
+    deleteClass(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.baseUrl}/${id}`);
     }
 }

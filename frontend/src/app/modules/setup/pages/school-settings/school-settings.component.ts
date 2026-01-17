@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpEventType } from '@angular/common/http';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SchoolSettings, SchoolSettingsService } from '../../../../core/services/school-settings.service';
@@ -763,7 +763,8 @@ export class SchoolSettingsComponent implements OnInit {
           if (type === 'logo') this.logoProgress = progress;
           else this.faviconProgress = progress;
         } else if (event.type === HttpEventType.Response) {
-          const url = event.body?.url || event.body?.key || null;
+          const response = event as HttpResponse<{ url?: string; key?: string }>;
+          const url = response.body?.url || response.body?.key || null;
           if (type === 'logo') {
             this.model.logoUrl = url || this.model.logoUrl;
             if (url) this.logoPreview = url;
