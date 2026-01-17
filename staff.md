@@ -18,11 +18,11 @@ Use this checklist to track implementation of the Staff Profile module. It is or
 
 ## Phase 1 — Backend data model (Mongoose)
 
-- [ ] Create new staff profile schemas (tenant-scoped, camelCase, indexed) in `backend/src/infrastructure/adapters/persistence/mongoose/schemas/`
-- [ ] Decide how existing `StaffSchema` maps to `staffMember` (keep/extend vs. new collection)
-- [ ] Implement `staffSchemaConfig` collection + defaults seeding service
+- [x] Create new staff profile schemas (tenant-scoped, camelCase, indexed) in `backend/src/infrastructure/adapters/persistence/mongoose/schemas/`
+- [x] Decide how existing `StaffSchema` maps to `staffMember` (keep/extend vs. new collection)
+- [x] Implement `staffSchemaConfig` collection + defaults seeding service
 - [ ] Add any required references to existing collections (schools, departments, roles, users)
-- [ ] Ensure tenant isolation (tenantId on all collections and indexes)
+- [x] Ensure tenant isolation (tenantId on all collections and indexes)
 
 ## Phase 2 — Backend APIs (REST)
 
@@ -42,7 +42,7 @@ Reuse existing:
 - `frontend/libs/ui/src/lib/staff-selector/`
 
 Tasks:
-- [ ] Update Staff Directory to match enterprise table + filters + right drawer workflow
+- [x] Update Staff Directory to match enterprise table + filters + right drawer workflow
 - [ ] Implement Staff Detail Drawer with tabs and URL sync
 - [ ] Implement Overview tab with attention flags
 - [ ] Implement Employment tab (history + modals)

@@ -157,3 +157,91 @@
 
   <div *ngIf="toast">{{ toast }}</div>
 </mb-stack>
+
+<mb-modal class="staff-modal-shell" [open]="createStaffOpen" [closeable]="false" size="lg"
+  (closed)="requestCloseCreateStaff()">
+  <div class="staff-modal__layout">
+    <div class="staff-modal__header">
+      <div class="staff-modal__header-main">
+        <div class="staff-modal__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false">
+            <path
+              d="M16 11a4 4 0 1 0-8 0M12 15c-3.3 0-6 2.2-6 5h12c0-2.8-2.7-5-6-5Z"
+              fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <path d="M18 8a3 3 0 1 0-3-3" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div>
+          <div class="staff-modal__title">Add staff</div>
+          <div class="staff-modal__subtitle">Add a staff member to start managing their profile.</div>
+        </div>
+      </div>
+      <button type="button" class="staff-modal__close" aria-label="Close modal"
+        (click)="requestCloseCreateStaff()">x</button>
+    </div>
+
+    <div class="staff-modal__error" *ngIf="createError">
+      <div class="staff-modal__error-title">{{ createError }}</div>
+    </div>
+
+    <div class="staff-modal__scroll">
+      <div class="staff-modal__columns">
+        <div class="staff-modal__section">
+          <div class="staff-modal__section-label">IDENTITY</div>
+          <div class="staff-modal__section-title">Staff identity</div>
+          <div class="staff-modal__section-helper">Core identity details for staff records.</div>
+          <div class="staff-modal__grid">
+            <mb-form-field class="staff-modal__field" label="Staff code" [required]="true"
+              [controlId]="'staff-form-code'" [error]="createFieldError('staffCode')">
+              <mb-input id="staff-form-code" cdkFocusInitial [value]="createForm.staffCode"
+                placeholder="e.g. ST-001" (valueChange)="createForm.staffCode = $event"
+                (blurEvent)="createTouched.staffCode = true"></mb-input>
+            </mb-form-field>
+            <mb-form-field class="staff-modal__field" label="Status" [controlId]="'staff-form-status'">
+              <mb-select id="staff-form-status" ariaLabel="Staff status"
+                [options]="createStatusOptions" [value]="createForm.status || ''"
+                (valueChange)="onCreateStatusChange($event)"></mb-select>
+            </mb-form-field>
+            <mb-form-field class="staff-modal__field" label="First name" [required]="true"
+              [controlId]="'staff-form-first-name'" [error]="createFieldError('firstName')">
+              <mb-input id="staff-form-first-name" [value]="createForm.firstName"
+                placeholder="First name" (valueChange)="createForm.firstName = $event"
+                (blurEvent)="createTouched.firstName = true"></mb-input>
+            </mb-form-field>
+            <mb-form-field class="staff-modal__field" label="Last name" [required]="true"
+              [controlId]="'staff-form-last-name'" [error]="createFieldError('lastName')">
+              <mb-input id="staff-form-last-name" [value]="createForm.lastName"
+                placeholder="Last name" (valueChange)="createForm.lastName = $event"
+                (blurEvent)="createTouched.lastName = true"></mb-input>
+            </mb-form-field>
+            <mb-form-field class="staff-modal__field staff-modal__field--full"
+              label="Preferred name" [controlId]="'staff-form-preferred-name'">
+              <mb-input id="staff-form-preferred-name" [value]="createForm.preferredName"
+                placeholder="Preferred name" (valueChange)="createForm.preferredName = $event"></mb-input>
+            </mb-form-field>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="staff-modal__footer">
+      <div class="staff-modal__footer-note">Required fields are marked.</div>
+      <div class="staff-modal__footer-actions">
+        <mb-button size="sm" variant="tertiary" (click)="requestCloseCreateStaff()">Cancel</mb-button>
+        <mb-button size="sm" variant="primary" [disabled]="createSaving" (click)="submitCreateStaff()">
+          Add staff
+        </mb-button>
+      </div>
+    </div>
+  </div>
+</mb-modal>
+
+<mb-modal [open]="createDiscardOpen" title="Discard changes?" size="sm" (closed)="closeCreateDiscard()">
+  <div>Any unsaved changes will be lost.</div>
+  <div mbModalFooter>
+    <mb-button size="sm" variant="tertiary" (click)="closeCreateDiscard()">Keep editing</mb-button>
+    <mb-button size="sm" variant="primary" (click)="confirmDiscardCreate()">Discard</mb-button>
+  </div>
+</mb-modal>

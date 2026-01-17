@@ -8,7 +8,10 @@ import {
   MbButtonComponent,
   MbCardComponent,
   MbCheckboxComponent,
+  MbFormFieldComponent,
   MbInlineComponent,
+  MbInputComponent,
+  MbModalComponent,
   MbPopoverComponent,
   MbSelectComponent,
   MbStackComponent,
@@ -17,6 +20,7 @@ import {
   MbTableComponent,
   MbTableEmptyState,
   MbSelectOption,
+  MbModalFooterDirective,
 } from '@mindbloom/ui';
 import { HrService, Staff } from '../../../../core/services/hr.service';
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
@@ -34,7 +38,10 @@ import { PageHeaderComponent } from '../../../../core/ui/page-header/page-header
     MbButtonComponent,
     MbCardComponent,
     MbCheckboxComponent,
+    MbFormFieldComponent,
     MbInlineComponent,
+    MbInputComponent,
+    MbModalComponent,
     MbPopoverComponent,
     MbSelectComponent,
     MbStackComponent,
@@ -42,6 +49,7 @@ import { PageHeaderComponent } from '../../../../core/ui/page-header/page-header
     MbTableComponent,
     SearchInputComponent,
     PageHeaderComponent,
+    MbModalFooterDirective,
   ],
   templateUrl: './staff-directory.component.html',
   styleUrls: ['./staff-directory.component.scss']
@@ -60,6 +68,28 @@ export class StaffDirectoryComponent implements OnInit {
   hiddenColumns: string[] = [];
   searchValue = '';
   openRowMenuId: string | null = null;
+  createStaffOpen = false;
+  createDiscardOpen = false;
+  createSaving = false;
+  createError = '';
+  createTouched = {
+    staffCode: false,
+    firstName: false,
+    lastName: false,
+  };
+  createForm: {
+    staffCode: string;
+    firstName: string;
+    lastName: string;
+    preferredName: string;
+    status: Staff['status'];
+  } = {
+    staffCode: '',
+    firstName: '',
+    lastName: '',
+    preferredName: '',
+    status: 'active',
+  };
   readonly onRetry = () => this.reload();
 
   statusOptions: MbSelectOption[] = [
@@ -68,6 +98,7 @@ export class StaffDirectoryComponent implements OnInit {
     { label: 'Inactive', value: 'inactive' },
     { label: 'Archived', value: 'archived' },
   ];
+  createStatusOptions = this.statusOptions.filter(option => option.value);
 
   rowsPerPageOptions: MbSelectOption[] = [
     { label: '10 rows', value: '10' },
@@ -270,6 +301,10 @@ export class StaffDirectoryComponent implements OnInit {
     this.reload();
   }
 
+  onCreateStatusChange(value: string) {
+    this.createForm.status = (value || 'active') as Staff['status'];
+  }
+
   onDensityChange(mode: 'comfortable' | 'compact') {
     this.density = mode;
     this.updateQueryParams({ density: mode });
@@ -356,7 +391,90 @@ export class StaffDirectoryComponent implements OnInit {
   }
 
   openAdd() {
-    alert('Add staff form coming soon.');
+    this.createStaffOpen = true;
+  }
+
+  requestCloseCreateStaff() {
+    if (this.isCreateDirty()) {
+      this.createDiscardOpen = true;
+      return;
+    }
+    this.resetCreateForm();
+    this.createStaffOpen = false;
+  }
+
+  closeCreateDiscard() {
+    this.createDiscardOpen = false;
+  }
+
+  confirmDiscardCreate() {
+    this.createDiscardOpen = false;
+    this.resetCreateForm();
+    this.createStaffOpen = false;
+  }
+
+  submitCreateStaff() {
+    if (this.createStaffInvalid()) {
+      this.markCreateTouched();
+      return;
+    }
+    this.createSaving = true;
+    this.createError = '';
+    this.hr.createStaff({
+      staffCode: this.createForm.staffCode.trim(),
+      firstName: this.createForm.firstName.trim(),
+      lastName: this.createForm.lastName.trim(),
+      preferredName: this.createForm.preferredName.trim() || undefined,
+      status: this.createForm.status || undefined,
+    });
+    this.createSaving = false;
+    this.notify('Staff member created.');
+    this.resetCreateForm();
+    this.createStaffOpen = false;
+  }
+
+  createFieldError(field: 'staffCode' | 'firstName' | 'lastName') {
+    if (!this.createTouched[field]) return '';
+    const value = this.createForm[field].trim();
+    return value ? '' : 'Required';
+  }
+
+  createStaffInvalid() {
+    return !this.createForm.staffCode.trim()
+      || !this.createForm.firstName.trim()
+      || !this.createForm.lastName.trim();
+  }
+
+  markCreateTouched() {
+    this.createTouched.staffCode = true;
+    this.createTouched.firstName = true;
+    this.createTouched.lastName = true;
+  }
+
+  isCreateDirty() {
+    return !!(
+      this.createForm.staffCode
+      || this.createForm.firstName
+      || this.createForm.lastName
+      || this.createForm.preferredName
+    );
+  }
+
+  resetCreateForm() {
+    this.createForm = {
+      staffCode: '',
+      firstName: '',
+      lastName: '',
+      preferredName: '',
+      status: 'active',
+    };
+    this.createTouched = {
+      staffCode: false,
+      firstName: false,
+      lastName: false,
+    };
+    this.createSaving = false;
+    this.createError = '';
   }
 
   notify(message: string) {

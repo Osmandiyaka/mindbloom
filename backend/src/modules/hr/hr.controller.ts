@@ -29,6 +29,9 @@ export class HrController {
     @Get('staff')
     listStaff(@Query() query: any) { return this.hr.listStaff(query); }
 
+    @Get('staff/filters')
+    staffFilters(@Query('tenantId') tenantId?: string) { return this.hr.getStaffFilters(tenantId); }
+
     @Post('staff')
     createStaff(@Body() dto: any) { return this.hr.createStaff(dto); }
 
