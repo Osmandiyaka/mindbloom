@@ -367,20 +367,13 @@
                     </div>
                     <div>
                         <div id="create-user-title" class="users-modal__title">Create user</div>
-                        <div class="users-modal__subtitle">Create an account manually for this workspace.</div>
-                        <div class="users-modal__learn">
-                            <button type="button" class="users-modal__learn-link" #createLearnOrigin
-                                (click)="vm.toggleCreateLearnMore()">
-                                Learn more
+                        <div class="users-modal__subtitle">
+                            Create an account for this workspace.
+                            <button type="button" class="users-modal__tooltip"
+                                mbTooltip="Users need a role and school access to use the platform."
+                                aria-label="Users need a role and school access to use the platform.">
+                                ?
                             </button>
-                            <mb-popover [open]="vm.createLearnMoreOpen()" [origin]="createLearnOrigin"
-                                [hasBackdrop]="true"
-                                [panelClass]="['mb-popover-panel', 'users-modal__learn-popover']"
-                                (closed)="vm.closeCreateLearnMore()">
-                                <div class="users-modal__learn-body">
-                                    Roles define permissions; school access controls where the user can work.
-                                </div>
-                            </mb-popover>
                         </div>
                     </div>
                 </div>
@@ -400,61 +393,59 @@
 
             <div class="users-modal__body users-modal__body--scroll">
                 <div class="users-create__grid">
-                    <div class="users-create__section">
-                        <div class="users-create__section-title">Identity</div>
-                        <div class="users-create__section-helper">Basic account information.</div>
-                        <div class="users-create__avatar">
-                            <div class="users-create__avatar-preview"
-                                [style.background-image]="vm.createProfilePicture() ? 'url(' + vm.createProfilePicture() + ')' : 'none'">
-                                <span *ngIf="!vm.createProfilePicture()">{{ vm.createUserInitials() }}</span>
+                    <div class="users-create__card">
+                        <div class="users-create__card-header">
+                            <div>
+                                <div class="users-create__card-title">User details</div>
+                                <div class="users-create__card-helper">Basic profile information for this person.</div>
                             </div>
-                            <div class="users-create__avatar-actions">
-                                <input #createUserPhotoInput type="file" accept="image/*"
-                                    (change)="vm.onCreateProfilePictureChange($event)" hidden />
-                                <mb-button variant="secondary" size="sm"
-                                    (click)="createUserPhotoInput.click()">Upload photo</mb-button>
-                                <mb-button *ngIf="vm.createProfilePicture()" variant="tertiary" size="sm"
-                                    (click)="vm.removeCreateProfilePicture()">Remove</mb-button>
-                                <div class="users-create__avatar-hint">JPG, PNG, or GIF up to 2MB.</div>
+                            <div class="users-create__avatar">
+                                <div class="users-create__avatar-preview"
+                                    [style.background-image]="vm.createProfilePicture() ? 'url(' + vm.createProfilePicture() + ')' : 'none'">
+                                    <span *ngIf="!vm.createProfilePicture()">{{ vm.createUserInitials() }}</span>
+                                </div>
+                                <div class="users-create__avatar-actions">
+                                    <input #createUserPhotoInput type="file" accept="image/*"
+                                        (change)="vm.onCreateProfilePictureChange($event)" hidden />
+                                    <button type="button" class="users-create__avatar-button"
+                                        mbTooltip="JPG, PNG, or GIF up to 2MB."
+                                        (click)="createUserPhotoInput.click()">Upload</button>
+                                    <button *ngIf="vm.createProfilePicture()" type="button"
+                                        class="users-create__avatar-link"
+                                        (click)="vm.removeCreateProfilePicture()">Remove</button>
+                                </div>
                             </div>
                         </div>
-                        <div class="users-create__fields">
-                            <mb-form-field label="Full name" [required]="true" [controlId]="'create-user-name'"
-                                [error]="vm.createNameError()"
-                                hint="Use the person's legal or preferred name.">
-                                <mb-input id="create-user-name" cdkFocusInitial [value]="vm.createName()"
-                                    placeholder="e.g. Ama Mensah"
-                                    (valueChange)="vm.createName.set($event)"
-                                    (blurEvent)="vm.createNameTouched.set(true)"></mb-input>
-                            </mb-form-field>
-                            <mb-form-field label="Email" [required]="true" [controlId]="'create-user-email'"
-                                [error]="vm.createEmailError()">
-                                <mb-input id="create-user-email" type="email" [value]="vm.createEmail()"
-                                    placeholder="name@school.com"
-                                    (valueChange)="vm.createEmail.set($event)"
-                                    (blurEvent)="vm.createEmailTouched.set(true)"></mb-input>
-                            </mb-form-field>
-                            <div class="users-create__email-duplicate"
-                                *ngIf="vm.createEmailDuplicate() && (vm.createEmailTouched() || vm.createSubmitAttempted())">
-                                Email already exists.
-                                <button type="button" class="users-create__action-link"
-                                    (click)="vm.searchUsersForCreateEmail()">Search users</button>
+                        <div class="users-create__card-body">
+                            <div class="users-create__row users-create__row--two">
+                                <mb-form-field label="Full name" [required]="true" [controlId]="'create-user-name'"
+                                    [error]="vm.createNameError()">
+                                    <mb-input id="create-user-name" cdkFocusInitial [value]="vm.createName()"
+                                        placeholder="e.g. Ama Mensah"
+                                        (valueChange)="vm.createName.set($event)"
+                                        (blurEvent)="vm.createNameTouched.set(true)"></mb-input>
+                                </mb-form-field>
+                                <mb-form-field label="Email" [required]="true" [controlId]="'create-user-email'"
+                                    [error]="vm.createEmailError()">
+                                    <mb-input id="create-user-email" type="email" [value]="vm.createEmail()"
+                                        placeholder="name@school.com"
+                                        (valueChange)="vm.createEmail.set($event)"
+                                        (blurEvent)="vm.createEmailTouched.set(true)"></mb-input>
+                                </mb-form-field>
                             </div>
-                            <mb-form-field label="Job title" [controlId]="'create-user-job'">
-                                <mb-input id="create-user-job" [value]="vm.createJobTitle()"
-                                    placeholder="e.g. Front desk officer"
-                                    (valueChange)="vm.createJobTitle.set($event)"></mb-input>
-                            </mb-form-field>
-                        </div>
-
-                        <button type="button" class="users-create__advanced-toggle"
-                            (click)="vm.toggleCreateAdvanced()">
-                            {{ vm.createAdvancedOpen() ? 'Hide advanced' : 'Show advanced' }}
-                        </button>
-
-                        <div class="users-create__advanced" *ngIf="vm.createAdvancedOpen()">
-                            <div class="users-create__divider"></div>
-                            <div class="users-create__fields">
+                            <div class="users-create__row users-create__row--two">
+                                <mb-form-field label="Phone" [controlId]="'create-user-phone'">
+                                    <mb-input id="create-user-phone" [value]="vm.createPhone()"
+                                        placeholder="e.g. +233 20 000 0000"
+                                        (valueChange)="vm.createPhone.set($event)"></mb-input>
+                                </mb-form-field>
+                                <mb-form-field label="Job title" [controlId]="'create-user-job'">
+                                    <mb-input id="create-user-job" [value]="vm.createJobTitle()"
+                                        placeholder="e.g. Front desk officer"
+                                        (valueChange)="vm.createJobTitle.set($event)"></mb-input>
+                                </mb-form-field>
+                            </div>
+                            <div class="users-create__row users-create__row--two">
                                 <mb-form-field label="Gender" [controlId]="'create-user-gender'">
                                     <mb-select id="create-user-gender" [value]="vm.createGender()"
                                         placeholder="Select gender"
@@ -466,85 +457,122 @@
                                     <mb-input id="create-user-dob" type="date" [value]="vm.createDateOfBirth()"
                                         (valueChange)="vm.createDateOfBirth.set($event)"></mb-input>
                                 </mb-form-field>
-                                <mb-form-field label="Phone" [controlId]="'create-user-phone'">
-                                    <mb-input id="create-user-phone" [value]="vm.createPhone()"
-                                        placeholder="+233 20 000 0000"
-                                        (valueChange)="vm.createPhone.set($event)"></mb-input>
-                                </mb-form-field>
-                                <mb-form-field label="Department" [controlId]="'create-user-dept'">
-                                    <mb-input id="create-user-dept" [value]="vm.createDepartment()"
-                                        (valueChange)="vm.createDepartment.set($event)"></mb-input>
-                                </mb-form-field>
-                                <mb-form-field label="Employee ID" [controlId]="'create-user-staff-id'">
-                                    <mb-input id="create-user-staff-id" [value]="vm.createStaffId()"
-                                        (valueChange)="vm.createStaffId.set($event)"></mb-input>
-                                </mb-form-field>
                             </div>
                         </div>
                     </div>
 
-                    <div class="users-create__section">
-                        <div class="users-create__section-title">Role</div>
-                        <div class="users-create__section-helper">Controls what the user can view and manage.</div>
-                        <div class="users-create__role-header">
-                            <div class="users-create__role-label">Role selection</div>
-                            <button type="button" class="users-create__role-preview" #rolePreviewOrigin
-                                (click)="vm.toggleCreateRolePreview()">
-                                Preview permissions
-                            </button>
-                            <mb-popover [open]="vm.createRolePreviewOpen()" [origin]="rolePreviewOrigin"
-                                [hasBackdrop]="true"
-                                [panelClass]="['mb-popover-panel', 'users-role-preview__panel']"
-                                (closed)="vm.closeCreateRolePreview()">
-                                <app-role-preview
-                                    [role]="vm.createRole()"
-                                    [items]="vm.createRolePreviewItems()"
-                                    [badge]="vm.createRoleBadge()">
-                                </app-role-preview>
-                            </mb-popover>
-                        </div>
-                        <mb-form-field label="Role" [required]="true" [controlId]="'create-user-role'"
-                            [error]="vm.createRoleError()">
-                            <div class="users-create__role-field" id="create-user-role" tabindex="-1">
-                                <mb-role-selector [value]="vm.createRoleIds()" [label]="''"
-                                    [placeholder]="'Select role...'" [multiple]="false"
-                                    (change)="vm.handleCreateRoleChange($event)"></mb-role-selector>
+                    <div class="users-create__card">
+                        <div class="users-create__card-header">
+                            <div>
+                                <div class="users-create__card-title">Access & security</div>
+                                <div class="users-create__card-helper">Define what this user can access in the school system.</div>
                             </div>
-                        </mb-form-field>
-                        <div class="users-create__role-warning" *ngIf="vm.createRoleIsHighPrivilege()">
-                            High privilege role — grants administrative access.
                         </div>
+                        <div class="users-create__card-body">
+                            <div class="users-create__card-section">
+                                <div class="users-create__label-row">
+                                    <div class="users-create__label">Role*</div>
+                                    <button type="button" class="users-create__role-preview" #rolePreviewOrigin
+                                        (click)="vm.toggleCreateRolePreview()">
+                                        Preview permissions
+                                    </button>
+                                    <mb-popover [open]="vm.createRolePreviewOpen()" [origin]="rolePreviewOrigin"
+                                        [hasBackdrop]="true"
+                                        [panelClass]="['mb-popover-panel', 'users-role-preview__panel']"
+                                        (closed)="vm.closeCreateRolePreview()">
+                                        <app-role-preview
+                                            [role]="vm.createRole()"
+                                            [items]="vm.createRolePreviewItems()"
+                                            [badge]="vm.createRoleBadge()">
+                                        </app-role-preview>
+                                    </mb-popover>
+                                </div>
+                                <mb-form-field [controlId]="'create-user-role'" [error]="vm.createRoleError()">
+                                    <div class="users-create__role-field" id="create-user-role" tabindex="-1">
+                                        <app-role-dropdown
+                                            [value]="vm.createRole()"
+                                            (valueChange)="vm.setCreateRole($event)">
+                                        </app-role-dropdown>
+                                    </div>
+                                </mb-form-field>
+                                <div class="users-create__role-warning" *ngIf="vm.createRoleIsHighPrivilege()">
+                                    High privilege role — grants administrative access.
+                                </div>
+                            </div>
 
-                        <div class="users-create__section-title users-create__section-title--spaced">School access</div>
-                        <div class="users-create__section-helper">Choose where this user can operate.</div>
-                        <div class="users-create__segmented" id="create-user-school-access" tabindex="-1"
-                            role="tablist"
-                            [style.--active-index]="vm.createSchoolAccess() === 'all' ? 0 : 1">
-                            <button type="button" role="tab"
-                                class="users-create__segmented-button"
-                                [class.is-active]="vm.createSchoolAccess() === 'all'"
-                                [attr.aria-selected]="vm.createSchoolAccess() === 'all'"
-                                (click)="vm.setCreateSchoolAccess('all')">
-                                All schools
-                            </button>
-                            <button type="button" role="tab"
-                                class="users-create__segmented-button"
-                                [class.is-active]="vm.createSchoolAccess() === 'selected'"
-                                [attr.aria-selected]="vm.createSchoolAccess() === 'selected'"
-                                (click)="vm.setCreateSchoolAccess('selected')">
-                                Selected schools
-                            </button>
-                        </div>
+                            <div class="users-create__card-section">
+                                <div class="users-create__label-row">
+                                    <div class="users-create__label">School access*</div>
+                                </div>
+                                <div class="users-create__segmented users-create__segmented--compact"
+                                    id="create-user-school-access" tabindex="-1" role="tablist"
+                                    [style.--active-index]="vm.createSchoolAccess() === 'all' ? 0 : 1">
+                                    <button type="button" role="tab"
+                                        class="users-create__segmented-button"
+                                        [class.is-active]="vm.createSchoolAccess() === 'all'"
+                                        [attr.aria-selected]="vm.createSchoolAccess() === 'all'"
+                                        (click)="vm.setCreateSchoolAccess('all')">
+                                        All schools
+                                    </button>
+                                    <button type="button" role="tab"
+                                        class="users-create__segmented-button"
+                                        [class.is-active]="vm.createSchoolAccess() === 'selected'"
+                                        [attr.aria-selected]="vm.createSchoolAccess() === 'selected'"
+                                        (click)="vm.setCreateSchoolAccess('selected')">
+                                        Selected schools
+                                    </button>
+                                </div>
+                                <div class="users-create__school-note" *ngIf="vm.createSchoolAccess() === 'all'">
+                                    User can access all schools in this workspace.
+                                </div>
+                                <div class="users-create__school-access" *ngIf="vm.createSchoolAccess() === 'selected'">
+                                    <app-school-selector
+                                        [schools]="vm.activeSchoolNames()"
+                                        [selected]="vm.createSelectedSchools()"
+                                        (selectedChange)="vm.setCreateSelectedSchools($event)"
+                                        (interaction)="vm.markCreateSchoolAccessTouched()">
+                                    </app-school-selector>
+                                    <div class="users-inline-error" *ngIf="vm.createSchoolAccessError()">
+                                        {{ vm.createSchoolAccessError() }}
+                                    </div>
+                                </div>
+                            </div>
 
-                        <div class="users-create__school-access" *ngIf="vm.createSchoolAccess() === 'selected'">
-                            <app-school-selector
-                                [schools]="vm.activeSchoolNames()"
-                                [selected]="vm.createSelectedSchools()"
-                                (selectedChange)="vm.setCreateSelectedSchools($event)"
-                                (interaction)="vm.markCreateSchoolAccessTouched()">
-                            </app-school-selector>
-                            <div class="users-inline-error" *ngIf="vm.createSchoolAccessError()">
-                                {{ vm.createSchoolAccessError() }}
+                            <button type="button" class="users-create__advanced-toggle"
+                                (click)="vm.toggleCreateAdvanced()">
+                                {{ vm.createAdvancedOpen() ? 'Hide advanced' : 'Show advanced' }}
+                            </button>
+
+                            <div class="users-create__advanced" *ngIf="vm.createAdvancedOpen()">
+                                <div class="users-create__divider"></div>
+                                <div class="users-create__card-section">
+                                    <div class="users-create__label-row">
+                                        <div class="users-create__label">Account status</div>
+                                    </div>
+                                    <mb-form-field [controlId]="'create-user-status'">
+                                        <mb-select id="create-user-status" [value]="vm.createStatus()"
+                                            [options]="vm.accountStatusOptions"
+                                            (valueChange)="vm.setCreateStatus($event)">
+                                        </mb-select>
+                                    </mb-form-field>
+                                    <mb-form-field label="Notes" [controlId]="'create-user-notes'">
+                                        <mb-textarea id="create-user-notes" [value]="vm.createNotes()"
+                                            placeholder="Optional internal notes"
+                                            (valueChange)="vm.setCreateNotes($event)"></mb-textarea>
+                                    </mb-form-field>
+                                </div>
+                                <div class="users-create__card-section">
+                                    <div class="users-create__label-row">
+                                        <div class="users-create__label">Department</div>
+                                    </div>
+                                    <mb-form-field [controlId]="'create-user-dept'">
+                                        <app-department-selector
+                                            [options]="vm.departmentOptions()"
+                                            [value]="vm.createDepartment()"
+                                            (valueChange)="vm.setCreateDepartment($event)">
+                                        </app-department-selector>
+                                    </mb-form-field>
+                                </div>
                             </div>
                         </div>
                     </div>

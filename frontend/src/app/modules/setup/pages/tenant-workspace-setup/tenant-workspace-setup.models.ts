@@ -10,7 +10,7 @@ export interface SchoolRow {
     address?: AddressValue;
 }
 
-export type UserRole = 'Owner' | 'Administrator' | 'Staff' | 'Teacher';
+export type UserRole = 'Owner' | 'Administrator' | 'Staff' | 'Teacher' | string;
 export type UserStatus = 'Invited' | 'Active' | 'Suspended';
 
 export interface UserRow {
@@ -27,6 +27,7 @@ export interface UserRow {
     dateOfBirth?: string;
     phone?: string;
     profilePicture?: string | null;
+    notes?: string;
     lastLogin?: string;
     createdAt?: string;
 }

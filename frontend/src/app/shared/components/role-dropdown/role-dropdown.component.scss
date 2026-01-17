@@ -1,0 +1,96 @@
+.role-dropdown {
+    position: relative;
+}
+
+.role-dropdown__trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--mb-control-radius);
+    border: 1px solid var(--mb-color-border-subtle);
+    background: var(--mb-color-surface);
+    cursor: pointer;
+    text-align: left;
+}
+
+.role-dropdown__trigger-text {
+    display: grid;
+    gap: 2px;
+}
+
+.role-dropdown__label {
+    font-size: 14px;
+    color: var(--mb-color-text);
+    font-weight: 600;
+}
+
+.role-dropdown__meta {
+    font-size: 12px;
+    color: var(--mb-color-text-muted);
+}
+
+.role-dropdown__chevron {
+    color: var(--mb-color-text-muted);
+}
+
+:host ::ng-deep .role-dropdown__panel .mb-popover {
+    min-width: 320px;
+    background: var(--mb-color-surface);
+    border: 1px solid var(--mb-color-border-subtle);
+    border-radius: 12px;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+    padding: 8px;
+}
+
+.role-dropdown__list {
+    display: grid;
+    gap: 6px;
+}
+
+.role-dropdown__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+}
+
+.role-dropdown__item:hover,
+.role-dropdown__item:focus-visible {
+    border-color: var(--mb-color-border-subtle);
+    background: color-mix(in srgb, var(--mb-color-primary) 8%, transparent);
+}
+
+.role-dropdown__item--selected {
+    border-color: var(--mb-color-primary);
+    background: color-mix(in srgb, var(--mb-color-primary) 12%, transparent);
+}
+
+.role-dropdown__item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mb-color-text);
+}
+
+.role-dropdown__item-desc {
+    font-size: 12px;
+    color: var(--mb-color-text-muted);
+    margin-top: 2px;
+}
+
+.role-dropdown__badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--mb-color-text-muted) 12%, transparent);
+    color: var(--mb-color-text-muted);
+    white-space: nowrap;
+}

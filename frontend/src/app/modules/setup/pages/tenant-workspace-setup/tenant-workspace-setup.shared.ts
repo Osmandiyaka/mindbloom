@@ -23,12 +23,15 @@ import {
     MbTableActionsDirective,
     MbTableComponent,
     MbTextareaComponent,
+    MbTooltipDirective,
 } from '@mindbloom/ui';
 import { AddressComponent } from '../../../../shared/components/address/address.component';
 import { CountrySelectComponent } from '../../../../shared/components/country-select/country-select.component';
 import { TimezoneSelectComponent } from '../../../../shared/components/timezone-select/timezone-select.component';
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
 import { SchoolSelectorComponent } from '../../../../shared/components/school-selector/school-selector.component';
+import { DepartmentSelectorComponent } from '../../../../shared/components/department-selector/department-selector.component';
+import { RoleDropdownComponent } from 'src/app/shared/components/role-dropdown/role-dropdown.component';
 import { RolePreviewComponent } from './role-preview.component';
 
 export const TENANT_WORKSPACE_SETUP_IMPORTS = [
@@ -56,10 +59,13 @@ export const TENANT_WORKSPACE_SETUP_IMPORTS = [
     MbCheckboxComponent,
     MbDrawerComponent,
     MbDrawerFooterDirective,
+    MbTooltipDirective,
     AddressComponent,
     CountrySelectComponent,
     TimezoneSelectComponent,
     SearchInputComponent,
     SchoolSelectorComponent,
+    DepartmentSelectorComponent,
+    RoleDropdownComponent,
     RolePreviewComponent,
 ];
