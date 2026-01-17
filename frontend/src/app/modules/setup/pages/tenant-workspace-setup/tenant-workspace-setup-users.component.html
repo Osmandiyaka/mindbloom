@@ -350,91 +350,226 @@
         </div>
     </div>
 
-    <div class="users-modal" *ngIf="vm.isCreateUserModalOpen()" role="presentation">
+    <div class="users-modal users-modal--create" *ngIf="vm.isCreateUserModalOpen()" role="presentation">
         <div class="users-modal__backdrop"></div>
-        <div class="users-modal__dialog" role="dialog" aria-modal="true"
-            aria-labelledby="create-user-title" tabindex="0"
-            (keydown.escape)="vm.closeCreateUserModal()">
-            <div class="users-modal__header">
-                <div>
-                    <div id="create-user-title" class="users-modal__title">Create user</div>
-                    <div class="users-modal__subtitle">Create an account manually for this
-                        workspace.</div>
+        <div class="users-modal__dialog users-modal__dialog--create" role="dialog" aria-modal="true"
+            aria-labelledby="create-user-title" tabindex="0" cdkTrapFocus cdkTrapFocusAutoCapture
+            (keydown.escape)="vm.requestCloseCreateUserModal()">
+            <div class="users-modal__header users-modal__header--sticky">
+                <div class="users-modal__header-main">
+                    <div class="users-modal__header-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                            <path
+                                d="M16 19a4 4 0 0 0-8 0m4-7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm7 1v6m3-3h-6"
+                                fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div id="create-user-title" class="users-modal__title">Create user</div>
+                        <div class="users-modal__subtitle">Create an account manually for this workspace.</div>
+                        <div class="users-modal__learn">
+                            <button type="button" class="users-modal__learn-link" #createLearnOrigin
+                                (click)="vm.toggleCreateLearnMore()">
+                                Learn more
+                            </button>
+                            <mb-popover [open]="vm.createLearnMoreOpen()" [origin]="createLearnOrigin"
+                                [hasBackdrop]="true"
+                                [panelClass]="['mb-popover-panel', 'users-modal__learn-popover']"
+                                (closed)="vm.closeCreateLearnMore()">
+                                <div class="users-modal__learn-body">
+                                    Roles define permissions; school access controls where the user can work.
+                                </div>
+                            </mb-popover>
+                        </div>
+                    </div>
                 </div>
                 <button type="button" class="users-modal__close"
-                    (click)="vm.closeCreateUserModal()" aria-label="Close dialog">×</button>
+                    (click)="vm.requestCloseCreateUserModal()" aria-label="Close dialog">×</button>
             </div>
-            <div class="users-modal__body">
-                <mb-form-field label="Full name" [controlId]="'create-user-name'"
-                    [error]="vm.createTouched() && !vm.createName().trim() ? 'Name is required.' : ''">
-                    <mb-input id="create-user-name" [value]="vm.createName()"
-                        (valueChange)="vm.createName.set($event)"
-                        (blur)="vm.createTouched.set(true)"></mb-input>
-                </mb-form-field>
-                <mb-form-field label="Email" [controlId]="'create-user-email'"
-                    [error]="vm.createEmailError()">
-                    <mb-input id="create-user-email" [value]="vm.createEmail()"
-                        (valueChange)="vm.createEmail.set($event)"
-                        (blur)="vm.createTouched.set(true)"></mb-input>
-                </mb-form-field>
-                <mb-form-field label="Role" [controlId]="'create-user-role'"
-                    hint="Determines what this user can view and manage.">
-                    <mb-role-selector [value]="vm.createRoleIds()" [label]="''"
-                        [placeholder]="'Select role…'" [multiple]="true" [maxVisibleChips]="3"
-                        (change)="vm.handleCreateRoleChange($event)"></mb-role-selector>
-                </mb-form-field>
 
-                <div class="users-modal__section users-modal__section--spaced">
-                    <div class="users-modal__section-title">School access</div>
-                    <div class="users-radio-group">
-                        <label class="users-radio">
-                            <input type="radio" name="create-access"
-                                [checked]="vm.createSchoolAccess() === 'all'"
-                                (change)="vm.createSchoolAccess.set('all')" />
-                            <span>Access all schools</span>
-                        </label>
-                        <label class="users-radio">
-                            <input type="radio" name="create-access"
-                                [checked]="vm.createSchoolAccess() === 'selected'"
-                                (change)="vm.createSchoolAccess.set('selected')" />
-                            <span>Limit to selected schools</span>
-                        </label>
-                    </div>
-                    <div class="users-school-list" *ngIf="vm.createSchoolAccess() === 'selected'">
-                        <mb-checkbox *ngFor="let name of vm.activeSchoolNames()"
-                            [checked]="vm.createSelectedSchools().includes(name)"
-                            (checkedChange)="vm.toggleCreateSchoolSelection(name, $event)">{{ name
-                            }}</mb-checkbox>
-                    </div>
-                </div>
-
-                <div class="users-modal__section users-modal__section--spaced">
-                    <div class="users-modal__section-title">Employment details</div>
-                    <mb-form-field label="Job title" [controlId]="'create-user-job'">
-                        <mb-input id="create-user-job" [value]="vm.createJobTitle()"
-                            (valueChange)="vm.createJobTitle.set($event)"></mb-input>
-                    </mb-form-field>
-                    <mb-form-field label="Department" [controlId]="'create-user-dept'">
-                        <mb-input id="create-user-dept" [value]="vm.createDepartment()"
-                            (valueChange)="vm.createDepartment.set($event)"></mb-input>
-                    </mb-form-field>
-                    <mb-form-field label="Staff ID (optional)"
-                        [controlId]="'create-user-staff-id'">
-                        <mb-input id="create-user-staff-id" [value]="vm.createStaffId()"
-                            (valueChange)="vm.createStaffId.set($event)"></mb-input>
-                    </mb-form-field>
+            <div class="users-modal__error" *ngIf="vm.createErrorSummaryText()">
+                <div class="users-modal__error-title">{{ vm.createErrorSummaryText() }}</div>
+                <div class="users-modal__error-actions">
+                    <button type="button" class="users-modal__error-link"
+                        *ngFor="let field of vm.createInvalidFields()" (click)="vm.focusCreateField(field.id)">
+                        {{ field.label }}
+                    </button>
                 </div>
             </div>
-            <div class="users-modal__footer">
+
+            <div class="users-modal__body users-modal__body--scroll">
+                <div class="users-create__grid">
+                    <div class="users-create__section">
+                        <div class="users-create__section-title">Identity</div>
+                        <div class="users-create__section-helper">Basic account information.</div>
+                        <div class="users-create__fields">
+                            <mb-form-field label="Full name" [required]="true" [controlId]="'create-user-name'"
+                                [error]="vm.createNameError()"
+                                hint="Use the person's legal or preferred name.">
+                                <mb-input id="create-user-name" cdkFocusInitial [value]="vm.createName()"
+                                    placeholder="e.g. Ama Mensah"
+                                    (valueChange)="vm.createName.set($event)"
+                                    (blurEvent)="vm.createNameTouched.set(true)"></mb-input>
+                            </mb-form-field>
+                            <mb-form-field label="Email" [required]="true" [controlId]="'create-user-email'"
+                                [error]="vm.createEmailError()">
+                                <mb-input id="create-user-email" type="email" [value]="vm.createEmail()"
+                                    placeholder="name@school.com"
+                                    (valueChange)="vm.createEmail.set($event)"
+                                    (blurEvent)="vm.createEmailTouched.set(true)"></mb-input>
+                            </mb-form-field>
+                            <div class="users-create__email-duplicate"
+                                *ngIf="vm.createEmailDuplicate() && (vm.createEmailTouched() || vm.createSubmitAttempted())">
+                                Email already exists.
+                                <button type="button" class="users-create__action-link"
+                                    (click)="vm.searchUsersForCreateEmail()">Search users</button>
+                            </div>
+                            <mb-form-field label="Job title" [controlId]="'create-user-job'">
+                                <mb-input id="create-user-job" [value]="vm.createJobTitle()"
+                                    placeholder="e.g. Front desk officer"
+                                    (valueChange)="vm.createJobTitle.set($event)"></mb-input>
+                            </mb-form-field>
+                        </div>
+
+                        <button type="button" class="users-create__advanced-toggle"
+                            (click)="vm.toggleCreateAdvanced()">
+                            {{ vm.createAdvancedOpen() ? 'Hide advanced' : 'Show advanced' }}
+                        </button>
+
+                        <div class="users-create__advanced" *ngIf="vm.createAdvancedOpen()">
+                            <div class="users-create__divider"></div>
+                            <div class="users-create__fields">
+                                <mb-form-field label="Department" [controlId]="'create-user-dept'">
+                                    <mb-input id="create-user-dept" [value]="vm.createDepartment()"
+                                        (valueChange)="vm.createDepartment.set($event)"></mb-input>
+                                </mb-form-field>
+                                <mb-form-field label="Employee ID" [controlId]="'create-user-staff-id'">
+                                    <mb-input id="create-user-staff-id" [value]="vm.createStaffId()"
+                                        (valueChange)="vm.createStaffId.set($event)"></mb-input>
+                                </mb-form-field>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="users-create__section">
+                        <div class="users-create__section-title">Role</div>
+                        <div class="users-create__section-helper">Controls what the user can view and manage.</div>
+                        <div class="users-create__role-header">
+                            <div class="users-create__role-label">Role selection</div>
+                            <button type="button" class="users-create__role-preview" #rolePreviewOrigin
+                                (click)="vm.toggleCreateRolePreview()">
+                                Preview permissions
+                            </button>
+                            <mb-popover [open]="vm.createRolePreviewOpen()" [origin]="rolePreviewOrigin"
+                                [hasBackdrop]="true"
+                                [panelClass]="['mb-popover-panel', 'users-role-preview__panel']"
+                                (closed)="vm.closeCreateRolePreview()">
+                                <app-role-preview
+                                    [role]="vm.createRole()"
+                                    [items]="vm.createRolePreviewItems()"
+                                    [badge]="vm.createRoleBadge()">
+                                </app-role-preview>
+                            </mb-popover>
+                        </div>
+                        <mb-form-field label="Role" [required]="true" [controlId]="'create-user-role'"
+                            [error]="vm.createRoleError()">
+                            <div class="users-create__role-field" id="create-user-role" tabindex="-1">
+                                <mb-role-selector [value]="vm.createRoleIds()" [label]="''"
+                                    [placeholder]="'Select role...'" [multiple]="false"
+                                    (change)="vm.handleCreateRoleChange($event)"></mb-role-selector>
+                            </div>
+                        </mb-form-field>
+                        <div class="users-create__role-warning" *ngIf="vm.createRoleIsHighPrivilege()">
+                            High privilege role — grants administrative access.
+                        </div>
+
+                        <div class="users-create__section-title users-create__section-title--spaced">School access</div>
+                        <div class="users-create__section-helper">Choose where this user can operate.</div>
+                        <div class="users-create__segmented" id="create-user-school-access" tabindex="-1"
+                            role="tablist"
+                            [style.--active-index]="vm.createSchoolAccess() === 'all' ? 0 : 1">
+                            <button type="button" role="tab"
+                                class="users-create__segmented-button"
+                                [class.is-active]="vm.createSchoolAccess() === 'all'"
+                                [attr.aria-selected]="vm.createSchoolAccess() === 'all'"
+                                (click)="vm.setCreateSchoolAccess('all')">
+                                All schools
+                            </button>
+                            <button type="button" role="tab"
+                                class="users-create__segmented-button"
+                                [class.is-active]="vm.createSchoolAccess() === 'selected'"
+                                [attr.aria-selected]="vm.createSchoolAccess() === 'selected'"
+                                (click)="vm.setCreateSchoolAccess('selected')">
+                                Selected schools
+                            </button>
+                        </div>
+
+                        <div class="users-create__school-access" *ngIf="vm.createSchoolAccess() === 'selected'">
+                            <div class="users-create__school-controls">
+                                <mb-input class="users-create__school-search" [value]="vm.createSchoolSearch()"
+                                    placeholder="Search schools..." [ariaLabel]="'Search schools'"
+                                    (valueChange)="vm.createSchoolSearch.set($event)"></mb-input>
+                                <div class="users-create__school-actions">
+                                    <button type="button" class="users-create__action-link"
+                                        (click)="vm.selectAllCreateSchools()">Select all</button>
+                                    <button type="button" class="users-create__action-link"
+                                        (click)="vm.clearCreateSchools()">Clear</button>
+                                </div>
+                            </div>
+                            <div class="users-create__school-meta">
+                                <div class="users-create__school-count">
+                                    {{ vm.createSelectedSchools().length }} selected
+                                </div>
+                                <div class="users-create__school-note">You can change access later.</div>
+                            </div>
+                            <div class="users-create__chips" *ngIf="vm.createSelectedSchools().length">
+                                <span class="users-create__chip"
+                                    *ngFor="let name of vm.createSelectedSchoolChips()">{{ name }}</span>
+                                <span class="users-create__chip users-create__chip--muted"
+                                    *ngIf="vm.createSelectedSchoolOverflow()">
+                                    +{{ vm.createSelectedSchoolOverflow() }} more
+                                </span>
+                            </div>
+                            <div class="users-create__school-list" role="group"
+                                [attr.aria-label]="'Select schools'">
+                                <mb-checkbox *ngFor="let name of vm.filteredCreateSchools()"
+                                    [checked]="vm.createSelectedSchools().includes(name)"
+                                    (checkedChange)="vm.toggleCreateSchoolSelection(name, $event)">
+                                    {{ name }}
+                                </mb-checkbox>
+                            </div>
+                            <div class="users-inline-error" *ngIf="vm.createSchoolAccessError()">
+                                {{ vm.createSchoolAccessError() }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="users-modal__footer users-modal__footer--sticky">
+                <div class="users-modal__hint">You can set a password later.</div>
                 <div class="users-modal__actions">
-                    <mb-button variant="tertiary"
-                        (click)="vm.closeCreateUserModal()">Cancel</mb-button>
-                    <mb-button variant="primary" [disabled]="!vm.createCanSubmit()"
+                    <mb-button variant="secondary"
+                        (click)="vm.requestCloseCreateUserModal()" [disabled]="vm.createSubmitting()">Cancel</mb-button>
+                    <mb-button variant="primary" [disabled]="!vm.createCanSubmit() || vm.createSubmitting()"
                         (click)="vm.saveCreateUser()">
-                        Create user
+                        {{ vm.createSubmitting() ? 'Creating...' : 'Create user' }}
                     </mb-button>
                 </div>
             </div>
         </div>
     </div>
+
+    <mb-modal [open]="vm.createDiscardOpen()" title="Discard changes?" size="sm"
+        (closed)="vm.closeCreateDiscardModal()">
+        <div class="users-confirm">
+            <div class="users-confirm__text">
+                You have unsaved changes. Discard them?
+            </div>
+        </div>
+        <div mbModalFooter class="users-confirm__footer">
+            <mb-button variant="secondary" (click)="vm.closeCreateDiscardModal()">Keep editing</mb-button>
+            <mb-button variant="danger" (click)="vm.confirmDiscardCreateUser()">Discard</mb-button>
+        </div>
+    </mb-modal>
 </div>

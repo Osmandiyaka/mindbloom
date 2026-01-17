@@ -33,6 +33,47 @@ import {
     UserStatus,
 } from './tenant-workspace-setup.models';
 
+type RolePreviewItem = {
+    title: string;
+    description?: string;
+};
+
+type CreateUserSnapshot = {
+    name: string;
+    email: string;
+    role: UserRole;
+    schoolAccess: 'all' | 'selected';
+    selectedSchools: string[];
+    jobTitle: string;
+    department: string;
+    staffId: string;
+};
+
+const HIGH_PRIVILEGE_ROLES: UserRole[] = ['Owner', 'Administrator'];
+
+const ROLE_PREVIEW_MAP: Record<UserRole, RolePreviewItem[]> = {
+    Owner: [
+        { title: 'Full administrative access', description: 'Manage billing, settings, and security.' },
+        { title: 'User & role management', description: 'Create, edit, and revoke access.' },
+        { title: 'Data exports', description: 'Export data across the workspace.' },
+    ],
+    Administrator: [
+        { title: 'Workspace management', description: 'Manage settings, users, and configurations.' },
+        { title: 'Academic operations', description: 'Edit academic structures and classes.' },
+        { title: 'Reporting access', description: 'View and export operational reports.' },
+    ],
+    Staff: [
+        { title: 'Operational workflows', description: 'Manage day-to-day tasks and records.' },
+        { title: 'Limited settings', description: 'Access assigned modules only.' },
+        { title: 'Reporting access', description: 'View assigned reports.' },
+    ],
+    Teacher: [
+        { title: 'Classroom access', description: 'Manage assigned classes and students.' },
+        { title: 'Grading tools', description: 'Enter grades and attendance.' },
+        { title: 'Limited administration', description: 'No billing or security permissions.' },
+    ],
+};
+
 @Injectable()
 export class TenantWorkspaceSetupFacade {
     private readonly tenantSettings = inject(TenantSettingsService);
@@ -240,7 +281,20 @@ export class TenantWorkspaceSetupFacade {
     createJobTitle = signal('');
     createDepartment = signal('');
     createStaffId = signal('');
-    createTouched = signal(false);
+    createSubmitAttempted = signal(false);
+    createNameTouched = signal(false);
+    createEmailTouched = signal(false);
+    createRoleTouched = signal(false);
+    createSchoolAccessTouched = signal(false);
+    createAdvancedOpen = signal(false);
+    createSchoolSearch = signal('');
+    createRolePreviewOpen = signal(false);
+    createLearnMoreOpen = signal(false);
+    createDiscardOpen = signal(false);
+    createFormSnapshot = signal<CreateUserSnapshot | null>(null);
+    createSubmitting = signal(false);
+    lastCreateRole = signal<UserRole>('Staff');
+    lastCreateAccess = signal<'all' | 'selected'>('all');
 
     isViewUserModalOpen = signal(false);
     viewUser = signal<UserRow | null>(null);
@@ -509,6 +563,59 @@ export class TenantWorkspaceSetupFacade {
         .filter(row => row.status === 'Active')
         .map(row => row.name)
     );
+
+    readonly filteredCreateSchools = computed(() => {
+        const query = this.createSchoolSearch().trim().toLowerCase();
+        const schools = this.activeSchoolNames();
+        if (!query) return schools;
+        return schools.filter(name => name.toLowerCase().includes(query));
+    });
+
+    readonly createSelectedSchoolChips = computed(() => {
+        const selected = new Set(this.createSelectedSchools());
+        const ordered = this.activeSchoolNames().filter(name => selected.has(name));
+        return ordered.slice(0, 2);
+    });
+
+    readonly createSelectedSchoolOverflow = computed(() => {
+        const total = this.createSelectedSchools().length;
+        return Math.max(0, total - 2);
+    });
+
+    readonly createFormDirty = computed(() => {
+        const snapshot = this.createFormSnapshot();
+        if (!snapshot) return false;
+        const current = this.currentCreateFormState();
+        return Object.keys(snapshot).some((key) => {
+            const k = key as keyof CreateUserSnapshot;
+            const left = snapshot[k];
+            const right = current[k];
+            if (Array.isArray(left) && Array.isArray(right)) {
+                return left.join('|') !== right.join('|');
+            }
+            return left !== right;
+        });
+    });
+
+    readonly createInvalidFields = computed(() => {
+        if (!this.createSubmitAttempted()) return [];
+        const errors: Array<{ id: string; label: string }> = [];
+        const nameError = this.createNameError(true);
+        const emailError = this.createEmailError(true);
+        const roleError = this.createRoleError(true);
+        const accessError = this.createSchoolAccessError(true);
+        if (nameError) errors.push({ id: 'create-user-name', label: 'Full name' });
+        if (emailError) errors.push({ id: 'create-user-email', label: 'Email' });
+        if (roleError) errors.push({ id: 'create-user-role', label: 'Role' });
+        if (accessError) errors.push({ id: 'create-user-school-access', label: 'School access' });
+        return errors;
+    });
+
+    readonly createErrorSummaryText = computed(() => {
+        const count = this.createInvalidFields().length;
+        if (!count) return '';
+        return `Fix ${count} field${count === 1 ? '' : 's'} to continue.`;
+    });
 
     readonly inviteEmailList = computed(() => this.parseEmailList(this.inviteEmails()));
     readonly inviteInvalidEmails = computed(() => this.inviteEmailList().filter(email => !this.isValidEmail(email)));
@@ -2638,20 +2745,55 @@ export class TenantWorkspaceSetupFacade {
     openCreateUserModal(): void {
         this.createName.set('');
         this.createEmail.set('');
-        this.createRole.set('Staff');
-        this.createRoleIds.set([this.createRole()]);
-        this.createSchoolAccess.set('all');
+        const role = this.lastCreateRole() || 'Staff';
+        const access = this.lastCreateAccess() || 'all';
+        this.createRole.set(role);
+        this.createRoleIds.set([role]);
+        this.createSchoolAccess.set(access);
         this.createSelectedSchools.set([]);
         this.createJobTitle.set('');
         this.createDepartment.set('');
         this.createStaffId.set('');
-        this.createTouched.set(false);
+        this.createSubmitAttempted.set(false);
+        this.createNameTouched.set(false);
+        this.createEmailTouched.set(false);
+        this.createRoleTouched.set(false);
+        this.createSchoolAccessTouched.set(false);
+        this.createAdvancedOpen.set(false);
+        this.createSchoolSearch.set('');
+        this.createRolePreviewOpen.set(false);
+        this.createLearnMoreOpen.set(false);
+        this.createDiscardOpen.set(false);
+        this.createSubmitting.set(false);
         this.isCreateUserModalOpen.set(true);
+        this.setCreateFormSnapshot();
+    }
+
+    requestCloseCreateUserModal(): void {
+        if (this.createFormDirty()) {
+            this.createDiscardOpen.set(true);
+            return;
+        }
+        this.closeCreateUserModal();
     }
 
     closeCreateUserModal(): void {
         this.isCreateUserModalOpen.set(false);
-        this.createTouched.set(false);
+        this.createSubmitAttempted.set(false);
+        this.createRolePreviewOpen.set(false);
+        this.createLearnMoreOpen.set(false);
+        this.createDiscardOpen.set(false);
+        this.createFormSnapshot.set(null);
+        this.createSubmitting.set(false);
+    }
+
+    closeCreateDiscardModal(): void {
+        this.createDiscardOpen.set(false);
+    }
+
+    confirmDiscardCreateUser(): void {
+        this.createDiscardOpen.set(false);
+        this.closeCreateUserModal();
     }
 
     toggleInviteMessage(): void {
@@ -2819,6 +2961,7 @@ export class TenantWorkspaceSetupFacade {
             if (checked) return [...items, name];
             return items.filter(item => item !== name);
         });
+        this.createSchoolAccessTouched.set(true);
     }
 
     saveUserEdits(): void {
@@ -2859,13 +3002,91 @@ export class TenantWorkspaceSetupFacade {
         if (event.roles?.length) {
             this.createRole.set(this.normalizeRole(event.roles[0].name));
         }
+        this.createRoleTouched.set(true);
+        if (this.createRole()) {
+            this.lastCreateRole.set(this.createRole());
+        }
+    }
+
+    toggleCreateAdvanced(): void {
+        this.createAdvancedOpen.update(value => !value);
+    }
+
+    toggleCreateRolePreview(): void {
+        this.createRolePreviewOpen.update(value => !value);
+    }
+
+    closeCreateRolePreview(): void {
+        this.createRolePreviewOpen.set(false);
+    }
+
+    toggleCreateLearnMore(): void {
+        this.createLearnMoreOpen.update(value => !value);
+    }
+
+    closeCreateLearnMore(): void {
+        this.createLearnMoreOpen.set(false);
+    }
+
+    setCreateSchoolAccess(value: 'all' | 'selected'): void {
+        this.createSchoolAccess.set(value);
+        this.createSchoolAccessTouched.set(true);
+        this.lastCreateAccess.set(value);
+        if (value === 'selected' && this.createSelectedSchools().length === 0) {
+            const schools = this.activeSchoolNames();
+            if (schools.length === 1) {
+                this.createSelectedSchools.set([schools[0]]);
+            }
+        }
+    }
+
+    selectAllCreateSchools(): void {
+        const list = this.filteredCreateSchools();
+        if (!list.length) return;
+        this.createSelectedSchools.set([...new Set([...this.createSelectedSchools(), ...list])]);
+    }
+
+    clearCreateSchools(): void {
+        this.createSelectedSchools.set([]);
+    }
+
+    createRoleIsHighPrivilege(): boolean {
+        return HIGH_PRIVILEGE_ROLES.includes(this.createRole());
+    }
+
+    createRolePreviewItems(): RolePreviewItem[] {
+        return ROLE_PREVIEW_MAP[this.createRole()] ?? [];
+    }
+
+    createRoleBadge(): string {
+        return 'System';
+    }
+
+    createEmailDuplicate(): boolean {
+        const email = this.createEmail().trim();
+        if (!this.isValidEmail(email)) return false;
+        return this.isCreateEmailDuplicate(email);
+    }
+
+    searchUsersForCreateEmail(): void {
+        const email = this.createEmail().trim();
+        if (!email) return;
+        this.userSearch.set(email);
+        this.closeCreateUserModal();
+    }
+
+    focusCreateField(id: string): void {
+        const element = document.getElementById(id) as HTMLElement | null;
+        element?.focus();
     }
 
     saveCreateUser(): void {
-        this.createTouched.set(true);
+        if (this.createSubmitting()) return;
+        this.createSubmitAttempted.set(true);
         const name = this.createName().trim();
         const email = this.createEmail().trim();
-        if (!name || !email || !this.isValidEmail(email)) return;
+        if (!this.createCanSubmit()) return;
+        this.createSubmitting.set(true);
         const schoolAccess = this.createSchoolAccess() === 'all'
             ? 'all'
             : [...this.createSelectedSchools()];
@@ -2885,23 +3106,46 @@ export class TenantWorkspaceSetupFacade {
             }
         ]);
         this.usersStepSkipped.set(false);
+        this.lastCreateRole.set(this.createRole());
+        this.lastCreateAccess.set(this.createSchoolAccess());
+        this.createSubmitting.set(false);
         this.closeCreateUserModal();
     }
 
-    createEmailError(): string {
-        if (!this.createTouched()) return '';
+    createNameError(force = false): string {
+        if (!this.shouldShowCreateError(this.createNameTouched(), force)) return '';
+        if (!this.createName().trim()) return 'Full name is required.';
+        return '';
+    }
+
+    createEmailError(force = false): string {
+        if (!this.shouldShowCreateError(this.createEmailTouched(), force)) return '';
         const email = this.createEmail().trim();
         if (!email) return 'Email is required.';
         if (!this.isValidEmail(email)) return 'Enter a valid email address.';
+        if (this.isCreateEmailDuplicate(email)) return 'Email already exists.';
+        return '';
+    }
+
+    createRoleError(force = false): string {
+        if (!this.shouldShowCreateError(this.createRoleTouched(), force)) return '';
+        if (!this.createRole()) return 'Role is required.';
+        return '';
+    }
+
+    createSchoolAccessError(force = false): string {
+        if (!this.shouldShowCreateError(this.createSchoolAccessTouched(), force)) return '';
+        if (this.createSchoolAccess() === 'selected' && this.createSelectedSchools().length === 0) {
+            return 'Select at least one school.';
+        }
         return '';
     }
 
     readonly createCanSubmit = computed(() => {
-        const name = this.createName().trim();
-        const email = this.createEmail().trim();
-        if (!name || !email) return false;
-        if (!this.isValidEmail(email)) return false;
-        if (this.createSchoolAccess() === 'selected' && this.createSelectedSchools().length === 0) return false;
+        if (this.createNameError(true)) return false;
+        if (this.createEmailError(true)) return false;
+        if (this.createRoleError(true)) return false;
+        if (this.createSchoolAccessError(true)) return false;
         return true;
     });
 
@@ -3442,6 +3686,33 @@ export class TenantWorkspaceSetupFacade {
 
     isValidEmail(email: string): boolean {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    private shouldShowCreateError(touched: boolean, force: boolean): boolean {
+        return force || this.createSubmitAttempted() || touched;
+    }
+
+    private isCreateEmailDuplicate(email: string): boolean {
+        const normalized = email.trim().toLowerCase();
+        if (!normalized) return false;
+        return this.users().some(user => user.email.toLowerCase() === normalized);
+    }
+
+    private currentCreateFormState(): CreateUserSnapshot {
+        return {
+            name: this.createName(),
+            email: this.createEmail(),
+            role: this.createRole(),
+            schoolAccess: this.createSchoolAccess(),
+            selectedSchools: [...this.createSelectedSchools()].sort(),
+            jobTitle: this.createJobTitle(),
+            department: this.createDepartment(),
+            staffId: this.createStaffId(),
+        };
+    }
+
+    private setCreateFormSnapshot(): void {
+        this.createFormSnapshot.set(this.currentCreateFormState());
     }
 
     private parseEmailList(input: string): string[] {

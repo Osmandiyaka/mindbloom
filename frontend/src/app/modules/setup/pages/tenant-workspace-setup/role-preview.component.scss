@@ -1,0 +1,43 @@
+.role-preview {
+    display: grid;
+    gap: 12px;
+    padding: 4px;
+}
+
+.role-preview__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.role-preview__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--mb-color-text);
+}
+
+.role-preview__badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--mb-color-primary) 14%, transparent);
+    color: var(--mb-color-primary);
+}
+
+.role-preview__list {
+    display: grid;
+    gap: 10px;
+}
+
+.role-preview__item-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--mb-color-text);
+}
+
+.role-preview__item-desc {
+    font-size: 11px;
+    color: var(--mb-color-text-muted);
+    margin-top: 2px;
+}
