@@ -1,14 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HrService, Staff } from '../../../../core/services/hr.service';
-import { AuthService } from '../../../../core/services/auth.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { CardComponent } from '../../../../shared/components/card/card.component';
 
 interface StaffDoc { id: string; name: string; type: string; size: string; status: 'complete' | 'uploading'; progress?: number; }
-type TabKey = 'overview' | 'employment' | 'comp' | 'docs' | 'leave' | 'attendance';
+type TabKey = 'overview' | 'docs';
 type ToastType = 'success' | 'error' | 'info';
 interface Toast { type: ToastType; message: string; }
 
@@ -24,7 +23,6 @@ export class StaffProfileComponent implements OnInit {
   error = signal<string | null>(null);
   staff = signal<Staff | null>(null);
   activeTab = signal<TabKey>('overview');
-  canViewComp = true; // TODO: gate by permissions/role
   saving = signal(false);
   docs = signal<StaffDoc[]>([
     { id: '1', name: 'Employment Contract.pdf', type: 'application/pdf', size: '240 KB', status: 'complete' },
@@ -33,22 +31,16 @@ export class StaffProfileComponent implements OnInit {
   toast = signal<Toast | null>(null);
 
   personalForm!: FormGroup;
-  employmentForm!: FormGroup;
-  compensationForm!: FormGroup;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private hr: HrService,
-    private fb: FormBuilder,
-    private auth: AuthService
+    private fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
     this.initForms();
-    const user = this.auth.getCurrentUser();
-    const roleName = user?.role?.name || user?.role;
-    this.canViewComp = roleName === 'HR' || roleName === 'Admin';
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.error.set('No staff ID provided');
@@ -60,23 +52,14 @@ export class StaffProfileComponent implements OnInit {
 
   initForms() {
     this.personalForm = this.fb.group({
+      staffCode: ['', Validators.required],
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
-      email: ['', [Validators.email]],
-      phone: [''],
-      dateOfBirth: ['']
-    });
-    this.employmentForm = this.fb.group({
-      departmentCode: [''],
-      designationCode: [''],
-      employeeId: [''],
-      joinDate: [''],
-      contractType: ['full-time']
-    });
-    this.compensationForm = this.fb.group({
-      amount: [null, [Validators.min(0)]],
-      currency: ['USD'],
-      frequency: ['monthly']
+      preferredName: [''],
+      dob: [''],
+      gender: [''],
+      nationality: [''],
+      status: ['active']
     });
   }
 
@@ -97,23 +80,14 @@ export class StaffProfileComponent implements OnInit {
 
   patchForms(staff: Staff) {
     this.personalForm.patchValue({
-      firstName: (staff as any).firstName || '',
-      lastName: (staff as any).lastName || '',
-      email: staff.email || '',
-      phone: staff.phone || '',
-      dateOfBirth: (staff as any).dateOfBirth || ''
-    });
-    this.employmentForm.patchValue({
-      departmentCode: staff.departmentCode || '',
-      designationCode: staff.designationCode || '',
-      employeeId: staff.employeeId || '',
-      joinDate: (staff as any).joinDate || '',
-      contractType: (staff as any).contractType || 'full-time'
-    });
-    this.compensationForm.patchValue({
-      amount: (staff as any).salary?.amount || null,
-      currency: (staff as any).salary?.currency || 'USD',
-      frequency: (staff as any).salary?.frequency || 'monthly'
+      staffCode: staff.staffCode || '',
+      firstName: staff.firstName || '',
+      lastName: staff.lastName || '',
+      preferredName: staff.preferredName || '',
+      dob: staff.dob || '',
+      gender: staff.gender || '',
+      nationality: staff.nationality || '',
+      status: staff.status || 'active'
     });
   }
 
@@ -122,10 +96,8 @@ export class StaffProfileComponent implements OnInit {
   }
 
   saveForms() {
-    if (this.personalForm.invalid || this.employmentForm.invalid || (this.canViewComp && this.compensationForm.invalid)) {
+    if (this.personalForm.invalid) {
       this.personalForm.markAllAsTouched();
-      this.employmentForm.markAllAsTouched();
-      this.compensationForm.markAllAsTouched();
       return;
     }
     this.saving.set(true);
@@ -181,7 +153,10 @@ export class StaffProfileComponent implements OnInit {
     return !!ctrl && ctrl.invalid && (ctrl.dirty || ctrl.touched);
   }
 
-  maskIfNoPermission(value: any) {
-    return this.canViewComp ? value : '••••';
+  displayName(staff?: Staff | null) {
+    if (!staff) return '';
+    const first = staff.preferredName || staff.firstName || '';
+    const last = staff.lastName || '';
+    return `${first} ${last}`.trim();
   }
 }

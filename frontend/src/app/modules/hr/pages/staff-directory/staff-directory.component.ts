@@ -15,7 +15,7 @@ import { HrService, Staff } from '../../../../core/services/hr.service';
   styleUrls: ['./staff-directory.component.scss']
 })
 export class StaffDirectoryComponent implements OnInit {
-  filters = { departmentCode: '', designationCode: '', status: '', search: '' };
+  filters = { status: '', search: '' };
   loading = false;
   error: string | null = null;
   selectedIds = new Set<string>();
@@ -25,9 +25,9 @@ export class StaffDirectoryComponent implements OnInit {
   columns: TableColumn[] = [
     { key: 'select', label: '', width: '48px' },
     { key: 'name', label: 'Name', sortable: true },
-    { key: 'department', label: 'Department', sortable: true },
-    { key: 'designation', label: 'Role', sortable: true },
+    { key: 'staffCode', label: 'Staff Code', sortable: true },
     { key: 'status', label: 'Status', sortable: true },
+    { key: 'updatedAt', label: 'Updated', sortable: true },
     { key: 'actions', label: 'Actions', width: '120px' }
   ];
 
@@ -38,20 +38,18 @@ export class StaffDirectoryComponent implements OnInit {
   }
 
   get hasActiveFilters() {
-    return !!(this.filters.departmentCode || this.filters.designationCode || this.filters.status || this.filters.search);
+    return !!(this.filters.status || this.filters.search);
   }
 
   get staffList(): Staff[] {
     return this.hr.staff().filter(s => {
-      const matchesDept = !this.filters.departmentCode || s.departmentCode === this.filters.departmentCode;
-      const matchesDes = !this.filters.designationCode || s.designationCode === this.filters.designationCode;
       const matchesStatus = !this.filters.status || s.status === this.filters.status;
       const term = this.filters.search.toLowerCase();
       const matchesSearch = !term ||
-        (s.fullName || `${s.firstName || ''} ${s.lastName || ''}`).toLowerCase().includes(term) ||
-        (s.email || '').toLowerCase().includes(term) ||
-        (s.employeeId || '').toLowerCase().includes(term);
-      return matchesDept && matchesDes && matchesStatus && matchesSearch;
+        (`${s.firstName || ''} ${s.lastName || ''}`).toLowerCase().includes(term) ||
+        (s.preferredName || '').toLowerCase().includes(term) ||
+        (s.staffCode || '').toLowerCase().includes(term);
+      return matchesStatus && matchesSearch;
     });
   }
 
@@ -59,8 +57,6 @@ export class StaffDirectoryComponent implements OnInit {
     this.loading = true;
     this.error = null;
     this.hr.loadStaff({
-      departmentCode: this.filters.departmentCode,
-      designationCode: this.filters.designationCode,
       status: this.filters.status,
       search: this.filters.search
     });
@@ -73,7 +69,7 @@ export class StaffDirectoryComponent implements OnInit {
   }
 
   clearFilters() {
-    this.filters = { departmentCode: '', designationCode: '', status: '', search: '' };
+    this.filters = { status: '', search: '' };
     this.selectedIds = new Set();
     this.reload();
   }
@@ -91,8 +87,14 @@ export class StaffDirectoryComponent implements OnInit {
   }
 
   initials(staff: Staff) {
-    const name = (staff.fullName || `${staff.firstName || ''} ${staff.lastName || ''}`).trim();
+    const name = this.displayName(staff);
     return (name || '?').slice(0, 2).toUpperCase();
+  }
+
+  displayName(staff: Staff) {
+    const first = staff.preferredName || staff.firstName || '';
+    const last = staff.lastName || '';
+    return `${first} ${last}`.trim();
   }
 
   toggleSelectAll(event: Event) {

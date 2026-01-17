@@ -279,7 +279,10 @@ export class LeaveComponent implements OnInit {
 
   resolveStaff(id: string) {
     const s = this.hr.staff().find(st => st.id === id || st._id === id);
-    return s ? (s.fullName || `${s.firstName} ${s.lastName}`) : id;
+    if (!s) return id;
+    const first = s.preferredName || s.firstName || '';
+    const last = s.lastName || '';
+    return `${first} ${last}`.trim() || id;
   }
 
   approve(req: any) {

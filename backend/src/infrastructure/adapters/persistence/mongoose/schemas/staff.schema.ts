@@ -1,60 +1,32 @@
 import { Schema, Types } from 'mongoose';
 
+const STAFF_STATUS = ['draft', 'pending', 'active', 'onLeave', 'suspended', 'archived', 'terminated'] as const;
+
 export const StaffSchema = new Schema(
     {
+        tenantId: { type: Types.ObjectId, ref: 'Tenant', required: true, index: true },
+        staffCode: { type: String, required: true },
         firstName: { type: String, required: true },
         lastName: { type: String, required: true },
-        middleName: { type: String },
-        fullName: { type: String },
-        email: { type: String, unique: true },
-        phone: { type: String },
-        gender: { type: String, enum: ['male', 'female', 'other'] },
-        dateOfBirth: { type: Date },
-        address: {
-            street: String,
-            city: String,
-            state: String,
-            postalCode: String,
-            country: String,
-        },
-        emergencyContacts: [
-            {
-                name: String,
-                relationship: String,
-                phone: String,
-                email: String,
-            },
-        ],
-        departmentCode: { type: String, ref: 'Department' },
-        designationCode: { type: String, ref: 'Designation' },
-        subjects: [{ type: String }],
-        employeeId: { type: String, unique: true },
-        joinDate: { type: Date },
-        status: { type: String, enum: ['active', 'inactive', 'terminated'], default: 'active' },
-        contractType: { type: String, enum: ['full-time', 'part-time', 'contract'], default: 'full-time' },
-        salary: {
-            amount: Number,
-            currency: { type: String, default: 'USD' },
-            frequency: { type: String, enum: ['monthly', 'hourly', 'annual'], default: 'monthly' },
-        },
-        bank: {
-            accountName: String,
-            accountNumber: String,
-            bankName: String,
-            branch: String,
-            ifsc: String,
-        },
-        documents: [
-            {
-                name: String,
-                url: String,
-                type: String,
-                uploadedAt: Date,
-            },
-        ],
-        metadata: Schema.Types.Mixed,
+        preferredName: { type: String },
+        dob: { type: Date },
+        gender: { type: String },
+        nationality: { type: String },
+        photoUrl: { type: String },
+        status: { type: String, enum: STAFF_STATUS, default: 'active' },
+        archivedAt: { type: Date },
+        createdBy: { type: Types.ObjectId, ref: 'User' },
+        updatedBy: { type: Types.ObjectId, ref: 'User' },
+        primarySchoolId: { type: Types.ObjectId, ref: 'School' },
+        primaryContactId: { type: Types.ObjectId, ref: 'StaffContact' },
+        primaryEmergencyContactId: { type: Types.ObjectId, ref: 'StaffEmergencyContact' },
+        userId: { type: Types.ObjectId, ref: 'User' },
     },
-    { timestamps: true },
+    { timestamps: true, strict: true }
 );
 
+StaffSchema.index({ tenantId: 1, staffCode: 1 }, { unique: true });
+StaffSchema.index({ tenantId: 1, status: 1 });
+StaffSchema.index({ tenantId: 1, lastName: 1 });
+StaffSchema.index({ tenantId: 1, primarySchoolId: 1 });
 

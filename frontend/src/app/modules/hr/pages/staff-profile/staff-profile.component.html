@@ -2,8 +2,8 @@
   <header class="page-header">
     <div>
       <p class="eyebrow">HR · Profile</p>
-      <h1>{{ staff()?.fullName || (staff()?.firstName + ' ' + staff()?.lastName) || 'Loading...' }}</h1>
-      <p class="muted">Manage personal, employment, compensation, and supporting documents.</p>
+      <h1>{{ displayName(staff()) || 'Loading...' }}</h1>
+      <p class="muted">Manage staff profile details and supporting documents.</p>
     </div>
     <div class="header-actions">
       <app-button variant="secondary" size="sm" (click)="backToDirectory()">Back to Directory</app-button>
@@ -19,34 +19,34 @@
     <app-card class="summary-card">
       <div class="summary-top">
         <div class="avatar">
-          {{ (staff()?.fullName || staff()?.firstName || '?') | slice:0:2 | uppercase }}
+          {{ (displayName(staff()) || '?') | slice:0:2 | uppercase }}
         </div>
         <div class="summary-info">
-          <h3>{{ staff()?.fullName || (staff()?.firstName + ' ' + staff()?.lastName) }}</h3>
-          <p class="muted">{{ staff()?.designationCode || 'Role pending' }} · {{ staff()?.departmentCode || 'Department' }}</p>
+          <h3>{{ displayName(staff()) }}</h3>
+          <p class="muted">Staff Code {{ staff()?.staffCode || '—' }}</p>
           <span class="pill status">{{ staff()?.status || 'active' }}</span>
         </div>
       </div>
       <div class="summary-meta">
-        <div><p class="label">Employee ID</p><p class="value">{{ staff()?.employeeId || '-' }}</p></div>
-        <div><p class="label">Joined</p><p class="value">{{ staff()?.joinDate || '-' }}</p></div>
-        <div><p class="label">Contract</p><p class="value">{{ staff()?.contractType || '-' }}</p></div>
-        <div><p class="label">Email</p><p class="value">{{ staff()?.email || '-' }}</p></div>
+        <div><p class="label">Preferred Name</p><p class="value">{{ staff()?.preferredName || '-' }}</p></div>
+        <div><p class="label">Date of Birth</p><p class="value">{{ staff()?.dob || '-' }}</p></div>
+        <div><p class="label">Gender</p><p class="value">{{ staff()?.gender || '-' }}</p></div>
+        <div><p class="label">Nationality</p><p class="value">{{ staff()?.nationality || '-' }}</p></div>
       </div>
     </app-card>
 
     <app-card class="tabs-card">
       <nav class="tabs">
         <button type="button" [class.active]="activeTab() === 'overview'" (click)="setTab('overview')">Overview</button>
-        <button type="button" [class.active]="activeTab() === 'employment'" (click)="setTab('employment')">Employment</button>
-        <button type="button" [class.active]="activeTab() === 'comp'" (click)="setTab('comp')">Compensation</button>
         <button type="button" [class.active]="activeTab() === 'docs'" (click)="setTab('docs')">Documents</button>
-        <button type="button" [class.active]="activeTab() === 'leave'" (click)="setTab('leave')">Leave Summary</button>
-        <button type="button" [class.active]="activeTab() === 'attendance'" (click)="setTab('attendance')">Attendance</button>
       </nav>
 
       <section class="tab-panel" *ngIf="activeTab() === 'overview'">
         <form [formGroup]="personalForm" class="form-grid">
+          <label>Staff Code
+            <input formControlName="staffCode" />
+            <span class="error" *ngIf="controlInvalid(personalForm, 'staffCode')">Staff code is required.</span>
+          </label>
           <label>First Name
             <input formControlName="firstName" />
             <span class="error" *ngIf="controlInvalid(personalForm, 'firstName')">First name is required.</span>
@@ -55,61 +55,29 @@
             <input formControlName="lastName" />
             <span class="error" *ngIf="controlInvalid(personalForm, 'lastName')">Last name is required.</span>
           </label>
-          <label>Email
-            <input type="email" formControlName="email" />
-            <span class="error" *ngIf="controlInvalid(personalForm, 'email')">Enter a valid email.</span>
-          </label>
-          <label>Phone
-            <input formControlName="phone" />
+          <label>Preferred Name
+            <input formControlName="preferredName" />
           </label>
           <label>Date of Birth
-            <input type="date" formControlName="dateOfBirth" />
+            <input type="date" formControlName="dob" />
           </label>
-        </form>
-      </section>
-
-      <section class="tab-panel" *ngIf="activeTab() === 'employment'">
-        <form [formGroup]="employmentForm" class="form-grid">
-          <label>Department
-            <input formControlName="departmentCode" placeholder="Dept code" />
+          <label>Gender
+            <input formControlName="gender" />
           </label>
-          <label>Designation
-            <input formControlName="designationCode" placeholder="Role code" />
+          <label>Nationality
+            <input formControlName="nationality" />
           </label>
-          <label>Employee ID
-            <input formControlName="employeeId" />
-          </label>
-          <label>Join Date
-            <input type="date" formControlName="joinDate" />
-          </label>
-          <label>Contract Type
-            <select formControlName="contractType">
-              <option value="full-time">Full-time</option>
-              <option value="part-time">Part-time</option>
-              <option value="contract">Contract</option>
+          <label>Status
+            <select formControlName="status">
+              <option value="draft">Draft</option>
+              <option value="pending">Pending</option>
+              <option value="active">Active</option>
+              <option value="onLeave">On Leave</option>
+              <option value="suspended">Suspended</option>
+              <option value="archived">Archived</option>
+              <option value="terminated">Terminated</option>
             </select>
           </label>
-        </form>
-      </section>
-
-      <section class="tab-panel" *ngIf="activeTab() === 'comp'">
-        <div class="muted" *ngIf="!canViewComp">Compensation details are masked for your role.</div>
-        <form *ngIf="canViewComp" [formGroup]="compensationForm" class="form-grid narrow">
-          <label>Amount
-            <input type="number" min="0" step="0.01" formControlName="amount" />
-            <span class="error" *ngIf="controlInvalid(compensationForm, 'amount')">Amount must be zero or more.</span>
-          </label>
-          <label>Currency
-            <input formControlName="currency" />
-          </label>
-          <label>Frequency
-            <select formControlName="frequency">
-              <option value="monthly">Monthly</option>
-              <option value="hourly">Hourly</option>
-              <option value="annual">Annual</option>
-            </select>
-          </label>
-          <p class="muted small">Masked for non-HR roles; requires permission to view.</p>
         </form>
       </section>
 
@@ -143,36 +111,6 @@
         </div>
       </section>
 
-      <section class="tab-panel" *ngIf="activeTab() === 'leave'">
-        <div class="muted" *ngIf="loading()">Loading leave summary…</div>
-        <div class="empty" *ngIf="!loading() && !(staff()?.leaveSummary)">No leave summary available.</div>
-        <div class="summary-grid" *ngIf="!loading() && staff()?.leaveSummary">
-          <div class="summary-pill" *ngFor="let item of staff()?.leaveSummary">
-            <p class="label">{{ item.name }}</p>
-            <p class="value">{{ item.remaining }} days left</p>
-            <p class="muted small">Used {{ item.used }} of {{ item.total }}</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="tab-panel" *ngIf="activeTab() === 'attendance'">
-        <div class="muted" *ngIf="loading()">Loading attendance…</div>
-        <div class="empty" *ngIf="!loading() && !(staff()?.attendanceSummary)">No attendance summary available.</div>
-        <div class="summary-grid" *ngIf="!loading() && staff()?.attendanceSummary">
-          <div class="summary-pill">
-            <p class="label">On-time %</p>
-            <p class="value">{{ staff()?.attendanceSummary?.onTime || 0 }}%</p>
-          </div>
-          <div class="summary-pill">
-            <p class="label">Late</p>
-            <p class="value">{{ staff()?.attendanceSummary?.late || 0 }} days</p>
-          </div>
-          <div class="summary-pill">
-            <p class="label">Absent</p>
-            <p class="value">{{ staff()?.attendanceSummary?.absent || 0 }} days</p>
-          </div>
-        </div>
-      </section>
     </app-card>
   </div>
 

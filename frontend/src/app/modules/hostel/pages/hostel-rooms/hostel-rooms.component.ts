@@ -46,7 +46,7 @@ import { HrService, Staff } from '../../../../core/services/hr.service';
           <label>Manager
             <select [(ngModel)]="hostelForm.managerId" name="managerId" (change)="onManagerChange()">
               <option value="">Select</option>
-              <option *ngFor="let s of staffList" [value]="s.id">{{ s.fullName || s.firstName + ' ' + s.lastName }}</option>
+              <option *ngFor="let s of staffList" [value]="s.id">{{ (s.preferredName || s.firstName) + ' ' + (s.lastName || '') }}</option>
             </select>
           </label>
           <label>Contact<input [(ngModel)]="hostelForm.managerContact" name="contact" /></label>
@@ -205,8 +205,10 @@ export class HostelRoomsComponent implements OnInit {
   onManagerChange() {
     const mgr = this.staffList.find(s => s.id === this.hostelForm.managerId);
     if (mgr) {
-      this.hostelForm.managerName = mgr.fullName || `${mgr.firstName} ${mgr.lastName}`;
-      this.hostelForm.managerContact = mgr.phone || mgr.email || '';
+      const first = mgr.preferredName || mgr.firstName || '';
+      const last = mgr.lastName || '';
+      this.hostelForm.managerName = `${first} ${last}`.trim();
+      this.hostelForm.managerContact = '';
     }
   }
 }

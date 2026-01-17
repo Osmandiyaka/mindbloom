@@ -1,22 +1,31 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { TenantContextService } from '../tenant/tenant-context.service';
 
 export interface Department { id?: string; _id?: string; name: string; code: string; description?: string; active?: boolean; }
 export interface Designation { id?: string; _id?: string; name: string; code: string; description?: string; active?: boolean; }
 export interface Staff {
   id?: string; _id?: string;
-  firstName: string; lastName: string; fullName?: string;
-  email?: string; phone?: string; departmentCode?: string; designationCode?: string;
-  status?: 'active' | 'inactive' | 'terminated';
-  employeeId?: string;
-  joinDate?: string;
-  contractType?: string;
-  salary?: { amount?: number; currency?: string; frequency?: string };
-  address?: { street?: string; city?: string; state?: string; postalCode?: string; country?: string };
-  emergencyContacts?: { name?: string; phone?: string; relationship?: string }[];
-  leaveSummary?: { name: string; remaining: number; used: number; total: number }[];
-  attendanceSummary?: { onTime?: number; late?: number; absent?: number };
+  tenantId?: string;
+  staffCode: string;
+  firstName: string;
+  lastName: string;
+  preferredName?: string;
+  dob?: string;
+  gender?: string;
+  nationality?: string;
+  photoUrl?: string;
+  status?: 'draft' | 'pending' | 'active' | 'onLeave' | 'suspended' | 'archived' | 'terminated';
+  archivedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: string;
+  updatedBy?: string;
+  primarySchoolId?: string;
+  primaryContactId?: string;
+  primaryEmergencyContactId?: string;
+  userId?: string;
 }
 export interface LeaveType { id?: string; _id?: string; name: string; code: string; daysPerYear: number; carryForward?: boolean; active?: boolean; }
 export interface LeaveRequest {
@@ -39,11 +48,15 @@ export class HrService {
   leaveTypes = signal<LeaveType[]>([]);
   leaveRequests = signal<LeaveRequest[]>([]);
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private tenantContext: TenantContextService) {
     this.loadDepartments();
     this.loadDesignations();
     this.loadStaff();
     this.loadLeaveTypes();
+  }
+
+  private tenantId() {
+    return this.tenantContext.activeTenantId() || environment.tenantId || null;
   }
 
   /* Departments */
@@ -60,9 +73,15 @@ export class HrService {
 
   /* Staff */
   loadStaff(filters?: any) {
-    this.http.get<any[]>(`${environment.apiUrl}/hr/staff`, { params: filters || {} }).subscribe(list => this.staff.set(list.map(s => ({ ...s, id: s.id || s._id }))));
+    const tenantId = this.tenantId();
+    const params = { ...(filters || {}), ...(tenantId ? { tenantId } : {}) };
+    this.http.get<any[]>(`${environment.apiUrl}/hr/staff`, { params }).subscribe(list => this.staff.set(list.map(s => ({ ...s, id: s.id || s._id }))));
   }
-  createStaff(dto: Partial<Staff>) { return this.http.post(`${environment.apiUrl}/hr/staff`, dto).subscribe(() => this.loadStaff()); }
+  createStaff(dto: Partial<Staff>) {
+    const tenantId = this.tenantId();
+    const payload = { ...dto, ...(tenantId ? { tenantId } : {}) };
+    return this.http.post(`${environment.apiUrl}/hr/staff`, payload).subscribe(() => this.loadStaff());
+  }
 
   /* Leave types */
   loadLeaveTypes() {

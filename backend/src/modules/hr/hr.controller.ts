@@ -35,6 +35,9 @@ export class HrController {
     @Patch('staff/:id')
     updateStaff(@Param('id') id: string, @Body() dto: any) { return this.hr.updateStaff(id, dto); }
 
+    @Get('staff/schema')
+    staffSchema(@Query('tenantId') tenantId?: string) { return this.hr.getStaffSchemaConfig(tenantId); }
+
     /* Leave types */
     @Get('leave-types')
     listLeaveTypes() { return this.hr.listLeaveTypes(); }

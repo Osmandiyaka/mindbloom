@@ -1,6 +1,32 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+
+const DEFAULT_STAFF_SCHEMA_CONFIG = {
+    requiredFields: ['staffCode', 'firstName', 'lastName'],
+    enabledFields: [
+        'staffCode',
+        'firstName',
+        'lastName',
+        'preferredName',
+        'dob',
+        'gender',
+        'nationality',
+        'photoUrl',
+        'status',
+        'primarySchoolId',
+        'primaryContactId',
+        'primaryEmergencyContactId',
+        'userId',
+    ],
+    relationshipOptions: {
+        guardianRelationships: ['parent', 'guardian', 'spouse', 'sibling', 'other'],
+        emergencyRelationships: ['spouse', 'parent', 'sibling', 'friend', 'other'],
+    },
+    noteVisibilityOptions: ['internal', 'hr', 'admin'],
+    employmentTypes: ['fullTime', 'partTime', 'contract', 'volunteer', 'intern'],
+    roleInAssignmentOptions: ['teacher', 'homeroomTeacher', 'headOfDepartment', 'admin', 'support'],
+};
 
 @Injectable()
 export class HrService {
@@ -8,6 +34,7 @@ export class HrService {
         @InjectModel('Department') private deptModel: Model<any>,
         @InjectModel('Designation') private desigModel: Model<any>,
         @InjectModel('Staff') private staffModel: Model<any>,
+        @InjectModel('StaffSchemaConfig') private staffSchemaConfigModel: Model<any>,
         @InjectModel('LeaveType') private leaveTypeModel: Model<any>,
         @InjectModel('LeaveRequest') private leaveReqModel: Model<any>,
         @InjectModel('StaffAttendance') private attModel: Model<any>,
@@ -26,13 +53,47 @@ export class HrService {
     /* Staff */
     listStaff(filters: any = {}) {
         const query: any = {};
-        if (filters.departmentCode) query.departmentCode = filters.departmentCode;
-        if (filters.designationCode) query.designationCode = filters.designationCode;
+        if (!filters.tenantId) {
+            throw new BadRequestException('tenantId is required');
+        }
+        query.tenantId = filters.tenantId;
         if (filters.status) query.status = filters.status;
+        if (filters.search) {
+            const term = filters.search.trim();
+            if (term) {
+                const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+                query.$or = [
+                    { staffCode: regex },
+                    { firstName: regex },
+                    { lastName: regex },
+                    { preferredName: regex },
+                ];
+            }
+        }
         return this.staffModel.find(query).sort({ lastName: 1, firstName: 1 }).lean();
     }
-    createStaff(dto: any) { return new this.staffModel(dto).save(); }
+    createStaff(dto: any) {
+        if (!dto.tenantId) {
+            throw new BadRequestException('tenantId is required');
+        }
+        return new this.staffModel(dto).save();
+    }
     updateStaff(id: string, dto: any) { return this.staffModel.findByIdAndUpdate(id, dto, { new: true }); }
+
+    /* Staff schema config */
+    async getStaffSchemaConfig(tenantId?: string) {
+        if (!tenantId) {
+            throw new BadRequestException('tenantId is required');
+        }
+        const existing = await this.staffSchemaConfigModel.findOne({ tenantId }).lean();
+        if (existing) return existing;
+        const created = new this.staffSchemaConfigModel({
+            tenantId,
+            ...DEFAULT_STAFF_SCHEMA_CONFIG,
+        });
+        const saved = await created.save();
+        return saved.toObject();
+    }
 
     /* Leave Types */
     listLeaveTypes() { return this.leaveTypeModel.find().sort({ name: 1 }).lean(); }
