@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TenantWorkspaceSetupFacade } from './tenant-workspace-setup.facade';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from './tenant-workspace-setup.shared';
-import { TenantWorkspaceSetupSchoolsComponent } from './tenant-workspace-setup-schools.component';
+import { TenantSchoolsComponent } from './school-setup.component';
 import { TenantWorkspaceSetupOrgUnitsComponent } from './tenant-workspace-setup-org-units.component';
 import { TenantWorkspaceSetupLevelsComponent } from './tenant-workspace-setup-levels.component';
 import { TenantWorkspaceSetupClassesSectionsComponent } from './tenant-workspace-setup-classes-sections.component';
@@ -16,7 +16,7 @@ import { TenantWorkspaceSetupCompleteComponent } from './tenant-workspace-setup-
     standalone: true,
     imports: [
         ...TENANT_WORKSPACE_SETUP_IMPORTS,
-        TenantWorkspaceSetupSchoolsComponent,
+        TenantSchoolsComponent,
         TenantWorkspaceSetupOrgUnitsComponent,
         TenantWorkspaceSetupLevelsComponent,
         TenantWorkspaceSetupClassesSectionsComponent,

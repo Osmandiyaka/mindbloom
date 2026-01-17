@@ -486,16 +486,6 @@ export class TenantWorkspaceSetupFacade {
         'Review & activate'
     ];
 
-    readonly progressIndex = computed(() => {
-        if (this.step() <= 0) return -1;
-        return Math.min(this.step() - 1, this.stepLabels.length - 1);
-    });
-
-    readonly progressPercent = computed(() => {
-        if (this.progressIndex() < 0) return 0;
-        return ((this.progressIndex() + 1) / this.stepLabels.length) * 100;
-    });
-
     readonly isReviewStep = computed(() => this.step() === 7);
     readonly isDoneStep = computed(() => this.step() === 8);
     readonly showErrors = computed(() => this.attemptedContinue());
@@ -557,18 +547,6 @@ export class TenantWorkspaceSetupFacade {
         && this.classRows().length > 0
         && this.sectionRows().length > 0
     );
-
-    readonly reviewCompletedCount = computed(() => {
-        let completed = 0;
-        if (this.schoolsValid()) completed += 1;
-        if (this.canContinueUsersStep()) completed += 1;
-        completed += 1; // Organizational units step is optional.
-        if (this.levels().length > 0) completed += 1;
-        if (this.classRows().length > 0 && this.sectionRows().length > 0) completed += 1;
-        completed += 1; // Grading system step is optional.
-        completed += 1; // Review & activate.
-        return completed;
-    });
 
     readonly userTableColumns: MbTableColumn<UserRow>[] = [
         {

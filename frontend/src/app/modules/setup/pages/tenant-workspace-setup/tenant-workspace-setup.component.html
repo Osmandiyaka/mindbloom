@@ -14,11 +14,9 @@
                             <div class="setup-progress__list">
                                 <button type="button" class="setup-progress__item"
                                     *ngFor="let label of vm.stepLabels; let i = index"
-                                    [class.is-complete]="i < vm.progressIndex()"
-                                    [class.is-current]="i === vm.progressIndex()"
+                                    [class.is-current]="vm.step() === i + 1"
                                     (click)="vm.goToStep(i + 1)">
-                                    <span class="setup-progress__icon" aria-hidden="true">{{ i < vm.progressIndex()
-                                            ? '✓' : (i===vm.progressIndex() ? '●' : '○' ) }}</span>
+                                    <span class="setup-progress__icon" aria-hidden="true">{{ vm.step() === i + 1 ? '●' : '○' }}</span>
                                     <span class="setup-progress__label">{{ label }}</span>
                                 </button>
                             </div>
@@ -29,7 +27,7 @@
                     <mb-card class="setup-content-card">
                         <mb-alert *ngIf="vm.errorMessage()" variant="danger">{{ vm.errorMessage() }}</mb-alert>
 
-                        <app-tenant-workspace-setup-schools *ngIf="vm.step() === 1"></app-tenant-workspace-setup-schools>
+                        <app-tenant-schools *ngIf="vm.step() === 1"></app-tenant-schools>
                         <app-tenant-workspace-setup-users *ngIf="vm.step() === 2"></app-tenant-workspace-setup-users>
                         <app-tenant-workspace-setup-org-units *ngIf="vm.step() === 3"></app-tenant-workspace-setup-org-units>
                         <app-tenant-workspace-setup-levels *ngIf="vm.step() === 4"></app-tenant-workspace-setup-levels>

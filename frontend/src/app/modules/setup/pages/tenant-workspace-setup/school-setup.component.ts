@@ -28,13 +28,13 @@ const TIMEZONE_VALUES = TIMEZONE_OPTIONS.map(option => option.value);
 const COUNTRY_LABELS = COUNTRY_OPTIONS.map(option => option.label.toLowerCase());
 
 @Component({
-    selector: 'app-tenant-workspace-setup-schools',
+    selector: 'app-tenant-schools',
     standalone: true,
     imports: [...TENANT_WORKSPACE_SETUP_IMPORTS],
-    templateUrl: './tenant-workspace-setup-schools.component.html',
-    styleUrls: ['./tenant-workspace-setup.component.scss']
+    templateUrl: './school-setup.component.html',
+    styleUrls: ['./school-setup.component.scss']
 })
-export class TenantWorkspaceSetupSchoolsComponent implements OnInit {
+export class TenantSchoolsComponent implements OnInit {
     private readonly tenantSettings = inject(TenantSettingsService);
     private readonly authService = inject(AuthService);
     private readonly api = inject(ApiClient);
