@@ -2,9 +2,9 @@ import { Routes } from '@angular/router';
 
 export const SETUP_ROUTES: Routes = [
     {
-        path: 'first-login',
+        path: 'workspace',
         loadComponent: () =>
-            import('./pages/first-login-setup/tenant-workspace-setup.component').then(m => m.TenantWorkspaceSetupComponent)
+            import('./pages/tenant-workspace-setup/tenant-workspace-setup.component').then(m => m.TenantWorkspaceSetupComponent)
     },
     {
         path: '',

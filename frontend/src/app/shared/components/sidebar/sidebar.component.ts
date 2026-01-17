@@ -549,7 +549,7 @@ export class SidebarComponent implements OnInit {
     {
       title: 'System',
       items: [
-        { label: 'Workspace Setup', path: '/setup/first-login', icon: 'dashboard', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
+        { label: 'Workspace Setup', path: '/setup/workspace', icon: 'dashboard', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
         { label: 'Access control', path: '/roles', icon: 'settings', permission: PERMISSIONS.roles.read, moduleKey: 'setup' },
         { label: 'Plan & Entitlements', path: '/setup/plan-entitlements', icon: 'expenses', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
 

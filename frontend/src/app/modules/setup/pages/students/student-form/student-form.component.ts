@@ -532,7 +532,7 @@ export class StudentFormComponent implements OnInit {
     }
 
     openCreateSection(): void {
-        this.router.navigate(['/setup/first-login']);
+        this.router.navigate(['/setup/workspace'], { queryParams: { step: 5 } });
     }
 
     private reconcileClassSelection(): void {
