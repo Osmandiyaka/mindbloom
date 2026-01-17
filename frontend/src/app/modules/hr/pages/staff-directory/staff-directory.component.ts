@@ -15,6 +15,7 @@ import {
   MbTableActionsDirective,
   MbTableColumn,
   MbTableComponent,
+  MbTableEmptyState,
   MbSelectOption,
 } from '@mindbloom/ui';
 import { HrService, Staff } from '../../../../core/services/hr.service';
@@ -59,6 +60,7 @@ export class StaffDirectoryComponent implements OnInit {
   hiddenColumns: string[] = [];
   searchValue = '';
   openRowMenuId: string | null = null;
+  readonly onRetry = () => this.reload();
 
   statusOptions: MbSelectOption[] = [
     { label: 'All', value: '' },
@@ -173,12 +175,35 @@ export class StaffDirectoryComponent implements OnInit {
     return `Showing ${this.staffList.length} of ${this.totalStaff} staff`;
   }
 
-  get isEmptyDirectory() {
-    return !this.loading && this.totalStaff === 0 && !this.hasActiveFilters;
-  }
-
   get isNoResults() {
     return !this.loading && this.hasActiveFilters && this.staffList.length === 0;
+  }
+
+  get tableEmptyState(): MbTableEmptyState | undefined {
+    if (this.error) {
+      return undefined;
+    }
+    if (this.isNoResults) {
+      return {
+        variant: 'filtered',
+        title: 'No results found',
+        description: 'Try adjusting your search or clearing filters.',
+        actions: [
+          { id: 'clearFilters', label: 'Clear filters', variant: 'primary' },
+          { id: 'resetSearch', label: 'Reset search', variant: 'secondary' },
+        ],
+      };
+    }
+    return {
+      variant: 'default',
+      title: 'No staff members yet',
+      description: 'Add your first staff member to start managing HR profiles and assignments.',
+      actions: [
+        { id: 'addStaff', label: 'Add staff', variant: 'primary' },
+        { id: 'importCsv', label: 'Import CSV', variant: 'secondary' },
+        { id: 'learnMore', label: 'Learn more', variant: 'tertiary' },
+      ],
+    };
   }
 
   get summaryItems() {
@@ -306,6 +331,28 @@ export class StaffDirectoryComponent implements OnInit {
   onExportAction(action: string) {
     this.exportMenuOpen = false;
     this.notify(`${action} export queued (placeholder).`);
+  }
+
+  onEmptyAction(actionId: string) {
+    switch (actionId) {
+      case 'addStaff':
+        this.openAdd();
+        break;
+      case 'importCsv':
+        this.notify('Import flow coming soon.');
+        break;
+      case 'learnMore':
+        this.notify('Learn more coming soon.');
+        break;
+      case 'clearFilters':
+        this.clearFilters();
+        break;
+      case 'resetSearch':
+        this.resetSearch();
+        break;
+      default:
+        break;
+    }
   }
 
   openAdd() {

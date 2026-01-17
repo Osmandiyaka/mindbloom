@@ -100,95 +100,58 @@
       <mb-inline class="staff-table-meta" justify="end" *ngIf="helperText">
         {{ helperText }}
       </mb-inline>
-      <div *ngIf="loading">Loading staff…</div>
-
-      <ng-container *ngIf="!loading">
-        <div class="staff-table-shell" [class.is-compact]="density === 'compact'">
-          <mb-table
-            [columns]="visibleColumns"
-            [rows]="pagedStaff"
-            [rowKey]="rowKey"
-            [rowClass]="rowClass"
-            [selectable]="true"
-            [sortLocal]="true"
-            [emptyMessage]="''"
-            (rowClick)="viewProfile($event)"
-            (selectionChange)="onSelectionChange($event)"
-            [style.--mb-space-3]="density === 'compact' ? '8px' : null"
-            [style.--mb-space-4]="density === 'compact' ? '12px' : null"
-          >
-            <ng-template mbTableActions let-row>
-              <mb-inline gap="var(--mb-space-2)" align="center">
-                <mb-button size="sm" variant="tertiary" class="staff-action-kebab" ariaLabel="Row actions"
-                  cdkOverlayOrigin #rowMenuOrigin="cdkOverlayOrigin" (click)="toggleRowMenu($event, row)">
-                  ⋯
-                </mb-button>
-                <mb-popover
-                  [open]="openRowMenuId === (row.id || row._id)"
-                  [origin]="rowMenuOrigin"
-                  [hasBackdrop]="true"
-                  (closed)="closeRowMenu()"
-                  [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal']"
-                >
-                  <mb-stack gap="var(--mb-space-2)">
-                    <mb-button size="sm" variant="tertiary" (click)="viewProfile(row); closeRowMenu()">View profile</mb-button>
-                    <mb-button size="sm" variant="tertiary" (click)="notify('Edit staff coming soon.'); closeRowMenu()">Edit</mb-button>
-                    <mb-button size="sm" variant="tertiary"
-                      (click)="notify(statusToggleLabel(row) + ' staff coming soon.'); closeRowMenu()">
-                      {{ statusToggleLabel(row) }}
-                    </mb-button>
-                    <mb-button size="sm" variant="danger" (click)="notify('Archive staff coming soon.'); closeRowMenu()">Archive</mb-button>
-                    <mb-button size="sm" variant="danger" (click)="notify('Delete staff coming soon.'); closeRowMenu()">Delete</mb-button>
-                  </mb-stack>
-                </mb-popover>
-              </mb-inline>
-            </ng-template>
-          </mb-table>
-          <div class="staff-table-empty" *ngIf="isEmptyDirectory">
-            <mb-stack gap="var(--mb-space-2)">
-              <div class="staff-empty-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M16 11a4 4 0 1 0-8 0" />
-                  <path d="M12 15c-3.3 0-6 2.2-6 5h12c0-2.8-2.7-5-6-5Z" />
-                  <path d="M18 8a3 3 0 1 0-3-3" />
-                  <path d="M22 20c0-2.1-2-3.9-4.5-4.4" />
-                </svg>
-              </div>
-              <div>No staff members yet</div>
-              <div>Add your first staff member to start managing HR profiles and assignments.</div>
-              <mb-inline gap="var(--mb-space-2)" align="center" [wrap]="true">
-                <mb-button size="sm" variant="primary" (click)="openAdd()">Add staff</mb-button>
-                <mb-button size="sm" variant="tertiary" (click)="notify('Import flow coming soon.')">Import CSV</mb-button>
-                <mb-button size="sm" variant="tertiary" (click)="notify('Learn more coming soon.')">Learn more</mb-button>
-              </mb-inline>
-            </mb-stack>
-          </div>
-          <div class="staff-table-empty" *ngIf="isNoResults">
-            <mb-stack gap="var(--mb-space-2)">
-              <div class="staff-empty-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="7" />
-                  <line x1="21" y1="21" x2="16.6" y2="16.6" />
-                </svg>
-              </div>
-              <div>No results found</div>
-              <div>Try a different search or clear filters.</div>
-              <mb-inline gap="var(--mb-space-2)" align="center" [wrap]="true">
-                <mb-button size="sm" variant="secondary" (click)="clearFilters()">Clear filters</mb-button>
-                <mb-button size="sm" variant="tertiary" (click)="resetSearch()">Reset search</mb-button>
-              </mb-inline>
-            </mb-stack>
-          </div>
-        </div>
-
-        <mb-inline *ngIf="staffList.length" gap="var(--mb-space-2)" align="center" justify="space-between" [wrap]="true">
-          <div>Page {{ pageIndex }} of {{ pageCount }}</div>
+      <mb-table
+        [columns]="visibleColumns"
+        [rows]="pagedStaff"
+        [rowKey]="rowKey"
+        [rowClass]="rowClass"
+        [selectable]="true"
+        [sortLocal]="true"
+        [density]="density"
+        [isLoading]="loading"
+        [isFiltered]="hasActiveFilters"
+        [isError]="!!error"
+        [onRetry]="onRetry"
+        [emptyState]="tableEmptyState"
+        (emptyAction)="onEmptyAction($event)"
+        (rowClick)="viewProfile($event)"
+        (selectionChange)="onSelectionChange($event)"
+      >
+        <ng-template mbTableActions let-row>
           <mb-inline gap="var(--mb-space-2)" align="center">
-            <mb-button size="sm" variant="tertiary" [disabled]="pageIndex === 1" (click)="prevPage()">Prev</mb-button>
-            <mb-button size="sm" variant="tertiary" [disabled]="pageIndex === pageCount" (click)="nextPage()">Next</mb-button>
+            <mb-button size="sm" variant="tertiary" class="staff-action-kebab" ariaLabel="Row actions"
+              cdkOverlayOrigin #rowMenuOrigin="cdkOverlayOrigin" (click)="toggleRowMenu($event, row)">
+              ⋯
+            </mb-button>
+            <mb-popover
+              [open]="openRowMenuId === (row.id || row._id)"
+              [origin]="rowMenuOrigin"
+              [hasBackdrop]="true"
+              (closed)="closeRowMenu()"
+              [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal']"
+            >
+              <mb-stack gap="var(--mb-space-2)">
+                <mb-button size="sm" variant="tertiary" (click)="viewProfile(row); closeRowMenu()">View profile</mb-button>
+                <mb-button size="sm" variant="tertiary" (click)="notify('Edit staff coming soon.'); closeRowMenu()">Edit</mb-button>
+                <mb-button size="sm" variant="tertiary"
+                  (click)="notify(statusToggleLabel(row) + ' staff coming soon.'); closeRowMenu()">
+                  {{ statusToggleLabel(row) }}
+                </mb-button>
+                <mb-button size="sm" variant="danger" (click)="notify('Archive staff coming soon.'); closeRowMenu()">Archive</mb-button>
+                <mb-button size="sm" variant="danger" (click)="notify('Delete staff coming soon.'); closeRowMenu()">Delete</mb-button>
+              </mb-stack>
+            </mb-popover>
           </mb-inline>
+        </ng-template>
+      </mb-table>
+
+      <mb-inline *ngIf="staffList.length" gap="var(--mb-space-2)" align="center" justify="space-between" [wrap]="true">
+        <div>Page {{ pageIndex }} of {{ pageCount }}</div>
+        <mb-inline gap="var(--mb-space-2)" align="center">
+          <mb-button size="sm" variant="tertiary" [disabled]="pageIndex === 1" (click)="prevPage()">Prev</mb-button>
+          <mb-button size="sm" variant="tertiary" [disabled]="pageIndex === pageCount" (click)="nextPage()">Next</mb-button>
         </mb-inline>
-      </ng-container>
+      </mb-inline>
     </mb-stack>
   </mb-card>
 
