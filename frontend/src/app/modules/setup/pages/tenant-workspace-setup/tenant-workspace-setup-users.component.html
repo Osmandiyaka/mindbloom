@@ -506,39 +506,12 @@
                         </div>
 
                         <div class="users-create__school-access" *ngIf="vm.createSchoolAccess() === 'selected'">
-                            <div class="users-create__school-controls">
-                                <mb-input class="users-create__school-search" [value]="vm.createSchoolSearch()"
-                                    placeholder="Search schools..." [ariaLabel]="'Search schools'"
-                                    (valueChange)="vm.createSchoolSearch.set($event)"></mb-input>
-                                <div class="users-create__school-actions">
-                                    <button type="button" class="users-create__action-link"
-                                        (click)="vm.selectAllCreateSchools()">Select all</button>
-                                    <button type="button" class="users-create__action-link"
-                                        (click)="vm.clearCreateSchools()">Clear</button>
-                                </div>
-                            </div>
-                            <div class="users-create__school-meta">
-                                <div class="users-create__school-count">
-                                    {{ vm.createSelectedSchools().length }} selected
-                                </div>
-                                <div class="users-create__school-note">You can change access later.</div>
-                            </div>
-                            <div class="users-create__chips" *ngIf="vm.createSelectedSchools().length">
-                                <span class="users-create__chip"
-                                    *ngFor="let name of vm.createSelectedSchoolChips()">{{ name }}</span>
-                                <span class="users-create__chip users-create__chip--muted"
-                                    *ngIf="vm.createSelectedSchoolOverflow()">
-                                    +{{ vm.createSelectedSchoolOverflow() }} more
-                                </span>
-                            </div>
-                            <div class="users-create__school-list" role="group"
-                                [attr.aria-label]="'Select schools'">
-                                <mb-checkbox *ngFor="let name of vm.filteredCreateSchools()"
-                                    [checked]="vm.createSelectedSchools().includes(name)"
-                                    (checkedChange)="vm.toggleCreateSchoolSelection(name, $event)">
-                                    {{ name }}
-                                </mb-checkbox>
-                            </div>
+                            <app-school-selector
+                                [schools]="vm.activeSchoolNames()"
+                                [selected]="vm.createSelectedSchools()"
+                                (selectedChange)="vm.setCreateSelectedSchools($event)"
+                                (interaction)="vm.markCreateSchoolAccessTouched()">
+                            </app-school-selector>
                             <div class="users-inline-error" *ngIf="vm.createSchoolAccessError()">
                                 {{ vm.createSchoolAccessError() }}
                             </div>

@@ -287,7 +287,6 @@ export class TenantWorkspaceSetupFacade {
     createRoleTouched = signal(false);
     createSchoolAccessTouched = signal(false);
     createAdvancedOpen = signal(false);
-    createSchoolSearch = signal('');
     createRolePreviewOpen = signal(false);
     createLearnMoreOpen = signal(false);
     createDiscardOpen = signal(false);
@@ -563,24 +562,6 @@ export class TenantWorkspaceSetupFacade {
         .filter(row => row.status === 'Active')
         .map(row => row.name)
     );
-
-    readonly filteredCreateSchools = computed(() => {
-        const query = this.createSchoolSearch().trim().toLowerCase();
-        const schools = this.activeSchoolNames();
-        if (!query) return schools;
-        return schools.filter(name => name.toLowerCase().includes(query));
-    });
-
-    readonly createSelectedSchoolChips = computed(() => {
-        const selected = new Set(this.createSelectedSchools());
-        const ordered = this.activeSchoolNames().filter(name => selected.has(name));
-        return ordered.slice(0, 2);
-    });
-
-    readonly createSelectedSchoolOverflow = computed(() => {
-        const total = this.createSelectedSchools().length;
-        return Math.max(0, total - 2);
-    });
 
     readonly createFormDirty = computed(() => {
         const snapshot = this.createFormSnapshot();
@@ -2760,7 +2741,6 @@ export class TenantWorkspaceSetupFacade {
         this.createRoleTouched.set(false);
         this.createSchoolAccessTouched.set(false);
         this.createAdvancedOpen.set(false);
-        this.createSchoolSearch.set('');
         this.createRolePreviewOpen.set(false);
         this.createLearnMoreOpen.set(false);
         this.createDiscardOpen.set(false);
@@ -2956,14 +2936,6 @@ export class TenantWorkspaceSetupFacade {
         });
     }
 
-    toggleCreateSchoolSelection(name: string, checked: boolean): void {
-        this.createSelectedSchools.update(items => {
-            if (checked) return [...items, name];
-            return items.filter(item => item !== name);
-        });
-        this.createSchoolAccessTouched.set(true);
-    }
-
     saveUserEdits(): void {
         this.editTouched.set(true);
         const index = this.editUserIndex();
@@ -3040,14 +3012,13 @@ export class TenantWorkspaceSetupFacade {
         }
     }
 
-    selectAllCreateSchools(): void {
-        const list = this.filteredCreateSchools();
-        if (!list.length) return;
-        this.createSelectedSchools.set([...new Set([...this.createSelectedSchools(), ...list])]);
+    setCreateSelectedSchools(next: string[]): void {
+        this.createSelectedSchools.set([...new Set(next)]);
+        this.createSchoolAccessTouched.set(true);
     }
 
-    clearCreateSchools(): void {
-        this.createSelectedSchools.set([]);
+    markCreateSchoolAccessTouched(): void {
+        this.createSchoolAccessTouched.set(true);
     }
 
     createRoleIsHighPrivilege(): boolean {
