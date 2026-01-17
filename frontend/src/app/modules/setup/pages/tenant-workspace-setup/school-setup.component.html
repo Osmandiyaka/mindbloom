@@ -11,8 +11,14 @@
                     <mb-button variant="primary" (click)="openAddSchool()">+ Add
                         school</mb-button>
                 </div>
+                <div class="setup-error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
                 <mb-table class="schools-table" *ngIf="schoolRows().length; else emptySchools"
                     [columns]="schoolTableColumns" [rows]="schoolRows()">
+                    <ng-template mbTableActions let-row>
+                        <div class="schools-table__actions">
+                            <mb-button size="sm" variant="tertiary" (click)="copySchoolCode(row)">Copy code</mb-button>
+                        </div>
+                    </ng-template>
                 </mb-table>
 
                 <ng-template #emptySchools>

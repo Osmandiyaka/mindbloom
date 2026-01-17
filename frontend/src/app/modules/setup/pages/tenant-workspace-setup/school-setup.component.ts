@@ -4,6 +4,7 @@ import { MbTableColumn } from '@mindbloom/ui';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from './tenant-workspace-setup.shared';
 import { TenantSettingsService } from '../../../../core/services/tenant-settings.service';
 import { ApiClient } from '../../../../core/http/api-client.service';
+import { ToastService } from '../../../../core/ui/toast/toast.service';
 import { AddressValue } from '../../../../shared/components/address/address.component';
 import { COUNTRY_OPTIONS } from '../../../../shared/components/country-select/country-select.component';
 import { TIMEZONE_OPTIONS } from '../../../../shared/components/timezone-select/timezone-select.component';
@@ -39,6 +40,7 @@ type SchoolCreatePayload = {
 export class TenantSchoolsComponent implements OnInit {
     private readonly tenantSettings = inject(TenantSettingsService);
     private readonly api = inject(ApiClient);
+    private readonly toast = inject(ToastService);
 
     isLoading = signal(true);
     isSaving = signal(false);
@@ -128,6 +130,23 @@ export class TenantSchoolsComponent implements OnInit {
         this.isSchoolModalOpen.set(false);
         this.schoolFormTouched.set(false);
         this.schoolFormCodeTouched.set(false);
+    }
+
+    copySchoolCode(row: SchoolRow): void {
+        const code = row.code?.trim();
+        if (!code) {
+            this.toast.warning('No school code available.');
+            return;
+        }
+        if (!navigator?.clipboard) {
+            this.toast.error('Clipboard is unavailable in this browser.');
+            return;
+        }
+        navigator.clipboard.writeText(code).then(() => {
+            this.toast.info('School code copied.', 1500);
+        }).catch(() => {
+            this.toast.error('Unable to copy school code.');
+        });
     }
 
     async saveSchool(): Promise<void> {
