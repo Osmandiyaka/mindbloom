@@ -12,7 +12,7 @@ import { SchoolService } from '../../../../core/school/school.service';
 import type { FirstLoginSetupState } from '../../../../core/types/first-login-setup-state';
 import { ToastService } from '../../../../core/ui/toast/toast.service';
 import { ClassSectionService } from '../../../../core/services/class-section.service';
-import { UserSerivce } from './user-serivce.service';
+import { UserSerivce } from './users/user-serivce.service';
 import {
     ClassLevelType,
     ClassRow,

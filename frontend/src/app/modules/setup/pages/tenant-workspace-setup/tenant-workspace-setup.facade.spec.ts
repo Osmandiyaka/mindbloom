@@ -7,7 +7,7 @@ import { SchoolService } from '../../../../core/school/school.service';
 import { ToastService } from '../../../../core/ui/toast/toast.service';
 import { ClassSectionService } from '../../../../core/services/class-section.service';
 import { ApiClient } from '../../../../core/http/api-client.service';
-import { UserSerivce } from './user-serivce.service';
+import { UserSerivce } from './users/user-serivce.service';
 
 describe('TenantWorkspaceSetupFacade (create user)', () => {
     let facade: TenantWorkspaceSetupFacade;

@@ -1,16 +1,16 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TenantWorkspaceSetupFacade } from './tenant-workspace-setup.facade';
-import { UserSerivce } from './user-serivce.service';
+import { UserSerivce } from './users/user-serivce.service';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from './tenant-workspace-setup.shared';
-import { TenantSchoolsComponent } from './school-setup.component';
-import { TenantWorkspaceSetupOrgUnitsComponent } from './tenant-workspace-setup-org-units.component';
-import { TenantWorkspaceSetupLevelsComponent } from './tenant-workspace-setup-levels.component';
-import { TenantWorkspaceSetupClassesSectionsComponent } from './tenant-workspace-setup-classes-sections.component';
-import { TenantWorkspaceSetupGradingComponent } from './tenant-workspace-setup-grading.component';
-import { TenantUsersComponent } from './users-setup.component';
-import { TenantWorkspaceSetupReviewComponent } from './tenant-workspace-setup-review.component';
-import { TenantWorkspaceSetupCompleteComponent } from './tenant-workspace-setup-complete.component';
+import { TenantSchoolsComponent } from './school/school-setup.component';
+import { TenantWorkspaceSetupOrgUnitsComponent } from './org-units/tenant-workspace-setup-org-units.component';
+import { TenantWorkspaceSetupLevelsComponent } from './levels/tenant-workspace-setup-levels.component';
+import { TenantWorkspaceSetupClassesSectionsComponent } from './classes-sections/tenant-workspace-setup-classes-sections.component';
+import { TenantWorkspaceSetupGradingComponent } from './grading/tenant-workspace-setup-grading.component';
+import { TenantUsersComponent } from './users/users-setup.component';
+import { TenantWorkspaceSetupReviewComponent } from './review/tenant-workspace-setup-review.component';
+import { TenantWorkspaceSetupCompleteComponent } from './complete/tenant-workspace-setup-complete.component';
 
 @Component({
     selector: 'app-tenant-workspace-setup',

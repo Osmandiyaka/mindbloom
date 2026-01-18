@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { MbSelectOption, MbTableColumn } from '@mindbloom/ui';
-import { ApiClient } from '../../../../core/http/api-client.service';
-import { UserRole, UserRow, UserStatus } from './tenant-workspace-setup.models';
+import { ApiClient } from '../../../../../core/http/api-client.service';
+import { UserRole, UserRow, UserStatus } from '../tenant-workspace-setup.models';
 
 type RolePreviewItem = {
     title: string;

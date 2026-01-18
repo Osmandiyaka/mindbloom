@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { TenantSchoolsComponent } from './school-setup.component';
-import { ApiClient } from '../../../../core/http/api-client.service';
+import { ApiClient } from '../../../../../core/http/api-client.service';
 
 const SCHOOLS = [
     {

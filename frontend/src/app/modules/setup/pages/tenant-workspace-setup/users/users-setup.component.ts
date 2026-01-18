@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { TENANT_WORKSPACE_SETUP_IMPORTS } from './tenant-workspace-setup.shared';
-import { TenantWorkspaceSetupFacade } from './tenant-workspace-setup.facade';
+import { TENANT_WORKSPACE_SETUP_IMPORTS } from '../tenant-workspace-setup.shared';
+import { TenantWorkspaceSetupFacade } from '../tenant-workspace-setup.facade';
 import { UserSerivce } from './user-serivce.service';
 
 @Component({

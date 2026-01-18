@@ -1,9 +1,9 @@
 import { Component, HostListener, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { MbSelectOption, MbTableColumn, MbTableComponent } from '@mindbloom/ui';
-import { TENANT_WORKSPACE_SETUP_IMPORTS } from './tenant-workspace-setup.shared';
-import { ToastService } from '../../../../core/ui/toast/toast.service';
-import { ApiClient } from '../../../../core/http/api-client.service';
-import type { School } from '../../../../core/school/school.models';
+import { TENANT_WORKSPACE_SETUP_IMPORTS } from '../tenant-workspace-setup.shared';
+import { ToastService } from '../../../../../core/ui/toast/toast.service';
+import { ApiClient } from '../../../../../core/http/api-client.service';
+import type { School } from '../../../../../core/school/school.models';
 
 const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZES = [10, 25, 50];
