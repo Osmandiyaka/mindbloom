@@ -43,6 +43,12 @@ export class UserSerivce {
         );
     }
 
+    getUser(userId: string): Observable<ApiUser> {
+        return this.api.get<ApiResponse<ApiUser>>(`users/${userId}`).pipe(
+            map(response => response.data),
+        );
+    }
+
     createUser(payload: CreateUserPayload): Observable<ApiUser> {
         return this.api.post<ApiResponse<ApiUser>>('users', payload).pipe(
             map(response => response.data),

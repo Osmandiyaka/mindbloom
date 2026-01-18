@@ -88,7 +88,7 @@ export class InviteUsersUseCase {
             });
         }
 
-        return results.map(toUserDto);
+        return results.map(user => toUserDto(user));
     }
 
     private generateRandomPassword(length = 16): string {

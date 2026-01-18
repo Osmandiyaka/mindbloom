@@ -28,6 +28,15 @@ export type ApiUser = {
     email: string;
     name: string;
     roleIds?: string[];
+    roles?: Array<{
+        id: string;
+        name: string;
+        description?: string;
+        isSystemRole?: boolean;
+        isGlobal?: boolean;
+        scopeType?: string;
+        status?: string;
+    }>;
     status?: UserStatus;
     schoolAccess?: SchoolAccess;
     profilePicture?: string | null;
@@ -49,7 +58,7 @@ export const mapApiUserToUserRow = (user: ApiUser): ExistingUserRow => ({
     name: user.name || '',
     email: user.email,
     roleId: user.roleIds?.[0] ?? null,
-    roleName: null,
+    roleName: user.roles?.[0]?.name ?? null,
     roleIds: user.roleIds ?? [],
     status: normalizeStatus(user.status),
     schoolAccess: user.schoolAccess ?? { scope: 'all' },

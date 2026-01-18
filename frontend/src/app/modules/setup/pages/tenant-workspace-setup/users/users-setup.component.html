@@ -5,29 +5,119 @@
                 <h2>Users</h2>
                 <p>Add users who will access the workspace. You can invite now and assign roles
                     later.</p>
-
             </div>
-        </div>
-        <input #csvInput type="file" class="users-csv-input" accept=".csv"
-            (change)="vm.handleCsvImport($event)" />
-
-        <div class="users-utility" *ngIf="vm.store.users().length">
-            <mb-form-field *ngIf="vm.store.users().length >= 5" label="Search"
-                [controlId]="'user-search'">
-                <mb-input id="user-search" [value]="vm.store.userSearch()"
-                    [placeholder]="'Search by name or email'"
-                    (valueChange)="vm.store.setSearch($event)"></mb-input>
-            </mb-form-field>
-            <div class="users-utility__actions">
+            <div class="users-header__actions">
+                <mb-button variant="secondary" size="sm">Export</mb-button>
                 <mb-split-button label="Add users" variant="primary" size="md"
                     [items]="vm.addUsersMenuItems()" (primaryClick)="vm.openInviteModal()"
                     (itemSelect)="vm.handleAddUsersAction($event, csvInput)"></mb-split-button>
             </div>
         </div>
+        <input #csvInput type="file" class="users-csv-input" accept=".csv"
+            (change)="vm.handleCsvImport($event)" />
 
-        <div class="users-table-wrap" *ngIf="vm.store.users().length; else emptyUsers">
-            <mb-table class="users-table" [columns]="vm.userTableColumns" [rows]="vm.store.filteredUsers()"
-                (cellClick)="vm.handleUserCellClick($event)">
+        <div class="users-toolbar" *ngIf="!vm.selectedCount()">
+            <div class="users-toolbar__left">
+                <mb-form-field label="Search" [controlId]="'user-search'">
+                    <mb-input id="user-search" [value]="vm.store.userSearch()"
+                        [placeholder]="'Search by name, email, or role…'"
+                        (valueChange)="vm.store.setSearch($event)"></mb-input>
+                </mb-form-field>
+                <div class="users-toolbar__filters">
+                    <div class="users-filter">
+                        <span class="users-filter__label">Status</span>
+                        <mb-select [value]="vm.statusFilter()" (valueChange)="vm.setStatusFilter($event)">
+                            <option value="all">All</option>
+                            <option value="active">Active</option>
+                            <option value="invited">Invited</option>
+                            <option value="suspended">Suspended</option>
+                        </mb-select>
+                    </div>
+                    <div class="users-filter">
+                        <span class="users-filter__label">Role</span>
+                        <button type="button" class="users-filter__trigger" #roleFilterOrigin
+                            (click)="vm.toggleRoleFilter()">
+                            {{ vm.roleFilterIds().length ? vm.roleFilterIds().length + ' selected' : 'All roles' }}
+                        </button>
+                        <mb-popover [open]="vm.roleFilterOpen()" [origin]="roleFilterOrigin"
+                            [hasBackdrop]="true"
+                            [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'users-filter__panel']"
+                            (closed)="vm.closeRoleFilter()">
+                            <div class="users-filter__panel-body">
+                                <mb-role-selector [label]="''" [multiple]="true"
+                                    [value]="vm.roleFilterIds()" (change)="vm.updateRoleFilter($event)">
+                                </mb-role-selector>
+                            </div>
+                        </mb-popover>
+                    </div>
+                    <div class="users-filter">
+                        <span class="users-filter__label">School access</span>
+                        <mb-select [value]="vm.schoolAccessFilter()" (valueChange)="vm.setSchoolAccessFilter($event)">
+                            <option value="any">All</option>
+                            <option value="all">All schools</option>
+                            <option value="selected">Selected schools</option>
+                        </mb-select>
+                    </div>
+                </div>
+            </div>
+            <div class="users-toolbar__right">
+                <div class="users-density">
+                    <button type="button" class="users-density__button"
+                        [class.is-active]="vm.density() === 'comfortable'"
+                        (click)="vm.changeDensity('comfortable')">Comfortable</button>
+                    <button type="button" class="users-density__button"
+                        [class.is-active]="vm.density() === 'compact'"
+                        (click)="vm.changeDensity('compact')">Compact</button>
+                </div>
+                <button type="button" class="users-columns__toggle" #columnsOrigin
+                    (click)="vm.toggleColumnsMenu()">☰ Columns</button>
+                <mb-popover [open]="vm.columnsMenuOpen()" [origin]="columnsOrigin" [hasBackdrop]="true"
+                    [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'users-columns__panel']"
+                    (closed)="vm.closeColumnsMenu()">
+                    <div class="users-columns__panel-body">
+                        <label class="users-columns__item" *ngFor="let column of vm.userTableColumns">
+                            <input type="checkbox"
+                                [checked]="vm.visibleColumnKeys().includes(column.key.toString())"
+                                (change)="vm.toggleColumn(column.key.toString())" />
+                            {{ column.label }}
+                        </label>
+                    </div>
+                </mb-popover>
+                <mb-select [value]="vm.rowsPerPage().toString()" (valueChange)="vm.changeRowsPerPage($event)">
+                    <option value="10">10 rows</option>
+                    <option value="20">20 rows</option>
+                    <option value="50">50 rows</option>
+                </mb-select>
+                <mb-button size="sm" variant="tertiary" *ngIf="vm.isFiltered()" (click)="vm.clearFilters()">
+                    Clear filters
+                </mb-button>
+            </div>
+        </div>
+
+        <div class="users-bulk" *ngIf="vm.selectedCount()">
+            <div class="users-bulk__left">{{ vm.selectedCount() }} selected</div>
+            <div class="users-bulk__actions">
+                <mb-button size="sm" variant="tertiary" (click)="vm.openBulkRole()">Assign role</mb-button>
+                <mb-button size="sm" variant="tertiary" (click)="vm.openBulkAccess()">Change school access</mb-button>
+                <mb-button size="sm" variant="tertiary" (click)="vm.openBulkConfirm('suspend')">Suspend</mb-button>
+                <mb-button size="sm" variant="danger" (click)="vm.openBulkConfirm('remove')">Remove</mb-button>
+            </div>
+            <mb-button size="sm" variant="secondary" (click)="vm.clearSelection()">Clear selection</mb-button>
+        </div>
+
+        <div class="users-table-wrap">
+            <mb-table class="users-table"
+                [columns]="vm.visibleColumns()"
+                [rows]="vm.pagedRows()"
+                [rowKey]="vm.rowKey"
+                [selectable]="true"
+                [density]="vm.density()"
+                [sortLocal]="true"
+                [emptyState]="vm.tableEmptyState()"
+                [isFiltered]="vm.isFiltered()"
+                (rowClick)="vm.handleRowClick($event)"
+                (selectionChange)="vm.handleSelectionChange($event)"
+                (emptyAction)="vm.handleEmptyAction($event, csvInput)">
                 <ng-template mbTableActions let-row>
                     <div class="users-table__actions">
                         <button type="button" class="users-menu__toggle" #userMenuOrigin
@@ -40,23 +130,44 @@
                             (closed)="vm.closeUserMenu()">
                             <div class="users-menu__panel-content" role="menu">
                                 <button type="button" class="users-menu__item"
-                                    (click)="row.kind === 'existing' && vm.openEditUser(row); vm.closeUserMenu()">
+                                    *ngIf="row.source.kind === 'existing'"
+                                    (click)="vm.openEditUser(row.source); vm.closeUserMenu()">
                                     Edit details
                                 </button>
                                 <button type="button" class="users-menu__item"
-                                    *ngIf="row.status === 'invited'"
-                                    (click)="vm.resendInvite(row); vm.closeUserMenu()">
+                                    *ngIf="row.source.kind === 'existing' && row.source.status === 'invited'"
+                                    (click)="vm.resendInvite(row.source); vm.closeUserMenu()">
                                     Resend invite
                                 </button>
                                 <button type="button" class="users-menu__item"
-                                    *ngIf="row.status !== 'invited'"
-                                    (click)="vm.toggleUserStatus(row); vm.closeUserMenu()">
-                                    {{ row.status === 'suspended' ? 'Activate user' : 'Suspend
-                                    user' }}
+                                    *ngIf="row.source.kind === 'existing' && row.source.status === 'active'"
+                                    (click)="vm.openEditUser(row.source); vm.closeUserMenu()">
+                                    Manage access
+                                </button>
+                                <button type="button" class="users-menu__item"
+                                    *ngIf="row.source.kind === 'existing' && row.source.status === 'active'"
+                                    (click)="vm.sendPasswordReset(row.source); vm.closeUserMenu()">
+                                    Send password reset
+                                </button>
+                                <button type="button" class="users-menu__item"
+                                    *ngIf="row.source.kind === 'existing' && row.source.status === 'active'"
+                                    (click)="vm.toggleUserStatus(row.source, 'suspended'); vm.closeUserMenu()">
+                                    Suspend user
+                                </button>
+                                <button type="button" class="users-menu__item"
+                                    *ngIf="row.source.kind === 'existing' && row.source.status === 'suspended'"
+                                    (click)="vm.toggleUserStatus(row.source, 'active'); vm.closeUserMenu()">
+                                    Re-activate user
+                                </button>
+                                <button type="button" class="users-menu__item users-menu__item--danger"
+                                    *ngIf="row.source.kind === 'existing' && row.source.status === 'invited'"
+                                    (click)="vm.removeUser(row.source); vm.closeUserMenu()">
+                                    Cancel invite
                                 </button>
                                 <button type="button"
                                     class="users-menu__item users-menu__item--danger"
-                                    (click)="vm.removeUser(row); vm.closeUserMenu()">
+                                    *ngIf="row.source.status !== 'invited' || row.source.kind === 'pendingInvite'"
+                                    (click)="vm.removeUser(row.source); vm.closeUserMenu()">
                                     Remove
                                 </button>
                             </div>
@@ -64,29 +175,18 @@
                     </div>
                 </ng-template>
             </mb-table>
-
         </div>
-        <ng-template #emptyUsers>
-            <div class="users-empty">
-                <div class="users-empty__icon" aria-hidden="true">
-                    <svg viewBox="0 0 48 48" fill="none">
-                        <circle cx="24" cy="16" r="8" stroke="currentColor" stroke-width="2">
-                        </circle>
-                        <path d="M10 40c0-7.2 6.3-13 14-13s14 5.8 14 13" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round"></path>
-                    </svg>
-                </div>
-                <div class="users-empty__title">No users yet</div>
-                <div class="users-empty__text">
-                    Add users to give your team access to the workspace.
-                </div>
-                <div class="users-empty__actions">
-                    <mb-split-button label="Add users" variant="primary" size="md"
-                        [items]="vm.addUsersMenuItems()" (primaryClick)="vm.openInviteModal()"
-                        (itemSelect)="vm.handleAddUsersAction($event, csvInput)"></mb-split-button>
-                </div>
+
+        <div class="users-table-footer" *ngIf="vm.directoryRows().length">
+            <div class="users-table-footer__summary">{{ vm.tableSummary() }}</div>
+            <div class="users-table-footer__paging">
+                <mb-button size="sm" variant="tertiary" [disabled]="vm.pageIndex() === 1"
+                    (click)="vm.prevPage()">Prev</mb-button>
+                <span>Page {{ vm.pageIndex() }} of {{ vm.pageCount() }}</span>
+                <mb-button size="sm" variant="tertiary" [disabled]="vm.pageIndex() === vm.pageCount()"
+                    (click)="vm.nextPage()">Next</mb-button>
             </div>
-        </ng-template>
+        </div>
     </div>
 
     <div class="setup-footer">
@@ -146,6 +246,76 @@
                 [disabled]="vm.store.deleteUserState().status === 'loading'">
                 {{ vm.store.deleteUserState().status === 'loading' ? 'Removing...' : 'Remove user' }}
             </mb-button>
+        </div>
+    </mb-modal>
+
+    <mb-modal
+        [open]="vm.bulkRoleOpen()"
+        title="Assign role"
+        size="md"
+        (closed)="vm.closeBulkRole()">
+        <div class="users-bulk-modal">
+            <div class="users-bulk-modal__title">Apply roles to selected users.</div>
+            <mb-role-selector [label]="''" [multiple]="true" [value]="vm.bulkRoleIds()"
+                placeholder="Select roles..." (change)="vm.bulkRoleIds.set($event.ids)">
+            </mb-role-selector>
+        </div>
+        <div mbModalFooter class="users-confirm__footer">
+            <mb-button variant="secondary" (click)="vm.closeBulkRole()">Cancel</mb-button>
+            <mb-button variant="primary" (click)="vm.confirmBulkRole()">Apply roles</mb-button>
+        </div>
+    </mb-modal>
+
+    <mb-modal
+        [open]="vm.bulkAccessOpen()"
+        title="Change school access"
+        size="md"
+        (closed)="vm.closeBulkAccess()">
+        <div class="users-bulk-modal">
+            <div class="users-bulk-modal__title">Update school access for selected users.</div>
+            <div class="users-bulk-access__toggle">
+                <button type="button" [class.is-active]="vm.bulkSchoolScope() === 'all'"
+                    (click)="vm.bulkSchoolScope.set('all')">All schools</button>
+                <button type="button" [class.is-active]="vm.bulkSchoolScope() === 'selected'"
+                    (click)="vm.bulkSchoolScope.set('selected')">Selected schools</button>
+            </div>
+            <mb-school-selector *ngIf="vm.bulkSchoolScope() === 'selected'" [label]="''"
+                [value]="vm.bulkSchoolIds()" (valueChange)="vm.bulkSchoolIds.set($event)">
+            </mb-school-selector>
+        </div>
+        <div mbModalFooter class="users-confirm__footer">
+            <mb-button variant="secondary" (click)="vm.closeBulkAccess()">Cancel</mb-button>
+            <mb-button variant="primary" (click)="vm.confirmBulkAccess()">Apply access</mb-button>
+        </div>
+    </mb-modal>
+
+    <mb-modal
+        [open]="vm.bulkConfirmOpen() === 'suspend'"
+        title="Suspend selected users?"
+        size="sm"
+        (closed)="vm.closeBulkConfirm()">
+        <div class="users-confirm">
+            <div class="users-confirm__title">Selected users will lose access immediately.</div>
+            <div class="users-confirm__text">You can reactivate them at any time.</div>
+        </div>
+        <div mbModalFooter class="users-confirm__footer">
+            <mb-button variant="secondary" (click)="vm.closeBulkConfirm()">Cancel</mb-button>
+            <mb-button variant="danger" (click)="vm.confirmBulkSuspend()">Suspend users</mb-button>
+        </div>
+    </mb-modal>
+
+    <mb-modal
+        [open]="vm.bulkConfirmOpen() === 'remove'"
+        title="Remove selected users?"
+        size="sm"
+        (closed)="vm.closeBulkConfirm()">
+        <div class="users-confirm">
+            <div class="users-confirm__title">This action cannot be undone.</div>
+            <div class="users-confirm__text">Selected users will lose access immediately.</div>
+        </div>
+        <div mbModalFooter class="users-confirm__footer">
+            <mb-button variant="secondary" (click)="vm.closeBulkConfirm()">Cancel</mb-button>
+            <mb-button variant="danger" (click)="vm.confirmBulkRemove()">Remove users</mb-button>
         </div>
     </mb-modal>
 </div>
