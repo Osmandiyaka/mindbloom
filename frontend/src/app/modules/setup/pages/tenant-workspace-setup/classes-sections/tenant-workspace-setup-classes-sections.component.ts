@@ -1,7 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from '../tenant-workspace-setup.shared';
 import { TenantWorkspaceSetupFacade } from '../tenant-workspace-setup.facade';
-import { UserSerivce } from '../users/user-serivce.service';
 
 @Component({
     selector: 'app-tenant-workspace-setup-classes-sections',
@@ -12,5 +11,14 @@ import { UserSerivce } from '../users/user-serivce.service';
 })
 export class TenantWorkspaceSetupClassesSectionsComponent {
     readonly vm = inject(TenantWorkspaceSetupFacade);
-    readonly usersVm = inject(UserSerivce);
+
+    readonly staffSelectorOptions = computed(() => this.vm.users()
+        .filter(user => ['Teacher', 'Staff'].includes(user.role))
+        .map(user => ({
+            id: user.id,
+            name: user.name || user.email,
+            email: user.email,
+            role: user.role,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)));
 }

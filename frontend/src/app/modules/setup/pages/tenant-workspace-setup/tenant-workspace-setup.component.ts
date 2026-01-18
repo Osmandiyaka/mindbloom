@@ -1,7 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TenantWorkspaceSetupFacade } from './tenant-workspace-setup.facade';
-import { UserSerivce } from './users/user-serivce.service';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from './tenant-workspace-setup.shared';
 import { TenantSchoolsComponent } from './school/school-setup.component';
 import { TenantWorkspaceSetupOrgUnitsComponent } from './org-units/tenant-workspace-setup-org-units.component';
@@ -28,16 +27,14 @@ import { TenantWorkspaceSetupCompleteComponent } from './complete/tenant-workspa
     ],
     templateUrl: './tenant-workspace-setup.component.html',
     styleUrls: ['./tenant-workspace-setup.component.scss'],
-    providers: [TenantWorkspaceSetupFacade, UserSerivce],
+    providers: [TenantWorkspaceSetupFacade],
 })
 export class TenantWorkspaceSetupComponent implements OnInit {
     readonly vm = inject(TenantWorkspaceSetupFacade);
-    private readonly users = inject(UserSerivce);
     private readonly route = inject(ActivatedRoute);
 
     ngOnInit(): void {
         this.vm.init();
-        this.users.init();
         this.route.queryParamMap.subscribe(params => {
             const stepParam = Number(params.get('step'));
             if (!Number.isFinite(stepParam) || stepParam <= 0) {

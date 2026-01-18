@@ -457,7 +457,7 @@
             </mb-form-field>
             <mb-form-field label="Homeroom teacher" [controlId]="'section-teacher'">
                 <mb-staff-selector [value]="vm.sectionFormTeacherId()"
-                    [options]="usersVm.staffSelectorOptions()" [disabled]="vm.sectionFormMode() === 'view'"
+                    [options]="staffSelectorOptions()" [disabled]="vm.sectionFormMode() === 'view'"
                     placeholder="Unassigned" (valueChange)="vm.sectionFormTeacherId.set($event)">
                 </mb-staff-selector>
             </mb-form-field>

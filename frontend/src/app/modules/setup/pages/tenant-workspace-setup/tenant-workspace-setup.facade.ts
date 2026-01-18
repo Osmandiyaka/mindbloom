@@ -12,7 +12,6 @@ import { SchoolService } from '../../../../core/school/school.service';
 import type { FirstLoginSetupState } from '../../../../core/types/first-login-setup-state';
 import { ToastService } from '../../../../core/ui/toast/toast.service';
 import { ClassSectionService } from '../../../../core/services/class-section.service';
-import { UserSerivce } from './users/user-serivce.service';
 import {
     ClassLevelType,
     ClassRow,
@@ -41,10 +40,8 @@ export class TenantWorkspaceSetupFacade {
     private readonly injector = inject(EnvironmentInjector);
     private readonly toast = inject(ToastService);
     private readonly classSectionService = inject(ClassSectionService);
-    private readonly userSerivce = inject(UserSerivce);
 
     private autosaveInitialized = false;
-    private userSyncInitialized = false;
 
     step = signal<number>(0);
     isLoading = signal(true);
@@ -201,6 +198,9 @@ export class TenantWorkspaceSetupFacade {
     gradingBandFormGpa = signal('');
     gradingBandFormError = signal('');
 
+    users = signal<UserRow[]>([]);
+    usersStepSkipped = signal(false);
+
     private orgUnitCounter = 0;
     private classCounter = 0;
     private sectionCounter = 0;
@@ -226,7 +226,7 @@ export class TenantWorkspaceSetupFacade {
         if (!activeId) return [];
         const memberIds = new Set(this.orgUnitMemberIds()[activeId] || []);
         const search = this.orgUnitMemberSearch().trim().toLowerCase();
-        return this.userSerivce.users().filter(user => {
+        return this.users().filter(user => {
             if (!memberIds.has(user.id)) return false;
             if (!search) return true;
             return (
@@ -435,7 +435,7 @@ export class TenantWorkspaceSetupFacade {
         return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
     });
 
-    readonly canContinueUsersStep = computed(() => this.userSerivce.canContinueUsersStep());
+    readonly canContinueUsersStep = computed(() => this.users().length > 0 || this.usersStepSkipped());
 
     readonly reviewReady = computed(() =>
         this.schoolsValid()
@@ -485,7 +485,6 @@ export class TenantWorkspaceSetupFacade {
     init(): void {
         this.loadInitialState();
         this.initAutosave();
-        this.initUserSync();
     }
 
     startSetup(): void {
@@ -1220,7 +1219,7 @@ export class TenantWorkspaceSetupFacade {
 
     teacherLabel(id: string | null | undefined): string {
         if (!id) return 'Unassigned';
-        const user = this.userSerivce.users().find(item => item.id === id);
+        const user = this.users().find(item => item.id === id);
         return user?.name || user?.email || 'Unassigned';
     }
 
@@ -2550,25 +2549,11 @@ export class TenantWorkspaceSetupFacade {
                 this.sectionRows();
                 this.gradingModel();
                 this.gradingScales();
-                this.userSerivce.users();
+                this.users();
 
                 if (!this.isLoading()) {
                     this.persistState('in_progress');
                 }
-            });
-        });
-    }
-
-    private initUserSync(): void {
-        if (this.userSyncInitialized) return;
-        this.userSyncInitialized = true;
-
-        runInInjectionContext(this.injector, () => {
-            effect(() => {
-                const activeSchools = this.schoolRows()
-                    .filter(row => row.status === 'Active')
-                    .map(row => row.name);
-                this.userSerivce.setActiveSchoolNames(activeSchools);
             });
         });
     }
@@ -2621,9 +2606,9 @@ export class TenantWorkspaceSetupFacade {
             this.gradingScales.set([defaultScale]);
         }
         if (data.users?.length) {
-            this.userSerivce.setUsers(data.users);
+            this.users.set(data.users);
         }
-        this.userSerivce.setUsersStepSkipped(!!data.usersStepSkipped);
+        this.usersStepSkipped.set(!!data.usersStepSkipped);
         this.syncClassCounter();
         this.syncSectionCounter();
         if (!this.selectedClassId() && this.classRows().length) {
@@ -2655,8 +2640,8 @@ export class TenantWorkspaceSetupFacade {
                 sections: this.sectionRows(),
                 gradingModel: this.gradingModel(),
                 gradingScales: this.gradingScales(),
-                users: this.userSerivce.users(),
-                usersStepSkipped: this.userSerivce.usersStepSkipped(),
+                users: this.users(),
+                usersStepSkipped: this.usersStepSkipped(),
             }
         };
 

@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from '../tenant-workspace-setup.shared';
 import { TenantWorkspaceSetupFacade } from '../tenant-workspace-setup.facade';
-import { UserSerivce } from '../users/user-serivce.service';
 
 @Component({
     selector: 'app-tenant-workspace-setup-complete',
@@ -12,5 +11,4 @@ import { UserSerivce } from '../users/user-serivce.service';
 })
 export class TenantWorkspaceSetupCompleteComponent {
     readonly vm = inject(TenantWorkspaceSetupFacade);
-    readonly usersVm = inject(UserSerivce);
 }

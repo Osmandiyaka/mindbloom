@@ -69,14 +69,14 @@
                     <button type="button" class="review-link"
                         (click)="vm.goToStep(2)">Edit</button>
                 </div>
-                <div class="review-value">{{ usersVm.userCount() }} users</div>
+                <div class="review-value">{{ vm.users().length }} users</div>
                 <div class="review-details">
-                    <span>{{ usersVm.usersStepSkipped() ? 'Invites skipped' : 'Invites sent' }}</span>
-                    <span>{{ usersVm.userCount() ? 'Access assigned' : 'No users added' }}</span>
+                    <span>{{ vm.usersStepSkipped() ? 'Invites skipped' : 'Invites sent' }}</span>
+                    <span>{{ vm.users().length ? 'Access assigned' : 'No users added' }}</span>
                 </div>
-                <span class="review-status" [class.is-complete]="usersVm.canContinueUsersStep()"
-                    [class.is-warning]="!usersVm.canContinueUsersStep()">
-                    {{ usersVm.canContinueUsersStep() ? 'Complete' : 'Needs attention' }}
+                <span class="review-status" [class.is-complete]="vm.canContinueUsersStep()"
+                    [class.is-warning]="!vm.canContinueUsersStep()">
+                    {{ vm.canContinueUsersStep() ? 'Complete' : 'Needs attention' }}
                 </span>
             </div>
         </div>

@@ -116,7 +116,7 @@
                                     placeholder="Search members..."></mb-input>
                             </div>
                             <mb-button class="ou-action-btn" variant="primary"
-                                [disabled]="!usersVm.users().length" (click)="vm.openAssignMembers()">Add
+                                [disabled]="!vm.users().length" (click)="vm.openAssignMembers()">Add
                                 members</mb-button>
                         </div>
                         <div class="ou-toolbar__hint">
@@ -126,9 +126,9 @@
                         <div class="ou-assign" *ngIf="vm.assignMembersOpen()">
                             <div class="ou-assign__title">Assign members</div>
                             <div class="ou-assign__list"
-                                *ngIf="usersVm.users().length; else ouAssignEmpty">
+                                *ngIf="vm.users().length; else ouAssignEmpty">
                                 <label class="ou-assign__row"
-                                    *ngFor="let user of usersVm.users(); trackBy: usersVm.trackUserRow">
+                                    *ngFor="let user of vm.users(); trackBy: trackUserRow">
                                     <input type="checkbox"
                                         [checked]="vm.assignMemberIds().includes(user.id)"
                                         (change)="vm.toggleAssignMember(user.id, $event)" />
@@ -160,7 +160,7 @@
                                     <div class="ou-members-table__actions">Actions</div>
                                 </div>
                                 <div class="ou-members-table__row"
-                                    *ngFor="let member of vm.selectedOrgUnitMembers(); trackBy: usersVm.trackUserRow">
+                                    *ngFor="let member of vm.selectedOrgUnitMembers(); trackBy: trackUserRow">
                                     <div class="ou-members-table__name">
                                         <div class="ou-members-table__name-text">
                                             {{ member.name || '—' }}
