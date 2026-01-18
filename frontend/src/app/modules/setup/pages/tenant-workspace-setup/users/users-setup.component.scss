@@ -83,15 +83,75 @@
 
 .users-header {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 16px;
+    flex-direction: column;
+    gap: 24px;
 }
 
 .users-header__actions {
     display: inline-flex;
     align-items: center;
     gap: 10px;
+}
+
+.users-header__row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.users-header__row--sticky {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--mb-color-surface);
+    padding: 16px 0;
+    border-bottom: 1px solid var(--mb-color-border-subtle);
+}
+
+.users-header__row--utility {
+    color: var(--mb-color-text-muted);
+}
+
+.users-header__left {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1 1 320px;
+}
+
+.users-header__right {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.users-header__search {
+    max-width: 520px;
+    width: 100%;
+}
+
+.users-header__filters {
+    display: inline-flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.users-header__role-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 180px;
+}
+
+.users-header__filter-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--mb-color-text-subtle);
 }
 
 .users-utility {
