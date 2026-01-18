@@ -164,26 +164,7 @@
                             <div class="users-create__label-row">
                                 <div class="users-create__label">School access*</div>
                             </div>
-                            <div class="users-create__segmented users-create__segmented--compact"
-                                id="create-user-school-access" tabindex="-1" role="tablist"
-                                [style.--active-index]="form().schoolAccessScope === 'all' ? 0 : 1">
-                                <button type="button" role="tab" class="users-create__segmented-button"
-                                    [class.is-active]="form().schoolAccessScope === 'all'"
-                                    [attr.aria-selected]="form().schoolAccessScope === 'all'"
-                                    (click)="setSchoolAccess('all')">
-                                    All schools
-                                </button>
-                                <button type="button" role="tab" class="users-create__segmented-button"
-                                    [class.is-active]="form().schoolAccessScope === 'selected'"
-                                    [attr.aria-selected]="form().schoolAccessScope === 'selected'"
-                                    (click)="setSchoolAccess('selected')">
-                                    Selected schools
-                                </button>
-                            </div>
-                            <div class="users-create__school-summary" *ngIf="form().schoolAccessScope === 'all'">
-                                Applies to all schools in this workspace.
-                            </div>
-                            <div class="users-create__school-access" *ngIf="form().schoolAccessScope === 'selected'">
+                            <div class="users-create__school-access">
                                 <mb-school-selector [label]="''" [value]="form().selectedSchoolIds"
                                     (valueChange)="updateField('selectedSchoolIds', $event)">
                                 </mb-school-selector>

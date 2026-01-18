@@ -15,7 +15,7 @@ const initialFormState: CreateUserFormState = {
     password: '',
     roleIds: [],
     roleNames: [],
-    schoolAccessScope: 'all',
+    schoolAccessScope: 'selected',
     selectedSchoolIds: [],
     profilePicture: null,
     status: 'active',
@@ -149,10 +149,6 @@ export class CreateUserModalComponent implements OnChanges {
         if (value === 'active' || value === 'suspended' || value === 'invited') {
             this.updateField('status', value as UserStatus);
         }
-    }
-
-    setSchoolAccess(scope: 'all' | 'selected'): void {
-        this.updateField('schoolAccessScope', scope);
     }
 
     handleRoleSelection(selection: { ids: string[]; roles?: Array<{ id: string; name: string }> }): void {
