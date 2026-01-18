@@ -17,6 +17,7 @@ import {
     MbModalFooterDirective,
     MbPopoverComponent,
     MbRoleSelectorComponent,
+    MbSchoolSelectorComponent,
     MbSelectComponent,
     MbSplitButtonComponent,
     MbStaffSelectorComponent,
@@ -29,9 +30,7 @@ import { AddressComponent } from '../../../../shared/components/address/address.
 import { CountrySelectComponent } from '../../../../shared/components/country-select/country-select.component';
 import { TimezoneSelectComponent } from '../../../../shared/components/timezone-select/timezone-select.component';
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
-import { SchoolSelectorComponent } from '../../../../shared/components/school-selector/school-selector.component';
 import { DepartmentSelectorComponent } from '../../../../shared/components/department-selector/department-selector.component';
-import { RoleDropdownComponent } from 'src/app/shared/components/role-dropdown/role-dropdown.component';
 import { RolePreviewComponent } from './role-preview.component';
 
 export const TENANT_WORKSPACE_SETUP_IMPORTS = [
@@ -49,6 +48,7 @@ export const TENANT_WORKSPACE_SETUP_IMPORTS = [
     MbModalFooterDirective,
     MbPopoverComponent,
     MbRoleSelectorComponent,
+    MbSchoolSelectorComponent,
     MbSelectComponent,
     MbSplitButtonComponent,
     MbStaffSelectorComponent,
@@ -64,8 +64,6 @@ export const TENANT_WORKSPACE_SETUP_IMPORTS = [
     CountrySelectComponent,
     TimezoneSelectComponent,
     SearchInputComponent,
-    SchoolSelectorComponent,
     DepartmentSelectorComponent,
-    RoleDropdownComponent,
     RolePreviewComponent,
 ];

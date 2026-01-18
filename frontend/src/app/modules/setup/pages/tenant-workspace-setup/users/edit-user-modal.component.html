@@ -16,10 +16,12 @@
                     (valueChange)="updateField('name', $event)"></mb-input>
             </mb-form-field>
             <mb-form-field label="Role" [controlId]="'edit-user-role'">
-                <app-role-dropdown
-                    [selectedIds]="selectedRoleIds()"
-                    (selectionChange)="handleRoleSelection($event)">
-                </app-role-dropdown>
+                <mb-role-selector
+                    [label]="''"
+                    [multiple]="false"
+                    [value]="selectedRoleIds()"
+                    (change)="handleRoleSelection($event)">
+                </mb-role-selector>
             </mb-form-field>
 
             <div class="users-modal__section">
@@ -37,11 +39,12 @@
                     <span>Selected schools</span>
                 </label>
                 <div class="users-school-list" *ngIf="form().schoolAccessScope === 'selected'">
-                    <app-school-selector
-                        [schools]="activeSchools"
-                        [selected]="form().selectedSchoolIds"
-                        (selectedChange)="updateField('selectedSchoolIds', $event)">
-                    </app-school-selector>
+                    <mb-school-selector
+                        [label]="''"
+                        [options]="activeSchools"
+                        [value]="form().selectedSchoolIds"
+                        (valueChange)="updateField('selectedSchoolIds', $event)">
+                    </mb-school-selector>
                 </div>
             </div>
 

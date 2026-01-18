@@ -64,11 +64,12 @@
                 <div class="users-school-list"
                     [class.is-open]="form().schoolAccessScope === 'selected'">
                     <div class="users-school-list__content">
-                        <app-school-selector
-                            [schools]="activeSchools"
-                            [selected]="form().selectedSchoolIds"
-                            (selectedChange)="updateField('selectedSchoolIds', $event)">
-                        </app-school-selector>
+                        <mb-school-selector
+                            [label]="''"
+                            [options]="activeSchools"
+                            [value]="form().selectedSchoolIds"
+                            (valueChange)="updateField('selectedSchoolIds', $event)">
+                        </mb-school-selector>
                     </div>
                 </div>
                 <div class="users-inline-error" *ngIf="errorFor('invite-school-access')">

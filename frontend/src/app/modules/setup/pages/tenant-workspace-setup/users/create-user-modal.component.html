@@ -208,11 +208,12 @@
                                 Applies to all schools in this workspace.
                             </div>
                             <div class="users-create__school-access" *ngIf="form().schoolAccessScope === 'selected'">
-                                <app-school-selector
-                                    [schools]="activeSchools"
-                                    [selected]="form().selectedSchoolIds"
-                                    (selectedChange)="updateField('selectedSchoolIds', $event)">
-                                </app-school-selector>
+                                <mb-school-selector
+                                    [label]="''"
+                                    [options]="activeSchools"
+                                    [value]="form().selectedSchoolIds"
+                                    (valueChange)="updateField('selectedSchoolIds', $event)">
+                                </mb-school-selector>
                                 <div class="users-inline-error" *ngIf="errorFor('create-user-school-access')">
                                     {{ errorFor('create-user-school-access') }}
                                 </div>

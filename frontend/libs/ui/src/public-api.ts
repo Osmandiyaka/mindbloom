@@ -25,6 +25,7 @@ export * from './lib/popover/mb-popover.component';
 export * from './lib/popover/mb-popover.directive';
 export * from './lib/split-button/mb-split-button.component';
 export * from './lib/role-selector/mb-role-selector.component';
+export * from './lib/school-selector/mb-school-selector.component';
 export * from './lib/staff-selector/mb-staff-selector.component';
 export * from './lib/class-selector/mb-class-selector.component';
 export * from './lib/table/mb-table.component';

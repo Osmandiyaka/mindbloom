@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, signal } from '@angular/core';
-import { MbButtonComponent, MbFormFieldComponent, MbInputComponent, MbSelectComponent } from '@mindbloom/ui';
-import { RoleDropdownComponent, RoleSelection } from '../../../../../shared/components/role-dropdown/role-dropdown.component';
-import { SchoolSelectorComponent, SchoolOption } from '../../../../../shared/components/school-selector/school-selector.component';
+import { MbButtonComponent, MbFormFieldComponent, MbInputComponent, MbRoleSelectorComponent, MbSchoolSelectorComponent, MbSelectComponent, type MbSchoolSelectorOption } from '@mindbloom/ui';
 import { EditUserFormState, RequestState } from './users.types';
 
 const initialFormState: EditUserFormState = {
@@ -25,15 +23,15 @@ const initialFormState: EditUserFormState = {
         MbFormFieldComponent,
         MbInputComponent,
         MbSelectComponent,
-        RoleDropdownComponent,
-        SchoolSelectorComponent,
+        MbRoleSelectorComponent,
+        MbSchoolSelectorComponent,
     ],
     templateUrl: './edit-user-modal.component.html',
     styleUrls: ['./users-setup.component.scss'],
 })
 export class EditUserModalComponent implements OnChanges {
     @Input() isOpen = false;
-    @Input() activeSchools: SchoolOption[] = [];
+    @Input() activeSchools: MbSchoolSelectorOption[] = [];
     @Input() requestState: RequestState = { status: 'idle' };
     @Input() payload: EditUserFormState | null = null;
     @Output() closed = new EventEmitter<void>();
@@ -71,9 +69,10 @@ export class EditUserModalComponent implements OnChanges {
         this.submitted.emit(this.form());
     }
 
-    handleRoleSelection(selection: RoleSelection): void {
+    handleRoleSelection(selection: { ids: string[]; roles?: Array<{ id: string; name: string }> }): void {
+        const name = selection.roles?.[0]?.name ?? null;
         this.updateField('roleId', selection.ids[0] ?? null);
-        this.updateField('roleName', selection.names[0] ?? null);
+        this.updateField('roleName', name);
         this.selectedRoleIds.set(selection.ids);
     }
 }

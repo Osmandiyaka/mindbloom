@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { MbTableColumn } from '@mindbloom/ui';
+import { MbTableColumn, type MbSchoolSelectorOption } from '@mindbloom/ui';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from '../tenant-workspace-setup.shared';
 import { TenantWorkspaceSetupFacade } from '../tenant-workspace-setup.facade';
 import { CreateUserModalComponent } from './create-user-modal.component';
@@ -7,7 +7,6 @@ import { EditUserModalComponent } from './edit-user-modal.component';
 import { InviteUsersModalComponent } from './invite-users-modal.component';
 import { ViewUserDrawerComponent } from './view-user-drawer.component';
 import { UsersStore } from './users.store';
-import { SchoolOption } from '../../../../../shared/components/school-selector/school-selector.component';
 import { CreateUserFormState, EditUserFormState, ExistingUserRow, InviteUsersFormState, UserListItem } from './users.types';
 import { mapCreateUserFormToApiPayload, mapInviteUsersFormToApiPayload } from './user-form.mapper';
 import { UserSerivce } from './user-serivce.service';
@@ -40,7 +39,7 @@ export class TenantUsersComponent implements OnInit {
     selectedUser = signal<ExistingUserRow | null>(null);
     editPayload = signal<EditUserFormState | null>(null);
 
-    readonly activeSchools = computed<SchoolOption[]>(() =>
+    readonly activeSchools = computed<MbSchoolSelectorOption[]>(() =>
         this.setup.schoolRows()
             .filter(row => !!row.id)
             .map(row => ({ id: row.id as string, name: row.name }))

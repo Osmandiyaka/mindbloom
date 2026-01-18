@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, computed, signal } from '@angular/core';
 import { A11yModule } from '@angular/cdk/a11y';
-import { MbButtonComponent, MbCheckboxComponent, MbFormFieldComponent, MbInputComponent, MbModalComponent, MbModalFooterDirective, MbPopoverComponent, MbRoleSelectorComponent, MbSelectComponent, MbTextareaComponent, MbTooltipDirective } from '@mindbloom/ui';
-import { SchoolSelectorComponent, SchoolOption } from '../../../../../shared/components/school-selector/school-selector.component';
+import { MbButtonComponent, MbCheckboxComponent, MbFormFieldComponent, MbInputComponent, MbModalComponent, MbModalFooterDirective, MbPopoverComponent, MbRoleSelectorComponent, MbSchoolSelectorComponent, MbSelectComponent, MbTextareaComponent, MbTooltipDirective, type MbSchoolSelectorOption } from '@mindbloom/ui';
 import { RolePreviewComponent } from '../role-preview.component';
 import { createDirtyTracker } from './dirty-tracker';
 import { getRoleBadge, getRolePreviewItems, isHighPrivilegeRole } from './role-preview';
@@ -56,7 +55,7 @@ const initialUiState: CreateUserUiState = {
         MbPopoverComponent,
         MbTooltipDirective,
         MbRoleSelectorComponent,
-        SchoolSelectorComponent,
+        MbSchoolSelectorComponent,
         RolePreviewComponent,
     ],
     templateUrl: './create-user-modal.component.html',
@@ -64,7 +63,7 @@ const initialUiState: CreateUserUiState = {
 })
 export class CreateUserModalComponent implements OnChanges {
     @Input() isOpen = false;
-    @Input() activeSchools: SchoolOption[] = [];
+    @Input() activeSchools: MbSchoolSelectorOption[] = [];
     @Input() existingEmails: string[] = [];
     @Input() requestState: RequestState = { status: 'idle' };
     @Output() closed = new EventEmitter<void>();

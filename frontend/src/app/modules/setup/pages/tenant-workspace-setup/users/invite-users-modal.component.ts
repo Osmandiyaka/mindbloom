@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, computed, signal } from '@angular/core';
 import { A11yModule } from '@angular/cdk/a11y';
-import { MbButtonComponent, MbCheckboxComponent, MbFormFieldComponent, MbInputComponent, MbPopoverComponent, MbRoleSelectorComponent, MbTextareaComponent } from '@mindbloom/ui';
-import { SchoolSelectorComponent, SchoolOption } from '../../../../../shared/components/school-selector/school-selector.component';
+import { MbButtonComponent, MbCheckboxComponent, MbFormFieldComponent, MbInputComponent, MbPopoverComponent, MbRoleSelectorComponent, MbSchoolSelectorComponent, MbTextareaComponent, type MbSchoolSelectorOption } from '@mindbloom/ui';
 import { createDirtyTracker } from './dirty-tracker';
 import { dedupeEmails, parseEmailList } from './user-input.parsers';
 import { validateInviteUsers } from './user-form.validation';
@@ -33,14 +32,14 @@ const initialFormState: InviteUsersFormState = {
         MbTextareaComponent,
         MbPopoverComponent,
         MbRoleSelectorComponent,
-        SchoolSelectorComponent,
+        MbSchoolSelectorComponent,
     ],
     templateUrl: './invite-users-modal.component.html',
     styleUrls: ['./users-setup.component.scss'],
 })
 export class InviteUsersModalComponent implements OnChanges {
     @Input() isOpen = false;
-    @Input() activeSchools: SchoolOption[] = [];
+    @Input() activeSchools: MbSchoolSelectorOption[] = [];
     @Input() existingEmails: string[] = [];
     @Input() requestState: RequestState = { status: 'idle' };
     @Output() closed = new EventEmitter<void>();
