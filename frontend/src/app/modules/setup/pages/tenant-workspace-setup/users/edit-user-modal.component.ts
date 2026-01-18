@@ -62,6 +62,13 @@ export class EditUserModalComponent implements OnChanges {
         this.submitted.emit(this.form());
     }
 
+    handleSchoolSelection(schoolIds: string[]): void {
+        this.updateField('selectedSchoolIds', schoolIds);
+        if (schoolIds.length) {
+            this.updateField('schoolAccessScope', 'selected');
+        }
+    }
+
     handleRoleSelection(selection: { ids: string[]; roles?: Array<{ id: string; name: string }> }): void {
         const name = selection.roles?.[0]?.name ?? null;
         this.updateField('roleId', selection.ids[0] ?? null);

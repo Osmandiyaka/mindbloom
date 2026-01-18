@@ -11,6 +11,7 @@ export type ValidationResult = {
 
 type CreateUserValidationContext = {
     existingEmails: string[];
+    mode?: 'create' | 'edit';
 };
 
 type InviteUsersValidationContext = {
@@ -59,7 +60,7 @@ export const validateCreateUser = (
         addError(errors, summary, 'create-user-school-access', 'School access', 'Select at least one school.');
     }
 
-    if (!form.generatePassword && !form.password.trim()) {
+    if (context.mode !== 'edit' && !form.generatePassword && !form.password.trim()) {
         addError(errors, summary, 'create-user-password', 'Password', 'Password is required.');
     }
 

@@ -42,7 +42,7 @@
                     <mb-school-selector
                         [label]="''"
                         [value]="form().selectedSchoolIds"
-                        (valueChange)="updateField('selectedSchoolIds', $event)">
+                        (valueChange)="handleSchoolSelection($event)">
                     </mb-school-selector>
                 </div>
             </div>

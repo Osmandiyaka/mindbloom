@@ -63,6 +63,8 @@ const initialUiState: CreateUserUiState = {
 })
 export class CreateUserModalComponent implements OnChanges {
     @Input() isOpen = false;
+    @Input() mode: 'create' | 'edit' = 'create';
+    @Input() preset: Partial<CreateUserFormState> | null = null;
     @Input() existingEmails: string[] = [];
     @Input() requestState: RequestState = { status: 'idle' };
     @Output() closed = new EventEmitter<void>();
@@ -92,7 +94,16 @@ export class CreateUserModalComponent implements OnChanges {
     }
 
     open(): void {
-        this.form.set({ ...initialFormState });
+        const base: CreateUserFormState = {
+            ...initialFormState,
+            ...(this.preset ?? {}),
+        };
+        if (this.mode === 'edit') {
+            base.password = '';
+            base.generatePassword = true;
+            base.sendInviteEmail = false;
+        }
+        this.form.set(base);
         this.ui.set({ ...initialUiState });
         this.touched.set({});
         this.validation.set(null);
@@ -158,8 +169,22 @@ export class CreateUserModalComponent implements OnChanges {
         this.markTouched('create-user-role');
     }
 
+    handleSchoolSelection(schoolIds: string[]): void {
+        this.updateField('selectedSchoolIds', schoolIds);
+        if (schoolIds.length) {
+            this.updateField('schoolAccessScope', 'selected');
+            return;
+        }
+        if (this.mode === 'edit') {
+            this.updateField('schoolAccessScope', 'all');
+        }
+    }
+
     submit(): void {
-        const result = validateCreateUser(this.form(), { existingEmails: this.existingEmails });
+        const result = validateCreateUser(this.form(), {
+            existingEmails: this.existingEmails,
+            mode: this.mode,
+        });
         this.validation.set(result);
         if (!result.canSubmit) return;
         this.submitted.emit(this.form());
@@ -175,6 +200,10 @@ export class CreateUserModalComponent implements OnChanges {
     rolePreviewItems = computed(() => getRolePreviewItems(this.primaryRoleName()));
     roleBadge = computed(() => getRoleBadge(this.primaryRoleName()));
     roleIsHighPrivilege = computed(() => isHighPrivilegeRole(this.primaryRoleName()));
+
+    isEditMode(): boolean {
+        return this.mode === 'edit';
+    }
 
     onProfilePictureChange(event: Event): void {
         const input = event.target as HTMLInputElement | null;

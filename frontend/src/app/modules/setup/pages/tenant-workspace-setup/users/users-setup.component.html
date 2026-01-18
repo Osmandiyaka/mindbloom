@@ -114,14 +114,6 @@
         (submitted)="vm.handleInviteSubmitted($event)">
     </app-invite-users-modal>
 
-    <app-edit-user-modal
-        [isOpen]="vm.isEditUserModalOpen()"
-        [payload]="vm.editPayload()"
-        [requestState]="vm.store.updateUserState()"
-        (closed)="vm.closeEditUser()"
-        (submitted)="vm.handleEditSubmitted($event)">
-    </app-edit-user-modal>
-
     <app-view-user-drawer
         [isOpen]="vm.isViewUserModalOpen()"
         [user]="vm.selectedUser()"
@@ -131,8 +123,10 @@
 
     <app-create-user-modal
         [isOpen]="vm.isCreateUserModalOpen()"
+        [mode]="vm.editUserId() ? 'edit' : 'create'"
+        [preset]="vm.editPreset()"
         [existingEmails]="vm.existingEmails()"
-        [requestState]="vm.store.createUserState()"
+        [requestState]="vm.editUserId() ? vm.store.updateUserState() : vm.store.createUserState()"
         (closed)="vm.closeCreateUserModal()"
         (submitted)="vm.handleCreateSubmitted($event)">
     </app-create-user-modal>

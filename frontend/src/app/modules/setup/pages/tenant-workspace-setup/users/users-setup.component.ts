@@ -3,12 +3,11 @@ import { MbTableColumn } from '@mindbloom/ui';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from '../tenant-workspace-setup.shared';
 import { TenantWorkspaceSetupFacade } from '../tenant-workspace-setup.facade';
 import { CreateUserModalComponent } from './create-user-modal.component';
-import { EditUserModalComponent } from './edit-user-modal.component';
 import { InviteUsersModalComponent } from './invite-users-modal.component';
 import { ViewUserDrawerComponent } from './view-user-drawer.component';
 import { UsersStore } from './users.store';
-import { CreateUserFormState, EditUserFormState, ExistingUserRow, InviteUsersFormState, UserListItem } from './users.types';
-import { mapCreateUserFormToApiPayload, mapInviteUsersFormToApiPayload } from './user-form.mapper';
+import { CreateUserFormState, ExistingUserRow, InviteUsersFormState, UserListItem } from './users.types';
+import { mapCreateUserFormToApiPayload, mapEditUserFormToApiPayload, mapInviteUsersFormToApiPayload } from './user-form.mapper';
 import { UserSerivce } from './user-serivce.service';
 
 @Component({
@@ -18,7 +17,6 @@ import { UserSerivce } from './user-serivce.service';
         ...TENANT_WORKSPACE_SETUP_IMPORTS,
         CreateUserModalComponent,
         InviteUsersModalComponent,
-        EditUserModalComponent,
         ViewUserDrawerComponent,
     ],
     templateUrl: './users-setup.component.html',
@@ -34,18 +32,21 @@ export class TenantUsersComponent implements OnInit {
     usersStepSkipped = signal(false);
     isInviteModalOpen = signal(false);
     isCreateUserModalOpen = signal(false);
-    isEditUserModalOpen = signal(false);
     isViewUserModalOpen = signal(false);
     isDeleteConfirmOpen = signal(false);
     selectedUser = signal<ExistingUserRow | null>(null);
-    editPayload = signal<EditUserFormState | null>(null);
+    editPreset = signal<Partial<CreateUserFormState> | null>(null);
+    editUserId = signal<string | null>(null);
+    editingUserEmail = signal<string | null>(null);
     deleteTarget = signal<UserListItem | null>(null);
 
-    readonly existingEmails = computed(() =>
-        this.store.users()
+    readonly existingEmails = computed(() => {
+        const currentEmail = this.editingUserEmail()?.toLowerCase();
+        return this.store.users()
             .filter(item => item.kind === 'existing')
             .map(item => item.email)
-    );
+            .filter(email => !currentEmail || email.toLowerCase() !== currentEmail);
+    });
 
     readonly addUsersMenuItems = computed(() => ([
         { label: 'Invite by email', value: 'invite' },
@@ -133,24 +134,30 @@ export class TenantUsersComponent implements OnInit {
 
     closeCreateUserModal(): void {
         this.isCreateUserModalOpen.set(false);
+        this.editPreset.set(null);
+        this.editUserId.set(null);
+        this.editingUserEmail.set(null);
     }
 
     openEditUser(user: ExistingUserRow): void {
-        this.editPayload.set({
-            id: user.id,
+        this.editUserId.set(user.id);
+        this.editingUserEmail.set(user.email);
+        this.editPreset.set({
             name: user.name,
-            roleId: user.roleId,
-            roleName: user.roleName,
+            email: user.email,
+            phone: user.phone || '',
+            roleIds: user.roleIds || [],
+            roleNames: user.roleName ? [user.roleName] : [],
             schoolAccessScope: user.schoolAccess.scope,
             selectedSchoolIds: user.schoolAccess.scope === 'selected' ? user.schoolAccess.schoolIds : [],
+            profilePicture: user.profilePicture ?? null,
+            status: user.status,
             jobTitle: user.jobTitle || '',
             department: user.department || '',
+            gender: user.gender || '',
+            dateOfBirth: user.dateOfBirth || '',
         });
-        this.isEditUserModalOpen.set(true);
-    }
-
-    closeEditUser(): void {
-        this.isEditUserModalOpen.set(false);
+        this.openCreateUserModal();
     }
 
     openViewUser(user: ExistingUserRow): void {
@@ -164,8 +171,14 @@ export class TenantUsersComponent implements OnInit {
     }
 
     handleCreateSubmitted(form: CreateUserFormState): void {
-        const payload = mapCreateUserFormToApiPayload(form);
-        this.store.createUser(payload);
+        const editUserId = this.editUserId();
+        if (editUserId) {
+            const payload = mapEditUserFormToApiPayload(form);
+            this.store.updateUser(editUserId, payload);
+        } else {
+            const payload = mapCreateUserFormToApiPayload(form);
+            this.store.createUser(payload);
+        }
         this.closeCreateUserModal();
     }
 
@@ -175,18 +188,7 @@ export class TenantUsersComponent implements OnInit {
         this.closeInviteModal();
     }
 
-    handleEditSubmitted(form: EditUserFormState): void {
-        this.store.updateUser(form.id, {
-            name: form.name,
-            roleIds: form.roleId ? [form.roleId] : [],
-            schoolAccess: form.schoolAccessScope === 'selected'
-                ? { scope: 'selected', schoolIds: form.selectedSchoolIds }
-                : { scope: 'all' },
-            jobTitle: form.jobTitle || undefined,
-            department: form.department || undefined,
-        });
-        this.closeEditUser();
-    }
+
 
     resendInvite(row: UserListItem): void {
         if (row.kind !== 'existing') return;

@@ -11,10 +11,14 @@
                     </svg>
                 </div>
                 <div>
-                    <div id="create-user-title" class="users-modal__title">Create user account</div>
+                    <div id="create-user-title" class="users-modal__title">
+                        {{ isEditMode() ? 'Edit user account' : 'Create user account' }}
+                    </div>
                     <div class="users-modal__subtitle">
-                        Create a login account and assign access to schools and features.
-                        <button type="button" class="users-modal__tooltip"
+                        {{ isEditMode()
+                            ? 'Update access, profile details, and account settings.'
+                            : 'Create a login account and assign access to schools and features.' }}
+                        <button *ngIf="!isEditMode()" type="button" class="users-modal__tooltip"
                             mbTooltip="This creates a login account for the workspace."
                             aria-label="This creates a login account for the workspace.">
                             ?
@@ -166,7 +170,7 @@
                             </div>
                             <div class="users-create__school-access">
                                 <mb-school-selector [label]="''" [value]="form().selectedSchoolIds"
-                                    (valueChange)="updateField('selectedSchoolIds', $event)">
+                                    (valueChange)="handleSchoolSelection($event)">
                                 </mb-school-selector>
                                 <div class="users-inline-error" *ngIf="errorFor('create-user-school-access')">
                                     {{ errorFor('create-user-school-access') }}
@@ -226,12 +230,16 @@
             </div>
         </div>
         <div class="users-modal__footer users-modal__footer--sticky">
-            <div class="users-modal__hint">Password can be set later.</div>
+            <div class="users-modal__hint">
+                {{ isEditMode() ? 'Changes are saved immediately.' : 'Password can be set later.' }}
+            </div>
             <div class="users-modal__actions">
                 <mb-button variant="secondary" (click)="close()"
                     [disabled]="requestState.status === 'loading'">Cancel</mb-button>
                 <mb-button variant="primary" [disabled]="requestState.status === 'loading'" (click)="submit()">
-                    {{ requestState.status === 'loading' ? 'Creating...' : 'Create user' }}
+                    {{ requestState.status === 'loading'
+                        ? 'Saving...'
+                        : (isEditMode() ? 'Save changes' : 'Create user') }}
                 </mb-button>
             </div>
         </div>

@@ -118,3 +118,22 @@ export const mapInviteUsersFormToApiPayload = (form: InviteUsersFormState): Invi
         schoolAccess,
     };
 };
+
+export const mapEditUserFormToApiPayload = (form: CreateUserFormState): Partial<CreateUserRequest> => {
+    const schoolAccess: SchoolAccess = form.selectedSchoolIds.length
+        ? { scope: 'selected', schoolIds: form.selectedSchoolIds }
+        : { scope: 'all' };
+    return {
+        name: form.name.trim() || undefined,
+        email: form.email.trim() || undefined,
+        roleIds: form.roleIds,
+        schoolAccess,
+        phone: form.phone.trim() || undefined,
+        profilePicture: form.profilePicture ?? undefined,
+        gender: form.gender.trim() || undefined,
+        dateOfBirth: form.dateOfBirth.trim() || undefined,
+        status: form.status,
+        forcePasswordReset: form.forcePasswordReset,
+        mfaEnabled: form.forceMfa,
+    };
+};
