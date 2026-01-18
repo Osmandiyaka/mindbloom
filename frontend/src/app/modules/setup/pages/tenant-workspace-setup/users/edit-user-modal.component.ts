@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, signal } from '@angular/core';
 import { MbButtonComponent, MbFormFieldComponent, MbInputComponent, MbSelectComponent } from '@mindbloom/ui';
-import { RoleDropdownComponent } from '../../../../../shared/components/role-dropdown/role-dropdown.component';
+import { RoleDropdownComponent, RoleSelection } from '../../../../../shared/components/role-dropdown/role-dropdown.component';
 import { SchoolSelectorComponent, SchoolOption } from '../../../../../shared/components/school-selector/school-selector.component';
 import { EditUserFormState, RequestState } from './users.types';
 
@@ -40,10 +40,12 @@ export class EditUserModalComponent implements OnChanges {
     @Output() submitted = new EventEmitter<EditUserFormState>();
 
     form = signal<EditUserFormState>({ ...initialFormState });
+    selectedRoleIds = signal<string[]>([]);
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['isOpen']?.currentValue && this.payload) {
             this.form.set({ ...this.payload });
+            this.selectedRoleIds.set(this.payload.roleId ? [this.payload.roleId] : []);
         }
     }
 
@@ -67,5 +69,11 @@ export class EditUserModalComponent implements OnChanges {
 
     submit(): void {
         this.submitted.emit(this.form());
+    }
+
+    handleRoleSelection(selection: RoleSelection): void {
+        this.updateField('roleId', selection.ids[0] ?? null);
+        this.updateField('roleName', selection.names[0] ?? null);
+        this.selectedRoleIds.set(selection.ids);
     }
 }

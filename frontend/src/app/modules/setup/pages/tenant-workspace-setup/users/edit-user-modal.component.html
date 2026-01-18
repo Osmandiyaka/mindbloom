@@ -17,9 +17,8 @@
             </mb-form-field>
             <mb-form-field label="Role" [controlId]="'edit-user-role'">
                 <app-role-dropdown
-                    [value]="form().roleName || ''"
-                    (valueChange)="updateField('roleName', $event)"
-                    (roleChange)="updateField('roleId', $event?.id || null)">
+                    [selectedIds]="selectedRoleIds()"
+                    (selectionChange)="handleRoleSelection($event)">
                 </app-role-dropdown>
             </mb-form-field>
 

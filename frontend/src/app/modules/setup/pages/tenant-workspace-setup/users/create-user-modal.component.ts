@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, computed, signal } from '@angular/core';
 import { A11yModule } from '@angular/cdk/a11y';
-import { MbButtonComponent, MbCheckboxComponent, MbFormFieldComponent, MbInputComponent, MbModalComponent, MbModalFooterDirective, MbPopoverComponent, MbSelectComponent, MbTextareaComponent, MbTooltipDirective } from '@mindbloom/ui';
-import { RoleDropdownComponent } from '../../../../../shared/components/role-dropdown/role-dropdown.component';
+import { MbButtonComponent, MbCheckboxComponent, MbFormFieldComponent, MbInputComponent, MbModalComponent, MbModalFooterDirective, MbPopoverComponent, MbRoleSelectorComponent, MbSelectComponent, MbTextareaComponent, MbTooltipDirective } from '@mindbloom/ui';
 import { SchoolSelectorComponent, SchoolOption } from '../../../../../shared/components/school-selector/school-selector.component';
 import { RolePreviewComponent } from '../role-preview.component';
 import { createDirtyTracker } from './dirty-tracker';
@@ -15,8 +14,8 @@ const initialFormState: CreateUserFormState = {
     email: '',
     phone: '',
     password: '',
-    roleId: null,
-    roleName: '',
+    roleIds: [],
+    roleNames: [],
     schoolAccessScope: 'all',
     selectedSchoolIds: [],
     profilePicture: null,
@@ -56,7 +55,7 @@ const initialUiState: CreateUserUiState = {
         MbTextareaComponent,
         MbPopoverComponent,
         MbTooltipDirective,
-        RoleDropdownComponent,
+        MbRoleSelectorComponent,
         SchoolSelectorComponent,
         RolePreviewComponent,
     ],
@@ -164,6 +163,13 @@ export class CreateUserModalComponent implements OnChanges {
         }
     }
 
+    handleRoleSelection(selection: { ids: string[]; roles?: Array<{ id: string; name: string }> }): void {
+        const names = selection.roles?.map(role => role.name) ?? [];
+        this.updateField('roleIds', selection.ids);
+        this.updateField('roleNames', names);
+        this.markTouched('create-user-role');
+    }
+
     submit(): void {
         const result = validateCreateUser(this.form(), { existingEmails: this.existingEmails });
         this.validation.set(result);
@@ -177,9 +183,10 @@ export class CreateUserModalComponent implements OnChanges {
         return errors[fieldId] || '';
     }
 
-    rolePreviewItems = computed(() => getRolePreviewItems(this.form().roleName || ''));
-    roleBadge = computed(() => getRoleBadge(this.form().roleName || ''));
-    roleIsHighPrivilege = computed(() => isHighPrivilegeRole(this.form().roleName || ''));
+    primaryRoleName = computed(() => this.form().roleNames[0] || '');
+    rolePreviewItems = computed(() => getRolePreviewItems(this.primaryRoleName()));
+    roleBadge = computed(() => getRoleBadge(this.primaryRoleName()));
+    roleIsHighPrivilege = computed(() => isHighPrivilegeRole(this.primaryRoleName()));
 
     onProfilePictureChange(event: Event): void {
         const input = event.target as HTMLInputElement | null;

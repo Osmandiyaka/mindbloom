@@ -49,8 +49,8 @@ export type CreateUserFormState = {
     email: string;
     phone: string;
     password: string;
-    roleId: string | null;
-    roleName: string | null;
+    roleIds: string[];
+    roleNames: string[];
     schoolAccessScope: 'all' | 'selected';
     selectedSchoolIds: string[];
     profilePicture: string | null;

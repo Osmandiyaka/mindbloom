@@ -16,6 +16,11 @@
     text-align: left;
 }
 
+.role-dropdown--flush .role-dropdown__trigger {
+    border: 0;
+    background: transparent;
+}
+
 .role-dropdown__trigger-text {
     display: grid;
     gap: 2px;
@@ -53,7 +58,6 @@
 .role-dropdown__item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 12px;
     padding: 8px 10px;
     border-radius: 10px;
@@ -86,6 +90,13 @@
     margin-top: 2px;
 }
 
+.role-dropdown__item-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
 .role-dropdown__badge {
     font-size: 11px;
     padding: 2px 8px;
@@ -93,4 +104,9 @@
     background: color-mix(in srgb, var(--mb-color-text-muted) 12%, transparent);
     color: var(--mb-color-text-muted);
     white-space: nowrap;
+}
+
+.role-dropdown__check {
+    font-size: 12px;
+    color: var(--mb-color-primary);
 }

@@ -51,7 +51,7 @@ export const validateCreateUser = (
         addError(errors, summary, 'create-user-email', 'Email', 'Email already exists in this workspace.');
     }
 
-    if (!form.roleId) {
+    if (!form.roleIds.length) {
         addError(errors, summary, 'create-user-role', 'Role', 'Role is required.');
     }
 

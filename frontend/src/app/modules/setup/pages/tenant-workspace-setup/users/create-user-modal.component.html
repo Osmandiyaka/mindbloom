@@ -149,7 +149,7 @@
                     <div class="users-create__panel-body">
                         <div class="users-create__block">
                             <div class="users-create__label-row">
-                                <div class="users-create__label">Role*</div>
+                                <div class="users-create__label">Roles*</div>
                                 <button type="button" class="users-create__role-preview" #rolePreviewOrigin
                                     (click)="toggleRolePreview()">
                                     Preview permissions
@@ -159,7 +159,7 @@
                                     [panelClass]="['mb-popover-panel', 'users-role-preview__panel']"
                                     (closed)="closeRolePreview()">
                                     <app-role-preview
-                                        [role]="form().roleName || ''"
+                                        [role]="primaryRoleName()"
                                         [items]="rolePreviewItems()"
                                         [badge]="roleBadge()">
                                     </app-role-preview>
@@ -167,11 +167,13 @@
                             </div>
                             <mb-form-field [controlId]="'create-user-role'" [error]="errorFor('create-user-role')">
                                 <div class="users-create__role-field" id="create-user-role" tabindex="-1">
-                                    <app-role-dropdown
-                                        [value]="form().roleName || ''"
-                                        (valueChange)="updateField('roleName', $event)"
-                                        (roleChange)="updateField('roleId', $event?.id || null)">
-                                    </app-role-dropdown>
+                                    <mb-role-selector
+                                        [label]="''"
+                                        [multiple]="true"
+                                        [value]="form().roleIds"
+                                        placeholder="Select roles..."
+                                        (change)="handleRoleSelection($event)">
+                                    </mb-role-selector>
                                 </div>
                             </mb-form-field>
                             <div class="users-create__role-helper">Controls what the user can view and manage.</div>

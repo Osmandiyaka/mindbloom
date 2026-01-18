@@ -94,7 +94,7 @@ export const mapCreateUserFormToApiPayload = (form: CreateUserFormState): Create
         name: form.name.trim(),
         email: form.email.trim(),
         password: form.generatePassword ? generateRandomPassword() : form.password.trim(),
-        roleIds: form.roleId ? [form.roleId] : [],
+        roleIds: form.roleIds,
         schoolAccess,
         phone: form.phone.trim() || undefined,
         profilePicture: form.profilePicture ?? undefined,
