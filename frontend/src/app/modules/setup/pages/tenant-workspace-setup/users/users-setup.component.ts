@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { Component, Injector, OnInit, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { MbSelectOption, MbTableColumn } from '@mindbloom/ui';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from '../tenant-workspace-setup.shared';
 import { TenantWorkspaceSetupFacade } from '../tenant-workspace-setup.facade';
@@ -64,6 +64,7 @@ export class TenantUsersComponent implements OnInit {
     readonly vm = this;
     private readonly setup = inject(TenantWorkspaceSetupFacade);
     private readonly usersApi = inject(UserSerivce);
+    private readonly injector = inject(Injector);
 
     private initialized = false;
     private syncEnabled = signal(false);
@@ -261,10 +262,12 @@ export class TenantUsersComponent implements OnInit {
 
     ngOnInit(): void {
         this.init();
-        effect(() => {
-            if (!this.syncEnabled()) return;
-            this.setup.users.set(this.users());
-            this.setup.usersStepSkipped.set(this.usersStepSkipped());
+        runInInjectionContext(this.injector, () => {
+            effect(() => {
+                if (!this.syncEnabled()) return;
+                this.setup.users.set(this.users());
+                this.setup.usersStepSkipped.set(this.usersStepSkipped());
+            }, { allowSignalWrites: true });
         });
     }
 
@@ -704,34 +707,66 @@ export class TenantUsersComponent implements OnInit {
         const name = this.createName().trim();
         const email = this.createEmail().trim();
         if (!this.createCanSubmit()) return;
+        const password = this.createGeneratePassword()
+            ? this.generateRandomPassword()
+            : this.createPassword().trim();
+        if (!password) {
+            this.createPasswordTouched.set(true);
+            return;
+        }
         this.createSubmitting.set(true);
         const schoolAccess = this.createSchoolAccess() === 'all'
             ? 'all'
             : [...this.createSelectedSchools()];
-        this.users.update(items => [
-            ...items,
-            {
-                id: this.nextUserId(),
-                name,
-                email,
-                role: this.createRole(),
-                schoolAccess,
-                status: this.createStatus(),
-                jobTitle: this.createJobTitle().trim() || undefined,
-                department: this.createDepartment().trim() || undefined,
-                gender: this.createGender().trim() || undefined,
-                dateOfBirth: this.createDateOfBirth().trim() || undefined,
-                phone: this.createPhone().trim() || undefined,
-                profilePicture: this.createProfilePicture(),
-                notes: this.createNotes().trim() || undefined,
-                createdAt: new Date().toISOString(),
+        const payload = {
+            name,
+            email,
+            password,
+            profilePicture: this.createProfilePicture() || undefined,
+            phone: this.createPhone().trim() || undefined,
+            forcePasswordReset: this.createRequirePasswordReset(),
+            mfaEnabled: this.createForceMfa(),
+        };
+        this.usersApi.createUser(payload).subscribe({
+            next: (user) => {
+                this.users.update(items => [
+                    ...items,
+                    {
+                        id: user.id || this.nextUserId(),
+                        name: user.name || name,
+                        email: user.email || email,
+                        role: this.createRole(),
+                        schoolAccess,
+                        status: this.createStatus(),
+                        jobTitle: this.createJobTitle().trim() || undefined,
+                        department: this.createDepartment().trim() || undefined,
+                        gender: this.createGender().trim() || undefined,
+                        dateOfBirth: this.createDateOfBirth().trim() || undefined,
+                        phone: user.phone ?? (this.createPhone().trim() || undefined),
+                        profilePicture: user.profilePicture ?? this.createProfilePicture(),
+                        notes: this.createNotes().trim() || undefined,
+                        createdAt: user.createdAt ? new Date(user.createdAt).toISOString() : new Date().toISOString(),
+                    }
+                ]);
+                this.usersStepSkipped.set(false);
+                this.lastCreateRole.set(this.createRole());
+                this.lastCreateAccess.set(this.createSchoolAccess());
+                this.createSubmitting.set(false);
+                this.closeCreateUserModal();
+            },
+            error: () => {
+                this.createSubmitting.set(false);
             }
-        ]);
-        this.usersStepSkipped.set(false);
-        this.lastCreateRole.set(this.createRole());
-        this.lastCreateAccess.set(this.createSchoolAccess());
-        this.createSubmitting.set(false);
-        this.closeCreateUserModal();
+        });
+    }
+
+    private generateRandomPassword(length = 12): string {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@$%*?';
+        let result = '';
+        for (let i = 0; i < length; i += 1) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
     }
 
     createNameError(force = false): string {
@@ -750,10 +785,10 @@ export class TenantUsersComponent implements OnInit {
     }
 
     createPasswordError(force = false): string {
-        if (this.createGeneratePassword() || this.createSendInviteEmail()) return '';
+        if (this.createGeneratePassword()) return '';
         if (!this.shouldShowCreateError(this.createPasswordTouched(), force)) return '';
         if (!this.createPassword().trim()) {
-            return 'Password is required when invite email is disabled.';
+            return 'Password is required.';
         }
         return '';
     }

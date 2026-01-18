@@ -420,7 +420,7 @@
                                         (valueChange)="vm.createName.set($event)"
                                         (blurEvent)="vm.createNameTouched.set(true)"></mb-input>
                                 </mb-form-field>
-                                <mb-form-field class="users-create__field users-create__field--span-2"
+                                <mb-form-field class="users-create__field users-create__field--span-3"
                                     label="Phone" [controlId]="'create-user-phone'">
                                     <mb-input id="create-user-phone" [value]="vm.createPhone()"
                                         placeholder="e.g. +233 20 000 0000"
@@ -436,7 +436,7 @@
                                 </mb-form-field>
                                 <mb-form-field class="users-create__field users-create__field--span-8"
                                     label="Password" [controlId]="'create-user-password'"
-                                    [hint]="vm.createGeneratePassword() ? 'A secure password will be generated automatically.' : 'If left blank, the user will set a password after receiving an invite.'"
+                                    [hint]="vm.createGeneratePassword() ? 'A secure password will be generated automatically.' : 'Enter a password or enable random password.'"
                                     [error]="vm.createPasswordError()">
                                     <div class="users-create__password-control">
                                         <mb-input id="create-user-password"

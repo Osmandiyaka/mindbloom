@@ -716,6 +716,10 @@
     grid-column: span 2;
 }
 
+.users-create__field--span-3 {
+    grid-column: span 3;
+}
+
 .users-create__field--span-8 {
     grid-column: span 8;
 }
@@ -781,6 +785,16 @@
 
 .users-create__password-control {
     position: relative;
+    width: 100%;
+}
+
+:host ::ng-deep .users-create__password-control mb-input {
+    display: block;
+    width: 100%;
+}
+
+:host ::ng-deep .users-create__password-control .mb-input-shell {
+    width: 100%;
 }
 
 :host ::ng-deep .users-create__password-control .mb-input {
@@ -1095,7 +1109,7 @@
 
     .users-create__field--span-6,
     .users-create__field--span-5,
-    .users-create__field--span-2,
+    .users-create__field--span-3,
     .users-create__field--span-8 {
         grid-column: span 2;
     }
