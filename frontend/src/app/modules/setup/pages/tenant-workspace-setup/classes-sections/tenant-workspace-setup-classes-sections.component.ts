@@ -13,12 +13,12 @@ export class TenantWorkspaceSetupClassesSectionsComponent {
     readonly vm = inject(TenantWorkspaceSetupFacade);
 
     readonly staffSelectorOptions = computed(() => this.vm.users()
-        .filter(user => ['Teacher', 'Staff'].includes(user.role))
+        .filter(user => ['Teacher', 'Staff'].includes(user.roleName || ''))
         .map(user => ({
             id: user.id,
             name: user.name || user.email,
             email: user.email,
-            role: user.role,
+            role: user.roleName || '',
         }))
         .sort((a, b) => a.name.localeCompare(b.name)));
 }

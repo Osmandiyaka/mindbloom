@@ -1,0 +1,297 @@
+<div class="users-modal users-modal--create" *ngIf="isOpen" role="presentation">
+    <div class="users-modal__backdrop"></div>
+    <div class="users-modal__dialog users-modal__dialog--create" role="dialog" aria-modal="true"
+        aria-labelledby="create-user-title" tabindex="0" cdkTrapFocus cdkTrapFocusAutoCapture>
+        <div class="users-modal__header users-modal__header--sticky">
+            <div class="users-modal__header-main">
+                <div class="users-modal__header-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <path
+                            d="M16 19a4 4 0 0 0-8 0m4-7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm7 1v6m3-3h-6"
+                            fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <div>
+                    <div id="create-user-title" class="users-modal__title">Create user account</div>
+                    <div class="users-modal__subtitle">
+                        Create a login account and assign access to schools and features.
+                        <button type="button" class="users-modal__tooltip"
+                            mbTooltip="This creates a login account for the workspace."
+                            aria-label="This creates a login account for the workspace.">
+                            ?
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="users-modal__close" (click)="close()"
+                aria-label="Close dialog">×</button>
+        </div>
+
+        <div class="users-modal__error" *ngIf="errorSummaryText()">
+            <div class="users-modal__error-title">{{ errorSummaryText() }}</div>
+            <div class="users-modal__error-actions">
+                <button type="button" class="users-modal__error-link"
+                    *ngFor="let field of invalidFields()">
+                    {{ field.label }}
+                </button>
+            </div>
+        </div>
+
+        <div class="users-modal__body users-modal__body--scroll">
+            <div class="users-create__grid">
+                <section class="users-create__panel users-create__panel--left">
+                    <div class="users-create__panel-header">
+                        <div>
+                            <div class="users-create__panel-title">Account information</div>
+                            <div class="users-create__panel-helper">Basic identity details for this user account.</div>
+                        </div>
+                        <div class="users-create__avatar users-create__avatar--compact">
+                            <div class="users-create__avatar-preview"
+                                [style.background-image]="form().profilePicture ? 'url(' + form().profilePicture + ')' : 'none'">
+                                <span *ngIf="!form().profilePicture">{{ form().name ? (form().name[0] || 'U') : 'U' }}</span>
+                            </div>
+                            <div class="users-create__avatar-actions">
+                                <input #createUserPhotoInput type="file" accept="image/*"
+                                    (change)="onProfilePictureChange($event)" hidden />
+                                <button type="button" class="users-create__avatar-button"
+                                    (click)="createUserPhotoInput.click()">Upload</button>
+                                <div class="users-create__avatar-caption">JPG/PNG up to 2MB.</div>
+                                <button *ngIf="form().profilePicture" type="button"
+                                    class="users-create__avatar-link"
+                                    (click)="removeProfilePicture()">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="users-create__panel-body">
+                        <div class="users-create__form-grid">
+                            <mb-form-field class="users-create__field users-create__field--span-5"
+                                label="Full name" [required]="true" [controlId]="'create-user-name'"
+                                [error]="errorFor('create-user-name')">
+                                <mb-input id="create-user-name" cdkFocusInitial
+                                    [value]="form().name"
+                                    placeholder="e.g. Ama Mensah"
+                                    (valueChange)="updateField('name', $event)"
+                                    (blurEvent)="markTouched('create-user-name')"></mb-input>
+                            </mb-form-field>
+                            <mb-form-field class="users-create__field users-create__field--span-3"
+                                label="Phone" [controlId]="'create-user-phone'">
+                                <mb-input id="create-user-phone" [value]="form().phone"
+                                    placeholder="e.g. +233 20 000 0000"
+                                    (valueChange)="updateField('phone', $event)"></mb-input>
+                            </mb-form-field>
+                            <mb-form-field class="users-create__field users-create__field--span-8"
+                                label="Email" [required]="true" [controlId]="'create-user-email'"
+                                [error]="errorFor('create-user-email')">
+                                <mb-input id="create-user-email" type="email" [value]="form().email"
+                                    placeholder="name@school.com"
+                                    (valueChange)="updateField('email', $event)"
+                                    (blurEvent)="markTouched('create-user-email')"></mb-input>
+                            </mb-form-field>
+                            <mb-form-field class="users-create__field users-create__field--span-8"
+                                label="Password" [controlId]="'create-user-password'"
+                                [hint]="form().generatePassword ? 'A secure password will be generated automatically.' : 'Enter a password or enable random password.'"
+                                [error]="errorFor('create-user-password')">
+                                <div class="users-create__password-control">
+                                    <mb-input id="create-user-password"
+                                        [type]="ui().showPassword ? 'text' : 'password'"
+                                        [value]="form().password" [disabled]="form().generatePassword"
+                                        placeholder="Set a password"
+                                        (valueChange)="updateField('password', $event)"
+                                        (blurEvent)="markTouched('create-user-password')"></mb-input>
+                                    <button type="button" class="users-create__password-toggle"
+                                        (click)="togglePasswordVisibility()"
+                                        [disabled]="form().generatePassword"
+                                        [attr.aria-label]="ui().showPassword ? 'Hide password' : 'Show password'">
+                                        <svg *ngIf="!ui().showPassword" class="users-create__password-icon"
+                                            viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path
+                                                d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"
+                                                stroke="currentColor" stroke-width="1.6" />
+                                            <circle cx="12" cy="12" r="3.2" stroke="currentColor"
+                                                stroke-width="1.6" />
+                                        </svg>
+                                        <svg *ngIf="ui().showPassword" class="users-create__password-icon"
+                                            viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M3 5l18 14" stroke="currentColor" stroke-width="1.6"
+                                                stroke-linecap="round" />
+                                            <path
+                                                d="M4.5 8.5C3.2 9.8 2 11.8 2 12s3.5 6 10 6c2.4 0 4.4-.6 6-1.5"
+                                                stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                                            <path
+                                                d="M9.6 7.2A9.6 9.6 0 0 1 12 6c6.5 0 10 6 10 6s-1.3 2.2-3.8 4"
+                                                stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                                            <path
+                                                d="M10.2 10.2a3.2 3.2 0 0 1 4.5 4.5"
+                                                stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </mb-form-field>
+                            <div
+                                class="users-create__field users-create__field--span-8 users-create__password-options">
+                                <mb-checkbox [checked]="form().generatePassword"
+                                    (checkedChange)="updateField('generatePassword', $event)">
+                                    Generate a random password
+                                </mb-checkbox>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="users-create__panel users-create__panel--right">
+                    <div class="users-create__panel-header">
+                        <div>
+                            <div class="users-create__panel-title">Access</div>
+                            <div class="users-create__panel-helper">Assign a role and school scope.</div>
+                        </div>
+                    </div>
+                    <div class="users-create__panel-body">
+                        <div class="users-create__block">
+                            <div class="users-create__label-row">
+                                <div class="users-create__label">Role*</div>
+                                <button type="button" class="users-create__role-preview" #rolePreviewOrigin
+                                    (click)="toggleRolePreview()">
+                                    Preview permissions
+                                </button>
+                                <mb-popover [open]="ui().rolePreviewOpen" [origin]="rolePreviewOrigin"
+                                    [hasBackdrop]="true"
+                                    [panelClass]="['mb-popover-panel', 'users-role-preview__panel']"
+                                    (closed)="closeRolePreview()">
+                                    <app-role-preview
+                                        [role]="form().roleName || ''"
+                                        [items]="rolePreviewItems()"
+                                        [badge]="roleBadge()">
+                                    </app-role-preview>
+                                </mb-popover>
+                            </div>
+                            <mb-form-field [controlId]="'create-user-role'" [error]="errorFor('create-user-role')">
+                                <div class="users-create__role-field" id="create-user-role" tabindex="-1">
+                                    <app-role-dropdown
+                                        [value]="form().roleName || ''"
+                                        (valueChange)="updateField('roleName', $event)"
+                                        (roleChange)="updateField('roleId', $event?.id || null)">
+                                    </app-role-dropdown>
+                                </div>
+                            </mb-form-field>
+                            <div class="users-create__role-helper">Controls what the user can view and manage.</div>
+                            <div class="users-create__role-warning" *ngIf="roleIsHighPrivilege()">
+                                High privilege role — grants administrative access.
+                            </div>
+                        </div>
+
+                        <div class="users-create__block">
+                            <div class="users-create__label-row">
+                                <div class="users-create__label">School access*</div>
+                            </div>
+                            <div class="users-create__segmented users-create__segmented--compact"
+                                id="create-user-school-access" tabindex="-1" role="tablist"
+                                [style.--active-index]="form().schoolAccessScope === 'all' ? 0 : 1">
+                                <button type="button" role="tab"
+                                    class="users-create__segmented-button"
+                                    [class.is-active]="form().schoolAccessScope === 'all'"
+                                    [attr.aria-selected]="form().schoolAccessScope === 'all'"
+                                    (click)="setSchoolAccess('all')">
+                                    All schools
+                                </button>
+                                <button type="button" role="tab"
+                                    class="users-create__segmented-button"
+                                    [class.is-active]="form().schoolAccessScope === 'selected'"
+                                    [attr.aria-selected]="form().schoolAccessScope === 'selected'"
+                                    (click)="setSchoolAccess('selected')">
+                                    Selected schools
+                                </button>
+                            </div>
+                            <div class="users-create__school-summary" *ngIf="form().schoolAccessScope === 'all'">
+                                Applies to all schools in this workspace.
+                            </div>
+                            <div class="users-create__school-access" *ngIf="form().schoolAccessScope === 'selected'">
+                                <app-school-selector
+                                    [schools]="activeSchools"
+                                    [selected]="form().selectedSchoolIds"
+                                    (selectedChange)="updateField('selectedSchoolIds', $event)">
+                                </app-school-selector>
+                                <div class="users-inline-error" *ngIf="errorFor('create-user-school-access')">
+                                    {{ errorFor('create-user-school-access') }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="users-create__block">
+                            <div class="users-create__label-row">
+                                <div class="users-create__label">Account status</div>
+                            </div>
+                            <mb-form-field [controlId]="'create-user-status'">
+                                <mb-select id="create-user-status" [value]="form().status"
+                                    (valueChange)="setStatus($event)">
+                                    <option value="active">Active</option>
+                                    <option value="suspended">Suspended</option>
+                                </mb-select>
+                            </mb-form-field>
+                            <div class="users-create__role-helper">Suspended users cannot sign in.</div>
+                        </div>
+
+                        <div class="users-create__block">
+                            <button type="button" class="users-create__note-toggle"
+                                (click)="toggleNotes()">
+                                {{ ui().notesOpen ? 'Hide internal note' : 'Add internal note' }}
+                            </button>
+                            <mb-form-field *ngIf="ui().notesOpen" label="Internal note"
+                                [controlId]="'create-user-notes'">
+                                <mb-textarea id="create-user-notes" [value]="form().notes"
+                                    placeholder="Optional internal notes"
+                                    (valueChange)="updateField('notes', $event)"></mb-textarea>
+                            </mb-form-field>
+                        </div>
+
+                        <button type="button" class="users-create__advanced-toggle"
+                            (click)="toggleAdvanced()">
+                            Advanced options
+                        </button>
+
+                        <div class="users-create__advanced" *ngIf="ui().advancedOpen">
+                            <div class="users-create__divider"></div>
+                            <div class="users-create__advanced-options">
+                                <mb-checkbox [checked]="form().forcePasswordReset"
+                                    (checkedChange)="updateField('forcePasswordReset', $event)">
+                                    Require password reset on first login
+                                </mb-checkbox>
+                                <mb-checkbox [checked]="form().sendInviteEmail"
+                                    (checkedChange)="updateField('sendInviteEmail', $event)">
+                                    Send invite email
+                                </mb-checkbox>
+                                <mb-checkbox [checked]="form().forceMfa"
+                                    (checkedChange)="updateField('forceMfa', $event)">
+                                    Force MFA for this user
+                                </mb-checkbox>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <div class="users-modal__footer users-modal__footer--sticky">
+            <div class="users-modal__hint">Password can be set later.</div>
+            <div class="users-modal__actions">
+                <mb-button variant="secondary" (click)="close()" [disabled]="requestState.status === 'loading'">Cancel</mb-button>
+                <mb-button variant="primary" [disabled]="requestState.status === 'loading'"
+                    (click)="submit()">
+                    {{ requestState.status === 'loading' ? 'Creating...' : 'Create user' }}
+                </mb-button>
+            </div>
+        </div>
+    </div>
+
+    <mb-modal [open]="ui().discardOpen" title="Discard changes?" size="sm"
+        (closed)="cancelDiscard()">
+        <div class="users-confirm">
+            <div class="users-confirm__text">
+                You have unsaved changes. Discard them?
+            </div>
+        </div>
+        <div mbModalFooter class="users-confirm__footer">
+            <mb-button variant="secondary" (click)="cancelDiscard()">Keep editing</mb-button>
+            <mb-button variant="danger" (click)="confirmDiscard()">Discard</mb-button>
+        </div>
+    </mb-modal>
+</div>

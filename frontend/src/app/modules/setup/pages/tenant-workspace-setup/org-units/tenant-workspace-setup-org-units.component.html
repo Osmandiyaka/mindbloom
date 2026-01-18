@@ -170,11 +170,11 @@
                                             {{ member.email }}
                                         </div>
                                     </div>
-                                    <div>{{ member.role }}</div>
+                                    <div>{{ member.roleName || '—' }}</div>
                                     <div>
                                         <span class="ou-status-pill"
-                                            [class.ou-status-pill--active]="member.status === 'Active'"
-                                            [class.ou-status-pill--invited]="member.status === 'Invited'">
+                                            [class.ou-status-pill--active]="member.status === 'active'"
+                                            [class.ou-status-pill--invited]="member.status === 'invited'">
                                             {{ member.status }}
                                         </span>
                                     </div>

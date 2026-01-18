@@ -1,0 +1,101 @@
+<div class="users-modal" *ngIf="isOpen" role="presentation">
+    <div class="users-modal__backdrop"></div>
+    <div class="users-modal__dialog" role="dialog" aria-modal="true"
+        aria-labelledby="invite-modal-title" tabindex="0" cdkTrapFocus cdkTrapFocusAutoCapture>
+        <div class="users-modal__header">
+            <div>
+                <div id="invite-modal-title" class="users-modal__title">Invite users</div>
+                <div class="users-modal__subtitle">Users will receive an email to set up
+                    their account.</div>
+            </div>
+            <button type="button" class="users-modal__close" (click)="close()"
+                aria-label="Close dialog">×</button>
+        </div>
+        <div class="users-modal__body">
+            <mb-form-field label="Email addresses" [controlId]="'invite-emails'"
+                [error]="errorFor('invite-emails')"
+                hint="Enter one or more email addresses. Press Enter or comma to add.">
+                <div class="users-email-input">
+                    <div class="users-email-input__list">
+                        <span class="users-token"
+                            *ngFor="let email of form().emails; let i = index">
+                            <span class="users-token__text">{{ email }}</span>
+                            <button type="button" class="users-token__remove"
+                                (click)="removeEmail(i)"
+                                [attr.aria-label]="'Remove ' + email">
+                                ×
+                            </button>
+                        </span>
+                        <mb-input class="users-email-input__field" id="invite-emails"
+                            [value]="form().emailInput"
+                            (valueChange)="updateField('emailInput', $event)"
+                            (keydown)="handleEmailKeydown($event)"
+                            (paste)="handleEmailPaste($event)"
+                            (blurEvent)="handleEmailBlur()"
+                            placeholder="name@company.com"></mb-input>
+                    </div>
+                </div>
+            </mb-form-field>
+
+            <mb-form-field label="Assigned role" [controlId]="'invite-role'"
+                hint="You can change roles later.">
+                <mb-role-selector id="invite-role" [value]="form().roleIds" [label]="''"
+                    [multiple]="true" placeholder="Select role..."
+                    (change)="updateField('roleIds', $event.ids || [])"></mb-role-selector>
+            </mb-form-field>
+
+            <div class="users-modal__section">
+                <div class="users-modal__section-title">School access</div>
+                <div class="users-radio-group users-radio-group--compact">
+                    <label class="users-radio">
+                        <input type="radio" name="invite-access"
+                            [checked]="form().schoolAccessScope === 'all'"
+                            (change)="setSchoolAccess('all')" />
+                        <span>All schools</span>
+                        <span class="users-radio__hint">Recommended</span>
+                    </label>
+                    <label class="users-radio">
+                        <input type="radio" name="invite-access"
+                            [checked]="form().schoolAccessScope === 'selected'"
+                            (change)="setSchoolAccess('selected')" />
+                        <span>Selected schools</span>
+                    </label>
+                </div>
+                <div class="users-school-list"
+                    [class.is-open]="form().schoolAccessScope === 'selected'">
+                    <div class="users-school-list__content">
+                        <app-school-selector
+                            [schools]="activeSchools"
+                            [selected]="form().selectedSchoolIds"
+                            (selectedChange)="updateField('selectedSchoolIds', $event)">
+                        </app-school-selector>
+                    </div>
+                </div>
+                <div class="users-inline-error" *ngIf="errorFor('invite-school-access')">
+                    {{ errorFor('invite-school-access') }}
+                </div>
+            </div>
+
+            <button type="button" class="users-link" (click)="updateField('messageOpen', !form().messageOpen)">
+                {{ form().messageOpen ? 'Hide message' : '+ Add optional message' }}
+            </button>
+            <mb-form-field *ngIf="form().messageOpen" class="users-textarea-field"
+                label="Optional message" [controlId]="'invite-message'">
+                <mb-textarea id="invite-message" [value]="form().message"
+                    (valueChange)="updateField('message', $event)"
+                    placeholder="Add a short note to include in the invitation email."></mb-textarea>
+            </mb-form-field>
+        </div>
+        <div class="users-modal__footer">
+            <div class="users-modal__hint">Invitations can be resent or revoked later.</div>
+            <div class="users-modal__actions">
+                <mb-button variant="secondary"
+                    (click)="close()">Cancel</mb-button>
+                <mb-button variant="primary" [disabled]="requestState.status === 'loading'"
+                    (click)="submit()">
+                    {{ requestState.status === 'loading' ? 'Sending...' : 'Send invitations' }}
+                </mb-button>
+            </div>
+        </div>
+    </div>
+</div>

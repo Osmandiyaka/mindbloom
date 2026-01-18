@@ -1,0 +1,73 @@
+<div class="users-modal" *ngIf="isOpen" role="presentation">
+    <div class="users-modal__backdrop"></div>
+    <div class="users-modal__dialog" role="dialog" aria-modal="true"
+        aria-labelledby="edit-user-title" tabindex="0">
+        <div class="users-modal__header">
+            <div>
+                <div id="edit-user-title" class="users-modal__title">Edit user</div>
+                <div class="users-modal__subtitle">Update role, access, and profile details.</div>
+            </div>
+            <button type="button" class="users-modal__close" (click)="closed.emit()"
+                aria-label="Close dialog">×</button>
+        </div>
+        <div class="users-modal__body">
+            <mb-form-field label="Full name" [controlId]="'edit-user-name'">
+                <mb-input id="edit-user-name" [value]="form().name"
+                    (valueChange)="updateField('name', $event)"></mb-input>
+            </mb-form-field>
+            <mb-form-field label="Role" [controlId]="'edit-user-role'">
+                <app-role-dropdown
+                    [value]="form().roleName || ''"
+                    (valueChange)="updateField('roleName', $event)"
+                    (roleChange)="updateField('roleId', $event?.id || null)">
+                </app-role-dropdown>
+            </mb-form-field>
+
+            <div class="users-modal__section">
+                <div class="users-modal__section-title">School access</div>
+                <label class="users-radio">
+                    <input type="radio" name="edit-access"
+                        [checked]="form().schoolAccessScope === 'all'"
+                        (change)="setSchoolAccess('all')" />
+                    <span>All schools</span>
+                </label>
+                <label class="users-radio">
+                    <input type="radio" name="edit-access"
+                        [checked]="form().schoolAccessScope === 'selected'"
+                        (change)="setSchoolAccess('selected')" />
+                    <span>Selected schools</span>
+                </label>
+                <div class="users-school-list" *ngIf="form().schoolAccessScope === 'selected'">
+                    <app-school-selector
+                        [schools]="activeSchools"
+                        [selected]="form().selectedSchoolIds"
+                        (selectedChange)="updateField('selectedSchoolIds', $event)">
+                    </app-school-selector>
+                </div>
+            </div>
+
+            <div class="users-modal__section">
+                <div class="users-modal__section-title">Profile details</div>
+                <mb-form-field label="Job title" [controlId]="'edit-user-job'">
+                    <mb-input id="edit-user-job" [value]="form().jobTitle"
+                        (valueChange)="updateField('jobTitle', $event)"></mb-input>
+                </mb-form-field>
+                <mb-form-field label="Department" [controlId]="'edit-user-dept'">
+                    <mb-input id="edit-user-dept" [value]="form().department"
+                        (valueChange)="updateField('department', $event)"></mb-input>
+                </mb-form-field>
+            </div>
+        </div>
+        <div class="users-modal__footer">
+            <div class="users-modal__hint">Changes are saved immediately.</div>
+            <div class="users-modal__actions">
+                <mb-button variant="secondary" (click)="closed.emit()">Cancel</mb-button>
+                <mb-button variant="primary"
+                    [disabled]="requestState.status === 'loading'"
+                    (click)="submit()">
+                    {{ requestState.status === 'loading' ? 'Saving...' : 'Save changes' }}
+                </mb-button>
+            </div>
+        </div>
+    </div>
+</div>

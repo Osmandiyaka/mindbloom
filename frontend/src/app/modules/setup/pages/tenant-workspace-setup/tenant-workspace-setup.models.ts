@@ -10,15 +10,20 @@ export interface SchoolRow {
     address?: AddressValue;
 }
 
-export type UserRole = 'Owner' | 'Administrator' | 'Staff' | 'Teacher' | string;
-export type UserStatus = 'Invited' | 'Active' | 'Suspended';
+export type UserStatus = 'active' | 'suspended' | 'invited';
+
+export type SchoolAccess =
+    | { scope: 'all' }
+    | { scope: 'selected'; schoolIds: string[] };
 
 export interface UserRow {
     id: string;
     name: string;
     email: string;
-    role: UserRole;
-    schoolAccess: 'all' | string[];
+    roleId: string | null;
+    roleName: string | null;
+    roleIds: string[];
+    schoolAccess: SchoolAccess;
     status: UserStatus;
     jobTitle?: string;
     department?: string;

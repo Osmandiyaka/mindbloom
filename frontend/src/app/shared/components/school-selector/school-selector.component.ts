@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MbCheckboxComponent, MbInputComponent } from '@mindbloom/ui';
-import { ApiClient } from '../../../core/http/api-client.service';
-import type { School } from '../../../core/school/school.models';
+export type SchoolOption = { id: string; name: string };
 
 @Component({
     selector: 'app-school-selector',
@@ -35,22 +34,22 @@ import type { School } from '../../../core/school/school.models';
                 <div class="school-selector__count">{{ selected.length }} selected</div>
                 <div class="school-selector__note">You can change access later.</div>
             </div>
-            <div class="school-selector__chips" *ngIf="selected.length">
-                <span class="school-selector__chip" *ngFor="let name of selectedChips">{{ name }}</span>
-                <span class="school-selector__chip school-selector__chip--muted" *ngIf="overflowCount">
-                    +{{ overflowCount }} more
-                </span>
-            </div>
+                <div class="school-selector__chips" *ngIf="selected.length">
+                    <span class="school-selector__chip" *ngFor="let name of selectedChips">{{ name }}</span>
+                    <span class="school-selector__chip school-selector__chip--muted" *ngIf="overflowCount">
+                        +{{ overflowCount }} more
+                    </span>
+                </div>
             <div class="school-selector__list" role="group" [attr.aria-label]="'Select schools'">
                 <div class="school-selector__skeleton" *ngIf="isLoading">
                     <span class="school-selector__skeleton-row" *ngFor="let _ of skeletonRows"></span>
                 </div>
                 <ng-container *ngIf="!isLoading">
-                    <mb-checkbox *ngFor="let name of filteredSchools"
-                        [checked]="selected.includes(name)"
+                    <mb-checkbox *ngFor="let school of filteredSchools; trackBy: trackSchool"
+                        [checked]="selected.includes(school.id)"
                         [disabled]="disabled"
-                        (checkedChange)="toggleSchool(name, $event)">
-                        {{ name }}
+                        (checkedChange)="toggleSchool(school.id, $event)">
+                        {{ school.name }}
                     </mb-checkbox>
                     <div class="school-selector__empty" *ngIf="!filteredSchools.length">
                         <div>No schools found.</div>
@@ -65,31 +64,29 @@ import type { School } from '../../../core/school/school.models';
     `,
     styleUrls: ['./school-selector.component.scss']
 })
-export class SchoolSelectorComponent implements OnInit {
-    @Input() schools: string[] = [];
+export class SchoolSelectorComponent {
+    @Input() schools: SchoolOption[] = [];
     @Input() selected: string[] = [];
     @Input() disabled = false;
     @Input() searchPlaceholder = 'Search schools...';
     @Output() selectedChange = new EventEmitter<string[]>();
     @Output() interaction = new EventEmitter<void>();
 
-    private readonly api = inject(ApiClient);
-
     search = '';
     isLoading = false;
     skeletonRows = Array.from({ length: 5 });
 
-    get filteredSchools(): string[] {
+    get filteredSchools(): SchoolOption[] {
         const query = this.search.trim().toLowerCase();
         const source = this.schools;
         if (!query) return source;
-        return source.filter(name => name.toLowerCase().includes(query));
+        return source.filter(school => school.name.toLowerCase().includes(query));
     }
 
     get selectedChips(): string[] {
         const selectedSet = new Set(this.selected);
-        const ordered = this.schools.filter(name => selectedSet.has(name));
-        return ordered.slice(0, 2);
+        const ordered = this.schools.filter(school => selectedSet.has(school.id));
+        return ordered.map(school => school.name).slice(0, 2);
     }
 
     get overflowCount(): number {
@@ -101,16 +98,16 @@ export class SchoolSelectorComponent implements OnInit {
         this.interaction.emit();
     }
 
-    toggleSchool(name: string, checked: boolean): void {
+    toggleSchool(schoolId: string, checked: boolean): void {
         const next = checked
-            ? [...this.selected, name]
-            : this.selected.filter(item => item !== name);
+            ? [...this.selected, schoolId]
+            : this.selected.filter(item => item !== schoolId);
         this.selectedChange.emit([...new Set(next)]);
         this.interaction.emit();
     }
 
     selectAll(): void {
-        const next = [...new Set([...this.selected, ...this.filteredSchools])];
+        const next = [...new Set([...this.selected, ...this.filteredSchools.map(school => school.id)])];
         this.selectedChange.emit(next);
         this.interaction.emit();
     }
@@ -125,19 +122,5 @@ export class SchoolSelectorComponent implements OnInit {
         this.interaction.emit();
     }
 
-    ngOnInit(): void {
-        this.isLoading = true;
-        this.api.get<School[]>('schools').subscribe({
-            next: (schools) => {
-                const names = Array.isArray(schools)
-                    ? schools.map(school => school.name).filter(Boolean)
-                    : [];
-                this.schools = names;
-                this.isLoading = false;
-            },
-            error: () => {
-                this.isLoading = false;
-            },
-        });
-    }
+    trackSchool = (_: number, school: SchoolOption) => school.id;
 }

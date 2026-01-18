@@ -229,10 +229,11 @@ export class TenantWorkspaceSetupFacade {
         return this.users().filter(user => {
             if (!memberIds.has(user.id)) return false;
             if (!search) return true;
+            const roleName = user.roleName || '';
             return (
                 user.name.toLowerCase().includes(search) ||
                 user.email.toLowerCase().includes(search) ||
-                user.role.toLowerCase().includes(search)
+                roleName.toLowerCase().includes(search)
             );
         });
     });
@@ -394,7 +395,7 @@ export class TenantWorkspaceSetupFacade {
         {
             key: 'role',
             label: 'Role',
-            cell: row => row.role
+            cell: row => row.roleName || '—'
         },
         {
             key: 'status',

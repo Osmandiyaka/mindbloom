@@ -1,0 +1,48 @@
+<div class="users-modal" *ngIf="isOpen && user" role="presentation">
+    <div class="users-modal__backdrop"></div>
+    <div class="users-modal__dialog" role="dialog" aria-modal="true"
+        aria-labelledby="view-user-title" tabindex="0">
+        <div class="users-modal__header">
+            <div>
+                <div id="view-user-title" class="users-modal__title">User details</div>
+                <div class="users-modal__subtitle">Review identity, access, and status.</div>
+            </div>
+            <button type="button" class="users-modal__close" (click)="closed.emit()"
+                aria-label="Close dialog">×</button>
+        </div>
+        <div class="users-modal__body" *ngIf="user">
+            <div class="users-view">
+                <div class="users-view__name">{{ user.name || 'Pending name' }}</div>
+                <div class="users-view__email">{{ user.email }}</div>
+                <div class="users-view__row">
+                    <div class="users-view__label">Role</div>
+                    <div class="users-view__value">{{ user.roleName || '—' }}</div>
+                </div>
+                <div class="users-view__row">
+                    <div class="users-view__label">School access</div>
+                    <div class="users-view__value">
+                        {{ user.schoolAccess.scope === 'all' ? 'All schools' : user.schoolAccess.schoolIds.length + ' schools' }}
+                    </div>
+                </div>
+                <div class="users-view__row">
+                    <div class="users-view__label">Status</div>
+                    <div class="users-view__value">{{ user.status }}</div>
+                </div>
+                <div class="users-view__row" *ngIf="user.lastLogin">
+                    <div class="users-view__label">Last login</div>
+                    <div class="users-view__value">{{ user.lastLogin }}</div>
+                </div>
+                <div class="users-view__row" *ngIf="user.createdAt">
+                    <div class="users-view__label">Created</div>
+                    <div class="users-view__value">{{ user.createdAt | date:'mediumDate' }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="users-modal__footer" *ngIf="user">
+            <div class="users-modal__actions">
+                <mb-button variant="secondary" (click)="closed.emit()">Close</mb-button>
+                <mb-button variant="primary" (click)="edit.emit(user)">Edit</mb-button>
+            </div>
+        </div>
+    </div>
+</div>

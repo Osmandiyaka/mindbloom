@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { UserRole } from './tenant-workspace-setup.models';
 
 type RolePreviewItem = {
     title: string;
@@ -28,7 +27,7 @@ type RolePreviewItem = {
     styleUrls: ['./role-preview.component.scss']
 })
 export class RolePreviewComponent {
-    @Input() role: UserRole = 'Staff';
+    @Input() role = 'Staff';
     @Input() badge = '';
     @Input() items: RolePreviewItem[] = [];
 }
