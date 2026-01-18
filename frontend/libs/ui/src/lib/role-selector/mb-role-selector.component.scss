@@ -231,6 +231,13 @@
     z-index: 1;
 }
 
+.mb-role-selector__content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: 6px;
+}
+
 .mb-role-selector__search-icon {
     width: 16px;
     height: 16px;
@@ -301,8 +308,6 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    max-height: 260px;
-    overflow-y: auto;
     padding: 0 6px;
 }
 

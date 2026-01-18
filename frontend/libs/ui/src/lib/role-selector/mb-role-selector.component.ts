@@ -166,6 +166,7 @@ type RoleGroup = {
                         />
                     </div>
 
+                    <div class="mb-role-selector__content">
                     <div *ngIf="loading" class="mb-role-selector__loading">
                         <div class="mb-role-selector__skeleton" *ngFor="let _ of skeletonRows"></div>
                     </div>
@@ -326,6 +327,7 @@ type RoleGroup = {
                             </div>
                         </ng-template>
                     </ng-container>
+                    </div>
 
                     <div class="mb-role-selector__footer" *ngIf="!readOnly">
                         <button type="button" class="mb-role-selector__footer-button" (click)="clearSelection()">Clear</button>
