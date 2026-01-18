@@ -708,6 +708,10 @@
     grid-column: span 6;
 }
 
+.users-create__field--span-5 {
+    grid-column: span 5;
+}
+
 .users-create__field--span-2 {
     grid-column: span 2;
 }
@@ -761,16 +765,59 @@
 }
 
 .users-create__avatar-preview {
-    width: 32px;
-    height: 32px;
-    border-radius: 12px;
-    background: color-mix(in srgb, var(--mb-color-border-subtle) 60%, transparent);
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--mb-color-primary) 8%, var(--mb-color-surface));
+    border: 1px solid color-mix(in srgb, var(--mb-color-border) 55%, transparent);
     display: grid;
     place-items: center;
     font-weight: 600;
+    font-size: 14px;
     color: var(--mb-color-text);
     background-size: cover;
     background-position: center;
+}
+
+.users-create__password-control {
+    position: relative;
+}
+
+:host ::ng-deep .users-create__password-control .mb-input {
+    padding-right: 44px;
+}
+
+.users-create__password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: var(--mb-color-text-muted);
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.users-create__password-toggle:hover,
+.users-create__password-toggle:focus-visible {
+    background: color-mix(in srgb, var(--mb-color-border) 35%, transparent);
+    color: var(--mb-color-text);
+}
+
+.users-create__password-toggle:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.users-create__password-icon {
+    width: 16px;
+    height: 16px;
 }
 
 .users-create__avatar-actions {
@@ -1047,6 +1094,7 @@
     }
 
     .users-create__field--span-6,
+    .users-create__field--span-5,
     .users-create__field--span-2,
     .users-create__field--span-8 {
         grid-column: span 2;

@@ -13,6 +13,8 @@ type RolePreviewItem = {
 type CreateUserSnapshot = {
     name: string;
     email: string;
+    password: string;
+    generatePassword: boolean;
     role: UserRole;
     schoolAccess: 'all' | 'selected';
     selectedSchools: string[];
@@ -107,9 +109,13 @@ export class TenantUsersComponent implements OnInit {
     createDateOfBirth = signal('');
     createPhone = signal('');
     createProfilePicture = signal<string | null>(null);
+    createPassword = signal('');
+    createGeneratePassword = signal(true);
+    createShowPassword = signal(false);
     createSubmitAttempted = signal(false);
     createNameTouched = signal(false);
     createEmailTouched = signal(false);
+    createPasswordTouched = signal(false);
     createRoleTouched = signal(false);
     createSchoolAccessTouched = signal(false);
     createAdvancedOpen = signal(false);
@@ -180,10 +186,12 @@ export class TenantUsersComponent implements OnInit {
         const errors: Array<{ id: string; label: string }> = [];
         const nameError = this.createNameError(true);
         const emailError = this.createEmailError(true);
+        const passwordError = this.createPasswordError(true);
         const roleError = this.createRoleError(true);
         const accessError = this.createSchoolAccessError(true);
         if (nameError) errors.push({ id: 'create-user-name', label: 'Full name' });
         if (emailError) errors.push({ id: 'create-user-email', label: 'Email' });
+        if (passwordError) errors.push({ id: 'create-user-password', label: 'Password' });
         if (roleError) errors.push({ id: 'create-user-role', label: 'Role' });
         if (accessError) errors.push({ id: 'create-user-school-access', label: 'School access' });
         return errors;
@@ -336,6 +344,9 @@ export class TenantUsersComponent implements OnInit {
         this.createDateOfBirth.set('');
         this.createPhone.set('');
         this.createProfilePicture.set(null);
+        this.createPassword.set('');
+        this.createGeneratePassword.set(true);
+        this.createShowPassword.set(false);
         this.createStatus.set('Active');
         this.createNotes.set('');
         this.createNotesOpen.set(false);
@@ -345,6 +356,7 @@ export class TenantUsersComponent implements OnInit {
         this.createSubmitAttempted.set(false);
         this.createNameTouched.set(false);
         this.createEmailTouched.set(false);
+        this.createPasswordTouched.set(false);
         this.createRoleTouched.set(false);
         this.createSchoolAccessTouched.set(false);
         this.createAdvancedOpen.set(false);
@@ -607,6 +619,20 @@ export class TenantUsersComponent implements OnInit {
         this.createRolePreviewOpen.set(false);
     }
 
+    toggleCreateGeneratePassword(checked: boolean): void {
+        this.createGeneratePassword.set(checked);
+        if (checked) {
+            this.createPassword.set('');
+            this.createShowPassword.set(false);
+            this.createPasswordTouched.set(false);
+        }
+    }
+
+    toggleCreateShowPassword(): void {
+        if (this.createGeneratePassword()) return;
+        this.createShowPassword.update(value => !value);
+    }
+
     setCreateSchoolAccess(value: 'all' | 'selected'): void {
         this.createSchoolAccess.set(value);
         this.createSchoolAccessTouched.set(true);
@@ -723,6 +749,15 @@ export class TenantUsersComponent implements OnInit {
         return '';
     }
 
+    createPasswordError(force = false): string {
+        if (this.createGeneratePassword() || this.createSendInviteEmail()) return '';
+        if (!this.shouldShowCreateError(this.createPasswordTouched(), force)) return '';
+        if (!this.createPassword().trim()) {
+            return 'Password is required when invite email is disabled.';
+        }
+        return '';
+    }
+
     createRoleError(force = false): string {
         if (!this.shouldShowCreateError(this.createRoleTouched(), force)) return '';
         if (!this.createRole()) return 'Role is required.';
@@ -740,6 +775,7 @@ export class TenantUsersComponent implements OnInit {
     readonly createCanSubmit = computed(() => {
         if (this.createNameError(true)) return false;
         if (this.createEmailError(true)) return false;
+        if (this.createPasswordError(true)) return false;
         if (this.createRoleError(true)) return false;
         if (this.createSchoolAccessError(true)) return false;
         return true;
@@ -838,6 +874,8 @@ export class TenantUsersComponent implements OnInit {
         return {
             name: this.createName(),
             email: this.createEmail(),
+            password: this.createPassword(),
+            generatePassword: this.createGeneratePassword(),
             role: this.createRole(),
             schoolAccess: this.createSchoolAccess(),
             selectedSchools: [...this.createSelectedSchools()].sort(),
