@@ -12,5 +12,3 @@ export const ChartOfAccountSchema = new Schema(
     },
     { timestamps: true },
 );
-
-ChartOfAccountSchema.index({ code: 1 }, { unique: true });

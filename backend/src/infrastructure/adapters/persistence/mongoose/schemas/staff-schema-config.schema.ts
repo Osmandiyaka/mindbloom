@@ -2,7 +2,7 @@ import { Schema, Types } from 'mongoose';
 
 export const StaffSchemaConfigSchema = new Schema(
     {
-        tenantId: { type: Types.ObjectId, ref: 'Tenant', required: true, index: true },
+        tenantId: { type: Types.ObjectId, ref: 'Tenant', required: true },
         requiredFields: { type: [String], default: [] },
         enabledFields: { type: [String], default: [] },
         relationshipOptions: {

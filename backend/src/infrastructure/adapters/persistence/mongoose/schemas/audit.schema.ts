@@ -9,7 +9,7 @@ export class AuditLogDocument extends Document {
     @Prop({ required: true })
     timestamp: Date;
 
-    @Prop({ index: true })
+    @Prop()
     correlationId?: string;
 
     @Prop()

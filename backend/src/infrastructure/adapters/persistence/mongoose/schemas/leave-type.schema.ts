@@ -10,5 +10,3 @@ export const LeaveTypeSchema = new Schema(
     },
     { timestamps: true },
 );
-
-LeaveTypeSchema.index({ code: 1 }, { unique: true });

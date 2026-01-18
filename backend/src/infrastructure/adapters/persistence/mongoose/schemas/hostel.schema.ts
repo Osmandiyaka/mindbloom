@@ -20,5 +20,3 @@ export const HostelSchema = new Schema(
   },
   { timestamps: true },
 );
-
-HostelSchema.index({ code: 1 }, { unique: true });

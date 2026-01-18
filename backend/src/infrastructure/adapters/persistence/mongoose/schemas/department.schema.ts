@@ -9,5 +9,3 @@ export const DepartmentSchema = new Schema(
     },
     { timestamps: true },
 );
-
-DepartmentSchema.index({ code: 1 }, { unique: true });

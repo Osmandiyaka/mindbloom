@@ -4,7 +4,7 @@ export const BudgetSchema = new Schema(
     {
         tenantId: { type: String, index: true },
         name: { type: String, required: true },
-        code: { type: String, required: true, index: true },
+        code: { type: String, required: true },
         ownerId: { type: String },
         ownerName: { type: String },
         approvers: [{ type: String }],
