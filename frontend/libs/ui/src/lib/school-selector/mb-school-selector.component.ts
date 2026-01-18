@@ -227,11 +227,13 @@ export class MbSchoolSelectorComponent implements OnDestroy {
     private static cachedSchools: MbSchoolSelectorOption[] | null = null;
 
     private get availableSchools(): MbSchoolSelectorOption[] {
-        return this.options.length ? this.options : this.schools;
-    }
-
-    private get schools(): MbSchoolSelectorOption[] {
-        return this.internalSchools;
+        const merged = [...this.internalSchools, ...this.options];
+        const seen = new Set<string>();
+        return merged.filter(option => {
+            if (!option?.id || seen.has(option.id)) return false;
+            seen.add(option.id);
+            return true;
+        });
     }
 
     private internalSchools: MbSchoolSelectorOption[] = [];
@@ -434,15 +436,14 @@ export class MbSchoolSelectorComponent implements OnDestroy {
     }
 
     loadSchools(): void {
-        if (this.options.length) return;
         if (this.loading) return;
-        if (MbSchoolSelectorComponent.cachedSchools) {
+        if (MbSchoolSelectorComponent.cachedSchools?.length) {
             this.internalSchools = [...MbSchoolSelectorComponent.cachedSchools];
             return;
         }
         this.loading = true;
         this.errorMessage = '';
-        this.api.get<unknown>('schools').subscribe({
+        this.api.get<unknown>('/api/schools').subscribe({
             next: response => {
                 const schools = this.normalizeSchools(response);
                 this.internalSchools = schools;
@@ -586,5 +587,5 @@ export class MbSchoolSelectorComponent implements OnDestroy {
         });
     }
 
-    constructor(private readonly viewContainerRef: ViewContainerRef) {}
+    constructor(private readonly viewContainerRef: ViewContainerRef) { }
 }
