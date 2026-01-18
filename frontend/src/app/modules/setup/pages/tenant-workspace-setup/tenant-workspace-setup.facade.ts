@@ -12,6 +12,7 @@ import { SchoolService } from '../../../../core/school/school.service';
 import type { FirstLoginSetupState } from '../../../../core/types/first-login-setup-state';
 import { ToastService } from '../../../../core/ui/toast/toast.service';
 import { ClassSectionService } from '../../../../core/services/class-section.service';
+import { UserSerivce } from './user-serivce.service';
 import {
     ClassLevelType,
     ClassRow,
@@ -88,8 +89,10 @@ export class TenantWorkspaceSetupFacade {
     private readonly injector = inject(EnvironmentInjector);
     private readonly toast = inject(ToastService);
     private readonly classSectionService = inject(ClassSectionService);
+    private readonly userSerivce = inject(UserSerivce);
 
     private autosaveInitialized = false;
+    private userSyncInitialized = false;
 
     step = signal<number>(0);
     isLoading = signal(true);
@@ -347,7 +350,7 @@ export class TenantWorkspaceSetupFacade {
         if (!activeId) return [];
         const memberIds = new Set(this.orgUnitMemberIds()[activeId] || []);
         const search = this.orgUnitMemberSearch().trim().toLowerCase();
-        return this.users().filter(user => {
+        return this.userSerivce.users().filter(user => {
             if (!memberIds.has(user.id)) return false;
             if (!search) return true;
             return (
@@ -438,7 +441,7 @@ export class TenantWorkspaceSetupFacade {
         return this.sectionRows().filter(section => section.classId === selected).length;
     });
     readonly totalSectionCount = computed(() => this.sectionRows().length);
-    readonly teacherOptions = computed(() => this.users()
+    readonly teacherOptions = computed(() => this.userSerivce.users()
         .filter(user => ['Teacher', 'Staff'].includes(user.role))
         .map(user => ({
             id: user.id,
@@ -453,7 +456,7 @@ export class TenantWorkspaceSetupFacade {
             code: row.code,
             levelType: row.levelType || undefined,
         })));
-    readonly staffSelectorOptions = computed(() => this.users()
+    readonly staffSelectorOptions = computed(() => this.userSerivce.users()
         .filter(user => ['Teacher', 'Staff'].includes(user.role))
         .map(user => ({
             id: user.id,
@@ -565,7 +568,7 @@ export class TenantWorkspaceSetupFacade {
     readonly isReviewStep = computed(() => this.step() === 7);
     readonly isDoneStep = computed(() => this.step() === 8);
     readonly showErrors = computed(() => this.attemptedContinue());
-    readonly userCount = computed(() => this.users().length);
+    readonly userCount = computed(() => this.userSerivce.users().length);
 
     readonly levelsError = computed(() => {
         if (!this.showErrors() || this.step() !== 4) return '';
@@ -573,9 +576,9 @@ export class TenantWorkspaceSetupFacade {
     });
 
     readonly filteredUsers = computed(() => {
-        const query = this.userSearch().trim().toLowerCase();
-        if (!query) return this.users();
-        return this.users().filter(user =>
+        const query = this.userSerivce.userSearch().trim().toLowerCase();
+        if (!query) return this.userSerivce.users();
+        return this.userSerivce.users().filter(user =>
             user.name.toLowerCase().includes(query) ||
             user.email.toLowerCase().includes(query)
         );
@@ -657,7 +660,7 @@ export class TenantWorkspaceSetupFacade {
         return true;
     });
 
-    readonly canContinueUsersStep = computed(() => this.users().length > 0 || this.usersStepSkipped());
+    readonly canContinueUsersStep = computed(() => this.userSerivce.canContinueUsersStep());
 
     readonly reviewReady = computed(() =>
         this.schoolsValid()
@@ -735,6 +738,7 @@ export class TenantWorkspaceSetupFacade {
     init(): void {
         this.loadInitialState();
         this.initAutosave();
+        this.initUserSync();
     }
 
     startSetup(): void {
@@ -965,7 +969,7 @@ export class TenantWorkspaceSetupFacade {
     }
 
     getUserRowIndex(row: UserRow): number {
-        return this.users().indexOf(row);
+        return this.userSerivce.users().indexOf(row);
     }
 
     handleUserCellClick(event: { row: UserRow; column: MbTableColumn<UserRow> }): void {
@@ -1497,7 +1501,7 @@ export class TenantWorkspaceSetupFacade {
 
     teacherLabel(id: string | null | undefined): string {
         if (!id) return 'Unassigned';
-        const user = this.users().find(item => item.id === id);
+        const user = this.userSerivce.users().find(item => item.id === id);
         return user?.name || user?.email || 'Unassigned';
     }
 
@@ -2867,7 +2871,7 @@ export class TenantWorkspaceSetupFacade {
         if (this.inviteHasErrors()) return;
         this.inviteSending.set(true);
         const emails = this.inviteEmailList();
-        const existingEmails = new Set(this.users().map(user => user.email.toLowerCase()));
+        const existingEmails = new Set(this.userSerivce.users().map(user => user.email.toLowerCase()));
         const schoolAccess = this.inviteSchoolAccess() === 'all'
             ? 'all'
             : [...this.inviteSelectedSchools()];
@@ -2884,8 +2888,8 @@ export class TenantWorkspaceSetupFacade {
                 createdAt: new Date().toISOString(),
             }));
         if (newUsers.length) {
-            this.users.update(items => [...items, ...newUsers]);
-            this.usersStepSkipped.set(false);
+            this.userSerivce.users.update(items => [...items, ...newUsers]);
+            this.userSerivce.usersStepSkipped.set(false);
         }
         this.closeInviteModal();
     }
@@ -2933,7 +2937,7 @@ export class TenantWorkspaceSetupFacade {
     }
 
     openViewUser(index: number): void {
-        const user = this.users()[index];
+        const user = this.userSerivce.users()[index];
         if (!user) return;
         this.viewUser.set(user);
         this.isViewUserModalOpen.set(true);
@@ -2945,7 +2949,7 @@ export class TenantWorkspaceSetupFacade {
     }
 
     openEditUser(index: number): void {
-        const user = this.users()[index];
+        const user = this.userSerivce.users()[index];
         if (!user) return;
         this.editUserIndex.set(index);
         this.editName.set(user.name);
@@ -2982,7 +2986,7 @@ export class TenantWorkspaceSetupFacade {
         const schoolAccess = this.editSchoolAccess() === 'all'
             ? 'all'
             : [...this.editSelectedSchools()];
-        this.users.update(items => items.map((user, i) => {
+        this.userSerivce.users.update(items => items.map((user, i) => {
             if (i !== index) return user;
             return {
                 ...user,
@@ -3115,7 +3119,7 @@ export class TenantWorkspaceSetupFacade {
         const schoolAccess = this.createSchoolAccess() === 'all'
             ? 'all'
             : [...this.createSelectedSchools()];
-        this.users.update(items => [
+        this.userSerivce.users.update(items => [
             ...items,
             {
                 id: this.nextUserId(),
@@ -3134,7 +3138,7 @@ export class TenantWorkspaceSetupFacade {
                 createdAt: new Date().toISOString(),
             }
         ]);
-        this.usersStepSkipped.set(false);
+        this.userSerivce.usersStepSkipped.set(false);
         this.lastCreateRole.set(this.createRole());
         this.lastCreateAccess.set(this.createSchoolAccess());
         this.createSubmitting.set(false);
@@ -3179,11 +3183,11 @@ export class TenantWorkspaceSetupFacade {
     });
 
     resendInvite(index: number): void {
-        this.users.update(items => items.map((user, i) => i === index ? { ...user } : user));
+        this.userSerivce.users.update(items => items.map((user, i) => i === index ? { ...user } : user));
     }
 
     toggleUserStatus(index: number): void {
-        this.users.update(items => items.map((user, i) => {
+        this.userSerivce.users.update(items => items.map((user, i) => {
             if (i !== index) return user;
             const status: UserStatus = user.status === 'Suspended' ? 'Active' : 'Suspended';
             return { ...user, status };
@@ -3191,7 +3195,7 @@ export class TenantWorkspaceSetupFacade {
     }
 
     removeUser(index: number): void {
-        this.users.update(items => items.filter((_, i) => i !== index));
+        this.userSerivce.users.update(items => items.filter((_, i) => i !== index));
     }
 
     triggerCsvImport(fileInput: HTMLInputElement): void {
@@ -3207,8 +3211,8 @@ export class TenantWorkspaceSetupFacade {
             const text = String(reader.result || '');
             const rows = this.parseCsvUsers(text);
             if (rows.length) {
-                this.users.update(items => [...items, ...rows]);
-                this.usersStepSkipped.set(false);
+                this.userSerivce.users.update(items => [...items, ...rows]);
+                this.userSerivce.usersStepSkipped.set(false);
             }
             input.value = '';
         };
@@ -3234,7 +3238,7 @@ export class TenantWorkspaceSetupFacade {
     }
 
     skipUsersStep(): void {
-        this.usersStepSkipped.set(true);
+        this.userSerivce.usersStepSkipped.set(true);
         this.attemptedContinue.set(false);
         this.next();
     }
@@ -3334,11 +3338,25 @@ export class TenantWorkspaceSetupFacade {
                 this.sectionRows();
                 this.gradingModel();
                 this.gradingScales();
-                this.users();
+                this.userSerivce.users();
 
                 if (!this.isLoading()) {
                     this.persistState('in_progress');
                 }
+            });
+        });
+    }
+
+    private initUserSync(): void {
+        if (this.userSyncInitialized) return;
+        this.userSyncInitialized = true;
+
+        runInInjectionContext(this.injector, () => {
+            effect(() => {
+                const activeSchools = this.schoolRows()
+                    .filter(row => row.status === 'Active')
+                    .map(row => row.name);
+                this.userSerivce.setActiveSchoolNames(activeSchools);
             });
         });
     }
@@ -3391,9 +3409,9 @@ export class TenantWorkspaceSetupFacade {
             this.gradingScales.set([defaultScale]);
         }
         if (data.users?.length) {
-            this.users.set(this.normalizeUserRows(data.users));
+            this.userSerivce.setUsers(data.users);
         }
-        this.usersStepSkipped.set(!!data.usersStepSkipped);
+        this.userSerivce.setUsersStepSkipped(!!data.usersStepSkipped);
         this.syncClassCounter();
         this.syncSectionCounter();
         if (!this.selectedClassId() && this.classRows().length) {
@@ -3425,8 +3443,8 @@ export class TenantWorkspaceSetupFacade {
                 sections: this.sectionRows(),
                 gradingModel: this.gradingModel(),
                 gradingScales: this.gradingScales(),
-                users: this.users(),
-                usersStepSkipped: this.usersStepSkipped(),
+                users: this.userSerivce.users(),
+                usersStepSkipped: this.userSerivce.usersStepSkipped(),
             }
         };
 
@@ -3724,7 +3742,7 @@ export class TenantWorkspaceSetupFacade {
     private isCreateEmailDuplicate(email: string): boolean {
         const normalized = email.trim().toLowerCase();
         if (!normalized) return false;
-        return this.users().some(user => user.email.toLowerCase() === normalized);
+        return this.userSerivce.users().some(user => user.email.toLowerCase() === normalized);
     }
 
     private currentCreateFormState(): CreateUserSnapshot {

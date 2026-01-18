@@ -6,24 +6,30 @@ import { TenantService } from '../../../../core/services/tenant.service';
 import { SchoolService } from '../../../../core/school/school.service';
 import { ToastService } from '../../../../core/ui/toast/toast.service';
 import { ClassSectionService } from '../../../../core/services/class-section.service';
+import { ApiClient } from '../../../../core/http/api-client.service';
+import { UserSerivce } from './user-serivce.service';
 
 describe('TenantWorkspaceSetupFacade (create user)', () => {
     let facade: TenantWorkspaceSetupFacade;
+    let usersService: UserSerivce;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
                 TenantWorkspaceSetupFacade,
+                UserSerivce,
                 { provide: TenantSettingsService, useValue: {} },
                 { provide: TenantService, useValue: {} },
                 { provide: SchoolService, useValue: {} },
                 { provide: ToastService, useValue: { success: () => {}, error: () => {} } },
                 { provide: ClassSectionService, useValue: {} },
                 { provide: Router, useValue: { navigateByUrl: () => {} } },
+                { provide: ApiClient, useValue: { get: () => ({ subscribe: () => {} }) } },
             ],
         });
 
         facade = TestBed.inject(TenantWorkspaceSetupFacade);
+        usersService = TestBed.inject(UserSerivce);
     });
 
     it('requires name, email, and role before submitting', () => {
@@ -49,7 +55,7 @@ describe('TenantWorkspaceSetupFacade (create user)', () => {
     });
 
     it('flags duplicate email addresses', () => {
-        facade.users.set([{
+        usersService.users.set([{
             id: 'user-1',
             name: 'Existing User',
             email: 'existing@school.com',

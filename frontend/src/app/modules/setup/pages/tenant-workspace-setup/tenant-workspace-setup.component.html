@@ -28,7 +28,7 @@
                         <mb-alert *ngIf="vm.errorMessage()" variant="danger">{{ vm.errorMessage() }}</mb-alert>
 
                         <app-tenant-schools *ngIf="vm.step() === 1"></app-tenant-schools>
-                        <app-tenant-workspace-setup-users *ngIf="vm.step() === 2"></app-tenant-workspace-setup-users>
+                        <app-tenant-users *ngIf="vm.step() === 2"></app-tenant-users>
                         <app-tenant-workspace-setup-org-units *ngIf="vm.step() === 3"></app-tenant-workspace-setup-org-units>
                         <app-tenant-workspace-setup-levels *ngIf="vm.step() === 4"></app-tenant-workspace-setup-levels>
                         <app-tenant-workspace-setup-classes-sections *ngIf="vm.step() === 5"></app-tenant-workspace-setup-classes-sections>

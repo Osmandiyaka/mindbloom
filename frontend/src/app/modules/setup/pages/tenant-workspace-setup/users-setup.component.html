@@ -91,12 +91,12 @@
 
     <div class="setup-footer">
         <div class="setup-footer__actions">
-            <mb-button variant="secondary" (click)="vm.back()">Back</mb-button>
+            <mb-button variant="secondary" (click)="back()">Back</mb-button>
             <mb-button variant="primary" [disabled]="!vm.canContinueUsersStep()"
-                (click)="vm.next()">Continue</mb-button>
+                (click)="next()">Continue</mb-button>
         </div>
         <div class="setup-footer__aside">
-            <button type="button" class="setup-skip-link" (click)="vm.skipUsersStep()">Skip for
+            <button type="button" class="setup-skip-link" (click)="skipUsersStep()">Skip for
                 now</button>
             <div class="setup-footer__hint">You can continue setup without adding users.</div>
             <div class="setup-footer__hint">You can resume later from Settings → Workspace

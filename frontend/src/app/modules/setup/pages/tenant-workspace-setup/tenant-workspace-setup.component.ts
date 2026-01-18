@@ -1,13 +1,14 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TenantWorkspaceSetupFacade } from './tenant-workspace-setup.facade';
+import { UserSerivce } from './user-serivce.service';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from './tenant-workspace-setup.shared';
 import { TenantSchoolsComponent } from './school-setup.component';
 import { TenantWorkspaceSetupOrgUnitsComponent } from './tenant-workspace-setup-org-units.component';
 import { TenantWorkspaceSetupLevelsComponent } from './tenant-workspace-setup-levels.component';
 import { TenantWorkspaceSetupClassesSectionsComponent } from './tenant-workspace-setup-classes-sections.component';
 import { TenantWorkspaceSetupGradingComponent } from './tenant-workspace-setup-grading.component';
-import { TenantWorkspaceSetupUsersComponent } from './tenant-workspace-setup-users.component';
+import { TenantUsersComponent } from './tenant-workspace-setup-users.component';
 import { TenantWorkspaceSetupReviewComponent } from './tenant-workspace-setup-review.component';
 import { TenantWorkspaceSetupCompleteComponent } from './tenant-workspace-setup-complete.component';
 
@@ -21,20 +22,22 @@ import { TenantWorkspaceSetupCompleteComponent } from './tenant-workspace-setup-
         TenantWorkspaceSetupLevelsComponent,
         TenantWorkspaceSetupClassesSectionsComponent,
         TenantWorkspaceSetupGradingComponent,
-        TenantWorkspaceSetupUsersComponent,
+        TenantUsersComponent,
         TenantWorkspaceSetupReviewComponent,
         TenantWorkspaceSetupCompleteComponent,
     ],
     templateUrl: './tenant-workspace-setup.component.html',
     styleUrls: ['./tenant-workspace-setup.component.scss'],
-    providers: [TenantWorkspaceSetupFacade],
+    providers: [TenantWorkspaceSetupFacade, UserSerivce],
 })
 export class TenantWorkspaceSetupComponent implements OnInit {
     readonly vm = inject(TenantWorkspaceSetupFacade);
+    private readonly users = inject(UserSerivce);
     private readonly route = inject(ActivatedRoute);
 
     ngOnInit(): void {
         this.vm.init();
+        this.users.init();
         this.route.queryParamMap.subscribe(params => {
             const stepParam = Number(params.get('step'));
             if (!Number.isFinite(stepParam) || stepParam <= 0) {

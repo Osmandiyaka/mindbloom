@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, SortOrder } from 'mongoose';
 
 const DEFAULT_STAFF_SCHEMA_CONFIG = {
     requiredFields: ['staffCode', 'firstName', 'lastName'],
@@ -142,7 +142,9 @@ export class HrService {
             ? filters.sortKey
             : 'lastName';
         const sortDirection = filters.sortDirection === 'desc' ? -1 : 1;
-        const sort = sortKey === 'lastName' ? { lastName: sortDirection, firstName: sortDirection } : { [sortKey]: sortDirection };
+        const sort: Record<string, SortOrder> = sortKey === 'lastName'
+            ? { lastName: sortDirection as SortOrder, firstName: sortDirection as SortOrder }
+            : { [sortKey]: sortDirection as SortOrder };
 
         const pageSize = Number(filters.pageSize || 0);
         const page = Math.max(1, Number(filters.page || 1));
