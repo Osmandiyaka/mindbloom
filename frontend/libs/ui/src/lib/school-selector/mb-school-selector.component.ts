@@ -190,7 +190,6 @@ export type MbSchoolSelectorOption = {
 export class MbSchoolSelectorComponent implements OnDestroy {
     private readonly api = inject(ApiClient);
 
-    @Input() options: MbSchoolSelectorOption[] = [];
     @Input() value: string[] = [];
     @Input() label = 'Schools';
     @Input() placeholder = 'Select schools...';
@@ -227,13 +226,7 @@ export class MbSchoolSelectorComponent implements OnDestroy {
     private static cachedSchools: MbSchoolSelectorOption[] | null = null;
 
     private get availableSchools(): MbSchoolSelectorOption[] {
-        const merged = [...this.internalSchools, ...this.options];
-        const seen = new Set<string>();
-        return merged.filter(option => {
-            if (!option?.id || seen.has(option.id)) return false;
-            seen.add(option.id);
-            return true;
-        });
+        return this.internalSchools;
     }
 
     private internalSchools: MbSchoolSelectorOption[] = [];

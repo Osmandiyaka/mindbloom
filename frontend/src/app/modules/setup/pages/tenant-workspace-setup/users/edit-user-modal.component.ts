@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, signal } from '@angular/core';
-import { MbButtonComponent, MbFormFieldComponent, MbInputComponent, MbRoleSelectorComponent, MbSchoolSelectorComponent, MbSelectComponent, type MbSchoolSelectorOption } from '@mindbloom/ui';
+import { MbButtonComponent, MbFormFieldComponent, MbInputComponent, MbRoleSelectorComponent, MbSchoolSelectorComponent, MbSelectComponent } from '@mindbloom/ui';
 import { EditUserFormState, RequestState } from './users.types';
 
 const initialFormState: EditUserFormState = {
@@ -31,7 +31,6 @@ const initialFormState: EditUserFormState = {
 })
 export class EditUserModalComponent implements OnChanges {
     @Input() isOpen = false;
-    @Input() activeSchools: MbSchoolSelectorOption[] = [];
     @Input() requestState: RequestState = { status: 'idle' };
     @Input() payload: EditUserFormState | null = null;
     @Output() closed = new EventEmitter<void>();
@@ -57,12 +56,6 @@ export class EditUserModalComponent implements OnChanges {
 
     setSchoolAccess(scope: 'all' | 'selected'): void {
         this.updateField('schoolAccessScope', scope);
-        if (scope === 'selected' && this.form().selectedSchoolIds.length === 0) {
-            const first = this.activeSchools[0];
-            if (first) {
-                this.updateField('selectedSchoolIds', [first.id]);
-            }
-        }
     }
 
     submit(): void {

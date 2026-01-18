@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, computed, signal } from '@angular/core';
 import { A11yModule } from '@angular/cdk/a11y';
-import { MbButtonComponent, MbCheckboxComponent, MbFormFieldComponent, MbInputComponent, MbModalComponent, MbModalFooterDirective, MbPopoverComponent, MbRoleSelectorComponent, MbSchoolSelectorComponent, MbSelectComponent, MbTextareaComponent, MbTooltipDirective, type MbSchoolSelectorOption } from '@mindbloom/ui';
+import { MbButtonComponent, MbCheckboxComponent, MbFormFieldComponent, MbInputComponent, MbModalComponent, MbModalFooterDirective, MbPopoverComponent, MbRoleSelectorComponent, MbSchoolSelectorComponent, MbSelectComponent, MbTextareaComponent, MbTooltipDirective } from '@mindbloom/ui';
 import { RolePreviewComponent } from '../role-preview.component';
 import { createDirtyTracker } from './dirty-tracker';
 import { getRoleBadge, getRolePreviewItems, isHighPrivilegeRole } from './role-preview';
@@ -63,7 +63,6 @@ const initialUiState: CreateUserUiState = {
 })
 export class CreateUserModalComponent implements OnChanges {
     @Input() isOpen = false;
-    @Input() activeSchools: MbSchoolSelectorOption[] = [];
     @Input() existingEmails: string[] = [];
     @Input() requestState: RequestState = { status: 'idle' };
     @Output() closed = new EventEmitter<void>();
@@ -154,12 +153,6 @@ export class CreateUserModalComponent implements OnChanges {
 
     setSchoolAccess(scope: 'all' | 'selected'): void {
         this.updateField('schoolAccessScope', scope);
-        if (scope === 'selected' && this.form().selectedSchoolIds.length === 0) {
-            const first = this.activeSchools[0];
-            if (first) {
-                this.updateField('selectedSchoolIds', [first.id]);
-            }
-        }
     }
 
     handleRoleSelection(selection: { ids: string[]; roles?: Array<{ id: string; name: string }> }): void {

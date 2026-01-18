@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, computed, signal } from '@angular/core';
 import { A11yModule } from '@angular/cdk/a11y';
-import { MbButtonComponent, MbCheckboxComponent, MbFormFieldComponent, MbInputComponent, MbPopoverComponent, MbRoleSelectorComponent, MbSchoolSelectorComponent, MbTextareaComponent, type MbSchoolSelectorOption } from '@mindbloom/ui';
+import { MbButtonComponent, MbCheckboxComponent, MbFormFieldComponent, MbInputComponent, MbPopoverComponent, MbRoleSelectorComponent, MbSchoolSelectorComponent, MbTextareaComponent } from '@mindbloom/ui';
 import { createDirtyTracker } from './dirty-tracker';
 import { dedupeEmails, parseEmailList } from './user-input.parsers';
 import { validateInviteUsers } from './user-form.validation';
@@ -39,7 +39,6 @@ const initialFormState: InviteUsersFormState = {
 })
 export class InviteUsersModalComponent implements OnChanges {
     @Input() isOpen = false;
-    @Input() activeSchools: MbSchoolSelectorOption[] = [];
     @Input() existingEmails: string[] = [];
     @Input() requestState: RequestState = { status: 'idle' };
     @Output() closed = new EventEmitter<void>();
@@ -137,12 +136,6 @@ export class InviteUsersModalComponent implements OnChanges {
 
     setSchoolAccess(scope: 'all' | 'selected'): void {
         this.updateField('schoolAccessScope', scope);
-        if (scope === 'selected' && this.form().selectedSchoolIds.length === 0) {
-            const first = this.activeSchools[0];
-            if (first) {
-                this.updateField('selectedSchoolIds', [first.id]);
-            }
-        }
     }
 
     submit(): void {

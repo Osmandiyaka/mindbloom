@@ -41,7 +41,6 @@
                 <div class="users-school-list" *ngIf="form().schoolAccessScope === 'selected'">
                     <mb-school-selector
                         [label]="''"
-                        [options]="activeSchools"
                         [value]="form().selectedSchoolIds"
                         (valueChange)="updateField('selectedSchoolIds', $event)">
                     </mb-school-selector>

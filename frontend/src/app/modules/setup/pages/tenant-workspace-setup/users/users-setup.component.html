@@ -108,7 +108,6 @@
 
     <app-invite-users-modal
         [isOpen]="vm.isInviteModalOpen()"
-        [activeSchools]="vm.activeSchools()"
         [existingEmails]="vm.existingEmails()"
         [requestState]="vm.store.inviteUsersState()"
         (closed)="vm.closeInviteModal()"
@@ -117,7 +116,6 @@
 
     <app-edit-user-modal
         [isOpen]="vm.isEditUserModalOpen()"
-        [activeSchools]="vm.activeSchools()"
         [payload]="vm.editPayload()"
         [requestState]="vm.store.updateUserState()"
         (closed)="vm.closeEditUser()"
@@ -133,7 +131,6 @@
 
     <app-create-user-modal
         [isOpen]="vm.isCreateUserModalOpen()"
-        [activeSchools]="vm.activeSchools()"
         [existingEmails]="vm.existingEmails()"
         [requestState]="vm.store.createUserState()"
         (closed)="vm.closeCreateUserModal()"
