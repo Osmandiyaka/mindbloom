@@ -136,4 +136,22 @@
         (closed)="vm.closeCreateUserModal()"
         (submitted)="vm.handleCreateSubmitted($event)">
     </app-create-user-modal>
+
+    <mb-modal
+        [open]="vm.isDeleteConfirmOpen()"
+        title="Remove user?"
+        size="sm"
+        (closed)="vm.cancelDelete()">
+        <div class="users-confirm">
+            <div class="users-confirm__title">This user will lose access immediately.</div>
+            <div class="users-confirm__text">This action cannot be undone.</div>
+        </div>
+        <div mbModalFooter class="users-confirm__footer">
+            <mb-button variant="secondary" (click)="vm.cancelDelete()">Cancel</mb-button>
+            <mb-button variant="danger" (click)="vm.confirmDelete()"
+                [disabled]="vm.store.deleteUserState().status === 'loading'">
+                {{ vm.store.deleteUserState().status === 'loading' ? 'Removing...' : 'Remove user' }}
+            </mb-button>
+        </div>
+    </mb-modal>
 </div>

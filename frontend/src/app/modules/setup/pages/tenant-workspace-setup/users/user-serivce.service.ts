@@ -72,4 +72,10 @@ export class UserSerivce {
             map(response => response.data),
         );
     }
+
+    deleteUser(userId: string): Observable<{ success: boolean }> {
+        return this.api.delete<ApiResponse<{ success: boolean }>>(`users/${userId}`).pipe(
+            map(response => response.data),
+        );
+    }
 }

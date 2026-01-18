@@ -36,8 +36,10 @@ export class TenantUsersComponent implements OnInit {
     isCreateUserModalOpen = signal(false);
     isEditUserModalOpen = signal(false);
     isViewUserModalOpen = signal(false);
+    isDeleteConfirmOpen = signal(false);
     selectedUser = signal<ExistingUserRow | null>(null);
     editPayload = signal<EditUserFormState | null>(null);
+    deleteTarget = signal<UserListItem | null>(null);
 
     readonly existingEmails = computed(() =>
         this.store.users()
@@ -198,7 +200,29 @@ export class TenantUsersComponent implements OnInit {
     }
 
     removeUser(row: UserListItem): void {
-        this.store.removeUser(row.id);
+        if (row.kind === 'pendingInvite') {
+            this.store.removeUser(row.id);
+            return;
+        }
+        this.deleteTarget.set(row);
+        this.isDeleteConfirmOpen.set(true);
+    }
+
+    cancelDelete(): void {
+        this.deleteTarget.set(null);
+        this.isDeleteConfirmOpen.set(false);
+    }
+
+    confirmDelete(): void {
+        const target = this.deleteTarget();
+        if (!target) return;
+        if (target.kind === 'pendingInvite') {
+            this.store.removeUser(target.id);
+        } else {
+            this.store.deleteUser(target.id);
+        }
+        this.deleteTarget.set(null);
+        this.isDeleteConfirmOpen.set(false);
     }
 
     handleAddUsersAction(action: string, csvInput: HTMLInputElement): void {

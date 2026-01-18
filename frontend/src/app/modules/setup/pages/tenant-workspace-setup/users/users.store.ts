@@ -16,6 +16,7 @@ export class UsersStore {
     inviteUsersState = signal<RequestState>({ status: 'idle' });
     updateUserState = signal<RequestState>({ status: 'idle' });
     statusUpdateState = signal<RequestState>({ status: 'idle' });
+    deleteUserState = signal<RequestState>({ status: 'idle' });
 
     filteredUsers = computed(() => {
         const query = this.userSearch().trim().toLowerCase();
@@ -131,6 +132,22 @@ export class UsersStore {
     removeUser(userId: string): void {
         this.users.update(items => items.filter(item => item.id !== userId));
         this.syncFacade();
+    }
+
+    deleteUser(userId: string): void {
+        const api = this.usersApi();
+        if (!api) return;
+        this.deleteUserState.set({ status: 'loading' });
+        api.deleteUser(userId).subscribe({
+            next: () => {
+                this.users.update(items => items.filter(item => item.id !== userId));
+                this.deleteUserState.set({ status: 'success' });
+                this.syncFacade();
+            },
+            error: (err) => {
+                this.deleteUserState.set({ status: 'error', error: err?.message || 'Failed to delete user' });
+            },
+        });
     }
 
     importCsvUsers(text: string): void {
