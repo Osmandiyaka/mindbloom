@@ -17,6 +17,7 @@ export class LoginResponseDto {
         email: string;
         name: string;
         roleId: string | null;
+        roleIds: string[];
         role: any;
     };
 }

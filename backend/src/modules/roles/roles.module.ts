@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RoleSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/role.schema';
 import { MongooseRoleRepository } from '../../infrastructure/adapters/persistence/mongoose/role.repository';
@@ -47,7 +47,7 @@ class RolesInitializer implements OnApplicationBootstrap {
 @Module({
     imports: [
         MongooseModule.forFeature([{ name: 'Role', schema: RoleSchema }]),
-        UsersModule,
+        forwardRef(() => UsersModule),
     ],
     controllers: [RolesController, PermissionsController, PermissionsMeController],
     providers: [

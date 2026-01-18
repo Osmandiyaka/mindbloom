@@ -26,6 +26,7 @@ export class TokenService {
             tenantId,
             email: user.email,
             roleId: user.roleId,
+            roleIds: user.roleIds,
             roleName: user.role?.name || null,
         };
 
@@ -76,6 +77,7 @@ export class TokenService {
             email: user.email,
             name: user.name,
             roleId: user.roleId,
+            roleIds: user.roleIds,
             role: user.role ? {
                 id: user.role.id,
                 name: user.role.name,

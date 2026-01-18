@@ -15,8 +15,12 @@ export class UserDocument extends Document {
     @Prop({ required: true })
     name: string;
 
-    @Prop({ type: Types.ObjectId, ref: 'Role', default: null })
-    roleId: Types.ObjectId | null;
+    @Prop({ type: [Types.ObjectId], ref: 'Role', default: [] })
+    roleIds: Types.ObjectId[];
+
+
+    @Prop({ type: String, default: 'active', index: true })
+    status: string;
 
     @Prop({ type: [String], default: [] })
     permissions: string[];
@@ -38,6 +42,15 @@ export class UserDocument extends Document {
 
     @Prop({ type: Boolean, default: false })
     mfaEnabled: boolean;
+
+    @Prop({
+        type: {
+            scope: { type: String, enum: ['all', 'selected'], default: 'all' },
+            schoolIds: { type: [String], default: [] },
+        },
+        default: { scope: 'all', schoolIds: [] },
+    })
+    schoolAccess: { scope: 'all' | 'selected'; schoolIds: string[] };
 
     @Prop({ type: String, default: null })
     resetToken?: string | null;

@@ -25,8 +25,8 @@ export class UpdateUserUseCase {
             tenantId: user.tenantId,
             email: command.email !== undefined ? command.email : user.email,
             name: command.name !== undefined ? command.name : user.name,
-            roleId: command.roleId !== undefined ? command.roleId : user.roleId,
-            role: user.role,
+            roleIds: command.roleId !== undefined && command.roleId !== null ? [command.roleId] : user.roleIds,
+            roles: user.roles,
             permissions: user.permissions,
             profilePicture: command.profilePicture !== undefined ? command.profilePicture : user.profilePicture,
             gender: command.gender !== undefined ? command.gender : user.gender,
@@ -34,6 +34,8 @@ export class UpdateUserUseCase {
             phone: command.phone !== undefined ? command.phone : user.phone,
             forcePasswordReset: command.forcePasswordReset !== undefined ? command.forcePasswordReset : user.forcePasswordReset,
             mfaEnabled: command.mfaEnabled !== undefined ? command.mfaEnabled : user.mfaEnabled,
+            status: user.status,
+            schoolAccess: user.schoolAccess,
         });
 
         // Save user

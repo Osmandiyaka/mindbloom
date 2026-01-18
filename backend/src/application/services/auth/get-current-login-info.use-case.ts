@@ -56,14 +56,18 @@ export class GetCurrentLoginInfoUseCase {
                 modules: canonical.modules,
             }
             : null;
-        const rolePermissions = user.role?.permissions ?? [];
+        const rolePermissions = user.roles.length
+            ? user.roles.flatMap(role => role.permissions)
+            : user.role?.permissions ?? [];
         const directPermissions = user.permissions ?? [];
         const effectivePermissions = [...rolePermissions, ...directPermissions];
         let permissionKeys = this.toPermissionKeys(effectivePermissions);
 
         // Guarantee full access for Tenant Admin/Host Admin even if stored role lacks wildcard permissions
-        const roleName = user.role?.name;
-        if (roleName === SYSTEM_ROLE_NAMES.TENANT_ADMIN || roleName === SYSTEM_ROLE_NAMES.HOST_ADMIN) {
+        const hasAdminRole = user.roles.some(role =>
+            role.name === SYSTEM_ROLE_NAMES.TENANT_ADMIN || role.name === SYSTEM_ROLE_NAMES.HOST_ADMIN
+        ) || user.role?.name === SYSTEM_ROLE_NAMES.TENANT_ADMIN || user.role?.name === SYSTEM_ROLE_NAMES.HOST_ADMIN;
+        if (hasAdminRole) {
             permissionKeys = ['*', '*.*'];
         }
 

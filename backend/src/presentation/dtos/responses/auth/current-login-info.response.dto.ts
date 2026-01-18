@@ -76,6 +76,9 @@ class UserLoginInfoDto {
     @ApiProperty({ required: false })
     roleId!: string | null;
 
+    @ApiProperty({ type: [String] })
+    roleIds!: string[];
+
     @ApiProperty({ type: () => RoleDto, required: false })
     role!: RoleDto | null;
 
@@ -98,6 +101,7 @@ class UserLoginInfoDto {
         dto.email = user.email;
         dto.name = user.name;
         dto.roleId = user.roleId;
+        dto.roleIds = user.roleIds;
         dto.role = user.role ? RoleDto.fromDomain(user.role) : null;
         dto.permissions = permissionKeys;
         dto.forcePasswordReset = user.forcePasswordReset;

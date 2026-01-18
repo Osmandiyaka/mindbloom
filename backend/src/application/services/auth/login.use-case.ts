@@ -20,6 +20,7 @@ export interface LoginResult {
         email: string;
         name: string;
         roleId: string | null;
+        roleIds: string[];
         role: {
             id: string;
             name: string;
@@ -98,6 +99,7 @@ export class LoginUseCase {
                 email: user.email,
                 name: user.name,
                 roleId: user.roleId,
+                roleIds: user.roleIds,
                 role: user.role ? {
                     id: user.role.id,
                     name: user.role.name,

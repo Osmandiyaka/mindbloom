@@ -125,6 +125,7 @@ export class ImpersonateUserUseCase {
             email: user.email,
             name: user.name,
             roleId: user.roleId,
+            roleIds: user.roleIds,
             role: user.role ? {
                 id: user.role.id,
                 name: user.role.name,
@@ -143,12 +144,17 @@ export class ImpersonateUserUseCase {
     }
 
     private toMembership(user: User, tenant: Tenant) {
+        const roleNames = user.roles.length
+            ? user.roles.map(role => role.name)
+            : [user.role?.name ?? 'User'];
         return {
             tenantId: tenant.id,
             tenantSlug: tenant.subdomain,
             tenantName: tenant.name,
-            roles: [user.role?.name ?? 'User'],
-            permissions: user.role?.permissions?.map(p => p.displayName || p.resource) ?? [],
+            roles: roleNames,
+            permissions: user.roles.length
+                ? user.roles.flatMap(role => role.permissions.map(p => p.displayName || p.resource))
+                : user.role?.permissions?.map(p => p.displayName || p.resource) ?? [],
         };
     }
 }

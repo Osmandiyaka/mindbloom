@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { IUserRepository } from '../../../domain/ports/out/user-repository.port';
 import { USER_REPOSITORY } from '../../../domain/ports/out/repository.tokens';
 import { GetPermissionTreeUseCase } from './get-permission-tree.use-case';
+import { AuditService } from '../audit/audit.service';
 
 /**
  * Use Case: Add Permissions to User
@@ -13,6 +14,7 @@ export class AddPermissionsToUserUseCase {
         @Inject(USER_REPOSITORY)
         private readonly userRepository: IUserRepository,
         private readonly getPermissionTree: GetPermissionTreeUseCase,
+        private readonly audit: AuditService,
     ) { }
 
     async execute(userId: string, permissionIds: string[]) {
@@ -38,6 +40,21 @@ export class AddPermissionsToUserUseCase {
         }
 
         // Save updated user
-        return this.userRepository.update(updatedUser);
+        const saved = await this.userRepository.update(updatedUser);
+        await this.audit.log({
+            category: 'USER',
+            action: 'UserPermissionsUpdated',
+            scope: 'TENANT',
+            tenantId: saved.tenantId ?? undefined,
+            actorType: 'TENANT_USER',
+            targetType: 'User',
+            targetId: saved.id,
+            targetNameSnapshot: saved.name,
+            before: { permissions: user.permissions.map(p => p.id) },
+            after: { permissions: saved.permissions.map(p => p.id) },
+            result: 'SUCCESS',
+            severity: 'INFO',
+        });
+        return saved;
     }
 }

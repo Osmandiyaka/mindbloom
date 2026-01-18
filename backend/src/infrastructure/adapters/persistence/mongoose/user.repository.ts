@@ -26,17 +26,26 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
     async findByEmail(email: string): Promise<User | null> {
         // For login, we might not have tenant context yet
         // Allow finding by email across tenants for authentication
-        const user = await this.userModel.findOne({ email }).populate('roleId').exec();
+        const user = await this.userModel
+            .findOne({ email })
+            .populate('roleIds')
+            .exec();
         return user ? this.toDomain(user) : null;
     }
 
     async findByEmailAndTenant(email: string, tenantId: string): Promise<User | null> {
-        const user = await this.userModel.findOne({ email, tenantId }).populate('roleId').exec();
+        const user = await this.userModel
+            .findOne({ email, tenantId })
+            .populate('roleIds')
+            .exec();
         return user ? this.toDomain(user) : null;
     }
 
     async findById(id: string): Promise<User | null> {
-        const user = await this.userModel.findById(id).populate('roleId').exec();
+        const user = await this.userModel
+            .findById(id)
+            .populate('roleIds')
+            .exec();
         return user ? this.toDomain(user) : null;
     }
 
@@ -49,13 +58,15 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
             email: user.email,
             name: user.name,
             password: hashedPassword,
-            roleId: user.roleId || null,
+            roleIds: user.roleIds,
             profilePicture: user.profilePicture ?? null,
             gender: user.gender ?? null,
             dateOfBirth: user.dateOfBirth ?? null,
             phone: user.phone ?? null,
             forcePasswordReset: user.forcePasswordReset ?? false,
             mfaEnabled: user.mfaEnabled ?? false,
+            status: user.status,
+            schoolAccess: user.schoolAccess,
         });
 
         return this.toDomain(created);
@@ -63,8 +74,72 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
 
     async findAll(tenantId: string): Promise<User[]> {
         const resolved = this.requireTenant(tenantId);
-        const users = await this.userModel.find({ tenantId: resolved }).populate('roleId').exec();
+        const users = await this.userModel
+            .find({ tenantId: resolved })
+            .populate('roleIds')
+            .exec();
         return users.map(user => this.toDomain(user));
+    }
+
+    async list(query: {
+        tenantId: string;
+        search?: string;
+        status?: string;
+        roleId?: string;
+        schoolId?: string;
+        page?: number;
+        pageSize?: number;
+    }): Promise<{ items: User[]; total: number; page: number; pageSize: number }> {
+        const resolved = this.requireTenant(query.tenantId);
+        const page = Math.max(1, query.page ?? 1);
+        const pageSize = Math.min(Math.max(1, query.pageSize ?? 20), 100);
+        const filter: Record<string, any> = { tenantId: resolved };
+        const andFilters: Record<string, any>[] = [];
+        if (query.status) {
+            filter.status = query.status;
+        }
+        if (query.roleId) {
+            filter.roleIds = query.roleId;
+        }
+        if (query.schoolId) {
+            andFilters.push({
+                $or: [
+                    { 'schoolAccess.scope': 'all' },
+                    { 'schoolAccess.scope': 'selected', 'schoolAccess.schoolIds': query.schoolId },
+                ],
+            });
+        }
+        if (query.search) {
+            const text = query.search.trim().toLowerCase();
+            if (text) {
+                andFilters.push({
+                    $or: [
+                        { email: { $regex: text, $options: 'i' } },
+                        { name: { $regex: text, $options: 'i' } },
+                    ],
+                });
+            }
+        }
+        if (andFilters.length) {
+            filter.$and = andFilters;
+        }
+
+        const [total, users] = await Promise.all([
+            this.userModel.countDocuments(filter).exec(),
+            this.userModel
+                .find(filter)
+                .skip((page - 1) * pageSize)
+                .limit(pageSize)
+                .populate('roleIds')
+                .exec(),
+        ]);
+
+        return {
+            items: users.map(user => this.toDomain(user)),
+            total,
+            page,
+            pageSize,
+        };
     }
 
     async update(user: User): Promise<User> {
@@ -73,7 +148,7 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
         const updated = await this.userModel.findByIdAndUpdate(
             user.id,
             {
-                roleId: user.roleId,
+                roleIds: user.roleIds,
                 permissions: permissionIds,
                 forcePasswordReset: user.forcePasswordReset,
                 mfaEnabled: user.mfaEnabled,
@@ -83,10 +158,12 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
                 gender: user.gender ?? null,
                 dateOfBirth: user.dateOfBirth ?? null,
                 phone: user.phone ?? null,
+                status: user.status,
+                schoolAccess: user.schoolAccess,
                 updatedAt: new Date(),
             },
             { new: true }
-        ).populate('roleId').exec();
+        ).populate('roleIds').exec();
 
         if (!updated) {
             throw new Error(`User with ID ${user.id} not found`);
@@ -143,34 +220,37 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
 
     private toDomain(doc: UserDocument): User {
         // Convert populated role document to Role entity
-        let role: Role | null = null;
-        if (doc.roleId && typeof doc.roleId === 'object' && 'name' in doc.roleId) {
-            const roleDoc = doc.roleId as any as RoleDocument;
-            const rolePermissions = roleDoc.permissions?.map(p => new Permission({
-                id: '', // Permission ID not stored in embedded schema
-                resource: p.resource,
-                displayName: p.resource, // Use resource as display name
-                description: undefined,
-                actions: p.actions as any[],
-                scope: p.scope as any,
-                parentId: undefined,
-                children: undefined,
-                icon: undefined,
-                order: undefined
-            })) || [];
+        const roles: Role[] = [];
+        const roleDocs = Array.isArray(doc.roleIds) ? doc.roleIds : [];
+        for (const entry of roleDocs) {
+            if (entry && typeof entry === 'object' && 'name' in entry) {
+                const roleDoc = entry as any as RoleDocument;
+                const rolePermissions = roleDoc.permissions?.map(p => new Permission({
+                    id: '',
+                    resource: p.resource,
+                    displayName: p.resource,
+                    description: undefined,
+                    actions: p.actions as any[],
+                    scope: p.scope as any,
+                    parentId: undefined,
+                    children: undefined,
+                    icon: undefined,
+                    order: undefined
+                })) || [];
 
-            role = new Role({
-                id: roleDoc._id?.toString() || '',
-                tenantId: roleDoc.tenantId ? roleDoc.tenantId.toString() : null,
-                name: roleDoc.name,
-                description: roleDoc.description,
-                isSystemRole: roleDoc.isSystemRole,
-                isGlobal: (roleDoc as any).isGlobal,
-                permissions: rolePermissions,
-                parentRoleId: roleDoc.parentRoleId?.toString(),
-                createdAt: roleDoc.createdAt,
-                updatedAt: roleDoc.updatedAt
-            });
+                roles.push(new Role({
+                    id: roleDoc._id?.toString() || '',
+                    tenantId: roleDoc.tenantId ? roleDoc.tenantId.toString() : null,
+                    name: roleDoc.name,
+                    description: roleDoc.description,
+                    isSystemRole: roleDoc.isSystemRole,
+                    isGlobal: (roleDoc as any).isGlobal,
+                    permissions: rolePermissions,
+                    parentRoleId: roleDoc.parentRoleId?.toString(),
+                    createdAt: roleDoc.createdAt,
+                    updatedAt: roleDoc.updatedAt
+                }));
+            }
         }
 
         // Convert permission IDs to Permission objects
@@ -184,30 +264,32 @@ export class MongooseUserRepository extends TenantScopedRepository<UserDocument,
             }
         }
 
-        const roleId = doc.roleId
-            ? (typeof doc.roleId === 'object' && '_id' in doc.roleId
-                ? (doc.roleId as any)._id?.toString()
-                : String(doc.roleId))
-            : null;
+        const roleIds = Array.isArray(doc.roleIds) && doc.roleIds.length
+            ? doc.roleIds.map(roleId => (typeof roleId === 'object' && roleId && '_id' in roleId
+                ? (roleId as any)._id?.toString()
+                : String(roleId)))
+            : [];
 
         const tenantId = doc.tenantId ? doc.tenantId.toString() : null;
 
-        return new User(
-            doc.id,
+        return User.create({
+            id: doc.id,
             tenantId,
-            doc.email,
-            doc.name,
-            roleId,
-            role,
+            email: doc.email,
+            name: doc.name,
+            roleIds,
+            roles,
             permissions,
-            doc.profilePicture,
-            doc.gender ?? null,
-            doc.dateOfBirth ?? null,
-            doc.phone ?? null,
-            doc.forcePasswordReset ?? false,
-            doc.mfaEnabled ?? false,
-            doc.createdAt,
-            doc.updatedAt,
-        );
+            profilePicture: doc.profilePicture,
+            gender: doc.gender ?? null,
+            dateOfBirth: doc.dateOfBirth ?? null,
+            phone: doc.phone ?? null,
+            forcePasswordReset: doc.forcePasswordReset ?? false,
+            mfaEnabled: doc.mfaEnabled ?? false,
+            status: (doc as any).status ?? 'active',
+            schoolAccess: (doc as any).schoolAccess ?? { scope: 'all' },
+            createdAt: doc.createdAt,
+            updatedAt: doc.updatedAt,
+        });
     }
 }

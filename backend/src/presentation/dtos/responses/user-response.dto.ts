@@ -12,10 +12,13 @@ export class UserResponseDto {
     name: string;
 
     @ApiProperty()
-    roleId: string | null;
+    roleIds: string[];
 
-    @ApiProperty()
-    role: any;
+    @ApiProperty({ required: false })
+    status?: string;
+
+    @ApiProperty({ required: false })
+    schoolAccess?: any;
 
     @ApiProperty()
     profilePicture: string | null;
@@ -37,14 +40,9 @@ export class UserResponseDto {
         dto.id = user.id;
         dto.email = user.email;
         dto.name = user.name;
-        dto.roleId = user.roleId;
-        dto.role = user.role ? {
-            id: user.role.id,
-            name: user.role.name,
-            description: user.role.description,
-            isSystemRole: user.role.isSystemRole,
-            permissions: user.role.permissions
-        } : null;
+        dto.roleIds = user.roleIds;
+        dto.status = user.status;
+        dto.schoolAccess = user.schoolAccess;
         dto.profilePicture = user.profilePicture;
         dto.gender = user.gender ?? null;
         dto.dateOfBirth = user.dateOfBirth ?? null;
