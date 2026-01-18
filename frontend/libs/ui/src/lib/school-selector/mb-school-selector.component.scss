@@ -314,6 +314,12 @@
     background: var(--mb-color-surface);
 }
 
+.mb-school-selector__footer-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .mb-school-selector__footer-button {
     border: none;
     background: transparent;

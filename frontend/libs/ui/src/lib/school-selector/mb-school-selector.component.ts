@@ -176,7 +176,10 @@ export type MbSchoolSelectorOption = {
                     </div>
 
                     <div class="mb-school-selector__footer" *ngIf="!readOnly">
-                        <button type="button" class="mb-school-selector__footer-button" (click)="clearSelection()">Clear</button>
+                        <div class="mb-school-selector__footer-actions">
+                            <button type="button" class="mb-school-selector__footer-button" (click)="selectAll()">Select all</button>
+                            <button type="button" class="mb-school-selector__footer-button" (click)="clearSelection()">Clear</button>
+                        </div>
                         <button type="button" class="mb-school-selector__footer-button mb-school-selector__footer-button--primary" (click)="close()">
                             Done
                         </button>
@@ -344,6 +347,12 @@ export class MbSchoolSelectorComponent implements OnDestroy {
         this.emitSelection([]);
         this.searchValue = '';
         this.debouncedSearch = '';
+    }
+
+    selectAll(): void {
+        if (this.disabled || this.readOnly) return;
+        const ids = this.availableSchools.map(school => school.id);
+        this.emitSelection(Array.from(new Set(ids)));
     }
 
     highlightParts(name: string): Array<{ text: string; match: boolean }> {
