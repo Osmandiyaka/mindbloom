@@ -160,7 +160,7 @@
                                     <div class="ou-members-table__actions">Actions</div>
                                 </div>
                                 <div class="ou-members-table__row"
-                                    *ngFor="let member of vm.selectedOrgUnitMembers(); trackBy: vm.trackUserRow">
+                                    *ngFor="let member of vm.selectedOrgUnitMembers(); trackBy: usersVm.trackUserRow">
                                     <div class="ou-members-table__name">
                                         <div class="ou-members-table__name-text">
                                             {{ member.name || '—' }}

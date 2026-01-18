@@ -8,7 +8,7 @@ import { TenantWorkspaceSetupOrgUnitsComponent } from './tenant-workspace-setup-
 import { TenantWorkspaceSetupLevelsComponent } from './tenant-workspace-setup-levels.component';
 import { TenantWorkspaceSetupClassesSectionsComponent } from './tenant-workspace-setup-classes-sections.component';
 import { TenantWorkspaceSetupGradingComponent } from './tenant-workspace-setup-grading.component';
-import { TenantUsersComponent } from './tenant-workspace-setup-users.component';
+import { TenantUsersComponent } from './users-setup.component';
 import { TenantWorkspaceSetupReviewComponent } from './tenant-workspace-setup-review.component';
 import { TenantWorkspaceSetupCompleteComponent } from './tenant-workspace-setup-complete.component';
 
