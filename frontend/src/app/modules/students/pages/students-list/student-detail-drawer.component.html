@@ -1,0 +1,542 @@
+<mb-drawer
+        [open]="open"
+        title=""
+        panelClass="student-detail-drawer"
+        backdropClass="student-detail-drawer-backdrop"
+        (closed)="vm.closeDetailDrawer()">
+        <div class="detail-shell">
+          @if (vm.panelStudent()) {
+            <div class="detail-header">
+              <div class="detail-header-main">
+                @if (vm.detailLoading()) {
+                  <div class="detail-title-row">
+                    <div class="skeleton-line skeleton-title"></div>
+                    <div class="skeleton-pill"></div>
+                  </div>
+                  <div class="detail-meta-line">
+                    <div class="skeleton-line skeleton-meta"></div>
+                  </div>
+                } @else {
+                  <div class="detail-title-row">
+                    <h3>{{ vm.panelStudent()?.fullName }}</h3>
+                    <span class="detail-status-pill">
+                      {{ vm.titleCase(vm.panelStudent()?.status || '') || '—' }}
+                    </span>
+                  </div>
+                  <div class="detail-meta-line">
+                    <span>ID: {{ vm.panelStudent()?.enrollment?.admissionNumber || '—' }}</span>
+                    <span>·</span>
+                    <span>{{ vm.panelStudent()?.enrollment?.class || '—' }}</span>
+                    <span *ngIf="vm.panelStudent()?.enrollment?.section">· {{ vm.panelStudent()?.enrollment?.section }}</span>
+                    <span>·</span>
+                    <span>{{ vm.panelStudent()?.enrollment?.academicYear || '—' }}</span>
+                  </div>
+                }
+              </div>
+              <div class="detail-actions">
+                <mb-button size="sm" variant="primary" *can="'students.update'" (click)="vm.editPanelStudent()">
+                  Edit
+                </mb-button>
+                <div class="detail-actions-menu" [class.open]="vm.detailMenuOpen()">
+                  <mb-button
+                    size="sm"
+                    variant="tertiary"
+                    aria-label="More actions"
+                    (click)="vm.toggleDetailMenu($event)">
+                    •••
+                  </mb-button>
+                  <div class="detail-actions-panel" *ngIf="vm.detailMenuOpen()">
+                    <mb-button size="sm" variant="tertiary" [fullWidth]="true">
+                      Print profile
+                    </mb-button>
+                    <mb-button size="sm" variant="tertiary" [fullWidth]="true">
+                      Export student
+                    </mb-button>
+                  </div>
+                </div>
+                <mb-button size="sm" variant="tertiary" aria-label="Close drawer" (click)="vm.closeDetailDrawer()">
+                  ✕
+                </mb-button>
+              </div>
+            </div>
+            <div class="detail-tabs" role="tablist">
+              <mb-button
+                size="sm"
+                variant="tertiary"
+                class="detail-tab-button"
+                role="tab"
+                *ngFor="let tab of vm.visibleDetailTabs()"
+                [class.active]="tab.key === vm.selectedDetailTab()"
+                [attr.aria-selected]="tab.key === vm.selectedDetailTab()"
+                (click)="vm.selectDetailTab(tab.key)">
+                <span class="detail-tab-label">
+                  {{ tab.label }}
+                  <span class="detail-tab-count" *ngIf="tab.key === 'guardians'">
+                    {{ vm.guardians().length }}
+                  </span>
+                  <span class="detail-tab-count" *ngIf="tab.key === 'documents'">
+                    {{ vm.documents().length }}
+                  </span>
+                  <span class="detail-tab-count" *ngIf="tab.key === 'notes'">
+                    {{ vm.notes().length }}
+                  </span>
+                  <span class="detail-tab-count" *ngIf="tab.key === 'activity'">
+                    {{ vm.activityItems().length }}
+                  </span>
+                </span>
+              </mb-button>
+            </div>
+            <div class="detail-scroll">
+              <div class="detail-summary">
+                @if (vm.detailLoading()) {
+                  <div class="summary-skeleton"></div>
+                  <div class="summary-skeleton"></div>
+                  <div class="summary-skeleton"></div>
+                  <div class="summary-skeleton"></div>
+                } @else {
+                  <div class="summary-strip">
+                    <div class="summary-group">
+                      <span class="summary-label">Enrollment</span>
+                      <span class="summary-value">
+                        {{ vm.panelStudent()?.enrollment?.academicYear || '—' }} ·
+                        {{ vm.panelStudent()?.enrollment?.class || '—' }}
+                        {{ vm.panelStudent()?.enrollment?.section ? ' · ' + vm.panelStudent()?.enrollment?.section : '' }}
+                      </span>
+                    </div>
+                    <div class="summary-group">
+                      <span class="summary-label">Status</span>
+                      <span class="summary-status">{{ vm.titleCase(vm.panelStudent()?.status || '') || '—' }}</span>
+                    </div>
+                    <div class="summary-group">
+                      <span class="summary-label">Last updated</span>
+                      <span class="summary-value">Updated {{ vm.formatRelativeUpdated(vm.panelStudent()?.updatedAt) }}</span>
+                    </div>
+                    <div class="summary-actions">
+                      <mb-button size="sm" variant="tertiary" *can="'students.write'" (click)="vm.openChangeSectionFromPanel()">
+                        Change section
+                      </mb-button>
+                      <mb-button size="sm" variant="tertiary" *can="'students.write'" (click)="vm.openTransferFromPanel()">
+                        Transfer
+                      </mb-button>
+                      <div class="summary-actions-menu" [class.open]="vm.summaryMenuOpen()">
+                        <mb-button
+                          size="sm"
+                          variant="tertiary"
+                          aria-label="More actions"
+                          (click)="vm.toggleSummaryMenu($event)">
+                          •••
+                        </mb-button>
+                        <div class="summary-actions-panel" *ngIf="vm.summaryMenuOpen()">
+                          <mb-button size="sm" variant="danger" [fullWidth]="true" *can="'students.delete'" (click)="vm.archivePanelStudent()">
+                            Archive
+                          </mb-button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            <div class="detail-tab-panel">
+              @if (vm.detailLoading()) {
+                <div class="detail-tab-loading">
+                  <div class="skeleton-card">
+                    <div class="skeleton-line skeleton-title"></div>
+                    <div class="skeleton-line skeleton-row"></div>
+                    <div class="skeleton-line skeleton-row"></div>
+                  </div>
+                  <div class="skeleton-card">
+                    <div class="skeleton-line skeleton-title"></div>
+                    <div class="skeleton-line skeleton-row"></div>
+                    <div class="skeleton-line skeleton-row"></div>
+                  </div>
+                  <div class="skeleton-card">
+                    <div class="skeleton-line skeleton-title"></div>
+                    <div class="skeleton-line skeleton-row"></div>
+                    <div class="skeleton-line skeleton-row"></div>
+                  </div>
+                </div>
+              } @else {
+                  @switch (vm.selectedDetailTab()) {
+                  @case ('overview') {
+                      <div class="overview-grid">
+                        <div class="overview-card overview-card-wide">
+                          <div class="overview-card-title">Student details</div>
+                          <div class="details-grid">
+                            <div class="details-row">
+                              <span class="detail-label">Date of birth</span>
+                              <span class="detail-value">{{ vm.formatDate(vm.panelStudent()?.dateOfBirth) }}</span>
+                            </div>
+                            <div class="details-row">
+                              <span class="detail-label">Gender</span>
+                              <span class="detail-value">{{ vm.titleCase(vm.panelStudent()?.gender || '') || '—' }}</span>
+                            </div>
+                            <div class="details-row details-row-full">
+                              <span class="detail-label">Address</span>
+                              <span class="detail-value">{{ vm.formatAddress(vm.panelStudent()) }}</span>
+                            </div>
+                            <div class="details-row details-row-full">
+                              <span class="detail-label">Student internal ID</span>
+                              <span class="detail-value detail-copy detail-truncate" [attr.title]="vm.panelStudent()?.id || ''">
+                                {{ vm.panelStudent()?.id || '—' }}
+                                <mb-button
+                                  size="sm"
+                                  variant="tertiary"
+                                  class="detail-copy-button"
+                                  aria-label="Copy student ID"
+                                  appTooltip="Copy"
+                                  [disabled]="!vm.panelStudent()?.id"
+                                  (click)="vm.copyToClipboard(vm.panelStudent()?.id)">
+                                  ⧉
+                                </mb-button>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="overview-column">
+                          <div class="overview-card">
+                            <div class="overview-card-title">Primary guardian</div>
+                            @if (vm.getPrimaryGuardian(vm.panelStudent()); as guardian) {
+                              <div class="detail-grid">
+                                <div class="detail-item">
+                                  <span class="detail-label">Name</span>
+                                  <span class="detail-value">{{ guardian.name || '—' }}</span>
+                                </div>
+                                <div class="detail-item">
+                                  <span class="detail-label">Phone</span>
+                                  <span class="detail-value guardian-phone">
+                                    {{ guardian.phone || '—' }}
+                                    <mb-button
+                                      size="sm"
+                                      variant="tertiary"
+                                      class="guardian-copy"
+                                      aria-label="Copy guardian phone"
+                                      appTooltip="Copy"
+                                      [disabled]="!guardian.phone"
+                                      (click)="vm.copyToClipboard(guardian.phone)">
+                                      ⧉
+                                    </mb-button>
+                                  </span>
+                                </div>
+                                <div class="detail-item detail-item-full" *ngIf="guardian.isEmergencyContact">
+                                  <span class="guardian-badge">Emergency contact</span>
+                                </div>
+                              </div>
+                            } @else {
+                              <div class="guardian-empty">
+                                <span class="guardian-empty-icon" aria-hidden="true">!</span>
+                                <span class="guardian-empty-text">No guardian assigned</span>
+                                <mb-button size="sm" variant="tertiary" *can="'students.write'" (click)="vm.openGuardianModal()">
+                                  Add guardian
+                                </mb-button>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                        <div class="overview-column">
+                          @if (vm.detailFlags(vm.panelStudent()).length) {
+                            <div class="overview-card overview-alerts">
+                              <div class="overview-card-title">Alerts & missing info</div>
+                              <div class="alert-list">
+                                <div class="alert-row" *ngFor="let flag of vm.detailFlags(vm.panelStudent())">
+                                  <span class="alert-icon" aria-hidden="true">!</span>
+                                  <div class="alert-text">
+                                    <span class="alert-title">{{ flag.label }}</span>
+                                    <span class="alert-note">{{ flag.note }}</span>
+                                  </div>
+                                  <mb-button size="sm" variant="tertiary" (click)="vm.selectDetailTab(flag.tab)">
+                                    {{ flag.action }}
+                                  </mb-button>
+                                </div>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  @case ('guardians') {
+                    <div class="detail-section">
+                      <div class="detail-section-header">
+                        <h4>Guardians</h4>
+                        <mb-button size="sm" variant="primary" *can="'students.write'" (click)="vm.openGuardianModal()">
+                          Add guardian
+                        </mb-button>
+                      </div>
+                      @if (vm.guardiansLoading()) {
+                        <div class="detail-empty">Loading guardians…</div>
+                      } @else if (vm.guardiansError()) {
+                        <div class="detail-empty">{{ vm.guardiansError() }}</div>
+                      } @else if (!vm.guardians().length) {
+                        <div class="tab-empty">
+                          <span class="tab-empty-icon" aria-hidden="true">👥</span>
+                          <span class="tab-empty-title">No guardians assigned</span>
+                          <span class="tab-empty-note">Add a guardian to complete the student profile.</span>
+                          <mb-button size="sm" variant="primary" *can="'students.write'" (click)="vm.openGuardianModal()">
+                            Add guardian
+                          </mb-button>
+                        </div>
+                      } @else {
+                        <mb-table
+                          [rows]="vm.guardians()"
+                          [columns]="vm.guardianColumns"
+                          [rowKey]="vm.guardianRowKey"
+                          emptyMessage="No guardians available."
+                        >
+                          <ng-template mbTableActions let-guardian>
+                            <div class="row-actions" [class.open]="vm.guardianMenuOpen() === guardian.id">
+                              <mb-button size="sm" variant="tertiary" aria-label="Guardian actions" (click)="vm.toggleGuardianMenu($event, guardian.id)">•••</mb-button>
+                              <div class="row-menu" *ngIf="vm.guardianMenuOpen() === guardian.id">
+                                <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="vm.setPrimaryGuardian(guardian)">
+                                  Set primary
+                                </mb-button>
+                                <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="vm.inviteGuardian(guardian)">
+                                  Invite guardian
+                                </mb-button>
+                                <mb-button size="sm" variant="danger" [fullWidth]="true" (click)="vm.removeGuardian(guardian)">
+                                  Remove guardian
+                                </mb-button>
+                              </div>
+                            </div>
+                          </ng-template>
+                        </mb-table>
+                      }
+                    </div>
+                  }
+                  @case ('academics') {
+                    @if (vm.academicsLoading()) {
+                      <p class="detail-empty">Loading academic records…</p>
+                    } @else if (vm.academicsError()) {
+                      <p class="detail-empty">{{ vm.academicsError() }}</p>
+                    } @else {
+                      <div class="detail-section">
+                        <h4>Current classes</h4>
+                        <mb-table
+                          [rows]="vm.academicsSubjects()"
+                          [columns]="vm.academicSubjectColumns"
+                          emptyMessage="No classes available.">
+                        </mb-table>
+                      </div>
+                      <div class="detail-section">
+                        <div class="detail-section-header">
+                          <h4>Term history</h4>
+                          <mb-button size="sm" variant="tertiary">View report card</mb-button>
+                        </div>
+                        <mb-table
+                          [rows]="vm.academicsTerms()"
+                          [columns]="vm.academicTermColumns"
+                          emptyMessage="No term records available.">
+                        </mb-table>
+                      </div>
+                    }
+                  }
+                  @case ('fees') {
+                    @if (vm.feesLoading()) {
+                      <p class="detail-empty">Loading fee records…</p>
+                    } @else if (vm.feesError()) {
+                      <p class="detail-empty">{{ vm.feesError() }}</p>
+                    } @else {
+                      <div class="detail-section">
+                        <div class="fees-strip">
+                          <div class="fees-metric">
+                            <span class="fees-label">Current balance</span>
+                            <span class="fees-value">{{ vm.feesSummary()?.balance || '—' }}</span>
+                          </div>
+                          <div class="fees-metric">
+                            <span class="fees-label">Paid YTD</span>
+                            <span class="fees-value">{{ vm.feesSummary()?.paidYtd || '—' }}</span>
+                          </div>
+                          <div class="fees-metric">
+                            <span class="fees-label">Outstanding invoices</span>
+                            <span class="fees-value">{{ vm.feesSummary()?.outstandingCount ?? '—' }}</span>
+                          </div>
+                          <div class="fees-actions">
+                            <mb-button size="sm" variant="tertiary">View in Fees</mb-button>
+                            <mb-button size="sm" variant="tertiary">Export payments</mb-button>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="detail-section">
+                        <h4>Invoices</h4>
+                        <mb-table
+                          [rows]="vm.feesInvoices()"
+                          [columns]="vm.feeInvoiceColumns"
+                          emptyMessage="No invoices available.">
+                        </mb-table>
+                      </div>
+                      <div class="detail-section">
+                        <h4>Payments</h4>
+                        <mb-table
+                          [rows]="vm.feesPayments()"
+                          [columns]="vm.feePaymentColumns"
+                          emptyMessage="No payments available.">
+                        </mb-table>
+                      </div>
+                    }
+                  }
+                  @case ('notes') {
+                    <div class="detail-section">
+                      <div class="detail-section-header">
+                        <h4>Notes</h4>
+                        <mb-button size="sm" variant="primary" (click)="vm.openNoteModal()">Add note</mb-button>
+                      </div>
+                      @if (vm.notesLoading()) {
+                        <p class="detail-empty">Loading notes…</p>
+                      } @else if (vm.notesError()) {
+                        <p class="detail-empty">{{ vm.notesError() }}</p>
+                      } @else if (!vm.notes().length) {
+                        <div class="tab-empty">
+                          <span class="tab-empty-icon" aria-hidden="true">📝</span>
+                          <span class="tab-empty-title">No notes yet</span>
+                          <span class="tab-empty-note">Add the first note to keep a record of updates.</span>
+                          <mb-button size="sm" variant="primary" (click)="vm.openNoteModal()">Add note</mb-button>
+                        </div>
+                      } @else {
+                        <div class="notes-list">
+                          <div class="note-card" *ngFor="let note of vm.notes()">
+                            <div class="note-header">
+                              <div>
+                                <p class="note-title" *ngIf="note.title">{{ note.title }}</p>
+                                <p class="note-meta">
+                                  {{ vm.formatDate(note.createdAt) }}
+                                  <span *ngIf="note.author"> · {{ note.author }}</span>
+                                </p>
+                              </div>
+                              <span class="note-visibility">{{ note.visibility || 'internal' }}</span>
+                            </div>
+                            <p class="note-body">{{ note.content }}</p>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                  @case ('documents') {
+                    <div class="detail-section">
+                      <div class="detail-section-header">
+                        <h4>Documents</h4>
+                        <mb-button size="sm" variant="primary" (click)="vm.openDocumentModal()">Upload document</mb-button>
+                      </div>
+                      @if (vm.documentsLoading()) {
+                        <div class="detail-empty">Loading documents…</div>
+                      } @else if (vm.documentsError()) {
+                        <div class="detail-empty">{{ vm.documentsError() }}</div>
+                      } @else if (!vm.documents().length) {
+                        <div class="tab-empty">
+                          <span class="tab-empty-icon" aria-hidden="true">📄</span>
+                          <span class="tab-empty-title">No documents uploaded</span>
+                          <span class="tab-empty-note">Upload required documents to complete the record.</span>
+                          <mb-button size="sm" variant="primary" (click)="vm.openDocumentModal()">Upload document</mb-button>
+                        </div>
+                      } @else {
+                        <mb-table
+                          [rows]="vm.documents()"
+                          [columns]="vm.documentColumns"
+                          emptyMessage="No documents available.">
+                          <ng-template mbTableActions let-document>
+                            <div class="row-actions">
+                              <mb-button size="sm" variant="tertiary" aria-label="Document actions">•••</mb-button>
+                            </div>
+                          </ng-template>
+                        </mb-table>
+                      }
+                    </div>
+                  }
+                  @case ('activity') {
+                    <div class="detail-section">
+                      <div class="timeline">
+                        <div class="timeline-filters">
+                          <mb-button
+                            size="sm"
+                            variant="tertiary"
+                            [class.active]="vm.activityFilter() === 'all'"
+                            (click)="vm.setActivityFilter('all')">
+                            All
+                          </mb-button>
+                          <mb-button
+                            size="sm"
+                            variant="tertiary"
+                            [class.active]="vm.activityFilter() === 'enrollment'"
+                            (click)="vm.setActivityFilter('enrollment')">
+                            Enrollment
+                          </mb-button>
+                          <mb-button
+                            size="sm"
+                            variant="tertiary"
+                            [class.active]="vm.activityFilter() === 'documents'"
+                            (click)="vm.setActivityFilter('documents')">
+                            Documents
+                          </mb-button>
+                          <mb-button
+                            size="sm"
+                            variant="tertiary"
+                            [class.active]="vm.activityFilter() === 'guardians'"
+                            (click)="vm.setActivityFilter('guardians')">
+                            Guardians
+                          </mb-button>
+                          <mb-button
+                            size="sm"
+                            variant="tertiary"
+                            [class.active]="vm.activityFilter() === 'system'"
+                            (click)="vm.setActivityFilter('system')">
+                            System
+                          </mb-button>
+                        </div>
+                        @if (vm.activityLoading()) {
+                          <div class="timeline-loading">Loading activity…</div>
+                        } @else if (vm.activityError()) {
+                          <div class="timeline-error">{{ vm.activityError() }}</div>
+                        } @else if (vm.activityItems().length === 0) {
+                          <div class="tab-empty">
+                            <span class="tab-empty-icon" aria-hidden="true">⏳</span>
+                            <span class="tab-empty-title">No activity yet</span>
+                            <span class="tab-empty-note">Activity will appear as changes are made.</span>
+                          </div>
+                        } @else {
+                          <div class="timeline-list">
+                            <div class="timeline-items">
+                              <mb-button
+                                size="sm"
+                                variant="tertiary"
+                                *ngFor="let item of vm.activityItems()"
+                                class="timeline-item"
+                                (click)="vm.openActivityDetail(item)">
+                                <div class="timeline-item-text">
+                                  <div class="timeline-title">{{ item.title }}</div>
+                                  <div class="timeline-meta">
+                                    <span>{{ vm.formatActivityTime(item.createdAt) }}</span>
+                                    <span *ngIf="item.actor">· {{ item.actor }}</span>
+                                  </div>
+                                  <div class="timeline-detail" *ngIf="item.metadata">{{ item.metadata }}</div>
+                                </div>
+                              </mb-button>
+                            </div>
+                            <div class="timeline-load" *ngIf="vm.activityHasNext()">
+                              <mb-button size="sm" variant="tertiary" (click)="vm.loadMoreActivity()">Load more</mb-button>
+                            </div>
+                          </div>
+                          <div class="activity-detail" *ngIf="vm.activityDetailOpen()">
+                            <div class="activity-detail-header">
+                              <div>
+                                <h4>{{ vm.selectedActivity()?.title }}</h4>
+                                <p>{{ vm.formatActivityTime(vm.selectedActivity()?.createdAt) }}</p>
+                              </div>
+                              <mb-button size="sm" variant="tertiary" (click)="vm.closeActivityDetail()">Close</mb-button>
+                            </div>
+                            <p class="activity-detail-meta" *ngIf="vm.selectedActivity()?.actor">
+                              Actor: {{ vm.selectedActivity()?.actor }}
+                            </p>
+                            <p class="activity-detail-body" *ngIf="vm.selectedActivity()?.metadata">
+                              {{ vm.selectedActivity()?.metadata }}
+                            </p>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                }
+              }
+              </div>
+            </div>
+          } @else {
+            <p class="detail-empty detail-empty-shell">Select a student to view details.</p>
+          }
+        </div>
+      </mb-drawer>

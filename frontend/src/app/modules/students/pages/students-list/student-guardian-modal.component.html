@@ -1,0 +1,39 @@
+<mb-modal
+  [open]="open"
+  title="Add guardian"
+  (closed)="vm.closeGuardianModal()"
+  [hasFooter]="true">
+  <div class="modal-form">
+    <label>
+      Full name
+      <mb-input [(ngModel)]="vm.guardianDraft.name" placeholder="Guardian name"></mb-input>
+    </label>
+    <label>
+      Relationship
+      <mb-select [options]="vm.guardianRelationshipOptions" [(ngModel)]="vm.guardianDraft.relationship"></mb-select>
+    </label>
+    <label>
+      Phone
+      <mb-input [(ngModel)]="vm.guardianDraft.phone" placeholder="Phone number"></mb-input>
+    </label>
+    <label>
+      Email
+      <mb-input [(ngModel)]="vm.guardianDraft.email" placeholder="Email address"></mb-input>
+    </label>
+    <label>
+      Occupation
+      <mb-input [(ngModel)]="vm.guardianDraft.occupation" placeholder="Occupation"></mb-input>
+    </label>
+    <div class="modal-toggle-row">
+      <mb-checkbox [(ngModel)]="vm.guardianDraft.isPrimary">Primary guardian</mb-checkbox>
+      <mb-checkbox [(ngModel)]="vm.guardianDraft.isEmergencyContact">Emergency contact</mb-checkbox>
+    </div>
+    <div class="modal-error" *ngIf="vm.guardianError()">{{ vm.guardianError() }}</div>
+  </div>
+  <div mbModalFooter>
+    <mb-button size="sm" variant="tertiary" (click)="vm.closeGuardianModal()">Cancel</mb-button>
+    <mb-button size="sm" variant="primary" [disabled]="vm.guardianSubmitting()" (click)="vm.submitGuardian()">
+      Save guardian
+    </mb-button>
+  </div>
+</mb-modal>
