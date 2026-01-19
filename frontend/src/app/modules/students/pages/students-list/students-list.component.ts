@@ -363,7 +363,7 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
             <div class="workflow-header-text">
               <h3>Quick actions</h3>
               @if (panelStudent()) {
-                <p class="workflow-meta">For {{ panelStudent()?.fullName }}</p>
+                <span class="sr-only">For {{ panelStudent()?.fullName }}</span>
               } @else {
                 <p class="workflow-meta">Select a student to enable actions.</p>
               }
@@ -394,17 +394,18 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
               *ngFor="let action of primaryQuickActions()"
               [appTooltip]="actionTooltip(action)"
               tooltipPosition="left">
-              <mb-button
-                size="sm"
-                variant="tertiary"
-                [fullWidth]="true"
+              <button
+                type="button"
+                class="quick-action__row"
                 [disabled]="!isActionEnabled(action)"
                 (click)="runQuickAction(action)">
-                <span class="action-text">
-                  <span class="action-label">{{ action.label }}</span>
-                  <span class="action-helper">{{ action.helper }}</span>
+                <span class="quick-action__icon" aria-hidden="true">{{ action.icon }}</span>
+                <span class="quick-action__content">
+                  <span class="quick-action__label">{{ action.label }}</span>
+                  <span class="quick-action__helper" *ngIf="action.helper">{{ action.helper }}</span>
                 </span>
-              </mb-button>
+                <span class="quick-action__chevron" aria-hidden="true">›</span>
+              </button>
             </div>
           </div>
         </div>

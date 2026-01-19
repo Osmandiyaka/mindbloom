@@ -709,16 +709,50 @@ tbody tr.is-selected {
   position: relative;
 }
 
-:host ::ng-deep .quick-action .mb-button {
-  justify-content: flex-start;
-  align-items: center;
-  gap: 12px;
-  text-align: left;
+.actions-list {
+  display: grid;
+  gap: 0;
+  margin-top: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  background: #ffffff;
+  overflow: hidden;
 }
 
-.action-icon {
-  width: 26px;
-  height: 26px;
+.quick-action + .quick-action {
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.quick-action__row {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 150ms ease-out, color 150ms ease-out;
+}
+
+.quick-action__row:hover {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.quick-action__row:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+}
+
+.quick-action__row:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.quick-action__icon {
+  width: 30px;
+  height: 30px;
   border-radius: 8px;
   display: inline-flex;
   align-items: center;
@@ -729,20 +763,43 @@ tbody tr.is-selected {
   flex: 0 0 auto;
 }
 
-.action-text {
+.quick-action__content {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
-.action-label {
+.quick-action__label {
   font-size: 13px;
+  font-weight: 600;
   color: var(--color-text-primary);
 }
 
-.action-helper {
+.quick-action__helper {
   font-size: 11px;
   color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-action__chevron {
+  margin-left: auto;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .detail-panel {
