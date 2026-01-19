@@ -400,7 +400,6 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                 [fullWidth]="true"
                 [disabled]="!isActionEnabled(action)"
                 (click)="runQuickAction(action)">
-                <span class="action-icon" aria-hidden="true">{{ action.icon }}</span>
                 <span class="action-text">
                   <span class="action-label">{{ action.label }}</span>
                   <span class="action-helper">{{ action.helper }}</span>
@@ -1392,7 +1391,7 @@ export class StudentsListComponent implements OnInit {
     private readonly entitlements: EditionService,
     private readonly tenantContext: TenantContextService,
     private readonly toast: ToastService,
-  ) {}
+  ) { }
 
   loading = signal(true);
   error = signal<string | null>(null);
@@ -2151,11 +2150,11 @@ export class StudentsListComponent implements OnInit {
       this.attentionFilters.set(
         attention
           ? new Set(
-              attention
-                .split(',')
-                .map((value) => value.trim())
-                .filter((value): value is AttentionFilter => this.isAttentionFilter(value))
-            )
+            attention
+              .split(',')
+              .map((value) => value.trim())
+              .filter((value): value is AttentionFilter => this.isAttentionFilter(value))
+          )
           : new Set()
       );
       const tabParam = params.get('tab');
@@ -3290,7 +3289,7 @@ export class StudentsListComponent implements OnInit {
     this.bulkStatusOpen.set(true);
   }
 
-  bulkExport(): void {}
+  bulkExport(): void { }
 
   bulkArchive(): void {
     this.bulkConfirmText = '';
@@ -3386,7 +3385,7 @@ export class StudentsListComponent implements OnInit {
     if (!value || !navigator?.clipboard) return;
     navigator.clipboard.writeText(value).then(() => {
       this.toast.info('Copied to clipboard', 1500);
-    }).catch(() => {});
+    }).catch(() => { });
   }
 
   handleKeydown(event: KeyboardEvent): void {
