@@ -214,6 +214,23 @@
     </mb-modal>
 
     <mb-modal
+        [open]="vm.isSuspendConfirmOpen()"
+        title="Suspend user?"
+        size="sm"
+        (closed)="vm.cancelSuspend()">
+        <div class="users-confirm">
+            <div class="users-confirm__title">This user will lose access immediately.</div>
+            <div class="users-confirm__text">You can reactivate them at any time.</div>
+        </div>
+        <div mbModalFooter class="users-confirm__footer">
+            <mb-button variant="secondary" (click)="vm.cancelSuspend()">Cancel</mb-button>
+            <mb-button variant="danger" (click)="vm.confirmSuspend()">
+                Suspend user
+            </mb-button>
+        </div>
+    </mb-modal>
+
+    <mb-modal
         [open]="vm.bulkRoleOpen()"
         title="Assign role"
         size="md"

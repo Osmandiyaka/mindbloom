@@ -60,6 +60,8 @@ export class TenantUsersComponent implements OnInit {
     isCreateUserModalOpen = signal(false);
     isViewUserModalOpen = signal(false);
     isDeleteConfirmOpen = signal(false);
+    isSuspendConfirmOpen = signal(false);
+    suspendTarget = signal<ExistingUserRow | null>(null);
     selectedUser = signal<ExistingUserRow | null>(null);
     editPreset = signal<Partial<CreateUserFormState> | null>(null);
     editUserId = signal<string | null>(null);
@@ -366,6 +368,11 @@ export class TenantUsersComponent implements OnInit {
     toggleUserStatus(row: UserListItem, nextStatus?: UserStatus): void {
         if (row.kind !== 'existing') return;
         const resolved = nextStatus ?? (row.status === 'suspended' ? 'active' : 'suspended');
+        if (resolved === 'suspended') {
+            this.suspendTarget.set(row);
+            this.isSuspendConfirmOpen.set(true);
+            return;
+        }
         this.store.toggleUserStatus(row.id, resolved);
     }
 
@@ -393,6 +400,19 @@ export class TenantUsersComponent implements OnInit {
         }
         this.deleteTarget.set(null);
         this.isDeleteConfirmOpen.set(false);
+    }
+
+    cancelSuspend(): void {
+        this.suspendTarget.set(null);
+        this.isSuspendConfirmOpen.set(false);
+    }
+
+    confirmSuspend(): void {
+        const target = this.suspendTarget();
+        if (!target) return;
+        this.store.toggleUserStatus(target.id, 'suspended');
+        this.suspendTarget.set(null);
+        this.isSuspendConfirmOpen.set(false);
     }
 
     clearSelection(): void {
