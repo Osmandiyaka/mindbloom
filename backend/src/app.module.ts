@@ -32,6 +32,7 @@ import { TenantSupportModule } from './common/tenant/tenant.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { SubscriptionJobsModule } from './modules/subscription/subscription-jobs.module';
 import { SchoolsModule } from './modules/schools/schools.module';
+import { OrgUnitsModule } from './modules/org-units/org-units.module';
 
 @Module({
     imports: [
@@ -65,6 +66,7 @@ import { SchoolsModule } from './modules/schools/schools.module';
         AdmissionsModule,
         TasksModule,
         SchoolsModule,
+        OrgUnitsModule,
         TenantSupportModule,
     ],
     controllers: [HostAuditController, AppAuditController],
