@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TenantWorkspaceSetupFacade } from './tenant-workspace-setup.facade';
+import { ClassesSectionsFacade } from './classes-sections/classes-sections.facade';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from './tenant-workspace-setup.shared';
 import { TenantSchoolsComponent } from './school/school-setup.component';
 import { TenantWorkspaceSetupOrgUnitsComponent } from './org-units/org-units.component';
@@ -27,7 +28,7 @@ import { TenantWorkspaceSetupCompleteComponent } from './complete/tenant-workspa
     ],
     templateUrl: './tenant-workspace-setup.component.html',
     styleUrls: ['./tenant-workspace-setup.component.scss'],
-    providers: [TenantWorkspaceSetupFacade],
+    providers: [TenantWorkspaceSetupFacade, ClassesSectionsFacade],
 })
 export class TenantWorkspaceSetupComponent implements OnInit {
     readonly vm = inject(TenantWorkspaceSetupFacade);
