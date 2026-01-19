@@ -33,6 +33,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { SubscriptionJobsModule } from './modules/subscription/subscription-jobs.module';
 import { SchoolsModule } from './modules/schools/schools.module';
 import { OrgUnitsModule } from './modules/org-units/org-units.module';
+import { ClassesSectionsModule } from './modules/classes-sections/classes-sections.module';
 
 @Module({
     imports: [
@@ -66,6 +67,7 @@ import { OrgUnitsModule } from './modules/org-units/org-units.module';
         AdmissionsModule,
         TasksModule,
         SchoolsModule,
+        ClassesSectionsModule,
         OrgUnitsModule,
         TenantSupportModule,
     ],

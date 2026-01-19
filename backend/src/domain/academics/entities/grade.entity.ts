@@ -1,21 +1,19 @@
-export type ClassProps = {
+export type GradeProps = {
     id: string;
     tenantId: string;
     schoolIds: string[];
-    academicYearId?: string;
-    gradeId?: string;
     name: string;
     normalizedName: string;
     code?: string;
-    status: 'active' | 'archived';
     sortOrder: number;
+    status: 'active' | 'archived';
     createdAt?: Date;
     updatedAt?: Date;
     archivedAt?: Date | null;
 };
 
-export class ClassEntity {
-    constructor(private readonly props: ClassProps) {}
+export class GradeEntity {
+    constructor(private readonly props: GradeProps) {}
 
     get id(): string {
         return this.props.id;
@@ -27,14 +25,6 @@ export class ClassEntity {
 
     get schoolIds(): string[] {
         return this.props.schoolIds;
-    }
-
-    get academicYearId(): string | undefined {
-        return this.props.academicYearId;
-    }
-
-    get gradeId(): string | undefined {
-        return this.props.gradeId;
     }
 
     get name(): string {
@@ -57,10 +47,6 @@ export class ClassEntity {
         return this.props.status;
     }
 
-    get archivedAt(): Date | null | undefined {
-        return this.props.archivedAt;
-    }
-
     get createdAt(): Date | undefined {
         return this.props.createdAt;
     }
@@ -69,11 +55,15 @@ export class ClassEntity {
         return this.props.updatedAt;
     }
 
-    toPrimitives(): ClassProps {
+    get archivedAt(): Date | null | undefined {
+        return this.props.archivedAt;
+    }
+
+    toPrimitives(): GradeProps {
         return { ...this.props };
     }
 
-    withUpdates(update: Partial<Omit<ClassProps, 'id' | 'tenantId'>>): ClassEntity {
-        return new ClassEntity({ ...this.props, ...update });
+    withUpdates(update: Partial<Omit<GradeProps, 'id' | 'tenantId'>>): GradeEntity {
+        return new GradeEntity({ ...this.props, ...update });
     }
 }

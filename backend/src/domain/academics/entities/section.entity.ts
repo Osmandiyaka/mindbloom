@@ -2,14 +2,17 @@ export type SectionProps = {
     id: string;
     tenantId: string;
     classId: string;
+    schoolId: string;
+    academicYearId?: string;
     name: string;
+    normalizedName: string;
     code?: string;
     capacity?: number;
-    homeroomTeacherId?: string;
-    active: boolean;
+    status: 'active' | 'archived';
     sortOrder: number;
     createdAt?: Date;
     updatedAt?: Date;
+    archivedAt?: Date | null;
 };
 
 export class SectionEntity {
@@ -27,8 +30,20 @@ export class SectionEntity {
         return this.props.classId;
     }
 
+    get schoolId(): string {
+        return this.props.schoolId;
+    }
+
+    get academicYearId(): string | undefined {
+        return this.props.academicYearId;
+    }
+
     get name(): string {
         return this.props.name;
+    }
+
+    get normalizedName(): string {
+        return this.props.normalizedName;
     }
 
     get code(): string | undefined {
@@ -39,12 +54,8 @@ export class SectionEntity {
         return this.props.capacity;
     }
 
-    get homeroomTeacherId(): string | undefined {
-        return this.props.homeroomTeacherId;
-    }
-
-    get active(): boolean {
-        return this.props.active;
+    get status(): 'active' | 'archived' {
+        return this.props.status;
     }
 
     get sortOrder(): number {
@@ -57,6 +68,10 @@ export class SectionEntity {
 
     get updatedAt(): Date | undefined {
         return this.props.updatedAt;
+    }
+
+    get archivedAt(): Date | null | undefined {
+        return this.props.archivedAt;
     }
 
     toPrimitives(): SectionProps {

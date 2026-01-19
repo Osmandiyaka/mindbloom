@@ -1,7 +1,8 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { firstValueFrom } from 'rxjs';
-import { ClassResponse, ClassSectionService, SectionResponse } from '../../../../../core/services/class-section.service';
+import { ClassResponse, SectionResponse } from '../../../../../core/services/class-section.service';
+import { ClassesSectionsApiService } from './classes-sections-api.service';
 import { ToastService } from '../../../../../core/ui/toast/toast.service';
 import {
     ClassLevelType,
@@ -12,7 +13,7 @@ import {
 
 @Injectable()
 export class ClassesSectionsFacade {
-    private readonly classSectionService: ClassSectionService = inject(ClassSectionService);
+    private readonly api: ClassesSectionsApiService = inject(ClassesSectionsApiService);
     private readonly toast: ToastService = inject(ToastService);
 
     classRows = signal<ClassRow[]>([]);
@@ -292,7 +293,7 @@ export class ClassesSectionsFacade {
             this.classFormSubmitting.set(true);
             if (this.classFormMode() === 'edit' && this.classFormId()) {
                 const id = this.classFormId()!;
-                const saved = await firstValueFrom(this.classSectionService.updateClass(id, payload)) as ClassResponse;
+                const saved = await firstValueFrom(this.api.updateClass(id, payload)) as ClassResponse;
                 const savedId = saved.id || saved._id || id;
                 const resolvedSchoolIds = saved.schoolIds ?? payload.schoolIds ?? null;
                 this.classRows.update(items => items.map(row => row.id === savedId
@@ -306,7 +307,7 @@ export class ClassesSectionsFacade {
                     : row));
                 this.toast.success(`Class "${name}" updated.`);
             } else {
-                const saved = await firstValueFrom(this.classSectionService.createClass(payload)) as ClassResponse;
+                const saved = await firstValueFrom(this.api.createClass(payload)) as ClassResponse;
                 const id = saved.id || saved._id || this.nextClassId();
                 const sortOrder = saved.sortOrder ?? (this.classRows().length + 1);
                 const newRow: ClassRow = {
@@ -362,7 +363,7 @@ export class ClassesSectionsFacade {
         this.classDeleteSubmitting.set(true);
         this.classDeleteError.set('');
         try {
-            await firstValueFrom(this.classSectionService.deleteClass(target.id));
+            await firstValueFrom(this.api.deleteClass(target.id));
             this.sectionRows.update(items => items.filter(section => section.classId !== target.id));
             this.classRows.update(items => items.filter(row => row.id !== target.id));
             if (this.selectedClassId() === target.id) {
@@ -382,7 +383,7 @@ export class ClassesSectionsFacade {
         const sortOrder = this.classRows().length + 1;
         const name = `${row.name} copy`;
         try {
-            const saved = await firstValueFrom(this.classSectionService.createClass({
+            const saved = await firstValueFrom(this.api.createClass({
                 name,
                 code: row.code,
                 levelType: row.levelType || undefined,
@@ -408,7 +409,7 @@ export class ClassesSectionsFacade {
     async toggleClassActive(row: ClassRow): Promise<void> {
         const nextActive = !row.active;
         try {
-            await firstValueFrom(this.classSectionService.updateClass(row.id, { active: nextActive }));
+            await firstValueFrom(this.api.updateClass(row.id, { active: nextActive }));
             this.classRows.update(items => items.map(item => item.id === row.id
                 ? { ...item, active: nextActive }
                 : item));
@@ -508,7 +509,7 @@ export class ClassesSectionsFacade {
         try {
             if (this.sectionFormMode() === 'edit' && this.sectionFormId()) {
                 const id = this.sectionFormId()!;
-                const saved = await firstValueFrom(this.classSectionService.updateSection(id, payload)) as SectionResponse;
+                const saved = await firstValueFrom(this.api.updateSection(id, payload)) as SectionResponse;
                 const savedId = saved.id || saved._id || id;
                 this.sectionRows.update(items => items.map(section => section.id === savedId
                     ? { ...section, ...payload, id: savedId }
@@ -516,7 +517,7 @@ export class ClassesSectionsFacade {
                 this.toast.success(`Section "${name}" updated.`);
             } else {
                 const sortOrder = this.sectionRows().filter(section => section.classId === classId).length + 1;
-                const saved = await firstValueFrom(this.classSectionService.createSection({
+                const saved = await firstValueFrom(this.api.createSection({
                     ...payload,
                     sortOrder
                 })) as SectionResponse;
@@ -566,7 +567,7 @@ export class ClassesSectionsFacade {
         this.sectionDeleteSubmitting.set(true);
         this.sectionDeleteError.set('');
         try {
-            await firstValueFrom(this.classSectionService.deleteSection(target.id));
+            await firstValueFrom(this.api.deleteSection(target.id));
             this.sectionRows.update(items => items.filter(section => section.id !== target.id));
             this.toast.success(`Section "${target.name}" deleted.`);
             this.requestCloseSectionDelete();
@@ -580,7 +581,7 @@ export class ClassesSectionsFacade {
     async toggleSectionActive(section: SectionRow): Promise<void> {
         const nextActive = !section.active;
         try {
-            await firstValueFrom(this.classSectionService.updateSection(section.id, { active: nextActive }));
+            await firstValueFrom(this.api.updateSection(section.id, { active: nextActive }));
             this.sectionRows.update(items => items.map(item => item.id === section.id
                 ? { ...item, active: nextActive }
                 : item));
@@ -662,7 +663,7 @@ export class ClassesSectionsFacade {
         try {
             for (const [index, name] of toCreate.entries()) {
                 const sortOrder = startIndex + index + 1;
-                const saved = await firstValueFrom(this.classSectionService.createSection({
+                const saved = await firstValueFrom(this.api.createSection({
                     classId,
                     name,
                     code: '',
@@ -734,7 +735,7 @@ export class ClassesSectionsFacade {
         const orderMap = new Map(draft.map((row, index) => [row.id, index + 1]));
         try {
             await Promise.all(draft.map((row, index) =>
-                firstValueFrom(this.classSectionService.updateClass(row.id, { sortOrder: index + 1 }))
+                firstValueFrom(this.api.updateClass(row.id, { sortOrder: index + 1 }))
             ));
             this.classRows.update(items => items.map(row => ({
                 ...row,
@@ -774,7 +775,7 @@ export class ClassesSectionsFacade {
         const orderMap = new Map(draft.map((row, index) => [row.id, index + 1]));
         try {
             await Promise.all(draft.map((row, index) =>
-                firstValueFrom(this.classSectionService.updateSection(row.id, { sortOrder: index + 1 }))
+                firstValueFrom(this.api.updateSection(row.id, { sortOrder: index + 1 }))
             ));
             this.sectionRows.update(items => items.map(row => ({
                 ...row,

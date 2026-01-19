@@ -1,94 +1,174 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { TenantScopedRepository } from '../../../../common/tenant/tenant-scoped.repository';
-import { TenantContext } from '../../../../common/tenant/tenant.context';
 import { ClassEntity } from '../../../../domain/academics/entities/class.entity';
-import { SectionEntity } from '../../../../domain/academics/entities/section.entity';
-import { IClassRepository } from '../../../../domain/ports/out/class-repository.port';
+import {
+    ClassListFilters,
+    ClassSort,
+    IClassReadModelPort,
+    IClassRepository,
+    PaginatedResult,
+    PaginationInput,
+} from '../../../../domain/ports/out/class-repository.port';
 
-type ClassDefinitionDoc = {
+type ClassDoc = {
     _id: Types.ObjectId;
-    tenantId: string;
+    tenantId: Types.ObjectId;
+    schoolIds: Types.ObjectId[];
+    academicYearId?: Types.ObjectId;
+    gradeId?: Types.ObjectId;
     name: string;
+    normalizedName: string;
     code?: string;
-    levelType?: string;
+    status: 'active' | 'archived';
     sortOrder: number;
-    active: boolean;
-    schoolIds: string[] | null;
-    notes?: string;
-    createdAt?: Date;
-    updatedAt?: Date;
-};
-
-type SectionDefinitionDoc = {
-    _id: Types.ObjectId;
-    tenantId: string;
-    classId: string;
-    name: string;
-    code?: string;
-    capacity?: number;
-    homeroomTeacherId?: string;
-    active: boolean;
-    sortOrder: number;
+    scopeKey: string;
+    archivedAt?: Date | null;
     createdAt?: Date;
     updatedAt?: Date;
 };
 
 @Injectable()
-export class MongooseClassRepository
-    extends TenantScopedRepository<ClassDefinitionDoc, ClassEntity>
-    implements IClassRepository {
+export class MongooseClassRepository implements IClassRepository, IClassReadModelPort {
     constructor(
-        @InjectModel('ClassDefinition') private readonly classModel: Model<ClassDefinitionDoc>,
-        @InjectModel('SectionDefinition') private readonly sectionModel: Model<SectionDefinitionDoc>,
-        tenantContext: TenantContext,
-    ) {
-        super(tenantContext);
+        @InjectModel('Class') private readonly classModel: Model<ClassDoc>,
+        @InjectModel('Section') private readonly sectionModel: Model<any>,
+    ) {}
+
+    async findById(tenantId: string, id: string): Promise<ClassEntity | null> {
+        const doc = await this.classModel.findOne({ _id: id, tenantId }).lean().exec();
+        return doc ? this.toEntity(doc) : null;
     }
 
-    async listClasses(tenantId: string): Promise<ClassEntity[]> {
-        const filter = this.withTenantFilter({}, tenantId);
-        const docs = await this.classModel.find(filter).sort({ sortOrder: 1 }).lean().exec();
-        return docs.map(doc => this.toClassEntity(doc));
+    async list(
+        tenantId: string,
+        filters: ClassListFilters,
+        pagination: PaginationInput,
+        sort?: ClassSort,
+    ): Promise<PaginatedResult<ClassEntity>> {
+        const query = this.buildFilters(tenantId, filters);
+        const page = pagination.page ?? 1;
+        const pageSize = pagination.pageSize ?? 25;
+        const sortSpec = this.buildSort(sort);
+
+        const [items, total] = await Promise.all([
+            this.classModel.find(query).sort(sortSpec).skip((page - 1) * pageSize).limit(pageSize).lean().exec(),
+            this.classModel.countDocuments(query).exec(),
+        ]);
+
+        return {
+            items: items.map(doc => this.toEntity(doc)),
+            total,
+            page,
+            pageSize,
+        };
     }
 
-    async findClassById(id: string, tenantId: string): Promise<ClassEntity | null> {
-        const filter = this.withTenantFilter({ _id: id }, tenantId);
-        const doc = await this.classModel.findOne(filter).lean().exec();
-        return doc ? this.toClassEntity(doc) : null;
+    async listWithCounts(
+        tenantId: string,
+        filters: ClassListFilters,
+        pagination: PaginationInput,
+        sort?: ClassSort,
+    ): Promise<PaginatedResult<ClassEntity & { sectionsCount: number }>> {
+        const query = this.buildFilters(tenantId, filters);
+        const page = pagination.page ?? 1;
+        const pageSize = pagination.pageSize ?? 25;
+        const sortSpec = this.buildSort(sort);
+
+        const schoolIdMatch =
+            filters.schoolId && Types.ObjectId.isValid(filters.schoolId)
+                ? new Types.ObjectId(filters.schoolId)
+                : null;
+
+        const pipeline: any[] = [
+            { $match: query },
+            { $sort: sortSpec },
+            { $skip: (page - 1) * pageSize },
+            { $limit: pageSize },
+            {
+                $lookup: {
+                    from: 'sections',
+                    let: { classId: '$_id', tenantId: '$tenantId' },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$classId', '$$classId'] },
+                                        { $eq: ['$tenantId', '$$tenantId'] },
+                                        { $eq: ['$status', 'active'] },
+                                    ],
+                                },
+                            },
+                        },
+                        ...(schoolIdMatch ? [{ $match: { schoolId: schoolIdMatch } }] : []),
+                    ],
+                    as: 'sections',
+                },
+            },
+            { $addFields: { sectionsCount: { $size: '$sections' } } },
+            { $project: { sections: 0 } },
+        ];
+
+        const [items, total] = await Promise.all([
+            this.classModel.aggregate(pipeline).exec(),
+            this.classModel.countDocuments(query).exec(),
+        ]);
+
+        return {
+            items: items.map((doc: any) => Object.assign(this.toEntity(doc), { sectionsCount: doc.sectionsCount ?? 0 })),
+            total,
+            page,
+            pageSize,
+        };
     }
 
-    async createClass(entity: ClassEntity): Promise<ClassEntity> {
-        const tenantId = this.requireTenant(entity.tenantId);
-        const created = new this.classModel({
-            tenantId,
-            name: entity.name,
-            code: entity.code,
-            levelType: entity.levelType,
-            sortOrder: entity.sortOrder,
-            active: entity.active,
+    async countSectionsByClass(tenantId: string, classId: string): Promise<number> {
+        return this.sectionModel.countDocuments({ tenantId, classId, status: 'active' }).exec();
+    }
+
+    async listByGradeId(tenantId: string, gradeId: string, status?: 'active' | 'archived'): Promise<ClassEntity[]> {
+        const query: Record<string, any> = { tenantId, gradeId };
+        if (status) {
+            query.status = status;
+        }
+        const docs = await this.classModel.find(query).lean().exec();
+        return docs.map(doc => this.toEntity(doc));
+    }
+
+    async create(entity: ClassEntity): Promise<ClassEntity> {
+        const created = await this.classModel.create({
+            tenantId: entity.tenantId,
             schoolIds: entity.schoolIds,
-            notes: entity.notes,
+            academicYearId: entity.academicYearId,
+            gradeId: entity.gradeId,
+            name: entity.name,
+            normalizedName: entity.normalizedName,
+            code: entity.code,
+            status: entity.status,
+            sortOrder: entity.sortOrder,
+            scopeKey: this.scopeKey(entity),
+            archivedAt: entity.archivedAt ?? null,
         });
-        const saved = await created.save();
-        return this.toClassEntity(saved.toObject());
+        return this.toEntity(created.toObject());
     }
 
-    async updateClass(entity: ClassEntity): Promise<ClassEntity> {
-        const filter = this.withTenantFilter({ _id: entity.id }, entity.tenantId);
+    async update(entity: ClassEntity): Promise<ClassEntity> {
         const doc = await this.classModel
             .findOneAndUpdate(
-                filter,
+                { _id: entity.id, tenantId: entity.tenantId },
                 {
                     $set: {
-                        name: entity.name,
-                        code: entity.code,
-                        levelType: entity.levelType,
-                        sortOrder: entity.sortOrder,
-                        active: entity.active,
                         schoolIds: entity.schoolIds,
-                        notes: entity.notes,
+                        academicYearId: entity.academicYearId,
+                        gradeId: entity.gradeId,
+                        name: entity.name,
+                        normalizedName: entity.normalizedName,
+                        code: entity.code,
+                        status: entity.status,
+                        sortOrder: entity.sortOrder,
+                        scopeKey: this.scopeKey(entity),
+                        archivedAt: entity.archivedAt ?? null,
                         updatedAt: new Date(),
                     },
                 },
@@ -99,123 +179,131 @@ export class MongooseClassRepository
         if (!doc) {
             throw new Error('Class not found');
         }
-        return this.toClassEntity(doc);
+        return this.toEntity(doc);
     }
 
-    async deleteClass(id: string, tenantId: string): Promise<void> {
-        const filter = this.withTenantFilter({ _id: id }, tenantId);
-        await this.classModel.deleteOne(filter).exec();
+    async archive(tenantId: string, id: string, actorUserId?: string | null): Promise<void> {
+        await this.classModel.updateOne(
+            { _id: id, tenantId },
+            { $set: { status: 'archived', archivedAt: new Date(), updatedBy: actorUserId ?? null } },
+        ).exec();
     }
 
-    async countClasses(tenantId: string): Promise<number> {
-        const filter = this.withTenantFilter({}, tenantId);
-        return this.classModel.countDocuments(filter).exec();
+    async restore(tenantId: string, id: string, actorUserId?: string | null): Promise<void> {
+        await this.classModel.updateOne(
+            { _id: id, tenantId },
+            { $set: { status: 'active', archivedAt: null, updatedBy: actorUserId ?? null } },
+        ).exec();
     }
 
-    async listSections(tenantId: string, classId?: string): Promise<SectionEntity[]> {
-        const baseFilter: Record<string, unknown> = {};
-        if (classId) {
-            baseFilter.classId = classId;
+    async existsActiveByNameScope(input: {
+        tenantId: string;
+        academicYearId?: string | null;
+        gradeId?: string | null;
+        scopeKey: string;
+        normalizedName: string;
+        excludeId?: string;
+    }): Promise<boolean> {
+        const query: Record<string, any> = {
+            tenantId: input.tenantId,
+            academicYearId: input.academicYearId ?? null,
+            gradeId: input.gradeId ?? null,
+            scopeKey: input.scopeKey,
+            normalizedName: input.normalizedName,
+            status: 'active',
+        };
+        if (input.excludeId) {
+            query._id = { $ne: input.excludeId };
         }
-        const filter = this.withTenantFilter(baseFilter, tenantId);
-        const docs = await this.sectionModel.find(filter).sort({ sortOrder: 1 }).lean().exec();
-        return docs.map(doc => this.toSectionEntity(doc));
+        const doc = await this.classModel.findOne(query).lean().exec();
+        return Boolean(doc);
     }
 
-    async findSectionById(id: string, tenantId: string): Promise<SectionEntity | null> {
-        const filter = this.withTenantFilter({ _id: id }, tenantId);
-        const doc = await this.sectionModel.findOne(filter).lean().exec();
-        return doc ? this.toSectionEntity(doc) : null;
+    async findConflictsByNameOverlap(input: {
+        tenantId: string;
+        academicYearId?: string | null;
+        gradeId?: string | null;
+        normalizedName: string;
+        schoolIds: string[];
+        excludeId?: string;
+    }): Promise<ClassEntity[]> {
+        const query: Record<string, any> = {
+            tenantId: input.tenantId,
+            academicYearId: input.academicYearId ?? null,
+            gradeId: input.gradeId ?? null,
+            normalizedName: input.normalizedName,
+            status: 'active',
+            schoolIds: { $in: input.schoolIds },
+        };
+        if (input.excludeId) {
+            query._id = { $ne: input.excludeId };
+        }
+        const docs = await this.classModel.find(query).lean().exec();
+        return docs.map(doc => this.toEntity(doc));
     }
 
-    async createSection(entity: SectionEntity): Promise<SectionEntity> {
-        const tenantId = this.requireTenant(entity.tenantId);
-        const created = new this.sectionModel({
-            tenantId,
-            classId: entity.classId,
-            name: entity.name,
-            code: entity.code,
-            capacity: entity.capacity,
-            homeroomTeacherId: entity.homeroomTeacherId,
-            active: entity.active,
-            sortOrder: entity.sortOrder,
-        });
-        const saved = await created.save();
-        return this.toSectionEntity(saved.toObject());
-    }
-
-    async updateSection(entity: SectionEntity): Promise<SectionEntity> {
-        const filter = this.withTenantFilter({ _id: entity.id }, entity.tenantId);
-        const doc = await this.sectionModel
-            .findOneAndUpdate(
-                filter,
-                {
-                    $set: {
-                        classId: entity.classId,
-                        name: entity.name,
-                        code: entity.code,
-                        capacity: entity.capacity,
-                        homeroomTeacherId: entity.homeroomTeacherId,
-                        active: entity.active,
-                        sortOrder: entity.sortOrder,
-                        updatedAt: new Date(),
-                    },
+    async updateSortOrders(tenantId: string, updates: Array<{ id: string; sortOrder: number }>): Promise<void> {
+        if (!updates.length) return;
+        await this.classModel.bulkWrite(
+            updates.map(update => ({
+                updateOne: {
+                    filter: { _id: update.id, tenantId },
+                    update: { $set: { sortOrder: update.sortOrder } },
                 },
-                { new: true },
-            )
-            .lean()
-            .exec();
-        if (!doc) {
-            throw new Error('Section not found');
+            })),
+        );
+    }
+
+    private buildFilters(tenantId: string, filters: ClassListFilters): Record<string, any> {
+        const query: Record<string, any> = { tenantId };
+        if (filters.status) {
+            query.status = filters.status;
         }
-        return this.toSectionEntity(doc);
+        if (filters.schoolId) {
+            query.schoolIds = filters.schoolId;
+        }
+        if (filters.academicYearId) {
+            query.academicYearId = filters.academicYearId;
+        }
+        if (filters.gradeId) {
+            query.gradeId = filters.gradeId;
+        }
+        if (filters.search) {
+            query.$or = [
+                { name: { $regex: filters.search, $options: 'i' } },
+                { code: { $regex: filters.search, $options: 'i' } },
+            ];
+        }
+        return query;
     }
 
-    async deleteSection(id: string, tenantId: string): Promise<void> {
-        const filter = this.withTenantFilter({ _id: id }, tenantId);
-        await this.sectionModel.deleteOne(filter).exec();
+    private buildSort(sort?: ClassSort): Record<string, 1 | -1> {
+        if (!sort?.field) {
+            return { sortOrder: 1 };
+        }
+        const direction = sort.direction === 'desc' ? -1 : 1;
+        return { [sort.field]: direction } as Record<string, 1 | -1>;
     }
 
-    async deleteSectionsByClassId(classId: string, tenantId: string): Promise<number> {
-        const filter = this.withTenantFilter({ classId }, tenantId);
-        const result = await this.sectionModel.deleteMany(filter).exec();
-        return result.deletedCount ?? 0;
+    private scopeKey(entity: ClassEntity): string {
+        return `${entity.tenantId}:${entity.schoolIds.map(id => id.toString()).sort().join('-')}`;
     }
 
-    async countSections(tenantId: string, classId: string): Promise<number> {
-        const filter = this.withTenantFilter({ classId }, tenantId);
-        return this.sectionModel.countDocuments(filter).exec();
-    }
-
-    private toClassEntity(doc: ClassDefinitionDoc): ClassEntity {
+    private toEntity(doc: ClassDoc & { sectionsCount?: number }): ClassEntity {
         return new ClassEntity({
             id: doc._id.toString(),
-            tenantId: doc.tenantId,
+            tenantId: doc.tenantId.toString(),
+            schoolIds: doc.schoolIds?.map(id => id.toString()) ?? [],
+            academicYearId: doc.academicYearId?.toString(),
+            gradeId: doc.gradeId?.toString(),
             name: doc.name,
+            normalizedName: doc.normalizedName,
             code: doc.code,
-            levelType: doc.levelType,
-            sortOrder: doc.sortOrder ?? 0,
-            active: doc.active ?? true,
-            schoolIds: doc.schoolIds ?? null,
-            notes: doc.notes,
-            createdAt: doc.createdAt,
-            updatedAt: doc.updatedAt,
-        });
-    }
-
-    private toSectionEntity(doc: SectionDefinitionDoc): SectionEntity {
-        return new SectionEntity({
-            id: doc._id.toString(),
-            tenantId: doc.tenantId,
-            classId: doc.classId,
-            name: doc.name,
-            code: doc.code,
-            capacity: doc.capacity,
-            homeroomTeacherId: doc.homeroomTeacherId,
-            active: doc.active ?? true,
+            status: doc.status ?? 'active',
             sortOrder: doc.sortOrder ?? 0,
             createdAt: doc.createdAt,
             updatedAt: doc.updatedAt,
+            archivedAt: doc.archivedAt ?? null,
         });
     }
 }
