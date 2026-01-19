@@ -21,13 +21,17 @@
                             Import classes
                         </button>
                         <button type="button" class="classes-header__menu-item"
-                            (click)="vm.downloadImportTemplate('classes'); vm.closeClassHeaderMenu()">
-                            Create from template
+                            (click)="vm.exportCsv('classes'); vm.closeClassHeaderMenu()">
+                            Export
+                        </button>
+                        <button type="button" class="classes-header__menu-item"
+                            (click)="vm.closeClassHeaderMenu()">
+                            Manage grading system
                         </button>
                         <div class="classes-header__menu-divider"></div>
                         <button type="button" class="classes-header__menu-item"
-                            (click)="vm.openClassReorder(); vm.closeClassHeaderMenu()">
-                            Bulk actions
+                            (click)="vm.closeClassHeaderMenu()">
+                            Help
                         </button>
                     </div>
                 </mb-popover>
@@ -55,22 +59,24 @@
         <div class="classes-shell">
             <div class="classes-split">
                 <div class="classes-panel classes-panel--list">
-                    <div class="classes-panel__toolbar"
-                        *ngIf="vm.isLoading() || vm.classRows().length">
-                        <div class="classes-panel__search">
-                            <app-search-input [value]="vm.classSearch()"
-                                placeholder="Search classes..."
-                                (search)="vm.classSearch.set($event)">
-                            </app-search-input>
-                        </div>
+                    <div class="classes-panel__toolbar">
                         <div class="classes-panel__meta-row">
-                            <span>{{ vm.filteredClassRows().length }} class{{ vm.filteredClassRows().length === 1 ? '' : 'es' }}</span>
+                            <div class="classes-panel__title">
+                                <span>Classes</span>
+                                <span class="classes-panel__count">{{ vm.filteredClassRows().length }}</span>
+                            </div>
                             <mb-select class="classes-panel__sort" id="class-sort"
                                 [value]="vm.classSort()" (valueChange)="vm.setClassSort($event)">
                                 <option value="az">A–Z</option>
                                 <option value="recent">Recently added</option>
                                 <option value="sections">Most sections</option>
                             </mb-select>
+                        </div>
+                        <div class="classes-panel__search">
+                            <app-search-input [value]="vm.classSearch()"
+                                placeholder="Search classes..."
+                                (search)="vm.classSearch.set($event)">
+                            </app-search-input>
                         </div>
                     </div>
 
@@ -142,7 +148,7 @@
                             <div class="classes-empty__text">
                                 Add your grade levels to begin creating sections.
                             </div>
-                            <mb-button variant="primary" (click)="vm.openAddClass()">Add
+                            <mb-button variant="secondary" (click)="vm.openAddClass()">Add
                                 class</mb-button>
                         </div>
                     </ng-template>
@@ -319,10 +325,13 @@
                                     <path d="M14 16h7"></path>
                                 </svg>
                             </div>
-                            <div class="sections-placeholder__title">Select a class to manage sections</div>
+                            <div class="sections-placeholder__title">Select a class</div>
                             <div class="sections-placeholder__text">
-                                Choose a class on the left to view and manage its sections.
+                                Choose a class on the left to manage its sections.
                             </div>
+                            <button type="button" class="sections-placeholder__link">
+                                Learn how sections work
+                            </button>
                         </div>
                     </ng-template>
                 </div>
@@ -331,12 +340,12 @@
     </div>
 
     <div class="setup-footer">
-        <div class="setup-footer__actions">
+        <div class="setup-footer__left">
             <mb-button variant="secondary" (click)="vm.back()">Back</mb-button>
+        </div>
+        <div class="setup-footer__right">
             <mb-button variant="primary" [disabled]="!vm.canContinue()"
                 (click)="vm.next()">Continue</mb-button>
-        </div>
-        <div class="setup-footer__aside">
             <button type="button" class="setup-skip-link" (click)="vm.skipSetup()">Skip for
                 now</button>
         </div>
