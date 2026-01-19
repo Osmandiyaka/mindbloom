@@ -1,0 +1,30 @@
+<mb-modal [open]="open" [title]="title" size="sm" [hasFooter]="true" (closed)="handleClosed()">
+    <div class="destructive-confirm">
+        <p class="destructive-confirm__description" *ngIf="description">{{ description }}</p>
+        <div class="destructive-confirm__impact" *ngIf="impactTitle || impactItems.length">
+            <div class="destructive-confirm__impact-title" *ngIf="impactTitle">{{ impactTitle }}</div>
+            <ul class="destructive-confirm__impact-list">
+                <li *ngFor="let item of impactItems">{{ item }}</li>
+            </ul>
+        </div>
+        <div class="destructive-confirm__confirm" *ngIf="requireConfirmation">
+            <div class="destructive-confirm__confirm-label">{{ confirmationLabel }}</div>
+            <mb-input
+                [value]="confirmationValue()"
+                [placeholder]="confirmationPlaceholder"
+                (valueChange)="confirmationValue.set($event)"
+            ></mb-input>
+        </div>
+    </div>
+    <div mbModalFooter class="destructive-confirm__footer">
+        <mb-button variant="secondary" (click)="handleClosed()">{{ cancelButtonLabel }}</mb-button>
+        <mb-button
+            variant="danger"
+            [loading]="isProcessing"
+            [disabled]="isProcessing || !canConfirm()"
+            (click)="confirm()"
+        >
+            {{ confirmButtonLabel }}
+        </mb-button>
+    </div>
+</mb-modal>

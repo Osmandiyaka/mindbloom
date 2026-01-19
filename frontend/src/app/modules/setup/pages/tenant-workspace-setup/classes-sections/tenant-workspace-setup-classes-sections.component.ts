@@ -2,6 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from '../tenant-workspace-setup.shared';
 import { TenantWorkspaceSetupFacade } from '../tenant-workspace-setup.facade';
 import { ClassesSectionsFacade } from './classes-sections.facade';
+import { SchoolContextService } from '../../../../../core/school/school-context.service';
 
 @Component({
     selector: 'app-tenant-workspace-setup-classes-sections',
@@ -13,6 +14,13 @@ import { ClassesSectionsFacade } from './classes-sections.facade';
 export class TenantWorkspaceSetupClassesSectionsComponent {
     readonly vm = inject(ClassesSectionsFacade);
     readonly setupVm = inject(TenantWorkspaceSetupFacade);
+    private readonly schoolContext = inject(SchoolContextService);
+
+    readonly schoolOptions = computed(() => this.schoolContext.schools()
+        .map(school => ({ id: school.id, name: school.name }))
+        .sort((a, b) => a.name.localeCompare(b.name)));
+
+    readonly hasMultipleSchools = computed(() => this.schoolOptions().length > 1);
 
     readonly staffSelectorOptions = computed(() => this.setupVm.users()
         .filter(user => ['Teacher', 'Staff'].includes(user.roleName || ''))

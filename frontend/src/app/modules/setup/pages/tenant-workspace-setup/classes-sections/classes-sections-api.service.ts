@@ -29,7 +29,6 @@ export class ClassesSectionsApiService {
     code?: string;
     capacity?: number | null;
     homeroomTeacherId?: string | null;
-    active?: boolean;
     sortOrder?: number;
   }): Observable<SectionResponse> {
     return this.classSectionService.createSection(payload);
@@ -41,7 +40,6 @@ export class ClassesSectionsApiService {
     code?: string;
     capacity?: number | null;
     homeroomTeacherId?: string | null;
-    active?: boolean;
     sortOrder?: number;
   }>): Observable<SectionResponse> {
     return this.classSectionService.updateSection(id, payload);

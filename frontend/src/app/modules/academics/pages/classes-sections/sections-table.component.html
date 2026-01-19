@@ -1,0 +1,34 @@
+<div class="sections-table">
+    <mb-table
+        [columns]="columns"
+        [rows]="tableRows()"
+        [rowKey]="rowKey"
+        [isLoading]="isLoading"
+        [isError]="isError"
+        [emptyState]="emptyState()"
+        [isFiltered]="isFiltered"
+        (emptyAction)="handleEmptyAction($event)"
+        (cellClick)="handleView($event.row)">
+        <ng-template mbTableActions let-row>
+            <div class="sections-table__actions">
+                <button type="button" class="sections-table__action" (click)="handleView(row)">
+                    View
+                </button>
+                <button type="button" class="sections-table__menu" #menuOrigin
+                    aria-label="More actions" [attr.aria-expanded]="menuOpenId() === row.id"
+                    (click)="toggleMenu(row.id)">...</button>
+                <mb-popover [open]="menuOpenId() === row.id" [origin]="menuOrigin" [hasBackdrop]="true"
+                    [panelClass]="['mb-popover-panel', 'sections-table__menu-panel']" (closed)="closeMenu()">
+                    <div class="sections-table__menu-content" role="menu">
+                        <button type="button" class="sections-table__menu-item" (click)="handleEdit(row)">
+                            Edit section
+                        </button>
+                        <button type="button" class="sections-table__menu-item" (click)="handleArchive(row)">
+                            {{ row.status === 'active' ? 'Archive section' : 'Restore section' }}
+                        </button>
+                    </div>
+                </mb-popover>
+            </div>
+        </ng-template>
+    </mb-table>
+</div>

@@ -1,15 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 export interface ClassPayload {
     name: string;
     code?: string;
-    levelType?: string;
     sortOrder?: number;
-    active?: boolean;
-    schoolIds?: string[] | null;
+    schoolIds: string[];
     notes?: string;
 }
 
@@ -33,14 +31,21 @@ export interface SectionResponse {
 @Injectable({ providedIn: 'root' })
 export class ClassSectionService {
     private readonly http = inject(HttpClient);
-    private readonly baseUrl = `${environment.apiUrl}/setup/classes`;
+    private readonly baseUrl = `${environment.apiUrl}/classes`;
+    private readonly sectionsUrl = `${environment.apiUrl}/sections`;
 
     createClass(payload: ClassPayload): Observable<ClassResponse> {
-        return this.http.post<ClassResponse>(this.baseUrl, payload);
+        return this.http.post<ClassResponse>(this.baseUrl, {
+            ...payload,
+            schoolIds: Array.isArray(payload.schoolIds) ? payload.schoolIds : [],
+        });
     }
 
     updateClass(id: string, payload: Partial<ClassPayload>): Observable<ClassResponse> {
-        return this.http.patch<ClassResponse>(`${this.baseUrl}/${id}`, payload);
+        return this.http.patch<ClassResponse>(`${this.baseUrl}/${id}`, {
+            ...payload,
+            schoolIds: payload.schoolIds ? payload.schoolIds : undefined,
+        });
     }
 
     listClasses(): Observable<ClassResponse[]> {
@@ -48,11 +53,10 @@ export class ClassSectionService {
     }
 
     listSections(classId?: string): Observable<SectionResponse[]> {
-        let params = new HttpParams();
-        if (classId) {
-            params = params.set('classId', classId);
+        if (!classId) {
+            return of([]);
         }
-        return this.http.get<SectionResponse[]>(`${this.baseUrl}/sections`, { params });
+        return this.http.get<SectionResponse[]>(`${this.baseUrl}/${classId}/sections`);
     }
 
     createSection(payload: {
@@ -64,7 +68,8 @@ export class ClassSectionService {
         active?: boolean;
         sortOrder?: number;
     }): Observable<SectionResponse> {
-        return this.http.post<SectionResponse>(`${this.baseUrl}/sections`, payload);
+        const { classId, ...body } = payload;
+        return this.http.post<SectionResponse>(`${this.baseUrl}/${classId}/sections`, body);
     }
 
     updateSection(id: string, payload: Partial<{
@@ -76,11 +81,11 @@ export class ClassSectionService {
         active?: boolean;
         sortOrder?: number;
     }>): Observable<SectionResponse> {
-        return this.http.patch<SectionResponse>(`${this.baseUrl}/sections/${id}`, payload);
+        return this.http.patch<SectionResponse>(`${this.sectionsUrl}/${id}`, payload);
     }
 
     deleteSection(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.baseUrl}/sections/${id}`);
+        return this.http.delete<void>(`${this.sectionsUrl}/${id}`);
     }
 
     deleteClass(id: string): Observable<void> {

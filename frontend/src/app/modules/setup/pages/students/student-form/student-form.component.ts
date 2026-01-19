@@ -10,7 +10,7 @@ import { TenantService, Tenant } from '../../../../../core/services/tenant.servi
 import { TenantSettingsService } from '../../../../../core/services/tenant-settings.service';
 import { IconRegistryService } from '../../../../../shared/services/icon-registry.service';
 import { SchoolContextService } from '../../../../../core/school/school-context.service';
-import { ClassSectionService, ClassResponse, SectionResponse } from '../../../../../core/services/class-section.service';
+import { ClassSectionService, SectionResponse } from '../../../../../core/services/class-section.service';
 import { MbButtonComponent, MbClassSelectorComponent, MbClassSelectorOption, MbFormFieldComponent, MbInputComponent, MbSelectComponent, MbSelectOption, MbTextareaComponent } from '@mindbloom/ui';
 
 @Component({
@@ -314,7 +314,6 @@ export class StudentFormComponent implements OnInit {
                     id: item.id || item._id || item.name,
                     name: item.name,
                     code: item.code,
-                    levelType: item.levelType
                 }));
                 const options = items.map((item) => ({
                     label: item.name,
@@ -549,7 +548,7 @@ export class StudentFormComponent implements OnInit {
         this.loadSections(match.value);
     }
 
-    private findClassById(id: string): ClassResponse | null {
+    private findClassById(id: string): { id: string; name: string } | null {
         const matches = this.classOptions().find(option => option.value === id);
         if (!matches) return null;
         return { name: matches.label, id: matches.value };

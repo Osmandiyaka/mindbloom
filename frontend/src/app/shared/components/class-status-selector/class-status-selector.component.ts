@@ -225,7 +225,6 @@ export class MbClassStatusSelectorComponent implements OnInit, OnChanges, OnDest
             id: item.id ?? item._id ?? '',
             name: item.name,
             code: item.code,
-            levelType: item.levelType
         };
     }
 }

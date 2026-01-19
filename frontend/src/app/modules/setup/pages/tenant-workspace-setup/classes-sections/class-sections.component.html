@@ -34,15 +34,15 @@
                 </mb-popover>
             </div>
         </div>
-        <div class="classes-filter-row" *ngIf="setupVm.hasMultipleSchools()">
+        <div class="classes-filter-row" *ngIf="hasMultipleSchools()">
             <div class="classes-filter">
                 <div class="classes-filter__pill">
                     <span class="classes-filter__label">School:</span>
                     <mb-select class="classes-filter__select" id="class-school-filter" [value]="vm.classSchoolFilter()"
                         (valueChange)="vm.classSchoolFilter.set($event)">
                         <option value="all">All schools</option>
-                        <option *ngFor="let school of setupVm.activeSchoolNames()" [value]="school">
-                            {{ school }}
+                        <option *ngFor="let school of schoolOptions()" [value]="school.id">
+                            {{ school.name }}
                         </option>
                     </mb-select>
                 </div>
@@ -87,8 +87,8 @@
                                 <div class="class-row__meta">
                                     <span>{{ vm.classSectionCountMap().get(row.id) || 0 }}
                                         sections</span>
-                                    <span class="class-row__status" [class.is-archived]="!row.active">
-                                        {{ row.active ? 'Active' : 'Archived' }}
+                                    <span class="class-row__status" [class.is-archived]="row.status !== 'active'">
+                                        {{ row.status === 'active' ? 'Active' : 'Archived' }}
                                     </span>
                                 </div>
                             </div>
@@ -113,11 +113,6 @@
                                             (click)="vm.duplicateClass(row); vm.closeClassMenu()">
                                             Duplicate class
                                         </button>
-                                        <button type="button" class="class-row__menu-item"
-                                            (click)="vm.toggleClassActive(row); vm.closeClassMenu()">
-                                            {{ row.active ? 'Archive class' : 'Restore class' }}
-                                        </button>
-                                        <div class="class-row__menu-divider"></div>
                                         <button type="button" class="class-row__menu-item class-row__menu-item--danger"
                                             (click)="vm.openClassDelete(row); vm.closeClassMenu()">
                                             Delete class
@@ -150,8 +145,8 @@
                             <div class="sections-detail__title-row">
                                 <div class="sections-detail__title">{{ selected.name }}</div>
                                 <span class="sections-detail__status"
-                                    [class.sections-detail__status--archived]="!selected.active">
-                                    {{ selected.active ? 'Active' : 'Archived' }}
+                                    [class.sections-detail__status--archived]="selected.status !== 'active'">
+                                    {{ selected.status === 'active' ? 'Active' : 'Archived' }}
                                 </span>
                             </div>
                             <div class="sections-detail__meta">
@@ -177,11 +172,6 @@
                                             (click)="vm.openEditClass(selected); vm.closeSectionsMenu()">
                                             Rename class
                                         </button>
-                                        <button type="button" class="sections-detail__menu-item"
-                                            (click)="vm.toggleClassActive(selected); vm.closeSectionsMenu()">
-                                            {{ selected.active ? 'Archive class' : 'Restore class' }}
-                                        </button>
-                                        <div class="sections-detail__menu-divider"></div>
                                         <button type="button"
                                             class="sections-detail__menu-item sections-detail__menu-item--danger"
                                             (click)="vm.openClassDelete(selected); vm.closeSectionsMenu()">
@@ -217,8 +207,8 @@
                                     {{ section.capacity ?? '—' }}
                                 </div>
                                 <div>
-                                    <span class="ou-status-pill" [class.ou-status-pill--active]="section.active">
-                                        {{ section.active ? 'Active' : 'Archived' }}
+                                    <span class="ou-status-pill" [class.ou-status-pill--active]="section.status === 'active'">
+                                        {{ section.status === 'active' ? 'Active' : 'Archived' }}
                                     </span>
                                 </div>
                                 <div class="sections-table__actions">
@@ -235,12 +225,6 @@
                                                 (click)="vm.openEditSection(section); vm.closeSectionMenu()">
                                                 Rename section
                                             </button>
-                                            <button type="button" class="sections-row-menu__item"
-                                                (click)="vm.toggleSectionActive(section); vm.closeSectionMenu()">
-                                                {{ section.active ? 'Archive section' : 'Restore
-                                                section' }}
-                                            </button>
-                                            <div class="sections-row-menu__divider"></div>
                                             <button type="button"
                                                 class="sections-row-menu__item sections-row-menu__item--danger"
                                                 (click)="vm.openSectionDelete(section); vm.closeSectionMenu()">
@@ -281,14 +265,9 @@
                                                 (click)="vm.openEditClass(selected); vm.closeSectionsMenu()">
                                                 Rename class
                                             </button>
-                                            <button type="button" class="sections-detail__menu-item"
-                                                (click)="vm.toggleClassActive(selected); vm.closeSectionsMenu()">
-                                                {{ selected.active ? 'Archive class' : 'Restore class' }}
-                                            </button>
-                                            <div class="sections-detail__menu-divider"></div>
-                                            <button type="button"
-                                                class="sections-detail__menu-item sections-detail__menu-item--danger"
-                                                (click)="vm.openClassDelete(selected); vm.closeSectionsMenu()">
+                                        <button type="button"
+                                            class="sections-detail__menu-item sections-detail__menu-item--danger"
+                                            (click)="vm.openClassDelete(selected); vm.closeSectionsMenu()">
                                                 Delete class
                                             </button>
                                         </div>
@@ -352,56 +331,21 @@
                 <mb-input id="class-code" [value]="vm.classFormCode()" [disabled]="vm.classFormMode() === 'view'"
                     (valueChange)="vm.classFormCode.set($event)"></mb-input>
             </mb-form-field>
-            <mb-form-field label="Level" [controlId]="'class-level'" hint="Used for grouping and analytics.">
-                <mb-select id="class-level" [value]="vm.classFormLevel()" [disabled]="vm.classFormMode() === 'view'"
-                    (valueChange)="vm.classFormLevel.set($any($event))">
-                    <option value="">Select level</option>
-                    <option value="Early Years">Early Years</option>
-                    <option value="Primary">Primary</option>
-                    <option value="JHS">JHS</option>
-                    <option value="SHS">SHS</option>
-                    <option value="College">College</option>
-                    <option value="Other">Other</option>
-                </mb-select>
-            </mb-form-field>
-            <mb-form-field *ngIf="setupVm.hasMultipleSchools()" label="School scope" [controlId]="'class-scope'">
-                <div class="class-modal__scope">
-                    <label class="class-modal__radio">
-                        <input type="radio" name="class-scope" value="all" [disabled]="vm.classFormMode() === 'view'"
-                            [checked]="vm.classFormSchoolScope() === 'all'"
-                            (change)="vm.classFormSchoolScope.set('all')" />
-                        <span>All schools</span>
-                    </label>
-                    <label class="class-modal__radio">
-                        <input type="radio" name="class-scope" value="specific"
-                            [disabled]="vm.classFormMode() === 'view'"
-                            [checked]="vm.classFormSchoolScope() === 'specific'"
-                            (change)="vm.classFormSchoolScope.set('specific')" />
-                        <span>Specific schools</span>
-                    </label>
-                </div>
-                <div class="class-modal__schools" *ngIf="vm.classFormSchoolScope() === 'specific'">
-                    <mb-checkbox *ngFor="let school of setupVm.activeSchoolNames()"
-                        [checked]="vm.classFormSchoolIds().includes(school)" [disabled]="vm.classFormMode() === 'view'"
-                        (checkedChange)="vm.toggleClassSchoolSelection(school, $event)">
-                        {{ school }}
-                    </mb-checkbox>
-                </div>
+            <mb-form-field label="Schools" [controlId]="'class-schools'">
+                <mb-school-selector [label]="''" [value]="vm.classFormSchoolIds()"
+                    [disabled]="vm.classFormMode() === 'view'"
+                    (valueChange)="vm.classFormSchoolIds.set($event)">
+                </mb-school-selector>
             </mb-form-field>
             <mb-form-field label="Notes" [controlId]="'class-notes'">
                 <mb-textarea id="class-notes" [value]="vm.classFormNotes()" [disabled]="vm.classFormMode() === 'view'"
                     (valueChange)="vm.classFormNotes.set($event)"></mb-textarea>
             </mb-form-field>
-            <label class="class-modal__toggle">
-                <input type="checkbox" [checked]="vm.classFormActive()" [disabled]="vm.classFormMode() === 'view'"
-                    (change)="vm.classFormActive.set($any($event.target).checked)" />
-                <span>Active</span>
-            </label>
         </div>
         <div mbModalFooter class="class-modal__footer">
             <mb-button variant="secondary" (click)="vm.requestCloseClassForm()">Cancel</mb-button>
             <mb-button variant="primary" *ngIf="vm.classFormMode() !== 'view'" [loading]="vm.classFormSubmitting()"
-                [disabled]="vm.classFormSubmitting()" (click)="vm.saveClassForm(setupVm.hasMultipleSchools())">Save class</mb-button>
+                [disabled]="vm.classFormSubmitting()" (click)="vm.saveClassForm(hasMultipleSchools())">Save class</mb-button>
         </div>
     </mb-modal>
 
@@ -438,11 +382,6 @@
                     (valueChange)="vm.sectionFormTeacherId.set($event)">
                 </mb-staff-selector>
             </mb-form-field>
-            <label class="section-modal__toggle">
-                <input type="checkbox" [checked]="vm.sectionFormActive()" [disabled]="vm.sectionFormMode() === 'view'"
-                    (change)="vm.sectionFormActive.set($any($event.target).checked)" />
-                <span>Active</span>
-            </label>
         </div>
         <div mbModalFooter class="section-modal__footer">
             <mb-button variant="secondary" (click)="vm.requestCloseSectionForm()">Cancel</mb-button>

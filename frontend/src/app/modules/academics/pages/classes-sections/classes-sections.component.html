@@ -1,0 +1,364 @@
+<div class="classes-header">
+    <div class="classes-header__content">
+        <h2>Classes &amp; sections</h2>
+        <p>Manage classes and sections across your schools with clear access and enrollment structure.</p>
+    </div>
+    <div class="classes-header__actions">
+        <mb-button variant="primary" *can="'classes.write'" (click)="openAddClass()">Add class</mb-button>
+        <button
+            type="button"
+            class="classes-header__menu"
+            #classHeaderMenuOrigin
+            aria-label="Class actions"
+            [attr.aria-expanded]="classHeaderMenuOpen()"
+            (click)="toggleClassHeaderMenu($event)"
+        >
+            ...
+        </button>
+        <mb-popover
+            [open]="classHeaderMenuOpen()"
+            [origin]="classHeaderMenuOrigin"
+            [hasBackdrop]="true"
+            [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'classes-header__menu-panel']"
+            (closed)="closeClassHeaderMenu()"
+        >
+            <div class="classes-header__menu-content" role="menu">
+                <button type="button" class="classes-header__menu-item" (click)="closeClassHeaderMenu()">
+                    Import classes
+                </button>
+                <button type="button" class="classes-header__menu-item" (click)="closeClassHeaderMenu()">
+                    Export
+                </button>
+                <button type="button" class="classes-header__menu-item" (click)="closeClassHeaderMenu()">
+                    Manage grading system
+                </button>
+                <div class="classes-header__menu-divider"></div>
+                <button type="button" class="classes-header__menu-item" (click)="closeClassHeaderMenu()">
+                    Help
+                </button>
+            </div>
+        </mb-popover>
+    </div>
+</div>
+
+<div class="classes-filter-row">
+    <div class="classes-filter" *ngIf="hasMultipleSchools()">
+        <div class="classes-filter__pill">
+            <span class="classes-filter__label">School:</span>
+            <mb-select class="classes-filter__select" id="class-school-filter" [value]="vm.filters().schoolId || 'all'"
+                (valueChange)="updateClassSchoolFilter($event)">
+                <option value="all">All schools</option>
+                <option *ngFor="let school of schools()" [value]="school.id">{{ school.name }}</option>
+            </mb-select>
+        </div>
+    </div>
+    <div class="classes-filter" *ngIf="gradeOptions().length">
+        <div class="classes-filter__pill">
+            <span class="classes-filter__label">Grade:</span>
+            <mb-select class="classes-filter__select" id="class-grade-filter" [value]="vm.filters().gradeId || 'all'"
+                (valueChange)="updateClassGradeFilter($event)">
+                <option value="all">All grades</option>
+                <option *ngFor="let grade of gradeOptions()" [value]="grade.id">{{ grade.name }}</option>
+            </mb-select>
+        </div>
+    </div>
+    <div class="classes-filter" *ngIf="showAcademicYearFilter()">
+        <div class="classes-filter__pill">
+            <span class="classes-filter__label">Academic year:</span>
+            <mb-select class="classes-filter__select" id="class-year-filter" [value]="vm.filters().academicYearId || 'all'"
+                (valueChange)="updateClassAcademicYearFilter($event)">
+                <option value="all">All years</option>
+                <option *ngFor="let year of academicYearOptions()" [value]="year.id">{{ year.name }}</option>
+            </mb-select>
+        </div>
+    </div>
+    <div class="classes-filter">
+        <div class="classes-filter__pill">
+            <span class="classes-filter__label">Status:</span>
+            <mb-select class="classes-filter__select" id="class-status-filter" [value]="vm.filters().status || 'all'"
+                (valueChange)="updateClassStatusFilter($event)">
+                <option value="all">All</option>
+                <option value="active">Active</option>
+                <option value="archived">Archived</option>
+            </mb-select>
+        </div>
+    </div>
+</div>
+
+<div class="classes-shell">
+    <div class="classes-split">
+        <div class="classes-panel classes-panel--list">
+            <div class="classes-panel__toolbar">
+                <div class="classes-panel__meta-row">
+                    <div class="classes-panel__title">
+                        <span>Classes</span>
+                        <span class="classes-panel__count">{{ vm.classes().length }}</span>
+                    </div>
+                </div>
+                <div class="classes-panel__search">
+                    <app-search-input [value]="vm.search()" placeholder="Search classes..." (search)="updateClassSearch($event)">
+                    </app-search-input>
+                </div>
+            </div>
+
+            <mb-alert *ngIf="vm.classesError()" variant="danger">
+                {{ vm.classesError()?.message || 'Unable to load classes.' }}
+            </mb-alert>
+
+            <div class="classes-list" *ngIf="!vm.classesLoading() && vm.classes().length; else classListState">
+                <div class="class-row" role="button" tabindex="0"
+                    *ngFor="let row of vm.classes(); trackBy: trackClassRow"
+                    [class.is-active]="vm.selectedClassId() === row.id"
+                    (click)="selectClass(row)"
+                    (keydown.enter)="selectClass(row)"
+                    (keydown.space)="selectClass(row); $event.preventDefault()">
+                    <div class="class-row__content">
+                        <div class="class-row__name">{{ row.name }}</div>
+                        <div class="class-row__meta">
+                            <span>{{ row.sectionsCount ?? 0 }} sections</span>
+                            <span *ngIf="classGradeLabel(row)">{{ classGradeLabel(row) }}</span>
+                            <span>{{ classSchoolLabel(row) }}</span>
+                            <span class="class-row__status" [class.is-archived]="row.status !== 'active'">
+                                {{ row.status === 'active' ? 'Active' : 'Archived' }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="class-row__actions">
+                        <button type="button" class="class-row__action" (click)="openEditClass(row); $event.stopPropagation()" aria-label="Edit class">
+                            Edit
+                        </button>
+                        <button type="button" class="class-row__action" #classMenuOrigin aria-label="More actions"
+                            [attr.aria-expanded]="vm.menuOpenId() === row.id"
+                            (click)="toggleClassMenu(row.id, $event)">...</button>
+                        <mb-popover [open]="vm.menuOpenId() === row.id" [origin]="classMenuOrigin" [hasBackdrop]="true"
+                            [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'class-row__menu-panel']"
+                            (closed)="closeClassMenu()">
+                            <div class="class-row__menu-content" role="menu">
+                                <button type="button" class="class-row__menu-item"
+                                    (click)="openEditClass(row); closeClassMenu()">
+                                    Edit class
+                                </button>
+                                <button type="button" class="class-row__menu-item"
+                                    (click)="row.status === 'active' ? openArchiveClass(row) : restoreClass(row); closeClassMenu()">
+                                    {{ row.status === 'active' ? 'Archive class' : 'Restore class' }}
+                                </button>
+                            </div>
+                        </mb-popover>
+                    </div>
+                </div>
+            </div>
+            <ng-template #classListState>
+                <div class="classes-skeleton" *ngIf="vm.classesLoading(); else emptyClasses">
+                    <div class="classes-skeleton__row" *ngFor="let item of skeletonRows"></div>
+                </div>
+            </ng-template>
+            <ng-template #emptyClasses>
+                <div class="classes-empty">
+                    <div class="classes-empty__title">No classes yet</div>
+                    <div class="classes-empty__text">
+                        Add grade levels to begin creating sections.
+                    </div>
+                    <mb-button variant="secondary" *can="'classes.write'" (click)="openAddClass()">Add class</mb-button>
+                </div>
+            </ng-template>
+        </div>
+
+        <div class="classes-panel classes-panel--detail">
+            <ng-container *ngIf="vm.selectedClass() as selected; else emptySectionState">
+                <div class="sections-detail__header">
+                    <div class="sections-detail__title-row">
+                        <div class="sections-detail__title">{{ selected.name }}</div>
+                        <span class="sections-detail__status" [class.sections-detail__status--archived]="selected.status !== 'active'">
+                            {{ selected.status === 'active' ? 'Active' : 'Archived' }}
+                        </span>
+                    </div>
+                    <div class="sections-detail__meta">{{ selectedClassMeta() }}</div>
+                    <div class="sections-detail__actions-row">
+                        <div class="sections-detail__actions">
+                            <mb-button variant="primary" *can="'sections.write'" (click)="openAddSection()">Add section</mb-button>
+                        </div>
+                        <button type="button" class="sections-detail__menu" #sectionsMenuOrigin
+                            aria-label="Class actions" [attr.aria-expanded]="sectionsHeaderMenuOpen()"
+                            (click)="toggleSectionsHeaderMenu($event)">...</button>
+                        <mb-popover [open]="sectionsHeaderMenuOpen()" [origin]="sectionsMenuOrigin" [hasBackdrop]="true"
+                            [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'sections-detail__menu-panel']"
+                            (closed)="closeSectionsHeaderMenu()">
+                            <div class="sections-detail__menu-content" role="menu">
+                                <button type="button" class="sections-detail__menu-item"
+                                    (click)="openEditClass(selected); closeSectionsHeaderMenu()">
+                                    Edit class
+                                </button>
+                                <button type="button" class="sections-detail__menu-item"
+                                    (click)="selected.status === 'active' ? openArchiveClass(selected) : restoreClass(selected); closeSectionsHeaderMenu()">
+                                    {{ selected.status === 'active' ? 'Archive class' : 'Restore class' }}
+                                </button>
+                            </div>
+                        </mb-popover>
+                    </div>
+                </div>
+
+                <div class="sections-toolbar">
+                    <app-search-input [value]="vm.sectionsFilters().search || ''" placeholder="Search sections..."
+                        (search)="updateSectionSearch($event)"></app-search-input>
+                    <div class="sections-toolbar__filters" *ngIf="sectionSchoolOptions().length">
+                        <mb-select class="classes-filter__select" id="section-school-filter"
+                            [value]="vm.sectionsFilters().schoolId || 'all'"
+                            (valueChange)="updateSectionSchoolFilter($event)">
+                            <option value="all">All schools</option>
+                            <option *ngFor="let school of sectionSchoolOptions()" [value]="school.id">{{ school.name }}</option>
+                        </mb-select>
+                        <mb-select class="classes-filter__select" id="section-status-filter"
+                            [value]="vm.sectionsFilters().status || 'all'"
+                            (valueChange)="updateSectionStatusFilter($event)">
+                            <option value="all">All status</option>
+                            <option value="active">Active</option>
+                            <option value="archived">Archived</option>
+                        </mb-select>
+                    </div>
+                </div>
+
+                <mb-alert *ngIf="vm.sectionsError()" variant="danger">
+                    {{ vm.sectionsError()?.message || 'Unable to load sections.' }}
+                </mb-alert>
+
+                <app-sections-table
+                    [rows]="vm.sections()"
+                    [schoolNames]="schoolNames()"
+                    [isLoading]="vm.sectionsLoading()"
+                    [isError]="!!vm.sectionsError()"
+                    [isFiltered]="sectionsFiltered()"
+                    (view)="openEditSection($event)"
+                    (edit)="openEditSection($event)"
+                    (archive)="openArchiveSection($event)"
+                    (restore)="restoreSection($event)"
+                    (emptyAction)="handleSectionEmptyAction($event)"
+                ></app-sections-table>
+            </ng-container>
+            <ng-template #emptySectionState>
+                <div class="sections-placeholder">
+                    <div class="sections-placeholder__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="4" width="7" height="7" rx="1"></rect>
+                            <rect x="14" y="4" width="7" height="7" rx="1"></rect>
+                            <rect x="3" y="13" width="7" height="7" rx="1"></rect>
+                            <path d="M14 16h7"></path>
+                        </svg>
+                    </div>
+                    <div class="sections-placeholder__title">Select a class</div>
+                    <div class="sections-placeholder__text">
+                        Choose a class on the left to manage its sections.
+                    </div>
+                    <button type="button" class="sections-placeholder__link">Learn how sections work</button>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>
+
+<mb-modal
+    [open]="classModalOpen()"
+    [title]="classModalMode() === 'add' ? 'Add class' : 'Edit class'"
+    size="md"
+    [hasFooter]="true"
+    (closed)="closeClassModal()"
+>
+    <div class="class-modal">
+        <div class="class-modal__subtitle">
+            {{ classModalMode() === 'add' ? 'Create a class/grade level. You can add sections next.' : 'Update class details.' }}
+        </div>
+        <mb-alert *ngIf="classFormError()" variant="danger">{{ classFormError() }}</mb-alert>
+        <mb-form-field label="Class name" [controlId]="'class-name'" [required]="true">
+            <mb-input id="class-name" [value]="classForm().name" cdkFocusInitial
+                (valueChange)="updateClassName($event)"></mb-input>
+        </mb-form-field>
+        <mb-form-field label="Code" [controlId]="'class-code'" hint="Short identifier used in reports and integrations.">
+            <mb-input id="class-code" [value]="classForm().code" (valueChange)="updateClassCode($event)"></mb-input>
+        </mb-form-field>
+        <mb-form-field label="Grade" [controlId]="'class-grade'" [required]="gradeRequired()" *ngIf="gradeOptions().length">
+            <mb-select id="class-grade" [value]="classForm().gradeId || ''" (valueChange)="updateClassGrade($event)">
+                <option value="">Select grade</option>
+                <option *ngFor="let grade of gradeOptions()" [value]="grade.id">{{ grade.name }}</option>
+            </mb-select>
+        </mb-form-field>
+        <mb-form-field label="Academic year" [controlId]="'class-year'" [required]="showAcademicYearFilter()" *ngIf="showAcademicYearFilter()">
+            <mb-select id="class-year" [value]="classForm().academicYearId || ''" (valueChange)="updateClassAcademicYear($event)">
+                <option value="">Select year</option>
+                <option *ngFor="let year of academicYearOptions()" [value]="year.id">{{ year.name }}</option>
+            </mb-select>
+        </mb-form-field>
+        <mb-form-field label="Schools" [controlId]="'class-schools'" [required]="true">
+            <mb-school-selector [label]="''" [value]="classForm().schoolIds" (valueChange)="updateClassSchools($event)">
+            </mb-school-selector>
+        </mb-form-field>
+    </div>
+    <div mbModalFooter class="class-modal__footer">
+        <mb-button variant="secondary" (click)="closeClassModal()">Cancel</mb-button>
+        <mb-button variant="primary" [loading]="classFormSaving()" [disabled]="classFormSaving()" (click)="saveClass()">
+            Save class
+        </mb-button>
+    </div>
+</mb-modal>
+
+<mb-modal
+    [open]="sectionModalOpen()"
+    [title]="sectionModalMode() === 'add' ? 'Add section' : 'Edit section'"
+    size="md"
+    [hasFooter]="true"
+    (closed)="closeSectionModal()"
+>
+    <div class="section-modal">
+        <div class="section-modal__subtitle">
+            {{ sectionModalMode() === 'add' ? 'Create a section under the selected class.' : 'Update section details.' }}
+        </div>
+        <mb-alert *ngIf="sectionFormError()" variant="danger">{{ sectionFormError() }}</mb-alert>
+        <mb-form-field label="Section name" [controlId]="'section-name'" [required]="true">
+            <mb-input id="section-name" [value]="sectionForm().name" cdkFocusInitial
+                (valueChange)="updateSectionName($event)"></mb-input>
+        </mb-form-field>
+        <mb-form-field label="Section code" [controlId]="'section-code'">
+            <mb-input id="section-code" [value]="sectionForm().code" (valueChange)="updateSectionCode($event)"></mb-input>
+        </mb-form-field>
+        <mb-form-field label="School" [controlId]="'section-school'" [required]="true" *ngIf="sectionSchoolOptions().length">
+            <mb-select id="section-school" [value]="sectionForm().schoolId" (valueChange)="updateSectionSchool($event)">
+                <option *ngFor="let school of sectionSchoolOptions()" [value]="school.id">{{ school.name }}</option>
+            </mb-select>
+        </mb-form-field>
+        <mb-form-field label="Capacity" [controlId]="'section-capacity'">
+            <mb-input id="section-capacity" type="number" [value]="sectionForm().capacity" placeholder="Optional"
+                (valueChange)="updateSectionCapacity($event)"></mb-input>
+        </mb-form-field>
+    </div>
+    <div mbModalFooter class="section-modal__footer">
+        <mb-button variant="secondary" (click)="closeSectionModal()">Cancel</mb-button>
+        <mb-button variant="primary" [loading]="sectionFormSaving()" [disabled]="sectionFormSaving()" (click)="saveSection()">
+            Save section
+        </mb-button>
+    </div>
+</mb-modal>
+
+<app-destructive-confirm-modal
+    [open]="classArchiveOpen()"
+    [title]="'Archive class'"
+    [description]="'Archiving this class will hide it from enrollment and reports.'"
+    [impactTitle]="classArchiveImpact().sectionsCount ? 'Impact summary' : ''"
+    [impactItems]="classArchiveImpact().sectionsCount ? ['Sections: ' + classArchiveImpact().sectionsCount] : []"
+    [requireConfirmation]="(classArchiveImpact().sectionsCount || 0) > 0"
+    [confirmationLabel]="'Type the class name to confirm'"
+    [confirmationPlaceholder]="classArchiveTarget()?.name || 'Class name'"
+    [confirmText]="classArchiveTarget()?.name || ''"
+    [confirmButtonLabel]="'Archive class'"
+    [isProcessing]="classArchiveProcessing()"
+    (closed)="closeArchiveClass()"
+    (confirmed)="confirmArchiveClass($event)"
+></app-destructive-confirm-modal>
+
+<app-destructive-confirm-modal
+    [open]="sectionArchiveOpen()"
+    [title]="'Archive section'"
+    [description]="'Archiving this section will remove it from active enrollment lists.'"
+    [confirmButtonLabel]="'Archive section'"
+    [requireConfirmation]="false"
+    [isProcessing]="sectionArchiveProcessing()"
+    (closed)="closeArchiveSection()"
+    (confirmed)="confirmArchiveSection()"
+></app-destructive-confirm-modal>

@@ -36,17 +36,14 @@ export interface UserRow {
     createdAt?: string;
 }
 
-export type ClassLevelType = 'Early Years' | 'Primary' | 'JHS' | 'SHS' | 'College' | 'Other';
-
 export interface ClassRow {
     id: string;
     name: string;
     code?: string;
-    levelType?: ClassLevelType | '';
     sortOrder: number;
-    active: boolean;
-    schoolIds: string[] | null;
+    schoolIds: string[];
     notes?: string;
+    status: 'active' | 'archived';
 }
 
 export interface SectionRow {
@@ -56,8 +53,8 @@ export interface SectionRow {
     code?: string;
     capacity?: number | null;
     homeroomTeacherId?: string | null;
-    active: boolean;
     sortOrder: number;
+    status: 'active' | 'archived';
 }
 
 export type OrgUnitStatus = 'Active' | 'Inactive';

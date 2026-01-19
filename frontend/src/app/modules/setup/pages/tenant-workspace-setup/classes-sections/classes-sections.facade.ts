@@ -5,16 +5,17 @@ import { ClassResponse, SectionResponse } from '../../../../../core/services/cla
 import { ClassesSectionsApiService } from './classes-sections-api.service';
 import { ToastService } from '../../../../../core/ui/toast/toast.service';
 import {
-    ClassLevelType,
     ClassRow,
     FirstLoginSetupData,
     SectionRow,
 } from '../tenant-workspace-setup.models';
+import { SchoolContextService } from '../../../../../core/school/school-context.service';
 
 @Injectable()
 export class ClassesSectionsFacade {
     private readonly api: ClassesSectionsApiService = inject(ClassesSectionsApiService);
     private readonly toast: ToastService = inject(ToastService);
+    private readonly schoolContext = inject(SchoolContextService);
 
     classRows = signal<ClassRow[]>([]);
     sectionRows = signal<SectionRow[]>([]);
@@ -31,10 +32,7 @@ export class ClassesSectionsFacade {
     classFormId = signal<string | null>(null);
     classFormName = signal('');
     classFormCode = signal('');
-    classFormLevel = signal<ClassLevelType | ''>('');
     classFormNotes = signal('');
-    classFormActive = signal(true);
-    classFormSchoolScope = signal<'all' | 'specific'>('all');
     classFormSchoolIds = signal<string[]>([]);
     classFormError = signal('');
     classFormSubmitting = signal(false);
@@ -47,7 +45,6 @@ export class ClassesSectionsFacade {
     sectionFormCode = signal('');
     sectionFormCapacity = signal<string>('');
     sectionFormTeacherId = signal<string | null>(null);
-    sectionFormActive = signal(true);
     sectionFormError = signal('');
     sectionFormSubmitting = signal(false);
     classDeleteOpen = signal(false);
@@ -84,7 +81,7 @@ export class ClassesSectionsFacade {
         const schoolFilter = this.classSchoolFilter();
         const rows = this.classRows().filter(row => {
             if (schoolFilter !== 'all') {
-                if (row.schoolIds !== null && !row.schoolIds.includes(schoolFilter)) {
+                if (!row.schoolIds.includes(schoolFilter)) {
                     return false;
                 }
             }
@@ -142,7 +139,6 @@ export class ClassesSectionsFacade {
             id: row.id,
             name: row.name,
             code: row.code,
-            levelType: row.levelType || undefined,
         })));
 
     applyState(data: FirstLoginSetupData): void {
@@ -169,11 +165,8 @@ export class ClassesSectionsFacade {
         this.classFormId.set(null);
         this.classFormName.set('');
         this.classFormCode.set('');
-        this.classFormLevel.set('');
         this.classFormNotes.set('');
-        this.classFormActive.set(true);
-        this.classFormSchoolScope.set('all');
-        this.classFormSchoolIds.set([]);
+        this.classFormSchoolIds.set(this.defaultSchoolIds());
         this.classFormError.set('');
         this.classFormSubmitting.set(false);
         this.classFormOpen.set(true);
@@ -184,11 +177,8 @@ export class ClassesSectionsFacade {
         this.classFormId.set(row.id);
         this.classFormName.set(row.name);
         this.classFormCode.set(row.code || '');
-        this.classFormLevel.set(row.levelType || '');
         this.classFormNotes.set(row.notes || '');
-        this.classFormActive.set(row.active);
-        this.classFormSchoolScope.set(row.schoolIds === null ? 'all' : 'specific');
-        this.classFormSchoolIds.set(row.schoolIds ? [...row.schoolIds] : []);
+        this.classFormSchoolIds.set([...row.schoolIds]);
         this.classFormError.set('');
         this.classFormSubmitting.set(false);
         this.classFormOpen.set(true);
@@ -271,21 +261,15 @@ export class ClassesSectionsFacade {
             this.classFormError.set('Class code must be alphanumeric and can include hyphens.');
             return;
         }
-        const levelType = this.classFormLevel();
-        const active = this.classFormActive();
-        const schoolIds = hasMultipleSchools && this.classFormSchoolScope() === 'specific'
-            ? [...this.classFormSchoolIds()]
-            : null;
-        if (hasMultipleSchools && this.classFormSchoolScope() === 'specific' && (!schoolIds || !schoolIds.length)) {
+        const schoolIds = this.resolveClassSchoolIds(hasMultipleSchools);
+        if (!schoolIds.length) {
             this.classFormError.set('Select at least one school.');
             return;
         }
         const payload = {
             name,
             code: code || undefined,
-            levelType: levelType || undefined,
-            active,
-            schoolIds: schoolIds && schoolIds.length ? schoolIds : undefined,
+            schoolIds,
             notes: this.classFormNotes().trim() || undefined
         };
 
@@ -295,7 +279,7 @@ export class ClassesSectionsFacade {
                 const id = this.classFormId()!;
                 const saved = await firstValueFrom(this.api.updateClass(id, payload)) as ClassResponse;
                 const savedId = saved.id || saved._id || id;
-                const resolvedSchoolIds = saved.schoolIds ?? payload.schoolIds ?? null;
+                const resolvedSchoolIds = saved.schoolIds ?? payload.schoolIds ?? [];
                 this.classRows.update(items => items.map(row => row.id === savedId
                     ? {
                         ...row,
@@ -315,10 +299,9 @@ export class ClassesSectionsFacade {
                     sortOrder,
                     name: saved.name || payload.name,
                     code: saved.code ?? payload.code,
-                    levelType: this.normalizeClassLevel(saved.levelType ?? payload.levelType),
-                    active: saved.active ?? payload.active ?? true,
-                    schoolIds: saved.schoolIds ?? payload.schoolIds ?? null,
+                    schoolIds: saved.schoolIds ?? payload.schoolIds ?? [],
                     notes: saved.notes ?? payload.notes,
+                    status: 'active',
                 };
                 this.classRows.update(items => [...items, newRow]);
                 this.selectedClassId.set(id);
@@ -386,9 +369,7 @@ export class ClassesSectionsFacade {
             const saved = await firstValueFrom(this.api.createClass({
                 name,
                 code: row.code,
-                levelType: row.levelType || undefined,
                 sortOrder,
-                active: row.active,
                 schoolIds: row.schoolIds,
                 notes: row.notes
             })) as ClassResponse;
@@ -397,25 +378,13 @@ export class ClassesSectionsFacade {
                 ...row,
                 id,
                 name,
-                sortOrder
+                sortOrder,
+                status: row.status,
             };
             this.classRows.update(items => [...items, newRow]);
             this.toast.success(`Class "${row.name}" duplicated.`);
         } catch {
             this.toast.error('Unable to duplicate class. Please try again.');
-        }
-    }
-
-    async toggleClassActive(row: ClassRow): Promise<void> {
-        const nextActive = !row.active;
-        try {
-            await firstValueFrom(this.api.updateClass(row.id, { active: nextActive }));
-            this.classRows.update(items => items.map(item => item.id === row.id
-                ? { ...item, active: nextActive }
-                : item));
-            this.toast.success(`Class "${row.name}" ${row.active ? 'deactivated' : 'activated'}.`);
-        } catch {
-            this.toast.error('Unable to update class status. Please try again.');
         }
     }
 
@@ -438,7 +407,6 @@ export class ClassesSectionsFacade {
         this.sectionFormCode.set('');
         this.sectionFormCapacity.set('');
         this.sectionFormTeacherId.set(null);
-        this.sectionFormActive.set(true);
         this.sectionFormError.set('');
         this.sectionFormOpen.set(true);
     }
@@ -451,7 +419,6 @@ export class ClassesSectionsFacade {
         this.sectionFormCode.set(section.code || '');
         this.sectionFormCapacity.set(section.capacity?.toString() || '');
         this.sectionFormTeacherId.set(section.homeroomTeacherId || null);
-        this.sectionFormActive.set(section.active);
         this.sectionFormError.set('');
         this.sectionFormOpen.set(true);
     }
@@ -501,8 +468,7 @@ export class ClassesSectionsFacade {
             name,
             code: code || undefined,
             capacity: capacityValue ? capacityNumber : null,
-            homeroomTeacherId: this.sectionFormTeacherId(),
-            active: this.sectionFormActive()
+            homeroomTeacherId: this.sectionFormTeacherId()
         };
         this.sectionFormSubmitting.set(true);
         this.sectionFormError.set('');
@@ -530,7 +496,7 @@ export class ClassesSectionsFacade {
                     code: saved.code ?? payload.code,
                     capacity: saved.capacity ?? payload.capacity,
                     homeroomTeacherId: saved.homeroomTeacherId ?? payload.homeroomTeacherId ?? null,
-                    active: saved.active ?? payload.active
+                    status: 'active',
                 };
                 this.sectionRows.update(items => [...items, newSection]);
                 this.toast.success(`Section "${name}" added.`);
@@ -575,19 +541,6 @@ export class ClassesSectionsFacade {
             this.sectionDeleteError.set('Unable to delete section. Please try again.');
         } finally {
             this.sectionDeleteSubmitting.set(false);
-        }
-    }
-
-    async toggleSectionActive(section: SectionRow): Promise<void> {
-        const nextActive = !section.active;
-        try {
-            await firstValueFrom(this.api.updateSection(section.id, { active: nextActive }));
-            this.sectionRows.update(items => items.map(item => item.id === section.id
-                ? { ...item, active: nextActive }
-                : item));
-            this.toast.success(`Section "${section.name}" ${section.active ? 'deactivated' : 'activated'}.`);
-        } catch {
-            this.toast.error('Unable to update section status. Please try again.');
         }
     }
 
@@ -669,7 +622,6 @@ export class ClassesSectionsFacade {
                     code: '',
                     capacity: capacityValue ? capacityNumber : null,
                     homeroomTeacherId: null,
-                    active: true,
                     sortOrder
                 })) as SectionResponse;
                 const id = saved.id || saved._id || this.nextSectionId();
@@ -680,7 +632,7 @@ export class ClassesSectionsFacade {
                     code: saved.code || '',
                     capacity: saved.capacity ?? (capacityValue ? capacityNumber : null),
                     homeroomTeacherId: saved.homeroomTeacherId ?? null,
-                    active: saved.active ?? true,
+                    status: 'active',
                     sortOrder: saved.sortOrder ?? sortOrder
                 });
             }
@@ -835,16 +787,13 @@ export class ClassesSectionsFacade {
             const name = (row['name'] || '').trim();
             if (!name) return;
             const code = (row['code'] || '').trim() || undefined;
-            const levelType = (row['leveltype'] || row['levelType'] || '').trim() as ClassLevelType | '';
-            const active = this.parseCsvBoolean(row['active'], true);
             newRows.push({
                     id: this.nextClassId(),
                     name,
                     code,
-                    levelType: levelType || undefined,
                     sortOrder: this.classRows().length + newRows.length + 1,
-                    active,
-                    schoolIds: null,
+                    schoolIds: this.defaultSchoolIds(),
+                    status: 'active',
                 });
             });
             if (newRows.length) {
@@ -875,7 +824,6 @@ export class ClassesSectionsFacade {
             const capacityValue = (row['capacity'] || '').trim();
             const capacityNumber = capacityValue ? Number(capacityValue) : null;
             if (capacityValue && (capacityNumber === null || !Number.isFinite(capacityNumber) || capacityNumber < 0)) return;
-            const active = this.parseCsvBoolean(row['active'], true);
             const nextOrder = (sectionCounts.get(classRow.id) || 0) + 1;
             sectionCounts.set(classRow.id, nextOrder);
             newSections.push({
@@ -885,8 +833,8 @@ export class ClassesSectionsFacade {
                 code,
                 capacity: capacityValue ? capacityNumber : null,
                 homeroomTeacherId: null,
-                active,
-                sortOrder: nextOrder
+                sortOrder: nextOrder,
+                status: 'active',
             });
         });
         if (newSections.length) {
@@ -901,8 +849,8 @@ export class ClassesSectionsFacade {
 
     downloadImportTemplate(type: 'classes' | 'sections'): void {
         const headers = type === 'classes'
-            ? ['name', 'code', 'levelType', 'active']
-            : ['classCode', 'className', 'sectionName', 'sectionCode', 'capacity', 'active'];
+            ? ['name', 'code']
+            : ['classCode', 'className', 'sectionName', 'sectionCode', 'capacity'];
         this.downloadCsv(headers.join(',') + '\n', `${type}-template.csv`);
     }
 
@@ -910,11 +858,9 @@ export class ClassesSectionsFacade {
         if (type === 'classes') {
             const rows = this.classRows().map(row => ([
                 row.name,
-                row.code || '',
-                row.levelType || '',
-                row.active ? 'true' : 'false'
+                row.code || ''
             ].join(',')));
-            this.downloadCsv(`name,code,levelType,active\n${rows.join('\n')}`, 'classes.csv');
+            this.downloadCsv(`name,code\n${rows.join('\n')}`, 'classes.csv');
             return;
         }
         const classById = new Map(this.classRows().map(row => [row.id, row]));
@@ -923,18 +869,9 @@ export class ClassesSectionsFacade {
             classById.get(section.classId)?.name || '',
             section.name,
             section.code || '',
-            section.capacity ?? '',
-            section.active ? 'true' : 'false'
+            section.capacity ?? ''
         ].join(',')));
-        this.downloadCsv(`classCode,className,sectionName,sectionCode,capacity,active\n${rows.join('\n')}`, 'sections.csv');
-    }
-
-    private parseCsvBoolean(value: string | undefined, fallback: boolean): boolean {
-        if (!value) return fallback;
-        const normalized = value.trim().toLowerCase();
-        if (['true', 'yes', '1'].includes(normalized)) return true;
-        if (['false', 'no', '0'].includes(normalized)) return false;
-        return fallback;
+        this.downloadCsv(`classCode,className,sectionName,sectionCode,capacity\n${rows.join('\n')}`, 'sections.csv');
     }
 
     private parseCsv(text: string): { rows: Array<Record<string, string>>; errors: string[] } {
@@ -967,10 +904,7 @@ export class ClassesSectionsFacade {
         if (this.classFormMode() === 'add') {
             return !!this.classFormName().trim()
                 || !!this.classFormCode().trim()
-                || !!this.classFormLevel()
                 || !!this.classFormNotes().trim()
-                || !this.classFormActive()
-                || this.classFormSchoolScope() === 'specific'
                 || this.classFormSchoolIds().length > 0;
         }
         const id = this.classFormId();
@@ -978,11 +912,8 @@ export class ClassesSectionsFacade {
         if (!existing) return true;
         return existing.name !== this.classFormName().trim()
             || (existing.code || '') !== this.classFormCode().trim()
-            || (existing.levelType || '') !== (this.classFormLevel() || '')
             || (existing.notes || '') !== this.classFormNotes().trim()
-            || existing.active !== this.classFormActive()
-            || (existing.schoolIds === null ? 'all' : 'specific') !== this.classFormSchoolScope()
-            || (existing.schoolIds || []).join(',') !== this.classFormSchoolIds().join(',');
+            || existing.schoolIds.join(',') !== this.classFormSchoolIds().join(',');
     }
 
     private isSectionFormDirty(): boolean {
@@ -990,8 +921,7 @@ export class ClassesSectionsFacade {
             return !!this.sectionFormName().trim()
                 || !!this.sectionFormCode().trim()
                 || !!this.sectionFormCapacity().trim()
-                || !!this.sectionFormTeacherId()
-                || !this.sectionFormActive();
+                || !!this.sectionFormTeacherId();
         }
         const id = this.sectionFormId();
         const existing = this.sectionRows().find(row => row.id === id);
@@ -1000,8 +930,7 @@ export class ClassesSectionsFacade {
             || existing.name !== this.sectionFormName().trim()
             || (existing.code || '') !== this.sectionFormCode().trim()
             || (existing.capacity?.toString() || '') !== this.sectionFormCapacity().trim()
-            || (existing.homeroomTeacherId || null) !== this.sectionFormTeacherId()
-            || existing.active !== this.sectionFormActive();
+            || (existing.homeroomTeacherId || null) !== this.sectionFormTeacherId();
     }
 
     private closeClassMenus(): void {
@@ -1009,6 +938,20 @@ export class ClassesSectionsFacade {
         this.classHeaderMenuOpen.set(false);
         this.sectionsMenuOpen.set(false);
         this.sectionMenuOpenId.set(null);
+    }
+
+    private defaultSchoolIds(): string[] {
+        return this.schoolContext.schools().map(school => school.id);
+    }
+
+    private resolveClassSchoolIds(hasMultipleSchools: boolean): string[] {
+        const selected = this.classFormSchoolIds();
+        if (selected.length) return [...selected];
+        const defaults = this.defaultSchoolIds();
+        if (!hasMultipleSchools && defaults.length) {
+            return defaults;
+        }
+        return [];
     }
 
     private migrateClasses(data?: FirstLoginSetupData['classes']): {
@@ -1031,10 +974,9 @@ export class ClassesSectionsFacade {
                 id: classId,
                 name: row.name.trim(),
                 code: '',
-                levelType: '',
                 sortOrder: index + 1,
-                active: true,
-                schoolIds: null,
+                schoolIds: this.defaultSchoolIds(),
+                status: 'active',
             });
             const sections = row.sections
                 .split(',')
@@ -1048,7 +990,7 @@ export class ClassesSectionsFacade {
                     code: '',
                     capacity: null,
                     homeroomTeacherId: null,
-                    active: true,
+                    status: 'active',
                     sortOrder: sectionIndex + 1
                 });
             });
@@ -1084,9 +1026,4 @@ export class ClassesSectionsFacade {
         return `section-${this.sectionCounter}`;
     }
 
-    private normalizeClassLevel(value?: string): ClassLevelType | '' | undefined {
-        if (!value) return undefined;
-        const options: ClassLevelType[] = ['Early Years', 'Primary', 'JHS', 'SHS', 'College', 'Other'];
-        return options.includes(value as ClassLevelType) ? (value as ClassLevelType) : '';
-    }
 }
