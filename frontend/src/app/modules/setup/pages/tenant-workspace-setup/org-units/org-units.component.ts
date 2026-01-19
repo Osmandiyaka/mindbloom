@@ -1,8 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ToastService } from '../../../../../core/ui/toast/toast.service';
 import { TenantWorkspaceSetupFacade } from '../tenant-workspace-setup.facade';
-import { OrgUnit, OrgUnitDeleteImpact, OrgUnitNode, OrgUnitRole, OrgUnitStatus, OrgUnitType, UserRow } from '../tenant-workspace-setup.models';
+import { OrgUnit, OrgUnitNode, OrgUnitRole, OrgUnitStatus, OrgUnitType } from '../tenant-workspace-setup.models';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from '../tenant-workspace-setup.shared';
+import { OrgUnitStore } from './org-unit.store';
 
 @Component({
     selector: 'app-tenant-workspace-setup-org-units',
@@ -15,13 +16,12 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     readonly vm = this;
     private readonly setup = inject(TenantWorkspaceSetupFacade);
     private readonly toast = inject(ToastService);
+    private readonly orgUnitStore = inject(OrgUnitStore);
 
     readonly users = this.setup.users;
-    readonly orgUnits = this.setup.orgUnits;
-    readonly orgUnitMemberIds = this.setup.orgUnitMemberIds;
-    readonly orgUnitRoles = this.setup.orgUnitRoles;
+    readonly orgUnits = computed(() => this.orgUnitStore.tree().map(unit => this.mapOrgUnit(unit)));
 
-    activeOrgUnitId = signal<string | null>(null);
+    activeOrgUnitId = this.orgUnitStore.selectedOrgUnitId;
     expandedOrgUnitIds = signal<string[]>([]);
     activeOrgUnitTab = signal<'members' | 'roles'>('members');
     orgUnitMemberSearch = signal('');
@@ -39,10 +39,10 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     assignRoleDraft = signal<OrgUnitRole[]>([]);
     isOrgUnitDeleteOpen = signal(false);
     orgUnitDeleteTarget = signal<OrgUnit | null>(null);
-    orgUnitDeleteImpact = signal<OrgUnitDeleteImpact | null>(null);
-    orgUnitDeleteImpactLoading = signal(false);
+    orgUnitDeleteImpact = this.orgUnitStore.deleteImpact;
+    orgUnitDeleteImpactLoading = this.orgUnitStore.deleteImpactLoading;
     orgUnitDeleteConfirm = signal('');
-    orgUnitDeleteError = signal('');
+    orgUnitDeleteError = this.orgUnitStore.deleteError;
     orgUnitDeleteSubmitting = signal(false);
     isOrgUnitRenameOpen = signal(false);
     orgUnitRenameName = signal('');
@@ -76,30 +76,21 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     });
     readonly selectedOrgUnitPath = computed(() => this.buildOrgUnitPath(this.activeOrgUnitId()));
     readonly selectedOrgUnitMembers = computed(() => {
-        const activeId = this.activeOrgUnitId();
-        if (!activeId) return [];
-        const memberIds = new Set(this.orgUnitMemberIds()[activeId] || []);
+        if (!this.activeOrgUnitId()) return [];
+        const members = this.orgUnitStore.members();
         const search = this.orgUnitMemberSearch().trim().toLowerCase();
-        return this.users().filter(user => {
-            if (!memberIds.has(user.id)) return false;
-            if (!search) return true;
-            const roleName = user.roleName || '';
-            return (
-                user.name.toLowerCase().includes(search) ||
-                user.email.toLowerCase().includes(search) ||
-                roleName.toLowerCase().includes(search)
-            );
+        if (!search) return members;
+        return members.filter(member => {
+            const haystack = `${member.name} ${member.email}`.toLowerCase();
+            return haystack.includes(search);
         });
     });
     readonly selectedOrgUnitMemberCount = computed(() => {
-        const activeId = this.activeOrgUnitId();
-        if (!activeId) return 0;
-        return (this.orgUnitMemberIds()[activeId] || []).length;
+        return this.orgUnitStore.selectedCounts().membersCount;
     });
     readonly selectedOrgUnitRoles = computed(() => {
-        const activeId = this.activeOrgUnitId();
-        if (!activeId) return [];
-        const roles = this.orgUnitRoles()[activeId] || [];
+        if (!this.activeOrgUnitId()) return [];
+        const roles = this.orgUnitStore.roles().map(role => this.mapOrgUnitRole(role));
         const search = this.orgUnitRoleSearch().trim().toLowerCase();
         if (!search) return roles;
         return roles.filter(role => {
@@ -108,18 +99,24 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         });
     });
     readonly selectedOrgUnitRoleCount = computed(() => {
-        const activeId = this.activeOrgUnitId();
-        if (!activeId) return 0;
-        return (this.orgUnitRoles()[activeId] || []).length;
+        return this.orgUnitStore.selectedCounts().rolesCount;
     });
     readonly orgUnitDeleteRequiresConfirm = computed(() => {
         const impact = this.orgUnitDeleteImpact();
-        return !!impact && impact.childUnits > 0;
+        return !!impact && (
+            impact.descendantUnitsCount > 0 ||
+            impact.membersDirectCount > 0 ||
+            impact.roleAssignmentsCount > 0
+        );
     });
 
     trackOrgUnit = (_: number, node: OrgUnitNode) => node.id;
     trackOrgUnitRole = (_: number, role: OrgUnitRole) => role.id;
-    trackUserRow = (_: number, user: { id: string }) => user.id;
+    trackUserRow = (_: number, user: { id?: string; userId?: string }) => user.id ?? user.userId ?? '';
+
+    ngOnInit(): void {
+        this.orgUnitStore.loadTree();
+    }
 
     startAddRootUnit(): void {
         this.orgUnitFormParentId.set(null);
@@ -172,23 +169,25 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
             this.orgUnitFormError.set('Unit name is required.');
             return;
         }
-
-        const newUnit: OrgUnit = {
-            id: this.nextOrgUnitId(),
-            name,
-            type: this.orgUnitFormType(),
-            status: this.orgUnitFormStatus(),
-            parentId: this.orgUnitFormParentId() || undefined
-        };
-
-        this.orgUnits.update(items => [...items, newUnit]);
-        if (newUnit.parentId) {
-            this.expandedOrgUnitIds.update(items => items.includes(newUnit.parentId!)
-                ? items
-                : [...items, newUnit.parentId!]);
-        }
-        this.activeOrgUnitId.set(newUnit.id);
-        this.cancelOrgUnitForm();
+        this.orgUnitFormError.set('');
+        this.orgUnitStore.createUnit(
+            {
+                name,
+                type: this.mapTypeToApi(this.orgUnitFormType()),
+                status: this.mapStatusToApi(this.orgUnitFormStatus()),
+                parentId: this.orgUnitFormParentId() || undefined,
+            },
+            () => {
+                const parentId = this.orgUnitFormParentId();
+                if (parentId) {
+                    this.expandedOrgUnitIds.update(items => items.includes(parentId)
+                        ? items
+                        : [...items, parentId]);
+                }
+                this.cancelOrgUnitForm();
+            },
+            (error) => this.orgUnitFormError.set(error?.message || 'Unable to create unit.'),
+        );
     }
 
     openDeleteOrgUnit(): void {
@@ -196,16 +195,11 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         if (!target) return;
         this.orgUnitDeleteTarget.set(target);
         this.orgUnitDeleteConfirm.set('');
-        this.orgUnitDeleteError.set('');
+        this.orgUnitDeleteError.set(null);
         this.orgUnitDeleteImpact.set(null);
-        this.orgUnitDeleteImpactLoading.set(true);
         this.orgUnitDeleteSubmitting.set(false);
         this.isOrgUnitDeleteOpen.set(true);
-        const impact = this.buildOrgUnitDeleteImpact(target.id);
-        setTimeout(() => {
-            this.orgUnitDeleteImpact.set(impact);
-            this.orgUnitDeleteImpactLoading.set(false);
-        }, 120);
+        this.orgUnitStore.loadDeleteImpact();
     }
 
     toggleOuActionsMenu(event?: MouseEvent): void {
@@ -223,9 +217,9 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         this.isOrgUnitDeleteOpen.set(false);
         this.orgUnitDeleteTarget.set(null);
         this.orgUnitDeleteImpact.set(null);
-        this.orgUnitDeleteImpactLoading.set(false);
         this.orgUnitDeleteConfirm.set('');
-        this.orgUnitDeleteError.set('');
+        this.orgUnitDeleteError.set(null);
+        this.orgUnitDeleteSubmitting.set(false);
     }
 
     openRenameOrgUnit(): void {
@@ -256,9 +250,17 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
             return;
         }
         this.orgUnitRenameSubmitting.set(true);
-        this.orgUnits.update(items => items.map(unit => unit.id === target.id ? { ...unit, name: nextName } : unit));
-        this.toast.success(`Organizational unit renamed to "${nextName}".`);
-        this.requestCloseRenameOrgUnit();
+        this.orgUnitStore.updateUnit(
+            { name: nextName },
+            () => {
+                this.toast.success(`Organizational unit renamed to "${nextName}".`);
+                this.requestCloseRenameOrgUnit();
+            },
+            (error) => {
+                this.orgUnitRenameError.set(error?.message || 'Unable to rename unit.');
+                this.orgUnitRenameSubmitting.set(false);
+            }
+        );
     }
 
     openMoveOrgUnit(): void {
@@ -347,11 +349,17 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         const target = this.selectedOrgUnit();
         if (!target || target.status !== 'Active' || this.orgUnitDeactivateSubmitting()) return;
         this.orgUnitDeactivateSubmitting.set(true);
-        this.orgUnits.update(items => items.map(unit => unit.id === target.id
-            ? { ...unit, status: 'Inactive' }
-            : unit));
-        this.toast.success(`Organizational unit "${target.name}" deactivated.`);
-        this.requestCloseDeactivateOrgUnit();
+        this.orgUnitStore.updateUnit(
+            { status: this.mapStatusToApi('Inactive') },
+            () => {
+                this.toast.success(`Organizational unit "${target.name}" deactivated.`);
+                this.requestCloseDeactivateOrgUnit();
+            },
+            (error) => {
+                this.orgUnitDeactivateError.set(error?.message || 'Unable to deactivate unit.');
+                this.orgUnitDeactivateSubmitting.set(false);
+            }
+        );
     }
 
     canDeleteSelectedOrgUnit(): boolean {
@@ -363,23 +371,18 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         if (!target || this.orgUnitDeleteSubmitting()) return;
         if (this.orgUnitDeleteRequiresConfirm() && !this.isOrgUnitDeleteConfirmValid()) return;
         this.orgUnitDeleteSubmitting.set(true);
-        const deleteIds = this.collectOrgUnitDescendantIds(target.id);
-        deleteIds.unshift(target.id);
-        this.orgUnits.update(items => items.filter(unit => !deleteIds.includes(unit.id)));
-        this.orgUnitMemberIds.update(map => {
-            const next = { ...map };
-            deleteIds.forEach(id => delete next[id]);
-            return next;
-        });
-        this.orgUnitRoles.update(map => {
-            const next = { ...map };
-            deleteIds.forEach(id => delete next[id]);
-            return next;
-        });
-        this.expandedOrgUnitIds.update(items => items.filter(id => !deleteIds.includes(id)));
-        this.selectFallbackOrgUnit(target);
-        this.toast.success(`Organizational unit "${target.name}" and its child units were deleted.`);
-        this.requestCloseDeleteOrgUnit();
+        this.orgUnitStore.deleteUnit(
+            this.orgUnitDeleteConfirm().trim(),
+            () => {
+                this.expandedOrgUnitIds.update(items => items.filter(id => id !== target.id));
+                this.toast.success(`Organizational unit "${target.name}" and its child units were deleted.`);
+                this.requestCloseDeleteOrgUnit();
+            },
+            (error) => {
+                this.orgUnitDeleteError.set(error);
+                this.orgUnitDeleteSubmitting.set(false);
+            }
+        );
     }
 
     isOrgUnitDeleteConfirmValid(): boolean {
@@ -404,7 +407,7 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     }
 
     selectOrgUnit(id: string): void {
-        this.activeOrgUnitId.set(id);
+        this.orgUnitStore.selectOrgUnit(id);
         this.orgUnitMemberSearch.set('');
         this.assignMembersOpen.set(false);
         this.assignMemberIds.set([]);
@@ -430,7 +433,7 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     openAssignMembers(): void {
         const activeId = this.activeOrgUnitId();
         if (!activeId) return;
-        this.assignMemberIds.set([...(this.orgUnitMemberIds()[activeId] || [])]);
+        this.assignMemberIds.set(this.orgUnitStore.members().map(member => member.userId));
         this.assignMembersOpen.set(true);
     }
 
@@ -453,24 +456,27 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         const activeId = this.activeOrgUnitId();
         if (!activeId) return;
         const memberIds = this.assignMemberIds();
-        this.orgUnitMemberIds.update(map => ({
-            ...map,
-            [activeId]: memberIds
-        }));
+        const currentIds = new Set(this.orgUnitStore.members().map(member => member.userId));
+        const nextIds = new Set(memberIds);
+        const toAdd = memberIds.filter(id => !currentIds.has(id));
+        const toRemove = Array.from(currentIds).filter(id => !nextIds.has(id));
+        if (toAdd.length) {
+            this.orgUnitStore.addMembers(toAdd, () => {
+                toRemove.forEach(id => this.orgUnitStore.removeMember(id));
+                this.assignMembersOpen.set(false);
+            });
+            return;
+        }
+        toRemove.forEach(id => this.orgUnitStore.removeMember(id));
         this.assignMembersOpen.set(false);
     }
 
-    removeMemberFromOrgUnit(user: UserRow): void {
-        const activeId = this.activeOrgUnitId();
-        if (!activeId) return;
-        this.orgUnitMemberIds.update(map => ({
-            ...map,
-            [activeId]: (map[activeId] || []).filter(id => id !== user.id)
-        }));
+    removeMemberFromOrgUnit(user: { userId: string; name?: string; email?: string }): void {
+        this.orgUnitStore.removeMember(user.userId);
     }
 
-    confirmRemoveMemberFromOrgUnit(user: UserRow): void {
-        const label = user.name || user.email;
+    confirmRemoveMemberFromOrgUnit(user: { userId: string; name?: string; email?: string }): void {
+        const label = user.name || user.email || 'this member';
         if (!window.confirm(`Remove ${label} from this unit?`)) return;
         this.removeMemberFromOrgUnit(user);
     }
@@ -490,7 +496,7 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     openAssignRoles(): void {
         const activeId = this.activeOrgUnitId();
         if (!activeId) return;
-        const currentRoles = this.orgUnitRoles()[activeId] || [];
+        const currentRoles = this.orgUnitStore.roles().map(role => this.mapOrgUnitRole(role));
         this.assignRoleIds.set(currentRoles.map(role => role.id));
         this.assignRoleDraft.set(currentRoles);
         this.assignRolesOpen.set(true);
@@ -520,45 +526,23 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     saveAssignRoles(): void {
         const activeId = this.activeOrgUnitId();
         if (!activeId) return;
-        this.orgUnitRoles.update(map => ({
-            ...map,
-            [activeId]: this.assignRoleDraft()
-        }));
-        this.assignRolesOpen.set(false);
+        const roleIds = this.assignRoleDraft().map(role => role.id);
+        this.orgUnitStore.assignRoles(roleIds, 'inheritsDown', () => {
+            this.assignRolesOpen.set(false);
+        });
     }
 
     removeRoleFromOrgUnit(role: OrgUnitRole): void {
         const activeId = this.activeOrgUnitId();
         if (!activeId) return;
-        this.orgUnitRoles.update(map => ({
-            ...map,
-            [activeId]: (map[activeId] || []).filter(item => item.id !== role.id)
-        }));
+        this.orgUnitStore.removeRole(role.id);
     }
 
     private commitOrgUnitParentChange(action: 'moved' | 'updated'): void {
         const target = this.orgUnitMoveTarget();
         if (!target || this.orgUnitMoveSubmitting()) return;
         const nextParentId = this.orgUnitMoveParentId();
-        if (!this.isOrgUnitParentAllowed(target.id, nextParentId)) {
-            this.orgUnitMoveError.set('Select a valid parent unit.');
-            return;
-        }
-        if ((nextParentId ?? null) === (target.parentId ?? null)) {
-            this.closeOrgUnitMoveModal();
-            return;
-        }
-        this.orgUnitMoveSubmitting.set(true);
-        this.orgUnits.update(items => items.map(unit => unit.id === target.id
-            ? { ...unit, parentId: nextParentId ?? undefined }
-            : unit));
-        if (nextParentId) {
-            this.expandedOrgUnitIds.update(items => items.includes(nextParentId)
-                ? items
-                : [...items, nextParentId]);
-        }
-        this.toast.success(`Organizational unit "${target.name}" ${action}.`);
-        this.closeOrgUnitMoveModal();
+        this.orgUnitMoveError.set(`Changing parent units is not supported yet. (${action})`);
     }
 
     private closeOrgUnitMoveModal(): void {
@@ -585,23 +569,6 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         return true;
     }
 
-    private buildOrgUnitDeleteImpact(id: string): OrgUnitDeleteImpact {
-        const descendantIds = this.collectOrgUnitDescendantIds(id);
-        const affectedIds = [id, ...descendantIds];
-        const memberIds = new Set<string>();
-        const memberMap = this.orgUnitMemberIds();
-        affectedIds.forEach(unitId => {
-            (memberMap[unitId] || []).forEach(memberId => memberIds.add(memberId));
-        });
-        const roleMap = this.orgUnitRoles();
-        const rolesCount = affectedIds.reduce((count, unitId) => count + (roleMap[unitId]?.length || 0), 0);
-        return {
-            childUnits: descendantIds.length,
-            members: memberIds.size,
-            roles: rolesCount
-        };
-    }
-
     private collectOrgUnitDescendantIds(id: string): string[] {
         const byParent = new Map<string, string[]>();
         this.orgUnits().forEach(unit => {
@@ -621,25 +588,6 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
             }
         }
         return collected;
-    }
-
-    private selectFallbackOrgUnit(deletedUnit: OrgUnit): void {
-        const remaining = this.orgUnits();
-        if (!remaining.length) {
-            this.activeOrgUnitId.set(null);
-            return;
-        }
-        const parentId = deletedUnit.parentId ?? null;
-        if (parentId && remaining.some(unit => unit.id === parentId)) {
-            this.selectOrgUnit(parentId);
-            return;
-        }
-        const root = remaining.find(unit => !unit.parentId);
-        if (root) {
-            this.selectOrgUnit(root.id);
-            return;
-        }
-        this.activeOrgUnitId.set(remaining[0].id);
     }
 
     private buildOrgUnitTree(units: OrgUnit[]): OrgUnitNode[] {
@@ -672,12 +620,53 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         return path.length ? path.join(' / ') : 'Organization';
     }
 
-    private nextOrgUnitId(): string {
-        const maxId = this.orgUnits().reduce((max, unit) => {
-            const match = unit.id.match(/org-unit-(\d+)/);
-            if (!match) return max;
-            return Math.max(max, Number(match[1]));
-        }, 0);
-        return `org-unit-${maxId + 1}`;
+    private mapOrgUnit(unit: { id: string; name: string; type: string; status: string; parentId?: string | null }): OrgUnit {
+        return {
+            id: unit.id,
+            name: unit.name,
+            type: this.mapTypeFromApi(unit.type),
+            status: this.mapStatusFromApi(unit.status),
+            parentId: unit.parentId ?? null,
+        };
+    }
+
+    private mapOrgUnitRole(role: { roleId: string; role?: { name: string; description: string } }): OrgUnitRole {
+        return {
+            id: role.roleId,
+            name: role.role?.name ?? role.roleId,
+            description: role.role?.description,
+        };
+    }
+
+    private mapStatusFromApi(status: string): OrgUnitStatus {
+        return status === 'archived' ? 'Inactive' : 'Active';
+    }
+
+    private mapStatusToApi(status: OrgUnitStatus): string {
+        return status === 'Inactive' ? 'archived' : 'active';
+    }
+
+    private mapTypeFromApi(type: string): OrgUnitType {
+        const mapping: Record<string, OrgUnitType> = {
+            organization: 'District',
+            division: 'Division',
+            department: 'Department',
+            school: 'School',
+            custom: 'Custom',
+        };
+        return mapping[type] ?? 'Department';
+    }
+
+    private mapTypeToApi(type: OrgUnitType): string {
+        const mapping: Record<OrgUnitType, string> = {
+            District: 'organization',
+            School: 'school',
+            Division: 'division',
+            Department: 'department',
+            Grade: 'department',
+            Section: 'department',
+            Custom: 'custom',
+        };
+        return mapping[type] ?? 'department';
     }
 }

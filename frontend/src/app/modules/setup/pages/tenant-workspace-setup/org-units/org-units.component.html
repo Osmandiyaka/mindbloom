@@ -170,7 +170,7 @@
                                             {{ member.email }}
                                         </div>
                                     </div>
-                                    <div>{{ member.roleName || '—' }}</div>
+                                    <div>{{ member.roleInUnit || '—' }}</div>
                                     <div>
                                         <span class="ou-status-pill"
                                             [class.ou-status-pill--active]="member.status === 'active'"
@@ -384,7 +384,7 @@
                     This action will permanently delete this unit and all of its child units.
                 </div>
                 <mb-alert *ngIf="vm.orgUnitDeleteError()" variant="danger">
-                    {{ vm.orgUnitDeleteError() }}
+                    {{ vm.orgUnitDeleteError()?.message || 'Unable to delete unit.' }}
                 </mb-alert>
                 <div class="ou-delete__loading" *ngIf="vm.orgUnitDeleteImpactLoading()">
                     Loading delete impact…
@@ -396,15 +396,15 @@
                     </div>
                     <div class="ou-delete__row">
                         <span>Child units</span>
-                        <span>{{ vm.orgUnitDeleteImpact()?.childUnits ?? 0 }}</span>
+                        <span>{{ vm.orgUnitDeleteImpact()?.descendantUnitsCount ?? 0 }}</span>
                     </div>
                     <div class="ou-delete__row">
                         <span>Members affected</span>
-                        <span>{{ vm.orgUnitDeleteImpact()?.members ?? 0 }}</span>
+                        <span>{{ vm.orgUnitDeleteImpact()?.membersDirectCount ?? 0 }}</span>
                     </div>
                     <div class="ou-delete__row">
                         <span>Roles removed</span>
-                        <span>{{ vm.orgUnitDeleteImpact()?.roles ?? 0 }}</span>
+                        <span>{{ vm.orgUnitDeleteImpact()?.roleAssignmentsCount ?? 0 }}</span>
                     </div>
                     <div class="ou-delete__warning" id="ou-delete-warning">
                         This action cannot be undone.
