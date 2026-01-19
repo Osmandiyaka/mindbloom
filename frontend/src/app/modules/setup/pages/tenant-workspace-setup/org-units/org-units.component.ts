@@ -32,6 +32,7 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     orgUnitFormStatus = signal<OrgUnitStatus>('Active');
     orgUnitFormParentId = signal<string | null>(null);
     orgUnitFormError = signal('');
+    orgUnitFormSubmitting = signal(false);
     assignMembersOpen = signal(false);
     assignMemberIds = signal<string[]>([]);
     assignRolesOpen = signal(false);
@@ -146,6 +147,7 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     cancelOrgUnitForm(): void {
         this.orgUnitFormOpen.set(false);
         this.orgUnitFormError.set('');
+        this.orgUnitFormSubmitting.set(false);
         this.orgUnitFormParentId.set(null);
     }
 
@@ -164,12 +166,14 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     }
 
     saveOrgUnitForm(): void {
+        if (this.orgUnitFormSubmitting()) return;
         const name = this.orgUnitFormName().trim();
         if (!name) {
             this.orgUnitFormError.set('Unit name is required.');
             return;
         }
         this.orgUnitFormError.set('');
+        this.orgUnitFormSubmitting.set(true);
         this.orgUnitStore.createUnit(
             {
                 name,
@@ -186,7 +190,10 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
                 }
                 this.cancelOrgUnitForm();
             },
-            (error) => this.orgUnitFormError.set(error?.message || 'Unable to create unit.'),
+            (error) => {
+                this.orgUnitFormError.set(error?.message || 'Unable to create unit.');
+                this.orgUnitFormSubmitting.set(false);
+            },
         );
     }
 

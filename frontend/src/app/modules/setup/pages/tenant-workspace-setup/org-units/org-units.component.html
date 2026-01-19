@@ -371,7 +371,10 @@
                 <mb-button variant="secondary"
                     (click)="vm.requestCloseOrgUnitForm()">Cancel</mb-button>
                 <mb-button variant="primary" (click)="vm.saveOrgUnitForm()"
-                    [disabled]="!vm.orgUnitFormName().trim()">Create unit</mb-button>
+                    [loading]="vm.orgUnitFormSubmitting()"
+                    [disabled]="!vm.orgUnitFormName().trim() || vm.orgUnitFormSubmitting()">
+                    Create unit
+                </mb-button>
             </div>
         </mb-modal>
 
