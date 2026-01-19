@@ -89,6 +89,7 @@ export class OrgUnitMembersTableComponent {
         {
             key: 'name',
             label: 'Name',
+            width: '52%',
             cell: row => ({
                 primary: row.name,
                 secondary: row.email,
@@ -98,11 +99,13 @@ export class OrgUnitMembersTableComponent {
         {
             key: 'role',
             label: 'Role',
+            width: '20%',
             cell: row => row.role,
         },
         {
             key: 'status',
             label: 'Status',
+            width: '18%',
             cell: row => row.status,
         },
     ];
