@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { TenantWorkspaceSetupFacade } from './tenant-workspace-setup.facade';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from './tenant-workspace-setup.shared';
 import { TenantSchoolsComponent } from './school/school-setup.component';
-import { TenantWorkspaceSetupOrgUnitsComponent } from './org-units/tenant-workspace-setup-org-units.component';
+import { TenantWorkspaceSetupOrgUnitsComponent } from './org-units/org-units.component';
 import { TenantWorkspaceSetupLevelsComponent } from './levels/tenant-workspace-setup-levels.component';
 import { TenantWorkspaceSetupClassesSectionsComponent } from './classes-sections/tenant-workspace-setup-classes-sections.component';
 import { TenantWorkspaceSetupGradingComponent } from './grading/tenant-workspace-setup-grading.component';

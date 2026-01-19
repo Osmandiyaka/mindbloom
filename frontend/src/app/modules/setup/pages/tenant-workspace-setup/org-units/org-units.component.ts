@@ -6,8 +6,8 @@ import { TenantWorkspaceSetupFacade } from '../tenant-workspace-setup.facade';
     selector: 'app-tenant-workspace-setup-org-units',
     standalone: true,
     imports: [...TENANT_WORKSPACE_SETUP_IMPORTS],
-    templateUrl: './tenant-workspace-setup-org-units.component.html',
-    styleUrls: ['../tenant-workspace-setup.component.scss']
+    templateUrl: './org-units.component.html',
+    styleUrls: ['../tenant-workspace-setup.component.scss', './org-units.component.scss']
 })
 export class TenantWorkspaceSetupOrgUnitsComponent {
     readonly vm = inject(TenantWorkspaceSetupFacade);
