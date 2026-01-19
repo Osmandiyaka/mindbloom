@@ -1,7 +1,7 @@
 <div class="setup-body">
     <div class="setup-section">
-        <div class="users-header">
-            <div class="users-header__row users-header__row--sticky">
+        <div class="users-header users-header-card">
+            <div class="users-header__row users-header__row--title">
                 <div class="users-header__left">
                     <h2>Users</h2>
                     <p>Add users who will access the workspace. You can invite now and assign roles
@@ -14,55 +14,20 @@
                         (itemSelect)="vm.handleAddUsersAction($event, csvInput)"></mb-split-button>
                 </div>
             </div>
-            <div class="users-header__row">
-                <div class="users-header__left">
-                    <mb-form-field class="users-header__search" [controlId]="'user-search'">
-                        <mb-input id="user-search" [value]="vm.store.userSearch()"
-                            [placeholder]="'Search by name, email, role…'"
-                            (valueChange)="vm.store.setSearch($event)"></mb-input>
-                    </mb-form-field>
-                </div>
-                <div class="users-header__right">
-                    <div class="users-header__filters">
-                        <mb-form-field label="Status" [controlId]="'user-status-filter'">
-                            <mb-select id="user-status-filter" [value]="vm.statusFilter()"
-                                (valueChange)="vm.setStatusFilter($event)">
-                                <option value="all">All</option>
-                                <option value="active">Active</option>
-                                <option value="invited">Invited</option>
-                                <option value="suspended">Suspended</option>
-                            </mb-select>
-                        </mb-form-field>
-                        <div class="users-header__role-filter">
-                            <label class="users-header__filter-label" for="user-role-filter">Role</label>
-                            <button type="button" id="user-role-filter" class="users-filter__trigger"
-                                #roleFilterOrigin (click)="vm.toggleRoleFilter()">
-                                {{ vm.roleFilterIds().length ? vm.roleFilterIds().length + ' selected' : 'All roles' }}
-                            </button>
-                            <mb-popover [open]="vm.roleFilterOpen()" [origin]="roleFilterOrigin"
-                                [hasBackdrop]="true"
-                                [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'users-filter__panel']"
-                                (closed)="vm.closeRoleFilter()">
-                                <div class="users-filter__panel-body">
-                                    <mb-role-selector [label]="''" [multiple]="true"
-                                        [value]="vm.roleFilterIds()" (change)="vm.updateRoleFilter($event)">
-                                    </mb-role-selector>
-                                </div>
-                            </mb-popover>
-                        </div>
-                        <mb-form-field label="School access" [controlId]="'user-school-access-filter'">
-                            <mb-select id="user-school-access-filter" [value]="vm.schoolAccessFilter()"
-                                (valueChange)="vm.setSchoolAccessFilter($event)">
-                                <option value="any">All</option>
-                                <option value="all">All schools</option>
-                                <option value="selected">Selected schools</option>
-                            </mb-select>
-                        </mb-form-field>
-                    </div>
+            <div class="users-header__row users-header__row--filters">
+                <div class="users-header__search-row">
+                    <app-search-input
+                        class="users-header__search"
+                        [value]="vm.store.userSearch()"
+                        [debounceMs]="300"
+                        placeholder="Search by name, email, or role…"
+                        (search)="vm.store.setSearch($event)"
+                    ></app-search-input>
                 </div>
             </div>
             <div class="users-header__row users-header__row--utility">
-                <div class="users-header__left">
+                <div class="users-header__left"></div>
+                <div class="users-header__right">
                     <div class="users-density">
                         <button type="button" class="users-density__button"
                             [class.is-active]="vm.density() === 'comfortable'"
@@ -71,8 +36,6 @@
                             [class.is-active]="vm.density() === 'compact'"
                             (click)="vm.changeDensity('compact')">Compact</button>
                     </div>
-                </div>
-                <div class="users-header__right">
                     <button type="button" class="users-columns__toggle" #columnsOrigin
                         (click)="vm.toggleColumnsMenu()">☰ Columns</button>
                     <mb-popover [open]="vm.columnsMenuOpen()" [origin]="columnsOrigin" [hasBackdrop]="true"
@@ -97,17 +60,6 @@
         </div>
         <input #csvInput type="file" class="users-csv-input" accept=".csv"
             (change)="vm.handleCsvImport($event)" />
-
-        <div class="users-toolbar" *ngIf="!vm.selectedCount()">
-            <div class="users-toolbar__left">
-                <div class="users-table-meta">{{ vm.tableSummary() }}</div>
-            </div>
-            <div class="users-toolbar__right">
-                <mb-button size="sm" variant="tertiary" *ngIf="vm.isFiltered()" (click)="vm.clearFilters()">
-                    Clear filters
-                </mb-button>
-            </div>
-        </div>
 
         <div class="users-bulk" *ngIf="vm.selectedCount()">
             <div class="users-bulk__left">{{ vm.selectedCount() }} selected</div>
