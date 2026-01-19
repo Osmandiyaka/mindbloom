@@ -24,10 +24,7 @@
                         (search)="vm.store.setSearch($event)"
                     ></app-search-input>
                 </div>
-            </div>
-            <div class="users-header__row users-header__row--utility">
-                <div class="users-header__left"></div>
-                <div class="users-header__right">
+                <div class="users-header__right users-header__right--tools">
                     <div class="users-density">
                         <button type="button" class="users-density__button"
                             [class.is-active]="vm.density() === 'comfortable'"

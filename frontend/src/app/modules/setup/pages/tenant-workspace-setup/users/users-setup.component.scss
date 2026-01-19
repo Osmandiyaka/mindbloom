@@ -115,6 +115,7 @@
 
 .users-header__row--filters {
     align-items: center;
+    flex-wrap: nowrap;
 }
 
 .users-header__row--utility {
@@ -143,6 +144,17 @@
 
 .users-header__search-row {
     width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.users-header__right--tools {
+    align-items: center;
+    flex-wrap: nowrap;
+    flex: 0 0 auto;
 }
 
 .users-utility {
