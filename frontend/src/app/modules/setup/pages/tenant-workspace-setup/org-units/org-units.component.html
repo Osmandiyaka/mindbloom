@@ -38,9 +38,10 @@
             <div class="ou-canvas">
                 <ng-container *ngIf="vm.selectedOrgUnit(); else ouEmptyDetail">
                     <div class="ou-canvas__header">
-                        <div>
-                            <div class="ou-breadcrumb">{{ vm.selectedOrgUnitPath() }}</div>
-                            <div class="ou-canvas__title">{{ vm.selectedOrgUnit()!.name }}</div>
+                        <div class="ou-canvas__details">
+                            <div class="ou-canvas__name" [attr.title]="vm.selectedOrgUnit()!.name">
+                                {{ vm.selectedOrgUnit()!.name }}
+                            </div>
                             <div class="ou-canvas__meta">{{ vm.selectedOrgUnit()!.type }} ·
                                 {{ vm.selectedOrgUnit()!.status }}</div>
                             <div class="ou-breadcrumb">
