@@ -2,6 +2,7 @@ import { Component, HostListener, OnInit, computed, effect, inject, signal } fro
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OverlayModule } from '@angular/cdk/overlay';
+import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { RoleService } from '../../../core/services/role.service';
 import { UserService, User } from '../../../core/services/user.service';
@@ -63,6 +64,7 @@ export class RoleListComponent implements OnInit {
     private readonly roleService = inject(RoleService);
     private readonly userService = inject(UserService);
     private readonly schoolService = inject(SchoolService);
+    private readonly route = inject(ActivatedRoute);
 
     roles = this.roleService.roles;
     permissionTree = this.roleService.permissionTree;
@@ -307,6 +309,11 @@ export class RoleListComponent implements OnInit {
         this.roleService.getPermissionTree().subscribe();
         this.loadUsers();
         this.loadSchools();
+        this.route.queryParamMap.subscribe(params => {
+            const term = params.get('roleSearch');
+            if (term === null) return;
+            this.search.set(term);
+        });
     }
 
     loadUsers(): void {

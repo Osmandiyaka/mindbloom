@@ -102,16 +102,6 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
             };
         });
     });
-    readonly selectedOrgUnitRoles = computed(() => {
-        if (!this.activeOrgUnitId()) return [];
-        const roles = this.orgUnitStore.roles().map(role => this.mapOrgUnitRole(role));
-        const search = this.orgUnitRoleSearch().trim().toLowerCase();
-        if (!search) return roles;
-        return roles.filter(role => {
-            const haystack = [role.name, role.description].filter(Boolean).join(' ').toLowerCase();
-            return haystack.includes(search);
-        });
-    });
     readonly selectedOrgUnitRoleCount = computed(() => {
         return this.orgUnitStore.selectedCounts().rolesCount;
     });
@@ -125,7 +115,6 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     });
 
     trackOrgUnit = (_: number, node: OrgUnitNode) => node.id;
-    trackOrgUnitRole = (_: number, role: OrgUnitRole) => role.id;
     trackAssignMember = (_: number, member: { id: string }) => member.id;
 
     ngOnInit(): void {
@@ -556,12 +545,6 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
                 this.toast.error(error?.message || 'Unable to assign roles.');
             }
         );
-    }
-
-    removeRoleFromOrgUnit(role: OrgUnitRole): void {
-        const activeId = this.activeOrgUnitId();
-        if (!activeId) return;
-        this.orgUnitStore.removeRole(role.id);
     }
 
     private commitOrgUnitParentChange(action: 'moved' | 'updated'): void {

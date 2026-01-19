@@ -196,40 +196,12 @@
                             </div>
                         </div>
 
-                        <ng-container *ngIf="vm.selectedOrgUnitRoles().length; else ouRolesEmpty">
-                            <div class="ou-roles-table">
-                                <div class="ou-roles-table__header">
-                                    <div>Role</div>
-                                    <div>Description</div>
-                                    <div class="ou-roles-table__actions">Actions</div>
-                                </div>
-                                <div class="ou-roles-table__row"
-                                    *ngFor="let role of vm.selectedOrgUnitRoles(); trackBy: vm.trackOrgUnitRole">
-                                    <div class="ou-roles-table__name">
-                                        {{ role.name }}
-                                    </div>
-                                    <div class="ou-roles-table__description">
-                                        {{ role.description || '—' }}
-                                    </div>
-                                    <div class="ou-roles-table__actions">
-                                        <button type="button" class="ou-row-action"
-                                            (click)="vm.removeRoleFromOrgUnit(role)">
-                                            Remove
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </ng-container>
-                        <ng-template #ouRolesEmpty>
-                            <div class="ou-empty ou-empty--inline ou-empty--roles">
-                                <div class="ou-empty__title">No roles assigned</div>
-                                <div class="ou-empty__text">
-                                    Assign roles to control access for this unit.
-                                </div>
-                                <mb-button variant="secondary"
-                                    (click)="vm.openAssignRoles()">Assign roles</mb-button>
-                            </div>
-                        </ng-template>
+                        <app-org-unit-roles-table
+                            [orgUnitId]="vm.activeOrgUnitId()"
+                            [searchTerm]="vm.orgUnitRoleSearch()"
+                            (clearSearch)="vm.orgUnitRoleSearch.set('')"
+                            (assignRoles)="vm.openAssignRoles()">
+                        </app-org-unit-roles-table>
                         <div class="ou-helper">
                             Roles assigned here inherit to child units. Add overrides at
                             specific

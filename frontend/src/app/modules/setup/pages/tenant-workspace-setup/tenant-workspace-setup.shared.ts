@@ -33,6 +33,7 @@ import { SearchInputComponent } from '../../../../shared/components/search-input
 import { DepartmentSelectorComponent } from '../../../../shared/components/department-selector/department-selector.component';
 import { RolePreviewComponent } from './role-preview.component';
 import { OrgUnitMembersTableComponent } from './org-units/org-unit-members-table.component';
+import { OrgUnitRolesTableComponent } from './org-units/org-unit-roles-table.component';
 
 export const TENANT_WORKSPACE_SETUP_IMPORTS = [
     CommonModule,
@@ -68,4 +69,5 @@ export const TENANT_WORKSPACE_SETUP_IMPORTS = [
     DepartmentSelectorComponent,
     RolePreviewComponent,
     OrgUnitMembersTableComponent,
+    OrgUnitRolesTableComponent,
 ];

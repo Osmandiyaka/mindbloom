@@ -17,7 +17,7 @@
                     <div class="roles-table__toolbar">
                         <div class="roles-table__toolbar-left">
                             <app-search-input class="roles-table__search" placeholder="Search roles…"
-                                (search)="search.set($event)"></app-search-input>
+                                [value]="search()" (search)="search.set($event)"></app-search-input>
                             <span class="roles-table__count">{{ filteredRoles().length }} roles</span>
                         </div>
                         <div class="roles-table__filters">

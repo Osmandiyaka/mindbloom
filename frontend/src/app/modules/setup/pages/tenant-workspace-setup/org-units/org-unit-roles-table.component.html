@@ -1,0 +1,30 @@
+<div class="ou-roles-table">
+    <mb-table class="ou-roles-table__table"
+        [columns]="columns"
+        [rows]="pagedRows()"
+        [rowKey]="rowKey"
+        [isLoading]="isLoading()"
+        [isError]="isError()"
+        [emptyState]="emptyState()"
+        [isFiltered]="isFiltered()"
+        (emptyAction)="handleEmptyAction($event)"
+        (cellClick)="handleCellClick($event)">
+        <ng-template mbTableActions let-row>
+            <button type="button" class="ou-row-action ou-row-action--subtle"
+                (click)="confirmRemove(row)">
+                Remove
+            </button>
+        </ng-template>
+    </mb-table>
+</div>
+
+<div class="ou-roles-table__footer" *ngIf="filteredRows().length">
+    <div class="ou-roles-table__summary">{{ tableSummary() }}</div>
+    <div class="ou-roles-table__paging">
+        <mb-button size="sm" variant="tertiary" [disabled]="pageIndex() === 1"
+            (click)="prevPage()">Prev</mb-button>
+        <span>Page {{ pageIndex() }} of {{ pageCount() }}</span>
+        <mb-button size="sm" variant="tertiary" [disabled]="pageIndex() === pageCount()"
+            (click)="nextPage()">Next</mb-button>
+    </div>
+</div>
