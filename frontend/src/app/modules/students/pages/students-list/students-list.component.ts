@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { OverlayModule } from '@angular/cdk/overlay';
 import { Subscription } from 'rxjs';
 import { StudentService } from '../../../../core/services/student.service';
 import { ToastService } from '../../../../core/ui/toast/toast.service';
@@ -44,6 +45,7 @@ import {
   MbInputComponent,
   MbModalComponent,
   MbModalFooterDirective,
+  MbPopoverComponent,
   MbSelectComponent,
   MbSelectOption,
   MbSplitButtonComponent,
@@ -83,6 +85,7 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
     RouterModule,
     FormsModule,
     DragDropModule,
+    OverlayModule,
     MbButtonComponent,
     MbCheckboxComponent,
     MbSelectComponent,
@@ -94,6 +97,7 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
     MbDrawerComponent,
     MbInputComponent,
     MbTextareaComponent,
+    MbPopoverComponent,
     StudentCreateModalComponent,
     StudentDetailDrawerComponent,
     StudentGuardianModalComponent,
@@ -151,28 +155,37 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
             {{ headerCopy.columns }}
           </mb-button>
           <div class="overflow" [class.open]="overflowOpen()">
-            <mb-button size="sm" variant="tertiary" aria-label="More actions" (click)="toggleOverflow($event)">•••</mb-button>
-            <div class="overflow-menu" *ngIf="overflowOpen()">
-              <mb-button
-                size="sm"
-                variant="tertiary"
-                [fullWidth]="true"
-                *can="'students.export'"
-                (click)="exportStudents()">
-                {{ headerCopy.exportCsv }}
-              </mb-button>
-              <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="openSavedViews()">
-                {{ headerCopy.savedViews }}
-              </mb-button>
-              <mb-button
-                size="sm"
-                variant="tertiary"
-                [fullWidth]="true"
-                *can="'setup.write'"
-                (click)="manageStudentIds()">
-                {{ headerCopy.manageStudentIds }}
-              </mb-button>
-            </div>
+            <span cdkOverlayOrigin #overflowMenuOrigin="cdkOverlayOrigin">
+              <mb-button size="sm" variant="tertiary" aria-label="More actions" (click)="toggleOverflow($event)">•••</mb-button>
+            </span>
+            <mb-popover
+              [open]="overflowOpen()"
+              [origin]="overflowMenuOrigin"
+              [hasBackdrop]="true"
+              variant="plain"
+              (closed)="closeOverflow()">
+              <div class="overflow-menu">
+                <mb-button
+                  size="sm"
+                  variant="tertiary"
+                  [fullWidth]="true"
+                  *can="'students.export'"
+                  (click)="exportStudents()">
+                  {{ headerCopy.exportCsv }}
+                </mb-button>
+                <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="openSavedViews()">
+                  {{ headerCopy.savedViews }}
+                </mb-button>
+                <mb-button
+                  size="sm"
+                  variant="tertiary"
+                  [fullWidth]="true"
+                  *can="'setup.write'"
+                  (click)="manageStudentIds()">
+                  {{ headerCopy.manageStudentIds }}
+                </mb-button>
+              </div>
+            </mb-popover>
           </div>
         </div>
       </header>
@@ -288,8 +301,16 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
             >
               <ng-template mbTableActions let-student>
                 <div class="row-actions" [class.open]="rowMenuOpen() === student.id">
-                  <mb-button size="sm" variant="tertiary" aria-label="Row actions" (click)="toggleRowMenu($event, student.id)">•••</mb-button>
-                  <div class="row-menu" *ngIf="rowMenuOpen() === student.id">
+                  <span cdkOverlayOrigin #rowMenuOrigin="cdkOverlayOrigin">
+                    <mb-button size="sm" variant="tertiary" aria-label="Row actions" (click)="toggleRowMenu($event, student.id)">•••</mb-button>
+                  </span>
+                  <mb-popover
+                    [open]="rowMenuOpen() === student.id"
+                    [origin]="rowMenuOrigin"
+                    [hasBackdrop]="true"
+                    variant="plain"
+                    (closed)="closeRowMenu()">
+                    <div class="row-menu">
                     <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="viewStudent($event, student)">
                       View student
                     </mb-button>
@@ -325,7 +346,8 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
                       (click)="archiveStudent($event, student)">
                       Archive
                     </mb-button>
-                  </div>
+                    </div>
+                  </mb-popover>
                 </div>
               </ng-template>
             </mb-table>
@@ -373,8 +395,9 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
           [actionTooltip]="actionTooltipFn"
           [isActionEnabled]="isActionEnabledFn"
           (toggleMenu)="toggleQuickActionsMenu($event)"
+          (closeMenu)="closeQuickActionsMenu()"
           (runAction)="runQuickAction($event)">
-        </app-student-quick-actions>
+      </app-student-quick-actions>
         <div class="workflow-section">
           <div class="workflow-header">
             <div class="workflow-header-text">
@@ -1703,6 +1726,10 @@ export class StudentsListComponent implements OnInit {
     this.overflowOpen.set(!this.overflowOpen());
   }
 
+  closeOverflow(): void {
+    this.overflowOpen.set(false);
+  }
+
   toggleColumns(): void {
     this.columnsDrawerOpen.set(true);
   }
@@ -1895,9 +1922,17 @@ export class StudentsListComponent implements OnInit {
     this.quickActionsMenuOpen.set(!this.quickActionsMenuOpen());
   }
 
+  closeQuickActionsMenu(): void {
+    this.quickActionsMenuOpen.set(false);
+  }
+
   toggleRowMenu(event: Event, id: string): void {
     event.stopPropagation();
     this.rowMenuOpen.set(this.rowMenuOpen() === id ? null : id);
+  }
+
+  closeRowMenu(): void {
+    this.rowMenuOpen.set(null);
   }
 
   toggleDetailMenu(event: Event): void {
@@ -1905,14 +1940,26 @@ export class StudentsListComponent implements OnInit {
     this.detailMenuOpen.set(!this.detailMenuOpen());
   }
 
+  closeDetailMenu(): void {
+    this.detailMenuOpen.set(false);
+  }
+
   toggleSummaryMenu(event: Event): void {
     event.stopPropagation();
     this.summaryMenuOpen.set(!this.summaryMenuOpen());
   }
 
+  closeSummaryMenu(): void {
+    this.summaryMenuOpen.set(false);
+  }
+
   toggleGuardianMenu(event: Event, id: string): void {
     event.stopPropagation();
     this.guardianMenuOpen.set(this.guardianMenuOpen() === id ? null : id);
+  }
+
+  closeGuardianMenu(): void {
+    this.guardianMenuOpen.set(null);
   }
 
   openGuardianModal(): void {

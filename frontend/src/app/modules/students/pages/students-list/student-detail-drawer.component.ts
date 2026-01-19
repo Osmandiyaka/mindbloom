@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { OverlayModule } from '@angular/cdk/overlay';
 import {
   MbButtonComponent,
   MbDrawerComponent,
+  MbPopoverComponent,
   MbTableActionsDirective,
   MbTableComponent,
 } from '@mindbloom/ui';
@@ -15,8 +17,10 @@ import type { StudentsListComponent } from './students-list.component';
   standalone: true,
   imports: [
     CommonModule,
+    OverlayModule,
     MbDrawerComponent,
     MbButtonComponent,
+    MbPopoverComponent,
     MbTableComponent,
     MbTableActionsDirective,
     CanDirective,

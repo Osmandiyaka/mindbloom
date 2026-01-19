@@ -394,9 +394,6 @@ tbody tr.is-selected {
 
 .overflow-menu,
 .row-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 6px);
   background: white;
   border: 1px solid rgba(148, 163, 184, 0.25);
   border-radius: 10px;
@@ -404,7 +401,6 @@ tbody tr.is-selected {
   gap: 4px;
   padding: 6px;
   min-width: 180px;
-  z-index: 20;
 }
 
 .row-menu mb-button .mb-button {
@@ -882,9 +878,6 @@ tbody tr.is-selected {
 }
 
 .detail-actions-panel {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 6px);
   background: var(--mb-color-surface);
   border: 1px solid var(--mb-color-border);
   border-radius: 10px;
@@ -893,7 +886,6 @@ tbody tr.is-selected {
   gap: 6px;
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
   min-width: 180px;
-  z-index: 3;
 }
 
 .detail-actions-divider {
@@ -953,9 +945,6 @@ tbody tr.is-selected {
 }
 
 .summary-actions-panel {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 6px);
   background: var(--mb-color-surface);
   border: 1px solid var(--mb-color-border);
   border-radius: 10px;
@@ -964,7 +953,6 @@ tbody tr.is-selected {
   gap: 6px;
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
   min-width: 160px;
-  z-index: 3;
 }
 
 .detail-tabs {

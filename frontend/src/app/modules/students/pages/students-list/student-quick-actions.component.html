@@ -9,23 +9,32 @@
       }
     </div>
     <div class="quick-actions-menu" [class.open]="menuOpen">
-      <mb-button size="sm" variant="tertiary" aria-label="Quick actions menu" (click)="toggleMenu.emit($event)">•••</mb-button>
-      <div class="quick-actions-menu-panel" *ngIf="menuOpen">
-        <div
-          class="quick-actions-menu-item"
-          *ngFor="let action of secondaryActions"
-          [appTooltip]="actionTooltip(action)"
-          tooltipPosition="left">
-          <mb-button
-            size="sm"
-            variant="tertiary"
-            [fullWidth]="true"
-            [disabled]="!isActionEnabled(action)"
-            (click)="runAction.emit(action)">
-            {{ action.label }}
-          </mb-button>
+      <span cdkOverlayOrigin #quickActionsMenuOrigin="cdkOverlayOrigin">
+        <mb-button size="sm" variant="tertiary" aria-label="Quick actions menu" (click)="toggleMenu.emit($event)">•••</mb-button>
+      </span>
+      <mb-popover
+        [open]="menuOpen"
+        [origin]="quickActionsMenuOrigin"
+        [hasBackdrop]="true"
+        variant="plain"
+        (closed)="closeMenu.emit()">
+        <div class="quick-actions-menu-panel">
+          <div
+            class="quick-actions-menu-item"
+            *ngFor="let action of secondaryActions"
+            [appTooltip]="actionTooltip(action)"
+            tooltipPosition="left">
+            <mb-button
+              size="sm"
+              variant="tertiary"
+              [fullWidth]="true"
+              [disabled]="!isActionEnabled(action)"
+              (click)="runAction.emit(action)">
+              {{ action.label }}
+            </mb-button>
+          </div>
         </div>
-      </div>
+      </mb-popover>
     </div>
   </div>
   <div class="actions-list">

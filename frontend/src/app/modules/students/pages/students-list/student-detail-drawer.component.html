@@ -38,21 +38,30 @@
                   Edit
                 </mb-button>
                 <div class="detail-actions-menu" [class.open]="vm.detailMenuOpen()">
-                  <mb-button
-                    size="sm"
-                    variant="tertiary"
-                    aria-label="More actions"
-                    (click)="vm.toggleDetailMenu($event)">
-                    •••
-                  </mb-button>
-                  <div class="detail-actions-panel" *ngIf="vm.detailMenuOpen()">
-                    <mb-button size="sm" variant="tertiary" [fullWidth]="true">
-                      Print profile
+                  <span cdkOverlayOrigin #detailMenuOrigin="cdkOverlayOrigin">
+                    <mb-button
+                      size="sm"
+                      variant="tertiary"
+                      aria-label="More actions"
+                      (click)="vm.toggleDetailMenu($event)">
+                      •••
                     </mb-button>
-                    <mb-button size="sm" variant="tertiary" [fullWidth]="true">
-                      Export student
-                    </mb-button>
-                  </div>
+                  </span>
+                  <mb-popover
+                    [open]="vm.detailMenuOpen()"
+                    [origin]="detailMenuOrigin"
+                    [hasBackdrop]="true"
+                    variant="plain"
+                    (closed)="vm.closeDetailMenu()">
+                    <div class="detail-actions-panel">
+                      <mb-button size="sm" variant="tertiary" [fullWidth]="true">
+                        Print profile
+                      </mb-button>
+                      <mb-button size="sm" variant="tertiary" [fullWidth]="true">
+                        Export student
+                      </mb-button>
+                    </div>
+                  </mb-popover>
                 </div>
                 <mb-button size="sm" variant="tertiary" aria-label="Close drawer" (click)="vm.closeDetailDrawer()">
                   ✕
@@ -119,18 +128,27 @@
                         Transfer
                       </mb-button>
                       <div class="summary-actions-menu" [class.open]="vm.summaryMenuOpen()">
-                        <mb-button
-                          size="sm"
-                          variant="tertiary"
-                          aria-label="More actions"
-                          (click)="vm.toggleSummaryMenu($event)">
-                          •••
-                        </mb-button>
-                        <div class="summary-actions-panel" *ngIf="vm.summaryMenuOpen()">
-                          <mb-button size="sm" variant="danger" [fullWidth]="true" *can="'students.delete'" (click)="vm.archivePanelStudent()">
-                            Archive
+                        <span cdkOverlayOrigin #summaryMenuOrigin="cdkOverlayOrigin">
+                          <mb-button
+                            size="sm"
+                            variant="tertiary"
+                            aria-label="More actions"
+                            (click)="vm.toggleSummaryMenu($event)">
+                            •••
                           </mb-button>
-                        </div>
+                        </span>
+                        <mb-popover
+                          [open]="vm.summaryMenuOpen()"
+                          [origin]="summaryMenuOrigin"
+                          [hasBackdrop]="true"
+                          variant="plain"
+                          (closed)="vm.closeSummaryMenu()">
+                          <div class="summary-actions-panel">
+                            <mb-button size="sm" variant="danger" [fullWidth]="true" *can="'students.delete'" (click)="vm.archivePanelStudent()">
+                              Archive
+                            </mb-button>
+                          </div>
+                        </mb-popover>
                       </div>
                     </div>
                   </div>
@@ -283,18 +301,27 @@
                         >
                           <ng-template mbTableActions let-guardian>
                             <div class="row-actions" [class.open]="vm.guardianMenuOpen() === guardian.id">
-                              <mb-button size="sm" variant="tertiary" aria-label="Guardian actions" (click)="vm.toggleGuardianMenu($event, guardian.id)">•••</mb-button>
-                              <div class="row-menu" *ngIf="vm.guardianMenuOpen() === guardian.id">
-                                <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="vm.setPrimaryGuardian(guardian)">
-                                  Set primary
-                                </mb-button>
-                                <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="vm.inviteGuardian(guardian)">
-                                  Invite guardian
-                                </mb-button>
-                                <mb-button size="sm" variant="danger" [fullWidth]="true" (click)="vm.removeGuardian(guardian)">
-                                  Remove guardian
-                                </mb-button>
-                              </div>
+                              <span cdkOverlayOrigin #guardianMenuOrigin="cdkOverlayOrigin">
+                                <mb-button size="sm" variant="tertiary" aria-label="Guardian actions" (click)="vm.toggleGuardianMenu($event, guardian.id)">•••</mb-button>
+                              </span>
+                              <mb-popover
+                                [open]="vm.guardianMenuOpen() === guardian.id"
+                                [origin]="guardianMenuOrigin"
+                                [hasBackdrop]="true"
+                                variant="plain"
+                                (closed)="vm.closeGuardianMenu()">
+                                <div class="row-menu">
+                                  <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="vm.setPrimaryGuardian(guardian)">
+                                    Set primary
+                                  </mb-button>
+                                  <mb-button size="sm" variant="tertiary" [fullWidth]="true" (click)="vm.inviteGuardian(guardian)">
+                                    Invite guardian
+                                  </mb-button>
+                                  <mb-button size="sm" variant="danger" [fullWidth]="true" (click)="vm.removeGuardian(guardian)">
+                                    Remove guardian
+                                  </mb-button>
+                                </div>
+                              </mb-popover>
                             </div>
                           </ng-template>
                         </mb-table>

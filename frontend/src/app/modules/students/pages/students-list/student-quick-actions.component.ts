@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { MbButtonComponent } from '@mindbloom/ui';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { MbButtonComponent, MbPopoverComponent } from '@mindbloom/ui';
 import { TooltipDirective } from '../../../../shared/directives/tooltip.directive';
 import { ModuleKey } from '../../../../shared/types/module-keys';
 
@@ -17,7 +18,7 @@ type QuickAction = {
 @Component({
   selector: 'app-student-quick-actions',
   standalone: true,
-  imports: [CommonModule, MbButtonComponent, TooltipDirective],
+  imports: [CommonModule, OverlayModule, MbButtonComponent, MbPopoverComponent, TooltipDirective],
   templateUrl: './student-quick-actions.component.html',
   styleUrls: ['./student-quick-actions.component.scss'],
 })
@@ -31,5 +32,6 @@ export class StudentQuickActionsComponent {
   @Input() isActionEnabled: (action: QuickAction) => boolean = () => true;
 
   @Output() toggleMenu = new EventEmitter<Event>();
+  @Output() closeMenu = new EventEmitter<void>();
   @Output() runAction = new EventEmitter<QuickAction>();
 }
