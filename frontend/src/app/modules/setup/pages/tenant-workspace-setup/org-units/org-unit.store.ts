@@ -200,7 +200,11 @@ export class OrgUnitStore {
             });
     }
 
-    addMembers(userIds: string[], onSuccess?: () => void): void {
+    addMembers(
+        userIds: string[],
+        onSuccess?: () => void,
+        onError?: (error: OrgUnitStoreError) => void,
+    ): void {
         const selectedId = this.selectedOrgUnitId();
         if (!selectedId) return;
         this.api.addMembers(selectedId, userIds)
@@ -210,7 +214,10 @@ export class OrgUnitStore {
                     this.refreshSelected();
                     onSuccess?.();
                 },
-                error: (error: OrgUnitStoreError) => this.membersError.set(error),
+                error: (error: OrgUnitStoreError) => {
+                    this.membersError.set(error);
+                    onError?.(error);
+                },
             });
     }
 
@@ -228,7 +235,12 @@ export class OrgUnitStore {
             });
     }
 
-    assignRoles(roleIds: string[], scope: string, onSuccess?: () => void): void {
+    assignRoles(
+        roleIds: string[],
+        scope: string,
+        onSuccess?: () => void,
+        onError?: (error: OrgUnitStoreError) => void,
+    ): void {
         const selectedId = this.selectedOrgUnitId();
         if (!selectedId) return;
         this.api.assignRoles(selectedId, roleIds, scope)
@@ -238,7 +250,10 @@ export class OrgUnitStore {
                     this.refreshSelected();
                     onSuccess?.();
                 },
-                error: (error: OrgUnitStoreError) => this.rolesError.set(error),
+                error: (error: OrgUnitStoreError) => {
+                    this.rolesError.set(error);
+                    onError?.(error);
+                },
             });
     }
 

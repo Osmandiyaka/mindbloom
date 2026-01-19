@@ -4,6 +4,8 @@ import { TenantWorkspaceSetupFacade } from '../tenant-workspace-setup.facade';
 import { OrgUnit, OrgUnitNode, OrgUnitRole, OrgUnitStatus, OrgUnitType } from '../tenant-workspace-setup.models';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from '../tenant-workspace-setup.shared';
 import { OrgUnitStore } from './org-unit.store';
+import { UserSerivce } from '../users/user-serivce.service';
+import { mapApiUserToUserRow } from '../users/user-form.mapper';
 
 @Component({
     selector: 'app-tenant-workspace-setup-org-units',
@@ -17,6 +19,7 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     private readonly setup = inject(TenantWorkspaceSetupFacade);
     private readonly toast = inject(ToastService);
     private readonly orgUnitStore = inject(OrgUnitStore);
+    private readonly usersApi = inject(UserSerivce);
 
     readonly users = this.setup.users;
     readonly orgUnits = computed(() => this.orgUnitStore.tree().map(unit => this.mapOrgUnit(unit)));
@@ -35,6 +38,7 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     orgUnitFormSubmitting = signal(false);
     assignMembersOpen = signal(false);
     assignMemberIds = signal<string[]>([]);
+    assignMemberSelection = signal<string | null>(null);
     assignRolesOpen = signal(false);
     assignRoleIds = signal<string[]>([]);
     assignRoleDraft = signal<OrgUnitRole[]>([]);
@@ -89,6 +93,25 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     readonly selectedOrgUnitMemberCount = computed(() => {
         return this.orgUnitStore.selectedCounts().membersCount;
     });
+    readonly staffSelectorOptions = computed(() => this.users()
+        .map(user => ({
+            id: user.id,
+            name: user.name || user.email,
+            email: user.email,
+            role: user.roleName || '',
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)));
+    readonly assignMemberRows = computed(() => {
+        const users = new Map(this.users().map(user => [user.id, user]));
+        return this.assignMemberIds().map(id => {
+            const user = users.get(id);
+            return {
+                id,
+                name: user?.name || user?.email || id,
+                email: user?.email || '',
+            };
+        });
+    });
     readonly selectedOrgUnitRoles = computed(() => {
         if (!this.activeOrgUnitId()) return [];
         const roles = this.orgUnitStore.roles().map(role => this.mapOrgUnitRole(role));
@@ -114,9 +137,11 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     trackOrgUnit = (_: number, node: OrgUnitNode) => node.id;
     trackOrgUnitRole = (_: number, role: OrgUnitRole) => role.id;
     trackUserRow = (_: number, user: { id?: string; userId?: string }) => user.id ?? user.userId ?? '';
+    trackAssignMember = (_: number, member: { id: string }) => member.id;
 
     ngOnInit(): void {
         this.orgUnitStore.loadTree();
+        this.loadAssignableUsers();
     }
 
     startAddRootUnit(): void {
@@ -441,6 +466,7 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         const activeId = this.activeOrgUnitId();
         if (!activeId) return;
         this.assignMemberIds.set(this.orgUnitStore.members().map(member => member.userId));
+        this.assignMemberSelection.set(null);
         this.assignMembersOpen.set(true);
     }
 
@@ -448,15 +474,16 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         this.assignMembersOpen.set(false);
     }
 
-    toggleAssignMember(userId: string, event: Event): void {
-        const target = event.target as HTMLInputElement | null;
-        const checked = target?.checked ?? false;
+    addAssignMember(userId: string | null): void {
+        if (!userId) return;
         this.assignMemberIds.update(ids => {
-            if (checked) {
-                return ids.includes(userId) ? ids : [...ids, userId];
-            }
-            return ids.filter(id => id !== userId);
+            return ids.includes(userId) ? ids : [...ids, userId];
         });
+        this.assignMemberSelection.set(null);
+    }
+
+    removeAssignMember(userId: string): void {
+        this.assignMemberIds.update(ids => ids.filter(id => id !== userId));
     }
 
     saveAssignMembers(): void {
@@ -468,10 +495,16 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         const toAdd = memberIds.filter(id => !currentIds.has(id));
         const toRemove = Array.from(currentIds).filter(id => !nextIds.has(id));
         if (toAdd.length) {
-            this.orgUnitStore.addMembers(toAdd, () => {
-                toRemove.forEach(id => this.orgUnitStore.removeMember(id));
-                this.assignMembersOpen.set(false);
-            });
+            this.orgUnitStore.addMembers(
+                toAdd,
+                () => {
+                    toRemove.forEach(id => this.orgUnitStore.removeMember(id));
+                    this.assignMembersOpen.set(false);
+                },
+                (error) => {
+                    this.toast.error(error?.message || 'Unable to assign members.');
+                }
+            );
             return;
         }
         toRemove.forEach(id => this.orgUnitStore.removeMember(id));
@@ -533,10 +566,17 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     saveAssignRoles(): void {
         const activeId = this.activeOrgUnitId();
         if (!activeId) return;
-        const roleIds = this.assignRoleDraft().map(role => role.id);
-        this.orgUnitStore.assignRoles(roleIds, 'inheritsDown', () => {
-            this.assignRolesOpen.set(false);
-        });
+        const roleIds = this.assignRoleIds();
+        this.orgUnitStore.assignRoles(
+            roleIds,
+            'inheritsDown',
+            () => {
+                this.assignRolesOpen.set(false);
+            },
+            (error) => {
+                this.toast.error(error?.message || 'Unable to assign roles.');
+            }
+        );
     }
 
     removeRoleFromOrgUnit(role: OrgUnitRole): void {
@@ -675,5 +715,21 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
             Custom: 'custom',
         };
         return mapping[type] ?? 'department';
+    }
+
+    private loadAssignableUsers(): void {
+        if (this.setup.users().length) return;
+        this.usersApi.getUsers().subscribe({
+            next: (users) => {
+                const rows = users.map(user => {
+                    const { kind, ...rest } = mapApiUserToUserRow(user);
+                    return rest;
+                });
+                this.setup.users.set(rows);
+            },
+            error: (error) => {
+                this.toast.error(error?.message || 'Unable to load users for assignments.');
+            },
+        });
     }
 }

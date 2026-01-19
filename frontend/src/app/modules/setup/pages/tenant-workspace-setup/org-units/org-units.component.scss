@@ -752,6 +752,31 @@
     width: 100%;
 }
 
+.ou-assign__selector mb-staff-selector {
+    display: block;
+    width: 100%;
+}
+
+.ou-assign__member {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px dashed color-mix(in srgb, var(--mb-color-border) 65%, transparent);
+}
+
+.ou-assign__member:last-child {
+    border-bottom: none;
+}
+
+.ou-assign__member-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
 .ou-assign__row {
     display: grid;
     grid-template-columns: 16px 1fr;

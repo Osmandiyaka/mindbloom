@@ -126,17 +126,27 @@
 
                         <div class="ou-assign" *ngIf="vm.assignMembersOpen()">
                             <div class="ou-assign__title">Assign members</div>
+                            <div class="ou-assign__selector">
+                                <mb-staff-selector [value]="vm.assignMemberSelection()"
+                                    [options]="vm.staffSelectorOptions()"
+                                    [disabled]="!vm.users().length"
+                                    placeholder="Select staff..."
+                                    (valueChange)="vm.addAssignMember($event)">
+                                </mb-staff-selector>
+                            </div>
                             <div class="ou-assign__list"
-                                *ngIf="vm.users().length; else ouAssignEmpty">
-                                <label class="ou-assign__row"
-                                    *ngFor="let user of vm.users(); trackBy: trackUserRow">
-                                    <input type="checkbox"
-                                        [checked]="vm.assignMemberIds().includes(user.id)"
-                                        (change)="vm.toggleAssignMember(user.id, $event)" />
-                                    <span class="ou-assign__name">{{ user.name || user.email
-                                        }}</span>
-                                    <span class="ou-assign__meta">{{ user.email }}</span>
-                                </label>
+                                *ngIf="vm.assignMemberRows().length; else ouAssignEmpty">
+                                <div class="ou-assign__member"
+                                    *ngFor="let member of vm.assignMemberRows(); trackBy: vm.trackAssignMember">
+                                    <div class="ou-assign__member-text">
+                                        <span class="ou-assign__name">{{ member.name }}</span>
+                                        <span class="ou-assign__meta">{{ member.email }}</span>
+                                    </div>
+                                    <button type="button" class="ou-row-action ou-row-action--subtle"
+                                        (click)="vm.removeAssignMember(member.id)">
+                                        Remove
+                                    </button>
+                                </div>
                             </div>
                             <ng-template #ouAssignEmpty>
                                 <div class="ou-assign__empty">Add staff in the previous step to
