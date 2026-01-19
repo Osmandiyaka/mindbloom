@@ -59,7 +59,7 @@ export class OrgUnitStore {
             this.refreshSelected();
             this.loadMembers({});
             this.loadRoles();
-        });
+        }, { allowSignalWrites: true });
     }
 
     loadTree(): void {

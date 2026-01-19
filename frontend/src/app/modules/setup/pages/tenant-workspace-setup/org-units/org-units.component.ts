@@ -80,16 +80,6 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         return activeId ? this.orgUnits().find(unit => unit.id === activeId) || null : null;
     });
     readonly selectedOrgUnitPath = computed(() => this.buildOrgUnitPath(this.activeOrgUnitId()));
-    readonly selectedOrgUnitMembers = computed(() => {
-        if (!this.activeOrgUnitId()) return [];
-        const members = this.orgUnitStore.members();
-        const search = this.orgUnitMemberSearch().trim().toLowerCase();
-        if (!search) return members;
-        return members.filter(member => {
-            const haystack = `${member.name} ${member.email}`.toLowerCase();
-            return haystack.includes(search);
-        });
-    });
     readonly selectedOrgUnitMemberCount = computed(() => {
         return this.orgUnitStore.selectedCounts().membersCount;
     });
@@ -136,7 +126,6 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
 
     trackOrgUnit = (_: number, node: OrgUnitNode) => node.id;
     trackOrgUnitRole = (_: number, role: OrgUnitRole) => role.id;
-    trackUserRow = (_: number, user: { id?: string; userId?: string }) => user.id ?? user.userId ?? '';
     trackAssignMember = (_: number, member: { id: string }) => member.id;
 
     ngOnInit(): void {
@@ -509,16 +498,6 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         }
         toRemove.forEach(id => this.orgUnitStore.removeMember(id));
         this.assignMembersOpen.set(false);
-    }
-
-    removeMemberFromOrgUnit(user: { userId: string; name?: string; email?: string }): void {
-        this.orgUnitStore.removeMember(user.userId);
-    }
-
-    confirmRemoveMemberFromOrgUnit(user: { userId: string; name?: string; email?: string }): void {
-        const label = user.name || user.email || 'this member';
-        if (!window.confirm(`Remove ${label} from this unit?`)) return;
-        this.removeMemberFromOrgUnit(user);
     }
 
     back(): void {

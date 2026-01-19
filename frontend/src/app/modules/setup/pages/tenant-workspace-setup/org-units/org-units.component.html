@@ -161,52 +161,12 @@
                             </div>
                         </div>
 
-                        <ng-container
-                            *ngIf="vm.selectedOrgUnitMembers().length; else ouMembersEmpty">
-                            <div class="ou-members-table">
-                                <div class="ou-members-table__header">
-                                    <div>Name</div>
-                                    <div>Role</div>
-                                    <div>Status</div>
-                                    <div class="ou-members-table__actions">Actions</div>
-                                </div>
-                                <div class="ou-members-table__row"
-                                    *ngFor="let member of vm.selectedOrgUnitMembers(); trackBy: trackUserRow">
-                                    <div class="ou-members-table__name">
-                                        <div class="ou-members-table__name-text">
-                                            {{ member.name || '—' }}
-                                        </div>
-                                        <div class="ou-members-table__email"
-                                            [attr.title]="member.email">
-                                            {{ member.email }}
-                                        </div>
-                                    </div>
-                                    <div>{{ member.roleInUnit || '—' }}</div>
-                                    <div>
-                                        <span class="ou-status-pill"
-                                            [class.ou-status-pill--active]="member.status === 'active'"
-                                            [class.ou-status-pill--invited]="member.status === 'invited'">
-                                            {{ member.status }}
-                                        </span>
-                                    </div>
-                                    <div class="ou-members-table__actions">
-                                        <button type="button"
-                                            class="ou-row-action ou-row-action--subtle"
-                                            title="Remove from unit (does not delete user)"
-                                            (click)="vm.confirmRemoveMemberFromOrgUnit(member)">
-                                            Remove
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </ng-container>
-                        <ng-template #ouMembersEmpty>
-                            <div class="ou-empty ou-empty--inline">
-                                <div class="ou-empty__text">
-                                    Assign members to control access and responsibilities.
-                                </div>
-                            </div>
-                        </ng-template>
+                        <app-org-unit-members-table
+                            [orgUnitId]="vm.activeOrgUnitId()"
+                            [searchTerm]="vm.orgUnitMemberSearch()"
+                            (clearSearch)="vm.orgUnitMemberSearch.set('')"
+                            (addMembers)="vm.openAssignMembers()">
+                        </app-org-unit-members-table>
                     </div>
 
                     <div *ngIf="vm.activeOrgUnitTab() === 'roles'" class="ou-roles">

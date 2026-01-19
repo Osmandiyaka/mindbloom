@@ -32,6 +32,7 @@ import { TimezoneSelectComponent } from '../../../../shared/components/timezone-
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
 import { DepartmentSelectorComponent } from '../../../../shared/components/department-selector/department-selector.component';
 import { RolePreviewComponent } from './role-preview.component';
+import { OrgUnitMembersTableComponent } from './org-units/org-unit-members-table.component';
 
 export const TENANT_WORKSPACE_SETUP_IMPORTS = [
     CommonModule,
@@ -66,4 +67,5 @@ export const TENANT_WORKSPACE_SETUP_IMPORTS = [
     SearchInputComponent,
     DepartmentSelectorComponent,
     RolePreviewComponent,
+    OrgUnitMembersTableComponent,
 ];

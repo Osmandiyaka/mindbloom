@@ -1,0 +1,48 @@
+.ou-members-table {
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 12px;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.ou-members-table__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: rgba(15, 23, 42, 0.7);
+}
+
+.ou-members-table__paging {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+:host ::ng-deep .ou-members-table__table .mb-table__cell[data-col='name'] {
+    font-weight: 600;
+}
+
+:host ::ng-deep .ou-members-table__table .mb-table__cell-secondary {
+    color: rgba(15, 23, 42, 0.6);
+}
+
+.ou-row-action {
+    border: 1px solid transparent;
+    background: transparent;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--mb-color-text);
+}
+
+.ou-row-action:hover {
+    background: color-mix(in srgb, var(--mb-color-border) 20%, transparent);
+}
+
+.ou-row-action--subtle:hover {
+    color: #dc2626;
+}
