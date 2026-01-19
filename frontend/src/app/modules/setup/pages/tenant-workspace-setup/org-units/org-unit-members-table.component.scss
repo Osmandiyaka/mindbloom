@@ -48,6 +48,17 @@
     word-break: break-word;
 }
 
+:host ::ng-deep .ou-members-table__table .mb-table__cell--link .mb-table__cell-primary {
+    color: #0f766e;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+}
+
+:host ::ng-deep .ou-members-table__table .mb-table__cell--link {
+    cursor: pointer;
+}
+
 .ou-row-action {
     border: 1px solid transparent;
     background: transparent;
