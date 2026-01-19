@@ -124,11 +124,7 @@ export class OrgUnitRolesTableComponent {
 
     constructor() {
         effect(() => {
-            const id = this.orgUnitIdValue();
-            const selected = this.store.selectedOrgUnitId();
-            if (id && id !== selected) {
-                this.store.selectOrgUnit(id);
-            }
+            this.orgUnitIdValue();
             this.pageIndex.set(1);
         }, { allowSignalWrites: true });
 
