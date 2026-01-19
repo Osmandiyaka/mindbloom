@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { MbTableColumn, MbTableDensity, MbTableEmptyState } from '@mindbloom/ui';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from '../tenant-workspace-setup.shared';
 import { TenantWorkspaceSetupFacade } from '../tenant-workspace-setup.facade';
@@ -40,6 +41,7 @@ export class TenantUsersComponent implements OnInit {
     private readonly setup = inject(TenantWorkspaceSetupFacade);
     private readonly usersApi = inject(UserSerivce);
     readonly store = inject(UsersStore);
+    private readonly route = inject(ActivatedRoute);
 
     density = signal<MbTableDensity>('comfortable');
     rowsPerPage = signal(20);
@@ -253,6 +255,12 @@ export class TenantUsersComponent implements OnInit {
         this.store.connect(this.usersApi, this.setup);
         this.store.loadUsers();
         this.usersStepSkipped.set(this.setup.usersStepSkipped());
+        this.route.queryParamMap.subscribe(params => {
+            const term = params.get('userSearch');
+            if (term === null) return;
+            this.store.setSearch(term);
+            this.pageIndex.set(1);
+        });
     }
 
     handleRowClick(row: DirectoryUserRow): void {

@@ -7,7 +7,8 @@
         [isError]="isError()"
         [emptyState]="emptyState()"
         [isFiltered]="isFiltered()"
-        (emptyAction)="handleEmptyAction($event)">
+        (emptyAction)="handleEmptyAction($event)"
+        (cellClick)="handleCellClick($event)">
         <ng-template mbTableActions let-row>
             <button type="button" class="ou-row-action ou-row-action--subtle"
                 (click)="confirmRemove(row)">

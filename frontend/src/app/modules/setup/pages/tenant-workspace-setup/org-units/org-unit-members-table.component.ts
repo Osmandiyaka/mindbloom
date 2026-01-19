@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output, computed, effect, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MbButtonComponent, MbTableActionsDirective, MbTableColumn, MbTableComponent, MbTableEmptyState } from '@mindbloom/ui';
 import { OrgUnitMemberDto } from '../../../../../core/services/org-unit-api.service';
 import { OrgUnitStore } from './org-unit.store';
@@ -22,6 +23,8 @@ type OrgUnitMemberRow = {
 })
 export class OrgUnitMembersTableComponent {
     private readonly store = inject(OrgUnitStore);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
 
     private readonly orgUnitIdValue = signal<string | null>(null);
     private readonly searchTermValue = signal('');
@@ -89,7 +92,7 @@ export class OrgUnitMembersTableComponent {
         {
             key: 'name',
             label: 'Name',
-            width: '52%',
+            width: '70%',
             cell: row => ({
                 primary: row.name,
                 secondary: row.email,
@@ -97,15 +100,9 @@ export class OrgUnitMembersTableComponent {
             }),
         },
         {
-            key: 'role',
-            label: 'Role',
-            width: '20%',
-            cell: row => row.role,
-        },
-        {
             key: 'status',
             label: 'Status',
-            width: '18%',
+            width: '20%',
             cell: row => row.status,
         },
     ];
@@ -171,6 +168,19 @@ export class OrgUnitMembersTableComponent {
         if (action === 'addMembers') {
             this.addMembers.emit();
         }
+    }
+
+    handleCellClick(event: { row: OrgUnitMemberRow; column: MbTableColumn<OrgUnitMemberRow> }): void {
+        if (String(event.column.key) !== 'name') return;
+        const query = event.row.email || event.row.name;
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {
+                step: 2,
+                userSearch: query,
+            },
+            queryParamsHandling: 'merge',
+        });
     }
 
     confirmRemove(row: OrgUnitMemberRow): void {
