@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ToastService } from '../../../../../core/ui/toast/toast.service';
+import { OrgUnitApiService } from '../../../../../core/services/org-unit-api.service';
 import { TenantWorkspaceSetupFacade } from '../tenant-workspace-setup.facade';
 import { OrgUnit, OrgUnitNode, OrgUnitRole, OrgUnitStatus, OrgUnitType } from '../tenant-workspace-setup.models';
 import { TENANT_WORKSPACE_SETUP_IMPORTS } from '../tenant-workspace-setup.shared';
@@ -20,6 +21,7 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     private readonly toast = inject(ToastService);
     private readonly orgUnitStore = inject(OrgUnitStore);
     private readonly usersApi = inject(UserSerivce);
+    private readonly orgUnitApi = inject(OrgUnitApiService);
 
     readonly users = this.setup.users;
     readonly orgUnits = computed(() => this.orgUnitStore.tree().map(unit => this.mapOrgUnit(unit)));
@@ -113,6 +115,10 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
             impact.roleAssignmentsCount > 0
         );
     });
+
+    canCopyFromParent(): boolean {
+        return !!this.selectedOrgUnit()?.parentId;
+    }
 
     trackOrgUnit = (_: number, node: OrgUnitNode) => node.id;
     trackAssignMember = (_: number, member: { id: string }) => member.id;
@@ -448,6 +454,30 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         this.assignMembersOpen.set(true);
     }
 
+    copyMembersFromParent(): void {
+        const selected = this.selectedOrgUnit();
+        const parentId = selected?.parentId ?? null;
+        if (!parentId) return;
+        if (!window.confirm('Copy members from the parent unit?')) return;
+        this.orgUnitApi.getMembers(parentId, { includeInherited: false }).subscribe({
+            next: (response) => {
+                const userIds = (response.data ?? []).map(member => member.userId).filter(Boolean);
+                if (!userIds.length) {
+                    this.toast.success('No members on the parent unit to copy.');
+                    return;
+                }
+                this.orgUnitStore.addMembers(
+                    userIds,
+                    () => this.toast.success('Members copied from parent unit.'),
+                    (error) => this.toast.error(error?.message || 'Unable to copy members from parent unit.'),
+                );
+            },
+            error: (error) => {
+                this.toast.error(error?.message || 'Unable to load parent members.');
+            },
+        });
+    }
+
     cancelAssignMembers(): void {
         this.assignMembersOpen.set(false);
     }
@@ -508,6 +538,31 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         this.assignRoleIds.set(currentRoles.map(role => role.id));
         this.assignRoleDraft.set(currentRoles);
         this.assignRolesOpen.set(true);
+    }
+
+    copyRolesFromParent(): void {
+        const selected = this.selectedOrgUnit();
+        const parentId = selected?.parentId ?? null;
+        if (!parentId) return;
+        if (!window.confirm('Copy roles from the parent unit?')) return;
+        this.orgUnitApi.getRoles(parentId, false).subscribe({
+            next: (response) => {
+                const roleIds = (response.data ?? []).map(role => role.roleId).filter(Boolean);
+                if (!roleIds.length) {
+                    this.toast.success('No roles on the parent unit to copy.');
+                    return;
+                }
+                this.orgUnitStore.assignRoles(
+                    roleIds,
+                    'inheritsDown',
+                    () => this.toast.success('Roles copied from parent unit.'),
+                    (error) => this.toast.error(error?.message || 'Unable to copy roles from parent unit.'),
+                );
+            },
+            error: (error) => {
+                this.toast.error(error?.message || 'Unable to load parent roles.');
+            },
+        });
     }
 
     cancelAssignRoles(): void {

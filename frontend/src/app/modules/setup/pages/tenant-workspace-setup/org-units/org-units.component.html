@@ -116,6 +116,10 @@
                                     (valueChange)="vm.orgUnitMemberSearch.set($event)"
                                     placeholder="Search members..."></mb-input>
                             </div>
+                            <mb-button class="ou-action-btn" variant="secondary"
+                                [disabled]="!vm.canCopyFromParent()"
+                                [attr.title]="vm.canCopyFromParent() ? null : 'Select a child unit to copy from its parent.'"
+                                (click)="vm.copyMembersFromParent()">Copy from parent</mb-button>
                             <mb-button class="ou-action-btn" variant="primary"
                                 [disabled]="!vm.users().length" (click)="vm.openAssignMembers()">Add
                                 members</mb-button>
@@ -176,6 +180,10 @@
                                     (valueChange)="vm.orgUnitRoleSearch.set($event)"
                                     placeholder="Search roles..."></mb-input>
                             </div>
+                            <mb-button class="ou-action-btn" variant="secondary"
+                                [disabled]="!vm.canCopyFromParent()"
+                                [attr.title]="vm.canCopyFromParent() ? null : 'Select a child unit to copy from its parent.'"
+                                (click)="vm.copyRolesFromParent()">Copy from parent</mb-button>
                             <mb-button class="ou-action-btn" variant="primary"
                                 (click)="vm.openAssignRoles()">Add roles</mb-button>
                         </div>
