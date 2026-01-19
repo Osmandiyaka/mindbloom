@@ -291,7 +291,7 @@
                 <span class="ou-tree__spacer" *ngIf="!node.children.length"></span>
                 <span class="ou-tree__indent"
                     *ngIf="depth > 0 && !node.children.length">›</span>
-                <span class="ou-tree__label">{{ node.name }}</span>
+                <span class="ou-tree__label" [attr.title]="node.name">{{ node.name }}</span>
                 <span class="ou-tree__badge" *ngIf="node.children.length">
                     {{ node.children.length }}
                 </span>

@@ -407,6 +407,7 @@
     grid-template-columns: 16px 12px 1fr auto;
     align-items: center;
     gap: 8px;
+    min-width: 0;
     border: 1px solid rgba(15, 23, 42, 0.08);
     background: transparent;
     padding: 0 12px 0 calc(12px + (var(--ou-depth, 0) * 16px));
@@ -464,6 +465,10 @@
 
 .ou-tree__label {
     font-weight: 500;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .ou-tree__node--child .ou-tree__label {
