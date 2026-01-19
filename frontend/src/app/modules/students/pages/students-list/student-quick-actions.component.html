@@ -1,0 +1,51 @@
+<div class="workflow-section">
+  <div class="workflow-header">
+    <div class="workflow-header-text">
+      <h3>Quick actions</h3>
+      @if (hasStudent) {
+        <span class="sr-only">For {{ studentName }}</span>
+      } @else {
+        <p class="workflow-meta">Select a student to enable actions.</p>
+      }
+    </div>
+    <div class="quick-actions-menu" [class.open]="menuOpen">
+      <mb-button size="sm" variant="tertiary" aria-label="Quick actions menu" (click)="toggleMenu.emit($event)">•••</mb-button>
+      <div class="quick-actions-menu-panel" *ngIf="menuOpen">
+        <div
+          class="quick-actions-menu-item"
+          *ngFor="let action of secondaryActions"
+          [appTooltip]="actionTooltip(action)"
+          tooltipPosition="left">
+          <mb-button
+            size="sm"
+            variant="tertiary"
+            [fullWidth]="true"
+            [disabled]="!isActionEnabled(action)"
+            (click)="runAction.emit(action)">
+            {{ action.label }}
+          </mb-button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="actions-list">
+    <div
+      class="quick-action"
+      *ngFor="let action of primaryActions"
+      [appTooltip]="actionTooltip(action)"
+      tooltipPosition="left">
+      <button
+        type="button"
+        class="quick-action__row"
+        [disabled]="!isActionEnabled(action)"
+        (click)="runAction.emit(action)">
+        <span class="quick-action__icon" aria-hidden="true">{{ action.icon }}</span>
+        <span class="quick-action__content">
+          <span class="quick-action__label">{{ action.label }}</span>
+          <span class="quick-action__helper" *ngIf="action.helper">{{ action.helper }}</span>
+        </span>
+        <span class="quick-action__chevron" aria-hidden="true">›</span>
+      </button>
+    </div>
+  </div>
+</div>

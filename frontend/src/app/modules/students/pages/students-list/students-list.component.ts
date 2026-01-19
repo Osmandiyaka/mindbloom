@@ -22,7 +22,8 @@ import {
   StudentNote,
   StudentStatus,
 } from '../../../../core/models/student.model';
-import { StudentFormComponent } from '../../../setup/pages/students/student-form/student-form.component';
+import { StudentCreateModalComponent } from './student-create-modal.component';
+import { StudentQuickActionsComponent } from './student-quick-actions.component';
 import { CanDirective } from '../../../../shared/security/can.directive';
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
 import { TooltipDirective } from '../../../../shared/directives/tooltip.directive';
@@ -91,7 +92,8 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
     MbDrawerComponent,
     MbInputComponent,
     MbTextareaComponent,
-    StudentFormComponent,
+    StudentCreateModalComponent,
+    StudentQuickActionsComponent,
     SearchInputComponent,
     CanDirective,
     TooltipDirective,
@@ -358,57 +360,17 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
             <p class="summary-empty">Select a student to see actions and timeline.</p>
           }
         </div>
-        <div class="workflow-section">
-          <div class="workflow-header">
-            <div class="workflow-header-text">
-              <h3>Quick actions</h3>
-              @if (panelStudent()) {
-                <span class="sr-only">For {{ panelStudent()?.fullName }}</span>
-              } @else {
-                <p class="workflow-meta">Select a student to enable actions.</p>
-              }
-            </div>
-            <div class="quick-actions-menu" [class.open]="quickActionsMenuOpen()">
-              <mb-button size="sm" variant="tertiary" aria-label="Quick actions menu" (click)="toggleQuickActionsMenu($event)">•••</mb-button>
-              <div class="quick-actions-menu-panel" *ngIf="quickActionsMenuOpen()">
-                <div
-                  class="quick-actions-menu-item"
-                  *ngFor="let action of secondaryQuickActions()"
-                  [appTooltip]="actionTooltip(action)"
-                  tooltipPosition="left">
-                  <mb-button
-                    size="sm"
-                    variant="tertiary"
-                    [fullWidth]="true"
-                    [disabled]="!isActionEnabled(action)"
-                    (click)="runQuickAction(action)">
-                    {{ action.label }}
-                  </mb-button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="actions-list">
-            <div
-              class="quick-action"
-              *ngFor="let action of primaryQuickActions()"
-              [appTooltip]="actionTooltip(action)"
-              tooltipPosition="left">
-              <button
-                type="button"
-                class="quick-action__row"
-                [disabled]="!isActionEnabled(action)"
-                (click)="runQuickAction(action)">
-                <span class="quick-action__icon" aria-hidden="true">{{ action.icon }}</span>
-                <span class="quick-action__content">
-                  <span class="quick-action__label">{{ action.label }}</span>
-                  <span class="quick-action__helper" *ngIf="action.helper">{{ action.helper }}</span>
-                </span>
-                <span class="quick-action__chevron" aria-hidden="true">›</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <app-student-quick-actions
+          [hasStudent]="!!panelStudent()"
+          [studentName]="panelStudent()?.fullName || ''"
+          [menuOpen]="quickActionsMenuOpen()"
+          [primaryActions]="primaryQuickActions()"
+          [secondaryActions]="secondaryQuickActions()"
+          [actionTooltip]="actionTooltipFn"
+          [isActionEnabled]="isActionEnabledFn"
+          (toggleMenu)="toggleQuickActionsMenu($event)"
+          (runAction)="runQuickAction($event)">
+        </app-student-quick-actions>
         <div class="workflow-section">
           <div class="workflow-header">
             <div class="workflow-header-text">
@@ -1155,67 +1117,15 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
         </div>
       </mb-modal>
 
-      <mb-modal
-        class="create-student-modal"
+      <app-student-create-modal
         [open]="createModalOpen()"
-        [closeable]="false"
         (closed)="closeCreateModal()"
-        [hasFooter]="true">
-        <div class="create-modal-body">
-          <div class="create-modal-header">
-            <div class="create-modal-header-text">
-              <div class="create-modal-title">
-                <span class="create-modal-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path
-                      d="M16 19v-1a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v1M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6M19 8v6M22 11h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </span>
-                <div>
-                  <h2>Add student</h2>
-                  <p>Create a student record. Enrollment and guardians are optional.</p>
-                  <p class="create-modal-helper">Fields marked * are required.</p>
-                </div>
-              </div>
-            </div>
-            <button type="button" class="create-modal-close" (click)="closeCreateModal()" aria-label="Close dialog">×</button>
-          </div>
-          <app-student-form
-            [embedded]="true"
-            (saved)="handleStudentCreated($event)"
-            (savedAndNew)="handleStudentCreatedAndContinue($event)"
-            (viewStudent)="openStudentFromCreate($event)">
-          </app-student-form>
-        </div>
-        <div mbModalFooter>
-          <div class="create-modal-footer">
-            <div class="footer-left">
-              <mb-button size="sm" variant="tertiary" (click)="closeCreateModal()">Cancel</mb-button>
-              <div class="footer-messages">
-                <div class="footer-hint">Changes are saved when you click Save.</div>
-                <div class="footer-status">
-                  @if (isCreateDirty()) {
-                  <span>Unsaved changes</span>
-                  }
-                </div>
-                @if (createSubmitHint()) {
-                <div class="footer-warning">{{ createSubmitHint() }}</div>
-                }
-              </div>
-            </div>
-            <div class="footer-actions">
-              <mb-button size="sm" variant="secondary" [disabled]="isCreateSubmitDisabled()" (click)="submitCreateStudent(true)">Save & add another</mb-button>
-              <mb-button size="sm" variant="primary" [disabled]="isCreateSubmitDisabled()" (click)="submitCreateStudent()">Save student</mb-button>
-            </div>
-          </div>
-        </div>
-      </mb-modal>
+        (save)="submitCreateStudent()"
+        (saveAndNew)="submitCreateStudent(true)"
+        (saved)="handleStudentCreated($event)"
+        (savedAndNewStudent)="handleStudentCreatedAndContinue($event)"
+        (viewStudent)="openStudentFromCreate($event)">
+      </app-student-create-modal>
 
       <mb-modal
         [open]="createRequestAccessOpen()"
@@ -1381,7 +1291,7 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
   `
 })
 export class StudentsListComponent implements OnInit {
-  @ViewChild(StudentFormComponent) studentForm?: StudentFormComponent;
+  @ViewChild(StudentCreateModalComponent) createModal?: StudentCreateModalComponent;
   @ViewChild(MbSplitButtonComponent) addStudentButton?: MbSplitButtonComponent;
 
   constructor(
@@ -1764,6 +1674,8 @@ export class StudentsListComponent implements OnInit {
 
   primaryQuickActions = computed(() => this.quickActions().filter((action) => action.primary));
   secondaryQuickActions = computed(() => this.quickActions().filter((action) => !action.primary));
+  readonly actionTooltipFn = (action: QuickAction) => this.actionTooltip(action);
+  readonly isActionEnabledFn = (action: QuickAction) => this.isActionEnabled(action);
 
   activityFilters = [
     { label: 'All', value: 'all' as ActivityFilter },
@@ -3091,7 +3003,7 @@ export class StudentsListComponent implements OnInit {
   }
 
   submitCreateStudent(saveAndNew: boolean = false): void {
-    void this.studentForm?.submit(saveAndNew);
+    this.createModal?.submit(saveAndNew);
   }
 
   handleStudentCreated(student: Student): void {
@@ -3154,64 +3066,15 @@ export class StudentsListComponent implements OnInit {
   }
 
   isCreateDirty(): boolean {
-    const form = this.studentForm;
-    if (!form) return false;
-    return Boolean(
-      form.personalInfoForm?.dirty
-      || form.enrollmentForm?.dirty
-      || form.guardiansForm?.dirty
-      || form.medicalForm?.dirty
-    );
+    return this.createModal?.isFormDirty() ?? false;
   }
 
   isCreateSubmitDisabled(): boolean {
-    const form = this.studentForm;
-    if (!form) return true;
-    const guardiansInvalid = form.guardianEnabled() && form.guardiansForm?.invalid;
-    const invalid = form.personalInfoForm?.invalid || form.enrollmentForm?.invalid || guardiansInvalid;
-    return Boolean(form.submitting() || invalid);
+    return this.createModal?.isFormSubmitDisabled() ?? true;
   }
 
   createSubmitHint(): string {
-    if (!this.createModalOpen() || !this.isCreateSubmitDisabled()) {
-      return '';
-    }
-    const form = this.studentForm;
-    if (!form) return '';
-    const missing: string[] = [];
-    const personal = form.personalInfoForm;
-    const enrollment = form.enrollmentForm;
-
-    const requiredChecks: Array<{ key: string; label: string }> = [
-      { key: 'firstName', label: 'First name' },
-      { key: 'lastName', label: 'Last name' },
-      { key: 'dateOfBirth', label: 'Date of birth' },
-      { key: 'gender', label: 'Gender' },
-      { key: 'email', label: 'Email' },
-      { key: 'phone', label: 'Phone' },
-    ];
-
-    requiredChecks.forEach(({ key, label }) => {
-      if (!form.isRequiredField(key)) return;
-      if (personal.get(key)?.hasError('required')) {
-        missing.push(label);
-      }
-    });
-
-    if (enrollment.get('enrollment.academicYear')?.hasError('required')) {
-      missing.push('Academic year');
-    }
-    if (enrollment.get('enrollment.admissionDate')?.hasError('required')) {
-      missing.push('Enrollment date');
-    }
-    if (enrollment.get('enrollment.class')?.hasError('required')) {
-      missing.push('Class');
-    }
-
-    if (missing.length) {
-      return `Missing: ${missing.join(', ')}.`;
-    }
-    return 'Complete required fields to enable save.';
+    return this.createModal?.buildSubmitHint() ?? '';
   }
 
   @HostListener('document:keydown', ['$event'])

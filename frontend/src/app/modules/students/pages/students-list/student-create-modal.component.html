@@ -1,0 +1,61 @@
+<mb-modal
+  class="create-student-modal"
+  [open]="open"
+  [closeable]="false"
+  (closed)="closed.emit()"
+  [hasFooter]="true">
+  <div class="create-modal-body">
+    <div class="create-modal-header">
+      <div class="create-modal-header-text">
+        <div class="create-modal-title">
+          <span class="create-modal-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M16 19v-1a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v1M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6M19 8v6M22 11h-6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          <div>
+            <h2>Add student</h2>
+            <p>Create a student record. Enrollment and guardians are optional.</p>
+            <p class="create-modal-helper">Fields marked * are required.</p>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="create-modal-close" (click)="closed.emit()" aria-label="Close dialog">×</button>
+    </div>
+    <app-student-form
+      [embedded]="true"
+      (saved)="saved.emit($event)"
+      (savedAndNew)="savedAndNewStudent.emit($event)"
+      (viewStudent)="viewStudent.emit($event)">
+    </app-student-form>
+  </div>
+  <div mbModalFooter>
+    <div class="create-modal-footer">
+      <div class="footer-left">
+        <mb-button size="sm" variant="tertiary" (click)="closed.emit()">Cancel</mb-button>
+        <div class="footer-messages">
+          <div class="footer-hint">Changes are saved when you click Save.</div>
+          <div class="footer-status">
+            @if (isFormDirty()) {
+            <span>Unsaved changes</span>
+            }
+          </div>
+          @if (buildSubmitHint()) {
+          <div class="footer-warning">{{ buildSubmitHint() }}</div>
+          }
+        </div>
+      </div>
+      <div class="footer-actions">
+        <mb-button size="sm" variant="secondary" [disabled]="isFormSubmitDisabled()" (click)="saveAndNew.emit()">Save & add another</mb-button>
+        <mb-button size="sm" variant="primary" [disabled]="isFormSubmitDisabled()" (click)="save.emit()">Save student</mb-button>
+      </div>
+    </div>
+  </div>
+</mb-modal>
