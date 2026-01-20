@@ -223,17 +223,21 @@
 
                     <div *ngIf="vm.activeOrgUnitTab() === 'roles'" class="ou-roles">
                         <div class="ou-toolbar">
-                            <div class="ou-search">
-                                <mb-input [value]="vm.orgUnitRoleSearch()"
-                                    (valueChange)="vm.orgUnitRoleSearch.set($event)"
-                                    placeholder="Search roles..."></mb-input>
+                            <div class="ou-toolbar__row">
+                                <div class="ou-toolbar__search">
+                                    <mb-input [value]="vm.orgUnitRoleSearch()"
+                                        (valueChange)="vm.orgUnitRoleSearch.set($event)"
+                                        placeholder="Search roles..."></mb-input>
+                                </div>
+                                <div class="ou-toolbar__actions">
+                                    <mb-button class="ou-action-btn" variant="secondary"
+                                        [disabled]="!vm.canCopyFromParent()"
+                                        [attr.title]="vm.canCopyFromParent() ? null : 'Select a child unit to copy from its parent.'"
+                                        (click)="vm.copyRolesFromParent()">Copy from parent</mb-button>
+                                    <mb-button class="ou-action-btn" variant="primary"
+                                        (click)="vm.openAssignRoles()">Add roles</mb-button>
+                                </div>
                             </div>
-                            <mb-button class="ou-action-btn" variant="secondary"
-                                [disabled]="!vm.canCopyFromParent()"
-                                [attr.title]="vm.canCopyFromParent() ? null : 'Select a child unit to copy from its parent.'"
-                                (click)="vm.copyRolesFromParent()">Copy from parent</mb-button>
-                            <mb-button class="ou-action-btn" variant="primary"
-                                (click)="vm.openAssignRoles()">Add roles</mb-button>
                         </div>
 
                         <div class="ou-assign" *ngIf="vm.assignRolesOpen()">
