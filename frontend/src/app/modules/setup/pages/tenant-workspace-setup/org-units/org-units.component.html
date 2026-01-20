@@ -225,9 +225,11 @@
                         <div class="ou-toolbar">
                             <div class="ou-toolbar__row">
                                 <div class="ou-toolbar__search">
-                                    <mb-input [value]="vm.orgUnitRoleSearch()"
-                                        (valueChange)="vm.orgUnitRoleSearch.set($event)"
-                                        placeholder="Search roles..."></mb-input>
+                                    <app-search-input
+                                        [value]="vm.orgUnitRoleSearch()"
+                                        (search)="vm.orgUnitRoleSearch.set($event)"
+                                        placeholder="Search roles">
+                                    </app-search-input>
                                 </div>
                                 <div class="ou-toolbar__actions">
                                     <mb-button class="ou-action-btn" variant="secondary"
