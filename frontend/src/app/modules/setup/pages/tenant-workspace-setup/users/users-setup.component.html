@@ -153,23 +153,6 @@
         </div>
     </div>
 
-    <div class="setup-footer">
-        <div class="setup-footer__actions">
-            <mb-button variant="secondary" (click)="back()">Back</mb-button>
-            <mb-button variant="primary" [disabled]="!vm.canContinueUsersStep()"
-                (click)="next()">Continue</mb-button>
-        </div>
-        <div class="setup-footer__aside">
-            <button type="button" class="setup-skip-link" (click)="skipUsersStep()">Skip for
-                now</button>
-            <div class="setup-footer__hint">You can continue setup without adding users.</div>
-            <div class="setup-footer__hint">You can resume later from Settings → Workspace
-                setup.</div>
-        </div>
-    </div>
-    <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are
-        saved automatically.</div>
-
     <app-invite-users-modal
         [isOpen]="vm.isInviteModalOpen()"
         [existingEmails]="vm.existingEmails()"

@@ -17,15 +17,15 @@
                 </p>
                 <div class="setup-complete__actions">
                     <mb-button variant="primary" (click)="vm.finish()">Go to dashboard</mb-button>
-                    <mb-button variant="secondary" (click)="vm.goToStep(1)">Review workspace
+                    <mb-button variant="secondary" (click)="navigateToSection('schools')">Review workspace
                         settings</mb-button>
-                    <mb-button variant="tertiary" (click)="vm.goToStep(2)">Invite users</mb-button>
+                    <mb-button variant="tertiary" (click)="navigateToSection('users')">Invite users</mb-button>
                 </div>
                 <div class="setup-complete__next">
                     <div class="setup-complete__next-title">Next steps</div>
                     <div class="setup-complete__next-links">
                         <a class="setup-complete__next-link" routerLink="/students">Enroll students</a>
-                        <button type="button" class="setup-complete__next-link" (click)="vm.goToStep(2)">Assign
+                        <button type="button" class="setup-complete__next-link" (click)="navigateToSection('org-units')">Assign
                             staff to schools</button>
                         <a class="setup-complete__next-link" routerLink="/academics">Set up timetables</a>
                     </div>

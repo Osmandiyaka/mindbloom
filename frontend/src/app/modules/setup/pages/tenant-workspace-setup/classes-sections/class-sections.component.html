@@ -301,20 +301,6 @@
         </div>
     </div>
 
-    <div class="setup-footer">
-        <div class="setup-footer__left">
-            <mb-button variant="secondary" (click)="setupVm.back()">Back</mb-button>
-        </div>
-        <div class="setup-footer__right">
-            <mb-button variant="primary" [disabled]="!setupVm.canContinue()"
-                (click)="setupVm.next()">Continue</mb-button>
-            <button type="button" class="setup-skip-link" (click)="setupVm.skipSetup()">Skip for
-                now</button>
-        </div>
-    </div>
-    <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are
-        saved automatically.</div>
-
     <mb-modal [open]="vm.classFormOpen()"
         [title]="vm.classFormMode() === 'add' ? 'Add class' : (vm.classFormMode() === 'edit' ? 'Edit class' : 'Class details')"
         size="md" [hasFooter]="true" (closed)="vm.requestCloseClassForm()">

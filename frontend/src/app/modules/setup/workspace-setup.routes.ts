@@ -41,11 +41,6 @@ export const WORKSPACE_SETUP_ROUTES: Routes = [
         loadComponent: () =>
           import('./pages/tenant-workspace-setup/grading/tenant-workspace-setup-grading.component').then(m => m.TenantWorkspaceSetupGradingComponent)
       },
-      {
-        path: 'review-activate',
-        loadComponent: () =>
-          import('./pages/tenant-workspace-setup/review/tenant-workspace-setup-review.component').then(m => m.TenantWorkspaceSetupReviewComponent)
-      }
     ]
   }
 ];

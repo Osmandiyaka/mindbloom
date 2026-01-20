@@ -39,17 +39,4 @@
         <button type="button" class="list-add" (click)="vm.addLevel()">Add level</button>
     </div>
 
-    <div class="setup-footer">
-        <div class="setup-footer__actions">
-            <mb-button variant="secondary" (click)="vm.back()">Back</mb-button>
-            <mb-button variant="primary" [disabled]="!vm.canContinue()"
-                (click)="vm.next()">Continue</mb-button>
-        </div>
-        <div class="setup-footer__aside">
-            <button type="button" class="setup-skip-link" (click)="vm.skipSetup()">Skip for
-                now</button>
-        </div>
-    </div>
-    <div class="setup-auto-save"><span aria-hidden="true">✓</span> Configuration changes are
-        saved automatically.</div>
 </div>

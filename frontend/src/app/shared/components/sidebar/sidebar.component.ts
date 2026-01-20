@@ -688,7 +688,6 @@ export class SidebarComponent implements OnInit {
             { label: 'Academic structure', path: '/workspace-setup/academic-structure', icon: 'academics', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
             { label: 'Classes & sections', path: '/workspace-setup/classes-sections', icon: 'assignment', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
             { label: 'Grading system', path: '/workspace-setup/grading-system', icon: 'check', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
-            { label: 'Review & activate', path: '/workspace-setup/review-activate', icon: 'spark', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
           ]
         },
         { label: 'Access control', path: '/roles', icon: 'settings', permission: PERMISSIONS.roles.read, moduleKey: 'setup' },

@@ -141,7 +141,7 @@ export class TenantPostLoginRouter {
             const isSkipped = setupProgram?.status === 'skipped' || !!setupProgram?.skippedAt;
 
             if (!isComplete && !isSkipped) {
-                await this.router.navigateByUrl('/setup/workspace');
+                await this.router.navigateByUrl('/workspace-setup');
                 return;
             }
         } catch {

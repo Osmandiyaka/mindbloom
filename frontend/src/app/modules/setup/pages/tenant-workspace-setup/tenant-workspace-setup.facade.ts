@@ -282,8 +282,7 @@ export class TenantWorkspaceSetupFacade {
         'Organizational units',
         'Academic structure',
         'Classes & sections',
-        'Grading system',
-        'Review & activate'
+        'Grading system'
     ];
 
     readonly isReviewStep = computed(() => this.step() === 7);
@@ -309,14 +308,6 @@ export class TenantWorkspaceSetupFacade {
     });
 
     readonly canContinueUsersStep = computed(() => this.users().length > 0 || this.usersStepSkipped());
-
-    readonly reviewReady = computed(() =>
-        this.schoolsValid()
-        && this.canContinueUsersStep()
-        && this.levels().length > 0
-        && this.classRows().length > 0
-        && this.sectionRows().length > 0
-    );
 
     readonly schoolsValid = computed(() => {
         const rows = this.schoolRows().filter(row => row.status === 'Active');

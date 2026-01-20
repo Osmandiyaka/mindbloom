@@ -531,7 +531,7 @@ export class StudentFormComponent implements OnInit {
     }
 
     openCreateSection(): void {
-        this.router.navigate(['/setup/workspace'], { queryParams: { step: 5 } });
+        this.router.navigate(['/workspace-setup', 'classes-sections']);
     }
 
     private reconcileClassSelection(): void {
