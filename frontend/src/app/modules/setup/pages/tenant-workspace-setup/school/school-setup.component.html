@@ -65,8 +65,8 @@
             </div>
         </div>
 
-        <div class="schools-card__body">
-            <div class="schools-bulk" *ngIf="selectedCount() > 0">
+            <div class="schools-card__body">
+                <div class="schools-bulk" *ngIf="selectedCount() > 0">
                 <div class="schools-bulk__label">{{ selectedCount() }} selected</div>
                 <div class="schools-bulk__actions">
                     <mb-button size="sm" variant="secondary" (click)="bulkArchive()">Archive</mb-button>
@@ -85,9 +85,17 @@
             </div>
 
             <div class="schools-table-wrap" *ngIf="filteredCount() > 0; else emptyState">
-            <mb-table class="schools-table" [class.is-compact]="density() === 'compact'"
-                [columns]="schoolTableColumns" [rows]="pagedSchools()" [rowKey]="rowKey" [rowClass]="rowClass"
-                [selectable]="true" [sortLocal]="false" (selectionChange)="handleSelectionChange($event)"
+            <mb-table
+                class="schools-table"
+                [density]="density()"
+                [class.is-compact]="density() === 'compact'"
+                [columns]="schoolTableColumns"
+                [rows]="pagedSchools()"
+                [rowKey]="rowKey"
+                [rowClass]="rowClass"
+                [selectable]="true"
+                [sortLocal]="false"
+                (selectionChange)="handleSelectionChange($event)"
                 (rowClick)="openDrawer($event)">
                 <ng-template mbTableActions let-row>
                     <div class="schools-table__actions">

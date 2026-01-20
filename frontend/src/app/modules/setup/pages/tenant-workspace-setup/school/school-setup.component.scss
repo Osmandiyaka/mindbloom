@@ -6,7 +6,8 @@
 
 .schools-page-body {
     background: var(--mb-color-bg);
-    padding: 48px 0;
+    padding: 48px 24px;
+    width: 100%;
 }
 
 .schools-card {
@@ -18,7 +19,7 @@
     display: flex;
     flex-direction: column;
     gap: 18px;
-    max-width: 1280px;
+    max-width: min(1600px, 100%);
     margin: 0 auto;
 }
 
@@ -225,8 +226,14 @@
     border-bottom: 1px solid var(--mb-color-border);
 }
 
-:host ::ng-deep .schools-table .mb-table__cell {
-    padding: 14px 12px;
+:host ::ng-deep .schools-table .mb-table:not(.mb-table--compact) .mb-table__cell {
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+:host ::ng-deep .schools-table .mb-table--compact .mb-table__cell {
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 :host ::ng-deep .schools-table .mb-table__cell-group {
