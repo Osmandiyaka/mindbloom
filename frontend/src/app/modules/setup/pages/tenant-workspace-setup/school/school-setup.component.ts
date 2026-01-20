@@ -154,7 +154,7 @@ export class TenantSchoolsComponent implements OnInit {
             label: 'School',
             cell: row => ({
                 primary: row.name,
-                secondary: `Code: ${row.code || '--'} | ${row.locationCountry || '--'}`,
+                secondary: `Code: ${row.code || '--'}`
             })
         },
         {

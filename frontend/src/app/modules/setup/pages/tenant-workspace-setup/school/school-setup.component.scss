@@ -1,1 +1,301 @@
 @use '../workspace-setup.shared.scss' as *;
+
+:host {
+    display: block;
+}
+
+.schools-page-body {
+    background: color-mix(in srgb, var(--mb-color-surface) 96%, #ffffff);
+}
+
+.schools-card {
+    background: var(--mb-color-surface);
+    border: 1px solid var(--mb-color-border-subtle);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 18px 32px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.schools-card__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.schools-header__main {
+    max-width: 560px;
+}
+
+.schools-header__main h2 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--mb-color-text);
+}
+
+.schools-header__main p {
+    margin: 0 0 12px;
+    color: var(--mb-color-text-muted);
+    font-size: 14px;
+}
+
+.schools-header__summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--mb-color-text-muted);
+    letter-spacing: 0.08em;
+}
+
+.schools-header__summary-divider {
+    color: var(--mb-color-border);
+}
+
+.schools-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.schools-header__add {
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.18);
+}
+
+.schools-header__menu {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--mb-color-border-subtle);
+    border-radius: 12px;
+    background: var(--mb-color-surface);
+    font-size: 18px;
+    color: var(--mb-color-text);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.schools-toolbar {
+    background: var(--mb-color-surface-2);
+    border: 1px solid var(--mb-color-border-subtle);
+    border-radius: 16px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.schools-toolbar__group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.schools-toolbar__group--right {
+    margin-left: auto;
+}
+
+.schools-toolbar__field {
+    min-width: 140px;
+}
+
+.schools-toolbar__field--search {
+    min-width: 260px;
+}
+
+:host ::ng-deep .schools-toolbar__field app-search-input .mb-input__field {
+    background: #ffffff;
+    border: 1px solid var(--mb-color-border-subtle);
+    border-radius: 12px;
+    min-height: 40px;
+}
+
+:host ::ng-deep .schools-toolbar__field app-search-input .mb-input__input {
+    font-size: 14px;
+    color: var(--mb-color-text);
+}
+
+:host ::ng-deep .schools-toolbar__field mb-select .mb-select__trigger {
+    min-height: 40px;
+    border-radius: 12px;
+    border: 1px solid var(--mb-color-border-subtle);
+    background: #ffffff;
+    font-size: 14px;
+}
+
+.schools-toolbar__field--count {
+    font-size: 13px;
+    color: var(--mb-color-text-muted);
+    text-align: right;
+}
+
+.schools-density {
+    display: inline-flex;
+    gap: 6px;
+    border: 1px solid var(--mb-color-border-subtle);
+    border-radius: 999px;
+    padding: 4px;
+    background: #ffffff;
+}
+
+.schools-density__button {
+    border: none;
+    background: transparent;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--mb-color-text-muted);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.schools-density__button.is-active {
+    background: color-mix(in srgb, var(--mb-color-primary) 12%, transparent);
+    color: var(--mb-color-primary);
+}
+
+.schools-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.schools-table-wrap {
+    background: #ffffff;
+    border: 1px solid var(--mb-color-border-subtle);
+    border-radius: 14px;
+    padding: 12px;
+}
+
+.schools-table {
+    width: 100%;
+}
+
+:host ::ng-deep .schools-table .mb-table table {
+    width: 100%;
+}
+
+:host ::ng-deep .schools-table .mb-table thead {
+    background: var(--mb-color-surface-2);
+    border-bottom: 1px solid var(--mb-color-border-subtle);
+}
+
+:host ::ng-deep .schools-table .mb-table thead th span {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--mb-color-text-muted);
+}
+
+:host ::ng-deep .schools-table .mb-table tbody tr {
+    border-bottom: 1px solid var(--mb-color-border-subtle);
+}
+
+:host ::ng-deep .schools-table .mb-table__cell {
+    padding: 16px 12px;
+}
+
+:host ::ng-deep .schools-table .mb-table__cell-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+:host ::ng-deep .schools-table .mb-table__cell-primary .mb-table__cell-text {
+    font-weight: 600;
+    color: var(--mb-color-text);
+}
+
+:host ::ng-deep .schools-table .mb-table__cell-secondary {
+    font-size: 13px;
+    color: var(--mb-color-text-muted);
+    letter-spacing: normal;
+}
+
+:host ::ng-deep .schools-table .mb-table__cell--status .mb-table__cell-text {
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--mb-color-primary) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--mb-color-primary) 60%, transparent);
+    font-size: 12px;
+    color: var(--mb-color-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 90px;
+    text-transform: capitalize;
+}
+
+:host ::ng-deep .schools-table .mb-table__cell--status.is-inactive .mb-table__cell-text {
+    background: color-mix(in srgb, var(--mb-color-border) 40%, transparent);
+    border-color: var(--mb-color-border-subtle);
+    color: var(--mb-color-text-muted);
+}
+
+.schools-table__actions button {
+    border-radius: 12px;
+    border: 1px solid var(--mb-color-border-subtle);
+    background: #ffffff;
+    width: 38px;
+    height: 38px;
+    position: relative;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    color: var(--mb-color-text-muted);
+}
+
+.schools-table__actions button:hover {
+    background: color-mix(in srgb, var(--mb-color-border) 30%, transparent);
+    color: var(--mb-color-text);
+}
+
+.schools-table__actions button:focus-visible {
+    outline: 2px solid var(--mb-color-primary);
+    outline-offset: 2px;
+}
+
+.schools-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--mb-color-text-muted);
+    flex-wrap: wrap;
+}
+
+.schools-pagination__controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.schools-pagination button {
+    border: 1px solid var(--mb-color-border-subtle);
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: var(--mb-color-text);
+}
+
+.schools-pagination__page.is-active {
+    background: var(--mb-color-primary);
+    color: #fff;
+}
+
+.schools-pagination__size {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}

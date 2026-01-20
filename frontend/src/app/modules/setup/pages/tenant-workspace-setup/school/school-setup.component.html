@@ -1,11 +1,15 @@
-<div class="setup-body" id="setup-step-content">
-    <div class="setup-section">
-        <div class="schools-header">
+<div class="setup-body schools-page-body" id="setup-step-content">
+    <div class="schools-card">
+        <div class="schools-card__header">
             <div class="schools-header__main">
                 <h2>Schools</h2>
                 <p>Manage the schools under your organization. You can add, edit, or deactivate schools at any time.</p>
                 <div class="schools-header__summary">
-                    {{ totalCount() }} schools - {{ activeCount() }} active - {{ archivedCount() }} archived
+                    <span>{{ totalCount() }} schools</span>
+                    <span class="schools-header__summary-divider" aria-hidden="true">•</span>
+                    <span>{{ activeCount() }} active</span>
+                    <span class="schools-header__summary-divider" aria-hidden="true">•</span>
+                    <span>{{ archivedCount() }} archived</span>
                 </div>
             </div>
             <div class="schools-header__actions">
@@ -31,14 +35,22 @@
             </div>
         </div>
 
-        <div class="schools-controls">
-            <div class="schools-controls__left">
-                <app-search-input [value]="searchQuery()" placeholder="Search schools..."
-                    (search)="handleSearch($event)"></app-search-input>
-                <mb-select ariaLabel="Filter by status" [options]="statusOptions" [value]="statusFilter()"
-                    (valueChange)="updateStatusFilter($event)"></mb-select>
-                <mb-select ariaLabel="Sort schools" [options]="sortOptions" [value]="sortBy()"
-                    (valueChange)="updateSort($event)"></mb-select>
+        <div class="schools-toolbar">
+            <div class="schools-toolbar__group">
+                <div class="schools-toolbar__field schools-toolbar__field--search">
+                    <app-search-input [value]="searchQuery()" placeholder="Search schools..."
+                        (search)="handleSearch($event)"></app-search-input>
+                </div>
+                <div class="schools-toolbar__field">
+                    <mb-select ariaLabel="Filter by status" [options]="statusOptions" [value]="statusFilter()"
+                        (valueChange)="updateStatusFilter($event)"></mb-select>
+                </div>
+                <div class="schools-toolbar__field">
+                    <mb-select ariaLabel="Sort schools" [options]="sortOptions" [value]="sortBy()"
+                        (valueChange)="updateSort($event)"></mb-select>
+                </div>
+            </div>
+            <div class="schools-toolbar__group schools-toolbar__group--right">
                 <div class="schools-density" role="group" aria-label="Table density">
                     <button type="button" class="schools-density__button"
                         [class.is-active]="density() === 'comfortable'" [attr.aria-pressed]="density() === 'comfortable'"
@@ -47,31 +59,32 @@
                         [class.is-active]="density() === 'compact'" [attr.aria-pressed]="density() === 'compact'"
                         (click)="toggleDensity('compact')">Compact</button>
                 </div>
-            </div>
-            <div class="schools-controls__right">
-                <div class="schools-controls__count">{{ filteredCount() }} results</div>
-            </div>
-        </div>
-
-        <div class="schools-bulk" *ngIf="selectedCount() > 0">
-            <div class="schools-bulk__label">{{ selectedCount() }} selected</div>
-            <div class="schools-bulk__actions">
-                <mb-button size="sm" variant="secondary" (click)="bulkArchive()">Archive</mb-button>
-                <mb-button size="sm" variant="tertiary" (click)="bulkExport()">Export</mb-button>
-                <button type="button" class="schools-bulk__menu" #bulkMenuOrigin
-                    aria-label="Bulk actions" (click)="toggleBulkMenu()">...</button>
-                <mb-popover [open]="bulkMenuOpen()" [origin]="bulkMenuOrigin" [hasBackdrop]="true"
-                    [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'schools-menu__panel']"
-                    (closed)="closeBulkMenu()">
-                    <div class="schools-menu__panel-content" role="menu">
-                        <button type="button" class="schools-menu__item schools-menu__item--danger"
-                            (click)="openBulkDelete()">Delete...</button>
-                    </div>
-                </mb-popover>
+                <div class="schools-toolbar__field schools-toolbar__field--count">
+                    {{ filteredCount() }} results
+                </div>
             </div>
         </div>
 
-        <div class="schools-table-wrap" *ngIf="filteredCount() > 0; else emptyState">
+        <div class="schools-card__body">
+            <div class="schools-bulk" *ngIf="selectedCount() > 0">
+                <div class="schools-bulk__label">{{ selectedCount() }} selected</div>
+                <div class="schools-bulk__actions">
+                    <mb-button size="sm" variant="secondary" (click)="bulkArchive()">Archive</mb-button>
+                    <mb-button size="sm" variant="tertiary" (click)="bulkExport()">Export</mb-button>
+                    <button type="button" class="schools-bulk__menu" #bulkMenuOrigin
+                        aria-label="Bulk actions" (click)="toggleBulkMenu()">...</button>
+                    <mb-popover [open]="bulkMenuOpen()" [origin]="bulkMenuOrigin" [hasBackdrop]="true"
+                        [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'schools-menu__panel']"
+                        (closed)="closeBulkMenu()">
+                        <div class="schools-menu__panel-content" role="menu">
+                            <button type="button" class="schools-menu__item schools-menu__item--danger"
+                                (click)="openBulkDelete()">Delete...</button>
+                        </div>
+                    </mb-popover>
+                </div>
+            </div>
+
+            <div class="schools-table-wrap" *ngIf="filteredCount() > 0; else emptyState">
             <mb-table class="schools-table" [class.is-compact]="density() === 'compact'"
                 [columns]="schoolTableColumns" [rows]="pagedSchools()" [rowKey]="rowKey" [rowClass]="rowClass"
                 [selectable]="true" [sortLocal]="false" (selectionChange)="handleSelectionChange($event)"
@@ -457,4 +470,5 @@
             </div>
         </mb-modal>
     </div>
+</div>
 </div>
