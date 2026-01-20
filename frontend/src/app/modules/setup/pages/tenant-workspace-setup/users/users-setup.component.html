@@ -1,30 +1,37 @@
 <div class="setup-body">
     <div class="setup-section">
         <div class="users-header users-header-card">
-            <div class="users-header__row users-header__row--title">
-                <div class="users-header__left">
+            <div class="users-header__main">
+                <div class="users-header__titles">
                     <h2>Users</h2>
                     <p>Add users who will access the workspace. You can invite now and assign roles
                         later.</p>
+                    <div class="users-header__meta">
+                        <span>{{ vm.usersSummary().total }} users</span>
+                        <span class="users-header__meta-divider" aria-hidden="true">•</span>
+                        <span>{{ vm.usersSummary().active }} active</span>
+                        <span class="users-header__meta-divider" aria-hidden="true">•</span>
+                        <span>{{ vm.usersSummary().invited }} invited</span>
+                    </div>
                 </div>
-                <div class="users-header__right">
+                <div class="users-header__actions">
                     <mb-button variant="secondary" size="sm">Export</mb-button>
                     <mb-split-button label="Add users" variant="primary" size="md"
                         [items]="vm.addUsersMenuItems()" (primaryClick)="vm.openInviteModal()"
                         (itemSelect)="vm.handleAddUsersAction($event, csvInput)"></mb-split-button>
                 </div>
             </div>
-            <div class="users-header__row users-header__row--filters">
-                <div class="users-header__search-row">
+            <div class="users-toolbar">
+                <div class="users-toolbar__left">
                     <app-search-input
-                        class="users-header__search"
+                        class="users-toolbar__search"
                         [value]="vm.store.userSearch()"
                         [debounceMs]="300"
                         placeholder="Search by name, email, or role…"
                         (search)="vm.store.setSearch($event)"
                     ></app-search-input>
                 </div>
-                <div class="users-header__right users-header__right--tools">
+                <div class="users-toolbar__right">
                     <div class="users-density">
                         <button type="button" class="users-density__button"
                             [class.is-active]="vm.density() === 'comfortable'"

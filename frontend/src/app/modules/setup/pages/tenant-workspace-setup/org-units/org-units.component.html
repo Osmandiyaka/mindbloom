@@ -1,12 +1,23 @@
 <div class="setup-body">
     <div class="setup-section">
         <div class="ou-header">
-            <div>
-                <h2>Organizational units</h2>
-                <p>Build a hierarchy of schools, divisions, and departments for access and reporting.</p>
+            <div class="ou-header__content">
+                <div class="ou-header__titles">
+                    <h2>Organizational units</h2>
+                    <p>Build a hierarchy of schools, divisions, and departments for access and reporting.</p>
+                    <div class="ou-header__meta">
+                        <span>Organization</span>
+                        <span class="ou-header__meta-divider" aria-hidden="true">•</span>
+                        <span>{{ vm.orgUnitSummary().total }} units</span>
+                        <span class="ou-header__meta-divider" aria-hidden="true">•</span>
+                        <span>{{ vm.orgUnitSummary().active }} active</span>
+                        <span class="ou-header__meta-divider" aria-hidden="true">•</span>
+                        <span>{{ vm.orgUnitSummary().inactive }} inactive</span>
+                    </div>
+                </div>
             </div>
             <div class="ou-header__actions">
-                <mb-button class="ou-action-btn" variant="secondary" (click)="vm.startAddChildUnit()">
+                <mb-button class="ou-action-btn" variant="primary" (click)="vm.startAddChildUnit()">
                     Add child unit
                 </mb-button>
                 <button
@@ -65,15 +76,15 @@
             <div class="ou-layout">
             <div class="ou-nav">
                 <div class="ou-nav__header">
-                    <div class="ou-nav__kicker">Organization</div>
-                    <div class="ou-nav__title-row">
+                    <div>
+                        <div class="ou-nav__kicker">Organization</div>
                         <div class="ou-nav__title">Units</div>
-                        <mb-button class="ou-nav__add" variant="tertiary"
-                            (click)="vm.startAddRootUnit()">
-                            <span class="ou-nav__add-icon" aria-hidden="true">+</span>
-                            <span>Add root unit</span>
-                        </mb-button>
                     </div>
+                    <mb-button class="ou-nav__add" variant="tertiary" size="sm"
+                        (click)="vm.startAddRootUnit()">
+                        <span class="ou-nav__add-icon" aria-hidden="true">+</span>
+                        <span>Add root unit</span>
+                    </mb-button>
                 </div>
 
                 <ng-container *ngIf="vm.orgUnitTree().length; else ouEmptyTree">
@@ -125,23 +136,28 @@
 
                     <div *ngIf="vm.activeOrgUnitTab() === 'members'" class="ou-members">
                         <div class="ou-toolbar">
-                            <div class="ou-search">
-                                <mb-input [value]="vm.orgUnitMemberSearch()"
-                                    (valueChange)="vm.orgUnitMemberSearch.set($event)"
-                                    placeholder="Search members..."></mb-input>
+                            <div class="ou-toolbar__row">
+                                <div class="ou-toolbar__search">
+                                    <app-search-input
+                                        [value]="vm.orgUnitMemberSearch()"
+                                        (search)="vm.orgUnitMemberSearch.set($event)"
+                                        placeholder="Search members">
+                                    </app-search-input>
+                                </div>
+                                <div class="ou-toolbar__actions">
+                                    <mb-button size="sm" variant="secondary" class="ou-toolbar__button"
+                                        [disabled]="!vm.canCopyFromParent()"
+                                        [attr.title]="vm.canCopyFromParent() ? null : 'Select a child unit to copy from its parent.'"
+                                        (click)="vm.copyMembersFromParent()">Copy from parent</mb-button>
+                                    <mb-button size="sm" variant="primary"
+                                        [disabled]="!vm.users().length" (click)="vm.openAssignMembers()">Add
+                                        members</mb-button>
+                                </div>
                             </div>
-                            <mb-button class="ou-action-btn" variant="secondary"
-                                [disabled]="!vm.canCopyFromParent()"
-                                [attr.title]="vm.canCopyFromParent() ? null : 'Select a child unit to copy from its parent.'"
-                                (click)="vm.copyMembersFromParent()">Copy from parent</mb-button>
-                            <mb-button class="ou-action-btn" variant="primary"
-                                [disabled]="!vm.users().length" (click)="vm.openAssignMembers()">Add
-                                members</mb-button>
+                            <div class="ou-toolbar__hint">
+                                Members assigned here inherit this unit’s access.
+                            </div>
                         </div>
-                        <div class="ou-toolbar__hint">
-                            Members assigned here inherit this unit’s access.
-                        </div>
-
                         <div class="ou-assign" *ngIf="vm.assignMembersOpen()">
                             <div class="ou-assign__title">Assign members</div>
                             <div class="ou-assign__selector">

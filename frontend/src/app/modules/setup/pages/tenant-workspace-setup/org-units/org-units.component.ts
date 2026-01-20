@@ -85,6 +85,16 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     readonly selectedOrgUnitMemberCount = computed(() => {
         return this.orgUnitStore.selectedCounts().membersCount;
     });
+    readonly orgUnitSummary = computed(() => {
+        const units = this.orgUnits();
+        const active = units.filter(unit => unit.status === 'Active').length;
+        const inactive = units.filter(unit => unit.status === 'Inactive').length;
+        return {
+            total: units.length,
+            active,
+            inactive,
+        };
+    });
     readonly staffSelectorOptions = computed(() => this.users()
         .map(user => ({
             id: user.id,

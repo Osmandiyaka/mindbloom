@@ -10,10 +10,32 @@
         (emptyAction)="handleEmptyAction($event)"
         (cellClick)="handleCellClick($event)">
         <ng-template mbTableActions let-row>
-            <button type="button" class="ou-row-action ou-row-action--subtle"
-                (click)="confirmRemove(row)">
-                Remove
-            </button>
+            <button
+                type="button"
+                class="ou-row-action"
+                #rowActionsOrigin
+                [attr.aria-label]="'Open actions for ' + (row.name || 'member')"
+                (click)="toggleRowMenu(row.id, $event)"
+            >⋯</button>
+            <mb-popover
+                [open]="actionsMenuOpenId() === row.id"
+                [origin]="rowActionsOrigin"
+                [hasBackdrop]="true"
+                [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'ou-row-actions-menu__panel']"
+                (closed)="closeRowMenu()"
+            >
+                <div class="ou-row-actions-menu" role="menu">
+                    <button type="button" class="ou-row-actions-menu__item"
+                        (click)="viewMemberProfile(row)">
+                        View profile
+                    </button>
+                    <button type="button"
+                        class="ou-row-actions-menu__item ou-row-actions-menu__item--danger"
+                        (click)="closeRowMenu(); confirmRemove(row)">
+                        Remove from unit
+                    </button>
+                </div>
+            </mb-popover>
         </ng-template>
     </mb-table>
 </div>

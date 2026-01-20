@@ -1,18 +1,18 @@
 .ou-members-table {
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    border-radius: 12px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 16px;
     background: #ffffff;
+    box-shadow: 0 12px 20px rgba(15, 23, 42, 0.08);
     overflow: hidden;
 }
 
 .ou-members-table__footer {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 12px;
-    margin-top: 12px;
+    justify-content: space-between;
+    padding: 12px 4px;
     font-size: 12px;
-    color: rgba(15, 23, 42, 0.7);
+    color: rgba(15, 23, 42, 0.65);
 }
 
 .ou-members-table__paging {
@@ -21,58 +21,111 @@
     gap: 8px;
 }
 
-:host ::ng-deep .ou-members-table__table .mb-table__cell[data-col='name'] {
-    font-weight: 600;
-}
-
-:host ::ng-deep .ou-members-table__table .mb-table__cell-secondary {
-    color: rgba(15, 23, 42, 0.6);
-}
-
 :host ::ng-deep .ou-members-table__table .mb-table table {
     width: 100%;
     table-layout: fixed;
+    border-collapse: collapse;
 }
 
-:host ::ng-deep .ou-members-table__table .mb-table td,
+:host ::ng-deep .ou-members-table__table .mb-table thead {
+    background: color-mix(in srgb, var(--mb-color-border) 10%, var(--mb-color-surface));
+}
+
 :host ::ng-deep .ou-members-table__table .mb-table th {
-    padding-left: 12px;
-    padding-right: 12px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(15, 23, 42, 0.65);
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.12);
 }
 
-:host ::ng-deep .ou-members-table__table .mb-table__actions {
-    width: 72px;
+:host ::ng-deep .ou-members-table__table .mb-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.05);
 }
 
-:host ::ng-deep .ou-members-table__table .mb-table__cell[data-col='name'] {
-    word-break: break-word;
+:host ::ng-deep .ou-members-table__table .mb-table tbody tr:hover {
+    background: rgba(15, 23, 42, 0.04);
 }
 
-:host ::ng-deep .ou-members-table__table .mb-table__cell--link .mb-table__cell-primary {
-    color: #0f766e;
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 2px;
+:host ::ng-deep .ou-members-table__table .mb-table__cell-primary {
+    font-weight: 600;
+    color: #0f172a;
 }
 
-:host ::ng-deep .ou-members-table__table .mb-table__cell--link {
-    cursor: pointer;
+:host ::ng-deep .ou-members-table__table .mb-table__cell-secondary {
+    font-size: 12px;
+    color: rgba(15, 23, 42, 0.55);
+}
+
+:host ::ng-deep .ou-members-table__table .mb-table__cell[data-col='status'] {
+    display: flex;
+    align-items: center;
+}
+
+:host ::ng-deep .ou-members-table__table .mb-table__cell[data-col='status'] .mb-table__cell-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 90px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #047857;
 }
 
 .ou-row-action {
-    border: 1px solid transparent;
-    background: transparent;
-    border-radius: 8px;
-    padding: 4px 8px;
-    font-size: 12px;
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(15, 23, 42, 0.2);
+    border-radius: 12px;
+    background: var(--mb-color-surface);
+    cursor: pointer;
+    color: var(--mb-color-text);
+    font-size: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.1s ease, background 0.1s ease;
+}
+
+.ou-row-action:hover {
+    border-color: rgba(15, 23, 42, 0.4);
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.ou-row-actions-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ou-row-actions-menu__item {
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 10px;
     cursor: pointer;
     color: var(--mb-color-text);
 }
 
-.ou-row-action:hover {
-    background: color-mix(in srgb, var(--mb-color-border) 20%, transparent);
+.ou-row-actions-menu__item:hover {
+    background: rgba(15, 23, 42, 0.04);
 }
 
-.ou-row-action--subtle:hover {
-    color: #dc2626;
+.ou-row-actions-menu__item--danger {
+    color: var(--mb-color-danger);
+}
+
+:host ::ng-deep .ou-row-actions-menu__panel .mb-popover {
+    border-radius: 14px;
+    padding: 6px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
+    background: #fff;
 }

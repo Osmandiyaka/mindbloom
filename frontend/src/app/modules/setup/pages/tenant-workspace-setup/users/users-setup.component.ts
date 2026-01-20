@@ -247,6 +247,14 @@ export class TenantUsersComponent implements OnInit {
         return `${label} • Filtered from ${total}`;
     });
 
+    readonly usersSummary = computed(() => {
+        const users = this.store.users();
+        const total = users.length;
+        const active = users.filter(user => user.status === 'active').length;
+        const invited = users.filter(user => user.status === 'invited').length;
+        return { total, active, invited };
+    });
+
     readonly canContinueUsersStep = computed(() =>
         this.store.users().some(item => item.kind === 'existing') || this.usersStepSkipped()
     );

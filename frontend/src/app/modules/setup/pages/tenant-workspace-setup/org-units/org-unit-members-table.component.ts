@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MbButtonComponent, MbTableActionsDirective, MbTableColumn, MbTableComponent, MbTableEmptyState } from '@mindbloom/ui';
+import { MbButtonComponent, MbPopoverComponent, MbTableActionsDirective, MbTableColumn, MbTableComponent, MbTableEmptyState } from '@mindbloom/ui';
 import { OrgUnitMemberDto } from '../../../../../core/services/org-unit-api.service';
 import { OrgUnitStore } from './org-unit.store';
 
@@ -17,7 +17,7 @@ type OrgUnitMemberRow = {
 @Component({
     selector: 'app-org-unit-members-table',
     standalone: true,
-    imports: [CommonModule, MbTableComponent, MbTableActionsDirective, MbButtonComponent],
+    imports: [CommonModule, MbTableComponent, MbTableActionsDirective, MbButtonComponent, MbPopoverComponent],
     templateUrl: './org-unit-members-table.component.html',
     styleUrls: ['./org-unit-members-table.component.scss'],
 })
@@ -41,6 +41,7 @@ export class OrgUnitMembersTableComponent {
     @Output() addMembers = new EventEmitter<void>();
 
     pageIndex = signal(1);
+    actionsMenuOpenId = signal<string | null>(null);
     private readonly rowsPerPage = 8;
 
     readonly isLoading = computed(() => this.store.membersLoading());
@@ -168,7 +169,28 @@ export class OrgUnitMembersTableComponent {
 
     handleCellClick(event: { row: OrgUnitMemberRow; column: MbTableColumn<OrgUnitMemberRow> }): void {
         if (String(event.column.key) !== 'name') return;
-        const query = event.row.email || event.row.name;
+        this.viewMemberProfile(event.row);
+    }
+
+    confirmRemove(row: OrgUnitMemberRow): void {
+        const label = row.name || row.email || 'this member';
+        if (!window.confirm(`Remove ${label} from this unit?`)) return;
+        this.store.removeMember(row.id);
+    }
+
+    toggleRowMenu(rowId: string, event?: MouseEvent): void {
+        event?.stopPropagation();
+        const next = this.actionsMenuOpenId() === rowId ? null : rowId;
+        this.actionsMenuOpenId.set(next);
+    }
+
+    closeRowMenu(): void {
+        this.actionsMenuOpenId.set(null);
+    }
+
+    viewMemberProfile(row: OrgUnitMemberRow): void {
+        this.closeRowMenu();
+        const query = row.email || row.name;
         this.router.navigate([], {
             relativeTo: this.route,
             queryParams: {
@@ -177,11 +199,5 @@ export class OrgUnitMembersTableComponent {
             },
             queryParamsHandling: 'merge',
         });
-    }
-
-    confirmRemove(row: OrgUnitMemberRow): void {
-        const label = row.name || row.email || 'this member';
-        if (!window.confirm(`Remove ${label} from this unit?`)) return;
-        this.store.removeMember(row.id);
     }
 }
