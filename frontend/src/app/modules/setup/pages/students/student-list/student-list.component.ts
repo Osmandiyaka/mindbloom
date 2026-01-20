@@ -26,6 +26,7 @@ export class StudentListComponent implements OnInit {
 
     // View mode
     viewMode = signal<'table' | 'cards'>('table');
+    selectedStudentId = signal<string | undefined>(undefined);
 
     // Computed
     filteredStudents = computed(() => {
@@ -129,6 +130,10 @@ export class StudentListComponent implements OnInit {
             [StudentStatus.SUSPENDED]: 'badge-danger',
         };
         return classes[status] || 'badge-secondary';
+    }
+
+    selectStudent(student: Student): void {
+        this.selectedStudentId.set(student.id);
     }
 
     getAge(dateOfBirth: Date): number {

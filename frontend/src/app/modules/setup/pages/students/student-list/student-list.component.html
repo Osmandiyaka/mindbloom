@@ -109,7 +109,13 @@
             </thead>
             <tbody>
                 @for (student of students(); track student.id) {
-                <tr>
+                <tr
+                    role="button"
+                    tabindex="0"
+                    [class.is-active]="selectedStudentId() === student.id"
+                    (click)="selectStudent(student)"
+                    (keydown.enter)="selectStudent(student)"
+                    (keydown.space)="selectStudent(student); $event.preventDefault()">
                     <td>
                         <div class="student-avatar">
                             @if (student.photo) {
@@ -149,13 +155,13 @@
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-sm btn-icon" (click)="viewStudent(student.id)" title="View">
+                            <button class="btn btn-sm btn-icon" (click)="viewStudent(student.id); $event.stopPropagation()" title="View">
                                 <i class="icon-eye"></i>
                             </button>
-                            <button class="btn btn-sm btn-icon" (click)="editStudent(student.id)" title="Edit">
+                            <button class="btn btn-sm btn-icon" (click)="editStudent(student.id); $event.stopPropagation()" title="Edit">
                                 <i class="icon-edit"></i>
                             </button>
-                            <button class="btn btn-sm btn-icon btn-danger" (click)="deleteStudent(student)"
+                            <button class="btn btn-sm btn-icon btn-danger" (click)="deleteStudent(student); $event.stopPropagation()"
                                 title="Delete">
                                 <i class="icon-trash"></i>
                             </button>
