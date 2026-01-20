@@ -2,11 +2,6 @@ import { Routes } from '@angular/router';
 
 export const SETUP_ROUTES: Routes = [
     {
-        path: 'workspace',
-        loadComponent: () =>
-            import('./pages/tenant-workspace-setup/tenant-workspace-setup.component').then(m => m.TenantWorkspaceSetupComponent)
-    },
-    {
         path: '',
         loadComponent: () => import('./pages/setup-overview/setup-overview.component').then(m => m.SetupOverviewComponent)
     },

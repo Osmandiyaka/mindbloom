@@ -9,7 +9,7 @@ import { SchoolContextService } from '../../../../../core/school/school-context.
     standalone: true,
     imports: [...TENANT_WORKSPACE_SETUP_IMPORTS],
     templateUrl: './class-sections.component.html',
-    styleUrls: ['../tenant-workspace-setup.component.scss', './class-sections.component.scss']
+    styleUrls: ['../workspace-setup.shared.scss', './class-sections.component.scss']
 })
 export class TenantWorkspaceSetupClassesSectionsComponent implements OnInit {
     readonly vm = inject(ClassesSectionsFacade);

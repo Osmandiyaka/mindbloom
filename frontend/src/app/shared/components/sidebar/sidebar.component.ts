@@ -64,29 +64,88 @@ import { NavFilterService, NavItem, NavSection } from '../../services/nav-filter
       <nav class="sidebar-nav" *ngIf="navReady(); else navLoading">
         <section class="nav-section" *ngFor="let section of filteredNavSections()">
           <header class="nav-section-title" *ngIf="!collapsed">{{ section.title }}</header>
-          <div class="nav-card">
+      <div class="nav-card">
             <ng-container *ngFor="let item of section.items">
-              <a
-                class="nav-link"
-                [class.is-locked]="item.locked"
-                [routerLink]="item.locked ? null : item.path"
-                routerLinkActive="active"
-                #rla="routerLinkActive"
-                [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
-                [attr.aria-current]="rla.isActive ? 'page' : null"
-                [attr.aria-disabled]="item.locked ? 'true' : null"
-                (click)="onNavItemClick($event, item)">
-                <span class="nav-link-icon" [innerHTML]="icon(item.icon)"></span>
-                <span class="nav-link-text" *ngIf="!collapsed">{{ item.label }}</span>
-                <span class="nav-meta" *ngIf="!collapsed"></span>
-                <span class="nav-lock" *ngIf="item.locked && !collapsed" [attr.title]="lockTooltip(item)">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="3" y="11" width="18" height="10" rx="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                  </svg>
-                </span>
-                <span class="nav-badge" *ngIf="item.badge && !collapsed">{{ item.badge }}</span>
-              </a>
+              <ng-container *ngIf="!item.children?.length; else parentNav">
+                <a
+                  class="nav-link"
+                  [class.is-locked]="item.locked"
+                  [routerLink]="item.locked ? null : item.path"
+                  routerLinkActive="active"
+                  #rla="routerLinkActive"
+                  [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
+                  [attr.aria-current]="rla.isActive ? 'page' : null"
+                  [attr.aria-disabled]="item.locked ? 'true' : null"
+                  (click)="onNavItemClick($event, item)">
+                  <span class="nav-link-icon" [innerHTML]="icon(item.icon)"></span>
+                  <span class="nav-link-text" *ngIf="!collapsed">{{ item.label }}</span>
+                  <span class="nav-meta" *ngIf="!collapsed"></span>
+                  <span class="nav-lock" *ngIf="item.locked && !collapsed" [attr.title]="lockTooltip(item)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                  </span>
+                  <span class="nav-badge" *ngIf="item.badge && !collapsed">{{ item.badge }}</span>
+                </a>
+              </ng-container>
+              <ng-template #parentNav>
+                <div class="nav-parent" [class.active-parent]="isActiveParent(item)">
+                  <button
+                    type="button"
+                    class="nav-parent-toggle"
+                    (click)="toggleNavGroup(item, $event)"
+                    [attr.aria-expanded]="isExpanded(item)"
+                    [attr.aria-controls]="parentChildrenId(item)"
+                    [attr.aria-label]="'Toggle ' + item.label + ' menu'"
+                    *ngIf="!collapsed"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 10l4 4 4-4"></path>
+                    </svg>
+                  </button>
+                  <a
+                    class="nav-link nav-link--parent"
+                    [class.is-locked]="item.locked"
+                    [routerLink]="item.locked ? null : item.path"
+                    [attr.aria-current]="isActiveParent(item) ? 'page' : null"
+                    [attr.aria-disabled]="item.locked ? 'true' : null"
+                    (click)="onNavItemClick($event, item)"
+                  >
+                    <span class="nav-link-icon" [innerHTML]="icon(item.icon)"></span>
+                    <span class="nav-link-text" *ngIf="!collapsed">{{ item.label }}</span>
+                    <span class="nav-lock" *ngIf="item.locked && !collapsed" [attr.title]="lockTooltip(item)">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                    </span>
+                  </a>
+                </div>
+                <div class="nav-children" *ngIf="isExpanded(item) && !collapsed" [id]="parentChildrenId(item)">
+                  <a
+                    *ngFor="let child of item.children"
+                    class="nav-link nav-link--child"
+                    [class.is-locked]="child.locked"
+                    [routerLink]="child.locked ? null : child.path"
+                    routerLinkActive="active"
+                    #childRla="routerLinkActive"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    [attr.aria-current]="childRla.isActive ? 'page' : null"
+                    [attr.aria-disabled]="child.locked ? 'true' : null"
+                    (click)="onNavItemClick($event, child)"
+                  >
+                    <span class="nav-link-icon" [innerHTML]="icon(child.icon)"></span>
+                    <span class="nav-link-text">{{ child.label }}</span>
+                    <span class="nav-lock" *ngIf="child.locked" [attr.title]="lockTooltip(child)">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                    </span>
+                  </a>
+                </div>
+              </ng-template>
             </ng-container>
           </div>
         </section>
@@ -246,6 +305,73 @@ import { NavFilterService, NavItem, NavSection } from '../../services/nav-filter
       display: grid;
       gap: 4px;
       padding: 0;
+    }
+
+    .nav-parent {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-parent-toggle {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: color 0.2s ease;
+    }
+
+    .nav-parent-toggle svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      transition: transform 0.2s ease;
+    }
+
+    .nav-parent-toggle[aria-expanded="true"] svg {
+      transform: rotate(180deg);
+    }
+
+    .nav-parent-toggle:hover {
+      color: var(--text-primary);
+    }
+
+    .nav-parent.active-parent .nav-parent-toggle {
+      color: var(--accent-primary);
+    }
+
+    .nav-link--parent {
+      width: 100%;
+      padding-left: 0.25rem;
+    }
+
+    .nav-children {
+      display: grid;
+      gap: 4px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+      margin-left: 38px;
+      padding-left: 4px;
+    }
+
+    .nav-link--child {
+      padding-left: 0.25rem;
+      font-size: 13px;
+    }
+
+    .nav-link--child .nav-link-icon {
+      opacity: 0.7;
+      min-width: 16px;
+    }
+
+    .sidebar.sidebar-collapsed .nav-parent-toggle {
+      display: none;
     }
 
     .nav-link {
@@ -549,7 +675,22 @@ export class SidebarComponent implements OnInit {
     {
       title: 'System',
       items: [
-        { label: 'Workspace Setup', path: '/setup/workspace', icon: 'dashboard', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
+        {
+          label: 'Workspace Setup',
+          path: '/workspace-setup',
+          icon: 'dashboard',
+          permission: PERMISSIONS.setup.read,
+          moduleKey: 'setup',
+          children: [
+            { label: 'Schools', path: '/workspace-setup/schools', icon: 'students', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
+            { label: 'Users', path: '/workspace-setup/users', icon: 'briefcase', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
+            { label: 'Organizational units', path: '/workspace-setup/org-units', icon: 'collection', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
+            { label: 'Academic structure', path: '/workspace-setup/academic-structure', icon: 'academics', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
+            { label: 'Classes & sections', path: '/workspace-setup/classes-sections', icon: 'assignment', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
+            { label: 'Grading system', path: '/workspace-setup/grading-system', icon: 'check', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
+            { label: 'Review & activate', path: '/workspace-setup/review-activate', icon: 'spark', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
+          ]
+        },
         { label: 'Access control', path: '/roles', icon: 'settings', permission: PERMISSIONS.roles.read, moduleKey: 'setup' },
         { label: 'Plan & Entitlements', path: '/setup/plan-entitlements', icon: 'expenses', permission: PERMISSIONS.setup.read, moduleKey: 'setup' },
 
@@ -560,6 +701,8 @@ export class SidebarComponent implements OnInit {
     },
 
   ];
+
+  expandedParents = new Set<string>();
 
   // Host-specific navigation
   hostNavSections: NavSection[] = [
@@ -728,6 +871,45 @@ export class SidebarComponent implements OnInit {
       return item.requiredPlan ? `Requires ${item.requiredPlan}+` : 'Requires a higher plan';
     }
     return 'Locked';
+  }
+
+  isExpanded(item: NavItem): boolean {
+    if (!item.children?.length) {
+      return false;
+    }
+    return this.expandedParents.has(item.path) || this.isActiveParent(item);
+  }
+
+  toggleNavGroup(item: NavItem, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    if (this.expandedParents.has(item.path)) {
+      this.expandedParents.delete(item.path);
+    } else {
+      this.expandedParents.add(item.path);
+    }
+  }
+
+  isActiveParent(item: NavItem): boolean {
+    if (!item.children?.length) {
+      return false;
+    }
+    const normalizedUrl = this.normalizeUrl(this.router.url);
+    return item.children.some(child => this.isUrlMatch(child.path, normalizedUrl));
+  }
+
+  parentChildrenId(item: NavItem): string {
+    return `nav-children-${item.path.replace(/[^a-zA-Z0-9]/g, '-')}`;
+  }
+
+  private normalizeUrl(url: string): string {
+    const trimmed = url.split('?')[0];
+    return trimmed.replace(/\/+$/, '') || '/';
+  }
+
+  private isUrlMatch(path: string, url: string): boolean {
+    const normalizedPath = this.normalizeUrl(path);
+    return normalizedPath === url || url.startsWith(`${normalizedPath}/`);
   }
 
   get isHostSidebar(): boolean {

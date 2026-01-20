@@ -7,7 +7,7 @@ import { TenantWorkspaceSetupFacade } from '../tenant-workspace-setup.facade';
     standalone: true,
     imports: [...TENANT_WORKSPACE_SETUP_IMPORTS],
     templateUrl: './tenant-workspace-setup-levels.component.html',
-    styleUrls: ['../tenant-workspace-setup.component.scss']
+    styleUrls: ['../workspace-setup.shared.scss']
 })
 export class TenantWorkspaceSetupLevelsComponent {
     readonly vm = inject(TenantWorkspaceSetupFacade);

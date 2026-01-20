@@ -187,6 +187,12 @@ export const routes: Routes = [
                 data: { moduleKey: 'setup', permissions: ['setup:read'] }
             },
             {
+                path: 'workspace-setup',
+                loadChildren: () => import('./modules/setup/workspace-setup.routes').then(m => m.WORKSPACE_SETUP_ROUTES),
+                canMatch: [moduleEntitlementGuard, permissionMatchGuard],
+                data: { moduleKey: 'setup', permissions: ['setup:read'] }
+            },
+            {
                 path: 'plugins',
                 loadChildren: () => import('./modules/plugins/plugins.routes').then(m => m.PLUGINS_ROUTES),
                 canMatch: [moduleEntitlementGuard],

@@ -165,6 +165,58 @@ describe('NavFilterService', () => {
             expect(filtered[1].items.length).toBe(1); // Only Students (admissions filtered by permission)
             expect(filtered[1].items[0].label).toBe('Students');
         });
+
+        it('should include parent item when children pass filters', () => {
+            entitlementsService.isEnabled.and.returnValue(true);
+            authorizationService.can.and.returnValue(true);
+
+            const sections: NavSection[] = [
+                {
+                    title: 'System',
+                    items: [
+                        {
+                            label: 'Workspace Setup',
+                            path: '/workspace-setup',
+                            icon: 'dashboard',
+                            children: [
+                                { label: 'Schools', path: '/workspace-setup/schools', icon: 'school', moduleKey: 'setup', permission: 'setup:read' }
+                            ]
+                        }
+                    ]
+                }
+            ];
+
+            const filtered = service.filterNavigationSync(sections);
+
+            expect(filtered.length).toBe(1);
+            expect(filtered[0].items[0].children?.length).toBe(1);
+            expect(filtered[0].items[0].children?.[0].label).toBe('Schools');
+        });
+
+        it('should drop parent item when all children filtered out', () => {
+            entitlementsService.isEnabled.and.returnValue(false);
+            authorizationService.can.and.returnValue(true);
+
+            const sections: NavSection[] = [
+                {
+                    title: 'System',
+                    items: [
+                        {
+                            label: 'Workspace Setup',
+                            path: '/workspace-setup',
+                            icon: 'dashboard',
+                            children: [
+                                { label: 'Schools', path: '/workspace-setup/schools', icon: 'school', moduleKey: 'setup', permission: 'setup:read' }
+                            ]
+                        }
+                    ]
+                }
+            ];
+
+            const filtered = service.filterNavigationSync(sections);
+
+            expect(filtered.length).toBe(0);
+        });
     });
 
     describe('isModuleVisible', () => {

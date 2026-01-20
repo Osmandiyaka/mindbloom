@@ -26,6 +26,7 @@ export interface NavItem {
     locked?: boolean;
     lockReason?: LockReason;
     requiredPlan?: string;
+    children?: NavItem[];
 }
 
 export interface NavSection {
@@ -78,6 +79,21 @@ export class NavFilterService {
      * @returns true if item should be visible
      */
     private decorateItem(item: NavItem): NavItem | null {
+        if (item.children?.length) {
+            const decoratedChildren = item.children
+                .map(child => this.decorateItem(child))
+                .filter((child): child is NavItem => Boolean(child));
+
+            if (decoratedChildren.length === 0) {
+                return null;
+            }
+
+            return {
+                ...item,
+                children: decoratedChildren,
+            };
+        }
+
         const moduleEnabled = !item.moduleKey || this.entitlements.isEnabled(item.moduleKey as ModuleKey);
         const permissionOk = !item.permission || this.authorization.can(item.permission);
 
