@@ -80,7 +80,7 @@ export const reorderClassesSchema = z.object({
 export const createSectionSchema = z.object({
     tenantId: idSchema,
     classId: idSchema,
-    schoolId: idSchema,
+    schoolId: idSchema.optional(),
     name: z.string().min(1),
     code: z.string().optional(),
     capacity: z.number().int().nonnegative().optional().nullable(),
@@ -91,7 +91,6 @@ export const createSectionSchema = z.object({
 export const updateSectionSchema = z.object({
     tenantId: idSchema,
     sectionId: idSchema,
-    schoolId: idSchema.optional(),
     name: z.string().optional(),
     code: z.string().optional().nullable(),
     capacity: z.number().int().nonnegative().optional().nullable(),
@@ -103,7 +102,6 @@ export const updateSectionSchema = z.object({
 export const listSectionsByClassSchema = z.object({
     tenantId: idSchema,
     classId: idSchema,
-    schoolId: idSchema.optional(),
     status: statusSchema.optional(),
     search: z.string().optional(),
     page: z.number().int().optional(),

@@ -41,7 +41,6 @@ export type SectionDto = {
     id: string;
     tenantId: string;
     classId: string;
-    schoolId: string;
     academicYearId?: string | null;
     name: string;
     code?: string | null;
@@ -81,7 +80,6 @@ export type ListClassesParams = {
 };
 
 export type ListSectionsParams = {
-    schoolId?: string;
     status?: 'active' | 'archived';
     search?: string;
     page?: number;
@@ -128,7 +126,6 @@ export type ReorderClassesRequest = {
 
 export type CreateSectionRequest = {
     name: string;
-    schoolId: string;
     code?: string | null;
     capacity?: number | null;
     sortOrder?: number;
@@ -136,7 +133,6 @@ export type CreateSectionRequest = {
 
 export type UpdateSectionRequest = {
     name?: string;
-    schoolId?: string;
     code?: string | null;
     capacity?: number | null;
     sortOrder?: number;

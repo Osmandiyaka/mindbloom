@@ -1,7 +1,7 @@
 export type CreateSectionInput = {
     tenantId: string;
     classId: string;
-    schoolId: string;
+    schoolId?: string;
     name: string;
     code?: string;
     capacity?: number | null;
@@ -12,7 +12,6 @@ export type CreateSectionInput = {
 export type UpdateSectionInput = {
     tenantId: string;
     sectionId: string;
-    schoolId?: string;
     name?: string;
     code?: string | null;
     capacity?: number | null;
@@ -24,7 +23,6 @@ export type UpdateSectionInput = {
 export type ListSectionsByClassInput = {
     tenantId: string;
     classId: string;
-    schoolId?: string;
     status?: 'active' | 'archived';
     search?: string;
     page?: number;

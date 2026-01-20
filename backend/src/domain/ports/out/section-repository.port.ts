@@ -3,7 +3,6 @@ import { PaginatedResult, PaginationInput } from './class-repository.port';
 
 export type SectionListFilters = {
     classId?: string;
-    schoolId?: string;
     status?: 'active' | 'archived';
     search?: string;
 };
@@ -18,11 +17,9 @@ export interface ISectionRepository {
     existsActiveByNameScope(input: {
         tenantId: string;
         classId: string;
-        schoolId: string;
         normalizedName: string;
         excludeId?: string;
     }): Promise<boolean>;
-    listSchoolIdsByClass(tenantId: string, classId: string): Promise<string[]>;
     archiveByClassId(tenantId: string, classId: string): Promise<number>;
     restoreByClassId(tenantId: string, classId: string): Promise<number>;
 }

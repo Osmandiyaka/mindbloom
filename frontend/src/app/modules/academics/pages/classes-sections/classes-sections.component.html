@@ -200,13 +200,7 @@
                 <div class="sections-toolbar">
                     <app-search-input [value]="vm.sectionsFilters().search || ''" placeholder="Search sections..."
                         (search)="updateSectionSearch($event)"></app-search-input>
-                    <div class="sections-toolbar__filters" *ngIf="sectionSchoolOptions().length">
-                        <mb-select class="classes-filter__select" id="section-school-filter"
-                            [value]="vm.sectionsFilters().schoolId || 'all'"
-                            (valueChange)="updateSectionSchoolFilter($event)">
-                            <option value="all">All schools</option>
-                            <option *ngFor="let school of sectionSchoolOptions()" [value]="school.id">{{ school.name }}</option>
-                        </mb-select>
+                    <div class="sections-toolbar__filters">
                         <mb-select class="classes-filter__select" id="section-status-filter"
                             [value]="vm.sectionsFilters().status || 'all'"
                             (valueChange)="updateSectionStatusFilter($event)">
@@ -223,7 +217,6 @@
 
                 <app-sections-table
                     [rows]="vm.sections()"
-                    [schoolNames]="schoolNames()"
                     [isLoading]="vm.sectionsLoading()"
                     [isError]="!!vm.sectionsError()"
                     [isFiltered]="sectionsFiltered()"
@@ -317,11 +310,6 @@
         </mb-form-field>
         <mb-form-field label="Section code" [controlId]="'section-code'">
             <mb-input id="section-code" [value]="sectionForm().code" (valueChange)="updateSectionCode($event)"></mb-input>
-        </mb-form-field>
-        <mb-form-field label="School" [controlId]="'section-school'" [required]="true" *ngIf="sectionSchoolOptions().length">
-            <mb-select id="section-school" [value]="sectionForm().schoolId" (valueChange)="updateSectionSchool($event)">
-                <option *ngFor="let school of sectionSchoolOptions()" [value]="school.id">{{ school.name }}</option>
-            </mb-select>
         </mb-form-field>
         <mb-form-field label="Capacity" [controlId]="'section-capacity'">
             <mb-input id="section-capacity" type="number" [value]="sectionForm().capacity" placeholder="Optional"

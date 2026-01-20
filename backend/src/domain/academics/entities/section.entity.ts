@@ -2,7 +2,6 @@ export type SectionProps = {
     id: string;
     tenantId: string;
     classId: string;
-    schoolId: string;
     academicYearId?: string;
     name: string;
     normalizedName: string;
@@ -28,10 +27,6 @@ export class SectionEntity {
 
     get classId(): string {
         return this.props.classId;
-    }
-
-    get schoolId(): string {
-        return this.props.schoolId;
     }
 
     get academicYearId(): string | undefined {

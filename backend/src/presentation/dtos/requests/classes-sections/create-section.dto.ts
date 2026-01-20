@@ -6,10 +6,6 @@ export class CreateSectionDto {
     @IsString()
     name: string;
 
-    @ApiProperty()
-    @IsString()
-    schoolId: string;
-
     @ApiProperty({ required: false })
     @IsOptional()
     @IsString()

@@ -27,10 +27,12 @@ function computeSimpleDiff(before: any, after: any): any {
 @Injectable()
 export class AuditService {
     private readonly logger = new Logger(AuditService.name);
+    private readonly disabled = process.env.AUDIT_DISABLED === 'true';
 
     constructor(@Inject(AUDIT_REPOSITORY) private readonly repo: IAuditRepository) { }
 
     async log(input: AuditEventInput): Promise<void> {
+        if (this.disabled) return;
         try {
             // compute a simple diff if before/after provided
             if (input.before && input.after && !input.diff) {
@@ -51,6 +53,7 @@ export class AuditService {
     }
 
     async logMany(inputs: AuditEventInput[]): Promise<void> {
+        if (this.disabled) return;
         try {
             await this.repo.insertMany(inputs);
         } catch (err) {

@@ -7,7 +7,6 @@ export type SectionTableRow = {
     id: string;
     name: string;
     code?: string | null;
-    schoolName?: string;
     capacity?: number | null;
     status: 'active' | 'archived';
     updatedAt?: string;
@@ -23,7 +22,6 @@ export type SectionTableRow = {
 })
 export class SectionsTableComponent {
     @Input() rows: SectionDto[] = [];
-    @Input() schoolNames = new Map<string, string>();
     @Input() isLoading = false;
     @Input() isError = false;
     @Input() isFiltered = false;
@@ -40,7 +38,6 @@ export class SectionsTableComponent {
         id: row.id,
         name: row.name,
         code: row.code ?? null,
-        schoolName: this.schoolNames.get(row.schoolId) ?? '-',
         capacity: row.capacity ?? null,
         status: row.status,
         updatedAt: row.updatedAt,
@@ -59,27 +56,21 @@ export class SectionsTableComponent {
             }),
         },
         {
-            key: 'schoolName',
-            label: 'School',
-            width: '20%',
-            cell: row => row.schoolName || '-',
-        },
-        {
             key: 'capacity',
             label: 'Capacity',
-            width: '16%',
+            width: '18%',
             cell: row => row.capacity != null ? String(row.capacity) : '-',
         },
         {
             key: 'status',
             label: 'Status',
-            width: '16%',
+            width: '18%',
             cell: row => row.status === 'active' ? 'Active' : 'Archived',
         },
         {
             key: 'updatedAt',
             label: 'Updated',
-            width: '16%',
+            width: '18%',
             cell: row => row.updatedAt ? new Date(row.updatedAt).toLocaleDateString() : '-',
         },
     ];

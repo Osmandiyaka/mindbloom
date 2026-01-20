@@ -38,7 +38,6 @@ type SectionFormState = {
     classId: string;
     name: string;
     code: string;
-    schoolId: string;
     capacity: string;
     status: 'active' | 'archived';
 };
@@ -118,7 +117,7 @@ export class ClassesSectionsComponent {
 
     readonly sectionsFiltered = computed(() => {
         const filters = this.vm.sectionsFilters();
-        return Boolean(filters.search || filters.schoolId || (filters.status && filters.status !== DEFAULT_STATUS));
+        return Boolean(filters.search || (filters.status && filters.status !== DEFAULT_STATUS));
     });
 
     readonly classFiltersApplied = computed(() => {
@@ -348,7 +347,6 @@ export class ClassesSectionsComponent {
             classId: row.classId,
             name: row.name,
             code: row.code ?? '',
-            schoolId: row.schoolId,
             capacity: row.capacity != null ? String(row.capacity) : '',
             status: row.status,
         });
@@ -368,16 +366,11 @@ export class ClassesSectionsComponent {
             this.sectionFormError.set('Section name is required.');
             return;
         }
-        if (!form.schoolId) {
-            this.sectionFormError.set('Select a school for this section.');
-            return;
-        }
 
         this.sectionFormSaving.set(true);
         const payload = {
             classId: form.classId,
             name: form.name.trim(),
-            schoolId: form.schoolId,
             code: form.code.trim() || null,
             capacity: this.parseCapacity(form.capacity),
         };
@@ -386,7 +379,6 @@ export class ClassesSectionsComponent {
         if (this.sectionModalMode() === 'edit' && form.id) {
             this.vm.updateSection(form.id, {
                 name: payload.name,
-                schoolId: payload.schoolId,
                 code: payload.code,
                 capacity: payload.capacity,
                 status: form.status,
@@ -420,20 +412,8 @@ export class ClassesSectionsComponent {
         this.sectionForm.update(form => ({ ...form, code: value }));
     }
 
-    updateSectionSchool(value: string): void {
-        this.sectionForm.update(form => ({ ...form, schoolId: value }));
-    }
-
     updateSectionCapacity(value: string): void {
         this.sectionForm.update(form => ({ ...form, capacity: value }));
-    }
-
-    updateSectionSchoolFilter(value: string): void {
-        this.vm.sectionsFilters.update(filters => ({
-            ...filters,
-            schoolId: value === 'all' ? undefined : value,
-        }));
-        this.vm.loadSectionsForSelectedClass();
     }
 
     updateSectionStatusFilter(value: string): void {
@@ -496,13 +476,6 @@ export class ClassesSectionsComponent {
         return `${count} schools`;
     }
 
-    sectionSchoolOptions(): Array<{ id: string; name: string }> {
-        const selected = this.vm.selectedClass();
-        if (!selected?.schoolIds?.length) return [];
-        const map = this.schoolNames();
-        return selected.schoolIds.map(id => ({ id, name: map.get(id) || id }));
-    }
-
     selectedClassMeta(): string {
         const selected = this.vm.selectedClass();
         if (!selected) return '';
@@ -528,13 +501,11 @@ export class ClassesSectionsComponent {
 
     private emptySectionForm(selected?: ClassDto | null): SectionFormState {
         const classEntity = selected ?? this.vm.selectedClass();
-        const schoolId = classEntity?.schoolIds?.[0] ?? '';
         return {
             id: null,
             classId: classEntity?.id ?? '',
             name: '',
             code: '',
-            schoolId,
             capacity: '',
             status: DEFAULT_STATUS,
         };

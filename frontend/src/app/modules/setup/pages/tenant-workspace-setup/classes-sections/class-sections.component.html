@@ -207,7 +207,8 @@
                                     {{ section.capacity ?? '—' }}
                                 </div>
                                 <div>
-                                    <span class="ou-status-pill" [class.ou-status-pill--active]="section.status === 'active'">
+                                    <span class="ou-status-pill"
+                                        [class.ou-status-pill--active]="section.status === 'active'">
                                         {{ section.status === 'active' ? 'Active' : 'Archived' }}
                                     </span>
                                 </div>
@@ -265,9 +266,9 @@
                                                 (click)="vm.openEditClass(selected); vm.closeSectionsMenu()">
                                                 Rename class
                                             </button>
-                                        <button type="button"
-                                            class="sections-detail__menu-item sections-detail__menu-item--danger"
-                                            (click)="vm.openClassDelete(selected); vm.closeSectionsMenu()">
+                                            <button type="button"
+                                                class="sections-detail__menu-item sections-detail__menu-item--danger"
+                                                (click)="vm.openClassDelete(selected); vm.closeSectionsMenu()">
                                                 Delete class
                                             </button>
                                         </div>
@@ -305,7 +306,8 @@
             <mb-button variant="secondary" (click)="setupVm.back()">Back</mb-button>
         </div>
         <div class="setup-footer__right">
-            <mb-button variant="primary" [disabled]="!setupVm.canContinue()" (click)="setupVm.next()">Continue</mb-button>
+            <mb-button variant="primary" [disabled]="!setupVm.canContinue()"
+                (click)="setupVm.next()">Continue</mb-button>
             <button type="button" class="setup-skip-link" (click)="setupVm.skipSetup()">Skip for
                 now</button>
         </div>
@@ -333,8 +335,7 @@
             </mb-form-field>
             <mb-form-field label="Schools" [controlId]="'class-schools'">
                 <mb-school-selector [label]="''" [value]="vm.classFormSchoolIds()"
-                    [disabled]="vm.classFormMode() === 'view'"
-                    (valueChange)="vm.classFormSchoolIds.set($event)">
+                    [disabled]="vm.classFormMode() === 'view'" (valueChange)="vm.classFormSchoolIds.set($event)">
                 </mb-school-selector>
             </mb-form-field>
             <mb-form-field label="Notes" [controlId]="'class-notes'">
@@ -345,7 +346,8 @@
         <div mbModalFooter class="class-modal__footer">
             <mb-button variant="secondary" (click)="vm.requestCloseClassForm()">Cancel</mb-button>
             <mb-button variant="primary" *ngIf="vm.classFormMode() !== 'view'" [loading]="vm.classFormSubmitting()"
-                [disabled]="vm.classFormSubmitting()" (click)="vm.saveClassForm(hasMultipleSchools())">Save class</mb-button>
+                [disabled]="vm.classFormSubmitting()" (click)="vm.saveClassForm(hasMultipleSchools())">Save
+                class</mb-button>
         </div>
     </mb-modal>
 
@@ -359,8 +361,8 @@
             </div>
             <mb-alert *ngIf="vm.sectionFormError()" variant="danger">{{ vm.sectionFormError() }}</mb-alert>
             <mb-form-field label="Class" [controlId]="'section-class'">
-                <mb-class-selector [value]="vm.sectionFormClassId()" [options]="vm.classSelectorOptions()"
-                    [disabled]="vm.sectionFormMode() === 'view'" (valueChange)="vm.sectionFormClassId.set($event)">
+                <mb-class-selector [value]="vm.sectionFormClassId() || ''" [options]="vm.classSelectorOptions()"
+                    [disabled]="vm.sectionFormMode() === 'view'" (valueChange)="vm.setSectionFormClassId($event)">
                 </mb-class-selector>
             </mb-form-field>
             <mb-form-field label="Section name" [controlId]="'section-name'">
@@ -375,12 +377,6 @@
                 <mb-input id="section-capacity" [value]="vm.sectionFormCapacity()"
                     [disabled]="vm.sectionFormMode() === 'view'" (valueChange)="vm.sectionFormCapacity.set($event)"
                     placeholder="Optional"></mb-input>
-            </mb-form-field>
-            <mb-form-field label="Homeroom teacher" [controlId]="'section-teacher'">
-                <mb-staff-selector [value]="vm.sectionFormTeacherId()" [options]="staffSelectorOptions()"
-                    [disabled]="vm.sectionFormMode() === 'view'" placeholder="Unassigned"
-                    (valueChange)="vm.sectionFormTeacherId.set($event)">
-                </mb-staff-selector>
             </mb-form-field>
         </div>
         <div mbModalFooter class="section-modal__footer">

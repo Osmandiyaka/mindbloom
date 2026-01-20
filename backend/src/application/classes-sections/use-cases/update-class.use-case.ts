@@ -66,17 +66,6 @@ export class UpdateClassUseCase {
             }
         }
 
-        if (command.schoolIds) {
-            const sectionSchoolIds = await this.sectionRepository.listSchoolIdsByClass(command.tenantId, existing.id);
-            const invalid = sectionSchoolIds.filter(id => !schoolIds.includes(id));
-            if (invalid.length) {
-                throw classesSectionsErrors.validation({
-                    message: 'Cannot remove schools that have existing sections',
-                    invalidSchoolIds: invalid,
-                });
-            }
-        }
-
         const normalizedName = normalizeName(name);
         const scopeKey = scopeKeyForSchoolIds(command.tenantId, schoolIds);
         const exists = await this.classRepository.existsActiveByNameScope({

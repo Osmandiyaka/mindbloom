@@ -10,7 +10,6 @@ export type AcademicsFilters = {
 };
 
 export type SectionFilters = {
-    schoolId?: string;
     status?: 'active' | 'archived';
     search?: string;
 };
@@ -92,7 +91,10 @@ export class AcademicsStore {
         this.configError.set(null);
         this.api.getClassConfig().subscribe({
             next: (response: ApiEnvelope<ClassConfigDto>) => this.classConfig.set(response.data ?? null),
-            error: (error: ApiErrorShape) => this.configError.set(error),
+            error: (error: ApiErrorShape) => {
+                this.configError.set(error);
+                this.configLoading.set(false);
+            },
             complete: () => this.configLoading.set(false),
         });
     }
@@ -109,7 +111,10 @@ export class AcademicsStore {
             pageSize: 200,
         }).subscribe({
             next: (response: ApiEnvelope<GradeDto[]>) => this.grades.set(response.data ?? []),
-            error: (error: ApiErrorShape) => this.gradesError.set(error),
+            error: (error: ApiErrorShape) => {
+                this.gradesError.set(error);
+                this.gradesLoading.set(false);
+            },
             complete: () => this.gradesLoading.set(false),
         });
     }
@@ -137,7 +142,10 @@ export class AcademicsStore {
                 const fallback = response.data?.[0]?.id ?? null;
                 this.selectedClassId.set(fallback);
             },
-            error: (error: ApiErrorShape) => this.classesError.set(error),
+            error: (error: ApiErrorShape) => {
+                this.classesError.set(error);
+                this.classesLoading.set(false);
+            },
             complete: () => this.classesLoading.set(false),
         });
     }
@@ -153,14 +161,16 @@ export class AcademicsStore {
         this.sectionsError.set(null);
         const filters = this.sectionsFilters();
         this.api.listSectionsByClass(classId, {
-            schoolId: filters.schoolId,
             status: filters.status,
             search: filters.search,
             page: 1,
             pageSize: 200,
         }).subscribe({
             next: (response: ApiEnvelope<SectionDto[]>) => this.sections.set(response.data ?? []),
-            error: (error: ApiErrorShape) => this.sectionsError.set(error),
+            error: (error: ApiErrorShape) => {
+                this.sectionsError.set(error);
+                this.sectionsLoading.set(false);
+            },
             complete: () => this.sectionsLoading.set(false),
         });
     }
@@ -232,12 +242,11 @@ export class AcademicsStore {
     }
 
     createSection(
-        payload: { classId: string; name: string; schoolId: string; code?: string | null; capacity?: number | null; },
+        payload: { classId: string; name: string; code?: string | null; capacity?: number | null; },
         callbacks?: { onSuccess?: () => void; onError?: (error: ApiErrorShape) => void; onComplete?: () => void }
     ): void {
         this.api.createSection(payload.classId, {
             name: payload.name,
-            schoolId: payload.schoolId,
             code: payload.code,
             capacity: payload.capacity,
         }).subscribe({
@@ -256,7 +265,7 @@ export class AcademicsStore {
 
     updateSection(
         sectionId: string,
-        patch: { name?: string; schoolId?: string; code?: string | null; capacity?: number | null; status?: 'active' | 'archived'; },
+        patch: { name?: string; code?: string | null; capacity?: number | null; status?: 'active' | 'archived'; },
         callbacks?: { onSuccess?: () => void; onError?: (error: ApiErrorShape) => void; onComplete?: () => void }
     ): void {
         this.api.updateSection(sectionId, patch).subscribe({

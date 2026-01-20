@@ -185,7 +185,6 @@ export class ClassesController {
     async listSections(
         @Request() req,
         @Param('classId') classId: string,
-        @Query('schoolId') schoolId?: string,
         @Query('status') status?: 'active' | 'archived',
         @Query('search') search?: string,
         @Query('page') page?: string,
@@ -195,7 +194,6 @@ export class ClassesController {
             const result = await this.listSectionsByClassUseCase.execute({
                 tenantId: req.user.tenantId,
                 classId,
-                schoolId,
                 status,
                 search,
                 page: page ? Number(page) : undefined,
@@ -213,7 +211,6 @@ export class ClassesController {
             const data = await this.createSectionUseCase.execute({
                 tenantId: req.user.tenantId,
                 classId,
-                schoolId: dto.schoolId,
                 name: dto.name,
                 code: dto.code,
                 capacity: dto.capacity ?? undefined,

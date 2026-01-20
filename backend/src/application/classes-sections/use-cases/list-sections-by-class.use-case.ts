@@ -15,7 +15,6 @@ export class ListSectionsByClassUseCase {
             command.classId,
             {
                 classId: command.classId,
-                schoolId: command.schoolId,
                 status: command.status,
                 search: command.search,
             },

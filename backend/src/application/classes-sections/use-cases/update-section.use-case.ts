@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AuditService } from '../../services/audit/audit.service';
 import { SectionEntity } from '../../../domain/academics/entities/section.entity';
-import { CLASS_REPOSITORY, IClassRepository } from '../../../domain/ports/out/class-repository.port';
 import { SECTION_REPOSITORY, ISectionRepository } from '../../../domain/ports/out/section-repository.port';
 import { UpdateSectionInput } from '../dto/section.inputs';
 import { validateInput } from '../validation/validate-input';
@@ -12,7 +11,6 @@ import { normalizeName, normalizeOptionalText } from '../utils';
 @Injectable()
 export class UpdateSectionUseCase {
     constructor(
-        @Inject(CLASS_REPOSITORY) private readonly classRepository: IClassRepository,
         @Inject(SECTION_REPOSITORY) private readonly sectionRepository: ISectionRepository,
         private readonly audit: AuditService,
     ) {}
@@ -31,34 +29,21 @@ export class UpdateSectionUseCase {
             throw classesSectionsErrors.validation({ message: 'Section name is required' });
         }
 
-        const schoolId = command.schoolId ?? existing.schoolId;
-        if (command.schoolId) {
-            const classEntity = await this.classRepository.findById(command.tenantId, existing.classId);
-            if (!classEntity) {
-                throw classesSectionsErrors.validation({ message: 'classId is invalid' });
-            }
-            if (!classEntity.schoolIds.includes(schoolId)) {
-                throw classesSectionsErrors.validation({ message: 'schoolId must be within class schoolIds' });
-            }
-        }
-
         const normalizedName = normalizeName(name);
         const exists = await this.sectionRepository.existsActiveByNameScope({
             tenantId: command.tenantId,
             classId: existing.classId,
-            schoolId,
             normalizedName,
             excludeId: existing.id,
         });
         if (exists) {
-            throw classesSectionsErrors.conflict('Section name already exists for this class and school.');
+            throw classesSectionsErrors.conflict('Section name already exists for this class.');
         }
 
         const updated = new SectionEntity({
             id: existing.id,
             tenantId: existing.tenantId,
             classId: existing.classId,
-            schoolId,
             academicYearId: existing.academicYearId,
             name,
             normalizedName,

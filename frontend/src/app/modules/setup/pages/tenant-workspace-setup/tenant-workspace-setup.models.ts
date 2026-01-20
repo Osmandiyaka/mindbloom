@@ -52,7 +52,6 @@ export interface SectionRow {
     name: string;
     code?: string;
     capacity?: number | null;
-    homeroomTeacherId?: string | null;
     sortOrder: number;
     status: 'active' | 'archived';
 }

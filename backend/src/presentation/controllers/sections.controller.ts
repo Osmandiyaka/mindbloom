@@ -45,7 +45,6 @@ export class SectionsController {
             const data = await this.updateSectionUseCase.execute({
                 tenantId: req.user.tenantId,
                 sectionId: id,
-                schoolId: dto.schoolId,
                 name: dto.name,
                 code: dto.code,
                 capacity: dto.capacity,

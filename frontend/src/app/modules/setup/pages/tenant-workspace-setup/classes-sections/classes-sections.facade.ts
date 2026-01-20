@@ -44,7 +44,6 @@ export class ClassesSectionsFacade {
     sectionFormName = signal('');
     sectionFormCode = signal('');
     sectionFormCapacity = signal<string>('');
-    sectionFormTeacherId = signal<string | null>(null);
     sectionFormError = signal('');
     sectionFormSubmitting = signal(false);
     classDeleteOpen = signal(false);
@@ -71,6 +70,8 @@ export class ClassesSectionsFacade {
     classImportRows = signal<Array<Record<string, string>>>([]);
     classImportErrors = signal<string[]>([]);
     classImportSubmitting = signal(false);
+    classesLoaded = signal(false);
+    classesLoading = signal(false);
 
     private classCounter = 0;
     private sectionCounter = 0;
@@ -157,6 +158,57 @@ export class ClassesSectionsFacade {
         this.syncSectionCounter();
         if (!this.selectedClassId() && this.classRows().length) {
             this.selectedClassId.set(this.classRows()[0].id);
+        }
+    }
+
+    async loadFromApi(): Promise<void> {
+        if (this.classesLoaded() || this.classesLoading()) return;
+        if (this.classRows().length || this.sectionRows().length) {
+            this.classesLoaded.set(true);
+            return;
+        }
+        this.classesLoading.set(true);
+        try {
+            const classes = await firstValueFrom(this.api.listClasses());
+            const classRows: ClassRow[] = classes.map((row, index) => ({
+                id: row.id || row._id || this.nextClassId(),
+                sortOrder: row.sortOrder ?? (index + 1),
+                name: row.name,
+                code: row.code ?? undefined,
+                notes: row.notes ?? undefined,
+                schoolIds: Array.isArray(row.schoolIds) ? row.schoolIds : [],
+                status: row.status ?? 'active',
+            }));
+            this.classRows.set(classRows);
+            if (!this.selectedClassId() && classRows.length) {
+                this.selectedClassId.set(classRows[0].id);
+            }
+            const sectionLists = await Promise.all(classRows.map(async (row) => {
+                try {
+                    return await firstValueFrom(this.api.listSections(row.id));
+                } catch {
+                    return [];
+                }
+            }));
+            const sections: SectionRow[] = sectionLists.flatMap(list => list.map((row, index) => ({
+                id: row.id || row._id || this.nextSectionId(),
+                sortOrder: row.sortOrder ?? (index + 1),
+                classId: row.classId,
+                name: row.name,
+                code: row.code ?? undefined,
+                capacity: row.capacity ?? null,
+                status: row.status ?? 'active',
+            })));
+            if (sections.length) {
+                this.sectionRows.set(sections);
+            }
+            this.syncClassCounter();
+            this.syncSectionCounter();
+            this.classesLoaded.set(true);
+        } catch {
+            this.toast.error('Unable to load classes. Please try again.');
+        } finally {
+            this.classesLoading.set(false);
         }
     }
 
@@ -406,9 +458,12 @@ export class ClassesSectionsFacade {
         this.sectionFormName.set('');
         this.sectionFormCode.set('');
         this.sectionFormCapacity.set('');
-        this.sectionFormTeacherId.set(null);
         this.sectionFormError.set('');
         this.sectionFormOpen.set(true);
+    }
+
+    setSectionFormClassId(classId: string | null): void {
+        this.sectionFormClassId.set(classId);
     }
 
     openEditSection(section: SectionRow): void {
@@ -418,7 +473,6 @@ export class ClassesSectionsFacade {
         this.sectionFormName.set(section.name);
         this.sectionFormCode.set(section.code || '');
         this.sectionFormCapacity.set(section.capacity?.toString() || '');
-        this.sectionFormTeacherId.set(section.homeroomTeacherId || null);
         this.sectionFormError.set('');
         this.sectionFormOpen.set(true);
     }
@@ -467,8 +521,7 @@ export class ClassesSectionsFacade {
             classId,
             name,
             code: code || undefined,
-            capacity: capacityValue ? capacityNumber : null,
-            homeroomTeacherId: this.sectionFormTeacherId()
+            capacity: capacityValue ? capacityNumber : null
         };
         this.sectionFormSubmitting.set(true);
         this.sectionFormError.set('');
@@ -495,7 +548,6 @@ export class ClassesSectionsFacade {
                     name: saved.name || name,
                     code: saved.code ?? payload.code,
                     capacity: saved.capacity ?? payload.capacity,
-                    homeroomTeacherId: saved.homeroomTeacherId ?? payload.homeroomTeacherId ?? null,
                     status: 'active',
                 };
                 this.sectionRows.update(items => [...items, newSection]);
@@ -621,7 +673,6 @@ export class ClassesSectionsFacade {
                     name,
                     code: '',
                     capacity: capacityValue ? capacityNumber : null,
-                    homeroomTeacherId: null,
                     sortOrder
                 })) as SectionResponse;
                 const id = saved.id || saved._id || this.nextSectionId();
@@ -631,7 +682,6 @@ export class ClassesSectionsFacade {
                     name: saved.name || name,
                     code: saved.code || '',
                     capacity: saved.capacity ?? (capacityValue ? capacityNumber : null),
-                    homeroomTeacherId: saved.homeroomTeacherId ?? null,
                     status: 'active',
                     sortOrder: saved.sortOrder ?? sortOrder
                 });
@@ -832,7 +882,6 @@ export class ClassesSectionsFacade {
                 name,
                 code,
                 capacity: capacityValue ? capacityNumber : null,
-                homeroomTeacherId: null,
                 sortOrder: nextOrder,
                 status: 'active',
             });
@@ -920,8 +969,7 @@ export class ClassesSectionsFacade {
         if (this.sectionFormMode() === 'add') {
             return !!this.sectionFormName().trim()
                 || !!this.sectionFormCode().trim()
-                || !!this.sectionFormCapacity().trim()
-                || !!this.sectionFormTeacherId();
+                || !!this.sectionFormCapacity().trim();
         }
         const id = this.sectionFormId();
         const existing = this.sectionRows().find(row => row.id === id);
@@ -929,8 +977,7 @@ export class ClassesSectionsFacade {
         return existing.classId !== this.sectionFormClassId()
             || existing.name !== this.sectionFormName().trim()
             || (existing.code || '') !== this.sectionFormCode().trim()
-            || (existing.capacity?.toString() || '') !== this.sectionFormCapacity().trim()
-            || (existing.homeroomTeacherId || null) !== this.sectionFormTeacherId();
+            || (existing.capacity?.toString() || '') !== this.sectionFormCapacity().trim();
     }
 
     private closeClassMenus(): void {
@@ -989,7 +1036,6 @@ export class ClassesSectionsFacade {
                     name: sectionName,
                     code: '',
                     capacity: null,
-                    homeroomTeacherId: null,
                     status: 'active',
                     sortOrder: sectionIndex + 1
                 });

@@ -11,6 +11,14 @@ import {
 export class ClassesSectionsApiService {
   constructor(private readonly classSectionService: ClassSectionService) {}
 
+  listClasses(): Observable<ClassResponse[]> {
+    return this.classSectionService.listClasses();
+  }
+
+  listSections(classId: string): Observable<SectionResponse[]> {
+    return this.classSectionService.listSections(classId);
+  }
+
   createClass(payload: ClassPayload): Observable<ClassResponse> {
     return this.classSectionService.createClass(payload);
   }
@@ -28,7 +36,6 @@ export class ClassesSectionsApiService {
     name: string;
     code?: string;
     capacity?: number | null;
-    homeroomTeacherId?: string | null;
     sortOrder?: number;
   }): Observable<SectionResponse> {
     return this.classSectionService.createSection(payload);
@@ -39,7 +46,6 @@ export class ClassesSectionsApiService {
     name: string;
     code?: string;
     capacity?: number | null;
-    homeroomTeacherId?: string | null;
     sortOrder?: number;
   }>): Observable<SectionResponse> {
     return this.classSectionService.updateSection(id, payload);

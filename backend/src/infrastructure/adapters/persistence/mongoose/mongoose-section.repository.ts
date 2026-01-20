@@ -9,7 +9,6 @@ type SectionDoc = {
     _id: Types.ObjectId;
     tenantId: Types.ObjectId;
     classId: Types.ObjectId;
-    schoolId: Types.ObjectId;
     academicYearId?: Types.ObjectId;
     name: string;
     normalizedName: string;
@@ -66,7 +65,6 @@ export class MongooseSectionRepository implements ISectionRepository, ISectionRe
         const created = await this.sectionModel.create({
             tenantId: entity.tenantId,
             classId: entity.classId,
-            schoolId: entity.schoolId,
             academicYearId: entity.academicYearId,
             name: entity.name,
             normalizedName: entity.normalizedName,
@@ -85,7 +83,6 @@ export class MongooseSectionRepository implements ISectionRepository, ISectionRe
                 { _id: entity.id, tenantId: entity.tenantId },
                 {
                     $set: {
-                        schoolId: entity.schoolId,
                         name: entity.name,
                         normalizedName: entity.normalizedName,
                         code: entity.code,
@@ -123,14 +120,12 @@ export class MongooseSectionRepository implements ISectionRepository, ISectionRe
     async existsActiveByNameScope(input: {
         tenantId: string;
         classId: string;
-        schoolId: string;
         normalizedName: string;
         excludeId?: string;
     }): Promise<boolean> {
         const query: Record<string, any> = {
             tenantId: input.tenantId,
             classId: input.classId,
-            schoolId: input.schoolId,
             normalizedName: input.normalizedName,
             status: 'active',
         };
@@ -139,12 +134,6 @@ export class MongooseSectionRepository implements ISectionRepository, ISectionRe
         }
         const doc = await this.sectionModel.findOne(query).lean().exec();
         return Boolean(doc);
-    }
-
-    async listSchoolIdsByClass(tenantId: string, classId: string): Promise<string[]> {
-        const docs = await this.sectionModel.find({ tenantId, classId }).select({ schoolId: 1 }).lean().exec();
-        const ids = docs.map(doc => doc.schoolId?.toString()).filter(Boolean) as string[];
-        return Array.from(new Set(ids));
     }
 
     async archiveByClassId(tenantId: string, classId: string): Promise<number> {
@@ -168,9 +157,6 @@ export class MongooseSectionRepository implements ISectionRepository, ISectionRe
         if (filters.classId) {
             query.classId = filters.classId;
         }
-        if (filters.schoolId) {
-            query.schoolId = filters.schoolId;
-        }
         if (filters.status) {
             query.status = filters.status;
         }
@@ -188,7 +174,6 @@ export class MongooseSectionRepository implements ISectionRepository, ISectionRe
             id: doc._id.toString(),
             tenantId: doc.tenantId.toString(),
             classId: doc.classId.toString(),
-            schoolId: doc.schoolId.toString(),
             academicYearId: doc.academicYearId?.toString(),
             name: doc.name,
             normalizedName: doc.normalizedName,

@@ -28,26 +28,26 @@ export class CreateSectionUseCase {
         if (!classEntity) {
             throw classesSectionsErrors.validation({ message: 'classId is invalid' });
         }
-        if (!classEntity.schoolIds.includes(command.schoolId)) {
-            throw classesSectionsErrors.validation({ message: 'schoolId must be within class schoolIds' });
+
+        const classSchoolIds = classEntity.schoolIds ?? [];
+        if (command.schoolId && !classSchoolIds.includes(command.schoolId)) {
+            throw classesSectionsErrors.validation({ message: 'schoolId is outside class scope' });
         }
 
         const normalizedName = normalizeName(name);
         const exists = await this.sectionRepository.existsActiveByNameScope({
             tenantId: command.tenantId,
             classId: classEntity.id,
-            schoolId: command.schoolId,
             normalizedName,
         });
         if (exists) {
-            throw classesSectionsErrors.conflict('Section name already exists for this class and school.');
+            throw classesSectionsErrors.conflict('Section name already exists for this class.');
         }
 
         const section = new SectionEntity({
             id: '',
             tenantId: command.tenantId,
             classId: classEntity.id,
-            schoolId: command.schoolId,
             academicYearId: classEntity.academicYearId,
             name,
             normalizedName,

@@ -7,7 +7,6 @@ export const SectionDefinitionSchema = new Schema(
         name: { type: String, required: true },
         code: { type: String },
         capacity: { type: Number },
-        homeroomTeacherId: { type: String },
         active: { type: Boolean, default: true },
         sortOrder: { type: Number, default: 0 },
     },

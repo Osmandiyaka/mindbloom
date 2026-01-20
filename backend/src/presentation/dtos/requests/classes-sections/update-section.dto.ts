@@ -5,11 +5,6 @@ export class UpdateSectionDto {
     @ApiProperty({ required: false })
     @IsOptional()
     @IsString()
-    schoolId?: string;
-
-    @ApiProperty({ required: false })
-    @IsOptional()
-    @IsString()
     name?: string;
 
     @ApiProperty({ required: false })

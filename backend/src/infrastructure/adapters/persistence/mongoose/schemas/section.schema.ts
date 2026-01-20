@@ -4,7 +4,6 @@ export const SectionSchema = new Schema(
     {
         tenantId: { type: Types.ObjectId, ref: 'Tenant', index: true, required: true },
         classId: { type: Types.ObjectId, ref: 'Class', index: true, required: true },
-        schoolId: { type: Types.ObjectId, ref: 'School', index: true, required: true },
         academicYearId: { type: Types.ObjectId, ref: 'AcademicYear' },
         name: { type: String, required: true, trim: true },
         normalizedName: { type: String, required: true, trim: true },
@@ -20,8 +19,7 @@ export const SectionSchema = new Schema(
 );
 
 SectionSchema.index({ tenantId: 1, classId: 1, status: 1 });
-SectionSchema.index({ tenantId: 1, schoolId: 1 });
 SectionSchema.index(
-    { tenantId: 1, classId: 1, schoolId: 1, normalizedName: 1 },
+    { tenantId: 1, classId: 1, normalizedName: 1 },
     { unique: true, partialFilterExpression: { status: 'active' } },
 );

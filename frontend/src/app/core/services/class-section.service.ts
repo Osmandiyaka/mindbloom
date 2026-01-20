@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { Observable, of } from 'rxjs';
+import { Observable, of, map } from 'rxjs';
 
 export interface ClassPayload {
     name: string;
@@ -14,6 +14,7 @@ export interface ClassPayload {
 export interface ClassResponse extends ClassPayload {
     _id?: string;
     id?: string;
+    status?: 'active' | 'archived';
 }
 
 export interface SectionResponse {
@@ -23,8 +24,7 @@ export interface SectionResponse {
     name: string;
     code?: string;
     capacity?: number;
-    active?: boolean;
-    homeroomTeacherId?: string | null;
+    status?: 'active' | 'archived';
     sortOrder?: number;
 }
 
@@ -49,7 +49,9 @@ export class ClassSectionService {
     }
 
     listClasses(): Observable<ClassResponse[]> {
-        return this.http.get<ClassResponse[]>(this.baseUrl);
+        return this.http.get<ClassResponse[] | { data: ClassResponse[] }>(this.baseUrl).pipe(
+            map((response) => Array.isArray(response) ? response : (response.data || []))
+        );
     }
 
     listSections(classId?: string): Observable<SectionResponse[]> {
@@ -64,7 +66,6 @@ export class ClassSectionService {
         name: string;
         code?: string;
         capacity?: number | null;
-        homeroomTeacherId?: string | null;
         active?: boolean;
         sortOrder?: number;
     }): Observable<SectionResponse> {
@@ -77,7 +78,6 @@ export class ClassSectionService {
         name: string;
         code?: string;
         capacity?: number | null;
-        homeroomTeacherId?: string | null;
         active?: boolean;
         sortOrder?: number;
     }>): Observable<SectionResponse> {
