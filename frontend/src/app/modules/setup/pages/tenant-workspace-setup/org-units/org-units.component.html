@@ -1,5 +1,5 @@
-<div class="setup-body">
-    <div class="setup-section">
+<div class="setup-body ou-page">
+    <div class="setup-section ou-section">
         <div class="ou-header">
             <div class="ou-header__content">
                 <div class="ou-header__titles">
@@ -18,8 +18,8 @@
             </div>
         </div>
 
-        <div class="ou-card">
-            <div class="ou-layout">
+        <div class="ou-layout">
+            <section class="ou-panel ou-panel--nav">
             <div class="ou-nav">
                 <div class="ou-nav__header">
                     <div>
@@ -33,14 +33,21 @@
                     </mb-button>
                 </div>
 
-                <ng-container *ngIf="vm.orgUnitTree().length; else ouEmptyTree">
-                    <div class="ou-tree" role="tree">
-                        <ng-container *ngFor="let node of vm.orgUnitTree(); trackBy: vm.trackOrgUnit">
-                            <ng-container
-                                *ngTemplateOutlet="orgUnitNode; context: { $implicit: node, depth: 0 }"></ng-container>
-                        </ng-container>
+                <ng-container *ngIf="vm.treeLoading(); else treeList">
+                    <div class="ou-tree-skeleton">
+                        <span class="ou-tree-skeleton__row" *ngFor="let item of [1,2,3,4]"></span>
                     </div>
                 </ng-container>
+                <ng-template #treeList>
+                    <ng-container *ngIf="vm.orgUnitTree().length; else ouEmptyTree">
+                        <div class="ou-tree" role="tree">
+                            <ng-container *ngFor="let node of vm.orgUnitTree(); trackBy: vm.trackOrgUnit">
+                                <ng-container
+                                    *ngTemplateOutlet="orgUnitNode; context: { $implicit: node, depth: 0 }"></ng-container>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                </ng-template>
                 <ng-template #ouEmptyTree>
                     <div class="ou-empty">
                         <div class="ou-empty__title">No organizational units yet</div>
@@ -48,8 +55,13 @@
                             hierarchy.</div>
                     </div>
                 </ng-template>
+                <div *ngIf="vm.treeError()" class="ou-tree-error">
+                    <span>{{ vm.treeError()?.message || 'Unable to load organizational units.' }}</span>
+                    <mb-button size="sm" variant="secondary" (click)="vm.reloadOrgUnitTree()">Retry</mb-button>
+                </div>
             </div>
-
+            </section>
+            <section class="ou-panel ou-panel--detail">
             <div class="ou-canvas">
                 <ng-container *ngIf="vm.selectedOrgUnit(); else ouEmptyDetail">
                     <div class="ou-canvas__header">
@@ -195,12 +207,27 @@
                             </div>
                         </div>
 
-                        <app-org-unit-members-table
-                            [orgUnitId]="vm.activeOrgUnitId()"
-                            [searchTerm]="vm.orgUnitMemberSearch()"
-                            (clearSearch)="vm.orgUnitMemberSearch.set('')"
-                            (addMembers)="vm.openAssignMembers()">
-                        </app-org-unit-members-table>
+                        <ng-container *ngIf="!vm.membersLoading(); else membersLoadingState">
+                            <app-org-unit-members-table
+                                [orgUnitId]="vm.activeOrgUnitId()"
+                                [searchTerm]="vm.orgUnitMemberSearch()"
+                                (clearSearch)="vm.orgUnitMemberSearch.set('')"
+                                (addMembers)="vm.openAssignMembers()">
+                            </app-org-unit-members-table>
+                            <div *ngIf="vm.membersError()" class="ou-table-error">
+                                <span>{{ vm.membersError()?.message || 'Unable to load members.' }}</span>
+                                <mb-button size="sm" variant="secondary" (click)="vm.reloadMembers()">Retry</mb-button>
+                            </div>
+                        </ng-container>
+                        <ng-template #membersLoadingState>
+                            <div class="ou-table-skeleton">
+                                <div class="ou-table-skeleton__row" *ngFor="let row of [1,2,3,4]">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </ng-template>
                     </div>
 
                     <div *ngIf="vm.activeOrgUnitTab() === 'roles'" class="ou-roles">
@@ -257,6 +284,7 @@
                     </div>
                 </ng-template>
             </div>
+        </section>
         </div>
 
         <ng-template #orgUnitNode let-node let-depth="depth">

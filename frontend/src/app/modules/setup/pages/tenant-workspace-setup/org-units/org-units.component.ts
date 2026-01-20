@@ -81,6 +81,8 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
         const activeId = this.activeOrgUnitId();
         return activeId ? this.orgUnits().find(unit => unit.id === activeId) || null : null;
     });
+    readonly treeLoading = this.orgUnitStore.treeLoading;
+    readonly treeError = this.orgUnitStore.treeError;
     readonly selectedOrgUnitPath = computed(() => this.buildOrgUnitPath(this.activeOrgUnitId()));
     readonly selectedOrgUnitMemberCount = computed(() => {
         return this.orgUnitStore.selectedCounts().membersCount;
@@ -125,6 +127,8 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
             impact.roleAssignmentsCount > 0
         );
     });
+    readonly membersLoading = this.orgUnitStore.membersLoading;
+    readonly membersError = this.orgUnitStore.membersError;
 
     canCopyFromParent(): boolean {
         return !!this.selectedOrgUnit()?.parentId;
@@ -136,6 +140,15 @@ export class TenantWorkspaceSetupOrgUnitsComponent {
     ngOnInit(): void {
         this.orgUnitStore.loadTree();
         this.loadAssignableUsers();
+    }
+
+    reloadOrgUnitTree(): void {
+        this.orgUnitStore.loadTree();
+    }
+
+    reloadMembers(): void {
+        const query = this.orgUnitMemberSearch().trim();
+        this.orgUnitStore.loadMembers({ search: query || undefined });
     }
 
     startAddRootUnit(): void {
