@@ -358,12 +358,39 @@
   overflow-x: auto;
 }
 
-.table-wrapper :is(tbody tr) {
-  transition: background 120ms ease;
+:host ::ng-deep .table-wrapper .mb-table table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
 }
 
-.table-wrapper :is(tbody tr:hover) {
+:host ::ng-deep .table-wrapper .mb-table tbody tr {
+  transition: background 120ms ease, border 120ms ease, box-shadow 120ms ease;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+}
+
+:host ::ng-deep .table-wrapper .mb-table tbody tr:hover {
   background: rgba(148, 163, 184, 0.08);
+}
+
+:host ::ng-deep .table-wrapper .mb-table tbody tr:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35), 0 0 0 4px rgba(255, 255, 255, 0.9);
+}
+
+:host ::ng-deep .table-wrapper .mb-table tbody tr.is-selected {
+  background: rgba(16, 185, 129, 0.04);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: inset 3px 0 0 #10b981, inset 0 0 0 1px rgba(16, 185, 129, 0.18);
+}
+
+:host ::ng-deep .table-wrapper .mb-table tbody td {
+  background: transparent;
+  border: none;
 }
 
 .table-skeleton {

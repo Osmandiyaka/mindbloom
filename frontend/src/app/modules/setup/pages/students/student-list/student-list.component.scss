@@ -143,7 +143,8 @@
 
 .students-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0 8px;
 
     thead {
         background: var(--gray-50);
@@ -162,47 +163,34 @@
 
     tbody {
         tr {
-            border-bottom: 1px solid var(--border-color);
-            transition: background 0.2s;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 12px;
+            background: #fff;
             cursor: pointer;
             position: relative;
+            transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 8px rgba(15, 23, 42, 0.04);
+        }
 
-            &:hover {
-                background: var(--gray-50);
-            }
+        tr:hover {
+            background: rgba(148, 163, 184, 0.08);
+        }
 
-            &:focus-visible {
-                outline: none;
-                box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35), 0 0 0 4px rgba(255, 255, 255, 0.9);
-            }
+        tr:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35), 0 0 0 4px rgba(255, 255, 255, 0.9);
+        }
 
-            &.is-active {
-                background: rgba(15, 23, 42, 0.04);
-
-                td:first-child {
-                    position: relative;
-
-                    &::before {
-                        content: '';
-                        position: absolute;
-                        left: 0;
-                        top: 6px;
-                        bottom: 6px;
-                        width: 3px;
-                        border-radius: 2px;
-                        background: rgba(15, 23, 42, 0.5);
-                    }
-                }
-            }
-
-            &:last-child {
-                border-bottom: none;
-            }
+        tr.is-active {
+            background: rgba(16, 185, 129, 0.04);
+            border-color: rgba(16, 185, 129, 0.4);
+            box-shadow: inset 3px 0 0 #10b981, inset 0 0 0 1px rgba(16, 185, 129, 0.18);
         }
 
         td {
             padding: 1rem;
             vertical-align: middle;
+            background: transparent;
         }
     }
 }

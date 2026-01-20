@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { StudentService } from '../../../../../core/services/student.service';
 import { Student, StudentFilters, StudentStatus } from '../../../../../core/models/student.model';
 
@@ -37,11 +37,15 @@ export class StudentListComponent implements OnInit {
 
     constructor(
         private studentService: StudentService,
-        private router: Router
+        private router: Router,
+        private route: ActivatedRoute
     ) { }
 
     ngOnInit(): void {
         this.loadStudents();
+        this.route.queryParamMap.subscribe((params) => {
+            this.selectedStudentId.set(params.get('studentId') ?? undefined);
+        });
     }
 
     loadStudents(): void {
@@ -134,6 +138,12 @@ export class StudentListComponent implements OnInit {
 
     selectStudent(student: Student): void {
         this.selectedStudentId.set(student.id);
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { studentId: student.id },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
     }
 
     getAge(dateOfBirth: Date): number {
