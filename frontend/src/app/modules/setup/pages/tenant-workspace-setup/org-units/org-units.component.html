@@ -1,10 +1,68 @@
 <div class="setup-body">
     <div class="setup-section">
-        <h2>Organizational units</h2>
-        <p>Build a hierarchy of schools, divisions, and departments for access and reporting.
-        </p>
+        <div class="ou-header">
+            <div>
+                <h2>Organizational units</h2>
+                <p>Build a hierarchy of schools, divisions, and departments for access and reporting.</p>
+            </div>
+            <div class="ou-header__actions">
+                <mb-button class="ou-action-btn" variant="secondary" (click)="vm.startAddChildUnit()">
+                    Add child unit
+                </mb-button>
+                <button
+                    type="button"
+                    class="ou-actions-menu__toggle"
+                    #ouActionsMenuOrigin
+                    aria-label="More actions"
+                    title="More actions"
+                    [attr.aria-expanded]="vm.ouActionsMenuOpen()"
+                    (click)="vm.toggleOuActionsMenu($event)"
+                >⋯</button>
+                <mb-popover
+                    [open]="vm.ouActionsMenuOpen()"
+                    [origin]="ouActionsMenuOrigin"
+                    [hasBackdrop]="true"
+                    [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'ou-actions-menu__panel']"
+                    (closed)="vm.closeOuActionsMenu()"
+                >
+                    <div class="ou-actions-menu__panel-content" role="menu">
+                        <button type="button" class="ou-actions-menu__item" (click)="vm.closeOuActionsMenu(); vm.startAddChildUnit()">
+                            Add child unit
+                        </button>
+                        <button type="button" class="ou-actions-menu__item" (click)="vm.closeOuActionsMenu(); vm.startAddRootUnit()">
+                            Add root unit
+                        </button>
+                        <div class="ou-actions-menu__divider" aria-hidden="true"></div>
+                        <button type="button" class="ou-actions-menu__item"
+                            [disabled]="!vm.selectedOrgUnit()" (click)="vm.closeOuActionsMenu(); vm.openRenameOrgUnit()">
+                            Rename unit
+                        </button>
+                        <button type="button" class="ou-actions-menu__item"
+                            [disabled]="!vm.selectedOrgUnit()" (click)="vm.closeOuActionsMenu(); vm.openMoveOrgUnit()">
+                            Move unit
+                        </button>
+                        <button type="button" class="ou-actions-menu__item"
+                            [disabled]="!vm.selectedOrgUnit()" (click)="vm.closeOuActionsMenu(); vm.openChangeParentOrgUnit()">
+                            Change parent
+                        </button>
+                        <div class="ou-actions-menu__divider" aria-hidden="true"></div>
+                        <button type="button" class="ou-actions-menu__item"
+                            [disabled]="!vm.canDeactivateSelectedOrgUnit()"
+                            (click)="vm.closeOuActionsMenu(); vm.openDeactivateOrgUnit()">
+                            Deactivate unit
+                        </button>
+                        <button type="button" class="ou-actions-menu__item ou-actions-menu__item--danger"
+                            [disabled]="!vm.canDeleteSelectedOrgUnit()"
+                            (click)="vm.closeOuActionsMenu(); vm.openDeleteOrgUnit()">
+                            Delete unit
+                        </button>
+                    </div>
+                </mb-popover>
+            </div>
+        </div>
 
-        <div class="ou-layout">
+        <div class="ou-card">
+            <div class="ou-layout">
             <div class="ou-nav">
                 <div class="ou-nav__header">
                     <div class="ou-nav__kicker">Organization</div>
@@ -47,50 +105,6 @@
                             <div class="ou-breadcrumb">
                                 Organization / {{ vm.selectedOrgUnitPath() }}
                             </div>
-                        </div>
-                        <div class="ou-canvas__actions">
-                            <mb-button class="ou-action-btn" variant="secondary"
-                                (click)="vm.startAddChildUnit()">Add child unit</mb-button>
-                            <button type="button" class="ou-actions-menu__toggle"
-                                #ouActionsMenuOrigin aria-label="More actions"
-                                title="More actions" [attr.aria-expanded]="vm.ouActionsMenuOpen()"
-                                (click)="vm.toggleOuActionsMenu($event)">⋯</button>
-                            <mb-popover [open]="vm.ouActionsMenuOpen()"
-                                [origin]="ouActionsMenuOrigin" [hasBackdrop]="true"
-                                [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'ou-actions-menu__panel']"
-                                (closed)="vm.closeOuActionsMenu()">
-                                <div class="ou-actions-menu__panel-content" role="menu">
-                                    <button type="button" class="ou-actions-menu__item"
-                                        [disabled]="!vm.selectedOrgUnit()"
-                                        (click)="vm.openRenameOrgUnit(); vm.closeOuActionsMenu()">
-                                        Rename unit
-                                    </button>
-                                    <button type="button" class="ou-actions-menu__item"
-                                        [disabled]="!vm.selectedOrgUnit()"
-                                        (click)="vm.openMoveOrgUnit(); vm.closeOuActionsMenu()">
-                                        Move unit
-                                    </button>
-                                    <button type="button" class="ou-actions-menu__item"
-                                        [disabled]="!vm.selectedOrgUnit()"
-                                        (click)="vm.openChangeParentOrgUnit(); vm.closeOuActionsMenu()">
-                                        Change parent
-                                    </button>
-                                    <button type="button" class="ou-actions-menu__item"
-                                        [disabled]="!vm.canDeactivateSelectedOrgUnit()"
-                                        [attr.title]="vm.selectedOrgUnit()?.status === 'Inactive' ? 'Unit is already inactive.' : null"
-                                        (click)="vm.openDeactivateOrgUnit(); vm.closeOuActionsMenu()">
-                                        Deactivate unit
-                                    </button>
-                                    <div class="ou-actions-menu__divider"></div>
-                                    <button type="button"
-                                        class="ou-actions-menu__item ou-actions-menu__item--danger"
-                                        [disabled]="!vm.canDeleteSelectedOrgUnit()"
-                                        [attr.title]="vm.getOrgUnitDeleteDisabledReason()"
-                                        (click)="vm.openDeleteOrgUnit(); vm.closeOuActionsMenu()">
-                                        Delete unit
-                                    </button>
-                                </div>
-                            </mb-popover>
                         </div>
                     </div>
 
