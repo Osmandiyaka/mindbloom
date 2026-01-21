@@ -1,0 +1,52 @@
+<div
+    class="timeline-item"
+    [class.timeline-item--selectable]="selectable"
+    [attr.role]="selectable ? 'button' : null"
+    [attr.tabindex]="selectable ? 0 : -1"
+    (click)="triggerSelect()"
+    (keydown.enter)="triggerSelect()"
+    (keydown.space)="triggerSelect(); $event.preventDefault()">
+    <div class="timeline-item__icon">
+        <span>{{ icon }}</span>
+    </div>
+    <div class="timeline-item__content">
+        <div class="timeline-item__title">{{ item.title }}</div>
+        <div class="timeline-item__description" *ngIf="item.description">{{ item.description }}</div>
+        <div class="timeline-item__meta" *ngIf="item.actor || metadataLabel">
+            <span *ngIf="item.actor">{{ item.actor.name }}</span>
+            <span *ngIf="item.actor && metadataLabel" aria-hidden="true">·</span>
+            <span *ngIf="metadataLabel">{{ metadataLabel }}</span>
+        </div>
+    </div>
+    <div class="timeline-item__aside">
+        <span class="timeline-item__time">{{ formattedTime() }}</span>
+        <ng-container *ngIf="hasActions">
+            <span cdkOverlayOrigin #actionsOrigin="cdkOverlayOrigin">
+                <mb-button
+                    size="sm"
+                    variant="tertiary"
+                    class="timeline-item__overflow"
+                    (click)="toggleActions($event)"
+                    aria-label="Open item actions">
+                    ⋯
+                </mb-button>
+            </span>
+            <mb-popover
+                [open]="actionsOpenSignal"
+                [origin]="actionsOrigin"
+                [hasBackdrop]="true"
+                variant="plain"
+                (closed)="actionsOpen.set(false)">
+                <div class="timeline-item__menu">
+                    <button
+                        *ngFor="let link of item.links"
+                        type="button"
+                        class="timeline-item__menu-item"
+                        (click)="handleLink(link)">
+                        {{ link.label }}
+                    </button>
+                </div>
+            </mb-popover>
+        </ng-container>
+    </div>
+</div>

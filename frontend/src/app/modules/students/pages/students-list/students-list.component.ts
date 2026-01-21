@@ -12,6 +12,7 @@ import {
   Guardian,
   RelationshipType,
   Student,
+  StudentActivityCategory,
   StudentActivityItem,
   StudentAcademicSubject,
   StudentAcademicTerm,
@@ -56,6 +57,8 @@ import {
   MbTableComponent,
   MbTableEmptyState,
 } from '@mindbloom/ui';
+import { StudentTimelineCardComponent } from './student-timeline-card.component';
+import { StudentTimelineCategory, StudentTimelineItem, TimelineFilter } from './student-timeline.model';
 
 type AttentionFilter = 'missing-docs' | 'missing-guardian' | 'inactive';
 type FilterChip = { key: string; label: string; type: 'search' | 'status' | 'grade' | 'section' | 'year' | 'attention' };
@@ -75,7 +78,8 @@ type QuickAction = {
   moduleKey: ModuleKey;
   primary: boolean;
 };
-type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system';
+
+type ActivityFilter = TimelineFilter;
 
 @Component({
   selector: 'app-students-list',
@@ -102,6 +106,7 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
     StudentDetailDrawerComponent,
     StudentGuardianModalComponent,
     StudentQuickActionsComponent,
+    StudentTimelineCardComponent,
     SearchInputComponent,
     CanDirective,
     TooltipDirective,
@@ -398,76 +403,36 @@ type ActivityFilter = 'all' | 'enrollment' | 'documents' | 'guardians' | 'system
           (closeMenu)="closeQuickActionsMenu()"
           (runAction)="runQuickAction($event)">
       </app-student-quick-actions>
-        <div class="workflow-section">
-          <div class="workflow-header">
-            <div class="workflow-header-text">
-              <h3>Timeline</h3>
-              @if (!selectedStudent()) {
-                <p class="workflow-meta">Select a student to view activity.</p>
-              }
-            </div>
-          </div>
-          <div class="timeline-filters">
-            <mb-button
-              size="sm"
-              variant="tertiary"
-              *ngFor="let filter of activityFilters"
-              [class.active]="activityFilter() === filter.value"
-              (click)="setActivityFilter(filter.value)">
-              {{ filter.label }}
-            </mb-button>
-          </div>
-          <div class="timeline-list">
-            @if (!panelStudent()) {
-              <div class="timeline-empty">No activity to show.</div>
-            } @else if (activityLoading()) {
-              <div class="timeline-skeleton">
-                <div class="skeleton-row" *ngFor="let _ of skeletonRows"></div>
-              </div>
-            } @else if (activityError()) {
-              <div class="timeline-error">
-                <p>{{ activityError() }}</p>
-                <mb-button size="sm" variant="tertiary" (click)="loadActivity(true)">Retry</mb-button>
-              </div>
-            } @else if (activityItems().length === 0) {
-              <div class="timeline-empty">No activity recorded.</div>
-            } @else {
-              <div class="timeline-items">
-                <mb-button
-                  *ngFor="let item of activityItems()"
-                  size="sm"
-                  variant="tertiary"
-                  [fullWidth]="true"
-                  class="timeline-item"
-                  (click)="openActivityDetail(item)">
-                  <div class="timeline-item-text">
-                    <div class="timeline-title">{{ item.title }}</div>
-                    <div class="timeline-meta">
-                      <span>{{ formatActivityTime(item.createdAt) }}</span>
-                      <span *ngIf="item.actor">· {{ item.actor }}</span>
-                    </div>
-                    <div class="timeline-detail" *ngIf="item.metadata">{{ item.metadata }}</div>
-                  </div>
-                </mb-button>
-              </div>
-              <div class="timeline-load" *ngIf="activityHasNext()">
-                <mb-button size="sm" variant="tertiary" (click)="loadMoreActivity()">Load more</mb-button>
-              </div>
-            }
-          </div>
-          <div class="activity-detail" *ngIf="activityDetailOpen()">
+        <div class="workflow-section timeline-section">
+          <app-student-timeline-card
+            [timelineItems]="timelineItems()"
+            [loading]="timelineLoading()"
+            [error]="timelineError()"
+            [activeFilter]="timelineFilter()"
+            [hasStudent]="!!panelStudent()"
+            [hasMore]="timelineHasNext()"
+            (filterChange)="setTimelineFilter($event)"
+            (loadMore)="loadMoreTimeline()"
+            (retry)="loadTimeline(true)"
+            (itemSelected)="openTimelineDetail($event)"
+            (itemAction)="handleTimelineAction($event)">
+          </app-student-timeline-card>
+          <div class="activity-detail" *ngIf="timelineDetailOpen()">
             <div class="activity-detail-header">
               <div>
-                <h4>{{ selectedActivity()?.title }}</h4>
-                <p>{{ formatActivityTime(selectedActivity()?.createdAt) }}</p>
+                <h4>{{ selectedTimelineItem()?.title }}</h4>
+                <p>{{ formatTimelineTime(selectedTimelineItem()?.occurredAt) }}</p>
               </div>
-              <mb-button size="sm" variant="tertiary" (click)="closeActivityDetail()">Close</mb-button>
+              <mb-button size="sm" variant="tertiary" (click)="closeTimelineDetail()">Close</mb-button>
             </div>
-            <p class="activity-detail-meta" *ngIf="selectedActivity()?.actor">
-              Actor: {{ selectedActivity()?.actor }}
+            <p class="activity-detail-meta" *ngIf="selectedTimelineItem()?.actor">
+              Actor: {{ selectedTimelineItem()?.actor?.name }}
             </p>
-            <p class="activity-detail-body" *ngIf="selectedActivity()?.metadata">
-              {{ selectedActivity()?.metadata }}
+            <p class="activity-detail-body" *ngIf="selectedTimelineItem()?.description">
+              {{ selectedTimelineItem()?.description }}
+            </p>
+            <p class="activity-detail-body" *ngIf="!selectedTimelineItem()?.description && selectedTimelineItem()?.metadata?.['detail']">
+              {{ selectedTimelineItem()?.metadata?.['detail'] }}
             </p>
           </div>
         </div>
@@ -783,14 +748,25 @@ export class StudentsListComponent implements OnInit {
   detailDrawerOpen = signal(false);
   quickActionsMenuOpen = signal(false);
   detailLoading = signal(false);
-  activityFilter = signal<ActivityFilter>('all');
-  activityItems = signal<StudentActivityItem[]>([]);
-  activityLoading = signal(false);
-  activityError = signal<string | null>(null);
-  activityPage = signal(1);
-  activityHasNext = signal(false);
-  activityDetailOpen = signal(false);
-  selectedActivity = signal<StudentActivityItem | null>(null);
+  timelineFilter = signal<TimelineFilter>('all');
+  timelineItems = signal<StudentTimelineItem[]>([]);
+  timelineLoading = signal(false);
+  timelineError = signal<string | null>(null);
+  timelinePage = signal(1);
+  timelineHasNext = signal(false);
+  timelineDetailOpen = signal(false);
+  selectedTimelineItem = signal<StudentTimelineItem | null>(null);
+
+  readonly activityItems = computed(() => this.timelineItems().map(this.mapToActivityItem));
+  readonly activityFilter = computed(() => this.timelineFilter());
+  readonly activityLoading = computed(() => this.timelineLoading());
+  readonly activityError = computed(() => this.timelineError());
+  readonly activityHasNext = computed(() => this.timelineHasNext());
+  readonly activityDetailOpen = computed(() => this.timelineDetailOpen());
+  readonly selectedActivity = computed(() => {
+    const timeline = this.selectedTimelineItem();
+    return timeline ? this.mapToActivityItem(timeline) : null;
+  });
 
   overflowOpen = signal(false);
   rowMenuOpen = signal<string | null>(null);
@@ -882,7 +858,7 @@ export class StudentsListComponent implements OnInit {
   private searchDebounce?: ReturnType<typeof setTimeout>;
   private studentsSub?: Subscription;
   private filtersSub?: Subscription;
-  private activitySub?: Subscription;
+  private timelineSub?: Subscription;
   private detailSub?: Subscription;
   private guardiansSub?: Subscription;
   private notesSub?: Subscription;
@@ -1132,13 +1108,12 @@ export class StudentsListComponent implements OnInit {
   secondaryQuickActions = computed(() => this.quickActions().filter((action) => !action.primary));
   readonly actionTooltipFn = (action: QuickAction) => this.actionTooltip(action);
   readonly isActionEnabledFn = (action: QuickAction) => this.isActionEnabled(action);
-
-  activityFilters = [
-    { label: 'All', value: 'all' as ActivityFilter },
-    { label: 'Enrollment', value: 'enrollment' as ActivityFilter },
-    { label: 'Documents', value: 'documents' as ActivityFilter },
-    { label: 'Guardians', value: 'guardians' as ActivityFilter },
-    { label: 'System', value: 'system' as ActivityFilter },
+  readonly activityFilters: Array<{ label: string; value: ActivityFilter }> = [
+    { label: 'All', value: 'all' },
+    { label: 'Enrollment', value: 'enrollment' },
+    { label: 'Documents', value: 'documents' },
+    { label: 'Guardians', value: 'guardians' },
+    { label: 'System', value: 'system' },
   ];
 
   statusOptions = computed<MbSelectOption[]>(() => {
@@ -1486,7 +1461,7 @@ export class StudentsListComponent implements OnInit {
     if (!this.selectedStudentId()) {
       return false;
     }
-    return this.loading() || this.detailLoading() || this.activityLoading();
+    return this.loading() || this.detailLoading() || this.timelineLoading();
   });
 
   selectedStudentDetail = signal<Student | null>(null);
@@ -1498,8 +1473,8 @@ export class StudentsListComponent implements OnInit {
       if (!id) {
         this.selectedStudentDetail.set(null);
         this.detailLoading.set(false);
-        this.activityItems.set([]);
-        this.activityDetailOpen.set(false);
+        this.timelineItems.set([]);
+        this.timelineDetailOpen.set(false);
       }
       this.searchTerm.set(params.get('search') || '');
       this.statusFilter = params.get('status') || '';
@@ -1533,7 +1508,7 @@ export class StudentsListComponent implements OnInit {
         this.selectedDetailTab.set(nextTab);
       }
       this.loadStudents();
-      this.loadActivity(true);
+      this.loadTimeline(true);
       this.loadFilterOptions();
     });
     this.loadColumnConfig();
@@ -1682,8 +1657,10 @@ export class StudentsListComponent implements OnInit {
     this.selectedStudentId.set(student.id);
     this.selectedStudentDetail.set(student);
     this.detailLoading.set(false);
-    this.activityPage.set(1);
-    this.activityItems.set([]);
+    this.timelinePage.set(1);
+    this.timelineItems.set([]);
+    this.timelineDetailOpen.set(false);
+    this.selectedTimelineItem.set(null);
     this.guardians.set([]);
     this.documents.set([]);
     this.notes.set([]);
@@ -1703,8 +1680,9 @@ export class StudentsListComponent implements OnInit {
   closeDetail(): void {
     this.selectedStudentId.set(null);
     this.detailDrawerOpen.set(false);
-    this.activityItems.set([]);
-    this.activityDetailOpen.set(false);
+    this.timelineItems.set([]);
+    this.timelineDetailOpen.set(false);
+    this.selectedTimelineItem.set(null);
     this.selectedStudentDetail.set(null);
     this.guardians.set([]);
     this.documents.set([]);
@@ -2375,80 +2353,140 @@ export class StudentsListComponent implements OnInit {
       return;
     }
     if (tab === 'activity') {
-      this.loadActivity(true);
+      this.loadTimeline(true);
     }
   }
 
-  setActivityFilter(filter: ActivityFilter): void {
-    if (this.activityFilter() === filter) {
+  setTimelineFilter(filter: TimelineFilter): void {
+    if (this.timelineFilter() === filter) {
       return;
     }
-    this.activityFilter.set(filter);
-    this.activityPage.set(1);
-    this.activityItems.set([]);
-    this.activityDetailOpen.set(false);
-    this.selectedActivity.set(null);
-    this.loadActivity(true);
+    this.timelineFilter.set(filter);
+    this.timelinePage.set(1);
+    this.timelineItems.set([]);
+    this.timelineDetailOpen.set(false);
+    this.selectedTimelineItem.set(null);
+    this.loadTimeline(true);
   }
 
-  loadActivity(reset = false): void {
+  loadTimeline(reset = false): void {
     const studentId = this.selectedStudentId();
     if (!studentId) {
-      this.activityItems.set([]);
-      this.activityLoading.set(false);
-      this.activityError.set(null);
-      this.activityHasNext.set(false);
+      this.timelineItems.set([]);
+      this.timelineLoading.set(false);
+      this.timelineError.set(null);
+      this.timelineHasNext.set(false);
       return;
     }
     if (reset) {
-      this.activityItems.set([]);
-      this.activityPage.set(1);
+      this.timelineItems.set([]);
+      this.timelinePage.set(1);
     }
-    this.activityLoading.set(true);
-    this.activityError.set(null);
-    const page = this.activityPage();
+    this.timelineLoading.set(true);
+    this.timelineError.set(null);
+    const page = this.timelinePage();
     const pageSize = 10;
-    this.activitySub?.unsubscribe();
-    this.activitySub = this.studentsService
-      .getStudentActivity(studentId, { category: this.activityFilter(), page, pageSize })
+    this.timelineSub?.unsubscribe();
+    this.timelineSub = this.studentsService
+      .getStudentActivity(studentId, { category: this.timelineFilter(), page, pageSize })
       .subscribe({
         next: (items) => {
-          const nextItems = page === 1 ? items : [...this.activityItems(), ...items];
-          this.activityItems.set(nextItems);
-          this.activityHasNext.set(items.length === pageSize);
-          this.activityLoading.set(false);
+          const converted = items.map((item) => this.mapToTimelineItem(studentId, item));
+          const nextItems = page === 1 ? converted : [...this.timelineItems(), ...converted];
+          this.timelineItems.set(nextItems);
+          this.timelineHasNext.set(items.length === pageSize);
+          this.timelineLoading.set(false);
         },
         error: () => {
-          this.activityError.set('Could not load activity.');
-          this.activityLoading.set(false);
-        }
+          this.timelineError.set('Could not load timeline.');
+          this.timelineLoading.set(false);
+        },
       });
   }
 
-  loadMoreActivity(): void {
-    if (this.activityLoading() || !this.activityHasNext()) {
+  loadMoreTimeline(): void {
+    if (this.timelineLoading() || !this.timelineHasNext()) {
       return;
     }
-    this.activityPage.set(this.activityPage() + 1);
-    this.loadActivity();
+    this.timelinePage.set(this.timelinePage() + 1);
+    this.loadTimeline();
   }
 
-  openActivityDetail(item: StudentActivityItem): void {
-    this.selectedActivity.set(item);
-    this.activityDetailOpen.set(true);
+  openTimelineDetail(item: StudentTimelineItem): void {
+    this.selectedTimelineItem.set(item);
+    this.timelineDetailOpen.set(true);
   }
 
-  closeActivityDetail(): void {
-    this.activityDetailOpen.set(false);
-    this.selectedActivity.set(null);
+  closeTimelineDetail(): void {
+    this.timelineDetailOpen.set(false);
+    this.selectedTimelineItem.set(null);
   }
 
-  formatActivityTime(date?: Date | string): string {
+  formatTimelineTime(date?: string): string {
     if (!date) {
       return '—';
     }
-    const value = typeof date === 'string' ? new Date(date) : date;
+    const value = new Date(date);
     return value.toLocaleString();
+  }
+
+  private mapToTimelineItem(studentId: string, item: StudentActivityItem): StudentTimelineItem {
+    const occurredAt = typeof item.createdAt === 'string' ? item.createdAt : item.createdAt.toISOString();
+    return {
+      id: item.id,
+      studentId,
+      category: item.category,
+      title: item.title,
+      description: item.metadata || undefined,
+      occurredAt,
+      actor: item.actor ? { name: item.actor } : undefined,
+      metadata: item.metadata ? { detail: item.metadata } : undefined,
+    };
+  }
+
+  private mapToActivityItem = (item: StudentTimelineItem): StudentActivityItem => ({
+    id: item.id,
+    title: item.title,
+    category: this.normalizeActivityCategory(item.category),
+    createdAt: item.occurredAt,
+    actor: item.actor?.name,
+    metadata: item.description,
+  });
+
+  private normalizeActivityCategory(category: StudentTimelineCategory): StudentActivityCategory {
+    return category === 'notes' ? 'system' : category;
+  }
+
+  setActivityFilter(filter: ActivityFilter): void {
+    this.setTimelineFilter(filter);
+  }
+
+  loadActivity(reset = false): void {
+    this.loadTimeline(reset);
+  }
+
+  loadMoreActivity(): void {
+    this.loadMoreTimeline();
+  }
+
+  openActivityDetail(item: StudentActivityItem): void {
+    const timelineItem = this.timelineItems().find((entry) => entry.id === item.id);
+    if (timelineItem) {
+      this.openTimelineDetail(timelineItem);
+    }
+  }
+
+  closeActivityDetail(): void {
+    this.closeTimelineDetail();
+  }
+
+  formatActivityTime(date?: Date | string): string {
+    const occurredAt = typeof date === 'string' ? date : date ? date.toISOString() : undefined;
+    return this.formatTimelineTime(occurredAt);
+  }
+
+  handleTimelineAction(event: { item: StudentTimelineItem; link: { label: string; route: string } }): void {
+    this.openTimelineDetail(event.item);
   }
 
   viewStudent(event: Event, student: Student): void {
@@ -2523,10 +2561,10 @@ export class StudentsListComponent implements OnInit {
     this.selectedStudentDetail.set(null);
     this.detailDrawerOpen.set(true);
     this.detailLoading.set(true);
-    this.activityItems.set([]);
-    this.activityPage.set(1);
+    this.timelineItems.set([]);
+    this.timelinePage.set(1);
     this.loadSelectedStudentDetail(studentId);
-    this.loadActivity(true);
+    this.loadTimeline(true);
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { studentId },

@@ -1,0 +1,85 @@
+<div class="timeline-card">
+    <div class="timeline-card__header">
+        <div>
+            <h3>Timeline</h3>
+            <p class="timeline-card__subtitle">Recent student activity</p>
+        </div>
+        <div class="timeline-card__menu">
+            <span cdkOverlayOrigin #menuOrigin="cdkOverlayOrigin">
+                <mb-button
+                    size="sm"
+                    variant="tertiary"
+                    aria-label="Timeline overflow menu"
+                    (click)="toggleMenu($event)">
+                    ⋯
+                </mb-button>
+            </span>
+            <mb-popover
+                [open]="menuOpenSignal"
+                [origin]="menuOrigin"
+                [hasBackdrop]="true"
+                variant="plain"
+                (closed)="menuOpen.set(false)">
+                <div class="timeline-card__menu-list">
+                    <button type="button" class="timeline-card__menu-item" (click)="handleHeaderAction('export')">
+                        Export timeline
+                    </button>
+                    <button type="button" class="timeline-card__menu-item" (click)="handleHeaderAction('filter')">
+                        Filter options
+                    </button>
+                </div>
+            </mb-popover>
+        </div>
+    </div>
+    <div class="timeline-card__filters" role="tablist" aria-label="Timeline filters">
+        <button
+            *ngFor="let filter of filters"
+            type="button"
+            class="timeline-card__filter"
+            [class.is-active]="activeFilter === filter.value"
+            (click)="setFilter(filter.value)"
+            [attr.aria-pressed]="activeFilter === filter.value">
+            {{ filter.label }}
+        </button>
+    </div>
+    <div class="timeline-card__body">
+        <ng-container *ngIf="!hasStudent">
+            <div class="timeline-card__empty">
+                Select a student to view activity.
+            </div>
+        </ng-container>
+        <ng-container *ngIf="hasStudent">
+            <ng-container *ngIf="loading">
+                <div class="timeline-card__skeleton">
+                    <div class="timeline-card__skeleton-row" *ngFor="let _ of skeletonRows"></div>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="!loading && error">
+                <div class="timeline-card__error">
+                    <p>Couldn’t load timeline.</p>
+                    <mb-button size="sm" variant="tertiary" (click)="retry.emit()">Retry</mb-button>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="!loading && !error && filteredItems.length === 0">
+                <div class="timeline-card__empty">
+                    <strong>No activity recorded yet.</strong>
+                    <p>Actions like adding a note or uploading a document will appear here.</p>
+                </div>
+            </ng-container>
+            <ng-container *ngIf="!loading && !error && filteredItems.length">
+                <div class="timeline-card__list" role="list">
+                    <app-student-timeline-item
+                        *ngFor="let item of filteredItems"
+                        [item]="item"
+                        [selectable]="true"
+                        (select)="onItemSelected($event)"
+                        (action)="onItemAction($event)">
+                    </app-student-timeline-item>
+                </div>
+                <div class="timeline-card__footer" *ngIf="hasMore">
+                    <mb-button size="sm" variant="tertiary" (click)="loadMore.emit()">Load more</mb-button>
+                </div>
+            </ng-container>
+        </ng-container>
+    </div>
+</div>
