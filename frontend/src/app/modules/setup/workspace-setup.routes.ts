@@ -29,7 +29,7 @@ export const WORKSPACE_SETUP_ROUTES: Routes = [
       {
         path: 'academic-structure',
         loadComponent: () =>
-          import('./pages/tenant-workspace-setup/levels/tenant-workspace-setup-levels.component').then(m => m.TenantWorkspaceSetupLevelsComponent)
+          import('./pages/academic-levels/academic-levels.page').then(m => m.AcademicLevelsPageComponent)
       },
       {
         path: 'classes-sections',

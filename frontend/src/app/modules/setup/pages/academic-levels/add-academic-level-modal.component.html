@@ -1,0 +1,46 @@
+<mb-modal [open]="open" title="Add level" size="sm" (closed)="handleClose()">
+    <p class="modal-description">
+        Create a new academic level for enrollment and class setup.
+    </p>
+    <mb-form-field label="Name" [required]="true">
+        <mb-input
+            [value]="name()"
+            placeholder="Level name"
+            [autofocus]="true"
+            (valueChange)="name.set($event)"
+            (keydown.enter)="handleSubmit()"
+        ></mb-input>
+    </mb-form-field>
+    <mb-form-field label="Code" class="modal-field">
+        <mb-input
+            [value]="code()"
+            placeholder="Optional code"
+            (valueChange)="code.set($event)"
+            (keydown.enter)="handleSubmit()"
+        ></mb-input>
+    </mb-form-field>
+    <mb-form-field
+        *ngIf="template?.supportsGrouping"
+        [label]="template?.groupLabel || 'Group'"
+        class="modal-field"
+    >
+        <mb-input
+            [value]="group()"
+            placeholder="Group name"
+            (valueChange)="group.set($event)"
+            (keydown.enter)="handleSubmit()"
+        ></mb-input>
+    </mb-form-field>
+    <div *ngIf="errorMessage" class="modal-error">{{ errorMessage }}</div>
+    <div mbModalFooter>
+        <mb-button variant="secondary" (click)="handleClose()">Cancel</mb-button>
+        <mb-button
+            variant="primary"
+            [loading]="isSubmitting"
+            [disabled]="isSubmitting || !name().trim()"
+            (click)="handleSubmit()"
+        >
+            Add level
+        </mb-button>
+    </div>
+</mb-modal>

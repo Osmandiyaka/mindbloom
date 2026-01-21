@@ -1,0 +1,15 @@
+.modal-description {
+    margin: 0 0 16px;
+    font-size: 14px;
+    color: var(--mb-color-text-muted);
+}
+
+.modal-field {
+    margin-top: 12px;
+}
+
+.modal-error {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--mb-color-text-danger, #dc2626);
+}

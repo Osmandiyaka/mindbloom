@@ -1,0 +1,154 @@
+<div class="levels-table">
+    <table>
+        <thead>
+            <tr>
+                <th class="levels-table__th levels-table__th--order" aria-label="Order"></th>
+                <th class="levels-table__th">Level name</th>
+                <th *ngIf="showCodeColumn" class="levels-table__th">Code</th>
+                <th *ngIf="showGroupColumn" class="levels-table__th">Group</th>
+                <th class="levels-table__th">Status</th>
+                <th class="levels-table__th levels-table__th--actions" aria-label="Actions"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let level of levels; let index = index" class="levels-table__row">
+                <td class="levels-table__cell levels-table__cell--order">
+                    <span class="levels-table__drag" aria-hidden="true">☰</span>
+                    <span class="levels-table__index">{{ index + 1 }}</span>
+                    <div *ngIf="reorderMode" class="levels-table__reorder-controls">
+                        <button
+                            type="button"
+                            class="levels-table__reorder"
+                            [disabled]="index === 0 || reorderSaving"
+                            aria-label="Move up"
+                            (click)="emitReorder(level.id, 'up')"
+                        >
+                            ▲
+                        </button>
+                        <button
+                            type="button"
+                            class="levels-table__reorder"
+                            [disabled]="index === levels.length - 1 || reorderSaving"
+                            aria-label="Move down"
+                            (click)="emitReorder(level.id, 'down')"
+                        >
+                            ▼
+                        </button>
+                    </div>
+                </td>
+                <td class="levels-table__cell" [class.is-editing]="isEditing(level.id, 'name')">
+                    <div class="levels-table__cell-content" (click)="startEditing(level.id, 'name')">
+                        <ng-container *ngIf="isEditing(level.id, 'name'); else viewName">
+                            <mb-input
+                                class="levels-table__input"
+                                [value]="getDraftValue(level, 'name')"
+                                (valueChange)="updateDraft(level.id, 'name', $event)"
+                                (blurEvent)="commitEdit(level.id, 'name')"
+                                (keydown.enter)="commitEdit(level.id, 'name')"
+                                (keydown.escape)="cancelEdit()"
+                                [autofocus]="true"
+                            ></mb-input>
+                        </ng-container>
+                        <ng-template #viewName>
+                            <span class="levels-table__text">{{ level.name || '—' }}</span>
+                        </ng-template>
+                        <span class="levels-table__status" *ngIf="autosaveStatuses[level.id]">
+                            {{ statusLabel(autosaveStatuses[level.id].status) }}
+                        </span>
+                    </div>
+                    <div class="levels-table__hint" *ngIf="validationWarnings[level.id]?.name">
+                        {{ validationWarnings[level.id]?.name }}
+                    </div>
+                </td>
+                <td *ngIf="showCodeColumn" class="levels-table__cell" [class.is-editing]="isEditing(level.id, 'code')">
+                    <div class="levels-table__cell-content" (click)="startEditing(level.id, 'code')">
+                        <ng-container *ngIf="isEditing(level.id, 'code'); else viewCode">
+                            <mb-input
+                                class="levels-table__input"
+                                [value]="getDraftValue(level, 'code')"
+                                (valueChange)="updateDraft(level.id, 'code', $event)"
+                                (blurEvent)="commitEdit(level.id, 'code')"
+                                (keydown.enter)="commitEdit(level.id, 'code')"
+                                (keydown.escape)="cancelEdit()"
+                            ></mb-input>
+                        </ng-container>
+                        <ng-template #viewCode>
+                            <span class="levels-table__text">{{ level.code || '—' }}</span>
+                        </ng-template>
+                    </div>
+                    <div class="levels-table__hint" *ngIf="validationWarnings[level.id]?.code">
+                        {{ validationWarnings[level.id]?.code }}
+                    </div>
+                </td>
+                <td *ngIf="showGroupColumn" class="levels-table__cell" [class.is-editing]="isEditing(level.id, 'group')">
+                    <div class="levels-table__cell-content" (click)="startEditing(level.id, 'group')">
+                        <ng-container *ngIf="isEditing(level.id, 'group'); else viewGroup">
+                            <mb-input
+                                class="levels-table__input"
+                                [value]="getDraftValue(level, 'group')"
+                                (valueChange)="updateDraft(level.id, 'group', $event)"
+                                (blurEvent)="commitEdit(level.id, 'group')"
+                                (keydown.enter)="commitEdit(level.id, 'group')"
+                                (keydown.escape)="cancelEdit()"
+                            ></mb-input>
+                        </ng-container>
+                        <ng-template #viewGroup>
+                            <span class="levels-table__text">{{ level.group || '—' }}</span>
+                        </ng-template>
+                    </div>
+                </td>
+                <td class="levels-table__cell">
+                    <span class="levels-table__badge" [class.levels-table__badge--archived]="level.status === 'archived'">
+                        {{ level.status === 'archived' ? 'Archived' : 'Active' }}
+                    </span>
+                </td>
+                <td class="levels-table__cell levels-table__cell--actions">
+                    <button
+                        type="button"
+                        class="levels-table__menu-trigger"
+                        #rowMenuOrigin
+                        aria-label="Row actions"
+                        (click)="toggleRowMenu(level.id, $event)"
+                    >
+                        …
+                    </button>
+                    <mb-popover
+                        [open]="rowMenuOpenId() === level.id"
+                        [origin]="rowMenuOrigin"
+                        [hasBackdrop]="true"
+                        [panelClass]="['mb-popover-panel', 'mb-popover-panel--above-modal', 'levels-row-menu__panel']"
+                        (closed)="rowMenuOpenId.set(null)"
+                    >
+                        <div class="levels-row-menu" role="menu">
+                            <button
+                                type="button"
+                                class="levels-row-menu__item"
+                                (click)="handleArchive(level); $event.stopPropagation()"
+                                *ngIf="level.status !== 'archived'"
+                            >
+                                Archive
+                            </button>
+                            <button
+                                type="button"
+                                class="levels-row-menu__item"
+                                (click)="handleRestore(level); $event.stopPropagation()"
+                                *ngIf="level.status === 'archived'"
+                            >
+                                Restore
+                            </button>
+                            <div class="levels-row-menu__divider" *ngIf="level.status === 'archived'"></div>
+                            <button
+                                type="button"
+                                class="levels-row-menu__item levels-row-menu__item--danger"
+                                (click)="handleDelete(level); $event.stopPropagation()"
+                                *ngIf="level.status === 'archived'"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </mb-popover>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

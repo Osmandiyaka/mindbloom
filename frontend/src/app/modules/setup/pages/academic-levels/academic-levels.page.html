@@ -1,0 +1,207 @@
+<div class="academic-levels-page">
+    <section class="page-header">
+        <div>
+            <h1>Academic levels</h1>
+            <p>Choose a template, then adjust the list to match your structure.</p>
+        </div>
+        <div class="page-header__actions">
+            <button
+                type="button"
+                class="column-trigger"
+                #columnsButton
+                aria-label="Column settings"
+                (click)="columnsMenuOpen.set(!columnsMenuOpen())"
+            >
+                Columns
+            </button>
+            <mb-popover
+                [open]="columnsMenuOpen()"
+                [origin]="columnsButton"
+                [hasBackdrop]="true"
+                [panelClass]="['mb-popover-panel', 'academic-levels-columns__panel']"
+                (closed)="columnsMenuOpen.set(false)"
+            >
+                <div class="columns-menu">
+                    <mb-checkbox
+                        [checked]="codeColumnVisible()"
+                        (checkedChange)="toggleColumn('code')"
+                    >
+                        Show code column
+                    </mb-checkbox>
+                    <mb-checkbox
+                        [checked]="groupColumnVisible()"
+                        (checkedChange)="toggleColumn('group')"
+                        [disabled]="!currentTemplate().supportsGrouping"
+                    >
+                        Show group column
+                    </mb-checkbox>
+                </div>
+            </mb-popover>
+            <button
+                type="button"
+                class="overflow-trigger"
+                #overflowButton
+                aria-label="More actions"
+                (click)="overflowMenuOpen.set(!overflowMenuOpen())"
+            >
+                …
+            </button>
+            <mb-popover
+                [open]="overflowMenuOpen()"
+                [origin]="overflowButton"
+                [hasBackdrop]="true"
+                [panelClass]="['mb-popover-panel', 'academic-levels-overflow__panel']"
+                (closed)="overflowMenuOpen.set(false)"
+            >
+                <div class="overflow-menu">
+                    <button type="button" class="overflow-menu__item" (click)="applyResetTemplate()">
+                        Reset
+                    </button>
+                    <button type="button" class="overflow-menu__item" (click)="showImportToast()">
+                        Import preset
+                    </button>
+                    <button type="button" class="overflow-menu__item" (click)="showExportToast()">
+                        Export
+                    </button>
+                    <label class="overflow-menu__item">
+                        <mb-checkbox
+                            [checked]="showArchived()"
+                            (checkedChange)="store.setShowArchived($event)"
+                        >
+                            Show archived levels
+                        </mb-checkbox>
+                    </label>
+                </div>
+            </mb-popover>
+        </div>
+    </section>
+
+    <section class="template-selector">
+        <button
+            *ngFor="let template of templates()"
+            type="button"
+            class="template-card"
+            [class.is-active]="template.key === store.selectedTemplateKey()"
+            (click)="handleTemplateSelect(template)"
+        >
+            <div class="template-card__title">{{ template.title }}</div>
+            <div class="template-card__description">{{ template.description }}</div>
+            <span class="template-card__indicator" *ngIf="template.key === store.selectedTemplateKey()">Selected</span>
+        </button>
+    </section>
+
+    <section class="levels-panel">
+        <header class="levels-panel__header">
+            <div>
+                <div class="levels-panel__title-row">
+                    <h2>Levels</h2>
+                    <span class="levels-panel__count">{{ store.levels().length }} total</span>
+                </div>
+                <p class="levels-panel__subtitle">Drag to reorder or edit inline.</p>
+                <div class="levels-panel__indicator" *ngIf="autosaveIndicator()?.text">
+                    <span [class]="'levels-panel__indicator-text ' + (autosaveIndicator()?.tone || '')">
+                        {{ autosaveIndicator()?.text }}
+                    </span>
+                </div>
+            </div>
+            <div class="levels-panel__actions">
+                <mb-button variant="primary" (click)="openAddModal()">+ Add level</mb-button>
+                <button
+                    type="button"
+                    class="levels-panel__reorder"
+                    [class.is-active]="store.reorderMode()"
+                    (click)="toggleReorderMode()"
+                    aria-pressed="{{ store.reorderMode() }}"
+                >
+                    Reorder
+                </button>
+            </div>
+        </header>
+
+        <div class="levels-panel__body">
+            <div class="levels-panel__archived-hint" *ngIf="showArchived() && store.hasArchived()">
+                Showing archived levels alongside active ones.
+            </div>
+
+            <ng-container *ngIf="isLoading(); else tableContent">
+                <div class="levels-skeleton" *ngFor="let row of [1,2,3,4,5]">
+                    <span class="levels-skeleton__line"></span>
+                </div>
+            </ng-container>
+
+            <ng-template #tableContent>
+                <div class="levels-error" *ngIf="errorMessage()">
+                    <p>{{ errorMessage() }}</p>
+                    <button type="button" (click)="store.loadLevels()">Retry</button>
+                </div>
+
+                <div class="levels-empty" *ngIf="!errorMessage() && !displayLevels().length">
+                    <p>No levels yet.</p>
+                    <div class="levels-empty__actions">
+                        <mb-button variant="primary" (click)="handleTemplateSelect(templates()[0])">
+                            Apply a template
+                        </mb-button>
+                        <mb-button variant="secondary" (click)="openAddModal()">Add level</mb-button>
+                    </div>
+                </div>
+
+                <app-academic-levels-table
+                    *ngIf="displayLevels().length"
+                    [levels]="displayLevels()"
+                    [focusRowId]="levelFocusId()"
+                    [showGroupColumn]="groupColumnVisible()"
+                    [showCodeColumn]="codeColumnVisible()"
+                    [reorderMode]="store.reorderMode()"
+                    [reorderSaving]="store.reorderSaving()"
+                    [autosaveStatuses]="store.autosaveStatus()"
+                    [validationWarnings]="validationWarnings()"
+                    (inlineEdit)="handleRowInlineEdit($event)"
+                    (requestArchive)="handleRowAction('archive', $event)"
+                    (requestRestore)="handleRowAction('restore', $event)"
+                    (requestDelete)="handleRowAction('delete', $event)"
+                    (requestReorder)="store.moveLevel($event.id, $event.direction)"
+                ></app-academic-levels-table>
+            </ng-template>
+        </div>
+    </section>
+
+    <mb-modal
+        [open]="templateConfirmOpen()"
+        title="Replace levels"
+        size="sm"
+        (closed)="cancelTemplateChange()"
+    >
+        <p>
+            Changing to <strong>{{ pendingTemplate()?.title }}</strong> will replace your current levels.
+            You currently have {{ store.levels().length }} level{{ store.levels().length === 1 ? '' : 's' }}.
+        </p>
+        <div mbModalFooter>
+            <mb-button variant="secondary" (click)="cancelTemplateChange()">Cancel</mb-button>
+            <mb-button variant="primary" (click)="confirmTemplateChange()">Replace</mb-button>
+        </div>
+    </mb-modal>
+
+    <app-add-academic-level-modal
+        [open]="addModalOpen()"
+        [template]="currentTemplate()"
+        [isSubmitting]="store.isAddingLevel()"
+        (closed)="addModalOpen.set(false)"
+        (submit)="handleAddLevel($event)"
+    ></app-add-academic-level-modal>
+
+    <app-destructive-confirm-modal
+        [open]="destructiveModalOpen()"
+        [title]="destructiveAction() === 'delete' ? 'Delete level' : 'Archive level'"
+        [description]="destructiveTarget()?.name ? 'This will impact ' + destructiveTarget()!.name : ''"
+        [impactTitle]="destructiveImpactItems().length ? 'Impact' : ''"
+        [impactItems]="destructiveImpactItems()"
+        [requireConfirmation]="requireTypedConfirmation()"
+        [confirmationLabel]="'Type the level name to confirm'"
+        [confirmationPlaceholder]="destructiveTarget()?.name || 'Level name'"
+        [confirmText]="destructiveTarget()?.name || ''"
+        [confirmButtonLabel]="destructiveAction() === 'delete' ? 'Delete' : 'Archive'"
+        [isProcessing]="destructiveProcessing()"
+        (closed)="handleDestructiveClosed()"
+        (confirmed)="handleDestructiveConfirm($event)"
+    ></app-destructive-confirm-modal>
+</div>
