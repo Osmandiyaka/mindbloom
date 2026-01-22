@@ -13,7 +13,7 @@ import {
 import { ApiError } from '../../../../core/http/api-client.service';
 
 type AutosaveStatusValue = {
-    status: 'idle' | 'saving' | 'saved' | 'error';
+    status: 'saving' | 'saved' | 'error';
     message?: string;
 };
 

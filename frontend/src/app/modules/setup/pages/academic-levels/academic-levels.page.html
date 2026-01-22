@@ -5,54 +5,30 @@
             <p>Choose a template, then adjust the list to match your structure.</p>
         </div>
         <div class="page-header__actions">
-            <button
-                type="button"
-                class="column-trigger"
-                #columnsButton
-                aria-label="Column settings"
-                (click)="columnsMenuOpen.set(!columnsMenuOpen())"
-            >
+            <button type="button" class="column-trigger" #columnsButton aria-label="Column settings"
+                (click)="columnsMenuOpen.set(!columnsMenuOpen())">
                 Columns
             </button>
-            <mb-popover
-                [open]="columnsMenuOpen()"
-                [origin]="columnsButton"
-                [hasBackdrop]="true"
+            <mb-popover [open]="columnsMenuOpen()" [origin]="columnsButton" [hasBackdrop]="true"
                 [panelClass]="['mb-popover-panel', 'academic-levels-columns__panel']"
-                (closed)="columnsMenuOpen.set(false)"
-            >
+                (closed)="columnsMenuOpen.set(false)">
                 <div class="columns-menu">
-                    <mb-checkbox
-                        [checked]="codeColumnVisible()"
-                        (checkedChange)="toggleColumn('code')"
-                    >
+                    <mb-checkbox [checked]="codeColumnVisible()" (checkedChange)="toggleColumn('code')">
                         Show code column
                     </mb-checkbox>
-                    <mb-checkbox
-                        [checked]="groupColumnVisible()"
-                        (checkedChange)="toggleColumn('group')"
-                        [disabled]="!currentTemplate().supportsGrouping"
-                    >
+                    <mb-checkbox [checked]="groupColumnVisible()" (checkedChange)="toggleColumn('group')"
+                        [disabled]="!currentTemplate().supportsGrouping">
                         Show group column
                     </mb-checkbox>
                 </div>
             </mb-popover>
-            <button
-                type="button"
-                class="overflow-trigger"
-                #overflowButton
-                aria-label="More actions"
-                (click)="overflowMenuOpen.set(!overflowMenuOpen())"
-            >
+            <button type="button" class="overflow-trigger" #overflowButton aria-label="More actions"
+                (click)="overflowMenuOpen.set(!overflowMenuOpen())">
                 …
             </button>
-            <mb-popover
-                [open]="overflowMenuOpen()"
-                [origin]="overflowButton"
-                [hasBackdrop]="true"
+            <mb-popover [open]="overflowMenuOpen()" [origin]="overflowButton" [hasBackdrop]="true"
                 [panelClass]="['mb-popover-panel', 'academic-levels-overflow__panel']"
-                (closed)="overflowMenuOpen.set(false)"
-            >
+                (closed)="overflowMenuOpen.set(false)">
                 <div class="overflow-menu">
                     <button type="button" class="overflow-menu__item" (click)="applyResetTemplate()">
                         Reset
@@ -64,10 +40,7 @@
                         Export
                     </button>
                     <label class="overflow-menu__item">
-                        <mb-checkbox
-                            [checked]="showArchived()"
-                            (checkedChange)="store.setShowArchived($event)"
-                        >
+                        <mb-checkbox [checked]="showArchived()" (checkedChange)="store.setShowArchived($event)">
                             Show archived levels
                         </mb-checkbox>
                     </label>
@@ -77,13 +50,8 @@
     </section>
 
     <section class="template-selector">
-        <button
-            *ngFor="let template of templates()"
-            type="button"
-            class="template-card"
-            [class.is-active]="template.key === store.selectedTemplateKey()"
-            (click)="handleTemplateSelect(template)"
-        >
+        <button *ngFor="let template of templates()" type="button" class="template-card"
+            [class.is-active]="template.key === store.selectedTemplateKey()" (click)="handleTemplateSelect(template)">
             <div class="template-card__title">{{ template.title }}</div>
             <div class="template-card__description">{{ template.description }}</div>
             <span class="template-card__indicator" *ngIf="template.key === store.selectedTemplateKey()">Selected</span>
@@ -106,13 +74,8 @@
             </div>
             <div class="levels-panel__actions">
                 <mb-button variant="primary" (click)="openAddModal()">+ Add level</mb-button>
-                <button
-                    type="button"
-                    class="levels-panel__reorder"
-                    [class.is-active]="store.reorderMode()"
-                    (click)="toggleReorderMode()"
-                    aria-pressed="{{ store.reorderMode() }}"
-                >
+                <button type="button" class="levels-panel__reorder" [class.is-active]="store.reorderMode()"
+                    (click)="toggleReorderMode()" [attr.aria-pressed]="store.reorderMode()">
                     Reorder
                 </button>
             </div>
@@ -145,32 +108,20 @@
                     </div>
                 </div>
 
-                <app-academic-levels-table
-                    *ngIf="displayLevels().length"
-                    [levels]="displayLevels()"
-                    [focusRowId]="levelFocusId()"
-                    [showGroupColumn]="groupColumnVisible()"
-                    [showCodeColumn]="codeColumnVisible()"
-                    [reorderMode]="store.reorderMode()"
-                    [reorderSaving]="store.reorderSaving()"
-                    [autosaveStatuses]="store.autosaveStatus()"
-                    [validationWarnings]="validationWarnings()"
-                    (inlineEdit)="handleRowInlineEdit($event)"
+                <app-academic-levels-table *ngIf="displayLevels().length" [levels]="displayLevels()"
+                    [focusRowId]="levelFocusId()" [showGroupColumn]="groupColumnVisible()"
+                    [showCodeColumn]="codeColumnVisible()" [reorderMode]="store.reorderMode()"
+                    [reorderSaving]="store.reorderSaving()" [autosaveStatuses]="store.autosaveStatus()"
+                    [validationWarnings]="validationWarnings()" (inlineEdit)="handleRowInlineEdit($event)"
                     (requestArchive)="handleRowAction('archive', $event)"
                     (requestRestore)="handleRowAction('restore', $event)"
                     (requestDelete)="handleRowAction('delete', $event)"
-                    (requestReorder)="store.moveLevel($event.id, $event.direction)"
-                ></app-academic-levels-table>
+                    (requestReorder)="store.moveLevel($event.id, $event.direction)"></app-academic-levels-table>
             </ng-template>
         </div>
     </section>
 
-    <mb-modal
-        [open]="templateConfirmOpen()"
-        title="Replace levels"
-        size="sm"
-        (closed)="cancelTemplateChange()"
-    >
+    <mb-modal [open]="templateConfirmOpen()" title="Replace levels" size="sm" (closed)="cancelTemplateChange()">
         <p>
             Changing to <strong>{{ pendingTemplate()?.title }}</strong> will replace your current levels.
             You currently have {{ store.levels().length }} level{{ store.levels().length === 1 ? '' : 's' }}.
@@ -181,27 +132,18 @@
         </div>
     </mb-modal>
 
-    <app-add-academic-level-modal
-        [open]="addModalOpen()"
-        [template]="currentTemplate()"
-        [isSubmitting]="store.isAddingLevel()"
-        (closed)="addModalOpen.set(false)"
-        (submit)="handleAddLevel($event)"
-    ></app-add-academic-level-modal>
+    <app-add-academic-level-modal [open]="addModalOpen()" [template]="currentTemplate()"
+        [isSubmitting]="store.isAddingLevel()" (closed)="addModalOpen.set(false)"
+        (submit)="handleAddLevel($event)"></app-add-academic-level-modal>
 
-    <app-destructive-confirm-modal
-        [open]="destructiveModalOpen()"
+    <app-destructive-confirm-modal [open]="destructiveModalOpen()"
         [title]="destructiveAction() === 'delete' ? 'Delete level' : 'Archive level'"
         [description]="destructiveTarget()?.name ? 'This will impact ' + destructiveTarget()!.name : ''"
-        [impactTitle]="destructiveImpactItems().length ? 'Impact' : ''"
-        [impactItems]="destructiveImpactItems()"
-        [requireConfirmation]="requireTypedConfirmation()"
-        [confirmationLabel]="'Type the level name to confirm'"
+        [impactTitle]="destructiveImpactItems().length ? 'Impact' : ''" [impactItems]="destructiveImpactItems()"
+        [requireConfirmation]="requireTypedConfirmation()" [confirmationLabel]="'Type the level name to confirm'"
         [confirmationPlaceholder]="destructiveTarget()?.name || 'Level name'"
         [confirmText]="destructiveTarget()?.name || ''"
         [confirmButtonLabel]="destructiveAction() === 'delete' ? 'Delete' : 'Archive'"
-        [isProcessing]="destructiveProcessing()"
-        (closed)="handleDestructiveClosed()"
-        (confirmed)="handleDestructiveConfirm($event)"
-    ></app-destructive-confirm-modal>
+        [isProcessing]="destructiveProcessing()" (closed)="handleDestructiveClosed()"
+        (confirmed)="handleDestructiveConfirm($event)"></app-destructive-confirm-modal>
 </div>
