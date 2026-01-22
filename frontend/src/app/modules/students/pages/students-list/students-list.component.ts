@@ -869,6 +869,7 @@ export class StudentsListComponent implements OnInit {
   skeletonRows = Array.from({ length: 8 });
 
   pageSizeOptions: MbSelectOption[] = [
+    { label: '5 / page', value: '5' },
     { label: '25 / page', value: '25' },
     { label: '50 / page', value: '50' },
     { label: '100 / page', value: '100' },
