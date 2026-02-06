@@ -1,0 +1,58 @@
+<div class="login-page">
+  <div class="login-container">
+    <div class="login-header">
+      <h1>🎓 MindBloom</h1>
+      <p>School Management System</p>
+    </div>
+
+    <app-card>
+      <div class="card-body">
+        <h2 class="mb-4">Sign In</h2>
+        <form (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              class="form-control"
+              [(ngModel)]="credentials.email"
+              name="email"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              class="form-control"
+              [(ngModel)]="credentials.password"
+              name="password"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <div class="form-check mb-4">
+            <input type="checkbox" id="remember" [(ngModel)]="rememberMe" name="remember" />
+            <label for="remember">Remember me</label>
+          </div>
+
+          <app-button
+            variant="primary"
+            [block]="true"
+            type="submit"
+            [disabled]="loading">
+            {{ loading ? 'Signing in...' : 'Sign In' }}
+          </app-button>
+
+          <div class="error-message" *ngIf="error">
+            {{ error }}
+          </div>
+        </form>
+      </div>
+    </app-card>
+  </div>
+</div>
