@@ -5,8 +5,34 @@
                 <div class="auth-card__header auth-card__header--center">
                     <mb-logo class="auth-logo" variant="icon" size="xxl"></mb-logo>
                     <h1>Sign in</h1>
-                    <p>Sign in with your school email to access your MindBloom workspace.</p>
+                    <p>Enter your school email to continue.</p>
                 </div>
+
+                @if (currentStep() === 'email') {
+                <form class="auth-step auth-step--email" (ngSubmit)="handleEmailContinue()">
+                    <p class="auth-step__label">Enter your school email to continue.</p>
+
+                    <mb-form-field label="Email" [controlId]="'login-email'" [error]="emailError()">
+                        <mb-input type="email" id="login-email" autocomplete="email" inputmode="email" [value]="username()"
+                            (valueChange)="username.set($event); errorMessage.set(''); tenantDiscoveryError.set('')"
+                            (focusout)="onEmailBlur()" ariaLabel="Email" [autofocus]="true"
+                            [disabled]="tenantDiscoveryLoading()"></mb-input>
+                    </mb-form-field>
+
+                    <div class="auth-step__actions">
+                        <mb-button type="submit" variant="primary" [fullWidth]="true"
+                            [loading]="tenantDiscoveryLoading()" [disabled]="tenantDiscoveryLoading()">
+                            {{ tenantDiscoveryLoading() ? 'Detecting workspace...' : 'Continue' }}
+                        </mb-button>
+                    </div>
+
+                    @if (tenantDiscoveryError()) {
+                    <p class="auth-step__error">{{ tenantDiscoveryError() }}</p>
+                    }
+
+                    <p class="auth-step__helper">We will detect your workspace and show the available sign-in options.</p>
+                </form>
+                } @else {
 
                 @if (resetSuccess() || errorMessage()) {
                 <div class="auth-alert" tabindex="-1" #alertRef aria-live="polite" aria-atomic="true">
@@ -20,13 +46,63 @@
                 </div>
                 }
 
-                <form class="auth-form" (ngSubmit)="onSubmit()">
-                    <mb-form-field label="Email" [controlId]="'login-email'" [error]="emailError()">
-                        <mb-input #firstFieldRef type="email" id="login-email" autocomplete="email" [value]="username()"
-                            (valueChange)="username.set($event); errorMessage.set('')" (focusout)="onEmailBlur()"
-                            ariaLabel="Email" [autofocus]="true" [disabled]="isLoading()"></mb-input>
-                    </mb-form-field>
+                <div class="tenant-branding">
+                    <div class="tenant-branding__logo" [class.is-empty]="!activeTenant()?.logoUrl">
+                        @if (activeTenant()?.logoUrl) {
+                        <img [src]="activeTenant()?.logoUrl" [alt]="activeTenant()?.tenantName + ' logo'" />
+                        } @else {
+                        <span class="tenant-branding__logo-placeholder"></span>
+                        }
+                    </div>
+                    <div class="tenant-branding__info">
+                        <p class="tenant-branding__name">
+                            {{ activeTenant()?.tenantName || 'Your MindBloom workspace' }}
+                        </p>
+                        <p class="tenant-branding__caption">
+                            @if (tenantDiscoveryResult()?.match === 'multiple') {
+                            Select your workspace below before continuing.
+                            } @else if (tenantDiscoveryResult()?.match === 'single') {
+                            You will sign in with your school's secured access.
+                            } @else {
+                            Enter your password to continue to your workspace.
+                            }
+                        </p>
+                    </div>
+                    <button class="auth-link auth-link--muted auth-link--inline" type="button"
+                        (click)="backToEmailStep()">Not your school?</button>
+                </div>
 
+                @if (tenantDiscoveryResult()?.match === 'multiple' && tenantDiscoveryResult()?.tenants?.length) {
+                <div class="tenant-chooser">
+                    <p class="tenant-chooser__title">Choose your workspace</p>
+                    <div class="tenant-chooser__grid">
+                        <button class="tenant-chooser__card" *ngFor="let tenant of tenantDiscoveryResult()?.tenants"
+                            type="button" [class.is-selected]="selectedTenantId() === tenant.tenantId"
+                            (click)="selectTenant(tenant.tenantId)">
+                            @if (tenant.logoUrl) {
+                            <span class="tenant-chooser__logo">
+                                <img [src]="tenant.logoUrl" [alt]="tenant.tenantName + ' logo'" />
+                            </span>
+                            }
+                            <span class="tenant-chooser__name">{{ tenant.tenantName }}</span>
+                        </button>
+                    </div>
+                    @if (!selectedTenantId()) {
+                    <p class="tenant-chooser__hint">Select a workspace to enable the password field.</p>
+                    }
+                </div>
+                }
+
+                <div class="auth-methods">
+                    <p class="auth-methods__title">Available sign-in options</p>
+                    <div class="auth-methods__grid">
+                        <span class="auth-methods__pill" *ngFor="let method of availableAuthMethods()">
+                            {{ formatAuthMethod(method) }}
+                        </span>
+                    </div>
+                </div>
+
+                <form class="auth-form" (ngSubmit)="onSubmit()">
                     <div class="auth-password-row">
                         <label class="auth-label" for="login-password">Password</label>
                         <a class="auth-link auth-link--muted" routerLink="/auth/forgot">Forgot password?</a>
@@ -68,16 +144,16 @@
                     </div>
 
                     <mb-button type="submit" variant="primary" [fullWidth]="true" [loading]="isLoading()"
-                        [hideLabelOnLoading]="false" [disabled]="isLoading() || !isFormValid()">
+                        [hideLabelOnLoading]="false" [disabled]="isPasswordSubmitDisabled() || !isFormValid()">
                         {{ isLoading() ? 'Signing in...' : 'Sign in' }}
                     </mb-button>
 
                     <div class="auth-links auth-links--stack">
-                        <a class="auth-link--secondary" href="#" (click)="onRegisterTenant($event)">New to MindBloom?
-                            Create an organization</a>
                         <a class="auth-link--muted" href="mailto:support@mindbloom.com">Need help signing in?</a>
+                        <a class="auth-link--secondary" routerLink="/admin/onboarding">IT Admin? Create an organization</a>
                     </div>
                 </form>
+                }
             </mb-card>
         </div>
     </main>
@@ -92,8 +168,3 @@
         </div>
     </footer>
 </div>
-
-@if (showRegistration()) {
-<app-tenant-onboarding mode="registration" (cancelled)="onRegistrationCancelled()"
-    (registered)="onRegistrationCompleted($event)"></app-tenant-onboarding>
-}

@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TenantPostLoginRouter } from '../../../../core/tenant/tenant-post-login-router.service';
-import { TenantOnboardingComponent } from '../../../tenant/pages/tenant-onboarding/tenant-onboarding.component';
 import { sanitizeReturnUrl } from '../../../../core/auth/return-url.util';
 import {
     MbAlertComponent,
@@ -16,6 +15,23 @@ import {
     MbLogoComponent
 } from '@mindbloom/ui';
 
+type TenantDiscoveryMatch = 'none' | 'single' | 'multiple';
+
+interface TenantDiscoveryTenant {
+    tenantId: string;
+    tenantSlug?: string;
+    tenantName: string;
+    logoUrl?: string;
+    allowedAuthMethods?: string[];
+}
+
+interface TenantDiscoveryResult {
+    match: TenantDiscoveryMatch;
+    allowedAuthMethods: string[];
+    tenants?: TenantDiscoveryTenant[];
+    tenant?: TenantDiscoveryTenant;
+}
+
 @Component({
     selector: 'app-login-overlay',
     standalone: true,
@@ -23,7 +39,6 @@ import {
         CommonModule,
         FormsModule,
         RouterModule,
-        TenantOnboardingComponent,
         MbFormFieldComponent,
         MbInputComponent,
         MbCheckboxComponent,
@@ -49,6 +64,11 @@ export class LoginOverlayComponent {
     emailTouched = signal(false);
     passwordTouched = signal(false);
     submitAttempted = signal(false);
+    tenantDiscoveryLoading = signal(false);
+    tenantDiscoveryError = signal('');
+    tenantDiscoveryResult = signal<TenantDiscoveryResult | null>(null);
+    selectedTenantId = signal<string | null>(null);
+    currentStep = signal<'email' | 'auth-method'>('email');
 
     emailError = computed(() => {
         if (!this.shouldShowValidation()) {
@@ -71,7 +91,42 @@ export class LoginOverlayComponent {
 
     isFormValid = computed(() => !this.emailError() && !this.passwordError());
 
-    showRegistration = signal(false);
+    activeTenant = computed(() => {
+        const result = this.tenantDiscoveryResult();
+        if (!result) return undefined;
+
+        if (result.match === 'single') {
+            return result.tenant;
+        }
+
+        if (result.match === 'multiple') {
+            const selectedId = this.selectedTenantId();
+            return result.tenants?.find(tenant => tenant.tenantId === selectedId);
+        }
+
+        return undefined;
+    });
+
+    availableAuthMethods = computed(() => {
+        const result = this.tenantDiscoveryResult();
+        if (!result) {
+            return ['password'];
+        }
+
+        const tenant = this.activeTenant();
+        if (tenant?.allowedAuthMethods?.length) {
+            return tenant.allowedAuthMethods;
+        }
+
+        return result.allowedAuthMethods.length ? result.allowedAuthMethods : ['password'];
+    });
+
+    isPasswordSubmitDisabled = computed(() => {
+        return this.tenantDiscoveryResult()?.match === 'multiple'
+            ? !this.selectedTenantId() || this.isLoading()
+            : this.isLoading();
+    });
+
     private readonly defaultReturnUrl = '/dashboard';
     private targetAfterLogin = this.defaultReturnUrl;
 
@@ -89,21 +144,21 @@ export class LoginOverlayComponent {
                 this.defaultReturnUrl
             );
         });
-
     }
 
-    onRegisterTenant(event: Event): void {
-        event.preventDefault();
-        this.showRegistration.set(true);
+    selectTenant(tenantId: string): void {
+        this.selectedTenantId.set(tenantId);
     }
 
-    onRegistrationCancelled(): void {
-        this.showRegistration.set(false);
-    }
-
-    onRegistrationCompleted(_data: { tenantId: string; subdomain: string }): void {
-        this.showRegistration.set(false);
-        this.errorMessage.set('');
+    backToEmailStep(): void {
+        this.currentStep.set('email');
+        this.selectedTenantId.set(null);
+        this.tenantDiscoveryResult.set(null);
+        this.tenantDiscoveryError.set('');
+        this.isLoading.set(false);
+        this.password.set('');
+        this.passwordTouched.set(false);
+        this.submitAttempted.set(false);
     }
 
     togglePassword(): void {
@@ -122,6 +177,38 @@ export class LoginOverlayComponent {
         this.capsLockOn.set(event.getModifierState?.('CapsLock') ?? false);
     }
 
+    handleEmailContinue(): void {
+        this.emailTouched.set(true);
+        this.tenantDiscoveryError.set('');
+
+        if (this.emailError()) {
+            return;
+        }
+
+        const email = this.username().trim();
+        if (!email) {
+            return;
+        }
+
+        this.tenantDiscoveryLoading.set(true);
+        this.authService.tenantDiscovery(email).subscribe({
+            next: (result) => {
+                this.tenantDiscoveryLoading.set(false);
+                this.tenantDiscoveryResult.set(result);
+                if (result.match === 'single' && result.tenant) {
+                    this.selectedTenantId.set(result.tenant.tenantId);
+                } else {
+                    this.selectedTenantId.set(null);
+                }
+                this.currentStep.set('auth-method');
+            },
+            error: () => {
+                this.tenantDiscoveryLoading.set(false);
+                this.tenantDiscoveryError.set('Unable to detect your workspace. Please try again.');
+            }
+        });
+    }
+
     onSubmit(): void {
         this.submitAttempted.set(true);
         if (!this.username().trim() || !this.password()) {
@@ -133,10 +220,11 @@ export class LoginOverlayComponent {
             return;
         }
 
+        const tenantId = this.getEffectiveTenantId();
         this.isLoading.set(true);
         this.errorMessage.set('');
 
-        this.authService.login(this.username(), this.password()).subscribe({
+        this.authService.login(this.username(), this.password(), tenantId).subscribe({
             next: async () => {
                 this.isLoading.set(false);
 
@@ -178,4 +266,35 @@ export class LoginOverlayComponent {
         return this.submitAttempted() || this.emailTouched() || this.passwordTouched();
     }
 
+    private getEffectiveTenantId(): string | null {
+        const result = this.tenantDiscoveryResult();
+        if (!result) {
+            return null;
+        }
+
+        if (result.match === 'single') {
+            return result.tenant?.tenantId ?? null;
+        }
+
+        if (result.match === 'multiple') {
+            return this.selectedTenantId();
+        }
+
+        return null;
+    }
+
+    formatAuthMethod(method: string): string {
+        switch (method.toLowerCase()) {
+            case 'password':
+                return 'Password';
+            case 'google':
+                return 'Google SSO';
+            case 'microsoft':
+                return 'Microsoft SSO';
+            case 'saml':
+                return 'SAML';
+            default:
+                return method.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+        }
+    }
 }

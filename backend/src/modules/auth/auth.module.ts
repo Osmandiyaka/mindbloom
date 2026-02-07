@@ -8,7 +8,7 @@ import { MongooseUserRepository } from '../../infrastructure/adapters/persistenc
 import { MongooseRefreshTokenRepository } from '../../infrastructure/adapters/persistence/mongoose/refresh-token.repository';
 import { UserSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/user.schema';
 import { RefreshTokenSchema } from '../../infrastructure/adapters/persistence/mongoose/schemas/refresh-token.schema';
-import { LoginUseCase, RegisterUseCase, ForgotPasswordUseCase, ResetPasswordUseCase, PasswordResetMailer, RefreshTokenUseCase, LogoutUseCase, TokenService, GetCurrentLoginInfoUseCase, ImpersonateUserUseCase } from '../../application/services/auth';
+import { LoginUseCase, RegisterUseCase, ForgotPasswordUseCase, ResetPasswordUseCase, PasswordResetMailer, RefreshTokenUseCase, LogoutUseCase, TokenService, GetCurrentLoginInfoUseCase, ImpersonateUserUseCase, TenantDiscoveryUseCase } from '../../application/services/auth';
 import { AuthController } from '../../presentation/controllers/auth.controller';
 import { HostImpersonationController } from '../../presentation/controllers/host-impersonation.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -65,6 +65,7 @@ import { HostContextGuard } from '../../common/guards/host-context.guard';
         LogoutUseCase,
         GetCurrentLoginInfoUseCase,
         ImpersonateUserUseCase,
+        TenantDiscoveryUseCase,
         GetPermissionTreeUseCase,
         TokenService,
         PermissionGuard,

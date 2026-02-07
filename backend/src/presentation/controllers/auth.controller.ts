@@ -1,6 +1,6 @@
-import { Controller, Post, Body, Req, Res, UseGuards, Get } from '@nestjs/common';
+import { Controller, Post, Body, Req, Res, UseGuards, Get, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ForgotPasswordUseCase, LoginUseCase, RegisterUseCase, ResetPasswordUseCase, RefreshTokenUseCase, LogoutUseCase, GetCurrentLoginInfoUseCase } from '../../application/services/auth';
+import { ForgotPasswordUseCase, LoginUseCase, RegisterUseCase, ResetPasswordUseCase, RefreshTokenUseCase, LogoutUseCase, GetCurrentLoginInfoUseCase, TenantDiscoveryUseCase } from '../../application/services/auth';
 import { LoginDto } from '../dtos/requests/auth/login.dto';
 import { RegisterDto } from '../dtos/requests/auth/register.dto';
 import { ForgotPasswordDto } from '../dtos/requests/auth/forgot-password.dto';
@@ -8,6 +8,7 @@ import { ResetPasswordDto } from '../dtos/requests/auth/reset-password.dto';
 import { LoginResponseDto } from '../dtos/responses/auth/login-response.dto';
 import { CurrentLoginInfoResponseDto } from '../dtos/responses/auth/current-login-info.response.dto';
 import { UserResponseDto } from '../dtos/responses/user-response.dto';
+import { TenantDiscoveryResponseDto } from '../dtos/responses/auth/tenant-discovery.response.dto';
 import { Response, Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
@@ -25,6 +26,7 @@ export class AuthController {
         private readonly logoutUseCase: LogoutUseCase,
         private readonly getCurrentLoginInfoUseCase: GetCurrentLoginInfoUseCase,
         private readonly configService: ConfigService,
+        private readonly tenantDiscoveryUseCase: TenantDiscoveryUseCase,
     ) { }
 
     @Post('login')
@@ -45,6 +47,13 @@ export class AuthController {
             isHost: result.isHost,
             user: result.user,
         };
+    }
+
+    @Get('tenant-discovery')
+    @ApiOperation({ summary: 'Discover tenant settings for the provided email' })
+    @ApiResponse({ status: 200, type: TenantDiscoveryResponseDto })
+    async tenantDiscovery(@Query('email') email: string): Promise<TenantDiscoveryResponseDto> {
+        return this.tenantDiscoveryUseCase.execute(email);
     }
 
     @Post('register')

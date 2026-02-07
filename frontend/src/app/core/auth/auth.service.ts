@@ -1,7 +1,7 @@
 import { Injectable, computed, signal, inject } from '@angular/core';
 import { HttpBackend, HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, throwError, BehaviorSubject, firstValueFrom } from 'rxjs';
+import { Observable, throwError, BehaviorSubject, firstValueFrom, of } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { AuthSession, AuthTokens } from './auth.models';
@@ -54,6 +54,20 @@ interface LoginResponse {
     expiresAt: string;
     issuedAt?: string;
     isHost?: boolean;
+}
+
+interface TenantDiscoveryTenant {
+    tenantId: string;
+    tenantName: string;
+    logoUrl?: string;
+    allowedAuthMethods?: string[];
+}
+
+interface TenantDiscoveryResponse {
+    match: 'none' | 'single' | 'multiple';
+    allowedAuthMethods: string[];
+    tenant?: TenantDiscoveryTenant;
+    tenants?: TenantDiscoveryTenant[];
 }
 
 // Legacy API login shape (access_token + user)
@@ -434,6 +448,25 @@ export class AuthService {
      */
     resetPassword(token: string, password: string): Observable<any> {
         return this.http.post(`${this.API_URL}/auth/reset-password`, { token, password });
+    }
+
+    /**
+     * Tenant discovery helps show branding/auth methods before credentials.
+     */
+    tenantDiscovery(email: string): Observable<TenantDiscoveryResponse> {
+        return this.http.get<TenantDiscoveryResponse>(`${this.API_URL}/auth/tenant-discovery`, {
+            params: { email },
+            withCredentials: true,
+        }).pipe(
+            catchError((error) => {
+                console.warn('[AuthService] Tenant discovery failed', error);
+                const fallback: TenantDiscoveryResponse = {
+                    match: 'none',
+                    allowedAuthMethods: ['password'],
+                };
+                return of(fallback);
+            })
+        );
     }
 
     // -------------------------------------------------------------------------

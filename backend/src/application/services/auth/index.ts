@@ -8,3 +8,4 @@ export * from './logout.use-case';
 export * from './token.service';
 export * from './get-current-login-info.use-case';
 export * from './impersonate-user.use-case';
+export * from './tenant-discovery.use-case';
