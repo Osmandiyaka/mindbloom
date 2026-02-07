@@ -14,6 +14,7 @@ import {
     MbInputComponent,
     MbLogoComponent
 } from '@mindbloom/ui';
+import { environment } from '../../../../../environments/environment';
 
 type TenantDiscoveryMatch = 'none' | 'single' | 'multiple';
 
@@ -24,6 +25,8 @@ interface TenantDiscoveryTenant {
     logoUrl?: string;
     allowedAuthMethods?: string[];
 }
+
+type AuthMethod = 'password' | 'google' | 'microsoft' | 'saml';
 
 interface TenantDiscoveryResult {
     match: TenantDiscoveryMatch;
@@ -69,7 +72,7 @@ export class LoginOverlayComponent {
     tenantDiscoveryResult = signal<TenantDiscoveryResult | null>(null);
     selectedTenantId = signal<string | null>(null);
     currentStep = signal<'email' | 'auth-method'>('email');
-    selectedAuthMethod = signal('password');
+    selectedAuthMethod = signal<'password' | 'google' | 'microsoft' | 'saml'>('password');
 
     emailError = computed(() => {
         if (!this.shouldShowValidation()) {
@@ -108,24 +111,27 @@ export class LoginOverlayComponent {
         return undefined;
     });
 
-    availableAuthMethods = computed(() => {
+    availableAuthMethods = computed<AuthMethod[]>(() => {
         const result = this.tenantDiscoveryResult();
         if (!result) {
-            return ['password'];
+            return ['password'] as AuthMethod[];
         }
 
         const tenant = this.activeTenant();
-        if (tenant?.allowedAuthMethods?.length) {
-            return tenant.allowedAuthMethods;
-        }
+        const methods = tenant?.allowedAuthMethods?.length
+            ? tenant.allowedAuthMethods
+            : result.allowedAuthMethods;
 
-        return result.allowedAuthMethods.length ? result.allowedAuthMethods : ['password'];
+        const normalized = methods.map((method) => this.normalizeAuthMethod(method));
+        return normalized.length ? normalized : (['password'] as AuthMethod[]);
     });
 
     isPasswordAuthAvailable = computed(() => this.availableAuthMethods().includes('password'));
 
     isPasswordSelected = computed(() => this.selectedAuthMethod() === 'password');
     isSsoSelected = computed(() => !this.isPasswordSelected());
+    availableSsoMethods = computed<AuthMethod[]>(() => this.availableAuthMethods().filter(method => method !== 'password'));
+    canStartExternalAuth = computed(() => this.tenantDiscoveryResult()?.match !== 'multiple' || Boolean(this.selectedTenantId()));
 
     isPasswordSubmitDisabled = computed(() => {
         if (!this.isPasswordSelected()) {
@@ -138,6 +144,7 @@ export class LoginOverlayComponent {
 
     private readonly defaultReturnUrl = '/dashboard';
     private targetAfterLogin = this.defaultReturnUrl;
+    private readonly apiUrl = environment.apiUrl;
 
     constructor(
         private authService: AuthService,
@@ -160,7 +167,7 @@ export class LoginOverlayComponent {
     }
 
     selectAuthMethod(method: string): void {
-        this.selectedAuthMethod.set(method);
+        this.selectedAuthMethod.set(method as 'password' | 'google' | 'microsoft' | 'saml');
     }
 
     backToEmailStep(): void {
@@ -216,7 +223,7 @@ export class LoginOverlayComponent {
                 const defaultMethod = result.allowedAuthMethods.includes('password')
                     ? 'password'
                     : result.allowedAuthMethods[0] ?? 'password';
-                this.selectedAuthMethod.set(defaultMethod);
+                this.selectedAuthMethod.set(this.normalizeAuthMethod(defaultMethod));
                 this.currentStep.set('auth-method');
             },
             error: () => {
@@ -304,6 +311,27 @@ export class LoginOverlayComponent {
         return null;
     }
 
+    startExternalAuth(method: AuthMethod): void {
+        if (!this.canStartExternalAuth()) {
+            return;
+        }
+
+        const tenantId = this.getEffectiveTenantId();
+        const params = new URLSearchParams();
+        if (tenantId) {
+            params.set('tenantId', tenantId);
+        }
+
+        const email = this.username().trim();
+        if (email) {
+            params.set('email', email);
+        }
+
+        const provider = method.toLowerCase();
+        const url = `${this.apiUrl}/auth/oidc/${provider}/start?${params.toString()}`;
+        window.location.assign(url);
+    }
+
     formatAuthMethod(method: string): string {
         switch (method.toLowerCase()) {
             case 'password':
@@ -317,5 +345,19 @@ export class LoginOverlayComponent {
             default:
                 return method.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
         }
+    }
+
+    private normalizeAuthMethod(method: string): AuthMethod {
+        const normalized = method?.toLowerCase() ?? '';
+        if (normalized.includes('google')) {
+            return 'google';
+        }
+        if (normalized.includes('microsoft') || normalized.includes('azure')) {
+            return 'microsoft';
+        }
+        if (normalized.includes('saml')) {
+            return 'saml';
+        }
+        return 'password';
     }
 }

@@ -166,11 +166,20 @@
                 </ng-container>
                 <ng-template #ssoPlaceholder>
                     <div class="sso-placeholder">
-                        <button class="sso-placeholder__button" type="button" disabled>
-                            Continue with {{ formatAuthMethod(selectedAuthMethod()) }}
+                        <button
+                            *ngFor="let method of availableSsoMethods()"
+                            class="sso-placeholder__button"
+                            type="button"
+                            [disabled]="!canStartExternalAuth()"
+                            (click)="startExternalAuth(method)"
+                        >
+                            Continue with {{ formatAuthMethod(method) }}
                         </button>
                         <p class="sso-placeholder__text">
-                            The {{ formatAuthMethod(selectedAuthMethod()) }} flow will be available once your IT admin configures it.
+                            The {{ formatAuthMethod(selectedAuthMethod()) }} flow will open in a new tab.
+                            @if (!canStartExternalAuth()) {
+                                Please select your workspace before proceeding.
+                            }
                         </p>
                     </div>
                 </ng-template>
