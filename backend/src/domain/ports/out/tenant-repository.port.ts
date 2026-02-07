@@ -48,6 +48,7 @@ export interface ITenantRepository {
     findById(id: string): Promise<Tenant | null>;
     findBySubdomain(subdomain: string): Promise<Tenant | null>;
     findByCustomDomain(customDomain: string): Promise<Tenant | null>;
+    findByDiscoveryDomain(domain: string): Promise<Tenant[]>;
     findWithFilters(query: TenantListQuery): Promise<TenantListResult>;
     create(tenant: Tenant): Promise<Tenant>;
     update(id: string, data: Partial<Tenant>): Promise<Tenant>;

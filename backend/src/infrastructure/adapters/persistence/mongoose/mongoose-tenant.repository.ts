@@ -185,6 +185,26 @@ export class MongooseTenantRepository implements ITenantRepository {
         return this.toDomain(created);
     }
 
+    async findByDiscoveryDomain(domain: string): Promise<Tenant[]> {
+        if (!domain) {
+            return [];
+        }
+
+        const normalized = domain.toLowerCase();
+        const regex = new RegExp(`@${normalized}$`, 'i');
+
+        const docs = await this.tenantModel.find({
+            $or: [
+                { 'customization.customDomain': normalized },
+                { subdomain: normalized },
+                { 'metadata.domainAliases': normalized },
+                { 'contactInfo.email': { $regex: regex } },
+            ],
+        }).exec();
+
+        return docs.map((doc) => this.toDomain(doc));
+    }
+
     async update(id: string, data: Partial<Tenant>): Promise<Tenant> {
         const updated = await this.tenantModel
             .findByIdAndUpdate(id, this.toDocument(data as Tenant), { new: true })
