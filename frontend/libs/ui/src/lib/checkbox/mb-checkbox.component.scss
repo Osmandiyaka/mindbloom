@@ -33,6 +33,7 @@
 .mb-checkbox__box svg {
     opacity: 0;
     transition: opacity var(--mb-motion-fast) var(--mb-motion-ease);
+    display: block;
 }
 
 .mb-checkbox__input:focus-visible + .mb-checkbox__box {
