@@ -22,18 +22,9 @@
 
                 <form class="auth-form" (ngSubmit)="onSubmit()">
                     <mb-form-field label="Email" [controlId]="'login-email'" [error]="emailError()">
-                        <mb-input
-                            #firstFieldRef
-                            type="email"
-                            id="login-email"
-                            autocomplete="email"
-                            [value]="username()"
-                            (valueChange)="username.set($event); errorMessage.set('')"
-                            (focusout)="onEmailBlur()"
-                            ariaLabel="Email"
-                            [autofocus]="true"
-                            [disabled]="isLoading()"
-                        ></mb-input>
+                        <mb-input #firstFieldRef type="email" id="login-email" autocomplete="email" [value]="username()"
+                            (valueChange)="username.set($event); errorMessage.set('')" (focusout)="onEmailBlur()"
+                            ariaLabel="Email" [autofocus]="true" [disabled]="isLoading()"></mb-input>
                     </mb-form-field>
 
                     <div class="auth-password-row">
@@ -41,32 +32,24 @@
                         <a class="auth-link auth-link--muted" routerLink="/auth/forgot">Forgot password?</a>
                     </div>
                     <mb-form-field [controlId]="'login-password'" [error]="passwordError()">
-                        <mb-input
-                            [type]="showPassword() ? 'text' : 'password'"
-                            id="login-password"
-                            autocomplete="current-password"
-                            [value]="password()"
-                            (valueChange)="password.set($event); errorMessage.set('')"
-                            (focusout)="onPasswordBlur()"
-                            (keydown)="handleCapsLock($event)"
-                            ariaLabel="Password"
-                            [disabled]="isLoading()"
-                        ></mb-input>
+                        <mb-input [type]="showPassword() ? 'text' : 'password'" id="login-password"
+                            autocomplete="current-password" [value]="password()"
+                            (valueChange)="password.set($event); errorMessage.set('')" (focusout)="onPasswordBlur()"
+                            (keydown)="handleCapsLock($event)" ariaLabel="Password" [disabled]="isLoading()"></mb-input>
                         <span mbSuffix>
-                            <button class="icon-button" type="button" (click)="togglePassword()" [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
+                            <button class="icon-button" type="button" (click)="togglePassword()"
+                                [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
                                 @if (showPassword()) {
                                 <svg viewBox="0 0 24 24" role="presentation" aria-hidden="true">
                                     <path
                                         d="M12 5c4.5 0 8.1 2.6 10 7-1.9 4.4-5.5 7-10 7-4.5 0-8.1-2.6-10-7 1.9-4.4 5.5-7 10-7zm0 2c-3.2 0-6 1.7-7.6 5 1.6 3.3 4.4 5 7.6 5 3.2 0 6-1.7 7.6-5-1.6-3.3-4.4-5-7.6-5zm0 2.5a2.5 2.5 0 110 5 2.5 2.5 0 010-5z"
-                                        fill="currentColor"
-                                    />
+                                        fill="currentColor" />
                                 </svg>
                                 } @else {
                                 <svg viewBox="0 0 24 24" role="presentation" aria-hidden="true">
                                     <path
                                         d="M4 5.3l1.4-1.4 14.3 14.3-1.4 1.4-2.6-2.6c-1.2.6-2.5 1-3.7 1-4.5 0-8.1-2.6-10-7 1-2.3 2.6-4.1 4.6-5.3L4 5.3zm6.2 6.2a2.5 2.5 0 003.5 3.5l-3.5-3.5zm8.6 1.5c-1.6-3.3-4.4-5-7.6-5-.7 0-1.4.1-2.1.3l-1.6-1.6c1.2-.4 2.4-.7 3.7-.7 4.5 0 8.1 2.6 10 7-.8 1.9-2 3.4-3.5 4.5l-1.4-1.4c1.1-.8 2-1.8 2.5-3.1z"
-                                        fill="currentColor"
-                                    />
+                                        fill="currentColor" />
                                 </svg>
                                 }
                             </button>
@@ -78,24 +61,20 @@
                     }
 
                     <div class="auth-inline">
-                        <mb-checkbox [checked]="rememberMe()" [disabled]="isLoading()" (checkedChange)="rememberMe.set($event)">
+                        <mb-checkbox [checked]="rememberMe()" [disabled]="isLoading()"
+                            (checkedChange)="rememberMe.set($event)">
                             Remember me
                         </mb-checkbox>
                     </div>
 
-                    <mb-button
-                        type="submit"
-                        variant="primary"
-                        [fullWidth]="true"
-                        [loading]="isLoading()"
-                        [hideLabelOnLoading]="false"
-                        [disabled]="isLoading() || !isFormValid()"
-                    >
+                    <mb-button type="submit" variant="primary" [fullWidth]="true" [loading]="isLoading()"
+                        [hideLabelOnLoading]="false" [disabled]="isLoading() || !isFormValid()">
                         {{ isLoading() ? 'Signing in...' : 'Sign in' }}
                     </mb-button>
 
                     <div class="auth-links auth-links--stack">
-                        <a class="auth-link--secondary" href="#" (click)="onRegisterTenant($event)">New to MindBloom? Create an organization</a>
+                        <a class="auth-link--secondary" href="#" (click)="onRegisterTenant($event)">New to MindBloom?
+                            Create an organization</a>
                         <a class="auth-link--muted" href="mailto:support@mindbloom.com">Need help signing in?</a>
                     </div>
                 </form>
