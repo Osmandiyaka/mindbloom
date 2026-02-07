@@ -69,6 +69,7 @@ export class LoginOverlayComponent {
     tenantDiscoveryResult = signal<TenantDiscoveryResult | null>(null);
     selectedTenantId = signal<string | null>(null);
     currentStep = signal<'email' | 'auth-method'>('email');
+    selectedAuthMethod = signal('password');
 
     emailError = computed(() => {
         if (!this.shouldShowValidation()) {
@@ -121,7 +122,15 @@ export class LoginOverlayComponent {
         return result.allowedAuthMethods.length ? result.allowedAuthMethods : ['password'];
     });
 
+    isPasswordAuthAvailable = computed(() => this.availableAuthMethods().includes('password'));
+
+    isPasswordSelected = computed(() => this.selectedAuthMethod() === 'password');
+    isSsoSelected = computed(() => !this.isPasswordSelected());
+
     isPasswordSubmitDisabled = computed(() => {
+        if (!this.isPasswordSelected()) {
+            return true;
+        }
         return this.tenantDiscoveryResult()?.match === 'multiple'
             ? !this.selectedTenantId() || this.isLoading()
             : this.isLoading();
@@ -148,6 +157,10 @@ export class LoginOverlayComponent {
 
     selectTenant(tenantId: string): void {
         this.selectedTenantId.set(tenantId);
+    }
+
+    selectAuthMethod(method: string): void {
+        this.selectedAuthMethod.set(method);
     }
 
     backToEmailStep(): void {
@@ -200,6 +213,10 @@ export class LoginOverlayComponent {
                 } else {
                     this.selectedTenantId.set(null);
                 }
+                const defaultMethod = result.allowedAuthMethods.includes('password')
+                    ? 'password'
+                    : result.allowedAuthMethods[0] ?? 'password';
+                this.selectedAuthMethod.set(defaultMethod);
                 this.currentStep.set('auth-method');
             },
             error: () => {
@@ -223,6 +240,10 @@ export class LoginOverlayComponent {
         const tenantId = this.getEffectiveTenantId();
         this.isLoading.set(true);
         this.errorMessage.set('');
+
+        if (!this.isPasswordSelected()) {
+            return;
+        }
 
         this.authService.login(this.username(), this.password(), tenantId).subscribe({
             next: async () => {

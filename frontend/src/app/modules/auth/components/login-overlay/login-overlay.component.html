@@ -93,16 +93,26 @@
                 </div>
                 }
 
-                <div class="auth-methods">
-                    <p class="auth-methods__title">Available sign-in options</p>
-                    <div class="auth-methods__grid">
-                        <span class="auth-methods__pill" *ngFor="let method of availableAuthMethods()">
+                <div class="auth-method-selector">
+                    <p class="auth-method-selector__title">Available sign-in options</p>
+                    <div class="auth-method-selector__grid">
+                        <button
+                            *ngFor="let method of availableAuthMethods()"
+                            type="button"
+                            class="auth-method-selector__pill"
+                            [class.is-selected]="selectedAuthMethod() === method"
+                            (click)="selectAuthMethod(method)"
+                        >
                             {{ formatAuthMethod(method) }}
-                        </span>
+                        </button>
                     </div>
+                    <p class="auth-method-selector__note" *ngIf="isSsoSelected() && !isPasswordAuthAvailable()">
+                        Password sign-in is disabled for this workspace. Sign in with the available SSO provider when ready.
+                    </p>
                 </div>
 
-                <form class="auth-form" (ngSubmit)="onSubmit()">
+                <ng-container *ngIf="isPasswordSelected() && isPasswordAuthAvailable(); else ssoPlaceholder">
+                    <form class="auth-form" (ngSubmit)="onSubmit()">
                     <div class="auth-password-row">
                         <label class="auth-label" for="login-password">Password</label>
                         <a class="auth-link auth-link--muted" routerLink="/auth/forgot">Forgot password?</a>
@@ -153,6 +163,17 @@
                         <a class="auth-link--secondary" routerLink="/admin/onboarding">IT Admin? Create an organization</a>
                     </div>
                 </form>
+                </ng-container>
+                <ng-template #ssoPlaceholder>
+                    <div class="sso-placeholder">
+                        <button class="sso-placeholder__button" type="button" disabled>
+                            Continue with {{ formatAuthMethod(selectedAuthMethod()) }}
+                        </button>
+                        <p class="sso-placeholder__text">
+                            The {{ formatAuthMethod(selectedAuthMethod()) }} flow will be available once your IT admin configures it.
+                        </p>
+                    </div>
+                </ng-template>
                 }
             </mb-card>
         </div>
